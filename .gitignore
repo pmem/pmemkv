@@ -1,0 +1,6 @@
+*.d
+.idea/
+cmake-build-debug/
+pmemkv_example
+pmemkv_stress
+pmemkv_test
