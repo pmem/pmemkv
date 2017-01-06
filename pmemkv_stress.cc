@@ -32,6 +32,7 @@
 
 #include <iostream>
 #include <random>
+#include <unistd.h>
 #include <sys/time.h>
 #include "pmemkv.h"
 
@@ -95,30 +96,27 @@ void testPut(KVTree* kv) {
 }
 
 int main() {
-  LOG("\nRecovering");
-  KVTree* kv = open();
-  LOG("Inserting " << COUNT << " values");
-  testPut(kv);
-  LOG("Getting " << COUNT << " sequential values");
-  testGetSequential(kv);
-  LOG("Getting " << COUNT << " random values");
-  testGetRandom(kv);
-  delete kv;
-
-  LOG("\nRecovering");
-  kv = open();
-  LOG("Getting " << COUNT << " random values");
-  testGetRandom(kv);
-  LOG("Getting " << COUNT << " sequential values");
-  testGetSequential(kv);
-  LOG("Updating " << COUNT << " values");
-  testPut(kv);
-  LOG("Deleting " << COUNT << " values");
-  testDelete(kv);
-  LOG("Reinserting " << COUNT << " values");
-  testPut(kv);
-  delete kv;
-
+  if (access(PATH.c_str(), F_OK) == 0) {
+    LOG("\nOpening for reads");
+    KVTree* kv = open();
+    LOG("Getting " << COUNT << " random values");
+    testGetRandom(kv);
+    LOG("Getting " << COUNT << " sequential values");
+    testGetSequential(kv);
+    delete kv;
+  } else {
+    LOG("\nOpening for writes");
+    KVTree* kv = open();
+    LOG("Inserting " << COUNT << " values");
+    testPut(kv);
+    LOG("Updating " << COUNT << " values");
+    testPut(kv);
+    LOG("Deleting " << COUNT << " values");
+    testDelete(kv);
+    LOG("Reinserting " << COUNT << " values");
+    testPut(kv);
+    delete kv;
+  }
   LOG("\nFinished");
   return 0;
 }
