@@ -80,7 +80,7 @@ TEST_F(KVTest, SizeofTest) {
 
   // volatile types
   ASSERT_TRUE(sizeof(KVInnerNode) == 232);
-  ASSERT_TRUE(sizeof(KVLeafNode) == 88);
+  ASSERT_TRUE(sizeof(KVLeafNode) == 1624);
 }
 
 TEST_F(KVTest, DeleteAllTest) {

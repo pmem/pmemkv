@@ -96,6 +96,7 @@ struct KVInnerNode : KVNode {                              // volatile inner nod
 
 struct KVLeafNode : KVNode {                               // volatile leaf nodes of the tree
   uint8_t hashes[NODE_KEYS];                               // Pearson hashes of keys
+  string keys[NODE_KEYS];                                  // keys stored in this leaf
   persistent_ptr<KVLeaf> leaf;                             // pointer to persistent leaf
   bool lock;                                               // boolean modification lock
 };
