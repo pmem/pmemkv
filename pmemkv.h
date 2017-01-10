@@ -73,8 +73,8 @@ private:                                                   // start private fiel
 struct KVLeaf {                                            // persistent leaves of the tree
   p<uint8_t> hashes[NODE_KEYS];                            // 48 bytes, Pearson hashes of keys
   persistent_ptr<KVLeaf> next;                             // 16 bytes, points to next leaf
-  p<KVString> kv_keys[NODE_KEYS];                          // key strings stored in this leaf
-  p<KVString> kv_values[NODE_KEYS];                        // value strings stored in this leaf
+  p<KVString> keys[NODE_KEYS];                             // key strings stored in this leaf
+  p<KVString> values[NODE_KEYS];                           // value strings stored in this leaf
 };
 
 struct KVRoot {                                            // persistent root object

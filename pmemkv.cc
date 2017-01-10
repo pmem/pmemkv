@@ -100,7 +100,7 @@ KVStatus KVTree::Get(const string& key, string* value) {
   for (int slot = NODE_KEYS; slot--;) {
     if (leafnode->hashes[slot] == hash) {
       if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
-        value->append(leafnode->leaf->kv_values[slot].get_ro().data());
+        value->append(leafnode->leaf->values[slot].get_ro().data());
         LOG("   found value=" << *value << ", slot=" << slot);
         return OK;
       }
@@ -216,12 +216,12 @@ void KVTree::LeafFillSpecificSlot(KVLeafNode* leafnode, const uint8_t hash,
                                   const string& key, const string& value, const int slot) {
   auto leaf = leafnode->leaf;
   if (leafnode->hashes[slot] == 0) {
-    leaf->kv_keys[slot].get_rw().set(key.c_str());
+    leaf->keys[slot].get_rw().set(key.c_str());
     leafnode->keys[slot] = key;
   }
   leafnode->hashes[slot] = hash;
   leaf->hashes[slot] = hash;
-  leaf->kv_values[slot].get_rw().set(value.c_str());
+  leaf->values[slot].get_rw().set(value.c_str());
 }
 
 void KVTree::LeafSplit(KVLeafNode* leafnode, const uint8_t hash,
@@ -249,14 +249,14 @@ void KVTree::LeafSplit(KVLeafNode* leafnode, const uint8_t hash,
     const auto leaf = leafnode->leaf;
     for (int slot = NODE_KEYS; slot--;) {
       if (strcmp(leafnode->keys[slot].c_str(), split_key.data()) > 0) {
-        const KVString slot_key = leaf->kv_keys[slot].get_ro();
+        const KVString slot_key = leaf->keys[slot].get_ro();
         if (slot_key.is_short()) {
-          new_leaf->kv_keys[slot].get_rw().set_short(slot_key.data());
-        } else new_leaf->kv_keys[slot].swap(leaf->kv_keys[slot]);
-        const KVString slot_value = leaf->kv_values[slot].get_ro();
+          new_leaf->keys[slot].get_rw().set_short(slot_key.data());
+        } else new_leaf->keys[slot].swap(leaf->keys[slot]);
+        const KVString slot_value = leaf->values[slot].get_ro();
         if (slot_value.is_short()) {
-          new_leaf->kv_values[slot].get_rw().set_short(slot_value.data());
-        } else new_leaf->kv_values[slot].swap(leaf->kv_values[slot]);
+          new_leaf->values[slot].get_rw().set_short(slot_value.data());
+        } else new_leaf->values[slot].swap(leaf->values[slot]);
         new_leafnode->hashes[slot] = leafnode->hashes[slot];
         new_leafnode->keys[slot] = leafnode->keys[slot];
         leafnode->keys[slot].clear();
@@ -358,7 +358,7 @@ void KVTree::RebuildNodes() {
     for (int slot = NODE_KEYS; slot--;) {
       leafnode->hashes[slot] = leaf->hashes[slot];
       if (leafnode->hashes[slot] == 0) continue;
-      char* key = leaf->kv_keys[slot].get_ro().data();
+      char* key = leaf->keys[slot].get_ro().data();
       if (max_key == nullptr || strcmp(max_key, key) < 0) max_key = key;
       leafnode->keys[slot] = key;
     }
