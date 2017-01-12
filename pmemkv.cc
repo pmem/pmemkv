@@ -47,7 +47,7 @@ KVTree::KVTree(const string& name) : name(name) {
   if (access(GetNamePtr(), F_OK) != 0) {
     LOG("Creating pool");
     pop_ = pool<KVRoot>::create(GetNamePtr(), "pmemkv",
-                                PMEMOBJ_MIN_POOL * 450, S_IRWXU);        // todo size is hardcoded
+                                PMEMOBJ_MIN_POOL * 138, S_IRWXU);        // todo size is hardcoded
   } else {
     pop_ = pool<KVRoot>::open(GetNamePtr(), "pmemkv");
   }

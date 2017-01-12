@@ -442,7 +442,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
 // TEST LARGE TREE
 // =============================================================================================
 
-const int LARGE_LIMIT = 1000000;
+const int LARGE_LIMIT = 9200000;
 
 TEST_F(KVTest, LargeAscendingTest) {
   for (int i = 1; i <= LARGE_LIMIT; i++) {
