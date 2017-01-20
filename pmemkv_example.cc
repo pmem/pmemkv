@@ -38,36 +38,36 @@
 using namespace pmemkv;
 
 int main() {
-  LOG("Opening database");
-  KVTree* kv = new KVTree("/dev/shm/pmemkv");
+    LOG("Opening database");
+    KVTree* kv = new KVTree("/dev/shm/pmemkv");
 
-  LOG("Putting new value");
-  KVStatus s = kv->Put("key1", "value1");
-  assert(s == OK);
-  std::string value;
-  s = kv->Get("key1", &value);
-  assert(s == OK && value == "value1");
+    LOG("Putting new value");
+    KVStatus s = kv->Put("key1", "value1");
+    assert(s == OK);
+    std::string value;
+    s = kv->Get("key1", &value);
+    assert(s == OK && value == "value1");
 
-  LOG("Replacing existing value");
-  std::string value2;
-  s = kv->Get("key1", &value2);
-  assert(s == OK && value2 == "value1");
-  s = kv->Put("key1", "value_replaced");
-  assert(s == OK);
-  std::string value3;
-  s = kv->Get("key1", &value3);
-  assert(s == OK && value3 == "value_replaced");
+    LOG("Replacing existing value");
+    std::string value2;
+    s = kv->Get("key1", &value2);
+    assert(s == OK && value2 == "value1");
+    s = kv->Put("key1", "value_replaced");
+    assert(s == OK);
+    std::string value3;
+    s = kv->Get("key1", &value3);
+    assert(s == OK && value3 == "value_replaced");
 
-  LOG("Deleting existing value");
-  s = kv->Delete("key1");
-  assert(s == OK);
-  std::string value4;
-  s = kv->Get("key1", &value4);
-  assert(s == NOT_FOUND);
+    LOG("Deleting existing value");
+    s = kv->Delete("key1");
+    assert(s == OK);
+    std::string value4;
+    s = kv->Get("key1", &value4);
+    assert(s == NOT_FOUND);
 
-  LOG("Closing database");
-  delete kv;
+    LOG("Closing database");
+    delete kv;
 
-  LOG("Finished successfully");
-  return 0;
+    LOG("Finished successfully");
+    return 0;
 }

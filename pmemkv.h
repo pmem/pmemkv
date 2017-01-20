@@ -60,100 +60,100 @@ namespace pmemkv {
 #define SSO_SIZE (SSO_CHARS + 1)                           // sso chars plus null terminator
 
 class KVString {                                           // persistent string class
-public:                                                    // start public fields and methods
-  char* data() const;                                      // returns data as c-style string
-  bool is_short() const { return !str; }                   // returns true for short strings
-  void set(const char* value);                             // copy data from c-style string
-  void set_short(const char* value);                       // copy data from known short string
-private:                                                   // start private fields and methods
-  char sso[SSO_SIZE];                                      // local storage for short strings
-  persistent_ptr<char[]> str;                              // pointer to storage for longer strings
+  public:                                                  // start public fields and methods
+    char* data() const;                                    // returns data as c-style string
+    bool is_short() const { return !str; }                 // returns true for short strings
+    void set(const char* value);                           // copy data from c-style string
+    void set_short(const char* value);                     // copy data from known short string
+  private:                                                 // start private fields and methods
+    char sso[SSO_SIZE];                                    // local storage for short strings
+    persistent_ptr<char[]> str;                            // pointer to storage for longer strings
 };
 
 struct KVLeaf {                                            // persistent leaves of the tree
-  p<uint8_t> hashes[NODE_KEYS];                            // 48 bytes, Pearson hashes of keys
-  persistent_ptr<KVLeaf> next;                             // 16 bytes, points to next leaf
-  p<KVString> keys[NODE_KEYS];                             // key strings stored in this leaf
-  p<KVString> values[NODE_KEYS];                           // value strings stored in this leaf
+    p<uint8_t> hashes[NODE_KEYS];                          // 48 bytes, Pearson hashes of keys
+    persistent_ptr<KVLeaf> next;                           // 16 bytes, points to next leaf
+    p<KVString> keys[NODE_KEYS];                           // key strings stored in this leaf
+    p<KVString> values[NODE_KEYS];                         // value strings stored in this leaf
 };
 
 struct KVRoot {                                            // persistent root object
-  p<uint64_t> opened;                                      // number of times opened
-  p<uint64_t> closed;                                      // number of times closed safely
-  persistent_ptr<KVLeaf> head;                             // head of linked list of leaves
+    p<uint64_t> opened;                                    // number of times opened
+    p<uint64_t> closed;                                    // number of times closed safely
+    persistent_ptr<KVLeaf> head;                           // head of linked list of leaves
 };
 
 struct KVNode {                                            // volatile nodes of the tree
-  bool is_leaf = false;                                    // indicate inner or leaf node
-  KVNode* parent;                                          // parent of this node (null if top)
+    bool is_leaf = false;                                  // indicate inner or leaf node
+    KVNode* parent;                                        // parent of this node (null if top)
 };
 
 struct KVInnerNode : KVNode {                              // volatile inner nodes of the tree
-  uint8_t keycount;                                        // count of keys in this node
-  string keys[INNER_KEYS + 1];                             // child keys plus one overflow slot
-  KVNode* children[INNER_KEYS + 2];                        // child nodes plus one overflow slot
+    uint8_t keycount;                                      // count of keys in this node
+    string keys[INNER_KEYS + 1];                           // child keys plus one overflow slot
+    KVNode* children[INNER_KEYS + 2];                      // child nodes plus one overflow slot
 };
 
 struct KVLeafNode : KVNode {                               // volatile leaf nodes of the tree
-  uint8_t hashes[NODE_KEYS];                               // Pearson hashes of keys
-  string keys[NODE_KEYS];                                  // keys stored in this leaf
-  persistent_ptr<KVLeaf> leaf;                             // pointer to persistent leaf
-  bool lock;                                               // boolean modification lock
+    uint8_t hashes[NODE_KEYS];                             // Pearson hashes of keys
+    string keys[NODE_KEYS];                                // keys stored in this leaf
+    persistent_ptr<KVLeaf> leaf;                           // pointer to persistent leaf
+    bool lock;                                             // boolean modification lock
 };
 
 struct KVRecoveredLeaf {                                   // temporary wrapper used for recovery
-  KVLeafNode* leafnode;                                    // leaf node being recovered
-  char* max_key;                                           // highest sorting key present
+    KVLeafNode* leafnode;                                  // leaf node being recovered
+    char* max_key;                                         // highest sorting key present
 };
 
 enum KVStatus {
-  OK = 0,
-  NOT_FOUND = 1,
-  CORRUPTION = 2,
-  NOT_SUPPORTED = 3,
-  INVALID_ARGUMENT = 4,
-  IO_ERROR = 5,
-  MERGE_IN_PROGRESS = 6,
-  INCOMPLETE = 7,
-  SHUTDOWN_IN_PROGRESS = 8,
-  TIMED_OUT = 9,
-  ABORTED = 10,
-  BUSY = 11,
-  EXPIRED = 12,
-  TRY_AGAIN = 13,
+    OK = 0,
+    NOT_FOUND = 1,
+    CORRUPTION = 2,
+    NOT_SUPPORTED = 3,
+    INVALID_ARGUMENT = 4,
+    IO_ERROR = 5,
+    MERGE_IN_PROGRESS = 6,
+    INCOMPLETE = 7,
+    SHUTDOWN_IN_PROGRESS = 8,
+    TIMED_OUT = 9,
+    ABORTED = 10,
+    BUSY = 11,
+    EXPIRED = 12,
+    TRY_AGAIN = 13,
 };
 
 class KVTree {
-public:
-  KVTree(const string& name);
-  ~KVTree();
-  const string& GetName() const { return name; }
-  const char* GetNamePtr() const { return name.c_str(); }
-  KVStatus Delete(const string& key);
-  KVStatus Get(const string& key, string* value);
-  vector<KVStatus> MultiGet(const vector<string>& keys, vector<string>* values);
-  KVStatus Put(const string& key, const string& value);
-protected:
-  KVLeafNode* LeafSearch(const string& key);
-  void LeafFillFirstEmptySlot(KVLeafNode* leafnode, const uint8_t hash,
-                              const string& key, const string& value);
-  bool LeafFillSlotForKey(KVLeafNode* leafnode, const uint8_t hash,
-                          const string& key, const string& value);
-  void LeafFillSpecificSlot(KVLeafNode* leafnode, const uint8_t hash,
-                            const string& key, const string& value, const int slot);
-  void LeafSplit(KVLeafNode* leafnode, const uint8_t hash,
-                 const string& key, const string& value);
-  void LeafUpdateParentsAfterSplit(KVNode* node, KVNode* new_node, string* split_key);
-  uint8_t PearsonHash(const char* data, const size_t size);
-  void RebuildNodes();
-  void Recover();
-  void Shutdown();
-private:
-  KVTree(const KVTree&);                                   // prevent copying
-  void operator=(const KVTree&);                           // prevent assignment
-  const string name;                                       // name when constructed
-  pool<KVRoot> pop_;                                       // pool for persistent root
-  KVNode* top_ = nullptr;                                  // top of volatile tree
+  public:
+    KVTree(const string& name);
+    ~KVTree();
+    const string& GetName() const { return name; }
+    const char* GetNamePtr() const { return name.c_str(); }
+    KVStatus Delete(const string& key);
+    KVStatus Get(const string& key, string* value);
+    vector<KVStatus> MultiGet(const vector<string>& keys, vector<string>* values);
+    KVStatus Put(const string& key, const string& value);
+  protected:
+    KVLeafNode* LeafSearch(const string& key);
+    void LeafFillFirstEmptySlot(KVLeafNode* leafnode, const uint8_t hash,
+                                const string& key, const string& value);
+    bool LeafFillSlotForKey(KVLeafNode* leafnode, const uint8_t hash,
+                            const string& key, const string& value);
+    void LeafFillSpecificSlot(KVLeafNode* leafnode, const uint8_t hash,
+                              const string& key, const string& value, const int slot);
+    void LeafSplit(KVLeafNode* leafnode, const uint8_t hash,
+                   const string& key, const string& value);
+    void LeafUpdateParentsAfterSplit(KVNode* node, KVNode* new_node, string* split_key);
+    uint8_t PearsonHash(const char* data, const size_t size);
+    void RebuildNodes();
+    void Recover();
+    void Shutdown();
+  private:
+    KVTree(const KVTree&);                                 // prevent copying
+    void operator=(const KVTree&);                         // prevent assignment
+    const string name;                                     // name when constructed
+    pool<KVRoot> pop_;                                     // pool for persistent root
+    KVNode* top_ = nullptr;                                // top of volatile tree
 };
 
 } // namespace pmemkv
