@@ -3,8 +3,7 @@ include make_config.mk
 all: clean thirdparty example test
 
 clean:
-	rm -rf /dev/shm/pmemkv
-	rm -rf pmemkv_example pmemkv_stress pmemkv_test
+	rm -rf /dev/shm/pmemkv pmemkv_example pmemkv_stress pmemkv_test
 
 thirdparty:
 	rm -rf 3rdparty && mkdir 3rdparty
@@ -15,21 +14,21 @@ thirdparty:
 	sh -c 'cd 3rdparty/nvml && make install prefix=`pwd`'
 
 example:
-	$(CXX) $(CXXFLAGS) pmemkv.cc pmemkv_example.cc -o pmemkv_example \
+	$(CXX) $(CXXFLAGS) src/pmemkv.cc src/pmemkv_example.cc -o pmemkv_example \
 	$(USE_NVML) \
 	-O2 -std=c++11 -ldl $(PLATFORM_LDFLAGS) $(PLATFORM_CXXFLAGS)
 	rm -rf /dev/shm/pmemkv
 	PMEM_IS_PMEM_FORCE=1 ./pmemkv_example
 
 stress:
-	$(CXX) $(CXXFLAGS) pmemkv.cc pmemkv_stress.cc -o pmemkv_stress \
+	$(CXX) $(CXXFLAGS) src/pmemkv.cc src/pmemkv_stress.cc -o pmemkv_stress \
 	$(USE_NVML) \
 	-DNDEBUG -O2 -std=c++11 -ldl $(PLATFORM_LDFLAGS) $(PLATFORM_CXXFLAGS)
 	rm -rf /dev/shm/pmemkv
 	PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress
 
 test:
-	$(CXX) $(CXXFLAGS) pmemkv.cc pmemkv_test.cc -o pmemkv_test \
+	$(CXX) $(CXXFLAGS) src/pmemkv.cc src/pmemkv_test.cc -o pmemkv_test \
 	$(USE_NVML) \
 	$(USE_GTEST) \
 	-O2 -std=c++11 -ldl $(PLATFORM_LDFLAGS) $(PLATFORM_CXXFLAGS)
