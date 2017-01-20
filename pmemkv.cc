@@ -47,7 +47,8 @@ KVTree::KVTree(const string& name) : name(name) {
   if (access(GetNamePtr(), F_OK) != 0) {
     LOG("Creating pool");
     pop_ = pool<KVRoot>::create(GetNamePtr(), "pmemkv",
-                                PMEMOBJ_MIN_POOL * 138, S_IRWXU);        // todo size is hardcoded
+                                PMEMOBJ_MIN_POOL * 138,  // todo #6, make configurable
+                                S_IRWXU);
   } else {
     pop_ = pool<KVRoot>::open(GetNamePtr(), "pmemkv");
   }
@@ -335,7 +336,7 @@ void KVTree::Recover() {
     });
   } else {
     LOG("   recovering head: opened=" << root->opened << ", closed=" << root->closed);
-    // todo handle opened/closed inequality, including count correction
+    // todo #11, are opened/closed counts necessary?
     RebuildNodes();
     transaction::exec_tx(pop_, [&] { root->opened = root->opened + 1; });
   }
@@ -365,7 +366,7 @@ void KVTree::RebuildNodes() {
 
     // use highest sorting key to decide how to recover the leaf
     if (max_key == nullptr) {
-      // todo squelch until decided on handling empty leaf node (part of GC?)
+      // todo #10, handle empty leaf nodes
     } else {
       auto rleaf = new KVRecoveredLeaf;
       rleaf->leafnode = leafnode;
