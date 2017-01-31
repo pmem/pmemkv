@@ -44,7 +44,7 @@ Start with Ubuntu 16.04 (either desktop or server distribution) or other
 so don't use those.
 
 To build pmemkv, you'll need make and g++ installed. No external libraries
-are required to be installed prior to using our makefile.
+are required to be installed beforehand.
 
 ```
 make                # build everything from scratch and run tests
@@ -54,6 +54,8 @@ make example        # build and run example program
 make stress         # build and run stress test
 make test           # build and run unit tests
 ```
+
+<a name="configuring_clion_project"/>
 
 Configuring CLion Project
 -------------------------
@@ -120,4 +122,5 @@ best cache-line optimization.
 **cpp_map**
 
 Use of NVML C++ bindings by pmemkv was lifted from this example program.
-Many thanks to @tomaszkapela for providing a great example to follow!
+Many thanks to [@tomaszkapela](https://github.com/tomaszkapela)
+for providing a great example to follow!
