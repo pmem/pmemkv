@@ -21,6 +21,12 @@ Contents
 Overview
 --------
 
+Both [pmse](https://github.com/pmem/pmse) and pmemkv are based on
+a B+ tree implementation. The main difference is that the pmse
+tree keeps inner and leaf nodes in persistent memory,
+where pmemkv keeps inner nodes in DRAM and leaf nodes in
+persistent memory.
+
 ![pmemkv-intro](https://cloud.githubusercontent.com/assets/913363/22454311/21f15aa8-e742-11e6-9821-e3af513e279b.png)
 
 <a name="project_structure"/>
