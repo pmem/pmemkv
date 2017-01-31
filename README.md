@@ -3,7 +3,8 @@ Key/Value Datastore for Persistent Memory
 
 *This is experimental pre-release software and should not be used in
 production systems. File formats may change at any time without
-preserving compatibility.*
+preserving compatibility. All known issues and limitations are logged
+as GitHub issues.*
 
 Contents
 --------
@@ -20,8 +21,8 @@ Contents
 Overview
 --------
 
-`pmemkv` is a local/embedded key-value store optimized for
-peristent memory that has an API similar to RocksDB
+`pmemkv` is a local/embedded key-value datastore optimized for
+peristent memory whose API is similar to RocksDB
 (but is not drop-in compatible with RocksDB). `pmemkv` has
 a lot in common with [pmse](https://github.com/pmem/pmse)
 -- both implementations rely on NVML internally, although
@@ -31,7 +32,10 @@ Both `pmse` and `pmemkv` are based on a B+ tree
 implementation. The main difference is that the `pmse`
 tree keeps inner and leaf nodes in persistent memory,
 where `pmemkv` keeps inner nodes in DRAM and leaf nodes in
-persistent memory. Another difference is that leaf nodes
+persistent memory. (This means that `pmemkv` has to recover
+all inner nodes when the datastore is first opened)
+
+Another difference is that leaf nodes
 in `pmemkv` contain a small hash table based on a 1-byte
 [Pearson hash](https://en.wikipedia.org/wiki/Pearson_hashing),
 which limits the maximum size of the leaf, but boosts efficiency.
@@ -64,9 +68,15 @@ make test           # build and run unit tests
 Related Work
 ------------
 
+**cpp_map**
+
+Use of NVML C++ bindings by `pmemkv` was lifted from this example program.
+Many thanks to [@tomaszkapela](https://github.com/tomaszkapela)
+for providing a great example to follow!
+
 **FPTree**
 
-This research paper describes a hybrid dram/pmem tree design (similar
+This research paper describes a hybrid DRAM/NVM tree design (similar
 to `pmemkv`) but doesn't provide any code, and even in describing the
 design omits certain important implementation details.
 
@@ -102,12 +112,6 @@ intentionally avoids this design pattern. `pmemkv` also adjusts sizes of
 data structures (conforming specifically to NVML primitive types) for
 best cache-line optimization.
 
-**cpp_map**
-
-Use of NVML C++ bindings by `pmemkv` was lifted from this example program.
-Many thanks to [@tomaszkapela](https://github.com/tomaszkapela)
-for providing a great example to follow!
-
 <a name="configuring_clion_project"/>
 
 Configuring CLion Project
@@ -119,9 +123,9 @@ you have a valid license.
 
 Use wizard to open project:
 
--	From Welcome screen, select "Open Project"
--	select root directory
--	do not "Overwrite CMakeLists.txt" if prompted
+* From Welcome screen, select "Open Project"
+* select root directory
+* do not "Overwrite CMakeLists.txt" if prompted
 
 Set code style to match pmse:
 * Start with [Google C++ Style](https://google.github.io/styleguide/cppguide.html)
