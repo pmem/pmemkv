@@ -12,6 +12,7 @@ Contents
 <ul>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#installation">Installation</a></li>
+<li><a href="#sample_code">Sample Code</a></li>
 <li><a href="#related_work">Related Work</a></li>
 <li><a href="#configuring_clion_project">Configuring CLion Project</a></li>
 </ul>
@@ -61,6 +62,38 @@ make clean          # remove build files
 make example        # build and run example program
 make stress         # build and run stress test
 make test           # build and run unit tests
+```
+
+<a name="sample_code"/>
+
+Sample Code
+-----------
+
+We are using `/dev/shm` to
+[emulate persistent memory](http://pmem.io/2016/02/22/pm-emulation.html)
+in this simple example.
+
+```
+using namespace pmemkv;
+
+int main() {
+    // open the datastore
+    KVTree* kv = new KVTree("/dev/shm/pmemkv", PMEMOBJ_MIN_POOL);
+
+    // put new key
+    KVStatus s = kv->Put("key1", "value1");
+    assert(s == OK);
+
+    // read last key back
+    std::string value;
+    s = kv->Get("key1", &value);
+    assert(s == OK && value == "value1");
+
+    // close the datastore
+    delete kv;
+
+    return 0;
+}
 ```
 
 <a name="related_work"/>
