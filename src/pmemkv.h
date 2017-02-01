@@ -78,8 +78,6 @@ struct KVLeaf {                                            // persistent leaves 
 };
 
 struct KVRoot {                                            // persistent root object
-    p<uint64_t> opened;                                    // number of times opened
-    p<uint64_t> closed;                                    // number of times closed safely
     persistent_ptr<KVLeaf> head;                           // head of linked list of leaves
 };
 
@@ -149,7 +147,6 @@ class KVTree {                                             // persistent tree cl
     void Recover();                                        // initialize from pool
     void Shutdown();                                       // finalize to pool
   private:
-    void RecoverNodes();                                   // reload inner nodes from pool
     KVTree(const KVTree&);                                 // prevent copying
     void operator=(const KVTree&);                         // prevent assignment
     const string path;                                     // path when constructed

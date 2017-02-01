@@ -324,24 +324,6 @@ void KVTree::InnerUpdateAfterSplit(KVNode* node, KVNode* new_node, string* split
 
 void KVTree::Recover() {
     LOG("Recovering");
-    auto root = pmpool.get_root();
-    if (!root->head) {
-        LOG("   creating root");
-        transaction::exec_tx(pmpool, [&] {
-            root->opened = 1;
-            root->closed = 0;
-        });
-    } else {
-        LOG("   recovering head: opened=" << root->opened << ", closed=" << root->closed);
-        // todo #11, are opened/closed counts necessary?
-        RecoverNodes();
-        transaction::exec_tx(pmpool, [&] { root->opened = root->opened + 1; });
-    }
-    LOG("Recovered ok");
-}
-
-void KVTree::RecoverNodes() {
-    LOG("   recover nodes");
 
     // traverse persistent leaves to build list of leaves to recover
     std::list<KVRecoveredLeaf*> leaves;
@@ -395,14 +377,12 @@ void KVTree::RecoverNodes() {
         delete rleaf;
     }
 
-    LOG("   rebuilt nodes ok");
+    LOG("Recovered ok");
 }
 
 void KVTree::Shutdown() {
     LOG("Shutting down");
-    auto root = pmpool.get_root();
-    transaction::exec_tx(pmpool, [&] { root->closed = root->closed + 1; });
-    // todo #11, are opened/closed counts necessary?
+    // nothing to do here yet
     LOG("Shut down ok");
 }
 

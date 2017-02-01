@@ -74,7 +74,7 @@ class KVTest : public testing::Test {
 
 TEST_F(KVTest, SizeofTest) {
     // persistent types
-    ASSERT_TRUE(sizeof(KVRoot) == 32);
+    ASSERT_TRUE(sizeof(KVRoot) == 16);
     ASSERT_TRUE(sizeof(KVLeaf) == 3136);
     ASSERT_TRUE(sizeof_field(KVLeaf, hashes) + sizeof_field(KVLeaf, next) == 64);
     ASSERT_TRUE(sizeof(KVString) == 32);
