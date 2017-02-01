@@ -131,9 +131,9 @@ KVStatus KVTree::Put(const string& key, const string& value) {
         leafnode = new KVLeafNode();
         leafnode->is_leaf = true;
         persistent_ptr<KVLeaf> new_leaf;
-        auto root = pmpool.get_root();
-        auto old_head = root->head;
         transaction::exec_tx(pmpool, [&] {
+            auto root = pmpool.get_root();
+            auto old_head = root->head;
             new_leaf = make_persistent<KVLeaf>();
             new_leaf->next = old_head;
             leafnode->leaf = new_leaf;
@@ -239,9 +239,9 @@ void KVTree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
     new_leafnode->parent = leafnode->parent;
     new_leafnode->is_leaf = true;
     persistent_ptr<KVLeaf> new_leaf;
-    auto root = pmpool.get_root();
-    auto old_head = root->head;
     transaction::exec_tx(pmpool, [&] {
+        auto root = pmpool.get_root();
+        auto old_head = root->head;
         new_leaf = make_persistent<KVLeaf>();
         new_leaf->next = old_head;
         new_leafnode->leaf = new_leaf;
