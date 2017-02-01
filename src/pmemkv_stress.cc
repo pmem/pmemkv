@@ -42,6 +42,7 @@ using namespace pmemkv;
 
 const unsigned long COUNT = 1000000;
 const std::string PATH = "/dev/shm/pmemkv";
+const size_t SIZE = PMEMOBJ_MIN_POOL * 138;
 
 const char* LOREM_IPSUM_200 =
         " Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec facilisis ipsum ipsum, nec sollicitudin nulla pharetra at. Sed accumsan ut felis sed ornare. Aliquam maximus dui congue ipsum cras amet.";
@@ -58,7 +59,7 @@ unsigned long current_millis() {
 
 KVTree* open() {
     auto started = current_millis();
-    auto kv = new KVTree(PATH);
+    auto kv = new KVTree(PATH, SIZE);
     LOG("   in " << current_millis() - started << " ms");
     return kv;
 }

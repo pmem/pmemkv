@@ -39,7 +39,7 @@ using namespace pmemkv;
 
 int main() {
     LOG("Opening database");
-    KVTree* kv = new KVTree("/dev/shm/pmemkv");
+    KVTree* kv = new KVTree("/dev/shm/pmemkv", PMEMOBJ_MIN_POOL);
 
     LOG("Putting new value");
     KVStatus s = kv->Put("key1", "value1");

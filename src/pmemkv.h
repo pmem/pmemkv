@@ -125,7 +125,7 @@ enum KVStatus {
 
 class KVTree {
   public:
-    KVTree(const string& name);
+    KVTree(const string& name, const size_t size);
     ~KVTree();
     const string& GetName() const { return name; }
     const char* GetNamePtr() const { return name.c_str(); }
@@ -153,6 +153,7 @@ class KVTree {
     void operator=(const KVTree&);                         // prevent assignment
     const string name;                                     // name when constructed
     pool<KVRoot> pop_;                                     // pool for persistent root
+    const size_t size;                                     // size when constructed
     KVNode* top_ = nullptr;                                // top of volatile tree
 };
 

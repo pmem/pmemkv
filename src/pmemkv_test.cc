@@ -38,6 +38,7 @@
 using namespace pmemkv;
 
 const std::string PATH = "/dev/shm/pmemkv";
+const size_t SIZE = PMEMOBJ_MIN_POOL * 138;
 
 int main(int argc, char* argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
@@ -62,7 +63,7 @@ class KVTest : public testing::Test {
 
   private:
     void Open() {
-        kv = new KVTree(PATH);
+        kv = new KVTree(PATH, SIZE);
         assert(kv->GetName() == PATH);
     }
 };

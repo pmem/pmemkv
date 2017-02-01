@@ -42,14 +42,12 @@
 
 namespace pmemkv {
 
-KVTree::KVTree(const string& name) : name(name) {
-    LOG("Opening");
+KVTree::KVTree(const string& name, const size_t size) : name(name), size(size) {
     if (access(GetNamePtr(), F_OK) != 0) {
         LOG("Creating pool");
-        pop_ = pool<KVRoot>::create(GetNamePtr(), "pmemkv",
-                                    PMEMOBJ_MIN_POOL * 138,  // todo #6, make configurable
-                                    S_IRWXU);
+        pop_ = pool<KVRoot>::create(GetNamePtr(), "pmemkv", size, S_IRWXU);
     } else {
+        LOG("Opening pool");
         pop_ = pool<KVRoot>::open(GetNamePtr(), "pmemkv");
     }
     Recover();
