@@ -106,30 +106,17 @@ struct KVRecoveredLeaf {                                   // temporary wrapper 
     char* max_key;                                         // highest sorting key present
 };
 
-enum KVStatus {
-    OK = 0,
-    NOT_FOUND = 1,
-    CORRUPTION = 2,
-    NOT_SUPPORTED = 3,
-    INVALID_ARGUMENT = 4,
-    IO_ERROR = 5,
-    MERGE_IN_PROGRESS = 6,
-    INCOMPLETE = 7,
-    SHUTDOWN_IN_PROGRESS = 8,
-    TIMED_OUT = 9,
-    ABORTED = 10,
-    BUSY = 11,
-    EXPIRED = 12,
-    TRY_AGAIN = 13,
+enum KVStatus {                                            // status enumeration
+    OK = 0,                                                // successful completion
+    NOT_FOUND = 1,                                         // key not located
 };
 
-class KVTree {
+class KVTree {                                             // persistent tree class
   public:
-    KVTree(const string& name, const size_t size);
-    ~KVTree();
-    const string& GetName() const { return name; }         // path when constructed
-    const char* GetNamePtr() const { return name.c_str(); }
-    const size_t GetSize() const { return size; }          // size when constructed
+    KVTree(const string& name, const size_t size);         // default constructor
+    ~KVTree();                                             // default destructor
+    const string& GetPath() const { return path; }         // path when constructed
+    const size_t GetSize() const { return pmsize; }        // size when constructed
     KVStatus Delete(const string& key);                    // remove single key
     KVStatus Get(const string& key, string* value);        // read single key/value
     KVStatus Put(const string& key, const string& value);  // write single key/value
@@ -137,38 +124,38 @@ class KVTree {
                               vector<string>* values);
   protected:
     KVLeafNode* LeafSearch(const string& key);             // find node for key
-    void LeafFillFirstEmptySlot(KVLeafNode* leafnode,      // fill first unoccupied slot
-                                const uint8_t hash,
-                                const string& key,
-                                const string& value);
-    bool LeafFillSlotForKey(KVLeafNode* leafnode,          // fill slot for matching key
+    void LeafFillEmptySlot(KVLeafNode* leafnode,           // write first unoccupied slot found
+                           const uint8_t hash,
+                           const string& key,
+                           const string& value);
+    bool LeafFillSlotForKey(KVLeafNode* leafnode,          // write slot for matching key if found
                             const uint8_t hash,
                             const string& key,
                             const string& value);
-    void LeafFillSpecificSlot(KVLeafNode* leafnode,        // fill slot at specific index
+    void LeafFillSpecificSlot(KVLeafNode* leafnode,        // write slot at specific index
                               const uint8_t hash,
                               const string& key,
                               const string& value,
                               const int slot);
-    void LeafSplit(KVLeafNode* leafnode,                   // split full leaf into two leaves
-                   const uint8_t hash,
-                   const string& key,
-                   const string& value);
-    void LeafUpdateParentsAfterSplit(KVNode* node,         // recursively update/split parents
-                                     KVNode* new_node,
-                                     string* split_key);
+    void LeafSplitFull(KVLeafNode* leafnode,               // split full leaf into two leaves
+                       const uint8_t hash,
+                       const string& key,
+                       const string& value);
+    void InnerUpdateAfterSplit(KVNode* node,               // update parents after leaf split
+                               KVNode* new_node,
+                               string* split_key);
     uint8_t PearsonHash(const char* data,                  // calculate 1-byte hash for string
                         const size_t size);
-    void RebuildNodes();
-    void Recover();
-    void Shutdown();
+    void Recover();                                        // initialize from pool
+    void Shutdown();                                       // finalize to pool
   private:
+    void RecoverNodes();                                   // reload inner nodes from pool
     KVTree(const KVTree&);                                 // prevent copying
     void operator=(const KVTree&);                         // prevent assignment
-    const string name;                                     // name when constructed
-    pool<KVRoot> pop_;                                     // pool for persistent root
-    const size_t size;                                     // size when constructed
-    KVNode* top_ = nullptr;                                // top of volatile tree
+    const string path;                                     // path when constructed
+    pool<KVRoot> pmpool;                                   // pool for persistent root
+    const size_t pmsize;                                   // size when constructed
+    KVNode* tree_top = nullptr;                            // pointer to uppermost inner node
 };
 
 } // namespace pmemkv

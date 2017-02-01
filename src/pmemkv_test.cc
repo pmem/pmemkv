@@ -64,7 +64,7 @@ class KVTest : public testing::Test {
   private:
     void Open() {
         kv = new KVTree(PATH, SIZE);
-        assert(kv->GetName() == PATH);
+        assert(kv->GetPath() == PATH);
     }
 };
 
