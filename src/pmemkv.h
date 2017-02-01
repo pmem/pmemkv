@@ -127,24 +127,38 @@ class KVTree {
   public:
     KVTree(const string& name, const size_t size);
     ~KVTree();
-    const string& GetName() const { return name; }
+    const string& GetName() const { return name; }         // path when constructed
     const char* GetNamePtr() const { return name.c_str(); }
-    KVStatus Delete(const string& key);
-    KVStatus Get(const string& key, string* value);
-    vector<KVStatus> MultiGet(const vector<string>& keys, vector<string>* values);
-    KVStatus Put(const string& key, const string& value);
+    const size_t GetSize() const { return size; }          // size when constructed
+    KVStatus Delete(const string& key);                    // remove single key
+    KVStatus Get(const string& key, string* value);        // read single key/value
+    KVStatus Put(const string& key, const string& value);  // write single key/value
+    vector<KVStatus> MultiGet(const vector<string>& keys,  // read multiple keys at once
+                              vector<string>* values);
   protected:
-    KVLeafNode* LeafSearch(const string& key);
-    void LeafFillFirstEmptySlot(KVLeafNode* leafnode, const uint8_t hash,
-                                const string& key, const string& value);
-    bool LeafFillSlotForKey(KVLeafNode* leafnode, const uint8_t hash,
-                            const string& key, const string& value);
-    void LeafFillSpecificSlot(KVLeafNode* leafnode, const uint8_t hash,
-                              const string& key, const string& value, const int slot);
-    void LeafSplit(KVLeafNode* leafnode, const uint8_t hash,
-                   const string& key, const string& value);
-    void LeafUpdateParentsAfterSplit(KVNode* node, KVNode* new_node, string* split_key);
-    uint8_t PearsonHash(const char* data, const size_t size);
+    KVLeafNode* LeafSearch(const string& key);             // find node for key
+    void LeafFillFirstEmptySlot(KVLeafNode* leafnode,      // fill first unoccupied slot
+                                const uint8_t hash,
+                                const string& key,
+                                const string& value);
+    bool LeafFillSlotForKey(KVLeafNode* leafnode,          // fill slot for matching key
+                            const uint8_t hash,
+                            const string& key,
+                            const string& value);
+    void LeafFillSpecificSlot(KVLeafNode* leafnode,        // fill slot at specific index
+                              const uint8_t hash,
+                              const string& key,
+                              const string& value,
+                              const int slot);
+    void LeafSplit(KVLeafNode* leafnode,                   // split full leaf into two leaves
+                   const uint8_t hash,
+                   const string& key,
+                   const string& value);
+    void LeafUpdateParentsAfterSplit(KVNode* node,         // recursively update/split parents
+                                     KVNode* new_node,
+                                     string* split_key);
+    uint8_t PearsonHash(const char* data,                  // calculate 1-byte hash for string
+                        const size_t size);
     void RebuildNodes();
     void Recover();
     void Shutdown();
