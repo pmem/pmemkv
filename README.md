@@ -125,7 +125,9 @@ Use wizard to open project:
 
 * From Welcome screen, select "Open Project"
 * select root directory
-* do not "Overwrite CMakeLists.txt" if prompted
+* do not overwrite CMakeLists.txt if prompted (use our version)
+* `src` directory should be automatically detected
+* mark `3rdparty` directory as excluded
 
 Set code style to match pmse:
 * Start with [Google C++ Style](https://google.github.io/styleguide/cppguide.html)
