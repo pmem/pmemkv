@@ -78,8 +78,12 @@ KVStatus KVTree::Delete(const string& key) {
             if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
                 LOG("   freeing slot=" << slot);
                 leafnode->hashes[slot] = 0;
+                leafnode->keys[slot].clear();
+                auto leaf = leafnode->leaf;
                 transaction::exec_tx(pmpool, [&] {
-                    leafnode->leaf->hashes[slot] = 0;
+                    leaf->hashes[slot] = 0;
+                    leaf->keys[slot].get_rw().reset();
+                    leaf->values[slot].get_rw().reset();
                 });
                 break;  // no duplicate keys allowed
             }
@@ -428,6 +432,12 @@ uint8_t KVTree::PearsonHash(const char* data, const size_t size) {
 
 char* KVString::data() const {
     return str ? str.get() : const_cast<char*>(sso);                     // return short or long
+}
+
+void KVString::reset() {
+    pmemobj_tx_add_range_direct(sso, 1);                                 // add first char to txn
+    sso[0] = 0;                                                          // clear first char
+    if (str) delete_persistent<char[]>(str, strlen(str.get()) + 1);      // free value if present
 }
 
 void KVString::set(const char* value) {

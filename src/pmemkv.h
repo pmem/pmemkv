@@ -63,6 +63,7 @@ class KVString {                                           // persistent string 
   public:                                                  // start public fields and methods
     char* data() const;                                    // returns data as c-style string
     bool is_short() const { return !str; }                 // returns true for short strings
+    void reset();                                          // clears contents, frees any memory
     void set(const char* value);                           // copy data from c-style string
     void set_short(const char* value);                     // copy data from known short string
   private:                                                 // start private fields and methods
