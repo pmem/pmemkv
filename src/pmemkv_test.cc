@@ -105,6 +105,24 @@ TEST_F(KVEmptyTest, SizeAfterReopeningTest) {
     delete kv;
 }
 
+TEST_F(KVEmptyTest, SizeOutOfRange1) {
+    try {
+        new KVTree(PATH, PMEMOBJ_MIN_POOL - 1);  // too small
+        FAIL();
+    } catch (...) {
+        // do nothing, expected to happen
+    }
+}
+
+TEST_F(KVEmptyTest, SizeOutOfRange2) {
+    try {
+        new KVTree(PATH, 9223372036854775807);   // 9.22 exabytes
+        FAIL();
+    } catch (...) {
+        // do nothing, expected to happen
+    }
+}
+
 // =============================================================================================
 // TEST SINGLE-LEAF TREE
 // =============================================================================================
