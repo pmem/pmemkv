@@ -51,6 +51,8 @@ using nvml::obj::pool;
 
 namespace pmemkv {
 
+const string LAYOUT = "pmemkv";                            // unique pool layout identifier
+
 #define INNER_KEYS 4                                       // maximum keys for inner nodes
 #define INNER_KEYS_MIDPOINT (INNER_KEYS / 2)               // halfway point within the node
 #define INNER_KEYS_UPPER ((INNER_KEYS / 2) + 1)            // index where upper half of keys begins
@@ -115,7 +117,7 @@ class KVTree {                                             // persistent tree cl
     KVTree(const string& name, const size_t size);         // default constructor
     ~KVTree();                                             // default destructor
     const string& GetPath() const { return path; }         // path when constructed
-    const size_t GetSize() const { return pmsize; }        // size when constructed
+    const size_t GetSize() const { return pmsize; }        // actual size of persistent pool
     KVStatus Delete(const string& key);                    // remove single key
     KVStatus Get(const string& key, string* value);        // read single key/value
     KVStatus Put(const string& key, const string& value);  // write single key/value
@@ -152,7 +154,7 @@ class KVTree {                                             // persistent tree cl
     void operator=(const KVTree&);                         // prevent assignment
     const string path;                                     // path when constructed
     pool<KVRoot> pmpool;                                   // pool for persistent root
-    const size_t pmsize;                                   // size when constructed
+    size_t pmsize;                                         // actual size of persistent pool
     KVNode* tree_top = nullptr;                            // pointer to uppermost inner node
 };
 

@@ -45,6 +45,13 @@ int main(int argc, char* argv[]) {
     return RUN_ALL_TESTS();
 }
 
+class KVEmptyTest : public testing::Test {
+  public:
+    KVEmptyTest() {
+        std::remove(PATH.c_str());
+    }
+};
+
 class KVTest : public testing::Test {
   public:
     KVTree* kv;
@@ -69,10 +76,10 @@ class KVTest : public testing::Test {
 };
 
 // =============================================================================================
-// TEST SINGLE-LEAF TREE
+// TEST EMPTY TREE
 // =============================================================================================
 
-TEST_F(KVTest, SizeofTest) {
+TEST_F(KVEmptyTest, SizeofTest) {
     // persistent types
     ASSERT_TRUE(sizeof(KVRoot) == 16);
     ASSERT_TRUE(sizeof(KVLeaf) == 3136);
@@ -83,6 +90,24 @@ TEST_F(KVTest, SizeofTest) {
     ASSERT_TRUE(sizeof(KVInnerNode) == 232);
     ASSERT_TRUE(sizeof(KVLeafNode) == 1624);
 }
+
+TEST_F(KVEmptyTest, SizeAfterOpeningTest) {
+    KVTree* kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
+    ASSERT_TRUE(kv->GetSize() == PMEMOBJ_MIN_POOL);
+    delete kv;
+}
+
+TEST_F(KVEmptyTest, SizeAfterReopeningTest) {
+    KVTree* kv = new KVTree(PATH, PMEMOBJ_MIN_POOL * 2);
+    delete kv;
+    kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
+    ASSERT_TRUE(kv->GetSize() == PMEMOBJ_MIN_POOL * 2);
+    delete kv;
+}
+
+// =============================================================================================
+// TEST SINGLE-LEAF TREE
+// =============================================================================================
 
 TEST_F(KVTest, DeleteAllTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);

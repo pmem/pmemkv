@@ -42,13 +42,17 @@
 
 namespace pmemkv {
 
-KVTree::KVTree(const string& name, const size_t size) : path(name), pmsize(size) {
+KVTree::KVTree(const string& name, const size_t size) : path(name) {
     if (access(name.c_str(), F_OK) != 0) {
         LOG("Creating pool");
-        pmpool = pool<KVRoot>::create(name.c_str(), "pmemkv", pmsize, S_IRWXU);
+        pmpool = pool<KVRoot>::create(name.c_str(), LAYOUT, size, S_IRWXU);
+        pmsize = size;
     } else {
-        LOG("Opening pool");
-        pmpool = pool<KVRoot>::open(name.c_str(), "pmemkv");
+        LOG("Opening existing pool");
+        pmpool = pool<KVRoot>::open(name.c_str(), LAYOUT);
+        struct stat st;
+        stat(name.c_str(), &st);
+        pmsize = (size_t) st.st_size;
     }
     Recover();
     LOG("Opened ok");
