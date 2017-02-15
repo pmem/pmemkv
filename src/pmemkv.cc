@@ -399,8 +399,21 @@ void KVTree::Recover() {
 
 void KVTree::Shutdown() {
     LOG("Shutting down");
-    // nothing to do here yet
+    if (tree_top) Shutdown(tree_top);
     LOG("Shut down ok");
+}
+
+void KVTree::Shutdown(KVNode* node) {
+    if (node->is_leaf) {
+        auto leafnode = (KVLeafNode*) node;
+        delete leafnode;
+    } else {
+        auto inner = (KVInnerNode*) node;
+        for (uint8_t idx = 0; idx < inner->keycount + 1; idx++) {
+            Shutdown(inner->children[idx]);
+        }
+        delete inner;
+    }
 }
 
 // ===============================================================================================

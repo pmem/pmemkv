@@ -557,13 +557,27 @@ class KVFullTest : public testing::Test {
 
     KVFullTest() {
         std::remove(PATH.c_str());
-        Init();
-        kv = new KVTree(PATH, SIZE);
+        Open();
     }
 
     ~KVFullTest() { delete kv; }
 
-    void Init() {
+    void Reopen() {
+        delete kv;
+        kv = new KVTree(PATH, SIZE);
+        assert(kv->GetPath() == PATH);
+    }
+
+    void Validate() {
+        for (int i = 1; i <= LARGE_LIMIT; i++) {
+            std::string istr = std::to_string(i);
+            std::string value;
+            assert(kv->Get(istr, &value) == OK && value == (istr + "!"));
+        }
+    }
+
+  private:
+    void Open() {
         if (access(PATH_CACHED.c_str(), F_OK) == 0) {
             assert(std::system(("cp -f " + PATH_CACHED + " " + PATH).c_str()) == 0);
         } else {
@@ -576,14 +590,8 @@ class KVFullTest : public testing::Test {
             delete kvt;
             assert(std::system(("cp -f " + PATH + " " + PATH_CACHED).c_str()) == 0);
         }
-    }
-
-    void Validate() {
-        for (int i = 1; i <= LARGE_LIMIT; i++) {
-            std::string istr = std::to_string(i);
-            std::string value;
-            assert(kv->Get(istr, &value) == OK && value == (istr + "!"));
-        }
+        kv = new KVTree(PATH, SIZE);
+        assert(kv->GetPath() == PATH);
     }
 };
 
@@ -650,5 +658,10 @@ TEST_F(KVFullTest, OutOfSpace5bTest) {
     }
     assert(kv->Delete("34567") == OK);
     assert(kv->Put("34567", "34567!") == OK);
+    Validate();
+}
+
+TEST_F(KVFullTest, RepeatedRecoveryTest) {
+    for (int i = 1; i <= 100; i++) Reopen();
     Validate();
 }

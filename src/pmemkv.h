@@ -148,8 +148,9 @@ class KVTree {                                             // persistent tree cl
                                string* split_key);
     uint8_t PearsonHash(const char* data,                  // calculate 1-byte hash for string
                         const size_t size);
-    void Recover();                                        // initialize from pool
-    void Shutdown();                                       // finalize to pool
+    void Recover();                                        // reload state from persistent pool
+    void Shutdown();                                       // release resources for tree
+    void Shutdown(KVNode* node);                           // release resources for node
   private:
     KVTree(const KVTree&);                                 // prevent copying
     void operator=(const KVTree&);                         // prevent assignment
