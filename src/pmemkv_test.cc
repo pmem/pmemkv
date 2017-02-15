@@ -38,6 +38,7 @@
 using namespace pmemkv;
 
 const std::string PATH = "/dev/shm/pmemkv";
+const std::string PATH_CACHED = "/tmp/pmemkv";
 const size_t SIZE = PMEMOBJ_MIN_POOL * 138;
 
 int main(int argc, char* argv[]) {
@@ -486,7 +487,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
 // TEST LARGE TREE
 // =============================================================================================
 
-const int LARGE_LIMIT = 9200000;
+const int LARGE_LIMIT = 9235297;
 
 TEST_F(KVTest, LargeAscendingTest) {
     for (int i = 1; i <= LARGE_LIMIT; i++) {
@@ -544,4 +545,110 @@ TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
         std::string value;
         assert(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
+}
+
+// =============================================================================================
+// TEST RUNNING OUT OF SPACE
+// =============================================================================================
+
+class KVFullTest : public testing::Test {
+  public:
+    KVTree* kv;
+
+    KVFullTest() {
+        std::remove(PATH.c_str());
+        Init();
+        kv = new KVTree(PATH, SIZE);
+    }
+
+    ~KVFullTest() { delete kv; }
+
+    void Init() {
+        if (access(PATH_CACHED.c_str(), F_OK) == 0) {
+            assert(std::system(("cp -f " + PATH_CACHED + " " + PATH).c_str()) == 0);
+        } else {
+            std::cout << "!!! creating cached copy at " << PATH_CACHED << "\n";
+            KVTree* kvt = new KVTree(PATH, SIZE);
+            for (int i = 1; i <= LARGE_LIMIT; i++) {
+                std::string istr = std::to_string(i);
+                assert(kvt->Put(istr, (istr + "!")) == OK);
+            }
+            delete kvt;
+            assert(std::system(("cp -f " + PATH + " " + PATH_CACHED).c_str()) == 0);
+        }
+    }
+
+    void Validate() {
+        for (int i = 1; i <= LARGE_LIMIT; i++) {
+            std::string istr = std::to_string(i);
+            std::string value;
+            assert(kv->Get(istr, &value) == OK && value == (istr + "!"));
+        }
+    }
+};
+
+const string LONGSTR = "123456789A123456789A123456789A123456789A123456789A123456789A123456789A";
+
+TEST_F(KVFullTest, OutOfSpace1Test) {
+    assert(kv->Put("100", "100?") == OK);
+    assert(kv->Put("100", "100!") == OK);
+    Validate();
+}
+
+TEST_F(KVFullTest, OutOfSpace2aTest) {
+    assert(kv->Delete("100") == OK);
+    assert(kv->Put("100", LONGSTR) == TXN_ERROR);
+    assert(kv->Put("100", "100!") == OK);
+    Validate();
+}
+
+TEST_F(KVFullTest, OutOfSpace2bTest) {
+    assert(kv->Delete("100") == OK);
+    assert(kv->Put("100", "100!") == OK);
+    assert(kv->Put("100", LONGSTR) == TXN_ERROR);
+    Validate();
+}
+
+TEST_F(KVFullTest, OutOfSpace3aTest) {
+    assert(kv->Put("100", LONGSTR) == TXN_ERROR);
+    Validate();
+}
+
+TEST_F(KVFullTest, OutOfSpace3bTest) {
+    for (int i = 0; i <= 99999; i++) {
+        assert(kv->Put("123456", LONGSTR) == TXN_ERROR);
+    }
+    assert(kv->Delete("4567") == OK);
+    assert(kv->Put("4567", "4567!") == OK);
+    Validate();
+}
+
+TEST_F(KVFullTest, OutOfSpace4aTest) {
+    assert(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == TXN_ERROR);
+    Validate();
+}
+
+TEST_F(KVFullTest, OutOfSpace4bTest) {
+    for (int i = 0; i <= 99999; i++) {
+        assert(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == TXN_ERROR);
+    }
+    assert(kv->Delete("98765") == OK);
+    assert(kv->Put("98765", "98765!") == OK);
+    Validate();
+}
+
+TEST_F(KVFullTest, OutOfSpace5aTest) {
+    assert(kv->Put(LONGSTR, "1") == TXN_ERROR);
+    assert(kv->Put(LONGSTR, LONGSTR) == TXN_ERROR);
+    Validate();
+}
+
+TEST_F(KVFullTest, OutOfSpace5bTest) {
+    for (int i = 0; i <= 99999; i++) {
+        assert(kv->Put(LONGSTR, "1") == TXN_ERROR);
+        assert(kv->Put(LONGSTR, LONGSTR) == TXN_ERROR);
+    }
+    assert(kv->Delete("34567") == OK);
+    assert(kv->Put("34567", "34567!") == OK);
+    Validate();
 }

@@ -3,7 +3,7 @@ include make_config.mk
 all: clean thirdparty example test
 
 clean:
-	rm -rf /dev/shm/pmemkv pmemkv_example pmemkv_stress pmemkv_test
+	rm -rf /dev/shm/pmemkv /tmp/pmemkv pmemkv_example pmemkv_stress pmemkv_test
 
 thirdparty:
 	rm -rf 3rdparty && mkdir 3rdparty
@@ -32,5 +32,5 @@ test:
 	$(USE_NVML) \
 	$(USE_GTEST) \
 	-O2 -std=c++11 -ldl $(PLATFORM_LDFLAGS) $(PLATFORM_CXXFLAGS)
-	rm -rf /dev/shm/pmemkv
+	rm -rf /dev/shm/pmemkv /tmp/pmemkv
 	PMEM_IS_PMEM_FORCE=1 ./pmemkv_test

@@ -110,6 +110,7 @@ struct KVRecoveredLeaf {                                   // temporary wrapper 
 enum KVStatus {                                            // status enumeration
     OK = 0,                                                // successful completion
     NOT_FOUND = 1,                                         // key not located
+    TXN_ERROR = 2                                          // persistent transaction failed
 };
 
 class KVTree {                                             // persistent tree class

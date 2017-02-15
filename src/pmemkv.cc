@@ -132,29 +132,34 @@ vector<KVStatus> KVTree::MultiGet(const vector<string>& keys, vector<string>* va
 
 KVStatus KVTree::Put(const string& key, const string& value) {
     LOG("Put key=" << key.c_str() << ", value=" << value.c_str());
-    const uint8_t hash = PearsonHash(key.c_str(), key.length());
-    auto leafnode = LeafSearch(key);
-    if (!leafnode) {
-        LOG("   adding head leaf");
-        leafnode = new KVLeafNode();
-        leafnode->is_leaf = true;
-        persistent_ptr<KVLeaf> new_leaf;
-        transaction::exec_tx(pmpool, [&] {
-            auto root = pmpool.get_root();
-            auto old_head = root->head;
-            new_leaf = make_persistent<KVLeaf>();
-            new_leaf->next = old_head;
-            leafnode->leaf = new_leaf;
-            LeafFillSpecificSlot(leafnode, hash, key, value, 0);
-            root->head = new_leaf;
-        });
-        tree_top = leafnode;
-    } else if (LeafFillSlotForKey(leafnode, hash, key, value)) {
-        // nothing else to do
-    } else {
-        LeafSplitFull(leafnode, hash, key, value);
+    try {
+        const uint8_t hash = PearsonHash(key.c_str(), key.length());
+        auto leafnode = LeafSearch(key);
+        if (!leafnode) {
+            LOG("   adding head leaf");
+            leafnode = new KVLeafNode();
+            leafnode->is_leaf = true;
+            transaction::exec_tx(pmpool, [&] {
+                auto root = pmpool.get_root();
+                auto old_head = root->head;
+                auto new_leaf = make_persistent<KVLeaf>();
+                root->head = new_leaf;
+                new_leaf->next = old_head;
+                leafnode->leaf = new_leaf;
+                LeafFillSpecificSlot(leafnode, hash, key, value, 0);
+            });
+            tree_top = leafnode;
+        } else if (LeafFillSlotForKey(leafnode, hash, key, value)) {
+            // nothing else to do
+        } else {
+            LeafSplitFull(leafnode, hash, key, value);
+        }
+        return OK;
+    } catch (nvml::transaction_alloc_error) {
+        return TXN_ERROR;
+    } catch (nvml::transaction_error) {
+        return TXN_ERROR;
     }
-    return OK;
 }
 
 // ===============================================================================================
@@ -244,38 +249,42 @@ void KVTree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
 
     // split leaf into two leaves, moving slots that sort above split key to new leaf
     auto new_leafnode = new KVLeafNode();
-    new_leafnode->parent = leafnode->parent;
-    new_leafnode->is_leaf = true;
-    persistent_ptr<KVLeaf> new_leaf;
-    transaction::exec_tx(pmpool, [&] {
-        auto root = pmpool.get_root();
-        auto old_head = root->head;
-        new_leaf = make_persistent<KVLeaf>();
-        new_leaf->next = old_head;
-        new_leafnode->leaf = new_leaf;
-        const auto leaf = leafnode->leaf;
-        for (int slot = NODE_KEYS; slot--;) {
-            if (strcmp(leafnode->keys[slot].c_str(), split_key.data()) > 0) {
-                const KVString slot_key = leaf->keys[slot].get_ro();
-                if (slot_key.is_short()) {
-                    new_leaf->keys[slot].get_rw().set_short(slot_key.data());
-                } else new_leaf->keys[slot].swap(leaf->keys[slot]);
-                const KVString slot_value = leaf->values[slot].get_ro();
-                if (slot_value.is_short()) {
-                    new_leaf->values[slot].get_rw().set_short(slot_value.data());
-                } else new_leaf->values[slot].swap(leaf->values[slot]);
-                new_leafnode->hashes[slot] = leafnode->hashes[slot];
-                new_leafnode->keys[slot] = leafnode->keys[slot];
-                leafnode->keys[slot].clear();
-                new_leaf->hashes[slot] = leafnode->hashes[slot];
-                leafnode->hashes[slot] = 0;
-                leaf->hashes[slot] = 0;
+    try {
+        new_leafnode->parent = leafnode->parent;
+        new_leafnode->is_leaf = true;
+        transaction::exec_tx(pmpool, [&] {
+            auto root = pmpool.get_root();
+            auto old_head = root->head;
+            auto new_leaf = make_persistent<KVLeaf>();
+            root->head = new_leaf;
+            new_leaf->next = old_head;
+            new_leafnode->leaf = new_leaf;
+            const auto leaf = leafnode->leaf;
+            for (int slot = NODE_KEYS; slot--;) {
+                if (strcmp(leafnode->keys[slot].c_str(), split_key.data()) > 0) {
+                    const KVString slot_key = leaf->keys[slot].get_ro();
+                    if (slot_key.is_short()) {
+                        new_leaf->keys[slot].get_rw().set_short(slot_key.data());
+                    } else new_leaf->keys[slot].swap(leaf->keys[slot]);
+                    const KVString slot_value = leaf->values[slot].get_ro();
+                    if (slot_value.is_short()) {
+                        new_leaf->values[slot].get_rw().set_short(slot_value.data());
+                    } else new_leaf->values[slot].swap(leaf->values[slot]);
+                    new_leafnode->hashes[slot] = leafnode->hashes[slot];
+                    new_leafnode->keys[slot] = leafnode->keys[slot];
+                    leafnode->keys[slot].clear();
+                    new_leaf->hashes[slot] = leafnode->hashes[slot];
+                    leafnode->hashes[slot] = 0;
+                    leaf->hashes[slot] = 0;
+                }
             }
-        }
-        auto target = strcmp(key.c_str(), split_key.data()) > 0 ? new_leafnode : leafnode;
-        LeafFillEmptySlot(target, hash, key, value);
-        root->head = new_leaf;
-    });
+            auto target = strcmp(key.c_str(), split_key.data()) > 0 ? new_leafnode : leafnode;
+            LeafFillEmptySlot(target, hash, key, value);
+        });
+    } catch (...) {
+        delete new_leafnode;
+        throw;
+    }
 
     // recursively update volatile parents outside persistent transaction
     InnerUpdateAfterSplit(leafnode, new_leafnode, &split_key);
