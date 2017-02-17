@@ -72,7 +72,9 @@ class KVTest : public testing::Test {
   private:
     void Open() {
         kv = new KVTree(PATH, SIZE);
-        assert(kv->GetPath() == PATH);
+        KVTreeMetadata kvmeta = {};
+        kv->Metadata(kvmeta);
+        assert(kvmeta.path == PATH);
     }
 };
 
@@ -94,7 +96,9 @@ TEST_F(KVEmptyTest, SizeofTest) {
 
 TEST_F(KVEmptyTest, SizeAfterOpeningTest) {
     KVTree* kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
-    ASSERT_TRUE(kv->GetSize() == PMEMOBJ_MIN_POOL);
+    KVTreeMetadata kvmeta = {};
+    kv->Metadata(kvmeta);
+    ASSERT_TRUE(kvmeta.size == PMEMOBJ_MIN_POOL);
     delete kv;
 }
 
@@ -102,7 +106,9 @@ TEST_F(KVEmptyTest, SizeAfterReopeningTest) {
     KVTree* kv = new KVTree(PATH, PMEMOBJ_MIN_POOL * 2);
     delete kv;
     kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
-    ASSERT_TRUE(kv->GetSize() == PMEMOBJ_MIN_POOL * 2);
+    KVTreeMetadata kvmeta = {};
+    kv->Metadata(kvmeta);
+    ASSERT_TRUE(kvmeta.size == PMEMOBJ_MIN_POOL * 2);
     delete kv;
 }
 
@@ -565,7 +571,6 @@ class KVFullTest : public testing::Test {
     void Reopen() {
         delete kv;
         kv = new KVTree(PATH, SIZE);
-        assert(kv->GetPath() == PATH);
     }
 
     void Validate() {
@@ -591,7 +596,6 @@ class KVFullTest : public testing::Test {
             assert(std::system(("cp -f " + PATH + " " + PATH_CACHED).c_str()) == 0);
         }
         kv = new KVTree(PATH, SIZE);
-        assert(kv->GetPath() == PATH);
     }
 };
 

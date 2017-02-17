@@ -38,7 +38,7 @@
 #include "pmemkv.h"
 
 #define DO_LOG 0
-#define LOG(msg) if (DO_LOG) std::cout << "[pmemkv:" << GetPath() << "] " << msg << "\n"
+#define LOG(msg) if (DO_LOG) std::cout << "[pmemkv] " << msg << "\n"
 
 namespace pmemkv {
 
@@ -414,6 +414,15 @@ void KVTree::Shutdown(KVNode* node) {
         }
         delete inner;
     }
+}
+
+// ===============================================================================================
+// METADATA METHODS
+// ===============================================================================================
+
+void KVTree::Metadata(KVTreeMetadata& metadata) {
+    metadata.path = path;
+    metadata.size = pmsize;
 }
 
 // ===============================================================================================
