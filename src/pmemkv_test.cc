@@ -74,7 +74,7 @@ class KVTest : public testing::Test {
         kv = new KVTree(PATH, SIZE);
         KVTreeMetadata kvmeta = {};
         kv->Metadata(kvmeta);
-        assert(kvmeta.path == PATH);
+        ASSERT_TRUE(kvmeta.path == PATH);
     }
 };
 
@@ -380,56 +380,56 @@ const int SINGLE_INNER_LIMIT = NODE_KEYS * (INNER_KEYS - 1);
 TEST_F(KVTest, SingleInnerNodeAscendingTest) {
     for (int i = 10000; i <= (10000 + SINGLE_INNER_LIMIT); i++) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     for (int i = 10000; i <= (10000 + SINGLE_INNER_LIMIT); i++) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
 }
 
 TEST_F(KVTest, SingleInnerNodeAscendingTest2) {
     for (int i = 1; i <= SINGLE_INNER_LIMIT; i++) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     for (int i = 1; i <= SINGLE_INNER_LIMIT; i++) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingTest) {
     for (int i = (10000 + SINGLE_INNER_LIMIT); i >= 10000; i--) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     for (int i = (10000 + SINGLE_INNER_LIMIT); i >= 10000; i--) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingTest2) {
     for (int i = SINGLE_INNER_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     for (int i = SINGLE_INNER_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
 }
 
@@ -440,52 +440,52 @@ TEST_F(KVTest, SingleInnerNodeDescendingTest2) {
 TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest) {
     for (int i = 10000; i <= (10000 + SINGLE_INNER_LIMIT); i++) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK);
     }
     Reopen();
     for (int i = 10000; i <= (10000 + SINGLE_INNER_LIMIT); i++) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
 }
 
 TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest2) {
     for (int i = 1; i <= SINGLE_INNER_LIMIT; i++) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK);
     }
     Reopen();
     for (int i = 1; i <= SINGLE_INNER_LIMIT; i++) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest) {
     for (int i = (10000 + SINGLE_INNER_LIMIT); i >= 10000; i--) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK);
     }
     Reopen();
     for (int i = (10000 + SINGLE_INNER_LIMIT); i >= 10000; i--) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
     for (int i = SINGLE_INNER_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK);
     }
     Reopen();
     for (int i = SINGLE_INNER_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == istr);
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
 }
 
@@ -498,28 +498,28 @@ const int LARGE_LIMIT = 9235297;
 TEST_F(KVTest, LargeAscendingTest) {
     for (int i = 1; i <= LARGE_LIMIT; i++) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, (istr + "!")) == OK);
+        ASSERT_TRUE(kv->Put(istr, (istr + "!")) == OK);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == (istr + "!"));
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
     }
     for (int i = 1; i <= LARGE_LIMIT; i++) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == (istr + "!"));
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
     }
 }
 
 TEST_F(KVTest, LargeDescendingTest) {
     for (int i = LARGE_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, ("ABC" + istr)) == OK);
+        ASSERT_TRUE(kv->Put(istr, ("ABC" + istr)) == OK);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
     for (int i = LARGE_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
 }
 
@@ -530,26 +530,26 @@ TEST_F(KVTest, LargeDescendingTest) {
 TEST_F(KVTest, LargeAscendingAfterRecoveryTest) {
     for (int i = 1; i <= LARGE_LIMIT; i++) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, (istr + "!")) == OK);
+        ASSERT_TRUE(kv->Put(istr, (istr + "!")) == OK);
     }
     Reopen();
     for (int i = 1; i <= LARGE_LIMIT; i++) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == (istr + "!"));
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
     }
 }
 
 TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
     for (int i = LARGE_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
-        assert(kv->Put(istr, ("ABC" + istr)) == OK);
+        ASSERT_TRUE(kv->Put(istr, ("ABC" + istr)) == OK);
     }
     Reopen();
     for (int i = LARGE_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
         std::string value;
-        assert(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
 }
 
@@ -577,23 +577,23 @@ class KVFullTest : public testing::Test {
         for (int i = 1; i <= LARGE_LIMIT; i++) {
             std::string istr = std::to_string(i);
             std::string value;
-            assert(kv->Get(istr, &value) == OK && value == (istr + "!"));
+            ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
         }
     }
 
   private:
     void Open() {
         if (access(PATH_CACHED.c_str(), F_OK) == 0) {
-            assert(std::system(("cp -f " + PATH_CACHED + " " + PATH).c_str()) == 0);
+            ASSERT_TRUE(std::system(("cp -f " + PATH_CACHED + " " + PATH).c_str()) == 0);
         } else {
             std::cout << "!!! creating cached copy at " << PATH_CACHED << "\n";
             KVTree* kvt = new KVTree(PATH, SIZE);
             for (int i = 1; i <= LARGE_LIMIT; i++) {
                 std::string istr = std::to_string(i);
-                assert(kvt->Put(istr, (istr + "!")) == OK);
+                ASSERT_TRUE(kvt->Put(istr, (istr + "!")) == OK);
             }
             delete kvt;
-            assert(std::system(("cp -f " + PATH + " " + PATH_CACHED).c_str()) == 0);
+            ASSERT_TRUE(std::system(("cp -f " + PATH + " " + PATH_CACHED).c_str()) == 0);
         }
         kv = new KVTree(PATH, SIZE);
     }
@@ -602,66 +602,66 @@ class KVFullTest : public testing::Test {
 const string LONGSTR = "123456789A123456789A123456789A123456789A123456789A123456789A123456789A";
 
 TEST_F(KVFullTest, OutOfSpace1Test) {
-    assert(kv->Put("100", "100?") == OK);
-    assert(kv->Put("100", "100!") == OK);
+    ASSERT_TRUE(kv->Put("100", "100?") == OK);
+    ASSERT_TRUE(kv->Put("100", "100!") == OK);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace2aTest) {
-    assert(kv->Delete("100") == OK);
-    assert(kv->Put("100", LONGSTR) == TXN_ERROR);
-    assert(kv->Put("100", "100!") == OK);
+    ASSERT_TRUE(kv->Delete("100") == OK);
+    ASSERT_TRUE(kv->Put("100", LONGSTR) == TXN_ERROR);
+    ASSERT_TRUE(kv->Put("100", "100!") == OK);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace2bTest) {
-    assert(kv->Delete("100") == OK);
-    assert(kv->Put("100", "100!") == OK);
-    assert(kv->Put("100", LONGSTR) == TXN_ERROR);
+    ASSERT_TRUE(kv->Delete("100") == OK);
+    ASSERT_TRUE(kv->Put("100", "100!") == OK);
+    ASSERT_TRUE(kv->Put("100", LONGSTR) == TXN_ERROR);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace3aTest) {
-    assert(kv->Put("100", LONGSTR) == TXN_ERROR);
+    ASSERT_TRUE(kv->Put("100", LONGSTR) == TXN_ERROR);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace3bTest) {
     for (int i = 0; i <= 99999; i++) {
-        assert(kv->Put("123456", LONGSTR) == TXN_ERROR);
+        ASSERT_TRUE(kv->Put("123456", LONGSTR) == TXN_ERROR);
     }
-    assert(kv->Delete("4567") == OK);
-    assert(kv->Put("4567", "4567!") == OK);
+    ASSERT_TRUE(kv->Delete("4567") == OK);
+    ASSERT_TRUE(kv->Put("4567", "4567!") == OK);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace4aTest) {
-    assert(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == TXN_ERROR);
+    ASSERT_TRUE(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == TXN_ERROR);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace4bTest) {
     for (int i = 0; i <= 99999; i++) {
-        assert(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == TXN_ERROR);
+        ASSERT_TRUE(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == TXN_ERROR);
     }
-    assert(kv->Delete("98765") == OK);
-    assert(kv->Put("98765", "98765!") == OK);
+    ASSERT_TRUE(kv->Delete("98765") == OK);
+    ASSERT_TRUE(kv->Put("98765", "98765!") == OK);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace5aTest) {
-    assert(kv->Put(LONGSTR, "1") == TXN_ERROR);
-    assert(kv->Put(LONGSTR, LONGSTR) == TXN_ERROR);
+    ASSERT_TRUE(kv->Put(LONGSTR, "1") == TXN_ERROR);
+    ASSERT_TRUE(kv->Put(LONGSTR, LONGSTR) == TXN_ERROR);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace5bTest) {
     for (int i = 0; i <= 99999; i++) {
-        assert(kv->Put(LONGSTR, "1") == TXN_ERROR);
-        assert(kv->Put(LONGSTR, LONGSTR) == TXN_ERROR);
+        ASSERT_TRUE(kv->Put(LONGSTR, "1") == TXN_ERROR);
+        ASSERT_TRUE(kv->Put(LONGSTR, LONGSTR) == TXN_ERROR);
     }
-    assert(kv->Delete("34567") == OK);
-    assert(kv->Put("34567", "34567!") == OK);
+    ASSERT_TRUE(kv->Delete("34567") == OK);
+    ASSERT_TRUE(kv->Put("34567", "34567!") == OK);
     Validate();
 }
 
