@@ -120,7 +120,7 @@ struct KVTreeMetadata {                                    // tree metadata snap
 
 class KVTree {                                             // persistent tree class
   public:
-    KVTree(const string& name, const size_t size);         // default constructor
+    KVTree(const string& path, const size_t size);         // default constructor
     ~KVTree();                                             // default destructor
     KVStatus Delete(const string& key);                    // remove single key
     KVStatus Get(const string& key, string* value);        // read single key/value
@@ -158,7 +158,7 @@ class KVTree {                                             // persistent tree cl
   private:
     KVTree(const KVTree&);                                 // prevent copying
     void operator=(const KVTree&);                         // prevent assignment
-    const string path;                                     // path when constructed
+    const string pmpath;                                   // path when constructed
     pool<KVRoot> pmpool;                                   // pool for persistent root
     size_t pmsize;                                         // actual size of persistent pool
     KVNode* tree_top = nullptr;                            // pointer to uppermost inner node

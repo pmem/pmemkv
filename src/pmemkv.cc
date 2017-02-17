@@ -42,16 +42,16 @@
 
 namespace pmemkv {
 
-KVTree::KVTree(const string& name, const size_t size) : path(name) {
-    if (access(name.c_str(), F_OK) != 0) {
+KVTree::KVTree(const string& path, const size_t size) : pmpath(path) {
+    if (access(path.c_str(), F_OK) != 0) {
         LOG("Creating pool");
-        pmpool = pool<KVRoot>::create(name.c_str(), LAYOUT, size, S_IRWXU);
+        pmpool = pool<KVRoot>::create(path.c_str(), LAYOUT, size, S_IRWXU);
         pmsize = size;
     } else {
         LOG("Opening existing pool");
-        pmpool = pool<KVRoot>::open(name.c_str(), LAYOUT);
+        pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
         struct stat st;
-        stat(name.c_str(), &st);
+        stat(path.c_str(), &st);
         pmsize = (size_t) st.st_size;
     }
     Recover();
@@ -421,7 +421,7 @@ void KVTree::Shutdown(KVNode* node) {
 // ===============================================================================================
 
 void KVTree::Metadata(KVTreeMetadata& metadata) {
-    metadata.path = path;
+    metadata.path = pmpath;
     metadata.size = pmsize;
 }
 
