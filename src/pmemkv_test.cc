@@ -84,21 +84,21 @@ class KVTest : public testing::Test {
 
 TEST_F(KVEmptyTest, SizeofTest) {
     // persistent types
-    ASSERT_TRUE(sizeof(KVRoot) == 16);
-    ASSERT_TRUE(sizeof(KVLeaf) == 3136);
-    ASSERT_TRUE(sizeof_field(KVLeaf, hashes) + sizeof_field(KVLeaf, next) == 64);
-    ASSERT_TRUE(sizeof(KVString) == 32);
+    ASSERT_EQ(sizeof(KVRoot), 16);
+    ASSERT_EQ(sizeof(KVLeaf), 3136);
+    ASSERT_EQ(sizeof_field(KVLeaf, hashes) + sizeof_field(KVLeaf, next), 64);
+    ASSERT_EQ(sizeof(KVString), 32);
 
     // volatile types
-    ASSERT_TRUE(sizeof(KVInnerNode) == 232);
-    ASSERT_TRUE(sizeof(KVLeafNode) == 1624);
+    ASSERT_EQ(sizeof(KVInnerNode), 232);
+    ASSERT_EQ(sizeof(KVLeafNode), 1624);
 }
 
 TEST_F(KVEmptyTest, SizeAfterOpeningTest) {
     KVTree* kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
     KVTreeMetadata kvmeta = {};
     kv->Metadata(kvmeta);
-    ASSERT_TRUE(kvmeta.size == PMEMOBJ_MIN_POOL);
+    ASSERT_EQ(kvmeta.size, PMEMOBJ_MIN_POOL);
     delete kv;
 }
 
@@ -108,7 +108,7 @@ TEST_F(KVEmptyTest, SizeAfterReopeningTest) {
     kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
     KVTreeMetadata kvmeta = {};
     kv->Metadata(kvmeta);
-    ASSERT_TRUE(kvmeta.size == PMEMOBJ_MIN_POOL * 2);
+    ASSERT_EQ(kvmeta.size, PMEMOBJ_MIN_POOL * 2);
     delete kv;
 }
 
