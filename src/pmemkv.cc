@@ -117,8 +117,8 @@ KVStatus KVTree::Get(const string& key, string* value) {
     return NOT_FOUND;
 }
 
-vector<KVStatus> KVTree::MultiGet(const vector<string>& keys, vector<string>* values) {
-    LOG("MultiGet for " << keys.size() << " keys");
+vector<KVStatus> KVTree::GetList(const vector<string>& keys, vector<string>* values) {
+    LOG("GetList for " << keys.size() << " keys");
     vector<KVStatus> status = vector<KVStatus>();
     for (auto& key: keys) {
         string value;
@@ -126,7 +126,7 @@ vector<KVStatus> KVTree::MultiGet(const vector<string>& keys, vector<string>* va
         status.push_back(s);
         values->push_back(s == OK ? value : "");
     }
-    LOG("MultiGet done for " << keys.size() << " keys");
+    LOG("GetList done for " << keys.size() << " keys");
     return status;
 }
 

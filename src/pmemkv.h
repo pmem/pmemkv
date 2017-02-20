@@ -122,12 +122,12 @@ class KVTree {                                             // persistent tree cl
   public:
     KVTree(const string& path, const size_t size);         // default constructor
     ~KVTree();                                             // default destructor
+    void Metadata(KVTreeMetadata& metadata);               // report internal state & stats
     KVStatus Delete(const string& key);                    // remove single key
     KVStatus Get(const string& key, string* value);        // read single key/value
+    vector<KVStatus> GetList(const vector<string>& keys,   // read multiple keys at once
+                             vector<string>* values);
     KVStatus Put(const string& key, const string& value);  // write single key/value
-    vector<KVStatus> MultiGet(const vector<string>& keys,  // read multiple keys at once
-                              vector<string>* values);
-    void Metadata(KVTreeMetadata& metadata);               // report internal state & stats
   protected:
     KVLeafNode* LeafSearch(const string& key);             // find node for key
     void LeafFillEmptySlot(KVLeafNode* leafnode,           // write first unoccupied slot found

@@ -231,7 +231,7 @@ TEST_F(KVTest, MultiGetTest) {
     keys.push_back("tmpkey2");
     keys.push_back("tmpkey3");
     keys.push_back("tmpkey");
-    std::vector<KVStatus> status = kv->MultiGet(keys, &values);
+    std::vector<KVStatus> status = kv->GetList(keys, &values);
     ASSERT_TRUE(status.size() == 4);
     ASSERT_TRUE(values.size() == 4);
     ASSERT_TRUE(status.at(0) == OK && values.at(0) == "tmpvalue1");
