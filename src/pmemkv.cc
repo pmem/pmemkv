@@ -70,6 +70,7 @@ KVTree::~KVTree() {
 // ===============================================================================================
 
 void KVTree::Analyze(KVTreeAnalysis& analysis) {
+    LOG("Analyzing");
     analysis.leaf_empty = 0;
     analysis.leaf_total = 0;
     analysis.path = pmpath;
@@ -89,6 +90,7 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
         analysis.leaf_total++;
         leaf = leaf->next;  // advance to next linked leaf
     }
+    LOG("Analyzed ok");
 }
 
 KVStatus KVTree::Delete(const string& key) {
