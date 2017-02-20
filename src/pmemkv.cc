@@ -70,8 +70,25 @@ KVTree::~KVTree() {
 // ===============================================================================================
 
 void KVTree::Analyze(KVTreeAnalysis& analysis) {
+    analysis.leaf_empty = 0;
+    analysis.leaf_total = 0;
     analysis.path = pmpath;
     analysis.size = pmsize;
+
+    // iterate persistent leaves for stats
+    auto leaf = pmpool.get_root()->head;
+    while (leaf) {
+        bool empty = true;
+        for (int slot = NODE_KEYS; slot--;) {
+            if (leaf->hashes[slot] != 0) {
+                empty = false;
+                break;
+            }
+        }
+        if (empty) analysis.leaf_empty++;
+        analysis.leaf_total++;
+        leaf = leaf->next;  // advance to next linked leaf
+    }
 }
 
 KVStatus KVTree::Delete(const string& key) {
@@ -350,7 +367,7 @@ void KVTree::Recover() {
     // traverse persistent leaves to build list of leaves to recover
     std::list<KVRecoveredLeaf*> leaves;
     auto leaf = pmpool.get_root()->head;
-    while (leaf != nullptr) {
+    while (leaf) {
         auto leafnode = new KVLeafNode();
         leafnode->leaf = leaf;
         leafnode->is_leaf = true;
@@ -375,7 +392,7 @@ void KVTree::Recover() {
             leaves.push_back(rleaf);
         }
 
-        leaf = leaf->next ? leaf->next : nullptr;  // advance to next linked leaf
+        leaf = leaf->next;  // advance to next linked leaf
     }
 
     // sort recovered leaves in ascending key order

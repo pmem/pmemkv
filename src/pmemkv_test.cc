@@ -141,10 +141,20 @@ TEST_F(KVEmptyTest, SizeOutOfRange2) {
 TEST_F(KVTest, DeleteAllTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
     ASSERT_TRUE(kv->Delete("tmpkey") == OK);
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 1);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
+
+TEST_F(KVTest, DeleteAndInsertTest) {
+    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
+    ASSERT_TRUE(kv->Delete("tmpkey") == OK);
     ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
     std::string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, DeleteExistingTest) {
@@ -156,17 +166,23 @@ TEST_F(KVTest, DeleteExistingTest) {
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, DeleteHeadlessTest) {
     ASSERT_TRUE(kv->Delete("nada") == OK);
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 0);
 }
 
 TEST_F(KVTest, DeleteNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
     ASSERT_TRUE(kv->Delete("nada") == OK);
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, EmptyKeyTest) {                                      // todo correct behavior?
@@ -174,6 +190,8 @@ TEST_F(KVTest, EmptyKeyTest) {                                      // todo corr
     std::string value;
     ASSERT_TRUE(kv->Get("", &value) == OK && value == "blah");
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, EmptyValueTest) {                                    // todo correct behavior?
@@ -181,6 +199,8 @@ TEST_F(KVTest, EmptyValueTest) {                                    // todo corr
     std::string value;
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "");
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, GetAppendToExternalValueTest) {
@@ -188,12 +208,16 @@ TEST_F(KVTest, GetAppendToExternalValueTest) {
     std::string value = "super";
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "supercool");
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, GetHeadlessTest) {
     std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 0);
 }
 
 TEST_F(KVTest, GetMultipleTest) {
@@ -213,6 +237,8 @@ TEST_F(KVTest, GetMultipleTest) {
     std::string value5;
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, GetMultipleAfterDeleteTest) {
@@ -228,6 +254,8 @@ TEST_F(KVTest, GetMultipleAfterDeleteTest) {
     std::string value3;
     ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, GetNonexistentTest) {
@@ -235,6 +263,8 @@ TEST_F(KVTest, GetNonexistentTest) {
     std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, GetListTest) {
@@ -254,6 +284,8 @@ TEST_F(KVTest, GetListTest) {
     ASSERT_TRUE(status.at(2) == NOT_FOUND && values.at(2) == "");
     ASSERT_TRUE(status.at(3) == OK && values.at(3) == "tmpvalue1");
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, PutExistingTest) {
@@ -272,7 +304,10 @@ TEST_F(KVTest, PutExistingTest) {
     std::string new_value3;
     ASSERT_TRUE(kv->Put("key1", "?") == OK);                // shorter length
     ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
+
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, PutKeysOfDifferentLengthsTest) {
@@ -327,13 +362,17 @@ TEST_F(KVTest, DeleteHeadlessAfterRecoveryTest) {
     Reopen();
     ASSERT_TRUE(kv->Delete("nada") == OK);
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 0);
 }
 
 TEST_F(KVTest, DeleteNonexistentAfterRecoveryTest) {
-    Reopen();
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    Reopen();
     ASSERT_TRUE(kv->Delete("nada") == OK);
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, GetHeadlessAfterRecoveryTest) {
@@ -341,6 +380,8 @@ TEST_F(KVTest, GetHeadlessAfterRecoveryTest) {
     std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 0);
 }
 
 TEST_F(KVTest, GetMultipleAfterRecoveryTest) {
@@ -361,14 +402,18 @@ TEST_F(KVTest, GetMultipleAfterRecoveryTest) {
     std::string value5;
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, GetNonexistentAfterRecoveryTest) {
-    Reopen();
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    Reopen();
     std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, PutAfterRecoveryTest) {
@@ -377,6 +422,8 @@ TEST_F(KVTest, PutAfterRecoveryTest) {
     std::string value1;
     ASSERT_TRUE(kv->Get("key1", &value1) == OK && value1 == "value1");
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(KVTest, UpdateAfterRecoveryTest) {
@@ -393,6 +440,8 @@ TEST_F(KVTest, UpdateAfterRecoveryTest) {
     std::string value3;
     ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 // =============================================================================================
@@ -414,6 +463,8 @@ TEST_F(KVTest, SingleInnerNodeAscendingTest) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 5);
 }
 
 TEST_F(KVTest, SingleInnerNodeAscendingTest2) {
@@ -429,6 +480,8 @@ TEST_F(KVTest, SingleInnerNodeAscendingTest2) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 5);
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingTest) {
@@ -444,6 +497,8 @@ TEST_F(KVTest, SingleInnerNodeDescendingTest) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 6);
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingTest2) {
@@ -459,6 +514,8 @@ TEST_F(KVTest, SingleInnerNodeDescendingTest2) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 5);
 }
 
 // =============================================================================================
@@ -477,6 +534,8 @@ TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 5);
 }
 
 TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest2) {
@@ -491,6 +550,8 @@ TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest2) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 5);
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest) {
@@ -505,6 +566,8 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 6);
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
@@ -519,6 +582,8 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 5);
 }
 
 // =============================================================================================
@@ -540,6 +605,8 @@ TEST_F(KVTest, LargeAscendingTest) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 351920);
 }
 
 TEST_F(KVTest, LargeDescendingTest) {
@@ -555,6 +622,8 @@ TEST_F(KVTest, LargeDescendingTest) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 346323);
 }
 
 // =============================================================================================
@@ -573,6 +642,8 @@ TEST_F(KVTest, LargeAscendingAfterRecoveryTest) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 351920);
 }
 
 TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
@@ -587,6 +658,8 @@ TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
     Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_total, 346323);
 }
 
 // =============================================================================================

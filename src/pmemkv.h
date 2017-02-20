@@ -114,6 +114,8 @@ enum KVStatus {                                            // status enumeration
 };
 
 struct KVTreeAnalysis {                                    // tree analysis structure
+    size_t leaf_empty;                                     // count of persisted leaves w/o keys
+    size_t leaf_total;                                     // count of all persisted leaves
     string path;                                           // path when constructed
     size_t size;                                           // actual size of persistent pool
 };
