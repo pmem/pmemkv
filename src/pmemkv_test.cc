@@ -55,6 +55,7 @@ class KVEmptyTest : public testing::Test {
 
 class KVTest : public testing::Test {
   public:
+    KVTreeAnalysis analysis;
     KVTree* kv;
 
     KVTest() {
@@ -64,6 +65,12 @@ class KVTest : public testing::Test {
 
     ~KVTest() { delete kv; }
 
+    void Analyze() {
+        analysis = {};
+        kv->Analyze(analysis);
+        ASSERT_TRUE(analysis.path == PATH);
+    }
+
     void Reopen() {
         delete kv;
         Open();
@@ -72,9 +79,6 @@ class KVTest : public testing::Test {
   private:
     void Open() {
         kv = new KVTree(PATH, SIZE);
-        KVTreeMetadata kvmeta = {};
-        kv->Metadata(kvmeta);
-        ASSERT_TRUE(kvmeta.path == PATH);
     }
 };
 
@@ -96,9 +100,9 @@ TEST_F(KVEmptyTest, SizeofTest) {
 
 TEST_F(KVEmptyTest, SizeAfterOpeningTest) {
     KVTree* kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
-    KVTreeMetadata kvmeta = {};
-    kv->Metadata(kvmeta);
-    ASSERT_EQ(kvmeta.size, PMEMOBJ_MIN_POOL);
+    KVTreeAnalysis analysis = {};
+    kv->Analyze(analysis);
+    ASSERT_EQ(analysis.size, PMEMOBJ_MIN_POOL);
     delete kv;
 }
 
@@ -106,9 +110,9 @@ TEST_F(KVEmptyTest, SizeAfterReopeningTest) {
     KVTree* kv = new KVTree(PATH, PMEMOBJ_MIN_POOL * 2);
     delete kv;
     kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
-    KVTreeMetadata kvmeta = {};
-    kv->Metadata(kvmeta);
-    ASSERT_EQ(kvmeta.size, PMEMOBJ_MIN_POOL * 2);
+    KVTreeAnalysis analysis = {};
+    kv->Analyze(analysis);
+    ASSERT_EQ(analysis.size, PMEMOBJ_MIN_POOL * 2);
     delete kv;
 }
 
@@ -140,6 +144,7 @@ TEST_F(KVTest, DeleteAllTest) {
     ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
     std::string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
+    Analyze();
 }
 
 TEST_F(KVTest, DeleteExistingTest) {
@@ -150,38 +155,45 @@ TEST_F(KVTest, DeleteExistingTest) {
     std::string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
+    Analyze();
 }
 
 TEST_F(KVTest, DeleteHeadlessTest) {
     ASSERT_TRUE(kv->Delete("nada") == OK);
+    Analyze();
 }
 
 TEST_F(KVTest, DeleteNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
     ASSERT_TRUE(kv->Delete("nada") == OK);
+    Analyze();
 }
 
 TEST_F(KVTest, EmptyKeyTest) {                                      // todo correct behavior?
     ASSERT_TRUE(kv->Put("", "blah") == OK);
     std::string value;
     ASSERT_TRUE(kv->Get("", &value) == OK && value == "blah");
+    Analyze();
 }
 
 TEST_F(KVTest, EmptyValueTest) {                                    // todo correct behavior?
     ASSERT_TRUE(kv->Put("key1", "") == OK);
     std::string value;
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "");
+    Analyze();
 }
 
 TEST_F(KVTest, GetAppendToExternalValueTest) {
     ASSERT_TRUE(kv->Put("key1", "cool") == OK);
     std::string value = "super";
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "supercool");
+    Analyze();
 }
 
 TEST_F(KVTest, GetHeadlessTest) {
     std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
+    Analyze();
 }
 
 TEST_F(KVTest, GetMultipleTest) {
@@ -200,6 +212,7 @@ TEST_F(KVTest, GetMultipleTest) {
     ASSERT_TRUE(kv->Get("jkl", &value4) == OK && value4 == "D4");
     std::string value5;
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
+    Analyze();
 }
 
 TEST_F(KVTest, GetMultipleAfterDeleteTest) {
@@ -214,15 +227,17 @@ TEST_F(KVTest, GetMultipleAfterDeleteTest) {
     ASSERT_TRUE(kv->Get("key2", &value2) == NOT_FOUND);
     std::string value3;
     ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
+    Analyze();
 }
 
 TEST_F(KVTest, GetNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
     std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
+    Analyze();
 }
 
-TEST_F(KVTest, MultiGetTest) {
+TEST_F(KVTest, GetListTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
     ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK);
     auto values = std::vector<std::string>();
@@ -238,6 +253,7 @@ TEST_F(KVTest, MultiGetTest) {
     ASSERT_TRUE(status.at(1) == OK && values.at(1) == "tmpvalue2");
     ASSERT_TRUE(status.at(2) == NOT_FOUND && values.at(2) == "");
     ASSERT_TRUE(status.at(3) == OK && values.at(3) == "tmpvalue1");
+    Analyze();
 }
 
 TEST_F(KVTest, PutExistingTest) {
@@ -256,6 +272,7 @@ TEST_F(KVTest, PutExistingTest) {
     std::string new_value3;
     ASSERT_TRUE(kv->Put("key1", "?") == OK);                // shorter length
     ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
+    Analyze();
 }
 
 TEST_F(KVTest, PutKeysOfDifferentLengthsTest) {
@@ -309,18 +326,21 @@ TEST_F(KVTest, PutValuesOfDifferentLengthsTest) {
 TEST_F(KVTest, DeleteHeadlessAfterRecoveryTest) {
     Reopen();
     ASSERT_TRUE(kv->Delete("nada") == OK);
+    Analyze();
 }
 
 TEST_F(KVTest, DeleteNonexistentAfterRecoveryTest) {
     Reopen();
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
     ASSERT_TRUE(kv->Delete("nada") == OK);
+    Analyze();
 }
 
 TEST_F(KVTest, GetHeadlessAfterRecoveryTest) {
     Reopen();
     std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
+    Analyze();
 }
 
 TEST_F(KVTest, GetMultipleAfterRecoveryTest) {
@@ -340,6 +360,7 @@ TEST_F(KVTest, GetMultipleAfterRecoveryTest) {
     ASSERT_TRUE(kv->Get("jkl", &value4) == OK && value4 == "D4");
     std::string value5;
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
+    Analyze();
 }
 
 TEST_F(KVTest, GetNonexistentAfterRecoveryTest) {
@@ -347,6 +368,7 @@ TEST_F(KVTest, GetNonexistentAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
     std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
+    Analyze();
 }
 
 TEST_F(KVTest, PutAfterRecoveryTest) {
@@ -354,6 +376,7 @@ TEST_F(KVTest, PutAfterRecoveryTest) {
     Reopen();
     std::string value1;
     ASSERT_TRUE(kv->Get("key1", &value1) == OK && value1 == "value1");
+    Analyze();
 }
 
 TEST_F(KVTest, UpdateAfterRecoveryTest) {
@@ -369,6 +392,7 @@ TEST_F(KVTest, UpdateAfterRecoveryTest) {
     ASSERT_TRUE(kv->Get("key2", &value2) == NOT_FOUND);
     std::string value3;
     ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
+    Analyze();
 }
 
 // =============================================================================================
@@ -389,6 +413,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingTest) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
+    Analyze();
 }
 
 TEST_F(KVTest, SingleInnerNodeAscendingTest2) {
@@ -403,6 +428,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingTest2) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
+    Analyze();
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingTest) {
@@ -417,6 +443,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingTest) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
+    Analyze();
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingTest2) {
@@ -431,6 +458,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingTest2) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
+    Analyze();
 }
 
 // =============================================================================================
@@ -448,6 +476,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
+    Analyze();
 }
 
 TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest2) {
@@ -461,6 +490,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest2) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
+    Analyze();
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest) {
@@ -474,6 +504,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
+    Analyze();
 }
 
 TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
@@ -487,6 +518,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
+    Analyze();
 }
 
 // =============================================================================================
@@ -507,6 +539,7 @@ TEST_F(KVTest, LargeAscendingTest) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
     }
+    Analyze();
 }
 
 TEST_F(KVTest, LargeDescendingTest) {
@@ -521,6 +554,7 @@ TEST_F(KVTest, LargeDescendingTest) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
+    Analyze();
 }
 
 // =============================================================================================
@@ -538,6 +572,7 @@ TEST_F(KVTest, LargeAscendingAfterRecoveryTest) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
     }
+    Analyze();
 }
 
 TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
@@ -551,6 +586,7 @@ TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
+    Analyze();
 }
 
 // =============================================================================================

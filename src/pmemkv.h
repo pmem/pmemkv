@@ -113,7 +113,7 @@ enum KVStatus {                                            // status enumeration
     TXN_ERROR = 2                                          // persistent transaction failed
 };
 
-struct KVTreeMetadata {                                    // tree metadata snapshot
+struct KVTreeAnalysis {                                    // tree analysis structure
     string path;                                           // path when constructed
     size_t size;                                           // actual size of persistent pool
 };
@@ -122,7 +122,7 @@ class KVTree {                                             // persistent tree cl
   public:
     KVTree(const string& path, const size_t size);         // default constructor
     ~KVTree();                                             // default destructor
-    void Metadata(KVTreeMetadata& metadata);               // report internal state & stats
+    void Analyze(KVTreeAnalysis& analysis);                // report on internal state & stats
     KVStatus Delete(const string& key);                    // remove single key
     KVStatus Get(const string& key, string* value);        // read single key/value
     vector<KVStatus> GetList(const vector<string>& keys,   // read multiple keys at once

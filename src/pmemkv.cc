@@ -69,6 +69,11 @@ KVTree::~KVTree() {
 // KEY/VALUE METHODS
 // ===============================================================================================
 
+void KVTree::Analyze(KVTreeAnalysis& analysis) {
+    analysis.path = pmpath;
+    analysis.size = pmsize;
+}
+
 KVStatus KVTree::Delete(const string& key) {
     LOG("Delete key=" << key.c_str());
     auto leafnode = LeafSearch(key);
@@ -414,15 +419,6 @@ void KVTree::Shutdown(KVNode* node) {
         }
         delete inner;
     }
-}
-
-// ===============================================================================================
-// METADATA METHODS
-// ===============================================================================================
-
-void KVTree::Metadata(KVTreeMetadata& metadata) {
-    metadata.path = pmpath;
-    metadata.size = pmsize;
 }
 
 // ===============================================================================================
