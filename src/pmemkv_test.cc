@@ -143,6 +143,7 @@ TEST_F(KVTest, DeleteAllTest) {
     ASSERT_TRUE(kv->Delete("tmpkey") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -154,6 +155,7 @@ TEST_F(KVTest, DeleteAndInsertTest) {
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -167,6 +169,7 @@ TEST_F(KVTest, DeleteExistingTest) {
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -174,6 +177,7 @@ TEST_F(KVTest, DeleteHeadlessTest) {
     ASSERT_TRUE(kv->Delete("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 0);
 }
 
@@ -182,6 +186,7 @@ TEST_F(KVTest, DeleteNonexistentTest) {
     ASSERT_TRUE(kv->Delete("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -191,6 +196,7 @@ TEST_F(KVTest, EmptyKeyTest) {                                      // todo corr
     ASSERT_TRUE(kv->Get("", &value) == OK && value == "blah");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -200,6 +206,7 @@ TEST_F(KVTest, EmptyValueTest) {                                    // todo corr
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -209,6 +216,7 @@ TEST_F(KVTest, GetAppendToExternalValueTest) {
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "supercool");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -217,6 +225,7 @@ TEST_F(KVTest, GetHeadlessTest) {
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 0);
 }
 
@@ -238,6 +247,7 @@ TEST_F(KVTest, GetMultipleTest) {
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -255,6 +265,7 @@ TEST_F(KVTest, GetMultipleAfterDeleteTest) {
     ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -264,6 +275,7 @@ TEST_F(KVTest, GetNonexistentTest) {
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -285,6 +297,7 @@ TEST_F(KVTest, GetListTest) {
     ASSERT_TRUE(status.at(3) == OK && values.at(3) == "tmpvalue1");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -307,6 +320,7 @@ TEST_F(KVTest, PutExistingTest) {
 
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -363,6 +377,7 @@ TEST_F(KVTest, DeleteHeadlessAfterRecoveryTest) {
     ASSERT_TRUE(kv->Delete("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 0);
 }
 
@@ -372,6 +387,7 @@ TEST_F(KVTest, DeleteNonexistentAfterRecoveryTest) {
     ASSERT_TRUE(kv->Delete("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -381,6 +397,7 @@ TEST_F(KVTest, GetHeadlessAfterRecoveryTest) {
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 0);
 }
 
@@ -403,6 +420,7 @@ TEST_F(KVTest, GetMultipleAfterRecoveryTest) {
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -413,6 +431,7 @@ TEST_F(KVTest, GetNonexistentAfterRecoveryTest) {
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -423,6 +442,7 @@ TEST_F(KVTest, PutAfterRecoveryTest) {
     ASSERT_TRUE(kv->Get("key1", &value1) == OK && value1 == "value1");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -441,6 +461,28 @@ TEST_F(KVTest, UpdateAfterRecoveryTest) {
     ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
+
+TEST_F(KVTest, UsePreallocAfterSingleLeafRecoveryTest) {
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Delete("key1") == OK);
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 1);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+
+    Reopen();
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 1);
+    ASSERT_EQ(analysis.leaf_prealloc, 1);
+    ASSERT_EQ(analysis.leaf_total, 1);
+
+    ASSERT_TRUE(kv->Put("key2", "value2") == OK);
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
@@ -464,6 +506,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingTest) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 5);
 }
 
@@ -481,6 +524,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingTest2) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 5);
 }
 
@@ -498,6 +542,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingTest) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 6);
 }
 
@@ -515,6 +560,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingTest2) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 5);
 }
 
@@ -535,6 +581,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 5);
 }
 
@@ -551,6 +598,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest2) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 5);
 }
 
@@ -567,6 +615,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 6);
 }
 
@@ -583,7 +632,50 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 5);
+}
+
+TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
+    for (int i = 1; i <= NODE_KEYS + 1; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK);
+    Reopen();
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 2);
+
+    for (int i = 1; i <= NODE_KEYS; i++) ASSERT_EQ(kv->Delete(std::to_string(i)), OK);
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 1);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 2);
+    Reopen();
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 1);
+    ASSERT_EQ(analysis.leaf_prealloc, 1);
+    ASSERT_EQ(analysis.leaf_total, 2);
+
+    ASSERT_EQ(kv->Delete(std::to_string(NODE_KEYS + 1)), OK);
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 2);
+    ASSERT_EQ(analysis.leaf_prealloc, 1);
+    ASSERT_EQ(analysis.leaf_total, 2);
+    Reopen();
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 2);
+    ASSERT_EQ(analysis.leaf_prealloc, 2);
+    ASSERT_EQ(analysis.leaf_total, 2);
+
+    for (int i = 1; i <= NODE_KEYS; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK);
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 1);
+    ASSERT_EQ(analysis.leaf_prealloc, 1);
+    ASSERT_EQ(analysis.leaf_total, 2);
+    ASSERT_EQ(kv->Put(std::to_string(NODE_KEYS + 1), "!"), OK);
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 2);
 }
 
 // =============================================================================================
@@ -606,6 +698,7 @@ TEST_F(KVTest, LargeAscendingTest) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 351920);
 }
 
@@ -623,6 +716,7 @@ TEST_F(KVTest, LargeDescendingTest) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 346323);
 }
 
@@ -643,6 +737,7 @@ TEST_F(KVTest, LargeAscendingAfterRecoveryTest) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 351920);
 }
 
@@ -659,6 +754,7 @@ TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
     }
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 346323);
 }
 

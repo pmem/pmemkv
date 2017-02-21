@@ -72,6 +72,7 @@ KVTree::~KVTree() {
 void KVTree::Analyze(KVTreeAnalysis& analysis) {
     LOG("Analyzing");
     analysis.leaf_empty = 0;
+    analysis.leaf_prealloc = leaves_prealloc.size();
     analysis.leaf_total = 0;
     analysis.path = pmpath;
     analysis.size = pmsize;
@@ -164,12 +165,17 @@ KVStatus KVTree::Put(const string& key, const string& value) {
             leafnode = new KVLeafNode();
             leafnode->is_leaf = true;
             transaction::exec_tx(pmpool, [&] {
-                auto root = pmpool.get_root();
-                auto old_head = root->head;
-                auto new_leaf = make_persistent<KVLeaf>();
-                root->head = new_leaf;
-                new_leaf->next = old_head;
-                leafnode->leaf = new_leaf;
+                if (!leaves_prealloc.empty()) {
+                    leafnode->leaf = leaves_prealloc.back();
+                    leaves_prealloc.pop_back();
+                } else {
+                    auto root = pmpool.get_root();
+                    auto old_head = root->head;
+                    auto new_leaf = make_persistent<KVLeaf>();
+                    root->head = new_leaf;
+                    new_leaf->next = old_head;
+                    leafnode->leaf = new_leaf;
+                }
                 LeafFillSpecificSlot(leafnode, hash, key, value, 0);
             });
             tree_top = leafnode;
@@ -277,12 +283,19 @@ void KVTree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
         new_leafnode->parent = leafnode->parent;
         new_leafnode->is_leaf = true;
         transaction::exec_tx(pmpool, [&] {
-            auto root = pmpool.get_root();
-            auto old_head = root->head;
-            auto new_leaf = make_persistent<KVLeaf>();
-            root->head = new_leaf;
-            new_leaf->next = old_head;
-            new_leafnode->leaf = new_leaf;
+            persistent_ptr<KVLeaf> new_leaf;
+            if (!leaves_prealloc.empty()) {
+                new_leaf = leaves_prealloc.back();
+                new_leafnode->leaf = new_leaf;
+                leaves_prealloc.pop_back();
+            } else {
+                auto root = pmpool.get_root();
+                auto old_head = root->head;
+                new_leaf = make_persistent<KVLeaf>();
+                root->head = new_leaf;
+                new_leaf->next = old_head;
+                new_leafnode->leaf = new_leaf;
+            }
             const auto leaf = leafnode->leaf;
             for (int slot = NODE_KEYS; slot--;) {
                 if (strcmp(leafnode->keys[slot].c_str(), split_key.data()) > 0) {
@@ -386,7 +399,7 @@ void KVTree::Recover() {
 
         // use highest sorting key to decide how to recover the leaf
         if (max_key == nullptr) {
-            // todo #10, handle empty leaf nodes
+            leaves_prealloc.push_back(leaf);
         } else {
             auto rleaf = new KVRecoveredLeaf;
             rleaf->leafnode = leafnode;

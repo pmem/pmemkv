@@ -115,6 +115,7 @@ enum KVStatus {                                            // status enumeration
 
 struct KVTreeAnalysis {                                    // tree analysis structure
     size_t leaf_empty;                                     // count of persisted leaves w/o keys
+    size_t leaf_prealloc;                                  // count of persisted but unused leaves
     size_t leaf_total;                                     // count of all persisted leaves
     string path;                                           // path when constructed
     size_t size;                                           // actual size of persistent pool
@@ -160,6 +161,7 @@ class KVTree {                                             // persistent tree cl
   private:
     KVTree(const KVTree&);                                 // prevent copying
     void operator=(const KVTree&);                         // prevent assignment
+    vector<persistent_ptr<KVLeaf>> leaves_prealloc;        // persisted but unused leaves
     const string pmpath;                                   // path when constructed
     pool<KVRoot> pmpool;                                   // pool for persistent root
     size_t pmsize;                                         // actual size of persistent pool
