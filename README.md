@@ -78,7 +78,7 @@ using namespace pmemkv;
 
 int main() {
     // open the datastore
-    KVTree* kv = new KVTree("/dev/shm/pmemkv", PMEMOBJ_MIN_POOL);
+    KVTree* kv = new KVTree("/dev/shm/pmemkv", 8388608); // 8 MB
 
     // put new key
     KVStatus s = kv->Put("key1", "value1");
@@ -138,12 +138,8 @@ DRAM usage.
 its design and implementation. `pmemkv` uses generic NVML transactions
 (ie. `transaction::exec_tx()` closures), there is no need for micro-logging
 structures as described in the FPTree paper to make internal delete and
-split operations safe. Preallocation of relatively large leaf objects
-(an important facet of the FPTree design) is slower when using NVML then
-allocating objects immediately when they are needed, so `pmemkv`
-intentionally avoids this design pattern. `pmemkv` also adjusts sizes of
-data structures (conforming specifically to NVML primitive types) for
-best cache-line optimization.
+split operations safe. `pmemkv` also adjusts sizes of data structures
+(to fit NVML primitive types) for best cache-line optimization.
 
 <a name="configuring_clion_project"/>
 
