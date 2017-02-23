@@ -490,7 +490,7 @@ TEST_F(KVTest, UsePreallocAfterSingleLeafRecoveryTest) {
 // TEST TREE WITH SINGLE INNER NODE
 // =============================================================================================
 
-const int SINGLE_INNER_LIMIT = NODE_KEYS * (INNER_KEYS - 1);
+const int SINGLE_INNER_LIMIT = LEAF_KEYS * (INNER_KEYS - 1);
 
 TEST_F(KVTest, SingleInnerNodeAscendingTest) {
     for (int i = 10000; i <= (10000 + SINGLE_INNER_LIMIT); i++) {
@@ -637,14 +637,14 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
 }
 
 TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
-    for (int i = 1; i <= NODE_KEYS + 1; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK);
+    for (int i = 1; i <= LEAF_KEYS + 1; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK);
     Reopen();
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 2);
 
-    for (int i = 1; i <= NODE_KEYS; i++) ASSERT_EQ(kv->Delete(std::to_string(i)), OK);
+    for (int i = 1; i <= LEAF_KEYS; i++) ASSERT_EQ(kv->Delete(std::to_string(i)), OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
@@ -655,7 +655,7 @@ TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
     ASSERT_EQ(analysis.leaf_prealloc, 1);
     ASSERT_EQ(analysis.leaf_total, 2);
 
-    ASSERT_EQ(kv->Delete(std::to_string(NODE_KEYS + 1)), OK);
+    ASSERT_EQ(kv->Delete(std::to_string(LEAF_KEYS + 1)), OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 2);
     ASSERT_EQ(analysis.leaf_prealloc, 1);
@@ -666,12 +666,12 @@ TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
     ASSERT_EQ(analysis.leaf_prealloc, 2);
     ASSERT_EQ(analysis.leaf_total, 2);
 
-    for (int i = 1; i <= NODE_KEYS; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK);
+    for (int i = 1; i <= LEAF_KEYS; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
     ASSERT_EQ(analysis.leaf_prealloc, 1);
     ASSERT_EQ(analysis.leaf_total, 2);
-    ASSERT_EQ(kv->Put(std::to_string(NODE_KEYS + 1), "!"), OK);
+    ASSERT_EQ(kv->Put(std::to_string(LEAF_KEYS + 1), "!"), OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);

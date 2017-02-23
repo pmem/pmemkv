@@ -81,7 +81,7 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
     auto leaf = pmpool.get_root()->head;
     while (leaf) {
         bool empty = true;
-        for (int slot = NODE_KEYS; slot--;) {
+        for (int slot = LEAF_KEYS; slot--;) {
             if (leaf->hashes[slot] != 0) {
                 empty = false;
                 break;
@@ -102,7 +102,7 @@ KVStatus KVTree::Delete(const string& key) {
         return OK;
     }
     const uint8_t hash = PearsonHash(key.c_str(), key.length());
-    for (int slot = NODE_KEYS; slot--;) {
+    for (int slot = LEAF_KEYS; slot--;) {
         if (leafnode->hashes[slot] == hash) {
             if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
                 LOG("   freeing slot=" << slot);
@@ -129,7 +129,7 @@ KVStatus KVTree::Get(const string& key, string* value) {
         return NOT_FOUND;
     }
     const uint8_t hash = PearsonHash(key.c_str(), key.length());
-    for (int slot = NODE_KEYS; slot--;) {
+    for (int slot = LEAF_KEYS; slot--;) {
         if (leafnode->hashes[slot] == hash) {
             if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
                 value->append(leafnode->leaf->values[slot].get_ro().data());
@@ -218,7 +218,7 @@ KVLeafNode* KVTree::LeafSearch(const string& key) {
 
 void KVTree::LeafFillEmptySlot(KVLeafNode* leafnode, const uint8_t hash,
                                const string& key, const string& value) {
-    for (int slot = NODE_KEYS; slot--;) {
+    for (int slot = LEAF_KEYS; slot--;) {
         if (leafnode->hashes[slot] == 0) {
             LeafFillSpecificSlot(leafnode, hash, key, value, slot);
             return;
@@ -231,7 +231,7 @@ bool KVTree::LeafFillSlotForKey(KVLeafNode* leafnode, const uint8_t hash,
     // scan for empty/matching slots
     int last_empty_slot = -1;
     int key_match_slot = -1;
-    for (int slot = NODE_KEYS; slot--;) {
+    for (int slot = LEAF_KEYS; slot--;) {
         auto slot_hash = leafnode->hashes[slot];
         if (slot_hash == 0) {
             last_empty_slot = slot;
@@ -268,13 +268,13 @@ void KVTree::LeafFillSpecificSlot(KVLeafNode* leafnode, const uint8_t hash,
 
 void KVTree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
                            const string& key, const string& value) {
-    string keys[NODE_KEYS + 1];
-    keys[NODE_KEYS] = key;
-    for (int slot = NODE_KEYS; slot--;) keys[slot] = leafnode->keys[slot];
+    string keys[LEAF_KEYS + 1];
+    keys[LEAF_KEYS] = key;
+    for (int slot = LEAF_KEYS; slot--;) keys[slot] = leafnode->keys[slot];
     std::sort(std::begin(keys), std::end(keys), [](const string& lhs, const string& rhs) {
         return (strcmp(lhs.c_str(), rhs.c_str()) < 0);
     });
-    string split_key = keys[NODE_KEYS_MIDPOINT];
+    string split_key = keys[LEAF_KEYS_MIDPOINT];
     LOG("   splitting leaf at key=" << split_key);
 
     // split leaf into two leaves, moving slots that sort above split key to new leaf
@@ -297,7 +297,7 @@ void KVTree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
                 new_leafnode->leaf = new_leaf;
             }
             const auto leaf = leafnode->leaf;
-            for (int slot = NODE_KEYS; slot--;) {
+            for (int slot = LEAF_KEYS; slot--;) {
                 if (strcmp(leafnode->keys[slot].c_str(), split_key.data()) > 0) {
                     const KVString slot_key = leaf->keys[slot].get_ro();
                     if (slot_key.is_short()) {
@@ -389,7 +389,7 @@ void KVTree::Recover() {
 
         // find highest sorting key in leaf, while recovering all hashes
         char* max_key = nullptr;
-        for (int slot = NODE_KEYS; slot--;) {
+        for (int slot = LEAF_KEYS; slot--;) {
             leafnode->hashes[slot] = leaf->hashes[slot];
             if (leafnode->hashes[slot] == 0) continue;
             char* key = leaf->keys[slot].get_ro().data();

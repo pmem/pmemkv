@@ -56,8 +56,8 @@ const string LAYOUT = "pmemkv";                            // unique pool layout
 #define INNER_KEYS 4                                       // maximum keys for inner nodes
 #define INNER_KEYS_MIDPOINT (INNER_KEYS / 2)               // halfway point within the node
 #define INNER_KEYS_UPPER ((INNER_KEYS / 2) + 1)            // index where upper half of keys begins
-#define NODE_KEYS 48                                       // maximum keys in tree nodes
-#define NODE_KEYS_MIDPOINT 24                              // halfway point within the node
+#define LEAF_KEYS 48                                       // maximum keys in tree nodes
+#define LEAF_KEYS_MIDPOINT (LEAF_KEYS / 2)                 // halfway point within the node
 #define SSO_CHARS 15                                       // chars for short string optimization
 #define SSO_SIZE (SSO_CHARS + 1)                           // sso chars plus null terminator
 
@@ -74,10 +74,10 @@ class KVString {                                           // persistent string 
 };
 
 struct KVLeaf {                                            // persistent leaves of the tree
-    p<uint8_t> hashes[NODE_KEYS];                          // 48 bytes, Pearson hashes of keys
+    p<uint8_t> hashes[LEAF_KEYS];                          // 48 bytes, Pearson hashes of keys
     persistent_ptr<KVLeaf> next;                           // 16 bytes, points to next leaf
-    p<KVString> keys[NODE_KEYS];                           // key strings stored in this leaf
-    p<KVString> values[NODE_KEYS];                         // value strings stored in this leaf
+    p<KVString> keys[LEAF_KEYS];                           // key strings stored in this leaf
+    p<KVString> values[LEAF_KEYS];                         // value strings stored in this leaf
 };
 
 struct KVRoot {                                            // persistent root object
@@ -96,8 +96,8 @@ struct KVInnerNode : KVNode {                              // volatile inner nod
 };
 
 struct KVLeafNode : KVNode {                               // volatile leaf nodes of the tree
-    uint8_t hashes[NODE_KEYS];                             // Pearson hashes of keys
-    string keys[NODE_KEYS];                                // keys stored in this leaf
+    uint8_t hashes[LEAF_KEYS];                             // Pearson hashes of keys
+    string keys[LEAF_KEYS];                                // keys stored in this leaf
     persistent_ptr<KVLeaf> leaf;                           // pointer to persistent leaf
     bool lock;                                             // boolean modification lock
 };
