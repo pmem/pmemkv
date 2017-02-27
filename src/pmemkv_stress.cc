@@ -99,7 +99,12 @@ void testGetRandom(KVTree* kv) {
 
 void testPut(KVTree* kv) {
     auto started = current_millis();
-    for (int i = 0; i < COUNT; i++) kv->Put(formatKey(i), LOREM_IPSUM_800);
+    for (int i = 0; i < COUNT; i++) {
+        if (kv->Put(formatKey(i), LOREM_IPSUM_800) != OK) {
+            std::cout << "Out of space at key " << std::to_string(i) << "\n";
+            exit(-42);
+        }
+    }
     LOG("   in " << current_millis() - started << " ms");
 }
 
