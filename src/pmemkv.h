@@ -58,26 +58,25 @@ const string LAYOUT = "pmemkv";                            // unique pool layout
 #define INNER_KEYS_UPPER ((INNER_KEYS / 2) + 1)            // index where upper half of keys begins
 #define LEAF_KEYS 48                                       // maximum keys in tree nodes
 #define LEAF_KEYS_MIDPOINT (LEAF_KEYS / 2)                 // halfway point within the node
-#define SSO_CHARS 15                                       // chars for short string optimization
-#define SSO_SIZE (SSO_CHARS + 1)                           // sso chars plus null terminator
 
-class KVString {                                           // persistent string class
-  public:                                                  // start public fields and methods
-    char* data() const;                                    // returns data as c-style string
-    bool is_short() const { return !str; }                 // returns true for short strings
-    void reset();                                          // clears contents, frees any memory
-    void set(const char* value);                           // copy data from c-style string
-    void set_short(const char* value);                     // copy data from known short string
-  private:                                                 // start private fields and methods
-    char sso[SSO_SIZE];                                    // local storage for short strings
-    persistent_ptr<char[]> str;                            // pointer to storage for longer strings
+class KVSlot {
+  public:
+    uint8_t hash() const { return ph; }                    // gets Pearson hash for key
+    const char* key() const { return kv.get(); }           // gets key as c-style string
+    const char* val() const { return kv.get() + ks + 1; }  // gets value as c-style string
+    void clear();                                          // frees persistent memory
+    void set(const uint8_t hash, const string& key,        // sets all slot fields
+             const string& value);
+  private:
+    uint8_t ph;                                            // Pearson hash for key
+    uint32_t ks;                                           // key size
+    uint32_t vs;                                           // value size
+    persistent_ptr<char[]> kv;                             // buffer for key & value
 };
 
-struct KVLeaf {                                            // persistent leaves of the tree
-    p<uint8_t> hashes[LEAF_KEYS];                          // 48 bytes, Pearson hashes of keys
-    persistent_ptr<KVLeaf> next;                           // 16 bytes, points to next leaf
-    p<KVString> keys[LEAF_KEYS];                           // key strings stored in this leaf
-    p<KVString> values[LEAF_KEYS];                         // value strings stored in this leaf
+struct KVLeaf {
+    p<KVSlot> slots[LEAF_KEYS];                            // array of slot containers
+    persistent_ptr<KVLeaf> next;                           // next leaf in unsorted list
 };
 
 struct KVRoot {                                            // persistent root object

@@ -82,7 +82,7 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
     while (leaf) {
         bool empty = true;
         for (int slot = LEAF_KEYS; slot--;) {
-            if (leaf->hashes[slot] != 0) {
+            if (leaf->slots[slot].get_ro().hash() != 0) {
                 empty = false;
                 break;
             }
@@ -101,7 +101,7 @@ KVStatus KVTree::Delete(const string& key) {
         LOG("   head not present");
         return OK;
     }
-    const uint8_t hash = PearsonHash(key.c_str(), key.length());
+    const uint8_t hash = PearsonHash(key.c_str(), key.size());
     for (int slot = LEAF_KEYS; slot--;) {
         if (leafnode->hashes[slot] == hash) {
             if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
@@ -110,9 +110,7 @@ KVStatus KVTree::Delete(const string& key) {
                 leafnode->keys[slot].clear();
                 auto leaf = leafnode->leaf;
                 transaction::exec_tx(pmpool, [&] {
-                    leaf->hashes[slot] = 0;
-                    leaf->keys[slot].get_rw().reset();
-                    leaf->values[slot].get_rw().reset();
+                    leaf->slots[slot].get_rw().clear();
                 });
                 break;  // no duplicate keys allowed
             }
@@ -128,11 +126,11 @@ KVStatus KVTree::Get(const string& key, string* value) {
         LOG("   head not present");
         return NOT_FOUND;
     }
-    const uint8_t hash = PearsonHash(key.c_str(), key.length());
+    const uint8_t hash = PearsonHash(key.c_str(), key.size());
     for (int slot = LEAF_KEYS; slot--;) {
         if (leafnode->hashes[slot] == hash) {
             if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
-                value->append(leafnode->leaf->values[slot].get_ro().data());
+                value->append(leafnode->leaf->slots[slot].get_ro().val());
                 LOG("   found value=" << *value << ", slot=" << slot);
                 return OK;
             }
@@ -158,7 +156,7 @@ vector<KVStatus> KVTree::GetList(const vector<string>& keys, vector<string>* val
 KVStatus KVTree::Put(const string& key, const string& value) {
     LOG("Put key=" << key.c_str() << ", value=" << value.c_str());
     try {
-        const uint8_t hash = PearsonHash(key.c_str(), key.length());
+        const uint8_t hash = PearsonHash(key.c_str(), key.size());
         auto leafnode = LeafSearch(key);
         if (!leafnode) {
             LOG("   adding head leaf");
@@ -256,14 +254,11 @@ bool KVTree::LeafFillSlotForKey(KVLeafNode* leafnode, const uint8_t hash,
 
 void KVTree::LeafFillSpecificSlot(KVLeafNode* leafnode, const uint8_t hash,
                                   const string& key, const string& value, const int slot) {
-    auto leaf = leafnode->leaf;
     if (leafnode->hashes[slot] == 0) {
-        leaf->keys[slot].get_rw().set(key.c_str());
+        leafnode->hashes[slot] = hash;
         leafnode->keys[slot] = key;
     }
-    leafnode->hashes[slot] = hash;
-    leaf->hashes[slot] = hash;
-    leaf->values[slot].get_rw().set(value.c_str());
+    leafnode->leaf->slots[slot].get_rw().set(hash, key, value);
 }
 
 void KVTree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
@@ -296,23 +291,13 @@ void KVTree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
                 new_leaf->next = old_head;
                 new_leafnode->leaf = new_leaf;
             }
-            const auto leaf = leafnode->leaf;
             for (int slot = LEAF_KEYS; slot--;) {
                 if (strcmp(leafnode->keys[slot].c_str(), split_key.data()) > 0) {
-                    const KVString slot_key = leaf->keys[slot].get_ro();
-                    if (slot_key.is_short()) {
-                        new_leaf->keys[slot].get_rw().set_short(slot_key.data());
-                    } else new_leaf->keys[slot].swap(leaf->keys[slot]);
-                    const KVString slot_value = leaf->values[slot].get_ro();
-                    if (slot_value.is_short()) {
-                        new_leaf->values[slot].get_rw().set_short(slot_value.data());
-                    } else new_leaf->values[slot].swap(leaf->values[slot]);
+                    new_leaf->slots[slot].swap(leafnode->leaf->slots[slot]);
                     new_leafnode->hashes[slot] = leafnode->hashes[slot];
                     new_leafnode->keys[slot] = leafnode->keys[slot];
-                    leafnode->keys[slot].clear();
-                    new_leaf->hashes[slot] = leafnode->hashes[slot];
                     leafnode->hashes[slot] = 0;
-                    leaf->hashes[slot] = 0;
+                    leafnode->keys[slot].clear();
                 }
             }
             auto target = strcmp(key.c_str(), split_key.data()) > 0 ? new_leafnode : leafnode;
@@ -390,10 +375,11 @@ void KVTree::Recover() {
         // find highest sorting key in leaf, while recovering all hashes
         char* max_key = nullptr;
         for (int slot = LEAF_KEYS; slot--;) {
-            leafnode->hashes[slot] = leaf->hashes[slot];
+            auto kvslot = leaf->slots[slot].get_ro();
+            leafnode->hashes[slot] = kvslot.hash();
             if (leafnode->hashes[slot] == 0) continue;
-            char* key = leaf->keys[slot].get_ro().data();
-            if (max_key == nullptr || strcmp(max_key, key) < 0) max_key = key;
+            const char* key = kvslot.key();
+            if (max_key == nullptr || strcmp(max_key, key) < 0) max_key = (char*) key;
             leafnode->keys[slot] = key;
         }
 
@@ -490,37 +476,28 @@ uint8_t KVTree::PearsonHash(const char* data, const size_t size) {
 }
 
 // ===============================================================================================
-// STRING CLASS METHODS
+// SLOT CLASS METHODS
 // ===============================================================================================
 
-char* KVString::data() const {
-    return str ? str.get() : const_cast<char*>(sso);                     // return short or long
+void KVSlot::clear() {
+    if (kv) delete_persistent<char[]>(kv, ks + vs + 2);                  // free buffer if present
+    ph = 0;                                                              // clear pearson hash
+    ks = 0;                                                              // clear key size
+    vs = 0;                                                              // clear value size
+    kv = nullptr;                                                        // clear buffer pointer
 }
 
-void KVString::reset() {
-    pmemobj_tx_add_range_direct(sso, 1);                                 // add first char to txn
-    sso[0] = 0;                                                          // clear first char
-    if (str) delete_persistent<char[]>(str, strlen(str.get()) + 1);      // free value if present
-}
-
-void KVString::set(const char* value) {
-    size_t value_len = strlen(value);
-    if (value_len <= SSO_CHARS) {                                        // setting short value?
-        set_short(value);
-    } else {                                                             // setting long value?
-        if (str) delete_persistent<char[]>(str, strlen(str.get()) + 1);  // free value if present
-        str = make_persistent<char[]>(value_len + 1);                    // allocate value pmem
-        strcpy(str.get(), value);                                        // copy value data
-    }
-}
-
-void KVString::set_short(const char* value) {
-    if (str) {                                                           // value already present?
-        delete_persistent<char[]>(str, strlen(str.get()) + 1);           // free value memory
-        str = nullptr;                                                   // zero out pointer
-    }
-    pmemobj_tx_add_range_direct(sso, SSO_SIZE);                          // add sso buffer to txn
-    strcpy(sso, value);                                                  // copy value data
+void KVSlot::set(const uint8_t hash, const string& key, const string& value) {
+    if (kv) delete_persistent<char[]>(kv, ks + vs + 2);                  // free buffer if present
+    ph = hash;                                                           // copy hash into leaf
+    ks = (uint32_t) key.size();                                          // read key size
+    vs = (uint32_t) value.size();                                        // read value size
+    size_t size = ks + vs + 2;                                           // set total size
+    kv = make_persistent<char[]>(size);                                  // reserve buffer space
+    char* kvptr = kv.get();                                              // set ptr into buffer
+    memcpy(kvptr, key.data(), ks);                                       // copy key into buffer
+    kvptr += ks + 1;                                                     // advance ptr past key
+    memcpy(kvptr, value.data(), vs);                                     // copy value into buffer
 }
 
 } // namespace pmemkv

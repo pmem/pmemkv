@@ -33,13 +33,11 @@
 #include "pmemkv.h"
 #include "gtest/gtest.h"
 
-#define sizeof_field(type, field) sizeof(((type *)0)->field)
-
 using namespace pmemkv;
 
 const std::string PATH = "/dev/shm/pmemkv";
 const std::string PATH_CACHED = "/tmp/pmemkv";
-const size_t SIZE = PMEMOBJ_MIN_POOL * 138;
+const size_t SIZE = ((size_t) (1024 * 1024 * 1104));
 
 int main(int argc, char* argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
@@ -89,9 +87,8 @@ class KVTest : public testing::Test {
 TEST_F(KVEmptyTest, SizeofTest) {
     // persistent types
     ASSERT_EQ(sizeof(KVRoot), 16);
-    ASSERT_EQ(sizeof(KVLeaf), 3136);
-    ASSERT_EQ(sizeof_field(KVLeaf, hashes) + sizeof_field(KVLeaf, next), 64);
-    ASSERT_EQ(sizeof(KVString), 32);
+    ASSERT_EQ(sizeof(KVSlot), 32);
+    ASSERT_EQ(sizeof(KVLeaf), 1552);
 
     // volatile types
     ASSERT_EQ(sizeof(KVInnerNode), 232);
@@ -307,64 +304,63 @@ TEST_F(KVTest, PutExistingTest) {
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
 
     std::string new_value;
-    ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK);           // same length
+    ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK);           // same size
     ASSERT_TRUE(kv->Get("key1", &new_value) == OK && new_value == "VALUE1");
 
     std::string new_value2;
-    ASSERT_TRUE(kv->Put("key1", "new_value") == OK);        // longer length
+    ASSERT_TRUE(kv->Put("key1", "new_value") == OK);        // longer size
     ASSERT_TRUE(kv->Get("key1", &new_value2) == OK && new_value2 == "new_value");
 
     std::string new_value3;
-    ASSERT_TRUE(kv->Put("key1", "?") == OK);                // shorter length
+    ASSERT_TRUE(kv->Put("key1", "?") == OK);                // shorter size
     ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
-
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
-TEST_F(KVTest, PutKeysOfDifferentLengthsTest) {
+TEST_F(KVTest, PutKeysOfDifferentSizesTest) {
     std::string value;
-    ASSERT_TRUE(kv->Put("123456789ABCDE", "A") == OK);      // 2 under the sso limit
+    ASSERT_TRUE(kv->Put("123456789ABCDE", "A") == OK);
     ASSERT_TRUE(kv->Get("123456789ABCDE", &value) == OK && value == "A");
 
     std::string value2;
-    ASSERT_TRUE(kv->Put("123456789ABCDEF", "B") == OK);     // 1 under the sso limit
+    ASSERT_TRUE(kv->Put("123456789ABCDEF", "B") == OK);
     ASSERT_TRUE(kv->Get("123456789ABCDEF", &value2) == OK && value2 == "B");
 
     std::string value3;
-    ASSERT_TRUE(kv->Put("123456789ABCDEFG", "C") == OK);    // at the sso limit
-    ASSERT_TRUE(kv->Get("123456789ABCDEFG", &value3) == OK && value3 == "C");
+    ASSERT_TRUE(kv->Put("12345678ABCDEFG", "C") == OK);
+    ASSERT_TRUE(kv->Get("12345678ABCDEFG", &value3) == OK && value3 == "C");
 
     std::string value4;
-    ASSERT_TRUE(kv->Put("123456789ABCDEFGH", "D") == OK);   // 1 over the sso limit
-    ASSERT_TRUE(kv->Get("123456789ABCDEFGH", &value4) == OK && value4 == "D");
+    ASSERT_TRUE(kv->Put("123456789", "D") == OK);
+    ASSERT_TRUE(kv->Get("123456789", &value4) == OK && value4 == "D");
 
     std::string value5;
-    ASSERT_TRUE(kv->Put("123456789ABCDEFGHI", "E") == OK);   // 2 over the sso limit
+    ASSERT_TRUE(kv->Put("123456789ABCDEFGHI", "E") == OK);
     ASSERT_TRUE(kv->Get("123456789ABCDEFGHI", &value5) == OK && value5 == "E");
 }
 
-TEST_F(KVTest, PutValuesOfDifferentLengthsTest) {
+TEST_F(KVTest, PutValuesOfDifferentSizesTest) {
     std::string value;
-    ASSERT_TRUE(kv->Put("A", "123456789ABCDE") == OK);      // 2 under the sso limit
+    ASSERT_TRUE(kv->Put("A", "123456789ABCDE") == OK);
     ASSERT_TRUE(kv->Get("A", &value) == OK && value == "123456789ABCDE");
 
     std::string value2;
-    ASSERT_TRUE(kv->Put("B", "123456789ABCDEF") == OK);     // 1 under the sso limit
+    ASSERT_TRUE(kv->Put("B", "123456789ABCDEF") == OK);
     ASSERT_TRUE(kv->Get("B", &value2) == OK && value2 == "123456789ABCDEF");
 
     std::string value3;
-    ASSERT_TRUE(kv->Put("C", "123456789ABCDEFG") == OK);    // at the sso limit
-    ASSERT_TRUE(kv->Get("C", &value3) == OK && value3 == "123456789ABCDEFG");
+    ASSERT_TRUE(kv->Put("C", "12345678ABCDEFG") == OK);
+    ASSERT_TRUE(kv->Get("C", &value3) == OK && value3 == "12345678ABCDEFG");
 
     std::string value4;
-    ASSERT_TRUE(kv->Put("D", "123456789ABCDEFGH") == OK);   // 1 over the sso limit
-    ASSERT_TRUE(kv->Get("D", &value4) == OK && value4 == "123456789ABCDEFGH");
+    ASSERT_TRUE(kv->Put("D", "123456789") == OK);
+    ASSERT_TRUE(kv->Get("D", &value4) == OK && value4 == "123456789");
 
     std::string value5;
-    ASSERT_TRUE(kv->Put("E", "123456789ABCDEFGHI") == OK);  // 2 over the sso limit
+    ASSERT_TRUE(kv->Put("E", "123456789ABCDEFGHI") == OK);
     ASSERT_TRUE(kv->Get("E", &value5) == OK && value5 == "123456789ABCDEFGHI");
 }
 
@@ -682,7 +678,7 @@ TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
 // TEST LARGE TREE
 // =============================================================================================
 
-const int LARGE_LIMIT = 9235297;
+const int LARGE_LIMIT = 6012299;
 
 TEST_F(KVTest, LargeAscendingTest) {
     for (int i = 1; i <= LARGE_LIMIT; i++) {
@@ -699,7 +695,7 @@ TEST_F(KVTest, LargeAscendingTest) {
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 351920);
+    ASSERT_EQ(analysis.leaf_total, 229126);
 }
 
 TEST_F(KVTest, LargeDescendingTest) {
@@ -717,7 +713,7 @@ TEST_F(KVTest, LargeDescendingTest) {
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 346323);
+    ASSERT_EQ(analysis.leaf_total, 225461);
 }
 
 // =============================================================================================
@@ -738,7 +734,7 @@ TEST_F(KVTest, LargeAscendingAfterRecoveryTest) {
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 351920);
+    ASSERT_EQ(analysis.leaf_total, 229126);
 }
 
 TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
@@ -755,7 +751,7 @@ TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 346323);
+    ASSERT_EQ(analysis.leaf_total, 225461);
 }
 
 // =============================================================================================
@@ -807,8 +803,7 @@ class KVFullTest : public testing::Test {
 const string LONGSTR = "123456789A123456789A123456789A123456789A123456789A123456789A123456789A";
 
 TEST_F(KVFullTest, OutOfSpace1Test) {
-    ASSERT_TRUE(kv->Put("100", "100?") == OK);
-    ASSERT_TRUE(kv->Put("100", "100!") == OK);
+    ASSERT_TRUE(kv->Put("100", "?") == TXN_ERROR);
     Validate();
 }
 
