@@ -1,4 +1,5 @@
 *.d
+.DS_Store
 .idea/
 3rdparty/
 cmake-build-debug/
