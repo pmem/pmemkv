@@ -3,6 +3,7 @@
 .idea/
 3rdparty/
 cmake-build-debug/
+libpmemkv.a
 pmemkv_example
 pmemkv_stress
 pmemkv_test

@@ -2,8 +2,11 @@ include make_config.mk
 
 all: clean thirdparty example test
 
-clean:
-	rm -rf /dev/shm/pmemkv /tmp/pmemkv pmemkv_example pmemkv_stress pmemkv_test
+reset:
+	rm -rf /dev/shm/pmemkv /tmp/pmemkv
+
+clean: reset
+	rm -rf cmake-build-debug/ libpmemkv.a pmemkv_example pmemkv_stress pmemkv_test
 
 thirdparty:
 	rm -rf 3rdparty && mkdir 3rdparty
@@ -13,24 +16,17 @@ thirdparty:
 	mkdir 3rdparty/nvml && tar -xzf 3rdparty/nvml.tar.gz -C 3rdparty/nvml --strip 1
 	sh -c 'cd 3rdparty/nvml && make install prefix=`pwd`'
 
-example:
-	$(CXX) $(CXXFLAGS) src/pmemkv.cc src/pmemkv_example.cc -o pmemkv_example \
-	$(USE_NVML) \
-	-O2 -std=c++11 -ldl $(PLATFORM_LDFLAGS) $(PLATFORM_CXXFLAGS)
-	rm -rf /dev/shm/pmemkv
+sharedlib:
+	$(CXX) src/pmemkv.cc -o libpmemkv.a -fPIC -shared $(USE_NVML) $(CXX_FLAGS)
+
+example: reset sharedlib
+	$(CXX) src/pmemkv_example.cc -o pmemkv_example $(USE_PMEMKV) $(CXX_FLAGS)
 	PMEM_IS_PMEM_FORCE=1 ./pmemkv_example
 
-stress:
-	$(CXX) $(CXXFLAGS) src/pmemkv.cc src/pmemkv_stress.cc -o pmemkv_stress \
-	$(USE_NVML) \
-	-DNDEBUG -O2 -std=c++11 -ldl $(PLATFORM_LDFLAGS) $(PLATFORM_CXXFLAGS)
-	rm -rf /dev/shm/pmemkv
+stress: reset sharedlib
+	$(CXX) src/pmemkv_stress.cc -o pmemkv_stress -DNDEBUG $(USE_PMEMKV) $(CXX_FLAGS)
 	PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress
 
-test:
-	$(CXX) $(CXXFLAGS) src/pmemkv.cc src/pmemkv_test.cc -o pmemkv_test \
-	$(USE_NVML) \
-	$(USE_GTEST) \
-	-O2 -std=c++11 -ldl $(PLATFORM_LDFLAGS) $(PLATFORM_CXXFLAGS)
-	rm -rf /dev/shm/pmemkv /tmp/pmemkv
+test: reset sharedlib
+	$(CXX) src/pmemkv_test.cc -o pmemkv_test $(USE_PMEMKV) $(USE_GTEST) $(CXX_FLAGS)
 	PMEM_IS_PMEM_FORCE=1 ./pmemkv_test
