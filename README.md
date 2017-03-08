@@ -64,6 +64,9 @@ make stress         # build and run stress test
 make test           # build and run unit tests
 ```
 
+Building with CMake is partially supported -- there are some
+[known issues](https://github.com/pmem/pmemkv/issues/42) to avoid.
+
 <a name="sample_code"/>
 
 Sample Code
