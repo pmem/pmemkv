@@ -6,7 +6,7 @@ reset:
 	rm -rf /dev/shm/pmemkv /tmp/pmemkv
 
 clean: reset
-	rm -rf cmake-build-debug/ libpmemkv.a pmemkv_example pmemkv_stress pmemkv_test
+	rm -rf libpmemkv.so pmemkv_example pmemkv_stress pmemkv_test
 
 thirdparty:
 	rm -rf 3rdparty && mkdir 3rdparty
@@ -17,7 +17,7 @@ thirdparty:
 	sh -c 'cd 3rdparty/nvml && make install prefix=`pwd`'
 
 sharedlib:
-	$(CXX) src/pmemkv.cc -o libpmemkv.a -fPIC -shared $(USE_NVML) $(CXX_FLAGS)
+	$(CXX) src/pmemkv.cc -o libpmemkv.so $(SO_FLAGS) $(USE_NVML) $(CXX_FLAGS)
 
 example: reset sharedlib
 	$(CXX) src/pmemkv_example.cc -o pmemkv_example $(USE_PMEMKV) $(CXX_FLAGS)
