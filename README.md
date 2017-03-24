@@ -2,9 +2,9 @@
 Key/Value Datastore for Persistent Memory
 
 *This is experimental pre-release software and should not be used in
-production systems. File formats may change at any time without
-preserving compatibility. All known issues and limitations are logged
-as GitHub issues.*
+production systems. APIs and file formats may change at any time without
+preserving backwards compatibility. All known issues and limitations
+are logged as GitHub issues.*
 
 Contents
 --------
