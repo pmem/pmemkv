@@ -48,21 +48,33 @@ which limits the maximum size of the leaf, but boosts efficiency.
 Installation
 ------------
 
-Start with Ubuntu 16.04 (either desktop or server distribution) or other
-64-bit Linux distribution. OSX and Windows are not yet supported by `pmemkv`,
-so don't use those.
+Start with Ubuntu 16.04 LTS or other 64-bit Linux distribution.
+OSX and Windows are not yet supported by `pmemkv`, so don't use those.
 
-To build `pmemkv`, you'll need make and g++ installed. No external libraries
-are required to be installed beforehand.
+To build `pmemkv`and run its tests and sample programs, you'll need 
+`make` and `g++` installed. Other required libraries will be 
+downloaded by the `make` script.
 
 ```
-make                # build everything from scratch and run tests
-make thirdparty     # download and build dependencies
-make clean          # remove build files
-make example        # build and run example program
-make stress         # build and run stress test
-make test           # build and run unit tests
+make                  # build everything from scratch and run tests
+make thirdparty       # download and build dependencies
+make clean            # remove build files
+make example          # build and run example program
+make stress           # build and run stress test
+make test             # build and run unit tests
 ```
+
+To package `pmemkv` as a shared library and install on your system:
+ 
+```
+sudo make sharedlib   # create shared library
+sudo make install     # copy shared library to /usr/local/lib
+sudo make uninstall   # remove shared library from /usr/local/lib
+```
+
+To use a different installation directory from the default
+(`/usr/lib/local`), edit `make_config.mk` to change the `INSTALL_DIR`
+variable accordingly.
 
 Building with CMake is partially supported -- there are some
 [known issues](https://github.com/pmem/pmemkv/issues/42) to avoid.

@@ -19,6 +19,12 @@ thirdparty:
 sharedlib:
 	$(CXX) src/pmemkv.cc -o libpmemkv.so $(SO_FLAGS) $(USE_NVML) $(CXX_FLAGS)
 
+install: sharedlib
+	cp libpmemkv.so ${INSTALL_DIR}
+
+uninstall:
+	rm -rf ${INSTALL_DIR}/libpmemkv.so
+
 example: reset sharedlib
 	$(CXX) src/pmemkv_example.cc -o pmemkv_example $(USE_PMEMKV) $(CXX_FLAGS)
 	PMEM_IS_PMEM_FORCE=1 ./pmemkv_example
