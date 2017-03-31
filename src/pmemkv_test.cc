@@ -135,18 +135,18 @@ TEST_F(KVEmptyTest, SizeOutOfRange2) {
 // TEST SINGLE-LEAF TREE
 // =============================================================================================
 
-TEST_F(KVTest, DeleteAllTest) {
+TEST_F(KVTest, RemoveAllTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
-    ASSERT_TRUE(kv->Delete("tmpkey") == OK);
+    ASSERT_TRUE(kv->Remove("tmpkey") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
-TEST_F(KVTest, DeleteAndInsertTest) {
+TEST_F(KVTest, RemoveAndInsertTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
-    ASSERT_TRUE(kv->Delete("tmpkey") == OK);
+    ASSERT_TRUE(kv->Remove("tmpkey") == OK);
     ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
     std::string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
@@ -156,11 +156,11 @@ TEST_F(KVTest, DeleteAndInsertTest) {
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
-TEST_F(KVTest, DeleteExistingTest) {
+TEST_F(KVTest, RemoveExistingTest) {
     ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
     ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK);
-    ASSERT_TRUE(kv->Delete("tmpkey1") == OK);
-    ASSERT_TRUE(kv->Delete("tmpkey1") == OK); // ok to delete twice
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK); // ok to remove twice
     std::string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
@@ -170,17 +170,17 @@ TEST_F(KVTest, DeleteExistingTest) {
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
-TEST_F(KVTest, DeleteHeadlessTest) {
-    ASSERT_TRUE(kv->Delete("nada") == OK);
+TEST_F(KVTest, RemoveHeadlessTest) {
+    ASSERT_TRUE(kv->Remove("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 0);
 }
 
-TEST_F(KVTest, DeleteNonexistentTest) {
+TEST_F(KVTest, RemoveNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
-    ASSERT_TRUE(kv->Delete("nada") == OK);
+    ASSERT_TRUE(kv->Remove("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
@@ -248,11 +248,11 @@ TEST_F(KVTest, GetMultipleTest) {
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
-TEST_F(KVTest, GetMultipleAfterDeleteTest) {
+TEST_F(KVTest, GetMultipleAfterRemoveTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
     ASSERT_TRUE(kv->Put("key2", "value2") == OK);
     ASSERT_TRUE(kv->Put("key3", "value3") == OK);
-    ASSERT_TRUE(kv->Delete("key2") == OK);
+    ASSERT_TRUE(kv->Remove("key2") == OK);
     ASSERT_TRUE(kv->Put("key3", "VALUE3") == OK);
     std::string value1;
     ASSERT_TRUE(kv->Get("key1", &value1) == OK && value1 == "value1");
@@ -368,19 +368,19 @@ TEST_F(KVTest, PutValuesOfDifferentSizesTest) {
 // TEST RECOVERY OF SINGLE-LEAF TREE
 // =============================================================================================
 
-TEST_F(KVTest, DeleteHeadlessAfterRecoveryTest) {
+TEST_F(KVTest, RemoveHeadlessAfterRecoveryTest) {
     Reopen();
-    ASSERT_TRUE(kv->Delete("nada") == OK);
+    ASSERT_TRUE(kv->Remove("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 0);
 }
 
-TEST_F(KVTest, DeleteNonexistentAfterRecoveryTest) {
+TEST_F(KVTest, RemoveNonexistentAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
     Reopen();
-    ASSERT_TRUE(kv->Delete("nada") == OK);
+    ASSERT_TRUE(kv->Remove("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
@@ -446,7 +446,7 @@ TEST_F(KVTest, UpdateAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
     ASSERT_TRUE(kv->Put("key2", "value2") == OK);
     ASSERT_TRUE(kv->Put("key3", "value3") == OK);
-    ASSERT_TRUE(kv->Delete("key2") == OK);
+    ASSERT_TRUE(kv->Remove("key2") == OK);
     ASSERT_TRUE(kv->Put("key3", "VALUE3") == OK);
     Reopen();
     std::string value1;
@@ -463,7 +463,7 @@ TEST_F(KVTest, UpdateAfterRecoveryTest) {
 
 TEST_F(KVTest, UsePreallocAfterSingleLeafRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
-    ASSERT_TRUE(kv->Delete("key1") == OK);
+    ASSERT_TRUE(kv->Remove("key1") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
@@ -640,7 +640,7 @@ TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
     ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 2);
 
-    for (int i = 1; i <= LEAF_KEYS; i++) ASSERT_EQ(kv->Delete(std::to_string(i)), OK);
+    for (int i = 1; i <= LEAF_KEYS; i++) ASSERT_EQ(kv->Remove(std::to_string(i)), OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
@@ -651,7 +651,7 @@ TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
     ASSERT_EQ(analysis.leaf_prealloc, 1);
     ASSERT_EQ(analysis.leaf_total, 2);
 
-    ASSERT_EQ(kv->Delete(std::to_string(LEAF_KEYS + 1)), OK);
+    ASSERT_EQ(kv->Remove(std::to_string(LEAF_KEYS + 1)), OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 2);
     ASSERT_EQ(analysis.leaf_prealloc, 1);
@@ -803,64 +803,64 @@ class KVFullTest : public testing::Test {
 const string LONGSTR = "123456789A123456789A123456789A123456789A123456789A123456789A123456789A";
 
 TEST_F(KVFullTest, OutOfSpace1Test) {
-    ASSERT_TRUE(kv->Put("100", "?") == TXN_ERROR);
+    ASSERT_TRUE(kv->Put("100", "?") == FAILED);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace2aTest) {
-    ASSERT_TRUE(kv->Delete("100") == OK);
-    ASSERT_TRUE(kv->Put("100", LONGSTR) == TXN_ERROR);
+    ASSERT_TRUE(kv->Remove("100") == OK);
+    ASSERT_TRUE(kv->Put("100", LONGSTR) == FAILED);
     ASSERT_TRUE(kv->Put("100", "100!") == OK);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace2bTest) {
-    ASSERT_TRUE(kv->Delete("100") == OK);
+    ASSERT_TRUE(kv->Remove("100") == OK);
     ASSERT_TRUE(kv->Put("100", "100!") == OK);
-    ASSERT_TRUE(kv->Put("100", LONGSTR) == TXN_ERROR);
+    ASSERT_TRUE(kv->Put("100", LONGSTR) == FAILED);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace3aTest) {
-    ASSERT_TRUE(kv->Put("100", LONGSTR) == TXN_ERROR);
+    ASSERT_TRUE(kv->Put("100", LONGSTR) == FAILED);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace3bTest) {
     for (int i = 0; i <= 99999; i++) {
-        ASSERT_TRUE(kv->Put("123456", LONGSTR) == TXN_ERROR);
+        ASSERT_TRUE(kv->Put("123456", LONGSTR) == FAILED);
     }
-    ASSERT_TRUE(kv->Delete("4567") == OK);
+    ASSERT_TRUE(kv->Remove("4567") == OK);
     ASSERT_TRUE(kv->Put("4567", "4567!") == OK);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace4aTest) {
-    ASSERT_TRUE(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == TXN_ERROR);
+    ASSERT_TRUE(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == FAILED);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace4bTest) {
     for (int i = 0; i <= 99999; i++) {
-        ASSERT_TRUE(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == TXN_ERROR);
+        ASSERT_TRUE(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == FAILED);
     }
-    ASSERT_TRUE(kv->Delete("98765") == OK);
+    ASSERT_TRUE(kv->Remove("98765") == OK);
     ASSERT_TRUE(kv->Put("98765", "98765!") == OK);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace5aTest) {
-    ASSERT_TRUE(kv->Put(LONGSTR, "1") == TXN_ERROR);
-    ASSERT_TRUE(kv->Put(LONGSTR, LONGSTR) == TXN_ERROR);
+    ASSERT_TRUE(kv->Put(LONGSTR, "1") == FAILED);
+    ASSERT_TRUE(kv->Put(LONGSTR, LONGSTR) == FAILED);
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace5bTest) {
     for (int i = 0; i <= 99999; i++) {
-        ASSERT_TRUE(kv->Put(LONGSTR, "1") == TXN_ERROR);
-        ASSERT_TRUE(kv->Put(LONGSTR, LONGSTR) == TXN_ERROR);
+        ASSERT_TRUE(kv->Put(LONGSTR, "1") == FAILED);
+        ASSERT_TRUE(kv->Put(LONGSTR, LONGSTR) == FAILED);
     }
-    ASSERT_TRUE(kv->Delete("34567") == OK);
+    ASSERT_TRUE(kv->Remove("34567") == OK);
     ASSERT_TRUE(kv->Put("34567", "34567!") == OK);
     Validate();
 }

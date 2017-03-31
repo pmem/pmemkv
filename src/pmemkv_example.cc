@@ -58,8 +58,8 @@ int main() {
     s = kv->Get("key1", &value3);
     assert(s == OK && value3 == "value_replaced");
 
-    LOG("Deleting existing value");
-    s = kv->Delete("key1");
+    LOG("Removing existing value");
+    s = kv->Remove("key1");
     assert(s == OK);
     std::string value4;
     s = kv->Get("key1", &value4);

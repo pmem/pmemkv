@@ -42,7 +42,7 @@ using namespace pmemkv;
 
 const unsigned long COUNT = 10000000;
 const std::string PATH = "/dev/shm/pmemkv";
-const size_t SIZE = ((size_t)(1024 * 1024) * (int)(9176 * 1.1));
+const size_t SIZE = ((size_t) (1024 * 1024) * (int) (9176 * 1.1));
 
 const char* LOREM_IPSUM_200 =
         " Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec facilisis ipsum ipsum, nec sollicitudin nulla pharetra at. Sed accumsan ut felis sed ornare. Aliquam maximus dui congue ipsum cras amet.";
@@ -70,9 +70,9 @@ string formatKey(int i) {
     return key;
 }
 
-void testDelete(KVTree* kv) {
+void testRemove(KVTree* kv) {
     auto started = current_millis();
-    for (int i = 0; i < COUNT; i++) kv->Delete(formatKey(i));
+    for (int i = 0; i < COUNT; i++) kv->Remove(formatKey(i));
     LOG("   in " << current_millis() - started << " ms");
 }
 
@@ -126,8 +126,8 @@ int main() {
         testPut(kv);
 //      LOG("Updating " << COUNT << " values");
 //      testPut(kv);
-//      LOG("Deleting " << COUNT << " values");
-//      testDelete(kv);
+//      LOG("Removing " << COUNT << " values");
+//      testRemove(kv);
 //      LOG("Reinserting " << COUNT << " values");
 //      testPut(kv);
         delete kv;

@@ -44,11 +44,11 @@ namespace pmemkv {
 
 KVTree::KVTree(const string& path, const size_t size) : pmpath(path) {
     if (access(path.c_str(), F_OK) != 0) {
-        LOG("Creating pool");
+        LOG("Creating pool, path=" << path << ", size=" << std::to_string(size));
         pmpool = pool<KVRoot>::create(path.c_str(), LAYOUT, size, S_IRWXU);
         pmsize = size;
     } else {
-        LOG("Opening existing pool");
+        LOG("Opening existing pool, path=" << path);
         pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
         struct stat st;
         stat(path.c_str(), &st);
@@ -94,8 +94,8 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
     LOG("Analyzed ok");
 }
 
-KVStatus KVTree::Delete(const string& key) {
-    LOG("Delete key=" << key.c_str());
+KVStatus KVTree::Remove(const string& key) {
+    LOG("Remove key=" << key.c_str());
     auto leafnode = LeafSearch(key);
     if (!leafnode) {
         LOG("   head not present");
@@ -119,8 +119,8 @@ KVStatus KVTree::Delete(const string& key) {
     return OK;
 }
 
-KVStatus KVTree::Get(const string& key, string* value) {
-    LOG("Get key=" << key.c_str());
+KVStatus KVTree::Get(const string& key, const size_t limit, char* value, uint32_t* valuebytes) {
+    LOG("Get C-style string for key=" << key.c_str());
     auto leafnode = LeafSearch(key);
     if (!leafnode) {
         LOG("   head not present");
@@ -130,8 +130,37 @@ KVStatus KVTree::Get(const string& key, string* value) {
     for (int slot = LEAF_KEYS; slot--;) {
         if (leafnode->hashes[slot] == hash) {
             if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
-                value->append(leafnode->leaf->slots[slot].get_ro().val());
+                auto kv = leafnode->leaf->slots[slot].get_ro();
+                auto vs = kv.valsize();
+                if (vs < limit - 1) {
+                    LOG("   found value=" << value << ", slot=" << slot
+                                          << ", size" << std::to_string(vs));
+                    strcpy(value, kv.val());
+                    *valuebytes = vs;
+                    return OK;
+                } else {
+                    return FAILED;
+                }
+            }
+        }
+    }
+    LOG("   could not find key");
+    return NOT_FOUND;
+}
+
+KVStatus KVTree::Get(const string& key, string* value) {
+    LOG("Get std::string for key=" << key.c_str());
+    auto leafnode = LeafSearch(key);
+    if (!leafnode) {
+        LOG("   head not present");
+        return NOT_FOUND;
+    }
+    const uint8_t hash = PearsonHash(key.c_str(), key.size());
+    for (int slot = LEAF_KEYS; slot--;) {
+        if (leafnode->hashes[slot] == hash) {
+            if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
                 LOG("   found value=" << *value << ", slot=" << slot);
+                value->append(leafnode->leaf->slots[slot].get_ro().val());
                 return OK;
             }
         }
@@ -184,9 +213,9 @@ KVStatus KVTree::Put(const string& key, const string& value) {
         }
         return OK;
     } catch (nvml::transaction_alloc_error) {
-        return TXN_ERROR;
+        return FAILED;
     } catch (nvml::transaction_error) {
-        return TXN_ERROR;
+        return FAILED;
     }
 }
 

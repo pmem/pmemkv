@@ -62,8 +62,10 @@ const string LAYOUT = "pmemkv";                            // unique pool layout
 class KVSlot {
   public:
     uint8_t hash() const { return ph; }                    // gets Pearson hash for key
-    const char* key() const { return kv.get(); }           // gets key as c-style string
-    const char* val() const { return kv.get() + ks + 1; }  // gets value as c-style string
+    const char* key() const { return kv.get(); }           // gets key as C-style string
+    const uint32_t keysize() const { return ks; }          // gets size of key (without null)
+    const char* val() const { return kv.get() + ks + 1; }  // gets value as C-style string
+    const uint32_t valsize() const { return vs; }          // gets size of length (without null)
     void clear();                                          // frees persistent memory
     void set(const uint8_t hash, const string& key,        // sets all slot fields
              const string& value);
@@ -107,9 +109,9 @@ struct KVRecoveredLeaf {                                   // temporary wrapper 
 };
 
 enum KVStatus {                                            // status enumeration
-    OK = 0,                                                // successful completion
-    NOT_FOUND = 1,                                         // key not located
-    TXN_ERROR = 2                                          // persistent transaction failed
+    FAILED = -1,                                           // operation failed
+    NOT_FOUND = 0,                                         // key not located
+    OK = 1                                                 // successful completion
 };
 
 struct KVTreeAnalysis {                                    // tree analysis structure
@@ -125,11 +127,15 @@ class KVTree {                                             // persistent tree cl
     KVTree(const string& path, const size_t size);         // default constructor
     ~KVTree();                                             // default destructor
     void Analyze(KVTreeAnalysis& analysis);                // report on internal state & stats
-    KVStatus Delete(const string& key);                    // remove single key
-    KVStatus Get(const string& key, string* value);        // read single key/value
-    vector<KVStatus> GetList(const vector<string>& keys,   // read multiple keys at once
+    KVStatus Remove(const string& key);                    // remove value for key
+    KVStatus Get(const string& key,                        // copy value for key to buffer
+                 const size_t limit,                       // maximum bytes to copy to buffer
+                 char* value,                              // value buffer as C-style string
+                 uint32_t* valuebytes);                    // buffer bytes actually copied
+    KVStatus Get(const string& key, string* value);        // append value for key to std::string
+    vector<KVStatus> GetList(const vector<string>& keys,   // get multiple values at once
                              vector<string>* values);
-    KVStatus Put(const string& key, const string& value);  // write single key/value
+    KVStatus Put(const string& key, const string& value);  // copy value for key from std::string
   protected:
     KVLeafNode* LeafSearch(const string& key);             // find node for key
     void LeafFillEmptySlot(KVLeafNode* leafnode,           // write first unoccupied slot found
@@ -159,12 +165,53 @@ class KVTree {                                             // persistent tree cl
     void Shutdown(KVNode* node);                           // release resources for node
   private:
     KVTree(const KVTree&);                                 // prevent copying
-    void operator=(const KVTree&);                         // prevent assignment
+    void operator=(const KVTree&);                         // prevent assigning
     vector<persistent_ptr<KVLeaf>> leaves_prealloc;        // persisted but unused leaves
     const string pmpath;                                   // path when constructed
     pool<KVRoot> pmpool;                                   // pool for persistent root
     size_t pmsize;                                         // actual size of persistent pool
     KVNode* tree_top = nullptr;                            // pointer to uppermost inner node
 };
+
+// ===============================================================================================
+// C API FOR LANGUAGE BINDINGS
+// ===============================================================================================
+
+extern "C" KVTree* kvtree_open(const char* path,           // recover KVTree instance from path
+                               const size_t size) {        // size used when creating new
+    return new KVTree(path, size);
+};
+
+extern "C" void kvtree_close(KVTree* kv) {                 // free KVTree instance
+    delete kv;
+};
+
+extern "C" int8_t kvtree_get(KVTree* kv,                   // copy value for key to buffer
+                             const char* key,              // key as C-style string
+                             const size_t limit,           // maximum bytes to copy to buffer
+                             char* value,                  // value buffer as C-style string
+                             uint32_t* valuebytes)         // buffer bytes actually copied
+{
+    return kv->Get(key, limit, value, valuebytes);
+}
+
+extern "C" int8_t kvtree_put(KVTree* kv,                   // copy value for key from buffer
+                             const char* key,              // key as C-style string
+                             const char* value) {          // value as C-style string
+    return kv->Put(key, value);
+}
+
+extern "C" int8_t kvtree_remove(KVTree* kv,                // remove value for key
+                                const char* key) {         // key as C-style string
+    return kv->Remove(key);
+};
+
+extern "C" size_t kvtree_size(KVTree* kv) {                // returns persistent pool size
+    KVTreeAnalysis analysis = {};
+    kv->Analyze(analysis);
+    return analysis.size;
+}
+
+// todo missing test cases for C API
 
 } // namespace pmemkv
