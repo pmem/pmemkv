@@ -127,7 +127,6 @@ class KVTree {                                             // persistent tree cl
     KVTree(const string& path, const size_t size);         // default constructor
     ~KVTree();                                             // default destructor
     void Analyze(KVTreeAnalysis& analysis);                // report on internal state & stats
-    KVStatus Remove(const string& key);                    // remove value for key
     KVStatus Get(const string& key,                        // copy value for key to buffer
                  const size_t limit,                       // maximum bytes to copy to buffer
                  char* value,                              // value buffer as C-style string
@@ -136,6 +135,7 @@ class KVTree {                                             // persistent tree cl
     vector<KVStatus> GetList(const vector<string>& keys,   // get multiple values at once
                              vector<string>* values);
     KVStatus Put(const string& key, const string& value);  // copy value for key from std::string
+    KVStatus Remove(const string& key);                    // remove value for key
   protected:
     KVLeafNode* LeafSearch(const string& key);             // find node for key
     void LeafFillEmptySlot(KVLeafNode* leafnode,           // write first unoccupied slot found

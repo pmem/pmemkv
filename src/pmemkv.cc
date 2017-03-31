@@ -94,31 +94,6 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
     LOG("Analyzed ok");
 }
 
-KVStatus KVTree::Remove(const string& key) {
-    LOG("Remove key=" << key.c_str());
-    auto leafnode = LeafSearch(key);
-    if (!leafnode) {
-        LOG("   head not present");
-        return OK;
-    }
-    const uint8_t hash = PearsonHash(key.c_str(), key.size());
-    for (int slot = LEAF_KEYS; slot--;) {
-        if (leafnode->hashes[slot] == hash) {
-            if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
-                LOG("   freeing slot=" << slot);
-                leafnode->hashes[slot] = 0;
-                leafnode->keys[slot].clear();
-                auto leaf = leafnode->leaf;
-                transaction::exec_tx(pmpool, [&] {
-                    leaf->slots[slot].get_rw().clear();
-                });
-                break;  // no duplicate keys allowed
-            }
-        }
-    }
-    return OK;
-}
-
 KVStatus KVTree::Get(const string& key, const size_t limit, char* value, uint32_t* valuebytes) {
     LOG("Get C-style string for key=" << key.c_str());
     auto leafnode = LeafSearch(key);
@@ -217,6 +192,31 @@ KVStatus KVTree::Put(const string& key, const string& value) {
     } catch (nvml::transaction_error) {
         return FAILED;
     }
+}
+
+KVStatus KVTree::Remove(const string& key) {
+    LOG("Remove key=" << key.c_str());
+    auto leafnode = LeafSearch(key);
+    if (!leafnode) {
+        LOG("   head not present");
+        return OK;
+    }
+    const uint8_t hash = PearsonHash(key.c_str(), key.size());
+    for (int slot = LEAF_KEYS; slot--;) {
+        if (leafnode->hashes[slot] == hash) {
+            if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
+                LOG("   freeing slot=" << slot);
+                leafnode->hashes[slot] = 0;
+                leafnode->keys[slot].clear();
+                auto leaf = leafnode->leaf;
+                transaction::exec_tx(pmpool, [&] {
+                    leaf->slots[slot].get_rw().clear();
+                });
+                break;  // no duplicate keys allowed
+            }
+        }
+    }
+    return OK;
 }
 
 // ===============================================================================================

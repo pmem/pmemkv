@@ -135,58 +135,6 @@ TEST_F(KVEmptyTest, SizeOutOfRange2) {
 // TEST SINGLE-LEAF TREE
 // =============================================================================================
 
-TEST_F(KVTest, RemoveAllTest) {
-    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
-    ASSERT_TRUE(kv->Remove("tmpkey") == OK);
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 1);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
-}
-
-TEST_F(KVTest, RemoveAndInsertTest) {
-    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
-    ASSERT_TRUE(kv->Remove("tmpkey") == OK);
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
-    std::string value;
-    ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
-}
-
-TEST_F(KVTest, RemoveExistingTest) {
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
-    ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK);
-    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
-    ASSERT_TRUE(kv->Remove("tmpkey1") == OK); // ok to remove twice
-    std::string value;
-    ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
-    ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
-}
-
-TEST_F(KVTest, RemoveHeadlessTest) {
-    ASSERT_TRUE(kv->Remove("nada") == OK);
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 0);
-}
-
-TEST_F(KVTest, RemoveNonexistentTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
-    ASSERT_TRUE(kv->Remove("nada") == OK);
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
-}
-
 TEST_F(KVTest, EmptyKeyTest) {                                      // todo correct behavior?
     ASSERT_TRUE(kv->Put("", "blah") == OK);
     std::string value;
@@ -248,7 +196,7 @@ TEST_F(KVTest, GetMultipleTest) {
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
-TEST_F(KVTest, GetMultipleAfterRemoveTest) {
+TEST_F(KVTest, GetMultiple2Test) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
     ASSERT_TRUE(kv->Put("key2", "value2") == OK);
     ASSERT_TRUE(kv->Put("key3", "value3") == OK);
@@ -298,7 +246,7 @@ TEST_F(KVTest, GetListTest) {
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
-TEST_F(KVTest, PutExistingTest) {
+TEST_F(KVTest, PutTest) {
     std::string value;
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
@@ -364,12 +312,42 @@ TEST_F(KVTest, PutValuesOfDifferentSizesTest) {
     ASSERT_TRUE(kv->Get("E", &value5) == OK && value5 == "123456789ABCDEFGHI");
 }
 
-// =============================================================================================
-// TEST RECOVERY OF SINGLE-LEAF TREE
-// =============================================================================================
+TEST_F(KVTest, RemoveAllTest) {
+    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
+    ASSERT_TRUE(kv->Remove("tmpkey") == OK);
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 1);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
 
-TEST_F(KVTest, RemoveHeadlessAfterRecoveryTest) {
-    Reopen();
+TEST_F(KVTest, RemoveAndInsertTest) {
+    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
+    ASSERT_TRUE(kv->Remove("tmpkey") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
+    std::string value;
+    ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
+
+TEST_F(KVTest, RemoveExistingTest) {
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK);
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK); // ok to remove twice
+    std::string value;
+    ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
+
+TEST_F(KVTest, RemoveHeadlessTest) {
     ASSERT_TRUE(kv->Remove("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
@@ -377,15 +355,18 @@ TEST_F(KVTest, RemoveHeadlessAfterRecoveryTest) {
     ASSERT_EQ(analysis.leaf_total, 0);
 }
 
-TEST_F(KVTest, RemoveNonexistentAfterRecoveryTest) {
+TEST_F(KVTest, RemoveNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
-    Reopen();
     ASSERT_TRUE(kv->Remove("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
+
+// =============================================================================================
+// TEST RECOVERY OF SINGLE-LEAF TREE
+// =============================================================================================
 
 TEST_F(KVTest, GetHeadlessAfterRecoveryTest) {
     Reopen();
@@ -420,29 +401,7 @@ TEST_F(KVTest, GetMultipleAfterRecoveryTest) {
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
-TEST_F(KVTest, GetNonexistentAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
-    Reopen();
-    std::string value;
-    ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
-}
-
-TEST_F(KVTest, PutAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
-    Reopen();
-    std::string value1;
-    ASSERT_TRUE(kv->Get("key1", &value1) == OK && value1 == "value1");
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
-}
-
-TEST_F(KVTest, UpdateAfterRecoveryTest) {
+TEST_F(KVTest, GetMultiple2AfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
     ASSERT_TRUE(kv->Put("key2", "value2") == OK);
     ASSERT_TRUE(kv->Put("key3", "value3") == OK);
@@ -455,6 +414,97 @@ TEST_F(KVTest, UpdateAfterRecoveryTest) {
     ASSERT_TRUE(kv->Get("key2", &value2) == NOT_FOUND);
     std::string value3;
     ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
+
+TEST_F(KVTest, GetNonexistentAfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    Reopen();
+    std::string value;
+    ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
+
+TEST_F(KVTest, PutAfterRecoveryTest) {
+    std::string value;
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
+
+    std::string new_value;
+    ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK);           // same size
+    ASSERT_TRUE(kv->Get("key1", &new_value) == OK && new_value == "VALUE1");
+    Reopen();
+
+    std::string new_value2;
+    ASSERT_TRUE(kv->Put("key1", "new_value") == OK);        // longer size
+    ASSERT_TRUE(kv->Get("key1", &new_value2) == OK && new_value2 == "new_value");
+
+    std::string new_value3;
+    ASSERT_TRUE(kv->Put("key1", "?") == OK);                // shorter size
+    ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
+
+TEST_F(KVTest, RemoveAllAfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
+    Reopen();
+    ASSERT_TRUE(kv->Remove("tmpkey") == OK);
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 1);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
+
+TEST_F(KVTest, RemoveAndInsertAfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
+    Reopen();
+    ASSERT_TRUE(kv->Remove("tmpkey") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
+    std::string value;
+    ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
+
+TEST_F(KVTest, RemoveExistingAfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK);
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
+    Reopen();
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK); // ok to remove twice
+    std::string value;
+    ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
+
+TEST_F(KVTest, RemoveHeadlessAfterRecoveryTest) {
+    Reopen();
+    ASSERT_TRUE(kv->Remove("nada") == OK);
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 0);
+}
+
+TEST_F(KVTest, RemoveNonexistentAfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    Reopen();
+    ASSERT_TRUE(kv->Remove("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);

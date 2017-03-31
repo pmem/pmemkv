@@ -70,21 +70,6 @@ string formatKey(int i) {
     return key;
 }
 
-void testRemove(KVTree* kv) {
-    auto started = current_millis();
-    for (int i = 0; i < COUNT; i++) kv->Remove(formatKey(i));
-    LOG("   in " << current_millis() - started << " ms");
-}
-
-void testGetSequential(KVTree* kv) {
-    auto started = current_millis();
-    for (int i = 0; i < COUNT; i++) {
-        std::string value;
-        kv->Get(formatKey(i), &value);
-    }
-    LOG("   in " << current_millis() - started << " ms");
-}
-
 void testGetRandom(KVTree* kv) {
     std::random_device random_device;
     std::mt19937 generator(random_device());
@@ -97,6 +82,15 @@ void testGetRandom(KVTree* kv) {
     LOG("   in " << current_millis() - started << " ms");
 }
 
+void testGetSequential(KVTree* kv) {
+    auto started = current_millis();
+    for (int i = 0; i < COUNT; i++) {
+        std::string value;
+        kv->Get(formatKey(i), &value);
+    }
+    LOG("   in " << current_millis() - started << " ms");
+}
+
 void testPut(KVTree* kv) {
     auto started = current_millis();
     for (int i = 0; i < COUNT; i++) {
@@ -105,6 +99,12 @@ void testPut(KVTree* kv) {
             exit(-42);
         }
     }
+    LOG("   in " << current_millis() - started << " ms");
+}
+
+void testRemove(KVTree* kv) {
+    auto started = current_millis();
+    for (int i = 0; i < COUNT; i++) kv->Remove(formatKey(i));
     LOG("   in " << current_millis() - started << " ms");
 }
 
