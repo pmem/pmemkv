@@ -89,7 +89,7 @@ using namespace pmemkv;
 
 int main() {
     // open the datastore
-    KVTree* kv = new KVTree("/dev/shm/pmemkv", 8388608); // 8 MB
+    KVTree* kv = new KVTree("/dev/shm/mykv", 8388608);  // 8 MB
 
     // put new key
     KVStatus s = kv->Put("key1", "value1");
