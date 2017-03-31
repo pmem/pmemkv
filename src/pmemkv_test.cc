@@ -84,18 +84,7 @@ class KVTest : public testing::Test {
 // TEST EMPTY TREE
 // =============================================================================================
 
-TEST_F(KVEmptyTest, SizeofTest) {
-    // persistent types
-    ASSERT_EQ(sizeof(KVRoot), 16);
-    ASSERT_EQ(sizeof(KVSlot), 32);
-    ASSERT_EQ(sizeof(KVLeaf), 1552);
-
-    // volatile types
-    ASSERT_EQ(sizeof(KVInnerNode), 232);
-    ASSERT_EQ(sizeof(KVLeafNode), 1624);
-}
-
-TEST_F(KVEmptyTest, SizeAfterOpeningTest) {
+TEST_F(KVEmptyTest, CreateInstanceTest) {
     KVTree* kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
     KVTreeAnalysis analysis = {};
     kv->Analyze(analysis);
@@ -103,7 +92,7 @@ TEST_F(KVEmptyTest, SizeAfterOpeningTest) {
     delete kv;
 }
 
-TEST_F(KVEmptyTest, SizeAfterReopeningTest) {
+TEST_F(KVEmptyTest, CreateInstanceFromExistingTest) {
     KVTree* kv = new KVTree(PATH, PMEMOBJ_MIN_POOL * 2);
     delete kv;
     kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
@@ -113,7 +102,16 @@ TEST_F(KVEmptyTest, SizeAfterReopeningTest) {
     delete kv;
 }
 
-TEST_F(KVEmptyTest, SizeOutOfRange1) {
+TEST_F(KVEmptyTest, FailsToCreateInstanceWithHugeSize) {
+    try {
+        new KVTree(PATH, 9223372036854775807);   // 9.22 exabytes
+        FAIL();
+    } catch (...) {
+        // do nothing, expected to happen
+    }
+}
+
+TEST_F(KVEmptyTest, FailsToCreateInstanceWithTinySize) {
     try {
         new KVTree(PATH, PMEMOBJ_MIN_POOL - 1);  // too small
         FAIL();
@@ -122,13 +120,15 @@ TEST_F(KVEmptyTest, SizeOutOfRange1) {
     }
 }
 
-TEST_F(KVEmptyTest, SizeOutOfRange2) {
-    try {
-        new KVTree(PATH, 9223372036854775807);   // 9.22 exabytes
-        FAIL();
-    } catch (...) {
-        // do nothing, expected to happen
-    }
+TEST_F(KVEmptyTest, SizeofTest) {
+    // persistent types
+    ASSERT_EQ(sizeof(KVRoot), 16);
+    ASSERT_EQ(sizeof(KVSlot), 32);
+    ASSERT_EQ(sizeof(KVLeaf), 1552);
+
+    // volatile types
+    ASSERT_EQ(sizeof(KVInnerNode), 232);
+    ASSERT_EQ(sizeof(KVLeafNode), 1624);
 }
 
 // =============================================================================================
