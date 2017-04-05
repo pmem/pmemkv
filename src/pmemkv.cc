@@ -529,4 +529,39 @@ void KVSlot::set(const uint8_t hash, const string& key, const string& value) {
     memcpy(kvptr, value.data(), vs);                                     // copy value into buffer
 }
 
+extern "C" KVTree* kvtree_open(const char* path,
+                               const size_t size) {
+    return new KVTree(path, size);
+};
+
+extern "C" void kvtree_close(KVTree* kv) {
+    delete kv;
+};
+
+extern "C" int8_t kvtree_get(KVTree* kv,
+                             const char* key,
+                             const size_t limit,
+                             char* value,
+                             uint32_t* valuebytes)
+{
+    return kv->Get(key, limit, value, valuebytes);
+}
+
+extern "C" int8_t kvtree_put(KVTree* kv,
+                             const char* key,
+                             const char* value) {
+    return kv->Put(key, value);
+}
+
+extern "C" int8_t kvtree_remove(KVTree* kv,
+                                const char* key) {
+    return kv->Remove(key);
+};
+
+extern "C" size_t kvtree_size(KVTree* kv) {
+    KVTreeAnalysis analysis = {};
+    kv->Analyze(analysis);
+    return analysis.size;
+}
+
 } // namespace pmemkv
