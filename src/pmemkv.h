@@ -173,10 +173,6 @@ class KVTree {                                             // persistent tree cl
     KVNode* tree_top = nullptr;                            // pointer to uppermost inner node
 };
 
-// ===============================================================================================
-// C API FOR LANGUAGE BINDINGS
-// ===============================================================================================
-
 extern "C" KVTree* kvtree_open(const char* path,           // recover KVTree instance from path
                                const size_t size);         // size used when creating new
 
@@ -196,7 +192,5 @@ extern "C" int8_t kvtree_remove(KVTree* kv,                // remove value for k
                                 const char* key);          // key as C-style string
 
 extern "C" size_t kvtree_size(KVTree* kv);                 // returns persistent pool size
-
-// todo missing test cases for C API
 
 } // namespace pmemkv
