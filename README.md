@@ -72,7 +72,7 @@ sudo make uninstall   # remove shared library from /usr/local/lib
 ```
 
 To use a different installation directory from the default
-(`/usr/lib/local`), edit `make_config.mk` to change the `INSTALL_DIR`
+(`/usr/local/lib`), edit `make_config.mk` to change the `INSTALL_DIR`
 variable accordingly.
 
 <a name="sample_code"/>
