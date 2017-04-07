@@ -178,39 +178,24 @@ class KVTree {                                             // persistent tree cl
 // ===============================================================================================
 
 extern "C" KVTree* kvtree_open(const char* path,           // recover KVTree instance from path
-                               const size_t size) {        // size used when creating new
-    return new KVTree(path, size);
-};
+                               const size_t size);         // size used when creating new
 
-extern "C" void kvtree_close(KVTree* kv) {                 // free KVTree instance
-    delete kv;
-};
+extern "C" void kvtree_close(KVTree* kv);                  // free KVTree instance
 
 extern "C" int8_t kvtree_get(KVTree* kv,                   // copy value for key to buffer
                              const char* key,              // key as C-style string
                              const size_t limit,           // maximum bytes to copy to buffer
                              char* value,                  // value buffer as C-style string
-                             uint32_t* valuebytes)         // buffer bytes actually copied
-{
-    return kv->Get(key, limit, value, valuebytes);
-}
+                             uint32_t* valuebytes);        // buffer bytes actually copied
 
 extern "C" int8_t kvtree_put(KVTree* kv,                   // copy value for key from buffer
                              const char* key,              // key as C-style string
-                             const char* value) {          // value as C-style string
-    return kv->Put(key, value);
-}
+                             const char* value);           // value as C-style string
 
 extern "C" int8_t kvtree_remove(KVTree* kv,                // remove value for key
-                                const char* key) {         // key as C-style string
-    return kv->Remove(key);
-};
+                                const char* key);          // key as C-style string
 
-extern "C" size_t kvtree_size(KVTree* kv) {                // returns persistent pool size
-    KVTreeAnalysis analysis = {};
-    kv->Analyze(analysis);
-    return analysis.size;
-}
+extern "C" size_t kvtree_size(KVTree* kv);                 // returns persistent pool size
 
 // todo missing test cases for C API
 
