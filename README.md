@@ -49,9 +49,11 @@ Installation
 ------------
 
 Start with Ubuntu 16.04 LTS or other 64-bit Linux distribution.
-OSX and Windows are not yet supported by `pmemkv`, so don't use those.
-To build `pmemkv`and run its tests and sample programs, you'll need 
-`make` and `g++` installed. Other required libraries will be 
+OSX and Windows are not yet supported by `pmemkv`.
+
+**Building with make**
+
+You'll need `make` and `g++` installed. Other required libraries will be 
 downloaded by the `make` script.
 
 ```
@@ -74,6 +76,12 @@ sudo make uninstall   # remove shared library from /usr/local/lib
 To use a different installation directory from the default
 (`/usr/local/lib`), edit `make_config.mk` to change the `INSTALL_DIR`
 variable accordingly.
+
+**Building with cmake**
+
+Alternatively `cmake` can be used to build the shared library. This uses
+the version of NVML installed on the system, but downloads other
+dependencies.
 
 <a name="sample_code"/>
 
