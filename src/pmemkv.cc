@@ -535,7 +535,11 @@ void KVSlot::set(const uint8_t hash, const string& key, const string& value) {
 
 extern "C" KVTree* kvtree_open(const char* path,
                                const size_t size) {
-    return new KVTree(path, size);
+    try {
+        return new KVTree(path, size);
+    } catch (...) {
+        return nullptr;
+    }
 };
 
 extern "C" void kvtree_close(KVTree* kv) {
