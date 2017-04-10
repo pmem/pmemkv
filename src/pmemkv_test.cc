@@ -102,6 +102,15 @@ TEST_F(KVEmptyTest, CreateInstanceFromExistingTest) {
     delete kv;
 }
 
+TEST_F(KVEmptyTest, FailsToCreateInstanceWithInvalidPath) {
+    try {
+        new KVTree("/tmp/123/234/345/456/567/678/nope.nope", PMEMOBJ_MIN_POOL);
+        FAIL();
+    } catch (...) {
+        // do nothing, expected to happen
+    }
+}
+
 TEST_F(KVEmptyTest, FailsToCreateInstanceWithHugeSize) {
     try {
         new KVTree(PATH, 9223372036854775807);   // 9.22 exabytes
