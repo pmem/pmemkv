@@ -40,60 +40,60 @@
 
 using namespace pmemkv;
 
-const unsigned long COUNT = 10000000;
-const std::string PATH = "/dev/shm/pmemkv";
-const size_t SIZE = ((size_t) (1024 * 1024) * (int) (9176 * 1.1));
+static unsigned long count = 10000000;
+static std::string path = "/dev/shm/pmemkv";
+static size_t size = ((size_t) (1024 * 1024) * (int) (9176 * 1.1));
 
-const char* LOREM_IPSUM_200 =
+static const char* LOREM_IPSUM_200 =
         " Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec facilisis ipsum ipsum, nec sollicitudin nulla pharetra at. Sed accumsan ut felis sed ornare. Aliquam maximus dui congue ipsum cras amet.";
-const char* LOREM_IPSUM_400 =
+static const char* LOREM_IPSUM_400 =
         " Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum eu tristique lorem. Integer sodales mi non ullamcorper faucibus. Suspendisse efficitur tortor mi. Phasellus facilisis placerat molestie. Proin tempus mollis volutpat. Quisque gravida hendrerit erat et commodo. Integer eu dolor et velit auctor pharetra non id sapien. Duis consectetur magna ut odio aliquam, vestibulum bibendum sed.";
-const char* LOREM_IPSUM_800 =
+static const char* LOREM_IPSUM_800 =
         " Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus bibendum ante sem, vel tincidunt odio aliquet vitae. Vestibulum eget laoreet sem. Donec ultrices scelerisque odio quis pretium. Proin semper in diam nec scelerisque. Fusce id ornare dui. Ut hendrerit interdum cursus. Praesent fringilla non nibh eget rhoncus. In eget est nec enim imperdiet scelerisque. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec ac egestas mi. Aenean a urna dui. Suspendisse urna nisl, rhoncus eget risus non, ultricies aliquam ante. Curabitur libero ante, imperdiet a consequat id, cursus eget eros. Suspendisse semper arcu odio, id pellentesque lacus eleifend sed. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Ut metus.";
 
-unsigned long current_millis() {
+static unsigned long current_millis() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return (unsigned long long) (tv.tv_sec) * 1000 + (unsigned long long) (tv.tv_usec) / 1000;
 }
 
-KVTree* open() {
+static KVTree* open() {
     auto started = current_millis();
-    auto kv = new KVTree(PATH, SIZE);
+    auto kv = new KVTree(path, size);
     LOG("   in " << current_millis() - started << " ms");
     return kv;
 }
 
-string formatKey(int i) {
+static string formatKey(int i) {
     string key = std::to_string(i);
     key.append(20 - key.length(), 'X');
     return key;
 }
 
-void testGetRandom(KVTree* kv) {
+static void testGetRandom(KVTree* kv) {
     std::random_device random_device;
     std::mt19937 generator(random_device());
-    std::uniform_int_distribution<> distribution(1, COUNT - 1);
+    std::uniform_int_distribution<> distribution(1, count - 1);
     auto started = current_millis();
-    for (int i = 0; i < COUNT; i++) {
+    for (int i = 0; i < count; i++) {
         std::string value;
         kv->Get(formatKey(distribution(generator)), &value);
     }
     LOG("   in " << current_millis() - started << " ms");
 }
 
-void testGetSequential(KVTree* kv) {
+static void testGetSequential(KVTree* kv) {
     auto started = current_millis();
-    for (int i = 0; i < COUNT; i++) {
+    for (int i = 0; i < count; i++) {
         std::string value;
         kv->Get(formatKey(i), &value);
     }
     LOG("   in " << current_millis() - started << " ms");
 }
 
-void testPut(KVTree* kv) {
+static void testPut(KVTree* kv) {
     auto started = current_millis();
-    for (int i = 0; i < COUNT; i++) {
+    for (int i = 0; i < count; i++) {
         if (kv->Put(formatKey(i), LOREM_IPSUM_800) != OK) {
             std::cout << "Out of space at key " << std::to_string(i) << "\n";
             exit(-42);
@@ -102,33 +102,63 @@ void testPut(KVTree* kv) {
     LOG("   in " << current_millis() - started << " ms");
 }
 
-void testRemove(KVTree* kv) {
+static void testRemove(KVTree* kv) {
     auto started = current_millis();
-    for (int i = 0; i < COUNT; i++) kv->Remove(formatKey(i));
+    for (int i = 0; i < count; i++) kv->Remove(formatKey(i));
     LOG("   in " << current_millis() - started << " ms");
 }
 
-int main() {
-    if (access(PATH.c_str(), F_OK) == 0) {
+static void usage_exit(int exit_code) {
+    ((exit_code == EXIT_SUCCESS) ? std::cout : std::cerr) <<
+        "Usage: pmemkv_stress [r|w path size]\n";
+    exit(exit_code);
+}
+
+int main(int argc, char **argv) {
+    bool reading = false;
+
+    if (argc > 1) {
+        std::string command(argv[1]);
+
+        if (command == "h" or command == "-help" or command == "--help")
+            usage_exit(EXIT_SUCCESS);
+
+        if (argc != 4)
+            usage_exit(EXIT_FAILURE);
+
+        if (command == "r" or command == "read")
+            reading = true;
+        else if (command == "w" or command == "write")
+            reading = false;
+        else
+            usage_exit(EXIT_FAILURE);
+
+        path = argv[2];
+
+        size = std::stoul(argv[3]) * (1024 * 1024);
+        count = size / 1000;
+    }
+
+    if (reading) {
         LOG("\nOpening for reads");
         KVTree* kv = open();
         for (int i = 0; i < 8; i++) {
-            LOG("Getting " << COUNT << " random values");
+            LOG("Getting " << count << " random values");
             testGetRandom(kv);
-            LOG("Getting " << COUNT << " sequential values");
+            LOG("Getting " << count << " sequential values");
             testGetSequential(kv);
         }
         delete kv;
     } else {
         LOG("\nOpening for writes");
         KVTree* kv = open();
-        LOG("Inserting " << COUNT << " values");
+        LOG("Inserting " << count << " values");
         testPut(kv);
-//      LOG("Updating " << COUNT << " values");
+//      LOG("Updating " << count << " values");
 //      testPut(kv);
-//      LOG("Removing " << COUNT << " values");
+//      LOG("Removing " << count << " values");
 //      testRemove(kv);
-//      LOG("Reinserting " << COUNT << " values");
+//      LOG("Reinserting " << count << " values");
 //      testPut(kv);
         delete kv;
     }
