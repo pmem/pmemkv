@@ -85,9 +85,11 @@ struct KVRoot {                                            // persistent root ob
     persistent_ptr<KVLeaf> head;                           // head of linked list of leaves
 };
 
+struct KVInnerNode;
+
 struct KVNode {                                            // volatile nodes of the tree
     bool is_leaf = false;                                  // indicate inner or leaf node
-    KVNode* parent;                                        // parent of this node (null if top)
+    KVInnerNode* parent;                                   // parent of this node (null if top)
 };
 
 struct KVInnerNode : KVNode {                              // volatile inner nodes of the tree

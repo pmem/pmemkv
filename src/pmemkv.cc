@@ -343,7 +343,7 @@ void KVTree::InnerUpdateAfterSplit(KVNode* node, KVNode* new_node, string* split
     }
 
     LOG("   updating parents for split_key=" << *split_key);
-    KVInnerNode* inner = (KVInnerNode*) node->parent;
+    KVInnerNode* inner = node->parent;
     { // insert split_key and new_node into inner node in sorted order
         const uint8_t keycount = inner->keycount;
         int idx = 0;  // position where split_key should be inserted
