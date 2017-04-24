@@ -7,3 +7,4 @@ libpmemkv.so*
 pmemkv_example
 pmemkv_stress
 pmemkv_test
+googletest-1.7.0.zip
