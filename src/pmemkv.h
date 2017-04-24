@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <libpmemobj++/make_persistent.hpp>
@@ -90,15 +91,17 @@ struct KVInnerNode;
 struct KVNode {                                            // volatile nodes of the tree
     bool is_leaf = false;                                  // indicate inner or leaf node
     KVInnerNode* parent;                                   // parent of this node (null if top)
+    virtual ~KVNode() = default;
 };
 
-struct KVInnerNode : KVNode {                              // volatile inner nodes of the tree
+struct KVInnerNode final : KVNode {                        // volatile inner nodes of the tree
     uint8_t keycount;                                      // count of keys in this node
     string keys[INNER_KEYS + 1];                           // child keys plus one overflow slot
-    KVNode* children[INNER_KEYS + 2];                      // child nodes plus one overflow slot
+    std::unique_ptr<KVNode> children[INNER_KEYS + 2];      // child nodes plus one overflow slot
+    void assert_invariants();
 };
 
-struct KVLeafNode : KVNode {                               // volatile leaf nodes of the tree
+struct KVLeafNode final : KVNode {                         // volatile leaf nodes of the tree
     uint8_t hashes[LEAF_KEYS];                             // Pearson hashes of keys
     string keys[LEAF_KEYS];                                // keys stored in this leaf
     persistent_ptr<KVLeaf> leaf;                           // pointer to persistent leaf
@@ -106,7 +109,7 @@ struct KVLeafNode : KVNode {                               // volatile leaf node
 };
 
 struct KVRecoveredLeaf {                                   // temporary wrapper used for recovery
-    KVLeafNode* leafnode;                                  // leaf node being recovered
+    std::unique_ptr<KVLeafNode> leafnode;                  // leaf node being recovered
     char* max_key;                                         // highest sorting key present
 };
 
@@ -157,13 +160,11 @@ class KVTree {                                             // persistent tree cl
                        const string& key,
                        const string& value);
     void InnerUpdateAfterSplit(KVNode* node,               // update parents after leaf split
-                               KVNode* new_node,
+                               std::unique_ptr<KVNode> new_node,
                                string* split_key);
     uint8_t PearsonHash(const char* data,                  // calculate 1-byte hash for string
                         const size_t size);
     void Recover();                                        // reload state from persistent pool
-    void Shutdown();                                       // release resources for tree
-    void Shutdown(KVNode* node);                           // release resources for node
   private:
     KVTree(const KVTree&);                                 // prevent copying
     void operator=(const KVTree&);                         // prevent assigning
@@ -171,7 +172,7 @@ class KVTree {                                             // persistent tree cl
     const string pmpath;                                   // path when constructed
     pool<KVRoot> pmpool;                                   // pool for persistent root
     size_t pmsize;                                         // actual size of persistent pool
-    KVNode* tree_top = nullptr;                            // pointer to uppermost inner node
+    std::unique_ptr<KVNode> tree_top;                      // pointer to uppermost inner node
 };
 
 extern "C" KVTree* kvtree_open(const char* path,           // recover KVTree instance from path

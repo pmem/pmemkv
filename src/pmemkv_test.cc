@@ -136,8 +136,10 @@ TEST_F(KVEmptyTest, SizeofTest) {
     ASSERT_EQ(sizeof(KVLeaf), 1552);
 
     // volatile types
-    ASSERT_EQ(sizeof(KVInnerNode), 232);
-    ASSERT_EQ(sizeof(KVLeafNode), 1624);
+    ASSERT_GE(sizeof(KVInnerNode), 232);
+    ASSERT_LE(sizeof(KVInnerNode), 240);
+    ASSERT_GE(sizeof(KVLeafNode), 1624);
+    ASSERT_LE(sizeof(KVLeafNode), 1632);
 }
 
 // =============================================================================================
