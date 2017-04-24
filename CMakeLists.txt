@@ -8,6 +8,7 @@ set(GTEST_VERSION 1.7.0)
 
 find_package(PkgConfig QUIET)
 include(ExternalProject)
+include(FindThreads)
 
 if(EXISTS ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
 set(GTEST_URL ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
@@ -51,4 +52,4 @@ add_executable(pmemkv_stress src/pmemkv_stress.cc)
 target_link_libraries(pmemkv_stress pmemkv)
 
 add_executable(pmemkv_test src/pmemkv_test.cc)
-target_link_libraries(pmemkv_test pthread pmemkv libgtest)
+target_link_libraries(pmemkv_test pmemkv libgtest)
