@@ -132,8 +132,6 @@ class KVTree {                                             // persistent tree cl
                  char* value,                              // value buffer as C-style string
                  uint32_t* valuebytes);                    // buffer bytes actually copied
     KVStatus Get(const string& key, string* value);        // append value for key to std::string
-    vector<KVStatus> GetList(const vector<string>& keys,   // get multiple values at once
-                             vector<string>* values);
     KVStatus Put(const string& key, const string& value);  // copy value for key from std::string
     KVStatus Remove(const string& key);                    // remove value for key
   protected:

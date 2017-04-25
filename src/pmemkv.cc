@@ -144,19 +144,6 @@ KVStatus KVTree::Get(const string& key, string* value) {
     return NOT_FOUND;
 }
 
-vector<KVStatus> KVTree::GetList(const vector<string>& keys, vector<string>* values) {
-    LOG("GetList for " << keys.size() << " keys");
-    vector<KVStatus> status = vector<KVStatus>();
-    for (auto& key: keys) {
-        string value;
-        KVStatus s = Get(key, &value);
-        status.push_back(s);
-        values->push_back(s == OK ? value : "");
-    }
-    LOG("GetList done for " << keys.size() << " keys");
-    return status;
-}
-
 KVStatus KVTree::Put(const string& key, const string& value) {
     LOG("Put key=" << key.c_str() << ", value=" << value.c_str());
     try {

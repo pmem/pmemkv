@@ -233,28 +233,6 @@ TEST_F(KVTest, GetNonexistentTest) {
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
-TEST_F(KVTest, GetListTest) {
-    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
-    ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK);
-    auto values = std::vector<std::string>();
-    auto keys = std::vector<std::string>();
-    keys.push_back("tmpkey");
-    keys.push_back("tmpkey2");
-    keys.push_back("tmpkey3");
-    keys.push_back("tmpkey");
-    std::vector<KVStatus> status = kv->GetList(keys, &values);
-    ASSERT_TRUE(status.size() == 4);
-    ASSERT_TRUE(values.size() == 4);
-    ASSERT_TRUE(status.at(0) == OK && values.at(0) == "tmpvalue1");
-    ASSERT_TRUE(status.at(1) == OK && values.at(1) == "tmpvalue2");
-    ASSERT_TRUE(status.at(2) == NOT_FOUND && values.at(2) == "");
-    ASSERT_TRUE(status.at(3) == OK && values.at(3) == "tmpvalue1");
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
-}
-
 TEST_F(KVTest, PutTest) {
     std::string value;
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
