@@ -145,7 +145,7 @@ TEST_F(KVEmptyTest, SizeofTest) {
 // =============================================================================================
 
 TEST_F(KVTest, EmptyKeyTest) {                                      // todo correct behavior?
-    ASSERT_TRUE(kv->Put("", "blah") == OK);
+    ASSERT_TRUE(kv->Put("", "blah") == OK) << pmemobj_errormsg();
     std::string value;
     ASSERT_TRUE(kv->Get("", &value) == OK && value == "blah");
     Analyze();
@@ -155,7 +155,7 @@ TEST_F(KVTest, EmptyKeyTest) {                                      // todo corr
 }
 
 TEST_F(KVTest, EmptyValueTest) {                                    // todo correct behavior?
-    ASSERT_TRUE(kv->Put("key1", "") == OK);
+    ASSERT_TRUE(kv->Put("key1", "") == OK) << pmemobj_errormsg();
     std::string value;
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "");
     Analyze();
@@ -165,7 +165,7 @@ TEST_F(KVTest, EmptyValueTest) {                                    // todo corr
 }
 
 TEST_F(KVTest, GetAppendToExternalValueTest) {
-    ASSERT_TRUE(kv->Put("key1", "cool") == OK);
+    ASSERT_TRUE(kv->Put("key1", "cool") == OK) << pmemobj_errormsg();
     std::string value = "super";
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "supercool");
     Analyze();
@@ -184,11 +184,11 @@ TEST_F(KVTest, GetHeadlessTest) {
 }
 
 TEST_F(KVTest, GetMultipleTest) {
-    ASSERT_TRUE(kv->Put("abc", "A1") == OK);
-    ASSERT_TRUE(kv->Put("def", "B2") == OK);
-    ASSERT_TRUE(kv->Put("hij", "C3") == OK);
-    ASSERT_TRUE(kv->Put("jkl", "D4") == OK);
-    ASSERT_TRUE(kv->Put("mno", "E5") == OK);
+    ASSERT_TRUE(kv->Put("abc", "A1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("def", "B2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("hij", "C3") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("jkl", "D4") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("mno", "E5") == OK) << pmemobj_errormsg();
     std::string value1;
     ASSERT_TRUE(kv->Get("abc", &value1) == OK && value1 == "A1");
     std::string value2;
@@ -206,11 +206,11 @@ TEST_F(KVTest, GetMultipleTest) {
 }
 
 TEST_F(KVTest, GetMultiple2Test) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
-    ASSERT_TRUE(kv->Put("key2", "value2") == OK);
-    ASSERT_TRUE(kv->Put("key3", "value3") == OK);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("key2", "value2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("key3", "value3") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("key2") == OK);
-    ASSERT_TRUE(kv->Put("key3", "VALUE3") == OK);
+    ASSERT_TRUE(kv->Put("key3", "VALUE3") == OK) << pmemobj_errormsg();
     std::string value1;
     ASSERT_TRUE(kv->Get("key1", &value1) == OK && value1 == "value1");
     std::string value2;
@@ -224,7 +224,7 @@ TEST_F(KVTest, GetMultiple2Test) {
 }
 
 TEST_F(KVTest, GetNonexistentTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
     Analyze();
@@ -235,19 +235,19 @@ TEST_F(KVTest, GetNonexistentTest) {
 
 TEST_F(KVTest, PutTest) {
     std::string value;
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
 
     std::string new_value;
-    ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK);           // same size
+    ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK) << pmemobj_errormsg();           // same size
     ASSERT_TRUE(kv->Get("key1", &new_value) == OK && new_value == "VALUE1");
 
     std::string new_value2;
-    ASSERT_TRUE(kv->Put("key1", "new_value") == OK);        // longer size
+    ASSERT_TRUE(kv->Put("key1", "new_value") == OK) << pmemobj_errormsg();        // longer size
     ASSERT_TRUE(kv->Get("key1", &new_value2) == OK && new_value2 == "new_value");
 
     std::string new_value3;
-    ASSERT_TRUE(kv->Put("key1", "?") == OK);                // shorter size
+    ASSERT_TRUE(kv->Put("key1", "?") == OK) << pmemobj_errormsg();                // shorter size
     ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
@@ -257,50 +257,50 @@ TEST_F(KVTest, PutTest) {
 
 TEST_F(KVTest, PutKeysOfDifferentSizesTest) {
     std::string value;
-    ASSERT_TRUE(kv->Put("123456789ABCDE", "A") == OK);
+    ASSERT_TRUE(kv->Put("123456789ABCDE", "A") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("123456789ABCDE", &value) == OK && value == "A");
 
     std::string value2;
-    ASSERT_TRUE(kv->Put("123456789ABCDEF", "B") == OK);
+    ASSERT_TRUE(kv->Put("123456789ABCDEF", "B") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("123456789ABCDEF", &value2) == OK && value2 == "B");
 
     std::string value3;
-    ASSERT_TRUE(kv->Put("12345678ABCDEFG", "C") == OK);
+    ASSERT_TRUE(kv->Put("12345678ABCDEFG", "C") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("12345678ABCDEFG", &value3) == OK && value3 == "C");
 
     std::string value4;
-    ASSERT_TRUE(kv->Put("123456789", "D") == OK);
+    ASSERT_TRUE(kv->Put("123456789", "D") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("123456789", &value4) == OK && value4 == "D");
 
     std::string value5;
-    ASSERT_TRUE(kv->Put("123456789ABCDEFGHI", "E") == OK);
+    ASSERT_TRUE(kv->Put("123456789ABCDEFGHI", "E") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("123456789ABCDEFGHI", &value5) == OK && value5 == "E");
 }
 
 TEST_F(KVTest, PutValuesOfDifferentSizesTest) {
     std::string value;
-    ASSERT_TRUE(kv->Put("A", "123456789ABCDE") == OK);
+    ASSERT_TRUE(kv->Put("A", "123456789ABCDE") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("A", &value) == OK && value == "123456789ABCDE");
 
     std::string value2;
-    ASSERT_TRUE(kv->Put("B", "123456789ABCDEF") == OK);
+    ASSERT_TRUE(kv->Put("B", "123456789ABCDEF") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("B", &value2) == OK && value2 == "123456789ABCDEF");
 
     std::string value3;
-    ASSERT_TRUE(kv->Put("C", "12345678ABCDEFG") == OK);
+    ASSERT_TRUE(kv->Put("C", "12345678ABCDEFG") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("C", &value3) == OK && value3 == "12345678ABCDEFG");
 
     std::string value4;
-    ASSERT_TRUE(kv->Put("D", "123456789") == OK);
+    ASSERT_TRUE(kv->Put("D", "123456789") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("D", &value4) == OK && value4 == "123456789");
 
     std::string value5;
-    ASSERT_TRUE(kv->Put("E", "123456789ABCDEFGHI") == OK);
+    ASSERT_TRUE(kv->Put("E", "123456789ABCDEFGHI") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("E", &value5) == OK && value5 == "123456789ABCDEFGHI");
 }
 
 TEST_F(KVTest, RemoveAllTest) {
-    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
@@ -309,9 +309,9 @@ TEST_F(KVTest, RemoveAllTest) {
 }
 
 TEST_F(KVTest, RemoveAndInsertTest) {
-    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     std::string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
     Analyze();
@@ -321,8 +321,8 @@ TEST_F(KVTest, RemoveAndInsertTest) {
 }
 
 TEST_F(KVTest, RemoveExistingTest) {
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
-    ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK); // ok to remove twice
     std::string value;
@@ -343,7 +343,7 @@ TEST_F(KVTest, RemoveHeadlessTest) {
 }
 
 TEST_F(KVTest, RemoveNonexistentTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("nada") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
@@ -366,12 +366,12 @@ TEST_F(KVTest, GetHeadlessAfterRecoveryTest) {
 }
 
 TEST_F(KVTest, GetMultipleAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("abc", "A1") == OK);
-    ASSERT_TRUE(kv->Put("def", "B2") == OK);
-    ASSERT_TRUE(kv->Put("hij", "C3") == OK);
+    ASSERT_TRUE(kv->Put("abc", "A1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("def", "B2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("hij", "C3") == OK) << pmemobj_errormsg();
     Reopen();
-    ASSERT_TRUE(kv->Put("jkl", "D4") == OK);
-    ASSERT_TRUE(kv->Put("mno", "E5") == OK);
+    ASSERT_TRUE(kv->Put("jkl", "D4") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("mno", "E5") == OK) << pmemobj_errormsg();
     std::string value1;
     ASSERT_TRUE(kv->Get("abc", &value1) == OK && value1 == "A1");
     std::string value2;
@@ -389,11 +389,11 @@ TEST_F(KVTest, GetMultipleAfterRecoveryTest) {
 }
 
 TEST_F(KVTest, GetMultiple2AfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
-    ASSERT_TRUE(kv->Put("key2", "value2") == OK);
-    ASSERT_TRUE(kv->Put("key3", "value3") == OK);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("key2", "value2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("key3", "value3") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("key2") == OK);
-    ASSERT_TRUE(kv->Put("key3", "VALUE3") == OK);
+    ASSERT_TRUE(kv->Put("key3", "VALUE3") == OK) << pmemobj_errormsg();
     Reopen();
     std::string value1;
     ASSERT_TRUE(kv->Get("key1", &value1) == OK && value1 == "value1");
@@ -408,7 +408,7 @@ TEST_F(KVTest, GetMultiple2AfterRecoveryTest) {
 }
 
 TEST_F(KVTest, GetNonexistentAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     Reopen();
     std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
@@ -420,20 +420,20 @@ TEST_F(KVTest, GetNonexistentAfterRecoveryTest) {
 
 TEST_F(KVTest, PutAfterRecoveryTest) {
     std::string value;
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
 
     std::string new_value;
-    ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK);           // same size
+    ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK) << pmemobj_errormsg();           // same size
     ASSERT_TRUE(kv->Get("key1", &new_value) == OK && new_value == "VALUE1");
     Reopen();
 
     std::string new_value2;
-    ASSERT_TRUE(kv->Put("key1", "new_value") == OK);        // longer size
+    ASSERT_TRUE(kv->Put("key1", "new_value") == OK) << pmemobj_errormsg();        // longer size
     ASSERT_TRUE(kv->Get("key1", &new_value2) == OK && new_value2 == "new_value");
 
     std::string new_value3;
-    ASSERT_TRUE(kv->Put("key1", "?") == OK);                // shorter size
+    ASSERT_TRUE(kv->Put("key1", "?") == OK) << pmemobj_errormsg();                // shorter size
     ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
@@ -442,7 +442,7 @@ TEST_F(KVTest, PutAfterRecoveryTest) {
 }
 
 TEST_F(KVTest, RemoveAllAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     Reopen();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
     Analyze();
@@ -452,10 +452,10 @@ TEST_F(KVTest, RemoveAllAfterRecoveryTest) {
 }
 
 TEST_F(KVTest, RemoveAndInsertAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     Reopen();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     std::string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
     Analyze();
@@ -465,8 +465,8 @@ TEST_F(KVTest, RemoveAndInsertAfterRecoveryTest) {
 }
 
 TEST_F(KVTest, RemoveExistingAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK);
-    ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK);
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
     Reopen();
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK); // ok to remove twice
@@ -489,7 +489,7 @@ TEST_F(KVTest, RemoveHeadlessAfterRecoveryTest) {
 }
 
 TEST_F(KVTest, RemoveNonexistentAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     Reopen();
     ASSERT_TRUE(kv->Remove("nada") == OK);
     Analyze();
@@ -499,7 +499,7 @@ TEST_F(KVTest, RemoveNonexistentAfterRecoveryTest) {
 }
 
 TEST_F(KVTest, UsePreallocAfterSingleLeafRecoveryTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("key1") == OK);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
@@ -512,7 +512,7 @@ TEST_F(KVTest, UsePreallocAfterSingleLeafRecoveryTest) {
     ASSERT_EQ(analysis.leaf_prealloc, 1);
     ASSERT_EQ(analysis.leaf_total, 1);
 
-    ASSERT_TRUE(kv->Put("key2", "value2") == OK);
+    ASSERT_TRUE(kv->Put("key2", "value2") == OK) << pmemobj_errormsg();
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
@@ -528,7 +528,7 @@ const int SINGLE_INNER_LIMIT = LEAF_KEYS * (INNER_KEYS - 1);
 TEST_F(KVTest, SingleInnerNodeAscendingTest) {
     for (int i = 10000; i <= (10000 + SINGLE_INNER_LIMIT); i++) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
@@ -546,7 +546,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingTest) {
 TEST_F(KVTest, SingleInnerNodeAscendingTest2) {
     for (int i = 1; i <= SINGLE_INNER_LIMIT; i++) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
@@ -564,7 +564,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingTest2) {
 TEST_F(KVTest, SingleInnerNodeDescendingTest) {
     for (int i = (10000 + SINGLE_INNER_LIMIT); i >= 10000; i--) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
@@ -582,7 +582,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingTest) {
 TEST_F(KVTest, SingleInnerNodeDescendingTest2) {
     for (int i = SINGLE_INNER_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
@@ -604,7 +604,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingTest2) {
 TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest) {
     for (int i = 10000; i <= (10000 + SINGLE_INNER_LIMIT); i++) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
     }
     Reopen();
     for (int i = 10000; i <= (10000 + SINGLE_INNER_LIMIT); i++) {
@@ -621,7 +621,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest) {
 TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest2) {
     for (int i = 1; i <= SINGLE_INNER_LIMIT; i++) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
     }
     Reopen();
     for (int i = 1; i <= SINGLE_INNER_LIMIT; i++) {
@@ -638,7 +638,7 @@ TEST_F(KVTest, SingleInnerNodeAscendingAfterRecoveryTest2) {
 TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest) {
     for (int i = (10000 + SINGLE_INNER_LIMIT); i >= 10000; i--) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
     }
     Reopen();
     for (int i = (10000 + SINGLE_INNER_LIMIT); i >= 10000; i--) {
@@ -655,7 +655,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest) {
 TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
     for (int i = SINGLE_INNER_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, istr) == OK);
+        ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
     }
     Reopen();
     for (int i = SINGLE_INNER_LIMIT; i >= 1; i--) {
@@ -670,7 +670,7 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
 }
 
 TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
-    for (int i = 1; i <= LEAF_KEYS + 1; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK);
+    for (int i = 1; i <= LEAF_KEYS + 1; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK) << pmemobj_errormsg();
     Reopen();
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
@@ -699,12 +699,12 @@ TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
     ASSERT_EQ(analysis.leaf_prealloc, 2);
     ASSERT_EQ(analysis.leaf_total, 2);
 
-    for (int i = 1; i <= LEAF_KEYS; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK);
+    for (int i = 1; i <= LEAF_KEYS; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK) << pmemobj_errormsg();
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
     ASSERT_EQ(analysis.leaf_prealloc, 1);
     ASSERT_EQ(analysis.leaf_total, 2);
-    ASSERT_EQ(kv->Put(std::to_string(LEAF_KEYS + 1), "!"), OK);
+    ASSERT_EQ(kv->Put(std::to_string(LEAF_KEYS + 1), "!"), OK) << pmemobj_errormsg();
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
@@ -720,7 +720,7 @@ const int LARGE_LIMIT = 6012299;
 TEST_F(KVTest, LargeAscendingTest) {
     for (int i = 1; i <= LARGE_LIMIT; i++) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, (istr + "!")) == OK);
+        ASSERT_TRUE(kv->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
     }
@@ -738,7 +738,7 @@ TEST_F(KVTest, LargeAscendingTest) {
 TEST_F(KVTest, LargeDescendingTest) {
     for (int i = LARGE_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, ("ABC" + istr)) == OK);
+        ASSERT_TRUE(kv->Put(istr, ("ABC" + istr)) == OK) << pmemobj_errormsg();
         std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
@@ -760,7 +760,7 @@ TEST_F(KVTest, LargeDescendingTest) {
 TEST_F(KVTest, LargeAscendingAfterRecoveryTest) {
     for (int i = 1; i <= LARGE_LIMIT; i++) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, (istr + "!")) == OK);
+        ASSERT_TRUE(kv->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
     }
     Reopen();
     for (int i = 1; i <= LARGE_LIMIT; i++) {
@@ -777,7 +777,7 @@ TEST_F(KVTest, LargeAscendingAfterRecoveryTest) {
 TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
     for (int i = LARGE_LIMIT; i >= 1; i--) {
         std::string istr = std::to_string(i);
-        ASSERT_TRUE(kv->Put(istr, ("ABC" + istr)) == OK);
+        ASSERT_TRUE(kv->Put(istr, ("ABC" + istr)) == OK) << pmemobj_errormsg();
     }
     Reopen();
     for (int i = LARGE_LIMIT; i >= 1; i--) {
@@ -828,7 +828,7 @@ class KVFullTest : public testing::Test {
             KVTree* kvt = new KVTree(PATH, SIZE);
             for (int i = 1; i <= LARGE_LIMIT; i++) {
                 std::string istr = std::to_string(i);
-                ASSERT_TRUE(kvt->Put(istr, (istr + "!")) == OK);
+                ASSERT_TRUE(kvt->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
             }
             delete kvt;
             ASSERT_TRUE(std::system(("cp -f " + PATH + " " + PATH_CACHED).c_str()) == 0);
@@ -847,13 +847,13 @@ TEST_F(KVFullTest, OutOfSpace1Test) {
 TEST_F(KVFullTest, OutOfSpace2aTest) {
     ASSERT_TRUE(kv->Remove("100") == OK);
     ASSERT_TRUE(kv->Put("100", LONGSTR) == FAILED);
-    ASSERT_TRUE(kv->Put("100", "100!") == OK);
+    ASSERT_TRUE(kv->Put("100", "100!") == OK) << pmemobj_errormsg();
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace2bTest) {
     ASSERT_TRUE(kv->Remove("100") == OK);
-    ASSERT_TRUE(kv->Put("100", "100!") == OK);
+    ASSERT_TRUE(kv->Put("100", "100!") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("100", LONGSTR) == FAILED);
     Validate();
 }
@@ -868,7 +868,7 @@ TEST_F(KVFullTest, OutOfSpace3bTest) {
         ASSERT_TRUE(kv->Put("123456", LONGSTR) == FAILED);
     }
     ASSERT_TRUE(kv->Remove("4567") == OK);
-    ASSERT_TRUE(kv->Put("4567", "4567!") == OK);
+    ASSERT_TRUE(kv->Put("4567", "4567!") == OK) << pmemobj_errormsg();
     Validate();
 }
 
@@ -882,7 +882,7 @@ TEST_F(KVFullTest, OutOfSpace4bTest) {
         ASSERT_TRUE(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == FAILED);
     }
     ASSERT_TRUE(kv->Remove("98765") == OK);
-    ASSERT_TRUE(kv->Put("98765", "98765!") == OK);
+    ASSERT_TRUE(kv->Put("98765", "98765!") == OK) << pmemobj_errormsg();
     Validate();
 }
 
@@ -898,7 +898,7 @@ TEST_F(KVFullTest, OutOfSpace5bTest) {
         ASSERT_TRUE(kv->Put(LONGSTR, LONGSTR) == FAILED);
     }
     ASSERT_TRUE(kv->Remove("34567") == OK);
-    ASSERT_TRUE(kv->Put("34567", "34567!") == OK);
+    ASSERT_TRUE(kv->Put("34567", "34567!") == OK) << pmemobj_errormsg();
     Validate();
 }
 
