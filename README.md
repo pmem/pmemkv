@@ -17,7 +17,7 @@ Contents
 <li><a href="#configuring_clion_project">Configuring CLion Project</a></li>
 </ul>
 
-<a name="overview"/>
+<a name="overview"></a>
 
 Overview
 --------
@@ -41,9 +41,9 @@ in `pmemkv` contain a small hash table based on a 1-byte
 [Pearson hash](https://en.wikipedia.org/wiki/Pearson_hashing),
 which limits the maximum size of the leaf, but boosts efficiency.
 
-![pmemkv-intro](https://cloud.githubusercontent.com/assets/913363/22454311/21f15aa8-e742-11e6-9821-e3af513e279b.png)
+![pmemkv-intro](https://cloud.githubusercontent.com/assets/913363/25543024/289f06d8-2c12-11e7-86e4-a1f0df891659.png)
 
-<a name="installation"/>
+<a name="installation"></a>
 
 Installation
 ------------
@@ -83,7 +83,7 @@ Alternatively `cmake` can be used to build the shared library. This uses
 the version of NVML installed on the system, but downloads other
 dependencies.
 
-<a name="sample_code"/>
+<a name="sample_code"></a>
 
 Sample Code
 -----------
@@ -115,7 +115,7 @@ int main() {
 }
 ```
 
-<a name="related_work"/>
+<a name="related_work"></a>
 
 Related Work
 ------------
@@ -168,7 +168,7 @@ value to a single persistent buffer, which minimizes the number of
 persistent allocations and improves storage efficiency with larger 
 keys and values.
 
-<a name="configuring_clion_project"/>
+<a name="configuring_clion_project"></a>
 
 Configuring CLion Project
 -------------------------
