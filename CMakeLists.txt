@@ -51,5 +51,5 @@ target_link_libraries(pmemkv_example pmemkv)
 add_executable(pmemkv_stress src/pmemkv_stress.cc)
 target_link_libraries(pmemkv_stress pmemkv)
 
-add_executable(pmemkv_test src/pmemkv_test.cc)
-target_link_libraries(pmemkv_test pmemkv libgtest)
+add_executable(pmemkv_test src/pmemkv_test.cc src/mock_tx_alloc.cc)
+target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})

@@ -32,6 +32,7 @@
 
 #include "pmemkv.h"
 #include "gtest/gtest.h"
+#include "mock_tx_alloc.h"
 
 using namespace pmemkv;
 
@@ -863,13 +864,17 @@ class KVFullTest : public testing::Test {
 const string LONGSTR = "123456789A123456789A123456789A123456789A123456789A123456789A123456789A";
 
 TEST_F(KVFullTest, OutOfSpace1Test) {
+    tx_alloc_should_fail = true;
     ASSERT_TRUE(kv->Put("100", "?") == FAILED);
+    tx_alloc_should_fail = false;
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace2aTest) {
     ASSERT_TRUE(kv->Remove("100") == OK);
+    tx_alloc_should_fail = true;
     ASSERT_TRUE(kv->Put("100", LONGSTR) == FAILED);
+    tx_alloc_should_fail = false;
     ASSERT_TRUE(kv->Put("100", "100!") == OK) << pmemobj_errormsg();
     Validate();
 }
@@ -877,49 +882,63 @@ TEST_F(KVFullTest, OutOfSpace2aTest) {
 TEST_F(KVFullTest, OutOfSpace2bTest) {
     ASSERT_TRUE(kv->Remove("100") == OK);
     ASSERT_TRUE(kv->Put("100", "100!") == OK) << pmemobj_errormsg();
+    tx_alloc_should_fail = true;
     ASSERT_TRUE(kv->Put("100", LONGSTR) == FAILED);
+    tx_alloc_should_fail = false;
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace3aTest) {
+    tx_alloc_should_fail = true;
     ASSERT_TRUE(kv->Put("100", LONGSTR) == FAILED);
+    tx_alloc_should_fail = false;
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace3bTest) {
+    tx_alloc_should_fail = true;
     for (int i = 0; i <= 99999; i++) {
         ASSERT_TRUE(kv->Put("123456", LONGSTR) == FAILED);
     }
+    tx_alloc_should_fail = false;
     ASSERT_TRUE(kv->Remove("4567") == OK);
     ASSERT_TRUE(kv->Put("4567", "4567!") == OK) << pmemobj_errormsg();
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace4aTest) {
+    tx_alloc_should_fail = true;
     ASSERT_TRUE(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == FAILED);
+    tx_alloc_should_fail = false;
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace4bTest) {
+    tx_alloc_should_fail = true;
     for (int i = 0; i <= 99999; i++) {
         ASSERT_TRUE(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == FAILED);
     }
+    tx_alloc_should_fail = false;
     ASSERT_TRUE(kv->Remove("98765") == OK);
     ASSERT_TRUE(kv->Put("98765", "98765!") == OK) << pmemobj_errormsg();
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace5aTest) {
+    tx_alloc_should_fail = true;
     ASSERT_TRUE(kv->Put(LONGSTR, "1") == FAILED);
     ASSERT_TRUE(kv->Put(LONGSTR, LONGSTR) == FAILED);
+    tx_alloc_should_fail = false;
     Validate();
 }
 
 TEST_F(KVFullTest, OutOfSpace5bTest) {
+    tx_alloc_should_fail = true;
     for (int i = 0; i <= 99999; i++) {
         ASSERT_TRUE(kv->Put(LONGSTR, "1") == FAILED);
         ASSERT_TRUE(kv->Put(LONGSTR, LONGSTR) == FAILED);
     }
+    tx_alloc_should_fail = false;
     ASSERT_TRUE(kv->Remove("34567") == OK);
     ASSERT_TRUE(kv->Put("34567", "34567!") == OK) << pmemobj_errormsg();
     Validate();

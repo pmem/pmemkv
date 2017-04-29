@@ -34,5 +34,5 @@ stress: reset sharedlib
 	LD_LIBRARY_PATH=.:${LD_LIBRARY_PATH} PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress
 
 test: reset sharedlib
-	$(CXX) src/pmemkv_test.cc -o pmemkv_test $(USE_PMEMKV) $(USE_GTEST) $(CXX_FLAGS)
+	$(CXX) src/pmemkv_test.cc src/mock_tx_alloc.cc -o pmemkv_test $(USE_PMEMKV) $(USE_GTEST) $(CXX_FLAGS)
 	LD_LIBRARY_PATH=.:${LD_LIBRARY_PATH} PMEM_IS_PMEM_FORCE=1 ./pmemkv_test
