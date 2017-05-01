@@ -144,6 +144,29 @@ TEST_F(KVEmptyTest, SizeofTest) {
 // TEST SINGLE-LEAF TREE
 // =============================================================================================
 
+TEST_F(KVTest, BinaryKeyTest) {
+    ASSERT_TRUE(kv->Put("a", "should_not_change") == OK);
+    std::string key1 = string("a\0b", 3);
+    ASSERT_TRUE(kv->Put(key1, "stuff") == OK);
+    std::string value;
+    ASSERT_TRUE(kv->Get(key1, &value) == OK && value == "stuff");
+    std::string value2;
+    ASSERT_TRUE(kv->Get("a", &value2) == OK && value2 == "should_not_change");
+    ASSERT_TRUE(kv->Remove(key1) == OK);
+    std::string value3;
+    ASSERT_TRUE(kv->Get("a", &value3) == OK && value3 == "should_not_change");
+}
+
+TEST_F(KVTest, BinaryValueTest) {
+    ASSERT_TRUE(kv->Put("key1", string("a\0b", 3)) == OK);
+    std::string value;
+    ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "a\0b");
+    Analyze();
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 1);
+}
+
 TEST_F(KVTest, EmptyKeyTest) {                                      // todo correct behavior?
     ASSERT_TRUE(kv->Put("", "blah") == OK);
     std::string value;
