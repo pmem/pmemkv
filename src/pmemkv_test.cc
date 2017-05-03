@@ -145,9 +145,9 @@ TEST_F(KVEmptyTest, SizeofTest) {
 // =============================================================================================
 
 TEST_F(KVTest, BinaryKeyTest) {
-    ASSERT_TRUE(kv->Put("a", "should_not_change") == OK);
+    ASSERT_TRUE(kv->Put("a", "should_not_change") == OK) << pmemobj_errormsg();
     std::string key1 = string("a\0b", 3);
-    ASSERT_TRUE(kv->Put(key1, "stuff") == OK);
+    ASSERT_TRUE(kv->Put(key1, "stuff") == OK) << pmemobj_errormsg();
     std::string value;
     ASSERT_TRUE(kv->Get(key1, &value) == OK && value == "stuff");
     std::string value2;
@@ -158,9 +158,9 @@ TEST_F(KVTest, BinaryKeyTest) {
 }
 
 TEST_F(KVTest, BinaryValueTest) {
-    ASSERT_TRUE(kv->Put("key1", string("a\0b", 3)) == OK);
+    ASSERT_TRUE(kv->Put("key1", string("A\0B\0\0C", 3)) == OK) << pmemobj_errormsg();
     std::string value;
-    ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "a\0b");
+    ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "A\0B\0\0C");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
