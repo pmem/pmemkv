@@ -59,13 +59,13 @@ const string LAYOUT = "pmemkv";                            // unique pool layout
 #define LEAF_KEYS 48                                       // maximum keys in tree nodes
 #define LEAF_KEYS_MIDPOINT (LEAF_KEYS / 2)                 // halfway point within the node
 
-class KVSlot {
+class KVSlot {                                             // todo test keysize & valsize methods
   public:
-    uint8_t hash() const { return ph; }                    // gets Pearson hash for key
-    const char* key() const { return kv.get(); }           // gets key as C-style string
-    const uint32_t keysize() const { return ks; }          // gets size of key (without null)
-    const char* val() const { return kv.get() + ks + 1; }  // gets value as C-style string
-    const uint32_t valsize() const { return vs; }          // gets size of length (without null)
+    uint8_t hash() const { return ph; }                    // Pearson hash for key
+    const char* key() const { return kv.get(); }           // key as C-style string
+    const uint32_t keysize() const { return ks; }          // size of key (without null)
+    const char* val() const { return kv.get() + ks + 1; }  // pointer to binary-safe value
+    const uint32_t valsize() const { return vs; }          // size of length (without null)
     void clear();                                          // frees persistent memory
     void set(const uint8_t hash, const string& key,        // sets all slot fields
              const string& value);
@@ -129,7 +129,7 @@ class KVTree {                                             // persistent tree cl
     void Analyze(KVTreeAnalysis& analysis);                // report on internal state & stats
     KVStatus Get(const string& key,                        // copy value for key to buffer
                  const size_t limit,                       // maximum bytes to copy to buffer
-                 char* value,                              // value buffer as C-style string
+                 char* value,                              // binary-safe value buffer
                  uint32_t* valuebytes);                    // buffer bytes actually copied
     KVStatus Get(const string& key, string* value);        // append value for key to std::string
     KVStatus Put(const string& key, const string& value);  // copy value for key from std::string
@@ -179,12 +179,13 @@ extern "C" void kvtree_close(KVTree* kv);                  // free KVTree instan
 extern "C" int8_t kvtree_get(KVTree* kv,                   // copy value for key to buffer
                              const char* key,              // key as C-style string
                              const size_t limit,           // maximum bytes to copy to buffer
-                             char* value,                  // value buffer as C-style string
+                             char* value,                  // binary-safe value buffer
                              uint32_t* valuebytes);        // buffer bytes actually copied
 
 extern "C" int8_t kvtree_put(KVTree* kv,                   // copy value for key from buffer
                              const char* key,              // key as C-style string
-                             const char* value);           // value as C-style string
+                             const char* value,            // binary-safe value buffer
+                             const uint32_t* valuebytes);  // buffer bytes available to copy
 
 extern "C" int8_t kvtree_remove(KVTree* kv,                // remove value for key
                                 const char* key);          // key as C-style string

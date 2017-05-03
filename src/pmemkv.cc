@@ -95,7 +95,7 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
 }
 
 KVStatus KVTree::Get(const string& key, const size_t limit, char* value, uint32_t* valuebytes) {
-    LOG("Get C-style string for key=" << key.c_str());
+    LOG("Get for key=" << key.c_str());
     auto leafnode = LeafSearch(key);
     if (!leafnode) {
         LOG("   head not present");
@@ -108,9 +108,8 @@ KVStatus KVTree::Get(const string& key, const size_t limit, char* value, uint32_
                 auto kv = leafnode->leaf->slots[slot].get_ro();
                 auto vs = kv.valsize();
                 if (vs < limit - 1) {
-                    LOG("   found value=" << value << ", slot=" << slot
-                                          << ", size" << std::to_string(vs));
-                    strcpy(value, kv.val());
+                    LOG("   found value, slot=" << slot << ", size=" << std::to_string(vs));
+                    memcpy(value, kv.val(), vs);
                     *valuebytes = vs;
                     return OK;
                 } else {
@@ -124,7 +123,7 @@ KVStatus KVTree::Get(const string& key, const size_t limit, char* value, uint32_
 }
 
 KVStatus KVTree::Get(const string& key, string* value) {
-    LOG("Get std::string for key=" << key.c_str());
+    LOG("Get for key=" << key.c_str());
     auto leafnode = LeafSearch(key);
     if (!leafnode) {
         LOG("   head not present");
@@ -134,8 +133,9 @@ KVStatus KVTree::Get(const string& key, string* value) {
     for (int slot = LEAF_KEYS; slot--;) {
         if (leafnode->hashes[slot] == hash) {
             if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
-                LOG("   found value=" << *value << ", slot=" << slot);
-                value->append(leafnode->leaf->slots[slot].get_ro().val());
+                auto kv = leafnode->leaf->slots[slot].get_ro();
+                LOG("   found value, slot=" << slot << ", size=" << std::to_string(kv.valsize()));
+                value->append(kv.val());
                 return OK;
             }
         }
@@ -145,7 +145,7 @@ KVStatus KVTree::Get(const string& key, string* value) {
 }
 
 KVStatus KVTree::Put(const string& key, const string& value) {
-    LOG("Put key=" << key.c_str() << ", value=" << value.c_str());
+    LOG("Put key=" << key.c_str() << ", value.size=" << std::to_string(value.size()));
     try {
         const uint8_t hash = PearsonHash(key.c_str(), key.size());
         auto leafnode = LeafSearch(key);
@@ -543,8 +543,9 @@ extern "C" int8_t kvtree_get(KVTree* kv,
 
 extern "C" int8_t kvtree_put(KVTree* kv,
                              const char* key,
-                             const char* value) {
-    return kv->Put(key, value);
+                             const char* value,
+                             const uint32_t* valuebytes) {
+    return kv->Put(key, string(value, *valuebytes));  // todo need put with pointer/length
 }
 
 extern "C" int8_t kvtree_remove(KVTree* kv,
