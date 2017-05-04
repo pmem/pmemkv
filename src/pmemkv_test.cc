@@ -739,7 +739,7 @@ TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
 // TEST LARGE TREE
 // =============================================================================================
 
-const int LARGE_LIMIT = 6012299;
+const int LARGE_LIMIT = 4000000;
 
 TEST_F(KVTest, LargeAscendingTest) {
     for (int i = 1; i <= LARGE_LIMIT; i++) {
@@ -756,7 +756,7 @@ TEST_F(KVTest, LargeAscendingTest) {
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 229126);
+    ASSERT_EQ(analysis.leaf_total, 152455);
 }
 
 TEST_F(KVTest, LargeDescendingTest) {
@@ -774,7 +774,7 @@ TEST_F(KVTest, LargeDescendingTest) {
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 225461);
+    ASSERT_EQ(analysis.leaf_total, 150000);
 }
 
 // =============================================================================================
@@ -795,7 +795,7 @@ TEST_F(KVTest, LargeAscendingAfterRecoveryTest) {
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 229126);
+    ASSERT_EQ(analysis.leaf_total, 152455);
 }
 
 TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
@@ -812,7 +812,7 @@ TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 225461);
+    ASSERT_EQ(analysis.leaf_total, 150000);
 }
 
 // =============================================================================================
