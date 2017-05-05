@@ -545,7 +545,7 @@ extern "C" int8_t kvtree_put(KVTree* kv,
                              const char* key,
                              const char* value,
                              const uint32_t* valuebytes) {
-    return kv->Put(key, string(value, *valuebytes));  // todo need put with pointer/length
+    return kv->Put(key, string(value, *valuebytes));  // todo need put with pointer/length (#39)
 }
 
 extern "C" int8_t kvtree_remove(KVTree* kv,
@@ -559,6 +559,6 @@ extern "C" size_t kvtree_size(KVTree* kv) {
     return analysis.size;
 }
 
-// todo missing test cases for C API
+// todo missing test cases for C API (#39)
 
 } // namespace pmemkv

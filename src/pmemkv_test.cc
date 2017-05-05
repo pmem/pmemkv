@@ -144,7 +144,7 @@ TEST_F(KVEmptyTest, SizeofTest) {
 // TEST SINGLE-LEAF TREE
 // =============================================================================================
 
-TEST_F(KVTest, BinaryKeyTest) {  // todo should fail?
+TEST_F(KVTest, BinaryKeyTest) {
     ASSERT_TRUE(kv->Put("a", "should_not_change") == OK) << pmemobj_errormsg();
     std::string key1 = string("a\0b", 3);
     ASSERT_TRUE(kv->Put(key1, "stuff") == OK) << pmemobj_errormsg();
@@ -167,7 +167,7 @@ TEST_F(KVTest, BinaryValueTest) {
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
-TEST_F(KVTest, EmptyKeyTest) {                                      // todo correct behavior?
+TEST_F(KVTest, EmptyKeyTest) {
     ASSERT_TRUE(kv->Put("", "blah") == OK) << pmemobj_errormsg();
     std::string value;
     ASSERT_TRUE(kv->Get("", &value) == OK && value == "blah");
@@ -177,7 +177,7 @@ TEST_F(KVTest, EmptyKeyTest) {                                      // todo corr
     ASSERT_EQ(analysis.leaf_total, 1);
 }
 
-TEST_F(KVTest, EmptyValueTest) {                                    // todo correct behavior?
+TEST_F(KVTest, EmptyValueTest) {
     ASSERT_TRUE(kv->Put("key1", "") == OK) << pmemobj_errormsg();
     std::string value;
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "");
