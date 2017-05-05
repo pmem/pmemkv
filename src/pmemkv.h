@@ -127,6 +127,7 @@ class KVTree {                                             // persistent tree cl
     KVTree(const string& path, const size_t size);         // default constructor
     ~KVTree();                                             // default destructor
     void Analyze(KVTreeAnalysis& analysis);                // report on internal state & stats
+    // todo add Close & IsClosed methods (#39)
     KVStatus Get(const string& key,                        // copy value for key to buffer
                  const size_t limit,                       // maximum bytes to copy to buffer
                  char* value,                              // binary-safe value buffer
@@ -175,6 +176,8 @@ extern "C" KVTree* kvtree_open(const char* path,           // recover KVTree ins
                                const size_t size);         // size used when creating new
 
 extern "C" void kvtree_close(KVTree* kv);                  // free KVTree instance
+
+// todo add kvtree_closed method (#39)
 
 extern "C" int8_t kvtree_get(KVTree* kv,                   // copy value for key to buffer
                              const char* key,              // key as C-style string
