@@ -48,40 +48,58 @@ which limits the maximum size of the leaf, but boosts efficiency.
 Installation
 ------------
 
-Start with Ubuntu 16.04 LTS or other 64-bit Linux distribution.
-OSX and Windows are not yet supported by `pmemkv`.
+**Prerequisites**
 
-**Building with make**
+* 64-bit Linux (OSX and Windows are not yet supported)
+* [NVML](https://github.com/pmem/nvml) (install binary package or build from source)
+* `make` and `cmake` (version 3.6 or higher)
+* `g++` (version 5.4 or higher)
 
-You'll need `make` and `g++` installed. Other required libraries will be 
-downloaded by the `make` script.
+**Building and running tests**
+
+After cloning sources from GitHub, use provided `make` targets for building and running
+tests and example programs.
 
 ```
-make                  # build everything from scratch and run tests
-make thirdparty       # download and build dependencies
-make clean            # remove build files
-make example          # build and run example program
-make stress           # build and run stress test
-make test             # build and run unit tests
+git clone https://github.com/pmem/pmemkv.git
+cd pmemkv
+
+make                    # build everything and run tests
+make test               # build and run unit tests
+make example            # build and run simple example
+make stress             # build and run stress test
+make clean              # remove build files
 ```
+
+**Managing shared library**
 
 To package `pmemkv` as a shared library and install on your system:
  
 ```
-sudo make sharedlib   # create shared library
-sudo make install     # copy shared library to /usr/local/lib
-sudo make uninstall   # remove shared library from /usr/local/lib
+sudo make install       # install to /usr/local/{include,lib}
+sudo make uninstall     # remove shared library and headers
 ```
 
-To use a different installation directory from the default
-(`/usr/local/lib`), edit `make_config.mk` to change the `INSTALL_DIR`
-variable accordingly.
+To install this library into other locations, use the `prefix` variable like this:
 
-**Building with cmake**
+```
+sudo make install prefix=/usr/local
+sudo make uninstall prefix=/usr/local
+```
 
-Alternatively `cmake` can be used to build the shared library. This uses
-the version of NVML installed on the system, but downloads other
-dependencies.
+**Out-of-source builds**
+
+If the standard build doesn't suit your needs, create your own
+out-of-source build and run tests like this:
+
+```
+cd ~
+mkdir mybuild
+cd mybuild
+cmake ~/pmemkv
+make
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_test
+```
 
 <a name="sample_code"></a>
 
@@ -181,9 +199,8 @@ Use wizard to open project:
 
 * From Welcome screen, select "Open Project"
 * select root directory
-* do not overwrite CMakeLists.txt if prompted (use our version)
 * `src` directory should be automatically detected
-* mark `3rdparty` directory as excluded
+* mark `bin` directory as excluded
 
 Set code style to match pmse:
 * Start with [Google C++ Style](https://google.github.io/styleguide/cppguide.html)

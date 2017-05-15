@@ -1,10 +1,6 @@
 *.d
 .DS_Store
 .idea/
-3rdparty/
+bin/
 cmake-build-debug/
-libpmemkv.so*
-pmemkv_example
-pmemkv_stress
-pmemkv_test
-googletest-1.7.0.zip
+googletest-*.zip
