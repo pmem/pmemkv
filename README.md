@@ -14,7 +14,6 @@ Contents
 <li><a href="#installation">Installation</a></li>
 <li><a href="#sample_code">Sample Code</a></li>
 <li><a href="#related_work">Related Work</a></li>
-<li><a href="#configuring_clion_project">Configuring CLion Project</a></li>
 </ul>
 
 <a name="overview"></a>
@@ -185,25 +184,3 @@ value data stored in the slots. `KVSlot` internally stores key and
 value to a single persistent buffer, which minimizes the number of
 persistent allocations and improves storage efficiency with larger 
 keys and values.
-
-<a name="configuring_clion_project"></a>
-
-Configuring CLion Project
--------------------------
-
-Obviously the use of an IDE is a personal preference. CLion is not
-required to be a contributor, but it's very easy to configure if
-you have a valid license.
-
-Use wizard to open project:
-
-* From Welcome screen, select "Open Project"
-* select root directory
-* `src` directory should be automatically detected
-* mark `bin` directory as excluded
-
-Set code style to match pmse:
-* Start with [Google C++ Style](https://google.github.io/styleguide/cppguide.html)
-* Indent 4 spaces, 8 spaces for continuation
-* Max 100 chars per line
-* Space after '*' and '&' (rather than before)
