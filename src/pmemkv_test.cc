@@ -130,19 +130,6 @@ TEST_F(KVEmptyTest, FailsToCreateInstanceWithTinySize) {
     }
 }
 
-TEST_F(KVEmptyTest, SizeofTest) {
-    // persistent types
-    ASSERT_EQ(sizeof(KVRoot), 16);
-    ASSERT_EQ(sizeof(KVSlot), 32);
-    ASSERT_EQ(sizeof(KVLeaf), 1552);
-
-    // volatile types
-    ASSERT_GE(sizeof(KVInnerNode), 232);
-    ASSERT_LE(sizeof(KVInnerNode), 240);
-    ASSERT_GE(sizeof(KVLeafNode), 1624);
-    ASSERT_LE(sizeof(KVLeafNode), 1632);
-}
-
 // =============================================================================================
 // TEST SINGLE-LEAF TREE
 // =============================================================================================
@@ -696,7 +683,8 @@ TEST_F(KVTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
 }
 
 TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
-    for (int i = 1; i <= LEAF_KEYS + 1; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK) << pmemobj_errormsg();
+    for (int i = 1; i <= LEAF_KEYS + 1; i++)
+        ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK) << pmemobj_errormsg();
     Reopen();
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
@@ -725,7 +713,8 @@ TEST_F(KVTest, UsePreallocAfterMultipleLeafRecoveryTest) {
     ASSERT_EQ(analysis.leaf_prealloc, 2);
     ASSERT_EQ(analysis.leaf_total, 2);
 
-    for (int i = 1; i <= LEAF_KEYS; i++) ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK) << pmemobj_errormsg();
+    for (int i = 1; i <= LEAF_KEYS; i++)
+        ASSERT_EQ(kv->Put(std::to_string(i), "!"), OK) << pmemobj_errormsg();
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
     ASSERT_EQ(analysis.leaf_prealloc, 1);
