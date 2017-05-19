@@ -42,6 +42,7 @@
 #include <libpmemobj++/transaction.hpp>
 
 using std::string;
+using std::unique_ptr;
 using std::vector;
 using nvml::obj::p;
 using nvml::obj::persistent_ptr;
@@ -97,7 +98,7 @@ struct KVNode {                                            // volatile nodes of 
 struct KVInnerNode final : KVNode {                        // volatile inner nodes of the tree
     uint8_t keycount;                                      // count of keys in this node
     string keys[INNER_KEYS + 1];                           // child keys plus one overflow slot
-    std::unique_ptr<KVNode> children[INNER_KEYS + 2];      // child nodes plus one overflow slot
+    unique_ptr<KVNode> children[INNER_KEYS + 2];           // child nodes plus one overflow slot
     void assert_invariants();
 };
 
@@ -109,7 +110,7 @@ struct KVLeafNode final : KVNode {                         // volatile leaf node
 };
 
 struct KVRecoveredLeaf {                                   // temporary wrapper used for recovery
-    std::unique_ptr<KVLeafNode> leafnode;                  // leaf node being recovered
+    unique_ptr<KVLeafNode> leafnode;                       // leaf node being recovered
     char* max_key;                                         // highest sorting key present
 };
 
@@ -160,7 +161,7 @@ class KVTree {                                             // persistent tree cl
                        const string& key,
                        const string& value);
     void InnerUpdateAfterSplit(KVNode* node,               // update parents after leaf split
-                               std::unique_ptr<KVNode> new_node,
+                               unique_ptr<KVNode> newnode,
                                string* split_key);
     uint8_t PearsonHash(const char* data,                  // calculate 1-byte hash for string
                         const size_t size);
@@ -172,7 +173,7 @@ class KVTree {                                             // persistent tree cl
     const string pmpath;                                   // path when constructed
     pool<KVRoot> pmpool;                                   // pool for persistent root
     size_t pmsize;                                         // actual size of persistent pool
-    std::unique_ptr<KVNode> tree_top;                      // pointer to uppermost inner node
+    unique_ptr<KVNode> tree_top;                           // pointer to uppermost inner node
 };
 
 extern "C" KVTree* kvtree_open(const char* path,           // recover KVTree instance from path

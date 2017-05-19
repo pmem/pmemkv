@@ -38,8 +38,9 @@
 #include <unistd.h>
 #include "pmemkv.h"
 
-using std::unique_ptr;
 using std::move;
+using std::to_string;
+using std::unique_ptr;
 
 #define DO_LOG 0
 #define LOG(msg) if (DO_LOG) std::cout << "[pmemkv] " << msg << "\n"
@@ -48,7 +49,7 @@ namespace pmemkv {
 
 KVTree::KVTree(const string& path, const size_t size) : pmpath(path) {
     if (access(path.c_str(), F_OK) != 0) {
-        LOG("Creating pool, path=" << path << ", size=" << std::to_string(size));
+        LOG("Creating pool, path=" << path << ", size=" << to_string(size));
         pmpool = pool<KVRoot>::create(path.c_str(), LAYOUT, size, S_IRWXU);
         pmsize = size;
     } else {
@@ -111,7 +112,7 @@ KVStatus KVTree::Get(const string& key, const size_t limit, char* value, uint32_
                 auto kv = leafnode->leaf->slots[slot].get_ro();
                 auto vs = kv.valsize();
                 if (vs < limit - 1) {
-                    LOG("   found value, slot=" << slot << ", size=" << std::to_string(vs));
+                    LOG("   found value, slot=" << slot << ", size=" << to_string(vs));
                     memcpy(value, kv.val(), vs);
                     *valuebytes = vs;
                     return OK;
@@ -137,7 +138,7 @@ KVStatus KVTree::Get(const string& key, string* value) {
         if (leafnode->hashes[slot] == hash) {
             if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
                 auto kv = leafnode->leaf->slots[slot].get_ro();
-                LOG("   found value, slot=" << slot << ", size=" << std::to_string(kv.valsize()));
+                LOG("   found value, slot=" << slot << ", size=" << to_string(kv.valsize()));
                 value->append(kv.val());
                 return OK;
             }
@@ -148,7 +149,7 @@ KVStatus KVTree::Get(const string& key, string* value) {
 }
 
 KVStatus KVTree::Put(const string& key, const string& value) {
-    LOG("Put key=" << key.c_str() << ", value.size=" << std::to_string(value.size()));
+    LOG("Put key=" << key.c_str() << ", value.size=" << to_string(value.size()));
     try {
         const uint8_t hash = PearsonHash(key.c_str(), key.size());
         auto leafnode = LeafSearch(key);
@@ -509,8 +510,7 @@ void KVSlot::set(const uint8_t hash, const string& key, const string& value) {
 // Node invariants
 // ===============================================================================================
 
-void KVInnerNode::assert_invariants()
-{
+void KVInnerNode::assert_invariants() {
     assert(keycount <= INNER_KEYS);
     for (auto i = 0; i < keycount; ++i) {
         assert(keys[i].size() > 0);
