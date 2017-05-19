@@ -7,7 +7,7 @@ reset:
 
 clean: reset
 	rm -rf 3rdparty libpmemkv.so pmemkv_example pmemkv_stress pmemkv_test
-	rm -rf ./bin ./cmake-build-debug googletest-*.zip
+	rm -rf ./bin googletest-*.zip
 
 configure:
 	mkdir -p ./bin
