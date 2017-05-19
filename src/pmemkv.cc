@@ -31,11 +31,15 @@
  */
 
 #include <algorithm>
+#include <cassert>
 #include <cstring>
 #include <iostream>
 #include <list>
 #include <unistd.h>
 #include "pmemkv.h"
+
+using std::unique_ptr;
+using std::move;
 
 #define DO_LOG 0
 #define LOG(msg) if (DO_LOG) std::cout << "[pmemkv] " << msg << "\n"
@@ -60,7 +64,6 @@ KVTree::KVTree(const string& path, const size_t size) : pmpath(path) {
 
 KVTree::~KVTree() {
     LOG("Closing");
-    Shutdown();
     pmpool.close();
     LOG("Closed ok");
 }
@@ -151,11 +154,11 @@ KVStatus KVTree::Put(const string& key, const string& value) {
         auto leafnode = LeafSearch(key);
         if (!leafnode) {
             LOG("   adding head leaf");
-            leafnode = new KVLeafNode();
-            leafnode->is_leaf = true;
+            unique_ptr<KVLeafNode> new_node(new KVLeafNode());
+            new_node->is_leaf = true;
             transaction::exec_tx(pmpool, [&] {
                 if (!leaves_prealloc.empty()) {
-                    leafnode->leaf = leaves_prealloc.back();
+                    new_node->leaf = leaves_prealloc.back();
                     leaves_prealloc.pop_back();
                 } else {
                     auto root = pmpool.get_root();
@@ -163,11 +166,11 @@ KVStatus KVTree::Put(const string& key, const string& value) {
                     auto new_leaf = make_persistent<KVLeaf>();
                     root->head = new_leaf;
                     new_leaf->next = old_head;
-                    leafnode->leaf = new_leaf;
+                    new_node->leaf = new_leaf;
                 }
-                LeafFillSpecificSlot(leafnode, hash, key, value, 0);
+                LeafFillSpecificSlot(new_node.get(), hash, key, value, 0);
             });
-            tree_top = leafnode;
+            tree_top = move(new_node);
         } else if (LeafFillSlotForKey(leafnode, hash, key, value)) {
             // nothing else to do
         } else {
@@ -211,21 +214,22 @@ KVStatus KVTree::Remove(const string& key) {
 // ===============================================================================================
 
 KVLeafNode* KVTree::LeafSearch(const string& key) {
-    KVNode* node = tree_top;
+    KVNode* node = tree_top.get();
     if (node == nullptr) return nullptr;
     bool matched;
     while (!node->is_leaf) {
         matched = false;
         KVInnerNode* inner = (KVInnerNode*) node;
+        inner->assert_invariants();
         const uint8_t keycount = inner->keycount;
         for (uint8_t idx = 0; idx < keycount; idx++) {
-            node = inner->children[idx];
+            node = inner->children[idx].get();
             if (strcmp(key.c_str(), inner->keys[idx].c_str()) <= 0) {
                 matched = true;
                 break;
             }
         }
-        if (!matched) node = inner->children[keycount];
+        if (!matched) node = inner->children[keycount].get();
     }
     return (KVLeafNode*) node;
 }
@@ -289,88 +293,91 @@ void KVTree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
     LOG("   splitting leaf at key=" << split_key);
 
     // split leaf into two leaves, moving slots that sort above split key to new leaf
-    auto new_leafnode = new KVLeafNode();
-    try {
-        new_leafnode->parent = leafnode->parent;
-        new_leafnode->is_leaf = true;
-        transaction::exec_tx(pmpool, [&] {
-            persistent_ptr<KVLeaf> new_leaf;
-            if (!leaves_prealloc.empty()) {
-                new_leaf = leaves_prealloc.back();
-                new_leafnode->leaf = new_leaf;
-                leaves_prealloc.pop_back();
-            } else {
-                auto root = pmpool.get_root();
-                auto old_head = root->head;
-                new_leaf = make_persistent<KVLeaf>();
-                root->head = new_leaf;
-                new_leaf->next = old_head;
-                new_leafnode->leaf = new_leaf;
+    unique_ptr<KVLeafNode> new_leafnode(new KVLeafNode());
+    new_leafnode->parent = leafnode->parent;
+    new_leafnode->is_leaf = true;
+    transaction::exec_tx(pmpool, [&] {
+        persistent_ptr<KVLeaf> new_leaf;
+        if (!leaves_prealloc.empty()) {
+            new_leaf = leaves_prealloc.back();
+            new_leafnode->leaf = new_leaf;
+            leaves_prealloc.pop_back();
+        } else {
+            auto root = pmpool.get_root();
+            auto old_head = root->head;
+            new_leaf = make_persistent<KVLeaf>();
+            root->head = new_leaf;
+            new_leaf->next = old_head;
+            new_leafnode->leaf = new_leaf;
+        }
+        for (int slot = LEAF_KEYS; slot--;) {
+            if (strcmp(leafnode->keys[slot].c_str(), split_key.data()) > 0) {
+                new_leaf->slots[slot].swap(leafnode->leaf->slots[slot]);
+                new_leafnode->hashes[slot] = leafnode->hashes[slot];
+                new_leafnode->keys[slot] = leafnode->keys[slot];
+                leafnode->hashes[slot] = 0;
+                leafnode->keys[slot].clear();
             }
-            for (int slot = LEAF_KEYS; slot--;) {
-                if (strcmp(leafnode->keys[slot].c_str(), split_key.data()) > 0) {
-                    new_leaf->slots[slot].swap(leafnode->leaf->slots[slot]);
-                    new_leafnode->hashes[slot] = leafnode->hashes[slot];
-                    new_leafnode->keys[slot] = leafnode->keys[slot];
-                    leafnode->hashes[slot] = 0;
-                    leafnode->keys[slot].clear();
-                }
-            }
-            auto target = strcmp(key.c_str(), split_key.data()) > 0 ? new_leafnode : leafnode;
-            LeafFillEmptySlot(target, hash, key, value);
-        });
-    } catch (...) {
-        delete new_leafnode;
-        throw;
-    }
+        }
+        auto target = strcmp(key.c_str(), split_key.data()) > 0 ? new_leafnode.get() : leafnode;
+        LeafFillEmptySlot(target, hash, key, value);
+    });
 
     // recursively update volatile parents outside persistent transaction
-    InnerUpdateAfterSplit(leafnode, new_leafnode, &split_key);
+    InnerUpdateAfterSplit(leafnode, move(new_leafnode), &split_key);
 }
 
-void KVTree::InnerUpdateAfterSplit(KVNode* node, KVNode* new_node, string* split_key) {
+void KVTree::InnerUpdateAfterSplit(KVNode* node, unique_ptr<KVNode> new_node, string* split_key) {
     if (!node->parent) {
+        assert(node == tree_top.get());
         LOG("   creating new top node for split_key=" << *split_key);
-        auto top = new KVInnerNode();
+        unique_ptr<KVInnerNode> top(new KVInnerNode());
         top->keycount = 1;
         top->keys[0] = *split_key;
-        top->children[0] = node;
-        top->children[1] = new_node;
-        node->parent = top;
-        new_node->parent = top;
-        tree_top = top;                                                  // assign new top node
+        node->parent = top.get();
+        new_node->parent = top.get();
+        top->children[0] = move(tree_top);
+        top->children[1] = move(new_node);
+        top->assert_invariants();
+        tree_top = move(top);                                            // assign new top node
         return;                                                          // end recursion
     }
 
     LOG("   updating parents for split_key=" << *split_key);
-    KVInnerNode* inner = (KVInnerNode*) node->parent;
+    KVInnerNode* inner = node->parent;
     { // insert split_key and new_node into inner node in sorted order
         const uint8_t keycount = inner->keycount;
         int idx = 0;  // position where split_key should be inserted
         while (idx < keycount && inner->keys[idx].compare(*split_key) <= 0) idx++;
-        for (int i = keycount - 1; i >= idx; i--) inner->keys[i + 1] = inner->keys[i];
-        for (int i = keycount; i >= idx; i--) inner->children[i + 1] = inner->children[i];
+        for (int i = keycount - 1; i >= idx; i--) inner->keys[i + 1] = move(inner->keys[i]);
+        for (int i = keycount; i > idx; i--) inner->children[i + 1] = move(inner->children[i]);
         inner->keys[idx] = *split_key;
-        inner->children[idx + 1] = new_node;
+        inner->children[idx + 1] = move(new_node);
         inner->keycount = (uint8_t) (keycount + 1);
     }
     const uint8_t keycount = inner->keycount;
-    if (keycount <= INNER_KEYS) return;                                  // end recursion
+    if (keycount <= INNER_KEYS) {
+        inner->assert_invariants();
+        return;                                                          // end recursion
+    }
 
     // split inner node at the midpoint, update parents as needed
-    auto new_inner = new KVInnerNode();                                  // allocate new node
+    unique_ptr<KVInnerNode> new_inner(new KVInnerNode());
+
     new_inner->parent = inner->parent;                                   // set parent reference
-    for (int i = INNER_KEYS_UPPER; i < keycount; i++) {                  // copy all upper keys
-        new_inner->keys[i - INNER_KEYS_UPPER] = inner->keys[i];          // copy key string
+    for (int i = INNER_KEYS_UPPER; i < keycount; i++) {                  // move all upper keys
+        new_inner->keys[i - INNER_KEYS_UPPER] = move(inner->keys[i]);    // move key string
     }
-    for (int i = INNER_KEYS_UPPER; i < keycount + 1; i++) {              // copy all upper children
-        new_inner->children[i - INNER_KEYS_UPPER] = inner->children[i];  // copy child reference
-        new_inner->children[i - INNER_KEYS_UPPER]->parent = new_inner;   // set parent reference
+    for (int i = INNER_KEYS_UPPER; i < keycount + 1; i++) {              // move all upper children
+        new_inner->children[i - INNER_KEYS_UPPER] = move(inner->children[i]);  // move child reference
+        new_inner->children[i - INNER_KEYS_UPPER]->parent = new_inner.get();   // set parent reference
     }
     new_inner->keycount = INNER_KEYS_MIDPOINT;                           // always half the keys
     string new_split_key = inner->keys[INNER_KEYS_MIDPOINT];             // save for recursion
     inner->keycount = INNER_KEYS_MIDPOINT;                               // half of keys remain
-    InnerUpdateAfterSplit(inner, new_inner, &new_split_key);             // recursive update
+    inner->assert_invariants();
+    new_inner->assert_invariants();
+    InnerUpdateAfterSplit(inner, move(new_inner), &new_split_key);             // recursive update
 }
 
 // ===============================================================================================
@@ -381,10 +388,10 @@ void KVTree::Recover() {
     LOG("Recovering");
 
     // traverse persistent leaves to build list of leaves to recover
-    std::list<KVRecoveredLeaf*> leaves;
+    std::list<KVRecoveredLeaf> leaves;
     auto leaf = pmpool.get_root()->head;
     while (leaf) {
-        auto leafnode = new KVLeafNode();
+        unique_ptr<KVLeafNode> leafnode(new KVLeafNode());
         leafnode->leaf = leaf;
         leafnode->is_leaf = true;
 
@@ -403,56 +410,38 @@ void KVTree::Recover() {
         if (max_key == nullptr) {
             leaves_prealloc.push_back(leaf);
         } else {
-            auto rleaf = new KVRecoveredLeaf;
-            rleaf->leafnode = leafnode;
-            rleaf->max_key = max_key;
-            leaves.push_back(rleaf);
+            leaves.push_back({move(leafnode), max_key});
         }
 
         leaf = leaf->next;  // advance to next linked leaf
     }
 
     // sort recovered leaves in ascending key order
-    leaves.sort([](const KVRecoveredLeaf* lhs, const KVRecoveredLeaf* rhs) {
-        return (strcmp(lhs->max_key, rhs->max_key) < 0);
+    leaves.sort([](const KVRecoveredLeaf& lhs, const KVRecoveredLeaf& rhs) {
+        return (strcmp(lhs.max_key, rhs.max_key) < 0);
     });
 
     // reconstruct top/inner nodes using adjacent pairs of recovered leaves
-    tree_top = nullptr;
-    while (!leaves.empty()) {
-        KVRecoveredLeaf* rleaf = leaves.front();
-        KVLeafNode* leafnode = rleaf->leafnode;
-        if (tree_top == nullptr) tree_top = leafnode;
+    tree_top.reset(nullptr);
+
+    if (!leaves.empty()) {
+        tree_top = move(leaves.front().leafnode);
+        auto max_key = leaves.front().max_key;
         leaves.pop_front();
-        if (!leaves.empty()) {
-            string split_key = string(rleaf->max_key);
-            KVLeafNode* nextnode = leaves.front()->leafnode;
-            nextnode->parent = leafnode->parent;
-            InnerUpdateAfterSplit(leafnode, nextnode, &split_key);
+
+        auto prevnode = tree_top.get();
+        while (!leaves.empty()) {
+            string split_key = string(max_key);
+            auto nextnode = leaves.front().leafnode.get();
+            nextnode->parent = prevnode->parent;
+            InnerUpdateAfterSplit(prevnode, move(leaves.front().leafnode), &split_key);
+            max_key = leaves.front().max_key;
+            leaves.pop_front();
+            prevnode = nextnode;
         }
-        delete rleaf;
     }
 
     LOG("Recovered ok");
-}
-
-void KVTree::Shutdown() {
-    LOG("Shutting down");
-    if (tree_top) Shutdown(tree_top);
-    LOG("Shut down ok");
-}
-
-void KVTree::Shutdown(KVNode* node) {
-    if (node->is_leaf) {
-        auto leafnode = (KVLeafNode*) node;
-        delete leafnode;
-    } else {
-        auto inner = (KVInnerNode*) node;
-        for (uint8_t idx = 0; idx < inner->keycount + 1; idx++) {
-            Shutdown(inner->children[idx]);
-        }
-        delete inner;
-    }
 }
 
 // ===============================================================================================
@@ -514,6 +503,22 @@ void KVSlot::set(const uint8_t hash, const string& key, const string& value) {
     memcpy(kvptr, key.data(), ks);                                       // copy key into buffer
     kvptr += ks + 1;                                                     // advance ptr past key
     memcpy(kvptr, value.data(), vs);                                     // copy value into buffer
+}
+
+// ===============================================================================================
+// Node invariants
+// ===============================================================================================
+
+void KVInnerNode::assert_invariants()
+{
+    assert(keycount <= INNER_KEYS);
+    for (auto i = 0; i < keycount; ++i) {
+        assert(keys[i].size() > 0);
+        assert(children[i] != nullptr);
+    }
+    assert(children[keycount] != nullptr);
+    for (auto i = keycount + 1; i < INNER_KEYS + 1; ++i)
+        assert(children[i] == nullptr);
 }
 
 // ===============================================================================================
