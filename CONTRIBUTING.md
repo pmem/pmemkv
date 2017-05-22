@@ -5,6 +5,13 @@
 Please log bugs or suggestions as [GitHub issues](https://github.com/pmem/pmemkv/issues).
 Details such as OS and NVML version are always appreciated.
 
+## Code Style
+
+* Start with [Google C++ Style](https://google.github.io/styleguide/cppguide.html)
+* Indent 4 spaces, 8 spaces for continuation
+* Max 100 chars per line
+* Space after '*' and '&' (rather than before)
+
 ## Submitting Pull Requests
 
 We take outside code contributions to `pmemkv` through GitHub pull requests.
@@ -52,22 +59,3 @@ to use your real name (not an alias) when committing your changes to the NVM Lib
 ```
 Author: Random J Developer <random@developer.example.org>
 ```
-
-## Configuring CLion Project
-
-Obviously the use of an IDE is a personal preference. CLion is not
-required to be a contributor, but it's very easy to configure if
-you have a valid license.
-
-Use wizard to open project:
-
-* From Welcome screen, select "Open Project"
-* select root directory
-* `src` directory should be automatically detected
-* mark `bin` directory as excluded
-
-Set code style to match pmse:
-* Start with [Google C++ Style](https://google.github.io/styleguide/cppguide.html)
-* Indent 4 spaces, 8 spaces for continuation
-* Max 100 chars per line
-* Space after '*' and '&' (rather than before)
