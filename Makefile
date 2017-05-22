@@ -18,9 +18,11 @@ sharedlib:
 
 install: sharedlib
 	cp ./bin/libpmemkv.so $(prefix)/lib
+	cp ./src/pmemkv.h $(prefix)/include
 
 uninstall:
 	rm -rf $(prefix)/lib/libpmemkv.so
+	rm -rf $(prefix)/include/pmemkv.h
 
 example: configure reset
 	cd ./bin && make pmemkv_example
