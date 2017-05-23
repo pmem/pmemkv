@@ -40,7 +40,8 @@
 
 using namespace pmemkv;
 
-static unsigned long count = 10000000;
+static std::string USAGE = "Usage: pmemkv_stress [r|w] [path] [size in MB]";
+static int count = 10000000;
 static std::string path = "/dev/shm/pmemkv";
 static size_t size = ((size_t) (1024 * 1024) * (int) (9176 * 1.1));
 
@@ -109,38 +110,34 @@ static void testRemove(KVTree* kv) {
 }
 
 static void usage_exit(int exit_code) {
-    ((exit_code == EXIT_SUCCESS) ? std::cout : std::cerr) <<
-        "Usage: pmemkv_stress [r|w path size]\n";
+    ((exit_code == EXIT_SUCCESS) ? std::cout : std::cerr) << USAGE << "\n";
     exit(exit_code);
 }
 
-int main(int argc, char **argv) {
-    bool reading = false;
+int main(int argc, char** argv) {
+    // assume reading by default when present
+    bool reading = (access(path.c_str(), F_OK) == 0);
 
+    // validate command line args if present
     if (argc > 1) {
         std::string command(argv[1]);
-
         if (command == "h" or command == "-help" or command == "--help")
             usage_exit(EXIT_SUCCESS);
-
-        if (argc != 4)
+        else if (argc != 4)
             usage_exit(EXIT_FAILURE);
-
-        if (command == "r" or command == "read")
+        else if (command == "r" or command == "read")
             reading = true;
         else if (command == "w" or command == "write")
             reading = false;
-        else
-            usage_exit(EXIT_FAILURE);
-
+        else usage_exit(EXIT_FAILURE);
         path = argv[2];
-
         size = std::stoul(argv[3]) * (1024 * 1024);
-        count = size / 1000;
+        count = (int) (size / 1100);
     }
 
+    // run read or write workload
     if (reading) {
-        LOG("\nOpening for reads");
+        LOG("\nOpening for reads: " + path);
         KVTree* kv = open();
         for (int i = 0; i < 8; i++) {
             LOG("Getting " << count << " random values");
@@ -150,7 +147,7 @@ int main(int argc, char **argv) {
         }
         delete kv;
     } else {
-        LOG("\nOpening for writes");
+        LOG("\nOpening for writes: " + path);
         KVTree* kv = open();
         LOG("Inserting " << count << " values");
         testPut(kv);
