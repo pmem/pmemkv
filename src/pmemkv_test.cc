@@ -312,6 +312,10 @@ TEST_F(KVTest, PutValuesOfDifferentSizesTest) {
     ASSERT_TRUE(kv->Get("E", &value5) == OK && value5 == "123456789ABCDEFGHI");
 }
 
+TEST_F(KVTest, PutValuesOfMaximumSizeTest) {
+    // todo finish this when max is decided
+}
+
 TEST_F(KVTest, RemoveAllTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
