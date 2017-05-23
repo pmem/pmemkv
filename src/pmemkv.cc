@@ -221,7 +221,9 @@ KVLeafNode* KVTree::LeafSearch(const string& key) {
     while (!node->is_leaf) {
         matched = false;
         KVInnerNode* inner = (KVInnerNode*) node;
+#ifndef NDEBUG
         inner->assert_invariants();
+#endif
         const uint8_t keycount = inner->keycount;
         for (uint8_t idx = 0; idx < keycount; idx++) {
             node = inner->children[idx].get();
@@ -339,7 +341,9 @@ void KVTree::InnerUpdateAfterSplit(KVNode* node, unique_ptr<KVNode> new_node, st
         new_node->parent = top.get();
         top->children[0] = move(tree_top);
         top->children[1] = move(new_node);
+#ifndef NDEBUG
         top->assert_invariants();
+#endif
         tree_top = move(top);                                            // assign new top node
         return;                                                          // end recursion
     }
@@ -358,27 +362,33 @@ void KVTree::InnerUpdateAfterSplit(KVNode* node, unique_ptr<KVNode> new_node, st
     }
     const uint8_t keycount = inner->keycount;
     if (keycount <= INNER_KEYS) {
+#ifndef NDEBUG
         inner->assert_invariants();
+#endif
         return;                                                          // end recursion
     }
 
     // split inner node at the midpoint, update parents as needed
-    unique_ptr<KVInnerNode> new_inner(new KVInnerNode());
-
-    new_inner->parent = inner->parent;                                   // set parent reference
+    unique_ptr<KVInnerNode> ni(new KVInnerNode());                       // create new inner node
+    ni->parent = inner->parent;                                          // set parent reference
     for (int i = INNER_KEYS_UPPER; i < keycount; i++) {                  // move all upper keys
-        new_inner->keys[i - INNER_KEYS_UPPER] = move(inner->keys[i]);    // move key string
+        ni->keys[i - INNER_KEYS_UPPER] = move(inner->keys[i]);           // move key string
     }
     for (int i = INNER_KEYS_UPPER; i < keycount + 1; i++) {              // move all upper children
-        new_inner->children[i - INNER_KEYS_UPPER] = move(inner->children[i]);  // move child reference
-        new_inner->children[i - INNER_KEYS_UPPER]->parent = new_inner.get();   // set parent reference
+        ni->children[i - INNER_KEYS_UPPER] = move(inner->children[i]);   // move child reference
+        ni->children[i - INNER_KEYS_UPPER]->parent = ni.get();           // set parent reference
     }
-    new_inner->keycount = INNER_KEYS_MIDPOINT;                           // always half the keys
+    ni->keycount = INNER_KEYS_MIDPOINT;                                  // always half the keys
     string new_split_key = inner->keys[INNER_KEYS_MIDPOINT];             // save for recursion
     inner->keycount = INNER_KEYS_MIDPOINT;                               // half of keys remain
-    inner->assert_invariants();
-    new_inner->assert_invariants();
-    InnerUpdateAfterSplit(inner, move(new_inner), &new_split_key);             // recursive update
+
+    // perform deep check on modified inner nodes
+#ifndef NDEBUG
+    inner->assert_invariants();                                          // check node just split
+    ni->assert_invariants();                                             // check new node
+#endif
+
+    InnerUpdateAfterSplit(inner, move(ni), &new_split_key);              // recursive update
 }
 
 // ===============================================================================================
