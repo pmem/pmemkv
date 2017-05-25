@@ -135,9 +135,9 @@ class KVTree {                                             // persistent tree cl
     void Analyze(KVTreeAnalysis& analysis);                // report on internal state & stats
     // todo add Close & IsClosed methods (#39)
     KVStatus Get(const string& key,                        // copy value for key to buffer
-                 const size_t limit,                       // maximum bytes to copy to buffer
+                 const int32_t limit,                      // maximum bytes to copy to buffer
                  char* value,                              // binary-safe value buffer
-                 uint32_t* valuebytes);                    // buffer bytes actually copied
+                 int32_t* valuebytes);                     // buffer bytes actually copied
     KVStatus Get(const string& key, string* value);        // append value for key to std::string
     KVStatus Put(const string& key, const string& value);  // copy value for key from std::string
     KVStatus Remove(const string& key);                    // remove value for key
@@ -185,14 +185,14 @@ extern "C" void kvtree_close(KVTree* kv);                  // free KVTree instan
 
 extern "C" int8_t kvtree_get(KVTree* kv,                   // copy value for key to buffer
                              const char* key,              // key as C-style string
-                             const size_t limit,           // maximum bytes to copy to buffer
+                             const int32_t limit,          // maximum bytes to copy to buffer
                              char* value,                  // binary-safe value buffer
-                             uint32_t* valuebytes);        // buffer bytes actually copied
+                             int32_t* valuebytes);         // buffer bytes actually copied
 
 extern "C" int8_t kvtree_put(KVTree* kv,                   // copy value for key from buffer
                              const char* key,              // key as C-style string
                              const char* value,            // binary-safe value buffer
-                             const uint32_t* valuebytes);  // buffer bytes available to copy
+                             const int32_t* valuebytes);   // buffer bytes available to copy
 
 extern "C" int8_t kvtree_remove(KVTree* kv,                // remove value for key
                                 const char* key);          // key as C-style string

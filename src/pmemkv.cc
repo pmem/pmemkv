@@ -98,7 +98,7 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
     LOG("Analyzed ok");
 }
 
-KVStatus KVTree::Get(const string& key, const size_t limit, char* value, uint32_t* valuebytes) {
+KVStatus KVTree::Get(const string& key, const int32_t limit, char* value, int32_t* valuebytes) {
     LOG("Get for key=" << key.c_str());
     auto leafnode = LeafSearch(key);
     if (!leafnode) {
@@ -550,17 +550,17 @@ extern "C" void kvtree_close(KVTree* kv) {
 
 extern "C" int8_t kvtree_get(KVTree* kv,
                              const char* key,
-                             const size_t limit,
+                             const int32_t limit,
                              char* value,
-                             uint32_t* valuebytes) {
+                             int32_t* valuebytes) {
     return kv->Get(key, limit, value, valuebytes);
 }
 
 extern "C" int8_t kvtree_put(KVTree* kv,
                              const char* key,
                              const char* value,
-                             const uint32_t* valuebytes) {
-    return kv->Put(key, string(value, *valuebytes));  // todo need put with pointer/length (#39)
+                             const int32_t* valuebytes) {
+    return kv->Put(key, string(value, (size_t) *valuebytes));  // todo put with pointer/size (#39)
 }
 
 extern "C" int8_t kvtree_remove(KVTree* kv,
