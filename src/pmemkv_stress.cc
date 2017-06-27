@@ -41,9 +41,9 @@
 using namespace pmemkv;
 
 static std::string USAGE = "Usage: pmemkv_stress [r|w] [path] [size in MB]";
-static int count = 10000000;
+static int count = 950000;
 static std::string path = "/dev/shm/pmemkv";
-static size_t size = ((size_t) (1024 * 1024) * (int) (9176 * 1.1));
+static size_t size = ((size_t) 1024 * 1024 * 1000);
 
 static const char* LOREM_IPSUM_50 =
         " Lorem ipsum dolor sit amet, consectetur volutpat.";
