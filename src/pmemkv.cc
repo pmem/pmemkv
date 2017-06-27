@@ -48,12 +48,16 @@ using std::unique_ptr;
 namespace pmemkv {
 
 KVTree::KVTree(const string& path, const size_t size) : pmpath(path) {
-    if (access(path.c_str(), F_OK) != 0) {
-        LOG("Creating pool, path=" << path << ", size=" << to_string(size));
+    if (path.find("/dev/dax") == 0) {
+        LOG("Opening device dax pool, path=" << path);
+        pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
+        pmsize = 0;  // todo get size of dax device?
+    } else if (access(path.c_str(), F_OK) != 0) {
+        LOG("Creating filesystem pool, path=" << path << ", size=" << to_string(size));
         pmpool = pool<KVRoot>::create(path.c_str(), LAYOUT, size, S_IRWXU);
         pmsize = size;
     } else {
-        LOG("Opening existing pool, path=" << path);
+        LOG("Opening filesystem pool, path=" << path);
         pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
         struct stat st;
         stat(path.c_str(), &st);

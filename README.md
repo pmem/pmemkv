@@ -13,6 +13,7 @@ Contents
 <li><a href="#overview">Overview</a></li>
 <li><a href="#installation">Installation</a></li>
 <li><a href="#sample_code">Sample Code</a></li>
+<li><a href="#device_dax">Using Device DAX</a></li>
 <li><a href="#related_work">Related Work</a></li>
 </ul>
 
@@ -130,6 +131,76 @@ int main() {
 
     return 0;
 }
+```
+
+<a name="device_dax"></a>
+
+Using Device DAX
+----------------
+
+When running in production on Linux, `pmemkv` should be used with device DAX.
+
+Filesystem DAX is suitable for development and testing, and it offers similar performance to device
+DAX so long as `PMEM_IS_PMEM_FORCE=1` is specified at runtime. But using `PMEM_IS_PMEM_FORCE=1` is
+not power-fail safe, which is not acceptable for most production environments. 
+
+If `ndctl` reports memory mode, as shown below, then you are using filesystem DAX!
+
+```
+ndctl list
+
+{
+  "dev":"namespace2.0",
+  "mode":"memory",
+  "size":<your-size>,
+  "uuid":"<your-uuid>",
+  "blockdev":"pmem2"
+}
+```
+
+Here's how you switch over to device DAX:
+
+```
+1. Unmount your existing filesystem DAX mount
+
+umount /mnt/<your-mapped-directory>
+
+mount | grep dax   <-- should return nothing now
+
+
+2. Convert namespace to DAX (name comes from ndctl output above)
+
+sudo ndctl create-namespace -e namespace2.0 -f -m dax
+
+{
+  "dev":"namespace2.0",
+  "mode":"dax",
+  "size":266352984064,
+  "uuid":"ac489425-ce96-43de-a728-e6d35bf44e11"
+}
+
+
+3. Verify DAX device now present
+
+ll /dev/da*
+
+crw------- 1 root root 238, 0 Jun  8 11:38 /dev/dax2.0
+
+
+4. Clear contents of DAX device
+
+pmempool rm --verbose /dev/dax2.0
+
+
+5. Initialize pmemkv on DAX device
+
+pmempool create --layout pmemkv obj /dev/dax2.0
+
+
+6. Reference your DAX device by its path
+
+./pmemkv_stress w /dev/dax2.0 1000
+
 ```
 
 <a name="related_work"></a>
