@@ -32,13 +32,11 @@
 
 #pragma once
 
-typedef enum {                                            // status enumeration
+typedef enum {                                             // status enumeration
     FAILED = -1,                                           // operation failed
     NOT_FOUND = 0,                                         // key not located
     OK = 1                                                 // successful completion
 } KVStatus;
-
-
 
 #ifdef __cplusplus
 
@@ -180,7 +178,6 @@ class KVTree {                                             // persistent tree cl
     unique_ptr<KVNode> tree_top;                           // pointer to uppermost inner node
 };
 
-
 extern "C" {
 #endif
 
@@ -188,28 +185,28 @@ extern "C" {
 #include <stddef.h>
 struct KVTree;
 typedef struct KVTree KVTree;
-KVTree* kvtree_open(const char* path,           // recover KVTree instance from path
-                               const size_t size);         // size used when creating new
+KVTree* kvtree_open(const char* path,                      // recover KVTree instance from path
+                    const size_t size);                    // size used when creating new
 
-void kvtree_close(KVTree* kv);                  // free KVTree instance
+void kvtree_close(KVTree* kv);                             // free KVTree instance
 
 // todo add kvtree_closed method (#39)
 
-int8_t kvtree_get(KVTree* kv,                   // copy value for key to buffer
-                             const char* key,              // key as C-style string
-                             const int32_t limit,          // maximum bytes to copy to buffer
-                             char* value,                  // binary-safe value buffer
-                             int32_t* valuebytes);         // buffer bytes actually copied
+int8_t kvtree_get(KVTree* kv,                              // copy value for key to buffer
+                  const char* key,                         // key as C-style string
+                  const int32_t limit,                     // maximum bytes to copy to buffer
+                  char* value,                             // binary-safe value buffer
+                  int32_t* valuebytes);                    // buffer bytes actually copied
 
-int8_t kvtree_put(KVTree* kv,                   // copy value for key from buffer
-                             const char* key,              // key as C-style string
-                             const char* value,            // binary-safe value buffer
-                             const int32_t* valuebytes);   // buffer bytes available to copy
+int8_t kvtree_put(KVTree* kv,                              // copy value for key from buffer
+                  const char* key,                         // key as C-style string
+                  const char* value,                       // binary-safe value buffer
+                  const int32_t* valuebytes);              // buffer bytes available to copy
 
-int8_t kvtree_remove(KVTree* kv,                // remove value for key
-                                const char* key);          // key as C-style string
+int8_t kvtree_remove(KVTree* kv,                           // remove value for key
+                     const char* key);                     // key as C-style string
 
-size_t kvtree_size(KVTree* kv);                 // returns persistent pool size
+size_t kvtree_size(KVTree* kv);                            // returns persistent pool size
 #ifdef __cplusplus
 }
 
