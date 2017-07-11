@@ -133,6 +133,36 @@ int main() {
 }
 ```
 
+There is also a C interface:
+
+```
+#include <libpmemkv.h>
+#include <string.h>
+#include <assert.h>
+
+int main() {
+    #define VAL_LEN 64
+    char value[VAL_LEN];
+    /* open the datastore */
+    KVTree* kv = kvtree_open("/dev/shm/mykv", 8388608);
+
+    /* put new key */
+    int32_t len = strlen("value1");
+    KVStatus s = kvtree_put(kv, "key1", "value1", &len);
+    assert(s == OK);
+
+    /* read last key back */
+    len = VAL_LEN;
+    s = kvtree_get(kv, "key1", VAL_LEN, value, &len);
+    assert(s == OK && !strcmp(value, "value1"));
+
+    // close the datastore
+    kvtree_close(kv);
+
+    return 0;
+}
+```
+
 <a name="device_dax"></a>
 
 Using Device DAX

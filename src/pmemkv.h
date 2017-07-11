@@ -32,6 +32,16 @@
 
 #pragma once
 
+typedef enum {                                            // status enumeration
+    FAILED = -1,                                           // operation failed
+    NOT_FOUND = 0,                                         // key not located
+    OK = 1                                                 // successful completion
+} KVStatus;
+
+
+
+#ifdef __cplusplus
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -114,12 +124,6 @@ struct KVRecoveredLeaf {                                   // temporary wrapper 
     char* max_key;                                         // highest sorting key present
 };
 
-enum KVStatus {                                            // status enumeration
-    FAILED = -1,                                           // operation failed
-    NOT_FOUND = 0,                                         // key not located
-    OK = 1                                                 // successful completion
-};
-
 struct KVTreeAnalysis {                                    // tree analysis structure
     size_t leaf_empty;                                     // count of persisted leaves w/o keys
     size_t leaf_prealloc;                                  // count of persisted but unused leaves
@@ -176,27 +180,38 @@ class KVTree {                                             // persistent tree cl
     unique_ptr<KVNode> tree_top;                           // pointer to uppermost inner node
 };
 
-extern "C" KVTree* kvtree_open(const char* path,           // recover KVTree instance from path
+
+extern "C" {
+#endif
+
+#include <stdint.h>
+#include <stddef.h>
+struct KVTree;
+typedef struct KVTree KVTree;
+KVTree* kvtree_open(const char* path,           // recover KVTree instance from path
                                const size_t size);         // size used when creating new
 
-extern "C" void kvtree_close(KVTree* kv);                  // free KVTree instance
+void kvtree_close(KVTree* kv);                  // free KVTree instance
 
 // todo add kvtree_closed method (#39)
 
-extern "C" int8_t kvtree_get(KVTree* kv,                   // copy value for key to buffer
+int8_t kvtree_get(KVTree* kv,                   // copy value for key to buffer
                              const char* key,              // key as C-style string
                              const int32_t limit,          // maximum bytes to copy to buffer
                              char* value,                  // binary-safe value buffer
                              int32_t* valuebytes);         // buffer bytes actually copied
 
-extern "C" int8_t kvtree_put(KVTree* kv,                   // copy value for key from buffer
+int8_t kvtree_put(KVTree* kv,                   // copy value for key from buffer
                              const char* key,              // key as C-style string
                              const char* value,            // binary-safe value buffer
                              const int32_t* valuebytes);   // buffer bytes available to copy
 
-extern "C" int8_t kvtree_remove(KVTree* kv,                // remove value for key
+int8_t kvtree_remove(KVTree* kv,                // remove value for key
                                 const char* key);          // key as C-style string
 
-extern "C" size_t kvtree_size(KVTree* kv);                 // returns persistent pool size
+size_t kvtree_size(KVTree* kv);                 // returns persistent pool size
+#ifdef __cplusplus
+}
 
 } // namespace pmemkv
+#endif
