@@ -175,8 +175,7 @@ bindings that are maintained separately (for Java, Ruby, and Node.js).
 
 We are using `/dev/shm` to
 [emulate persistent memory](http://pmem.io/2016/02/22/pm-emulation.html)
-in the examples below, but real deployments should only use
-[device DAX](#device_dax).
+below, but real deployments should only use [device DAX](#device_dax).
 
 ### C++
 
@@ -248,9 +247,7 @@ Related Work
 
 `pmemkv` has a lot in common with [pmse](https://github.com/pmem/pmse)
 -- both implementations rely on NVML internally, although
-they expose different APIs externally.
-
-Both `pmse` and `pmemkv` are based on a B+ tree
+they expose different APIs externally. Both `pmse` and `pmemkv` are based on a B+ tree
 implementation. The biggest difference is that the `pmse`
 tree keeps inner and leaf nodes in persistent memory,
 where `pmemkv` keeps inner nodes in DRAM and leaf nodes in
