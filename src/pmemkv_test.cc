@@ -158,9 +158,15 @@ TEST_F(KVTest, BinaryValueTest) {
 }
 
 TEST_F(KVTest, EmptyKeyTest) {
-    ASSERT_TRUE(kv->Put("", "blah") == OK) << pmemobj_errormsg();
-    std::string value;
-    ASSERT_TRUE(kv->Get("", &value) == OK && value == "blah");
+    ASSERT_TRUE(kv->Put("", "empty") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put(" ", "single-space") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("\t\t", "two-tab") == OK) << pmemobj_errormsg();
+    std::string value1;
+    std::string value2;
+    std::string value3;
+    ASSERT_TRUE(kv->Get("", &value1) == OK && value1 == "empty");
+    ASSERT_TRUE(kv->Get(" ", &value2) == OK && value2 == "single-space");
+    ASSERT_TRUE(kv->Get("\t\t", &value3) == OK && value3 == "two-tab");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
@@ -168,9 +174,15 @@ TEST_F(KVTest, EmptyKeyTest) {
 }
 
 TEST_F(KVTest, EmptyValueTest) {
-    ASSERT_TRUE(kv->Put("key1", "") == OK) << pmemobj_errormsg();
-    std::string value;
-    ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "");
+    ASSERT_TRUE(kv->Put("empty", "") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("single-space", " ") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("two-tab", "\t\t") == OK) << pmemobj_errormsg();
+    std::string value1;
+    std::string value2;
+    std::string value3;
+    ASSERT_TRUE(kv->Get("empty", &value1) == OK && value1 == "");
+    ASSERT_TRUE(kv->Get("single-space", &value2) == OK && value2 == " ");
+    ASSERT_TRUE(kv->Get("two-tab", &value3) == OK && value3 == "\t\t");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
