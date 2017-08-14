@@ -1,6 +1,6 @@
 prefix=/usr/local
 
-all: clean example test
+all: clean example stress test
 
 reset:
 	rm -rf /dev/shm/pmemkv /tmp/pmemkv
@@ -30,7 +30,6 @@ example: configure reset
 
 stress: configure reset
 	cd ./bin && make pmemkv_stress
-	PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_stress
 
 test: configure reset
 	cd ./bin && make pmemkv_test

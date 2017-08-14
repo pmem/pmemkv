@@ -12,7 +12,7 @@ Contents
 <ul>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#installation">Installation</a></li>
-<li><a href="#device_dax">Using Device DAX</a></li>
+<li><a href="#benchmarking">Benchmarking</a></li>
 <li><a href="#language_bindings">Language Bindings</a></li>
 <li><a href="#related_work">Related Work</a></li>
 </ul>
@@ -42,127 +42,57 @@ a given key. Leaf modifications are accelerated using
 Installation
 ------------
 
-**Prerequisites**
+* [Installing on Fedora](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora)
+* [Building from sources](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources)
+* [Configuring device DAX](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#device_dax)
 
-* 64-bit Linux (OSX and Windows are not yet supported)
-* [NVML](https://github.com/pmem/nvml) (install binary package or build from source)
-* `make` and `cmake` (version 3.6 or higher)
-* `g++` (version 5.4 or higher)
+<a name="benchmarking"></a>
 
-**Building and running tests**
+Benchmarking
+------------
 
-After cloning sources from GitHub, use provided `make` targets for building and running
-tests and example programs.
-
-```
-git clone https://github.com/pmem/pmemkv.git
-cd pmemkv
-
-make                    # build everything and run tests
-make test               # build and run unit tests
-make example            # build and run simple example
-make stress             # build and run stress test
-make clean              # remove build files
-```
-
-**Managing shared library**
-
-To package `pmemkv` as a shared library and install on your system:
- 
-```
-sudo make install       # install to /usr/local/{include,lib}
-sudo make uninstall     # remove shared library and headers
-```
-
-To install this library into other locations, use the `prefix` variable like this:
+The `pmemkv_stress` utility provides some simple read & write benchmarks.
 
 ```
-sudo make install prefix=/usr/local
-sudo make uninstall prefix=/usr/local
-```
+Usage:  pmemkv_stress [r|w] [path] [size in MB]
+```  
 
-**Out-of-source builds**
-
-If the standard build does not suit your needs, create your own
-out-of-source build and run tests like this:
+Benchmarking on emulated persistent memory:
 
 ```
-cd ~
-mkdir mybuild
-cd mybuild
-cmake ~/pmemkv
-make
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_test
+(/dev/shm exists on Linux by default)
+
+cd pmemkv/bin
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w /dev/shm/pmemkv 1000
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress r /dev/shm/pmemkv 1000
+rm -rf /dev/shm/pmemkv
 ```
 
-<a name="device_dax"></a>
-
-Using Device DAX
-----------------
-
-When running in production on Linux, `pmemkv` should be used with device DAX.
-
-Filesystem DAX is suitable for development and testing, and it offers similar performance to device
-DAX so long as `PMEM_IS_PMEM_FORCE=1` is specified at runtime. But using `PMEM_IS_PMEM_FORCE=1` is
-not power-fail safe, which is not acceptable for most production environments. 
-
-If `ndctl` reports memory mode, as shown below, then you are using filesystem DAX!
+Benchmarking on filesystem DAX:
 
 ```
-ndctl list
+(assuming device present at /dev/pmem1)
 
-{
-  "dev":"namespace2.0",
-  "mode":"memory",
-  "size":<your-size>,
-  "uuid":"<your-uuid>",
-  "blockdev":"pmem2"
-}
+mkdir /mnt/pmem
+mount -o dax /dev/pmem1 /mnt/pmem
+
+cd pmemkv/bin
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w /mnt/pmem/pmemkv 1000
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress r /mnt/pmem/pmemkv 1000
+rm -rf /mnt/pmem/pmemkv
 ```
 
-Here's how you switch over to device DAX:
+Benchmarking on device DAX:
 
 ```
-1. Unmount your existing filesystem DAX mount
+(assuming device present at /dev/dax1.0)
 
-umount /mnt/<your-mapped-directory>
+pmempool rm --verbose /dev/dax1.0
+pmempool create --layout pmemkv obj /dev/dax1.0
 
-mount | grep dax   <-- should return nothing now
-
-
-2. Convert namespace to DAX (name comes from ndctl output above)
-
-sudo ndctl create-namespace -e namespace2.0 -f -m dax
-
-{
-  "dev":"namespace2.0",
-  "mode":"dax",
-  "size":266352984064,
-  "uuid":"ac489425-ce96-43de-a728-e6d35bf44e11"
-}
-
-
-3. Verify DAX device now present
-
-ll /dev/da*
-
-crw------- 1 root root 238, 0 Jun  8 11:38 /dev/dax2.0
-
-
-4. Clear contents of DAX device
-
-pmempool rm --verbose /dev/dax2.0
-
-
-5. Initialize pmemkv on DAX device
-
-pmempool create --layout pmemkv obj /dev/dax2.0
-
-
-6. Reference your DAX device by its path
-
-./pmemkv_stress w /dev/dax2.0 1000
-
+cd pmemkv/bin
+./pmemkv_stress w /dev/dax1.0 1000
+./pmemkv_stress r /dev/dax1.0 1000
 ```
 
 <a name="language_bindings"></a>
@@ -172,10 +102,6 @@ Language Bindings
 
 Developers can use native C/C++ interfaces provided by `pmemkv`, or one of several high-level
 bindings that are maintained separately (for Java, Ruby, and Node.js).
-
-We are using `/dev/shm` to
-[emulate persistent memory](http://pmem.io/2016/02/22/pm-emulation.html)
-below, but real deployments should only use [device DAX](#device_dax).
 
 ### C++
 
