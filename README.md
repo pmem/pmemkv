@@ -63,6 +63,7 @@ Benchmarking on emulated persistent memory:
 (/dev/shm exists on Linux by default)
 
 cd pmemkv/bin
+rm -rf /dev/shm/pmemkv
 PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w /dev/shm/pmemkv 1000
 PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress r /dev/shm/pmemkv 1000
 rm -rf /dev/shm/pmemkv
@@ -77,6 +78,7 @@ mkdir /mnt/pmem
 mount -o dax /dev/pmem1 /mnt/pmem
 
 cd pmemkv/bin
+rm -rf /mnt/pmem/pmemkv
 PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w /mnt/pmem/pmemkv 1000
 PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress r /mnt/pmem/pmemkv 1000
 rm -rf /mnt/pmem/pmemkv
