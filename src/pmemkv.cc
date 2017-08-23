@@ -38,6 +38,9 @@
 #include <unistd.h>
 #include "pmemkv.h"
 
+#include <libpmemobj++/make_persistent_array_atomic.hpp>
+#include <libpmemobj++/pext.hpp>
+
 using std::move;
 using std::to_string;
 using std::unique_ptr;
@@ -46,6 +49,8 @@ using std::unique_ptr;
 #define LOG(msg) if (DO_LOG) std::cout << "[pmemkv] " << msg << "\n"
 
 namespace pmemkv {
+
+constexpr unsigned default_gc_capacity = 0x1000;
 
 KVTree::KVTree(const string& path, const size_t size) : pmpath(path) {
     if (path.find("/dev/dax") == 0) {
@@ -204,9 +209,17 @@ KVStatus KVTree::Remove(const string& key) {
                 leafnode->hashes[slot] = 0;
                 leafnode->keys[slot].clear();
                 auto leaf = leafnode->leaf;
-                transaction::exec_tx(pmpool, [&] {
-                    leaf->slots[slot].get_rw().clear();
-                });
+		bool success = false;
+                do {
+                    try {
+                        transaction::exec_tx(pmpool, [&] {
+                            leaf->slots[slot].get_rw().clear(pmpool.get_root()->discardedKVs);
+                        });
+                        success = true;
+                    } catch (nvml::transaction_alloc_error) {
+                        PerformGC(16);
+                    }
+		} while(!success); // how many retries?
                 break;  // no duplicate keys allowed
             }
         }
@@ -285,7 +298,8 @@ void KVTree::LeafFillSpecificSlot(KVLeafNode* leafnode, const uint8_t hash,
         leafnode->hashes[slot] = hash;
         leafnode->keys[slot] = key;
     }
-    leafnode->leaf->slots[slot].get_rw().set(hash, key, value);
+    leafnode->leaf->slots[slot].get_rw().set(pmpool.get_root()->discardedKVs,
+                                             hash, key, value);
 }
 
 void KVTree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
@@ -395,12 +409,49 @@ void KVTree::InnerUpdateAfterSplit(KVNode* node, unique_ptr<KVNode> new_node, st
     InnerUpdateAfterSplit(inner, move(ni), &new_split_key);              // recursive update
 }
 
+void KVTree::PerformGC() {
+    PerformGC(pmpool.get_root()->discardedKVs.count);
+}
+
+void KVTree::PerformGC(unsigned count) {
+    auto& queue = pmpool.get_root()->discardedKVs;
+    persistent_ptr<p<DiscardedAllocation<char[]> >[] > items = queue.items;
+    while (count > 0 && queue.count > 0) {
+       auto& item = items[queue.count - 1].get_rw();
+       if (item.pointer) {
+           nvml::obj::delete_persistent_atomic<char[]>(item.pointer, item.size);
+       }
+       queue.count--;
+       pmpool.persist(queue.count);
+       --count;
+    }
+}
+
 // ===============================================================================================
 // PROTECTED LIFECYCLE METHODS
 // ===============================================================================================
 
+void KVTree::SetupDiscardedQueues() {
+    auto& queue = pmpool.get_root()->discardedKVs;
+    if (queue.capacity == 0) {
+        try {
+            transaction::exec_tx(pmpool, [&] {
+                 queue.capacity.get_rw() = default_gc_capacity;
+                 queue.count.get_rw() = 0;
+                 queue.items.get_rw() = make_persistent< p<DiscardedAllocation<char[]> >[] >(queue.capacity);
+            });
+        } catch (nvml::transaction_alloc_error) {
+            // Not enough space for the discareded pointers?
+            // Ignore it for now. The capacity remains zero.
+        }
+    }
+}
+
 void KVTree::Recover() {
     LOG("Recovering");
+
+    SetupDiscardedQueues();
+    PerformGC();
 
     // traverse persistent leaves to build list of leaves to recover
     std::list<KVRecoveredLeaf> leaves;
@@ -495,20 +546,37 @@ uint8_t KVTree::PearsonHash(const char* data, const size_t size) {
     // MODIFICATION END
 }
 
+template<typename T>
+static void DiscardPointer(DiscardedQueue<T>& queue,
+                    persistent_ptr<T> pointer, size_t size) {
+    if (queue.count < queue.capacity) {
+        persistent_ptr< p<DiscardedAllocation<char[]> >[] > items = queue.items;
+	auto& item = items[queue.count].get_rw();
+        item.pointer = pointer;
+        item.size = size;
+        queue.count++;
+    } else {
+        delete_persistent<T>(pointer, size);
+    }
+}
+
 // ===============================================================================================
 // SLOT CLASS METHODS
 // ===============================================================================================
 
-void KVSlot::clear() {
-    if (kv) delete_persistent<char[]>(kv, ks + vs + 2);                  // free buffer if present
+void KVSlot::clear(DiscardedQueue<char[]>& discardedQueue) {
+    if (kv) {                                                            // free buffer if present
+        DiscardPointer(discardedQueue, kv, ks + vs + 2);
+        kv = nullptr;
+    }
     ph = 0;                                                              // clear pearson hash
     ks = 0;                                                              // clear key size
     vs = 0;                                                              // clear value size
-    kv = nullptr;                                                        // clear buffer pointer
 }
 
-void KVSlot::set(const uint8_t hash, const string& key, const string& value) {
-    if (kv) delete_persistent<char[]>(kv, ks + vs + 2);                  // free buffer if present
+void KVSlot::set(DiscardedQueue<char[]>& discardedQueue,
+		 const uint8_t hash, const string& key, const string& value) {
+    if (kv) DiscardPointer(discardedQueue, kv, ks + vs + 2);             // free buffer if present
     ph = hash;                                                           // copy hash into leaf
     ks = (uint32_t) key.size();                                          // read key size
     vs = (uint32_t) value.size();                                        // read value size
