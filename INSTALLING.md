@@ -37,7 +37,7 @@ export HTTP_PROXY="<YOUR PROXY>"
 export HTTPS_PROXY="<YOUR PROXY>"
 make
 ```
-<a name="fedora_stable_nvml"></a>
+<a name="fedora_latest_nvml"></a>
 
 Installing on Fedora (Latest NVML)
 ----------------------------------
