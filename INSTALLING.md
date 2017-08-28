@@ -31,6 +31,7 @@ Build pmemkv: (skip proxy steps if you have none)
 
 ```
 git config --global http.proxy <YOUR PROXY>
+cd ~
 git clone https://github.com/pmem/pmemkv.git
 cd pmemkv
 export HTTP_PROXY="<YOUR PROXY>"
@@ -52,6 +53,7 @@ Install latest NVML: (skip proxy steps if you have none)
 
 ```
 git config --global http.proxy <YOUR PROXY>
+cd ~
 git clone https://github.com/pmem/nvml.git
 cd nvml
 su -c 'make install'
@@ -60,6 +62,7 @@ su -c 'make install'
 Build pmemkv: (skip proxy steps if you have none)
 
 ```
+cd ~
 git clone https://github.com/pmem/pmemkv.git
 cd pmemkv
 export HTTP_PROXY="<YOUR PROXY>"
