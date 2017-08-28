@@ -10,21 +10,16 @@ Contents
 --------
 
 <ul>
-<li><a href="#fedora">Installing on Fedora</a></li>
+<li><a href="#fedora_stable_nvml">Installing on Fedora (Stable NVML)</a></li>
+<li><a href="#fedora_latest_nvml">Installing on Fedora (Latest NVML)</a></li>
 <li><a href="#building_from_sources">Building from Sources</a></li>
 <li><a href="#device_dax">Configuring Device DAX</a></li>
 </ul>
 
-<a name="fedora"></a>
+<a name="fedora_stable_nvml"></a>
 
-Installing on Fedora
---------------------
-
-Update installed packages first:
-
-```
-su -c 'dnf update'
-```
+Installing on Fedora (Stable NVML)
+----------------------------------
 
 Install required packages:
 
@@ -40,6 +35,36 @@ git clone https://github.com/pmem/pmemkv.git
 cd pmemkv
 export HTTP_PROXY="<YOUR PROXY>"
 export HTTPS_PROXY="<YOUR PROXY>"
+make
+```
+<a name="fedora_stable_nvml"></a>
+
+Installing on Fedora (Latest NVML)
+----------------------------------
+
+Install required packages:
+
+```
+su -c 'dnf install autoconf cmake gcc-c++'
+```
+
+Install latest NVML: (skip proxy steps if you have none)
+
+```
+git config --global http.proxy <YOUR PROXY>
+git clone https://github.com/pmem/nvml.git
+cd nvml
+su -c 'make install'
+```
+
+Build pmemkv: (skip proxy steps if you have none)
+
+```
+git clone https://github.com/pmem/pmemkv.git
+cd pmemkv
+export HTTP_PROXY="<YOUR PROXY>"
+export HTTPS_PROXY="<YOUR PROXY>"
+export PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig
 make
 ```
 
