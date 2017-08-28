@@ -42,7 +42,8 @@ a given key. Leaf modifications are accelerated using
 Installation
 ------------
 
-* [Installing on Fedora](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora)
+* [Installing on Fedora (Stable NVML)](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_stable_nvml)
+* [Installing on Fedora (Latest NVML)](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_latest_nvml)
 * [Building from sources](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources)
 * [Configuring device DAX](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#device_dax)
 
