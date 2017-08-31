@@ -15,6 +15,7 @@ Contents
 <li><a href="#building_from_sources">Building from Sources</a></li>
 <li><a href="#device_dax">Converting Filesystem DAX to Device DAX</a></li>
 <li><a href="#filesystem_dax">Converting Device DAX to Filesystem DAX</a></li>
+<li><a href="#pool_set">Using a Pool Set</a></li>
 </ul>
 
 <a name="fedora_stable_nvml"></a>
@@ -240,4 +241,29 @@ Now pass the filesystem DAX device as a parameter to `pmemkv` like this:
 
 ```
 PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w /mnt/pmem/pmemkv 1000
+```
+
+<a name="pool_set"></a>
+
+Using a Pool Set
+----------------
+
+First create a pool set descriptor:  (`~/pmemkv.poolset` in this example)
+
+```
+PMEMPOOLSET
+1000M /dev/shm/pmemkv1
+1000M /dev/shm/pmemkv2
+```
+
+Next initialize the pool set:
+
+```
+pmempool create --layout pmemkv obj ~/pmemkv.poolset
+```
+
+Now pass the pool set as a parameter to `pmemkv` like this:
+
+```
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w ~/pmemkv.poolset 1000
 ```
