@@ -47,6 +47,7 @@ Installation
 * [Building From Sources](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources)
 * [Converting Filesystem DAX to Device DAX](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#device_dax)
 * [Converting Device DAX to Filesystem DAX](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#filesystem_dax)
+* [Using a Pool Set](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#pool_set)
 
 <a name="benchmarking"></a>
 
