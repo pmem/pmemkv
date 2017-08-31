@@ -69,6 +69,20 @@ const string LAYOUT = "pmemkv";                            // unique pool layout
 #define LEAF_KEYS 48                                       // maximum keys in tree nodes
 #define LEAF_KEYS_MIDPOINT (LEAF_KEYS / 2)                 // halfway point within the node
 
+template<typename T>
+struct DiscardedAllocation {
+    persistent_ptr<T> pointer;
+    size_t size;
+};
+
+template<typename T>
+struct DiscardedQueue {
+    p<unsigned> capacity;
+    p<unsigned> count;
+    p<persistent_ptr<p<DiscardedAllocation<T> >[]> > items;
+};
+
+
 class KVSlot {                                             // todo test keysize & valsize methods
   public:
     uint8_t hash() const { return ph; }                    // Pearson hash for key
@@ -76,9 +90,10 @@ class KVSlot {                                             // todo test keysize 
     const uint32_t keysize() const { return ks; }          // size of key (without null)
     const char* val() const { return kv.get() + ks + 1; }  // pointer to binary-safe value
     const uint32_t valsize() const { return vs; }          // size of length (without null)
-    void clear();                                          // frees persistent memory
-    void set(const uint8_t hash, const string& key,        // sets all slot fields
-             const string& value);
+    void clear(DiscardedQueue<char[]>&);                   // frees persistent memory
+    void set(DiscardedQueue<char[]>&,                      // sets all slot fields
+	     const uint8_t hash,
+	     const string& key, const string& value);
   private:
     uint8_t ph;                                            // Pearson hash for key
     uint32_t ks;                                           // key size
@@ -93,6 +108,8 @@ struct KVLeaf {
 
 struct KVRoot {                                            // persistent root object
     persistent_ptr<KVLeaf> head;                           // head of linked list of leaves
+    // persistent_ptr<DiscardedQueue<KVSlot>> discardedSlots;
+    DiscardedQueue<char[]> discardedKVs;
 };
 
 struct KVInnerNode;
@@ -176,6 +193,9 @@ class KVTree {                                             // persistent tree cl
     pool<KVRoot> pmpool;                                   // pool for persistent root
     size_t pmsize;                                         // actual size of persistent pool
     unique_ptr<KVNode> tree_top;                           // pointer to uppermost inner node
+    void SetupDiscardedQueues();
+    void PerformGC();
+    void PerformGC(unsigned max_count);
 };
 
 extern "C" {
