@@ -13,7 +13,8 @@ Contents
 <li><a href="#fedora_stable_nvml">Installing on Fedora (Stable NVML)</a></li>
 <li><a href="#fedora_latest_nvml">Installing on Fedora (Latest NVML)</a></li>
 <li><a href="#building_from_sources">Building from Sources</a></li>
-<li><a href="#device_dax">Configuring Device DAX</a></li>
+<li><a href="#device_dax">Converting Filesystem DAX to Device DAX</a></li>
+<li><a href="#filesystem_dax">Converting Device DAX to Filesystem DAX</a></li>
 </ul>
 
 <a name="fedora_stable_nvml"></a>
@@ -131,8 +132,8 @@ PMEM_IS_PMEM_FORCE=1 ./pmemkv_test
 
 <a name="device_dax"></a>
 
-Configuring Device DAX
-----------------------
+Converting Filesystem DAX to Device DAX
+---------------------------------------
 
 If `ndctl` reports memory mode, as shown below, then you are using filesystem DAX.
 
@@ -148,18 +149,17 @@ ndctl list
 }
 ```
 
-Here's how you switch over to device DAX:
+To convert to device DAX, first unmount your existing filesystem:
 
 ```
-1. Unmount your existing filesystem DAX mount
-
 umount /mnt/<your-mapped-directory>
 
 mount | grep dax   <-- should return nothing now
+```
 
+Then convert the namespace to DAX: (name comes from ndctl output above)
 
-2. Convert namespace to DAX (name comes from ndctl output above)
-
+```
 sudo ndctl create-namespace -e namespace2.0 -f -m dax
 
 {
@@ -169,26 +169,75 @@ sudo ndctl create-namespace -e namespace2.0 -f -m dax
   "uuid":"ac489425-ce96-43de-a728-e6d35bf44e11"
 }
 
-
-3. Verify DAX device now present
-
 ll /dev/da*
 
 crw------- 1 root root 238, 0 Jun  8 11:38 /dev/dax2.0
+```
 
+Next clear and initialize the DAX device:
 
-4. Clear contents of DAX device
-
+```
 pmempool rm --verbose /dev/dax2.0
-
-
-5. Initialize pmemkv on DAX device
-
 pmempool create --layout pmemkv obj /dev/dax2.0
+```
 
+Now pass the device DAX device as a parameter to `pmemkv` like this:
 
-6. Reference your DAX device by its path
-
+```
 ./pmemkv_stress w /dev/dax2.0 1000
+```
 
+<a name="filesystem_dax"></a>
+
+Converting Device DAX to Filesystem DAX
+---------------------------------------
+
+If `ndctl` reports 'dax' mode, as shown below, then you are using device DAX.
+
+```
+[root@ch6_crpnp_81 ~]# ndctl list
+{
+  "dev":"namespace2.0",
+  "mode":"dax",
+  "size":<your-size>,
+  "uuid":"<your-uuid>"
+}
+```
+
+To convert to filesystem DAX:
+
+```
+[root@ch6_crpnp_81 ~]# sudo ndctl create-namespace -e namespace2.0 -f -m memory
+{
+  "dev":"namespace2.0",
+  "mode":"memory",
+  "size":263182090240,
+  "uuid":"ef45a74a-6d43-458b-b186-87ff83e86ecc",
+  "blockdev":"pmem2"
+}
+```
+
+Now create and mount filesystem: (using block device name from previous step)
+
+```
+[root@ch6_crpnp_81 ~]# sudo mkfs.ext4 /dev/pmem1
+mke2fs 1.43.3 (04-Sep-2016)
+Creating filesystem with 64253440 4k blocks and 16064512 inodes
+Filesystem UUID: f6050213-c006-4e9a-be0b-c4bce5f1a531
+Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208,
+        4096000, 7962624, 11239424, 20480000, 23887872
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (262144 blocks): done
+Writing superblocks and filesystem accounting information: done
+
+[root@ch6_crpnp_81 ~]# mount -o dax /dev/pmem1 /mnt/pmem
+```
+
+Now pass the filesystem DAX device as a parameter to `pmemkv` like this:
+
+```
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w /mnt/pmem/pmemkv 1000
 ```
