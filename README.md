@@ -48,10 +48,6 @@ Installation
 * [Converting Filesystem DAX to Device DAX](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#device_dax)
 * [Converting Device DAX to Filesystem DAX](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#filesystem_dax)
 
-<li><a href="#device_dax"></a></li>
-<li><a href="#filesystem_dax">Converting Device DAX to Filesystem DAX</a></li>
-
-
 <a name="benchmarking"></a>
 
 Benchmarking
