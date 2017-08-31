@@ -62,8 +62,6 @@ Usage:  pmemkv_stress [r|w] [path] [size in MB]
 Benchmarking on emulated persistent memory:
 
 ```
-(/dev/shm exists on Linux by default)
-
 cd pmemkv/bin
 rm -rf /dev/shm/pmemkv
 PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w /dev/shm/pmemkv 1000
@@ -74,10 +72,7 @@ rm -rf /dev/shm/pmemkv
 Benchmarking on filesystem DAX:
 
 ```
-(assuming device present at /dev/pmem1)
-
-mkdir /mnt/pmem
-mount -o dax /dev/pmem1 /mnt/pmem
+(assuming filesystem mounted at /dev/pmem1)
 
 cd pmemkv/bin
 rm -rf /mnt/pmem/pmemkv
@@ -90,9 +85,6 @@ Benchmarking on device DAX:
 
 ```
 (assuming device present at /dev/dax1.0)
-
-pmempool rm --verbose /dev/dax1.0
-pmempool create --layout pmemkv obj /dev/dax1.0
 
 cd pmemkv/bin
 ./pmemkv_stress w /dev/dax1.0 1000
