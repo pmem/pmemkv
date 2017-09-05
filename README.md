@@ -57,7 +57,12 @@ Benchmarking
 The `pmemkv_stress` utility provides some simple read & write benchmarks.
 
 ```
-Usage:  pmemkv_stress [r|w] [path] [size in MB]
+Usage: pmemkv_stress [engine] [command] [value-length] [path] [size]
+  engine=default|kvtree
+  command=a|r|w|gr|gs|pr|ps|rr|rs
+  value-length=<positive integer>
+  path=DAX device|filesystem DAX mount|pool set
+  size=pool size in MB|0 for device DAX
 ```  
 
 Benchmarking on emulated persistent memory:
@@ -65,8 +70,7 @@ Benchmarking on emulated persistent memory:
 ```
 cd pmemkv/bin
 rm -rf /dev/shm/pmemkv
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w /dev/shm/pmemkv 1000
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress r /dev/shm/pmemkv 1000
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress default a 800 /dev/shm/pmemkv 1000
 rm -rf /dev/shm/pmemkv
 ```
 
@@ -77,8 +81,7 @@ Benchmarking on filesystem DAX:
 
 cd pmemkv/bin
 rm -rf /mnt/pmem/pmemkv
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w /mnt/pmem/pmemkv 1000
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress r /mnt/pmem/pmemkv 1000
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress default a 800 /mnt/pmem/pmemkv 1000
 rm -rf /mnt/pmem/pmemkv
 ```
 
@@ -88,8 +91,7 @@ Benchmarking on device DAX:
 (assuming device present at /dev/dax1.0)
 
 cd pmemkv/bin
-./pmemkv_stress w /dev/dax1.0 1000
-./pmemkv_stress r /dev/dax1.0 1000
+./pmemkv_stress default a 800 /dev/dax1.0 1000
 ```
 
 <a name="language_bindings"></a>
