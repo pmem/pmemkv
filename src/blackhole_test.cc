@@ -31,8 +31,24 @@
  */
 
 #include "gtest/gtest.h"
+#include "blackhole.h"
 
-int main(int argc, char* argv[]) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+using namespace pmemkv::blackhole;
+
+class BlackholeTest : public testing::Test {
+  public:
+    Blackhole* kv;
+
+    BlackholeTest() { kv = new Blackhole(); }
+
+    ~BlackholeTest() {}
+};
+
+TEST_F(BlackholeTest, SimpleTest) {
+    string value;
+    ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Remove("key1") == OK);
+    ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
 }

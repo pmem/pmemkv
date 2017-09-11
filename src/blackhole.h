@@ -30,9 +30,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
+#pragma once
 
-int main(int argc, char* argv[]) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+#include "pmemkv.h"
+
+namespace pmemkv {
+namespace blackhole {
+
+const string ENGINE = "blackhole";                         // engine identifier
+
+class Blackhole : public KVEngine {
+  public:
+    Blackhole();                                           // default constructor
+    ~Blackhole();                                          // default destructor
+    string Engine() final { return ENGINE; }               // engine identifier
+    KVStatus Get(const string& key,                        // copy value for key to buffer
+                 int32_t limit,                            // maximum bytes to copy to buffer
+                 char* value,                              // binary-safe value buffer
+                 int32_t* valuebytes) final;               // buffer bytes actually copied
+    KVStatus Get(const string& key,                        // append value for key to std::string
+                 string* value) final;
+    KVStatus Put(const string& key,                        // copy value for key from std::string
+                 const string& value) final;
+    KVStatus Remove(const string& key) final;              // remove value for key
+};
+
+} // namespace blackhole
+} // namespace pmemkv

@@ -1,18 +1,34 @@
 # Contributing to pmemkv
 
-## Opening New Issues
+<ul>
+<li><a href="#issues">Opening New Issues</a></li>
+<li><a href="#style">Code Style</a></li>
+<li><a href="#pull_requests">Submitting Pull Requests</a></li>
+<li><a href="#engines">Creating New Engines</a></li>
+</ul>
+
+<a name="issues"></a>
+
+Opening New Issues
+------------------
 
 Please log bugs or suggestions as [GitHub issues](https://github.com/pmem/pmemkv/issues).
 Details such as OS and NVML version are always appreciated.
 
-## Code Style
+<a name="style"></a>
+
+Code Style
+----------
 
 * Start with [Google C++ Style](https://google.github.io/styleguide/cppguide.html)
 * Indent 4 spaces, 8 spaces for continuation
 * Max 100 chars per line
 * Space after '*' and '&' (rather than before)
 
-## Submitting Pull Requests
+<a name="pull_requests"></a>
+
+Submitting Pull Requests
+------------------------
 
 We take outside code contributions to `pmemkv` through GitHub pull requests.
 
@@ -59,3 +75,65 @@ to use your real name (not an alias) when committing your changes to the NVM Lib
 ```
 Author: Random J Developer <random@developer.example.org>
 ```
+
+<a name="engines"></a>
+
+Creating New Engines
+--------------------
+
+There are several motivations to create a `pmemkv` storage engine:
+
+* Using a completely different implementation strategy than already exists
+* Trying out a signifcant change to an existing engine without disruption
+* Sharing an experimental engine that isn't even finished yet
+
+Next we'll walk you through the steps of creating a new engine.
+
+### Picking Engine Name
+
+* Relatively short (users will have to type this!)
+* Formatted in all lower-case
+* No whitespace or special characters
+* For this example: `mytree`
+
+### Creating Engine Header
+
+* Create `pmemkv/src/mytree.h` header file
+* For new engines, use `blackhole.h` as a template
+* Use `pmemkv::mytree` namespace to define internal types
+* Define `ENGINE` constant in namespace to export engine name
+* Use camel-case for implementation class name (`class MyTree`)
+
+### Creating Engine Implementation
+
+* Create `pmemkv/src/mytree.cc` implementation file
+* For new engines, use `blackhole.cc` as a template
+* Use `pmemkv::mytree` namespace defined by the header
+
+### Providing Unit Test
+
+* Create `pmemkv/srv/mytree_test.cc` for unit tests
+* For new engines, use `blackhole_test.cc` as a template
+* For stable engines, just copy existing tests (eventually replace the original)
+
+### Updating Build System
+
+* In `CMakeLists.txt`:
+    * Add `src/mytree.h` and `src/mytree.cc` to `SOURCE_FILES`
+    * Add `src/mytree_test.cc` to `pmemkv_test` executable
+    * Use `pkg_check_modules` and/or `find_package` for upstream libraries
+* `make` should now run to completion without errors
+
+### Updating KVEngine
+
+* In `pmemkv.cc`:
+    * Add `#include "mytree.h"`
+    * Update `KVEngine::Open` to return new `MyTree` instances
+    * Update `KVEngine::Close` to delete `MyTree` instances
+* Engine should now work with `pmemkv_stress` and/or high-level bindings 
+
+### Documentation
+
+* In `ENGINES.md`, add `mytree` section
+* In `README.md`, link `mytree` in the table of supported engines
+* Submit blog post on pmem.io?

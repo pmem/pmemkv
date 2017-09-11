@@ -30,9 +30,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
+#include <iostream>
+#include "blackhole.h"
 
-int main(int argc, char* argv[]) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+#define DO_LOG 0
+#define LOG(msg) if (DO_LOG) std::cout << "[blackhole] " << msg << "\n"
+
+namespace pmemkv {
+namespace blackhole {
+
+Blackhole::Blackhole() {
+    LOG("Opened ok");
 }
+
+Blackhole::~Blackhole() {
+    LOG("Closed ok");
+}
+
+KVStatus Blackhole::Get(const string& key, const int32_t limit,
+                        char* value, int32_t* valuebytes) {
+    LOG("Get for key=" << key.c_str());
+    return NOT_FOUND;
+}
+
+KVStatus Blackhole::Get(const string& key, string* value) {
+    LOG("Get for key=" << key.c_str());
+    return NOT_FOUND;
+}
+
+KVStatus Blackhole::Put(const string& key, const string& value) {
+    LOG("Put key=" << key.c_str() << ", value.size=" << to_string(value.size()));
+    return OK;
+}
+
+KVStatus Blackhole::Remove(const string& key) {
+    LOG("Remove key=" << key.c_str());
+    return OK;
+}
+
+} // namespace blackhole
+} // namespace pmemkv

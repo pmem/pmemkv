@@ -41,13 +41,14 @@
 using namespace pmemkv;
 
 static int count = 950000;
+static string engine = "kvtree";
 static string path = "/dev/shm/pmemkv";
 static size_t size = ((size_t) 1024 * 1024 * 1000);
 static size_t value_length = 800;
 
 static const char* USAGE =
         "Usage: pmemkv_stress [engine] [command] [value-length] [path] [size]\n"
-                "  engine=default|kvtree\n"
+                "  engine=kvtree|blackhole\n"
                 "  command=a|r|w|gr|gs|pr|ps|rr|rs\n"
                 "  value-length=<positive integer>\n"
                 "  path=DAX device|filesystem DAX mount|pool set\n"
@@ -59,15 +60,15 @@ static unsigned long current_millis() {
     return (unsigned long long) (tv.tv_sec) * 1000 + (unsigned long long) (tv.tv_usec) / 1000;
 }
 
-static KVTree* open() {
+static KVEngine* open() {
     auto started = current_millis();
-    auto kv = new KVTree(path, size);
+    auto kv = KVEngine::Open(engine, path, size);
     LOG("   in " << current_millis() - started << " ms");
     return kv;
 }
 
 static string formatKey(int i) {
-    string key = std::to_string(i);
+    string key = to_string(i);
     key.append(20 - key.length(), 'X');
     return key;
 }
@@ -78,30 +79,30 @@ static string formatValue() {
     return val;
 }
 
-static void testGetRandom(KVTree* kv) {
+static void testGetRandom(KVEngine* kv) {
     std::random_device random_device;
     std::mt19937 generator(random_device());
     std::uniform_int_distribution<> distribution(1, count - 1);
     int failures = 0;
     auto started = current_millis();
     for (int i = 0; i < count; i++) {
-        std::string value;
+        string value;
         if (kv->Get(formatKey(distribution(generator)), &value) != OK) failures++;
     }
-    LOG("   in " << current_millis() - started << " ms, failures=" + std::to_string(failures));
+    LOG("   in " << current_millis() - started << " ms, failures=" + to_string(failures));
 }
 
-static void testGetSequential(KVTree* kv) {
+static void testGetSequential(KVEngine* kv) {
     int failures = 0;
     auto started = current_millis();
     for (int i = 0; i < count; i++) {
-        std::string value;
+        string value;
         if (kv->Get(formatKey(i), &value) != OK) failures++;
     }
-    LOG("   in " << current_millis() - started << " ms, failures=" + std::to_string(failures));
+    LOG("   in " << current_millis() - started << " ms, failures=" + to_string(failures));
 }
 
-static void testPutRandom(KVTree* kv) {
+static void testPutRandom(KVEngine* kv) {
     std::random_device random_device;
     std::mt19937 generator(random_device());
     std::uniform_int_distribution<> distribution(1, count - 1);
@@ -109,26 +110,26 @@ static void testPutRandom(KVTree* kv) {
     auto started = current_millis();
     for (int i = 0; i < count; i++) {
         if (kv->Put(formatKey(distribution(generator)), value) != OK) {
-            std::cout << "Out of space at key " << std::to_string(i) << "\n";
+            std::cout << "Out of space at key " << to_string(i) << "\n";
             exit(-42);
         }
     }
     LOG("   in " << current_millis() - started << " ms");
 }
 
-static void testPutSequential(KVTree* kv) {
+static void testPutSequential(KVEngine* kv) {
     auto value = formatValue();
     auto started = current_millis();
     for (int i = 0; i < count; i++) {
         if (kv->Put(formatKey(i), value) != OK) {
-            std::cout << "Out of space at key " << std::to_string(i) << "\n";
+            std::cout << "Out of space at key " << to_string(i) << "\n";
             exit(-42);
         }
     }
     LOG("   in " << current_millis() - started << " ms");
 }
 
-static void testRemoveRandom(KVTree* kv) {
+static void testRemoveRandom(KVEngine* kv) {
     std::random_device random_device;
     std::mt19937 generator(random_device());
     std::uniform_int_distribution<> distribution(1, count - 1);
@@ -139,7 +140,7 @@ static void testRemoveRandom(KVTree* kv) {
     LOG("   in " << current_millis() - started << " ms");
 }
 
-static void testRemoveSequential(KVTree* kv) {
+static void testRemoveSequential(KVEngine* kv) {
     auto started = current_millis();
     for (int i = 0; i < count; i++) kv->Remove(formatKey(i));
     LOG("   in " << current_millis() - started << " ms");
@@ -151,7 +152,6 @@ static void usage_exit(int exit_code) {
 }
 
 int main(int argc, char** argv) {
-    string engine;
     string command;
 
     // validate command line args
@@ -164,17 +164,16 @@ int main(int argc, char** argv) {
         path = argv[4];
         size = std::stoul(argv[5]) * (1024 * 1024);
         count = (int) (size / 1100);
-        if (engine != "default" and engine != "kvtree")
-            usage_exit(EXIT_FAILURE);
-        else if (command != "a" and command != "r" and command != "w" and command != "gr"
+        if (command != "a" and command != "r" and command != "w" and command != "gr"
                 and command != "gs" and command != "pr" and command != "ps"
                 and command != "rr" and command != "rs")
             usage_exit(EXIT_FAILURE);
     }
 
     // open datastore
-    LOG("Opening engine=" + engine + ", path=" + path);
-    KVTree* kv = open();
+    LOG("Opening datastore: engine=" + engine + ", path=" + path + ", size=" + to_string(size));
+    KVEngine* kv = open();
+    if (kv == nullptr) usage_exit(EXIT_FAILURE);
 
     // run requested command
     if (command == "a") {
