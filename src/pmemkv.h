@@ -56,49 +56,71 @@ const string LAYOUT = "pmemkv";                            // pool layout identi
 
 class KVEngine {                                           // storage engine implementations
   public:
-    static KVEngine* Open(const string& engine,            // open specified engine
+    static KVEngine* Open(const string& engine,            // open storage engine
                           const string& path,              // path to persistent pool
-                          size_t size);                    // size of persistent pool
-    static void Close(KVEngine* kv);                       // close specified engine
+                          size_t size);                    // size used when creating pool
+    static void Close(KVEngine* kv);                       // close storage engine
 
     virtual string Engine() = 0;                           // engine identifier
-    virtual KVStatus Get(const string& key,                // copy value for key to buffer
-                         int32_t limit,                    // maximum bytes to copy to buffer
-                         char* value,                      // binary-safe value buffer
-                         int32_t* valuebytes) = 0;         // buffer bytes actually copied
-    virtual KVStatus Get(const string& key,                // append value for key to std::string
+    virtual KVStatus Get(int32_t limit,                    // copy value to fixed-size buffer
+                         int32_t keybytes,
+                         int32_t* valuebytes,
+                         const char* key,
+                         char* value) = 0;
+    virtual KVStatus Get(const string& key,                // append value to std::string
                          string* value) = 0;
-    virtual KVStatus Put(const string& key,                // copy value for key from std::string
+    virtual KVStatus Put(const string& key,                // copy value from std::string
                          const string& value) = 0;
     virtual KVStatus Remove(const string& key) = 0;        // remove value for key
 };
+
+#pragma pack(push, 1)
+struct FFIBuffer {                                         // FFI buffer providing all params
+    KVEngine* kv;
+    int32_t limit;
+    int32_t keybytes;
+    int32_t valuebytes;
+    char data[];
+};
+#pragma pack(pop)
 
 extern "C" {
 #endif
 
 #include <stdint.h>
 #include <stddef.h>
-struct KVEngine;
+
+struct KVEngine;                                           // define types as simple structs
 typedef struct KVEngine KVEngine;
-KVEngine* kvengine_open(const char* engine,                // open requested engine
-                        const char* path,                  // path to persistent pool
-                        size_t size);                      // size of persistent pool
+struct FFIBuffer;
+typedef struct FFIBuffer FFIBuffer;
 
-void kvengine_close(KVEngine* kv);                         // close engine instance
+KVEngine* kvengine_open(const char* engine,                // open storage engine
+                        const char* path,
+                        size_t size);
 
-int8_t kvengine_get(KVEngine* kv,                          // copy value for key to buffer
-                    const char* key,                       // key as C-style string
-                    int32_t limit,                         // maximum bytes to copy to buffer
-                    char* value,                           // binary-safe value buffer
-                    int32_t* valuebytes);                  // buffer bytes actually copied
+void kvengine_close(KVEngine* kv);                         // close storage engine
 
-int8_t kvengine_put(KVEngine* kv,                          // copy value for key from buffer
-                    const char* key,                       // key as C-style string
-                    const char* value,                     // binary-safe value buffer
-                    const int32_t* valuebytes);            // buffer bytes available to copy
+int8_t kvengine_get(KVEngine* kv,                          // copy value to fixed-size buffer
+                    int32_t limit,
+                    int32_t keybytes,
+                    int32_t* valuebytes,
+                    const char* key,
+                    char* value);
+
+int8_t kvengine_put(KVEngine* kv,                          // copy value from fixed-size buffer
+                    int32_t keybytes,
+                    int32_t* valuebytes,
+                    const char* key,
+                    const char* value);
 
 int8_t kvengine_remove(KVEngine* kv,                       // remove value for key
-                       const char* key);                   // key as C-style string
+                       int32_t keybytes,
+                       const char* key);
+
+int8_t kvengine_get_ffi(FFIBuffer* buf);                   // FFI optimized methods
+int8_t kvengine_put_ffi(const FFIBuffer* buf);
+int8_t kvengine_remove_ffi(const FFIBuffer* buf);
 
 #ifdef __cplusplus
 }

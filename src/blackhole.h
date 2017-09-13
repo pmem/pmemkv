@@ -43,14 +43,16 @@ class Blackhole : public KVEngine {
   public:
     Blackhole();                                           // default constructor
     ~Blackhole();                                          // default destructor
+
     string Engine() final { return ENGINE; }               // engine identifier
-    KVStatus Get(const string& key,                        // copy value for key to buffer
-                 int32_t limit,                            // maximum bytes to copy to buffer
-                 char* value,                              // binary-safe value buffer
-                 int32_t* valuebytes) final;               // buffer bytes actually copied
-    KVStatus Get(const string& key,                        // append value for key to std::string
+    KVStatus Get(int32_t limit,                            // copy value to fixed-size buffer
+                 int32_t keybytes,
+                 int32_t* valuebytes,
+                 const char* key,
+                 char* value) final;
+    KVStatus Get(const string& key,                        // append value to std::string
                  string* value) final;
-    KVStatus Put(const string& key,                        // copy value for key from std::string
+    KVStatus Put(const string& key,                        // copy value from std::string
                  const string& value) final;
     KVStatus Remove(const string& key) final;              // remove value for key
 };

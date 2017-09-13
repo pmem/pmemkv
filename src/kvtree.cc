@@ -99,26 +99,25 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
     LOG("Analyzed ok");
 }
 
-KVStatus KVTree::Get(const string& key, const int32_t limit, char* value, int32_t* valuebytes) {
-    LOG("Get for key=" << key.c_str());
+KVStatus KVTree::Get(const int32_t limit, const int32_t keybytes, int32_t* valuebytes,
+                     const char* key, char* value) {
+    LOG("Get for key=" << key);
     auto leafnode = LeafSearch(key);
-    if (!leafnode) {
-        LOG("   head not present");
-        return NOT_FOUND;
-    }
-    const uint8_t hash = PearsonHash(key.c_str(), key.size());
-    for (int slot = LEAF_KEYS; slot--;) {
-        if (leafnode->hashes[slot] == hash) {
-            if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
-                auto kv = leafnode->leaf->slots[slot].get_ro();
-                auto vs = kv.valsize();
-                if (vs < limit - 1) {
-                    LOG("   found value, slot=" << slot << ", size=" << to_string(vs));
-                    memcpy(value, kv.val(), vs);
-                    *valuebytes = vs;
-                    return OK;
-                } else {
-                    return FAILED;
+    if (leafnode) {
+        const uint8_t hash = PearsonHash(key, (size_t) keybytes);
+        for (int slot = LEAF_KEYS; slot--;) {
+            if (leafnode->hashes[slot] == hash) {
+                if (strcmp(leafnode->keys[slot].c_str(), key) == 0) {
+                    auto kv = leafnode->leaf->slots[slot].get_ro();
+                    auto vs = kv.valsize();
+                    if (vs < limit - keybytes - 64) {
+                        LOG("   found value, slot=" << slot << ", size=" << to_string(vs));
+                        memcpy(value, kv.val(), vs);
+                        *valuebytes = vs;
+                        return OK;
+                    } else {
+                        return FAILED;
+                    }
                 }
             }
         }
@@ -130,18 +129,16 @@ KVStatus KVTree::Get(const string& key, const int32_t limit, char* value, int32_
 KVStatus KVTree::Get(const string& key, string* value) {
     LOG("Get for key=" << key.c_str());
     auto leafnode = LeafSearch(key);
-    if (!leafnode) {
-        LOG("   head not present");
-        return NOT_FOUND;
-    }
-    const uint8_t hash = PearsonHash(key.c_str(), key.size());
-    for (int slot = LEAF_KEYS; slot--;) {
-        if (leafnode->hashes[slot] == hash) {
-            if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
-                auto kv = leafnode->leaf->slots[slot].get_ro();
-                LOG("   found value, slot=" << slot << ", size=" << to_string(kv.valsize()));
-                value->append(kv.val());
-                return OK;
+    if (leafnode) {
+        const uint8_t hash = PearsonHash(key.c_str(), key.size());
+        for (int slot = LEAF_KEYS; slot--;) {
+            if (leafnode->hashes[slot] == hash) {
+                if (strcmp(leafnode->keys[slot].c_str(), key.c_str()) == 0) {
+                    auto kv = leafnode->leaf->slots[slot].get_ro();
+                    LOG("   found value, slot=" << slot << ", size=" << to_string(kv.valsize()));
+                    value->append(kv.val());
+                    return OK;
+                }
             }
         }
     }
@@ -221,7 +218,7 @@ KVLeafNode* KVTree::LeafSearch(const string& key) {
     bool matched;
     while (!node->is_leaf) {
         matched = false;
-        KVInnerNode* inner = (KVInnerNode*) node;
+        auto inner = (KVInnerNode*) node;
 #ifndef NDEBUG
         inner->assert_invariants();
 #endif
@@ -483,7 +480,7 @@ const uint8_t PEARSON_LOOKUP_TABLE[256] = {
 
 // Modified Pearson hashing algorithm from RFC 3074
 uint8_t KVTree::PearsonHash(const char* data, const size_t size) {
-    uint8_t hash = (uint8_t) size;
+    auto hash = (uint8_t) size;
     for (size_t i = size; i > 0;) {
         hash = PEARSON_LOOKUP_TABLE[hash ^ data[--i]];
     }

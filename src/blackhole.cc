@@ -47,9 +47,9 @@ Blackhole::~Blackhole() {
     LOG("Closed ok");
 }
 
-KVStatus Blackhole::Get(const string& key, const int32_t limit,
-                        char* value, int32_t* valuebytes) {
-    LOG("Get for key=" << key.c_str());
+KVStatus Blackhole::Get(const int32_t limit, const int32_t keybytes, int32_t* valuebytes,
+                        const char* key, char* value) {
+    LOG("Get for key=" << key);
     return NOT_FOUND;
 }
 
