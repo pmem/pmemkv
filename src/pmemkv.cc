@@ -30,8 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "blackhole.h"
-#include "kvtree.h"
+#include "engines/blackhole.h"
+#include "engines/kvtree.h"
 
 namespace pmemkv {
 

@@ -31,8 +31,8 @@
  */
 
 #include "gtest/gtest.h"
-#include "mock_tx_alloc.h"
-#include "kvtree.h"
+#include "../mock_tx_alloc.h"
+#include "../../src/engines/kvtree.h"
 
 using namespace pmemkv::kvtree;
 

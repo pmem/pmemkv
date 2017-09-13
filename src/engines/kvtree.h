@@ -33,7 +33,7 @@
 #pragma once
 
 #include <vector>
-#include "pmemkv.h"
+#include "../pmemkv.h"
 
 using std::move;
 using std::unique_ptr;

@@ -30,32 +30,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "gtest/gtest.h"
+#include "../../src/engines/blackhole.h"
 
-#include "pmemkv.h"
+using namespace pmemkv::blackhole;
 
-namespace pmemkv {
-namespace blackhole {
-
-const string ENGINE = "blackhole";                         // engine identifier
-
-class Blackhole : public KVEngine {
+class BlackholeTest : public testing::Test {
   public:
-    Blackhole();                                           // default constructor
-    ~Blackhole();                                          // default destructor
+    Blackhole* kv;
 
-    string Engine() final { return ENGINE; }               // engine identifier
-    KVStatus Get(int32_t limit,                            // copy value to fixed-size buffer
-                 int32_t keybytes,
-                 int32_t* valuebytes,
-                 const char* key,
-                 char* value) final;
-    KVStatus Get(const string& key,                        // append value to std::string
-                 string* value) final;
-    KVStatus Put(const string& key,                        // copy value from std::string
-                 const string& value) final;
-    KVStatus Remove(const string& key) final;              // remove value for key
+    BlackholeTest() { kv = new Blackhole(); }
+
+    ~BlackholeTest() {}
 };
 
-} // namespace blackhole
-} // namespace pmemkv
+TEST_F(BlackholeTest, SimpleTest) {
+    string value;
+    ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Remove("key1") == OK);
+    ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
+}

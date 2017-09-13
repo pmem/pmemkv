@@ -33,8 +33,9 @@ project(pmemkv)
 
 set(CMAKE_CXX_STANDARD 11)
 set(SOURCE_FILES src/pmemkv.cc src/pmemkv.h
-    src/blackhole.h src/blackhole.cc
-    src/kvtree.h src/kvtree.cc)
+    src/engines/blackhole.h src/engines/blackhole.cc
+    src/engines/kvtree.h src/engines/kvtree.cc
+)
 set(3RDPARTY ${PROJECT_SOURCE_DIR}/3rdparty)
 set(GTEST_VERSION 1.7.0)
 
@@ -83,6 +84,8 @@ target_link_libraries(pmemkv_example pmemkv)
 add_executable(pmemkv_stress src/pmemkv_stress.cc)
 target_link_libraries(pmemkv_stress pmemkv)
 
-add_executable(pmemkv_test src/mock_tx_alloc.cc src/pmemkv_test.cc
-               src/blackhole_test.cc src/kvtree_test.cc)
+add_executable(pmemkv_test tests/pmemkv_test.cc tests/mock_tx_alloc.cc
+               tests/engines/blackhole_test.cc
+               tests/engines/kvtree_test.cc
+)
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})

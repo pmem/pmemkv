@@ -98,7 +98,7 @@ Next we'll walk you through the steps of creating a new engine.
 
 ### Creating Engine Header
 
-* Create `pmemkv/src/mytree.h` header file
+* Create `src/engines/mytree.h` header file
 * For new engines, use `blackhole.h` as a template
 * Use `pmemkv::mytree` namespace to define internal types
 * Define `ENGINE` constant in namespace to export engine name
@@ -106,34 +106,34 @@ Next we'll walk you through the steps of creating a new engine.
 
 ### Creating Engine Implementation
 
-* Create `pmemkv/src/mytree.cc` implementation file
+* Create `src/engines/mytree.cc` implementation file
 * For new engines, use `blackhole.cc` as a template
 * Use `pmemkv::mytree` namespace defined by the header
 
 ### Providing Unit Test
 
-* Create `pmemkv/srv/mytree_test.cc` for unit tests
+* Create `tests/engines/mytree_test.cc` for unit tests
 * For new engines, use `blackhole_test.cc` as a template
 * For stable engines, just copy existing tests (eventually replace the original)
 
 ### Updating Build System
 
 * In `CMakeLists.txt`:
-    * Add `src/mytree.h` and `src/mytree.cc` to `SOURCE_FILES`
-    * Add `src/mytree_test.cc` to `pmemkv_test` executable
+    * Add `src/engines/mytree.h` and `src/engines/mytree.cc` to `SOURCE_FILES`
+    * Add `tests/mytree_test.cc` to `pmemkv_test` executable
     * Use `pkg_check_modules` and/or `find_package` for upstream libraries
 * `make` should now run to completion without errors
 
 ### Updating KVEngine
 
-* In `pmemkv.cc`:
-    * Add `#include "mytree.h"`
+* In `src/pmemkv.cc`:
+    * Add `#include "engines/mytree.h"`
     * Update `KVEngine::Open` to return new `MyTree` instances
     * Update `KVEngine::Close` to delete `MyTree` instances
-* Engine should now work with `pmemkv_stress` and/or high-level bindings 
+* Engine should now work with `pmemkv_stress` and high-level bindings
 
 ### Documentation
 
 * In `ENGINES.md`, add `mytree` section
 * In `README.md`, link `mytree` in the table of supported engines
-* Submit blog post on pmem.io?
+* Submit blog post on pmem.io
