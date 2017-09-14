@@ -12,7 +12,7 @@ Overview
 `pmemkv` is a local/embedded key-value datastore optimized for persistent memory.
 
 Rather than being tied to a single language or backing implementation, `pmemkv`
-provides users with multiple options for high-level language bindings and storage engines.
+provides users with different options for storage engines and language bindings.
 
 <ul>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">Installation</a>
@@ -48,9 +48,6 @@ is easy and encouraged!
 
 Language Bindings
 -----------------
-
-Developers can use native C/C++ interfaces provided by `pmemkv`, or one of several high-level
-bindings that are maintained separately.
 
 ### C++
 
@@ -113,7 +110,7 @@ int main() {
 
 ### Other Languages
 
-High-level language bindings are maintained in separate GitHub repos, but these are still kept
+These bindings are maintained in separate GitHub repos, but are still kept
 in sync with the main `pmemkv` distribution.
  
 * Java - https://github.com/pmem/pmemkv-java
