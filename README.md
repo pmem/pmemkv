@@ -34,19 +34,26 @@ Storage Engines
 `pmemkv` provides multiple storage engines with vastly different implementations. Since all
 engines conform to the same common API, any engine can be used with common `pmemkv` utilities
 and language bindings. Engines are requested at runtime by name.
+[Contributing a new engine](https://github.com/pmem/pmemkv/blob/master/CONTRIBUTING.md#engines)
+is easy and encouraged!
+
+![pmemkv-engines](https://user-images.githubusercontent.com/913363/30487989-49e80e86-99f2-11e7-8836-50f27b2ac11a.png)
+
+### Available Engines
 
 | Engine  | Description | Thread-Safe? |
 | ------- | ----------- | ------------ | 
 | [kvtree](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree) | Hybrid B+ persistent tree | No |
 | [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes |
 
-[Contributing a new engine](https://github.com/pmem/pmemkv/blob/master/CONTRIBUTING.md#engines)
-is easy and encouraged!
-
 <a name="bindings"></a>
 
 Language Bindings
 -----------------
+
+`pmemkv` is written in C and C++. Developers can either use native C++ classes directly, or use our `extern "C"` API, or use one of several high-level language bindings that are based on the `extern "C"` API.
+
+![pmemkv-bindings](https://user-images.githubusercontent.com/913363/30488014-6221b11e-99f2-11e7-85af-202ad6013e0a.png)
 
 ### C++
 
@@ -113,6 +120,7 @@ These bindings are maintained in separate GitHub repos, but are still kept
 in sync with the main `pmemkv` distribution.
  
 * Java - https://github.com/pmem/pmemkv-java
+* JNI - https://github.com/pmem/pmemkv-jni
 * Node.js - https://github.com/pmem/pmemkv-nodejs
 * Ruby - https://github.com/pmem/pmemkv-ruby
 
