@@ -129,42 +129,48 @@ in sync with the main `pmemkv` distribution.
 Benchmarking
 ------------
 
-The `pmemkv_stress` utility provides some simple read & write benchmarks.
+The `pmemkv_bench` utility provides some simple read & write benchmarks. This is
+much like the `db_bench` utility included with LevelDB and RocksDB, although the
+list of supported parameters is slightly different.
 
 ```
-Usage: pmemkv_stress [engine] [command] [value-length] [path] [size]
-  engine=kvtree|blackhole
-  command=a|r|w|gr|gs|pr|ps|rr|rs
-  value-length=<positive integer>
-  path=DAX device|filesystem DAX mount|pool set
-  size=pool size in MB|0 for device DAX
+pmemkv_bench
+--engine=<name>            (storage engine name, default: kvtree)
+--db=<location>            (path to persistent pool, default: /dev/shm/pmemkv)
+--db_size_in_gb=<integer>  (size of persistent pool in GB, default: 1)
+--num=<integer>            (number of keys to place in database, default: 1000000)
+--reads=<integer>          (number of read operations, default: 1000000)
+--threads=<integer>        (number of concurrent threads, default: 1)
+--value_size=<integer>     (size of values in bytes, default: 100)
+--benchmarks=<name>,       (comma-separated list of benchmarks to run)
+    fillseq                (load N values in sequential key order into fresh db)
+    fillrandom             (load N values in random key order into fresh db)
+    overwrite              (replace N values in random key order)
+    readseq                (read N values in sequential key order)
+    readrandom             (read N values in random key order)
+    readmissing            (read N missing values in random key order)
+    deleteseq              (delete N values in sequential key order)
+    deleterandom           (delete N values in random key order)
 ```  
 
 Benchmarking on emulated persistent memory:
 
 ```
-cd pmemkv/bin
-rm -rf /dev/shm/pmemkv
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress kvtree a 800 /dev/shm/pmemkv 1000
+PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_bench
 rm -rf /dev/shm/pmemkv
 ```
 
 Benchmarking on filesystem DAX:
 
 ```
-(assuming filesystem mounted at /dev/pmem1)
-
-cd pmemkv/bin
-rm -rf /mnt/pmem/pmemkv
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress kvtree a 800 /mnt/pmem/pmemkv 1000
+(assuming /dev/pmemX device mounted as /mnt/pmem filesystem)
+PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_bench --db=/mnt/pmem/pmemkv
 rm -rf /mnt/pmem/pmemkv
 ```
 
 Benchmarking on device DAX:
 
 ```
-(assuming device present at /dev/dax1.0)
-
-cd pmemkv/bin
-./pmemkv_stress kvtree a 800 /dev/dax1.0 1000
+(assuming /dev/dax1.0 device present)
+./bin/pmemkv_bench --db=/dev/dax1.0
 ```

@@ -130,7 +130,7 @@ Next we'll walk you through the steps of creating a new engine.
     * Add `#include "engines/mytree.h"`
     * Update `KVEngine::Open` to return new `MyTree` instances
     * Update `KVEngine::Close` to delete `MyTree` instances
-* Engine should now work with `pmemkv_stress` and high-level bindings
+* Engine should now work with `pmemkv_bench` and high-level bindings
 
 ### Documentation
 

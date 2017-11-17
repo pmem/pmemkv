@@ -81,11 +81,29 @@ target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES})
 add_executable(pmemkv_example src/pmemkv_example.cc)
 target_link_libraries(pmemkv_example pmemkv)
 
-add_executable(pmemkv_stress src/pmemkv_stress.cc)
-target_link_libraries(pmemkv_stress pmemkv)
-
 add_executable(pmemkv_test tests/pmemkv_test.cc tests/mock_tx_alloc.cc
                tests/engines/blackhole_test.cc
                tests/engines/kvtree_test.cc
 )
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
+
+include_directories(leveldb leveldb/include leveldb/port leveldb/util)
+add_executable(pmemkv_bench
+    src/pmemkv_bench.cc
+    leveldb/include/leveldb/env.h
+    leveldb/include/leveldb/slice.h
+    leveldb/include/leveldb/status.h
+    leveldb/port/atomic_pointer.h
+    leveldb/port/port_posix.h leveldb/port/port_posix.cc
+    leveldb/port/thread_annotations.h
+    leveldb/util/env.cc
+    leveldb/util/env_posix.cc
+    leveldb/util/env_posix_test_helper.h
+    leveldb/util/histogram.h leveldb/util/histogram.cc
+    leveldb/util/logging.h leveldb/util/logging.cc
+    leveldb/util/mutexlock.h
+    leveldb/util/posix_logger.h
+    leveldb/util/random.h
+    leveldb/util/status.cc
+)
+target_link_libraries(pmemkv_bench pmemkv pthread)

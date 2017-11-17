@@ -97,7 +97,7 @@ cd pmemkv
 make                    # build everything and run tests
 make test               # build and run unit tests
 make example            # build and run simple example
-make stress             # build stress test utility
+make bench              # build and run benchmarks
 make clean              # remove build files
 ```
 
@@ -185,7 +185,7 @@ pmempool create --layout pmemkv obj /dev/dax2.0
 Now pass the device DAX device as a parameter to `pmemkv` like this:
 
 ```
-./pmemkv_stress w /dev/dax2.0 1000
+./pmemkv_bench --db=/dev/dax2.0
 ```
 
 <a name="filesystem_dax"></a>
@@ -240,7 +240,7 @@ Writing superblocks and filesystem accounting information: done
 Now pass the filesystem DAX device as a parameter to `pmemkv` like this:
 
 ```
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w /mnt/pmem/pmemkv 1000
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_bench --db=/mnt/pmem/pmemkv
 ```
 
 <a name="pool_set"></a>
@@ -265,5 +265,5 @@ pmempool create --layout pmemkv obj ~/pmemkv.poolset
 Now pass the pool set as a parameter to `pmemkv` like this:
 
 ```
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_stress w ~/pmemkv.poolset 1000
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_bench --db=~/pmemkv.poolset
 ```
