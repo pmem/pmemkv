@@ -138,6 +138,7 @@ pmemkv_bench
 --engine=<name>            (storage engine name, default: kvtree)
 --db=<location>            (path to persistent pool, default: /dev/shm/pmemkv)
 --db_size_in_gb=<integer>  (size of persistent pool in GB, default: 1)
+--histogram=<0|1>          (show histograms when reporting latencies)
 --num=<integer>            (number of keys to place in database, default: 1000000)
 --reads=<integer>          (number of read operations, default: 1000000)
 --threads=<integer>        (number of concurrent threads, default: 1)

@@ -45,6 +45,7 @@ static const string USAGE =
                 "--engine=<name>            (storage engine name, default: kvtree)\n"
                 "--db=<location>            (path to persistent pool, default: /dev/shm/pmemkv)\n"
                 "--db_size_in_gb=<integer>  (size of persistent pool in GB, default: 1)\n"
+                "--histogram=<0|1>          (show histograms when reporting latencies)\n"
                 "--num=<integer>            (number of keys to place in database, default: 1000000)\n"
                 "--reads=<integer>          (number of read operations, default: 1000000)\n"
                 "--threads=<integer>        (number of concurrent threads, default: 1)\n"
