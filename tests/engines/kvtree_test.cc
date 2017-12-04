@@ -41,16 +41,16 @@ const string PATH_CACHED = "/tmp/pmemkv";
 const size_t SIZE = ((size_t) (1024 * 1024 * 1104));
 
 class KVEmptyTest : public testing::Test {
-  public:
+public:
     KVEmptyTest() {
         std::remove(PATH.c_str());
     }
 };
 
 class KVTest : public testing::Test {
-  public:
+public:
     KVTreeAnalysis analysis;
-    KVTree* kv;
+    KVTree *kv;
 
     KVTest() {
         std::remove(PATH.c_str());
@@ -70,7 +70,7 @@ class KVTest : public testing::Test {
         Open();
     }
 
-  private:
+private:
     void Open() {
         kv = new KVTree(PATH, SIZE);
     }
@@ -81,7 +81,7 @@ class KVTest : public testing::Test {
 // =============================================================================================
 
 TEST_F(KVEmptyTest, CreateInstanceTest) {
-    KVTree* kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
+    KVTree *kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
     KVTreeAnalysis analysis = {};
     kv->Analyze(analysis);
     ASSERT_EQ(analysis.size, PMEMOBJ_MIN_POOL);
@@ -89,7 +89,7 @@ TEST_F(KVEmptyTest, CreateInstanceTest) {
 }
 
 TEST_F(KVEmptyTest, CreateInstanceFromExistingTest) {
-    KVTree* kv = new KVTree(PATH, PMEMOBJ_MIN_POOL * 2);
+    KVTree *kv = new KVTree(PATH, PMEMOBJ_MIN_POOL * 2);
     delete kv;
     kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
     KVTreeAnalysis analysis = {};
@@ -822,8 +822,8 @@ TEST_F(KVTest, LargeDescendingAfterRecoveryTest) {
 // =============================================================================================
 
 class KVFullTest : public testing::Test {
-  public:
-    KVTree* kv;
+public:
+    KVTree *kv;
 
     KVFullTest() {
         std::remove(PATH.c_str());
@@ -843,15 +843,30 @@ class KVFullTest : public testing::Test {
             string value;
             ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
         }
+
+        Reopen();
+
+        ASSERT_TRUE(kv->Put("1", "!1") == OK);
+        string value;
+        ASSERT_TRUE(kv->Get("1", &value) == OK && value == ("!1"));
+        ASSERT_TRUE(kv->Put("1", "1!") == OK);
+        string value2;
+        ASSERT_TRUE(kv->Get("1", &value2) == OK && value2 == ("1!"));
+
+        for (int i = 1; i <= LARGE_LIMIT; i++) {
+            string istr = to_string(i);
+            string value3;
+            ASSERT_TRUE(kv->Get(istr, &value3) == OK && value3 == (istr + "!"));
+        }
     }
 
-  private:
+private:
     void Open() {
         if (access(PATH_CACHED.c_str(), F_OK) == 0) {
             ASSERT_TRUE(std::system(("cp -f " + PATH_CACHED + " " + PATH).c_str()) == 0);
         } else {
             std::cout << "!!! creating cached copy at " << PATH_CACHED << "\n";
-            KVTree* kvt = new KVTree(PATH, SIZE);
+            KVTree *kvt = new KVTree(PATH, SIZE);
             for (int i = 1; i <= LARGE_LIMIT; i++) {
                 string istr = to_string(i);
                 ASSERT_TRUE(kvt->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
@@ -945,6 +960,15 @@ TEST_F(KVFullTest, OutOfSpace5bTest) {
     ASSERT_TRUE(kv->Put("34567", "34567!") == OK) << pmemobj_errormsg();
     Validate();
 }
+
+//TEST_F(KVFullTest, OutOfSpace6Test) {
+//    tx_alloc_should_fail = true;
+//    ASSERT_TRUE(kv->Put(LONGSTR, "?") == FAILED);
+//    tx_alloc_should_fail = false;
+//    std::string str;
+//    ASSERT_TRUE(kv->Get(LONGSTR, &str) == NOT_FOUND) << pmemobj_errormsg();
+//    Validate();
+//}
 
 TEST_F(KVFullTest, RepeatedRecoveryTest) {
     for (int i = 1; i <= 100; i++) Reopen();
