@@ -546,15 +546,15 @@ private:
     }
 
     void ReadSeq(ThreadState *thread) {
-        DoRead(thread, false, false);
-    }
-
-    void ReadRandom(ThreadState *thread) {
         DoRead(thread, true, false);
     }
 
+    void ReadRandom(ThreadState *thread) {
+        DoRead(thread, false, false);
+    }
+
     void ReadMissing(ThreadState *thread) {
-        DoRead(thread, true, true);
+        DoRead(thread, false, true);
     }
 
     void DoDelete(ThreadState *thread, bool seq) {
