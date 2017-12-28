@@ -13,7 +13,7 @@ Opening New Issues
 ------------------
 
 Please log bugs or suggestions as [GitHub issues](https://github.com/pmem/pmemkv/issues).
-Details such as OS and NVML version are always appreciated.
+Details such as OS and PMDK version are always appreciated.
 
 <a name="style"></a>
 
@@ -34,7 +34,7 @@ We take outside code contributions to `pmemkv` through GitHub pull requests.
 
 **NOTE: If you do decide to implement code changes and contribute them,
 please make sure you agree your contribution can be made available
-under the [BSD-style License used for the NVM Library](https://github.com/pmem/nvml/blob/master/LICENSE).**
+under the [BSD-style License used for the PMDK](https://github.com/pmem/pmdk/blob/master/LICENSE).**
 
 **NOTE: Submitting your changes also means that you certify the following:**
 

@@ -16,8 +16,8 @@ provides different options for storage engines and language bindings.
 <ul>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">Installation</a>
 <ul>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_stable_nvml">Installing on Fedora (Stable NVML)</a>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_latest_nvml">Installing on Fedora (Latest NVML)</a>
+<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_stable_pmdk">Installing on Fedora (Stable PMDK)</a>
+<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_latest_pmdk">Installing on Fedora (Latest PMDK)</a>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources">Building From Sources</a>
 </ul>
 </li>
@@ -37,7 +37,7 @@ and language bindings. Engines are requested at runtime by name.
 [Contributing a new engine](https://github.com/pmem/pmemkv/blob/master/CONTRIBUTING.md#engines)
 is easy and encouraged!
 
-![pmemkv-engines](https://user-images.githubusercontent.com/913363/30487989-49e80e86-99f2-11e7-8836-50f27b2ac11a.png)
+![pmemkv-engines](https://user-images.githubusercontent.com/913363/34419331-68619cfe-ebc0-11e7-9443-fa13dc9decbb.png)
 
 ### Available Engines
 
@@ -53,7 +53,7 @@ Language Bindings
 
 `pmemkv` is written in C and C++. Developers can either use native C++ classes directly, or use our `extern "C"` API, or use one of several high-level language bindings that are based on the `extern "C"` API.
 
-![pmemkv-bindings](https://user-images.githubusercontent.com/913363/30488014-6221b11e-99f2-11e7-85af-202ad6013e0a.png)
+![pmemkv-bindings](https://user-images.githubusercontent.com/913363/34419334-6d6252fc-ebc0-11e7-9a34-d78591fb8c40.png)
 
 ### C++
 

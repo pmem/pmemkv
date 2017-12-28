@@ -43,7 +43,7 @@ The `kvtree` engine is intended for single-threaded workloads and is not thread-
 **pmse**
 
 `kvtree` has a lot in common with [pmse](https://github.com/pmem/pmse)
--- both implementations rely on NVML internally, although
+-- both implementations rely on PMDK internally, although
 they expose different APIs externally. Both `pmse` and `kvtree` are based on a B+ tree
 implementation. The biggest difference is that the `pmse`
 tree keeps inner and leaf nodes in persistent memory,
@@ -60,12 +60,12 @@ omits certain important implementation details.
 Beyond providing a clean-room implementation, the design of `kvtree`
 differs from FPTree in several important areas:
 
-1. `kvtree` is written using NVML C++ bindings, which exerts influence on
-its design and implementation. `kvtree` uses generic NVML transactions
+1. `kvtree` is written using PMDK C++ bindings, which exerts influence on
+its design and implementation. `kvtree` uses generic PMDK transactions
 (ie. `transaction::exec_tx()` closures), there is no need for micro-logging
 structures as described in the FPTree paper to make internal delete and
 split operations safe. `kvtree` also adjusts sizes of data structures
-(to fit NVML primitive types) for best cache-line optimization.
+(to fit PMDK primitive types) for best cache-line optimization.
 
 2. FPTree does not specify a hash method implementation, where `kvtree`
 uses a Pearson hash (RFC 3074).
@@ -95,6 +95,6 @@ keys and values.
 
 **cpp_map**
 
-Use of NVML C++ bindings by `kvtree` was lifted from this example program.
+Use of PMDK C++ bindings by `kvtree` was lifted from this example program.
 Many thanks to [@tomaszkapela](https://github.com/tomaszkapela)
 for providing a great example to follow!

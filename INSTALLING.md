@@ -10,17 +10,17 @@ Contents
 --------
 
 <ul>
-<li><a href="#fedora_stable_nvml">Installing on Fedora (Stable NVML)</a></li>
-<li><a href="#fedora_latest_nvml">Installing on Fedora (Latest NVML)</a></li>
+<li><a href="#fedora_stable_pmdk">Installing on Fedora (Stable PMDK)</a></li>
+<li><a href="#fedora_latest_pmdk">Installing on Fedora (Latest PMDK)</a></li>
 <li><a href="#building_from_sources">Building from Sources</a></li>
 <li><a href="#device_dax">Converting Filesystem DAX to Device DAX</a></li>
 <li><a href="#filesystem_dax">Converting Device DAX to Filesystem DAX</a></li>
 <li><a href="#pool_set">Using a Pool Set</a></li>
 </ul>
 
-<a name="fedora_stable_nvml"></a>
+<a name="fedora_stable_pmdk"></a>
 
-Installing on Fedora (Stable NVML)
+Installing on Fedora (Stable PMDK)
 ----------------------------------
 
 Install required packages:
@@ -40,9 +40,9 @@ export HTTP_PROXY="<YOUR PROXY>"
 export HTTPS_PROXY="<YOUR PROXY>"
 make
 ```
-<a name="fedora_latest_nvml"></a>
+<a name="fedora_latest_pmdk"></a>
 
-Installing on Fedora (Latest NVML)
+Installing on Fedora (Latest PMDK)
 ----------------------------------
 
 Install required packages:
@@ -51,13 +51,13 @@ Install required packages:
 su -c 'dnf install autoconf cmake gcc-c++'
 ```
 
-Install latest NVML: (skip proxy steps if you have none)
+Install latest PMDK: (skip proxy steps if you have none)
 
 ```
 git config --global http.proxy <YOUR PROXY>
 cd ~
-git clone https://github.com/pmem/nvml.git
-cd nvml
+git clone https://github.com/pmem/pmdk.git
+cd pmdk
 su -c 'make install'
 ```
 
@@ -81,7 +81,7 @@ Building from Sources
 **Prerequisites**
 
 * 64-bit Linux (OSX and Windows are not yet supported)
-* [NVML](https://github.com/pmem/nvml) (install binary package or build from source)
+* [PMDK](https://github.com/pmem/pmdk) (install binary package or build from source)
 * `make` and `cmake` (version 3.6 or higher)
 * `g++` (version 5.4 or higher)
 
