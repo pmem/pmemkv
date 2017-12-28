@@ -33,6 +33,7 @@
 #include "engines/blackhole.h"
 #include "engines/kvtree.h"
 #include "engines/kvtree2.h"
+#include "engines/versioned_b_tree.h"
 
 namespace pmemkv {
 
@@ -44,6 +45,8 @@ KVEngine* KVEngine::Open(const string& engine, const string& path, const size_t 
             return new kvtree::KVTree(path, size);
         } else if (engine == kvtree2::ENGINE) {
             return new kvtree2::KVTree(path, size);
+        } else if (engine == versioned_b_tree::ENGINE) {
+            return new versioned_b_tree::BTreeEngine(path, size);
         } else {
             return nullptr;
         }
@@ -60,6 +63,8 @@ void KVEngine::Close(KVEngine* kv) {
         delete (kvtree::KVTree*) kv;
     } else if (engine == kvtree2::ENGINE) {
         delete (kvtree2::KVTree*) kv;
+    } else if (engine == versioned_b_tree::ENGINE) {
+        delete (versioned_b_tree::BTreeEngine*) kv;
     }
 }
 
