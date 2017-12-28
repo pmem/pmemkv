@@ -53,7 +53,7 @@
 namespace persistent {
 
 namespace internal {
-	using namespace nvml::obj;
+	using namespace pmem::obj;
 
     class node_t {
         uint64_t _level;

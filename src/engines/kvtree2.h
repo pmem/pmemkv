@@ -38,12 +38,12 @@
 using std::move;
 using std::unique_ptr;
 using std::vector;
-using nvml::obj::p;
-using nvml::obj::persistent_ptr;
-using nvml::obj::make_persistent;
-using nvml::obj::transaction;
-using nvml::obj::delete_persistent;
-using nvml::obj::pool;
+using pmem::obj::p;
+using pmem::obj::persistent_ptr;
+using pmem::obj::make_persistent;
+using pmem::obj::transaction;
+using pmem::obj::delete_persistent;
+using pmem::obj::pool;
 
 namespace pmemkv {
 namespace kvtree2 {

@@ -42,9 +42,9 @@
 #define DO_LOG 0
 #define LOG(msg) if (DO_LOG) std::cout << "[btree] " << msg << "\n"
 
-using nvml::obj::make_persistent_atomic;
-using nvml::obj::transaction;
-using nvml::detail::conditional_add_to_tx;
+using pmem::obj::make_persistent_atomic;
+using pmem::obj::transaction;
+using pmem::detail::conditional_add_to_tx;
 
 namespace pmemkv {
 namespace versioned_b_tree {

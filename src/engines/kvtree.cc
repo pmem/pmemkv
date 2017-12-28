@@ -176,9 +176,9 @@ KVStatus KVTree::Put(const string& key, const string& value) {
             LeafSplitFull(leafnode, hash, key, value);
         }
         return OK;
-    } catch (nvml::transaction_alloc_error) {
+    } catch (pmem::transaction_alloc_error) {
         return FAILED;
-    } catch (nvml::transaction_error) {
+    } catch (pmem::transaction_error) {
         return FAILED;
     }
 }

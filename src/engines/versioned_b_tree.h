@@ -36,8 +36,8 @@
 #include "versioned_b_tree/persistent_b_tree.h"
 #include "versioned_b_tree/pstring.h"
 
-using nvml::obj::pool;
-using nvml::obj::persistent_ptr;
+using pmem::obj::pool;
+using pmem::obj::persistent_ptr;
 
 namespace pmemkv {
 namespace versioned_b_tree {
