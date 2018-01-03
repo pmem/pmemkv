@@ -48,7 +48,7 @@ Installing on Fedora (Latest PMDK)
 Install required packages:
 
 ```
-su -c 'dnf install autoconf cmake gcc-c++'
+su -c 'dnf install autoconf cmake gcc-c++ glib2-devel'
 ```
 
 Install latest PMDK: (skip proxy steps if you have none)
