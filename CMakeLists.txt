@@ -46,16 +46,14 @@ find_package(PkgConfig QUIET)
 include(ExternalProject)
 include(FindThreads)
 
-if(EXISTS ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
 set(GTEST_URL ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
+if(EXISTS ${GTEST_URL})
+# do nothing
 else()
-set(GTEST_URL https://github.com/google/googletest/archive/release-${GTEST_VERSION}.zip)
+execute_process(COMMAND wget -O ${GTEST_URL} https://github.com/google/googletest/archive/release-${GTEST_VERSION}.zip)
 endif()
-ExternalProject_Add(
-    gtest
+ExternalProject_Add(gtest
     URL ${GTEST_URL}
-    DOWNLOAD_NAME googletest-${GTEST_VERSION}.zip
-    DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
     INSTALL_COMMAND ""
     CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
