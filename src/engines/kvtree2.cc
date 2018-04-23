@@ -101,7 +101,7 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
 
 KVStatus KVTree::Get(const int32_t limit, const int32_t keybytes, int32_t* valuebytes,
                      const char* key, char* value) {
-    LOG("Get for key=" << key);
+    LOG("Get for key=" << std::string(key, keybytes));
     auto leafnode = LeafSearch(key);
     if (leafnode) {
         const uint8_t hash = PearsonHash(key, (size_t) keybytes);
