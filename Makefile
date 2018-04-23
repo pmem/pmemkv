@@ -16,7 +16,7 @@ configure:
 sharedlib:
 	cd ./bin && make pmemkv
 
-install: sharedlib
+install:
 	cp ./bin/libpmemkv.so $(prefix)/lib
 	cp ./src/pmemkv.h $(prefix)/include/libpmemkv.h
 
