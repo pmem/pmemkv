@@ -58,19 +58,18 @@ const string ENGINE = "kvtree2";                           // engine identifier
 
 class KVSlot {
   public:
-    uint8_t hash() const { return get_ph(); }                    // Pearson hash for key
-    uint8_t hash_direct(char *p) const { return *((uint8_t *)(p + sizeof(uint32_t) + sizeof(uint32_t))); }                    // Pearson hash for key
-    const char* key() const { return ((char *)(kv.get()) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)); }           // key as C-style string
-    const char* key_direct(char *p) const { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)); }           // key as C-style string
-    const uint32_t keysize() const { return get_ks(); }          // size of key (without null)
-    const uint32_t keysize_direct(char *p) const { return *((uint32_t *)(p)); }          // size of key (without null)
-    const char* val() const { return ((char *)(kv.get()) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + get_ks() + 1); }  // pointer to binary-safe value
-    const char* val_direct(char *p) const { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + *((uint32_t *)(p)) + 1); }  // pointer to binary-safe value
-    const uint32_t valsize() const { return get_vs(); }          // size of length (without null)
-    const uint32_t valsize_direct(char *p) const { return *((uint32_t *)(p + sizeof(uint32_t))); }          // size of length (without null)
-    void clear();                                          // frees persistent memory
-    void set(const uint8_t hash, const string& key,        // sets all slot fields
-             const string& value);
+    uint8_t hash() const { return get_ph(); }
+    uint8_t hash_direct(char *p) const { return *((uint8_t *)(p + sizeof(uint32_t) + sizeof(uint32_t))); }
+    const char* key() const { return ((char *)(kv.get()) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)); }
+    const char* key_direct(char *p) const { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)); }
+    const uint32_t keysize() const { return get_ks(); }
+    const uint32_t keysize_direct(char *p) const { return *((uint32_t *)(p)); }
+    const char* val() const { return ((char *)(kv.get()) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + get_ks() + 1); }
+    const char* val_direct(char *p) const { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + *((uint32_t *)(p)) + 1); }
+    const uint32_t valsize() const { return get_vs(); }
+    const uint32_t valsize_direct(char *p) const { return *((uint32_t *)(p + sizeof(uint32_t))); }
+    void clear();
+    void set(const uint8_t hash, const string& key, const string& value);
     void set_ph(uint8_t v) {*((uint8_t *)((char *)(kv.get()) + sizeof(uint32_t) + sizeof(uint32_t))) = v;}
     void set_ph_direct(char *p, uint8_t v) {*((uint8_t *)(p + sizeof(uint32_t) + sizeof(uint32_t))) = v;}
     void set_ks(uint32_t v) {*((uint32_t *)(kv.get())) = v;}
@@ -85,9 +84,6 @@ class KVSlot {
     uint32_t get_vs_direct(char *p) const {return *((uint32_t *)((char *)(p) + sizeof(uint32_t)));}
     bool empty();
   private:
-    //uint8_t ph;                                            // Pearson hash for key
-    //uint32_t ks;                                           // key size
-    //uint32_t vs;                                           // value size
     persistent_ptr<char[]> kv;                             // buffer for key & value
 };
 
@@ -123,7 +119,7 @@ struct KVLeafNode final : KVNode {                         // volatile leaf node
 
 struct KVRecoveredLeaf {                                   // temporary wrapper used for recovery
     unique_ptr<KVLeafNode> leafnode;                       // leaf node being recovered
-    char* max_key;                                         // highest sorting key present
+    string max_key;                                        // highest sorting key present
 };
 
 struct KVTreeAnalysis {                                    // tree analysis structure
