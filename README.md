@@ -135,7 +135,7 @@ list of supported parameters is slightly different.
 
 ```
 pmemkv_bench
---engine=<name>            (storage engine name, default: kvtree)
+--engine=<name>            (storage engine name, default: kvtree2)
 --db=<location>            (path to persistent pool, default: /dev/shm/pmemkv)
 --db_size_in_gb=<integer>  (size of persistent pool in GB, default: 1)
 --histogram=<0|1>          (show histograms when reporting latencies)
