@@ -42,7 +42,7 @@
 
 static const string USAGE =
         "pmemkv_bench\n"
-                "--engine=<name>            (storage engine name, default: kvtree)\n"
+                "--engine=<name>            (storage engine name, default: kvtree2)\n"
                 "--db=<location>            (path to persistent pool, default: /dev/shm/pmemkv)\n"
                 "--db_size_in_gb=<integer>  (size of persistent pool in GB, default: 1)\n"
                 "--histogram=<0|1>          (show histograms when reporting latencies)\n"
@@ -65,7 +65,7 @@ static const char *FLAGS_benchmarks =
         "fillrandom,overwrite,fillseq,readrandom,readseq,readrandom,readmissing,readrandom,deleteseq";
 
 // Default engine name
-static const char *FLAGS_engine = "kvtree";
+static const char *FLAGS_engine = "kvtree2";
 
 // Number of key/values to place in database
 static int FLAGS_num = 1000000;

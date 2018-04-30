@@ -65,7 +65,7 @@ using namespace pmemkv;
 
 int main() {
     // open the datastore
-    KVEngine* kv = new KVEngine("kvtree", "/dev/shm/mykv", 8388608);  // 8 MB
+    KVEngine* kv = new KVEngine("kvtree2", "/dev/shm/mykv", 8388608);  // 8 MB
 
     // put new key
     KVStatus s = kv->Put("key1", "value1");
@@ -95,7 +95,7 @@ int main() {
     char value[VAL_LEN];
 
     /* open the datastore */
-    KVEngine* kv = kvengine_open("kvtree", "/dev/shm/mykv", 8388608);
+    KVEngine* kv = kvengine_open("kvtree2", "/dev/shm/mykv", 8388608);
 
     /* put new key */
     int32_t len = strlen("value1");
