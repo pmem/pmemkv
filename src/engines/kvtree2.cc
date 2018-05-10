@@ -44,24 +44,19 @@
 namespace pmemkv {
 namespace kvtree2 {
 
-KVTree::KVTree(const string& path, const size_t size) : pmpath(path) {
-    if (path.find("/dev/dax") == 0) {
-        LOG("Opening device dax pool, path=" << path);
-        pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
-        pmsize = 0;
-    } else if (access(path.c_str(), F_OK) != 0) {
-        LOG("Creating filesystem pool, path=" << path << ", size=" << to_string(size));
-        pmpool = pool<KVRoot>::create(path.c_str(), LAYOUT, size, S_IRWXU);
-        pmsize = size;
-    } else {
-        LOG("Opening filesystem pool, path=" << path);
-        pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
-        struct stat st;
-        stat(path.c_str(), &st);
-        pmsize = (size_t) st.st_size;
+KVTree::KVTree(const string& path, const size_t size, const init_mode mode) : pmpath(path) {
+    switch(mode) {
+    case init_mode::CREATE:
+       pmpool = pool<KVRoot>::create(path.c_str(), LAYOUT, size, S_IRWXU);
+       pmsize = size;
+       break;
+    case init_mode::OPEN:
+       assert(size == 0);
+       pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
+       pmsize = 0;
+       break;
     }
     Recover();
-    LOG("Opened ok");
 }
 
 KVTree::~KVTree() {

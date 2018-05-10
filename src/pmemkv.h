@@ -55,10 +55,25 @@ namespace pmemkv {
 const string LAYOUT = "pmemkv";                            // pool layout identifier
 
 class KVEngine {                                           // storage engine implementations
-  public:
-    static KVEngine* Open(const string& engine,            // open storage engine
-                          const string& path,              // path to persistent pool
-                          size_t size);                    // size used when creating pool
+public:
+    enum init_mode {
+        CREATE,
+        OPEN
+    };
+private:
+    static KVEngine* CreateOpenCommon(const string& engine,
+                                      const string& path,
+                                      const size_t size,
+                                      init_mode mode);
+
+public:
+
+
+   static KVEngine* Create(const string& engine,           // open storage engine
+                         const string& path,               // path to persistent pool
+                         size_t size);                     // size used when creating pool
+   static KVEngine* Open(const string& engine,             // open storage engine
+                         const string& path);              // path to persistent pool
     static void Close(KVEngine* kv);                       // close storage engine
 
     virtual string Engine() = 0;                           // engine identifier
@@ -95,9 +110,12 @@ typedef struct KVEngine KVEngine;
 struct FFIBuffer;
 typedef struct FFIBuffer FFIBuffer;
 
-KVEngine* kvengine_open(const char* engine,                // open storage engine
+KVEngine* kvengine_create(const char* engine,                // create storage engine
                         const char* path,
-                        size_t size);
+         const size_t size);
+
+KVEngine* kvengine_open(const char* engine,                // open storage engine
+                        const char* path);
 
 void kvengine_close(KVEngine* kv);                         // close storage engine
 

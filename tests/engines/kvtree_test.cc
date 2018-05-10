@@ -31,9 +31,14 @@
  */
 
 #include "gtest/gtest.h"
+
+#include <libpmempool.h>
+
 #include "../mock_tx_alloc.h"
+#include "../../src/pmemkv.h"
 #include "../../src/engines/kvtree2.h"
 
+using namespace pmemkv;
 using namespace pmemkv::kvtree2;
 
 const string PATH = "/dev/shm/pmemkv";
@@ -53,8 +58,8 @@ public:
     KVTree *kv;
 
     KVTest() {
-        std::remove(PATH.c_str());
-        Open();
+        pmempool_rm(PATH.c_str(), 0);
+        Create();
     }
 
     ~KVTest() { delete kv; }
@@ -71,8 +76,12 @@ public:
     }
 
 private:
+    void Create() {
+        kv = new KVTree(PATH, SIZE, KVEngine::CREATE);
+    }
+
     void Open() {
-        kv = new KVTree(PATH, SIZE);
+        kv = new KVTree(PATH, 0, KVEngine::OPEN);
     }
 };
 
@@ -81,7 +90,7 @@ private:
 // =============================================================================================
 
 TEST_F(KVEmptyTest, CreateInstanceTest) {
-    KVTree *kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
+    KVTree *kv = new KVTree(PATH, PMEMOBJ_MIN_POOL, KVEngine::CREATE);
     KVTreeAnalysis analysis = {};
     kv->Analyze(analysis);
     ASSERT_EQ(analysis.size, PMEMOBJ_MIN_POOL);
@@ -89,18 +98,18 @@ TEST_F(KVEmptyTest, CreateInstanceTest) {
 }
 
 TEST_F(KVEmptyTest, CreateInstanceFromExistingTest) {
-    KVTree *kv = new KVTree(PATH, PMEMOBJ_MIN_POOL * 2);
+    KVTree *kv = new KVTree(PATH, PMEMOBJ_MIN_POOL * 2, KVEngine::CREATE);
     delete kv;
-    kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
+    kv = new KVTree(PATH, 0, KVEngine::OPEN);
     KVTreeAnalysis analysis = {};
     kv->Analyze(analysis);
-    ASSERT_EQ(analysis.size, PMEMOBJ_MIN_POOL * 2);
+    ASSERT_EQ(analysis.size, 0); // XXX cannot obtain pool size during open
     delete kv;
 }
 
 TEST_F(KVEmptyTest, FailsToCreateInstanceWithInvalidPath) {
     try {
-        new KVTree("/tmp/123/234/345/456/567/678/nope.nope", PMEMOBJ_MIN_POOL);
+        new KVTree("/tmp/123/234/345/456/567/678/nope.nope", PMEMOBJ_MIN_POOL, KVEngine::CREATE);
         FAIL();
     } catch (...) {
         // do nothing, expected to happen
@@ -109,7 +118,7 @@ TEST_F(KVEmptyTest, FailsToCreateInstanceWithInvalidPath) {
 
 TEST_F(KVEmptyTest, FailsToCreateInstanceWithHugeSize) {
     try {
-        new KVTree(PATH, 9223372036854775807);   // 9.22 exabytes
+        new KVTree(PATH, 9223372036854775807, KVEngine::CREATE);   // 9.22 exabytes
         FAIL();
     } catch (...) {
         // do nothing, expected to happen
@@ -118,7 +127,7 @@ TEST_F(KVEmptyTest, FailsToCreateInstanceWithHugeSize) {
 
 TEST_F(KVEmptyTest, FailsToCreateInstanceWithTinySize) {
     try {
-        new KVTree(PATH, PMEMOBJ_MIN_POOL - 1);  // too small
+        new KVTree(PATH, PMEMOBJ_MIN_POOL - 1, KVEngine::CREATE);  // too small
         FAIL();
     } catch (...) {
         // do nothing, expected to happen
@@ -834,7 +843,7 @@ public:
 
     void Reopen() {
         delete kv;
-        kv = new KVTree(PATH, SIZE);
+        kv = new KVTree(PATH, SIZE, KVEngine::OPEN);
     }
 
     void Validate() {
@@ -866,7 +875,7 @@ private:
             ASSERT_TRUE(std::system(("cp -f " + PATH_CACHED + " " + PATH).c_str()) == 0);
         } else {
             std::cout << "!!! creating cached copy at " << PATH_CACHED << "\n";
-            KVTree *kvt = new KVTree(PATH, SIZE);
+            KVTree *kvt = new KVTree(PATH, SIZE, KVEngine::CREATE);
             for (int i = 1; i <= LARGE_LIMIT; i++) {
                 string istr = to_string(i);
                 ASSERT_TRUE(kvt->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
@@ -874,7 +883,7 @@ private:
             delete kvt;
             ASSERT_TRUE(std::system(("cp -f " + PATH + " " + PATH_CACHED).c_str()) == 0);
         }
-        kv = new KVTree(PATH, SIZE);
+        kv = new KVTree(PATH, SIZE, KVEngine::OPEN);
     }
 };
 
