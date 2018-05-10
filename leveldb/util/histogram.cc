@@ -113,6 +113,12 @@ std::string Histogram::ToString() const {
            "Min: %.4f  Median: %.4f  Max: %.4f\n",
            (num_ == 0.0 ? 0.0 : min_), Median(), max_);
   r.append(buf);
+  snprintf(buf, sizeof(buf),
+           "Percentiles: P50: %.2f P75: %.2f P99: %.2f P99.9: %.2f P99.99: %.2f\n",
+           Percentile(50), Percentile(75), Percentile(99),
+           Percentile(99.9), Percentile(99.99)
+          );
+  r.append(buf);
   r.append("------------------------------------------------------\n");
   const double mult = 100.0 / num_;
   double sum = 0;
