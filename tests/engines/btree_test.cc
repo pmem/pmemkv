@@ -31,9 +31,9 @@
  */
 
 #include "gtest/gtest.h"
-#include "../../src/engines/versioned_b_tree.h"
+#include "../../src/engines/btree.h"
 
-using namespace pmemkv::versioned_b_tree;
+using namespace pmemkv::btree;
 
 const string PATH = "/dev/shm/pmemkv";
 const size_t SIZE = 1024ull * 1024ull * 512ull;

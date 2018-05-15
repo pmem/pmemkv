@@ -33,14 +33,14 @@
 #pragma once
 
 #include "../pmemkv.h"
-#include "versioned_b_tree/persistent_b_tree.h"
-#include "versioned_b_tree/pstring.h"
+#include "btree/persistent_b_tree.h"
+#include "btree/pstring.h"
 
 using pmem::obj::pool;
 using pmem::obj::persistent_ptr;
 
 namespace pmemkv {
-namespace versioned_b_tree {
+namespace btree {
 
 const string ENGINE = "btree";                         // engine identifier
 const size_t DEGREE = 64;
@@ -78,5 +78,5 @@ class BTreeEngine : public KVEngine {
     btree_type* my_btree;
 };
 
-} // namespace versioned_b_tree
+} // namespace btree
 } // namespace pmemkv

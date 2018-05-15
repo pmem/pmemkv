@@ -37,7 +37,7 @@
 #include <libpmemobj++/make_persistent_atomic.hpp>
 #include <libpmemobj++/detail/common.hpp>
 
-#include "versioned_b_tree.h"
+#include "btree.h"
 
 #define DO_LOG 0
 #define LOG(msg) if (DO_LOG) std::cout << "[btree] " << msg << "\n"
@@ -47,7 +47,7 @@ using pmem::obj::transaction;
 using pmem::detail::conditional_add_to_tx;
 
 namespace pmemkv {
-namespace versioned_b_tree {
+namespace btree {
 
 BTreeEngine::BTreeEngine(const string& path, const size_t size) {
     if (path.find("/dev/dax") == 0) {
@@ -118,5 +118,5 @@ void BTreeEngine::Recover() {
     }
 }
 
-} // namespace versioned_b_tree
+} // namespace btree
 } // namespace pmemkv
