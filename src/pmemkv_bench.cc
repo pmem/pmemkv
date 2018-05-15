@@ -211,9 +211,10 @@ public:
         }
         AppendWithSpace(&extra, message_);
 
-        fprintf(stdout, "%-12s : %11.3f micros/op;%s%s\n",
+        fprintf(stdout, "%-12s : %11.3f micros/op %.0f ops/sec;%s%s\n",
                 name.ToString().c_str(),
                 seconds_ * 1e6 / done_,
+                done_ / seconds_,
                 (extra.empty() ? "" : " "),
                 extra.c_str());
         if (FLAGS_histogram) {
