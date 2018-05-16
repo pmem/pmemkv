@@ -132,7 +132,9 @@ struct KVTreeAnalysis {                                    // tree analysis stru
 
 class KVTree : public KVEngine {                           // hybrid B+ tree engine
   public:
-    KVTree(const string& path, size_t size);               // default constructor
+    KVTree(const string& path,                             // default constructor
+           size_t size,
+           init_mode mode);
     ~KVTree();                                             // default destructor
 
     string Engine() final { return ENGINE; }               // engine identifier

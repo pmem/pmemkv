@@ -33,6 +33,9 @@
 #include <sys/types.h>
 #include <cstdio>
 #include <cstdlib>
+
+#include <libpmempool.h>
+
 #include "leveldb/env.h"
 #include "port/port_posix.h"
 #include "histogram.h"
@@ -44,6 +47,7 @@ static const string USAGE =
         "pmemkv_bench\n"
                 "--engine=<name>            (storage engine name, default: kvtree2)\n"
                 "--db=<location>            (path to persistent pool, default: /dev/shm/pmemkv)\n"
+                "--db_is_poolset            (persistent pool is described by the poolset file)\n"
                 "--db_size_in_gb=<integer>  (size of persistent pool in GB, default: 1)\n"
                 "--histogram=<0|1>          (show histograms when reporting latencies)\n"
                 "--num=<integer>            (number of keys to place in database, default: 1000000)\n"
@@ -84,6 +88,9 @@ static bool FLAGS_histogram = false;
 
 // Use the db with the following name.
 static const char *FLAGS_db = NULL;
+
+// Use the db as a poolset
+static bool FLAGS_db_is_poolset = false;
 
 // Use following size when opening the database.
 static int FLAGS_db_size_in_gb = 1;
@@ -385,20 +392,14 @@ public:
 
             if (fresh_db) {
                 if (kv_ != NULL) {
-                    delete kv_;
+                    pmemkv::KVEngine::Close(kv_);
                     kv_ = NULL;
                 }
-                string db = FLAGS_db;
-                if (db.find("/dev/dax") == 0) {
-                    fprintf(stdout, "skipped deleting for DAX device\n");
-                } else {
-                    auto start = g_env->NowMicros();
-                    std::remove(FLAGS_db);
-                    fprintf(stdout, "%-12s : %11.3f millis/op;\n", "removed", ((g_env->NowMicros() - start) * 1e-3));
-                }
-            }
-
-            if (kv_ == NULL) {
+                auto start = g_env->NowMicros();
+                pmempool_rm(FLAGS_db, 0);
+                fprintf(stdout, "%-12s : %11.3f millis/op;\n", "removed", ((g_env->NowMicros() - start) * 1e-3));
+                Create();
+            } else if (kv_ == NULL) {
                 Open();
             }
 
@@ -486,10 +487,21 @@ private:
         delete[] arg;
     }
 
+    void Create() {
+        assert(kv_ == NULL);
+        size_t size = 0;
+        if (!FLAGS_db_is_poolset) {
+            size = (size_t) (1024 * 1024 * 1024 * FLAGS_db_size_in_gb);
+        }
+        auto start = g_env->NowMicros();
+        kv_ = pmemkv::KVEngine::Create(FLAGS_engine, FLAGS_db, size);
+        fprintf(stdout, "%-12s : %11.3f millis/op;\n", "open", ((g_env->NowMicros() - start) * 1e-3));
+    }
+
     void Open() {
         assert(kv_ == NULL);
         auto start = g_env->NowMicros();
-        kv_ = pmemkv::KVEngine::Open(FLAGS_engine, FLAGS_db, ((size_t) 1024 * 1024 * 1024 * FLAGS_db_size_in_gb));
+        kv_ = pmemkv::KVEngine::Open(FLAGS_engine, FLAGS_db);
         fprintf(stdout, "%-12s : %11.3f millis/op;\n", "open", ((g_env->NowMicros() - start) * 1e-3));
     }
 
@@ -608,6 +620,8 @@ int main(int argc, char **argv) {
             FLAGS_value_size = n;
         } else if (strncmp(argv[i], "--db=", 5) == 0) {
             FLAGS_db = argv[i] + 5;
+        } else if (strncmp(argv[i], "--db_is_poolset", 15) == 0) {
+            FLAGS_db_is_poolset = true;
         } else if (sscanf(argv[i], "--db_size_in_gb=%d%c", &n, &junk) == 1) {
             FLAGS_db_size_in_gb = n;
         } else {

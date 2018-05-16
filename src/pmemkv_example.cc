@@ -39,7 +39,7 @@ using namespace pmemkv;
 
 int main() {
     LOG("Opening datastore");
-    KVEngine* kv = KVEngine::Open("kvtree2", "/dev/shm/pmemkv", PMEMOBJ_MIN_POOL);
+    KVEngine* kv = KVEngine::Create("kvtree2", "/dev/shm/pmemkv", PMEMOBJ_MIN_POOL);
 
     LOG("Putting new value");
     KVStatus s = kv->Put("key1", "value1");

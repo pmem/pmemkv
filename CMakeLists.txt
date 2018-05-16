@@ -69,15 +69,17 @@ include_directories("${source_dir}/include")
 
 if(PKG_CONFIG_FOUND)
     pkg_check_modules(PMEMOBJ++ REQUIRED libpmemobj++)
+    pkg_check_modules(PMEMPOOL REQUIRED libpmempool)
 else()
     find_package(PMEMOBJ++ REQUIRED)
+    find_package(PMEMPOOL REQUIRED)
 endif()
 
-include_directories(${PMEMOBJ++_INCLUDE_DIRS})
-link_directories(${PMEMOBJ++_LIBRARY_DIRS})
+include_directories(${PMEMOBJ++_INCLUDE_DIRS} ${PMEMPOOL_INCLUDE_DIRS})
+link_directories(${PMEMOBJ++_LIBRARY_DIRS} ${PMEMPOOL_LIBRARY_DIRS})
 
 add_library(pmemkv SHARED ${SOURCE_FILES})
-target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES})
+target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES} ${PMEMPOOL_LIBRARIES})
 
 add_executable(pmemkv_example src/pmemkv_example.cc)
 target_link_libraries(pmemkv_example pmemkv)

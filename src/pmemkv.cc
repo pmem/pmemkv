@@ -37,22 +37,32 @@
 
 namespace pmemkv {
 
-KVEngine* KVEngine::Open(const string& engine, const string& path, const size_t size) {
+KVEngine* KVEngine::CreateOpenCommon(const string& engine, const string& path,
+                                     const size_t size, init_mode mode) {
     try {
         if (engine == blackhole::ENGINE) {
             return new blackhole::Blackhole();
         } else if (engine == kvtree::ENGINE) {
-            return new kvtree::KVTree(path, size);
+            return new kvtree::KVTree(path, size, mode);
         } else if (engine == kvtree2::ENGINE) {
-            return new kvtree2::KVTree(path, size);
+            return new kvtree2::KVTree(path, size, mode);
         } else if (engine == btree::ENGINE) {
-            return new btree::BTreeEngine(path, size);
+            return new btree::BTreeEngine(path, size, mode);
         } else {
             return nullptr;
         }
     } catch (...) {
         return nullptr;
     }
+}
+
+KVEngine* KVEngine::Create(const string& engine, const string& path,
+                           const size_t size) {
+    return CreateOpenCommon(engine, path, size, init_mode::CREATE);
+}
+
+KVEngine* KVEngine::Open(const string& engine, const string& path) {
+   return CreateOpenCommon(engine, path, 0, init_mode::OPEN);
 }
 
 void KVEngine::Close(KVEngine* kv) {
@@ -68,8 +78,13 @@ void KVEngine::Close(KVEngine* kv) {
     }
 }
 
-extern "C" KVEngine* kvengine_open(const char* engine, const char* path, const size_t size) {
-    return KVEngine::Open(engine, path, size);
+extern "C" KVEngine* kvengine_create(const char* engine, const char* path,
+                                     const size_t size) {
+    return KVEngine::Create(engine, path, size);
+};
+
+extern "C" KVEngine* kvengine_open(const char* engine, const char* path) {
+    return KVEngine::Open(engine, path);
 };
 
 extern "C" void kvengine_close(KVEngine* kv) {
