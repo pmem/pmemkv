@@ -50,17 +50,15 @@ namespace pmemkv {
 namespace btree {
 
 BTreeEngine::BTreeEngine(const string& path, const size_t size) {
-    if (path.find("/dev/dax") == 0) {
-        LOG("Opening device dax pool, path=" << path);
-        pmpool = pool<RootData>::open(path.c_str(), LAYOUT);
-    } else if (access(path.c_str(), F_OK) != 0) {
+    if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
         LOG("Creating filesystem pool, path=" << path << ", size=" << to_string(size));
         pmpool = pool<RootData>::create(path.c_str(), LAYOUT, size, S_IRWXU);
     } else {
-        LOG("Opening filesystem pool, path=" << path);
+        LOG("Opening pool, path=" << path);
         pmpool = pool<RootData>::open(path.c_str(), LAYOUT);
     }
     Recover();
+    LOG("Opened ok");
 }
 
 BTreeEngine::~BTreeEngine() {
