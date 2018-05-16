@@ -127,7 +127,6 @@ struct KVTreeAnalysis {                                    // tree analysis stru
     size_t leaf_prealloc;                                  // count of persisted but unused leaves
     size_t leaf_total;                                     // count of all persisted leaves
     string path;                                           // path when constructed
-    size_t size;                                           // actual size of persistent pool
 };
 
 class KVTree : public KVEngine {                           // hybrid B+ tree engine
@@ -179,7 +178,6 @@ class KVTree : public KVEngine {                           // hybrid B+ tree eng
     vector<persistent_ptr<KVLeaf>> leaves_prealloc;        // persisted but unused leaves
     const string pmpath;                                   // path when constructed
     pool<KVRoot> pmpool;                                   // pool for persistent root
-    size_t pmsize;                                         // actual size of persistent pool
     unique_ptr<KVNode> tree_top;                           // pointer to uppermost inner node
 };
 

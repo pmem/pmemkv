@@ -84,17 +84,9 @@ TEST_F(KVEmptyTest, CreateInstanceTest) {
     KVTree *kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
     KVTreeAnalysis analysis = {};
     kv->Analyze(analysis);
-    ASSERT_EQ(analysis.size, PMEMOBJ_MIN_POOL);
-    delete kv;
-}
-
-TEST_F(KVEmptyTest, CreateInstanceFromExistingTest) {
-    KVTree *kv = new KVTree(PATH, PMEMOBJ_MIN_POOL * 2);
-    delete kv;
-    kv = new KVTree(PATH, PMEMOBJ_MIN_POOL);
-    KVTreeAnalysis analysis = {};
-    kv->Analyze(analysis);
-    ASSERT_EQ(analysis.size, PMEMOBJ_MIN_POOL * 2);
+    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_prealloc, 0);
+    ASSERT_EQ(analysis.leaf_total, 0);
     delete kv;
 }
 

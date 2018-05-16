@@ -48,17 +48,12 @@ KVTree::KVTree(const string& path, const size_t size) : pmpath(path) {
     if (path.find("/dev/dax") == 0) {
         LOG("Opening device dax pool, path=" << path);
         pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
-        pmsize = 0;
     } else if (access(path.c_str(), F_OK) != 0) {
         LOG("Creating filesystem pool, path=" << path << ", size=" << to_string(size));
         pmpool = pool<KVRoot>::create(path.c_str(), LAYOUT, size, S_IRWXU);
-        pmsize = size;
     } else {
         LOG("Opening filesystem pool, path=" << path);
         pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
-        struct stat st;
-        stat(path.c_str(), &st);
-        pmsize = (size_t) st.st_size;
     }
     Recover();
     LOG("Opened ok");
@@ -80,7 +75,6 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
     analysis.leaf_prealloc = leaves_prealloc.size();
     analysis.leaf_total = 0;
     analysis.path = pmpath;
-    analysis.size = pmsize;
 
     // iterate persistent leaves for stats
     auto leaf = pmpool.get_root()->head;
