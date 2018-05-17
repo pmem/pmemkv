@@ -138,15 +138,17 @@ list of supported parameters is slightly different.
 pmemkv_bench
 --engine=<name>            (storage engine name, default: kvtree2)
 --db=<location>            (path to persistent pool, default: /dev/shm/pmemkv)
---db_size_in_gb=<integer>  (size of persistent pool in GB, default: 1)
+                           (note: file on DAX filesystem, DAX device, or poolset file)
+--db_size_in_gb=<integer>  (size of persistent pool to create in GB, default: 0)
+                           (note: always use 0 with poolset or device DAX configs)
 --histogram=<0|1>          (show histograms when reporting latencies)
 --num=<integer>            (number of keys to place in database, default: 1000000)
 --reads=<integer>          (number of read operations, default: 1000000)
 --threads=<integer>        (number of concurrent threads, default: 1)
 --value_size=<integer>     (size of values in bytes, default: 100)
 --benchmarks=<name>,       (comma-separated list of benchmarks to run)
-    fillseq                (load N values in sequential key order into fresh db)
-    fillrandom             (load N values in random key order into fresh db)
+    fillseq                (load N values in sequential key order)
+    fillrandom             (load N values in random key order)
     overwrite              (replace N values in random key order)
     readseq                (read N values in sequential key order)
     readrandom             (read N values in random key order)
@@ -158,21 +160,23 @@ pmemkv_bench
 Benchmarking on emulated persistent memory:
 
 ```
-PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_bench
-rm -rf /dev/shm/pmemkv
+PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_bench --db=/dev/shm/pmemkv --db_size_in_gb=1
 ```
 
 Benchmarking on filesystem DAX:
 
 ```
-(assuming /dev/pmemX device mounted as /mnt/pmem filesystem)
-PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_bench --db=/mnt/pmem/pmemkv
-rm -rf /mnt/pmem/pmemkv
+PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_bench --db=/mnt/pmem/pmemkv --db_size_in_gb=1
 ```
 
 Benchmarking on device DAX:
 
 ```
-(assuming /dev/dax1.0 device present)
 ./bin/pmemkv_bench --db=/dev/dax1.0
+```
+
+Benchmarking with poolset:
+
+```
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_bench --db=~/pmemkv.poolset
 ```

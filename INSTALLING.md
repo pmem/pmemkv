@@ -240,7 +240,7 @@ Writing superblocks and filesystem accounting information: done
 Now pass the filesystem DAX device as a parameter to `pmemkv` like this:
 
 ```
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_bench --db=/mnt/pmem/pmemkv
+PMEM_IS_PMEM_FORCE=1 ./pmemkv_bench --db=/mnt/pmem/pmemkv --db_size_in_gb=1
 ```
 
 <a name="pool_set"></a>

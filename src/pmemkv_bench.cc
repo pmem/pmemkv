@@ -42,23 +42,25 @@
 
 static const string USAGE =
         "pmemkv_bench\n"
-                "--engine=<name>            (storage engine name, default: kvtree2)\n"
-                "--db=<location>            (path to persistent pool, default: /dev/shm/pmemkv)\n"
-                "--db_size_in_gb=<integer>  (size of persistent pool in GB, default: 1)\n"
-                "--histogram=<0|1>          (show histograms when reporting latencies)\n"
-                "--num=<integer>            (number of keys to place in database, default: 1000000)\n"
-                "--reads=<integer>          (number of read operations, default: 1000000)\n"
-                "--threads=<integer>        (number of concurrent threads, default: 1)\n"
-                "--value_size=<integer>     (size of values in bytes, default: 100)\n"
-                "--benchmarks=<name>,       (comma-separated list of benchmarks to run)\n"
-                "    fillseq                (load N values in sequential key order into fresh db)\n"
-                "    fillrandom             (load N values in random key order into fresh db)\n"
-                "    overwrite              (replace N values in random key order)\n"
-                "    readseq                (read N values in sequential key order)\n"
-                "    readrandom             (read N values in random key order)\n"
-                "    readmissing            (read N missing values in random key order)\n"
-                "    deleteseq              (delete N values in sequential key order)\n"
-                "    deleterandom           (delete N values in random key order)\n";
+        "--engine=<name>            (storage engine name, default: kvtree2)\n"
+        "--db=<location>            (path to persistent pool, default: /dev/shm/pmemkv)\n"
+        "                           (note: file on DAX filesystem, DAX device, or poolset file)\n"
+        "--db_size_in_gb=<integer>  (size of persistent pool to create in GB, default: 0)\n"
+        "                           (note: always use 0 with poolset or device DAX configs)\n"
+        "--histogram=<0|1>          (show histograms when reporting latencies)\n"
+        "--num=<integer>            (number of keys to place in database, default: 1000000)\n"
+        "--reads=<integer>          (number of read operations, default: 1000000)\n"
+        "--threads=<integer>        (number of concurrent threads, default: 1)\n"
+        "--value_size=<integer>     (size of values in bytes, default: 100)\n"
+        "--benchmarks=<name>,       (comma-separated list of benchmarks to run)\n"
+        "    fillseq                (load N values in sequential key order)\n"
+        "    fillrandom             (load N values in random key order)\n"
+        "    overwrite              (replace N values in random key order)\n"
+        "    readseq                (read N values in sequential key order)\n"
+        "    readrandom             (read N values in random key order)\n"
+        "    readmissing            (read N missing values in random key order)\n"
+        "    deleteseq              (delete N values in sequential key order)\n"
+        "    deleterandom           (delete N values in random key order)\n";
 
 // Default list of comma-separated operations to run
 static const char *FLAGS_benchmarks =
@@ -86,7 +88,7 @@ static bool FLAGS_histogram = false;
 static const char *FLAGS_db = NULL;
 
 // Use following size when opening the database.
-static int FLAGS_db_size_in_gb = 1;
+static int FLAGS_db_size_in_gb = 0;
 
 using namespace leveldb;
 
@@ -385,13 +387,10 @@ public:
 
             if (fresh_db) {
                 if (kv_ != NULL) {
-                    delete kv_;
+                    pmemkv::KVEngine::Close(kv_);
                     kv_ = NULL;
                 }
-                string db = FLAGS_db;
-                if (db.find("/dev/dax") == 0) {
-                    fprintf(stdout, "skipped deleting for DAX device\n");
-                } else {
+                if (FLAGS_db_size_in_gb > 0) {
                     auto start = g_env->NowMicros();
                     std::remove(FLAGS_db);
                     fprintf(stdout, "%-12s : %11.3f millis/op;\n", "removed", ((g_env->NowMicros() - start) * 1e-3));
@@ -490,6 +489,10 @@ private:
         assert(kv_ == NULL);
         auto start = g_env->NowMicros();
         kv_ = pmemkv::KVEngine::Open(FLAGS_engine, FLAGS_db, ((size_t) 1024 * 1024 * 1024 * FLAGS_db_size_in_gb));
+        if (kv_ == nullptr) {
+            fprintf(stderr, "Cannot open db (%s) with %i GB capacity\n", FLAGS_db, FLAGS_db_size_in_gb);
+            exit(-42);
+        }
         fprintf(stdout, "%-12s : %11.3f millis/op;\n", "open", ((g_env->NowMicros() - start) * 1e-3));
     }
 
