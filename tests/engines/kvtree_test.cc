@@ -131,6 +131,7 @@ TEST_F(KVTest, BinaryKeyTest) {
     ASSERT_TRUE(kv->Get("a", &value2) == OK && value2 == "should_not_change");
     ASSERT_TRUE(kv->Remove(key1) == OK);
     string value3;
+    ASSERT_TRUE(kv->Get(key1, &value3) == NOT_FOUND);
     ASSERT_TRUE(kv->Get("a", &value3) == OK && value3 == "should_not_change");
 }
 
@@ -138,8 +139,7 @@ TEST_F(KVTest, BinaryValueTest) {
     string value("A\0B\0\0C", 6);
     ASSERT_TRUE(kv->Put("key1", value) == OK) << pmemobj_errormsg();
     string value_out;
-    ASSERT_TRUE(kv->Get("key1", &value_out) == OK && 
-                memcmp(&value[0], &value_out[0], 6) == 0);
+    ASSERT_TRUE(kv->Get("key1", &value_out) == OK && memcmp(&value[0], &value_out[0], 6) == 0);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
@@ -320,6 +320,8 @@ TEST_F(KVTest, PutValuesOfMaximumSizeTest) {
 TEST_F(KVTest, RemoveAllTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
+    string value;
+    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
@@ -329,11 +331,14 @@ TEST_F(KVTest, RemoveAllTest) {
 TEST_F(KVTest, RemoveAndInsertTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     string value;
+    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
+    ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
     Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_empty, 1);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
@@ -463,6 +468,8 @@ TEST_F(KVTest, RemoveAllAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     Reopen();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
+    string value;
+    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
@@ -473,11 +480,14 @@ TEST_F(KVTest, RemoveAndInsertAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     Reopen();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     string value;
+    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
+    ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
     Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
+    ASSERT_EQ(analysis.leaf_empty, 1);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
     ASSERT_EQ(analysis.leaf_total, 1);
 }
