@@ -80,7 +80,7 @@ KVStatus BTreeEngine::Get(const string& key, string* value) {
         LOG("Key=" << key.c_str() << " not found");
         return NOT_FOUND;
     }
-    value->append( it->second.c_str() );
+    value->append( it->second.c_str(), it->second.size() );
     return OK;
 }
 

@@ -88,9 +88,10 @@ TEST_F(BTreeEngineTest, BinaryKeyTest) {
 }
 
 TEST_F(BTreeEngineTest, BinaryValueTest) {
-    ASSERT_TRUE(kv->Put("key1", string("A\0B\0\0C", 3)) == OK) << pmemobj_errormsg();
-    string value;
-    ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "A\0B\0\0C");
+    string value("A\0B\0\0C", 6);
+    ASSERT_TRUE(kv->Put("key1", value) == OK) << pmemobj_errormsg();
+    string value_out;
+    ASSERT_TRUE(kv->Get("key1", &value_out) == OK && memcmp(&value[0], &value_out[0], 6) == 0);
 }
 
 TEST_F(BTreeEngineTest, EmptyKeyTest) {
