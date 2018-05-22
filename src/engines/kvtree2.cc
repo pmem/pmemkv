@@ -129,7 +129,7 @@ KVStatus KVTree::Get(const string& key, string* value) {
                 if (leafnode->keys[slot].compare(key) == 0) {
                     auto kv = leafnode->leaf->slots[slot].get_ro();
                     LOG("   found value, slot=" << slot << ", size=" << to_string(kv.valsize()));
-                    value->append(kv.val());
+                    value->append(kv.val(), kv.valsize());
                     return OK;
                 }
             }
