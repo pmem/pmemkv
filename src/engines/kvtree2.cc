@@ -412,7 +412,7 @@ void KVTree::Recover() {
             } else if (max_key.compare(0, string::npos, kvslot.key(), kvslot.get_ks()) < 0) {
                 max_key = string(kvslot.key(), kvslot.get_ks());
             }
-            leafnode->keys[slot] = key;
+            leafnode->keys[slot] = string(key, kvslot.get_ks());
         }
 
         // use highest sorting key to decide how to recover the leaf
