@@ -60,8 +60,7 @@ static const string USAGE =
         "    readrandom             (read N values in random key order)\n"
         "    readmissing            (read N missing values in random key order)\n"
         "    deleteseq              (delete N values in sequential key order)\n"
-        "    deleterandom           (delete N values in random key order)\n"
-        "    readrandomwriterandom  (read R values in random key order and load (N-R) values in random key order)\n";
+        "    deleterandom           (delete N values in random key order)\n";
 
 // Default list of comma-separated operations to run
 static const char *FLAGS_benchmarks =
@@ -380,8 +379,6 @@ public:
                 method = &Benchmark::DeleteSeq;
             } else if (name == Slice("deleterandom")) {
                 method = &Benchmark::DeleteRandom;
-            } else if (name == Slice("readrandomwriterandom")) {
-                method = &Benchmark::ReadRandomWriteRandom;
             } else {
                 if (name != Slice()) {  // No error message for empty name
                     fprintf(stderr, "unknown benchmark '%s'\n", name.ToString().c_str());
@@ -580,14 +577,6 @@ private:
 
     void DeleteRandom(ThreadState *thread) {
         DoDelete(thread, false);
-    }
-
-    void ReadRandomWriteRandom(ThreadState *thread) {
-        DoRead(thread, false, false);
-        int total = num_;
-        num_ -= reads_;
-        DoWrite(thread, false);
-        num_ = total;
     }
 };
 
