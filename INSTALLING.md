@@ -136,17 +136,17 @@ PMEM_IS_PMEM_FORCE=1 ./pmemkv_test
 Converting Filesystem DAX to Device DAX
 ---------------------------------------
 
-If `ndctl` reports memory mode, as shown below, then you are using filesystem DAX.
+If `ndctl` shows results like those below, then you are using filesystem DAX.
 
 ```
 ndctl list
 
 {
-  "dev":"namespace2.0",
-  "mode":"memory",
+  "dev":"namespace<X>.0",
+  "mode":"fsdax",
   "size":<your-size>,
   "uuid":"<your-uuid>",
-  "blockdev":"pmem2"
+  "blockdev":"pmem<X>"
 }
 ```
 
@@ -158,16 +158,26 @@ umount /mnt/<your-mapped-directory>
 mount | grep dax   <-- should return nothing now
 ```
 
-Then convert the namespace to DAX: (name comes from ndctl output above)
+Then convert the namespace to DAX:
 
 ```
-sudo ndctl create-namespace -e namespace2.0 -f -m dax
+sudo ndctl create-namespace -e namespace<X>.0 -f -m dax
 
 {
-  "dev":"namespace2.0",
-  "mode":"dax",
-  "size":266352984064,
-  "uuid":"ac489425-ce96-43de-a728-e6d35bf44e11"
+  "dev":"namespace<X>.0",
+  "mode":"devdax",
+  "size":<your-size>,
+  "uuid":"<your-uuid>",
+  "daxregion":{
+    "id":<X>,
+    "size":<your-size>,
+    "devices":[
+      {
+        "chardev":"dax<X>.0",
+        "size":<your-size>
+      }
+    ]
+  }
 }
 
 ll /dev/da*
@@ -175,7 +185,7 @@ ll /dev/da*
 crw------- 1 root root 238, 0 Jun  8 11:38 /dev/dax2.0
 ```
 
-Next clear and initialize the DAX device:
+Next clear and initialize the DAX device: (using chardev from previous step)
 
 ```
 pmempool rm --verbose /dev/dax2.0
@@ -193,32 +203,33 @@ Now pass the device DAX device as a parameter to `pmemkv` like this:
 Converting Device DAX to Filesystem DAX
 ---------------------------------------
 
-If `ndctl` reports 'dax' mode, as shown below, then you are using device DAX.
+If `ndctl` shows results like those below, then you are using device DAX.
 
 ```
 [root@ch6_crpnp_81 ~]# ndctl list
 {
-  "dev":"namespace2.0",
-  "mode":"dax",
+  "dev":"namespace<X>.0",
+  "mode":"devdax",
   "size":<your-size>,
-  "uuid":"<your-uuid>"
+  "uuid":"<your-uuid>",
+  "chardev":"dax<X>.0"
 }
 ```
 
 To convert to filesystem DAX:
 
 ```
-[root@ch6_crpnp_81 ~]# sudo ndctl create-namespace -e namespace2.0 -f -m memory
+[root@ch6_crpnp_81 ~]# sudo ndctl create-namespace -e namespace<X>.0 -f -m fsdax
 {
-  "dev":"namespace2.0",
-  "mode":"memory",
-  "size":263182090240,
-  "uuid":"ef45a74a-6d43-458b-b186-87ff83e86ecc",
-  "blockdev":"pmem2"
+  "dev":"namespace<X>.0",
+  "mode":"fsdax",
+  "size":<your-size>,
+  "uuid":"<your-uuid>",
+  "blockdev":"pmem<X>"
 }
 ```
 
-Now create and mount filesystem: (using block device name from previous step)
+Now create and mount filesystem: (using blockdev from previous step)
 
 ```
 [root@ch6_crpnp_81 ~]# sudo mkfs.ext4 /dev/pmem1
