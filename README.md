@@ -155,7 +155,6 @@ pmemkv_bench
     readmissing            (read N missing values in random key order)
     deleteseq              (delete N values in sequential key order)
     deleterandom           (delete N values in random key order)
-    readrandomwriterandom  (read R values in random key order and load (N-R) values in random key order)
 ```  
 
 Benchmarking on emulated persistent memory:
