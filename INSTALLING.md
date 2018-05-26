@@ -158,10 +158,10 @@ umount /mnt/<your-mapped-directory>
 mount | grep dax   <-- should return nothing now
 ```
 
-Then convert the namespace to DAX:
+Then convert the namespace to device DAX:
 
 ```
-sudo ndctl create-namespace -e namespace<X>.0 -f -m dax
+sudo ndctl create-namespace -e namespace<X>.0 -f -m devdax
 
 {
   "dev":"namespace<X>.0",
@@ -192,7 +192,7 @@ pmempool rm --verbose /dev/dax2.0
 pmempool create --layout pmemkv obj /dev/dax2.0
 ```
 
-Now pass the device DAX device as a parameter to `pmemkv` like this:
+Now pass the DAX device as a parameter to `pmemkv` like this:
 
 ```
 ./pmemkv_bench --db=/dev/dax2.0
@@ -248,7 +248,7 @@ Writing superblocks and filesystem accounting information: done
 [root@ch6_crpnp_81 ~]# mount -o dax /dev/pmem1 /mnt/pmem
 ```
 
-Now pass the filesystem DAX device as a parameter to `pmemkv` like this:
+Now pass a filesystem directory as a parameter to `pmemkv` like this:
 
 ```
 PMEM_IS_PMEM_FORCE=1 ./pmemkv_bench --db=/mnt/pmem/pmemkv --db_size_in_gb=1
