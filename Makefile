@@ -37,4 +37,4 @@ example: configure reset
 test: configure reset
 	cd ./bin && make pmemkv_test
 	PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_test
-	rm -rf /dev/shm/pmemkv
+	rm -rf /dev/shm/pmemkv /tmp/pmemkv
