@@ -139,7 +139,7 @@ TEST_F(KVTest, BinaryValueTest) {
     string value("A\0B\0\0C", 6);
     ASSERT_TRUE(kv->Put("key1", value) == OK) << pmemobj_errormsg();
     string value_out;
-    ASSERT_TRUE(kv->Get("key1", &value_out) == OK && memcmp(&value[0], &value_out[0], 6) == 0);
+    ASSERT_TRUE(kv->Get("key1", &value_out) == OK && (value_out.length() == 6) && (value_out == value));
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);
