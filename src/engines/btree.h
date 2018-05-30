@@ -57,7 +57,9 @@ class BTreeEngine : public KVEngine {
     BTreeEngine(const BTreeEngine&);
     void operator=(const BTreeEngine&);
   public:
-    BTreeEngine(const string& path, size_t size);               // default constructor
+    BTreeEngine(const string& path,                             // default constructor
+                size_t size,
+                Options options);
     ~BTreeEngine();                                             // default destructor
 
     string Engine() final { return ENGINE; }                    // engine identifier
@@ -71,6 +73,11 @@ class BTreeEngine : public KVEngine {
     KVStatus Put(const string& key,                             // copy value from std::string
                  const string& value) final;
     KVStatus Remove(const string& key) final;                   // remove value for key
+  protected:
+    void Open(const string& path);                              // open persistent pool
+    void Create(const string& path,                             // create persistent pool
+                size_t size);
+    void Close();                                               // close persistent pool
   private:
     void Recover();
 

@@ -49,22 +49,30 @@ using pmem::detail::conditional_add_to_tx;
 namespace pmemkv {
 namespace btree {
 
-BTreeEngine::BTreeEngine(const string& path, const size_t size) {
-    if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
-        LOG("Creating filesystem pool, path=" << path << ", size=" << to_string(size));
-        pmpool = pool<RootData>::create(path.c_str(), LAYOUT, size, S_IRWXU);
-    } else {
-        LOG("Opening pool, path=" << path);
-        pmpool = pool<RootData>::open(path.c_str(), LAYOUT);
-    }
+BTreeEngine::BTreeEngine(const string& path, const size_t size, const Options options) {
+    OpenCommon(path, size, options);
     Recover();
     LOG("Opened ok");
 }
 
-BTreeEngine::~BTreeEngine() {
-    LOG("Closing");
+void BTreeEngine::Open(const string& path) {
+    LOG("Opening pool, path=" << path);
+    pmpool = pool<RootData>::open(path.c_str(), LAYOUT);
+}
+
+void BTreeEngine::Create(const string& path, const size_t size) {
+    LOG("Creating pool, path=" << path << ", size=" << to_string(size));
+    pmpool = pool<RootData>::create(path.c_str(), LAYOUT, size, S_IRWXU);
+}
+
+void BTreeEngine::Close() {
+    LOG("Closing pool");
     pmpool.close();
     LOG("Closed ok");
+}
+
+BTreeEngine::~BTreeEngine() {
+    Close();
 }
 
 KVStatus BTreeEngine::Get(const int32_t limit, const int32_t keybytes, int32_t* valuebytes,

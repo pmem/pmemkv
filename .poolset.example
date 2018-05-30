@@ -1,0 +1,2 @@
+PMEMPOOLSET
+1GB /dev/shm/pmemkv

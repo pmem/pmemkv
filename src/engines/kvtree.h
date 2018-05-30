@@ -118,7 +118,9 @@ struct KVTreeAnalysis {                                    // tree analysis stru
 
 class KVTree : public KVEngine {                           // hybrid B+ tree engine
   public:
-    KVTree(const string& path, size_t size);               // default constructor
+    KVTree(const string& path,                             // default constructor
+           size_t size,
+           Options options);
     ~KVTree();                                             // default destructor
 
     string Engine() final { return ENGINE; }               // engine identifier
@@ -135,6 +137,11 @@ class KVTree : public KVEngine {                           // hybrid B+ tree eng
 
     void Analyze(KVTreeAnalysis& analysis);                // report on internal state & stats
   protected:
+    void Open(const string& path);                         // open persistent pool
+    void Create(const string& path,                        // create persistent pool
+                size_t size);
+    void Close();                                          // close persistent pool
+
     KVLeafNode* LeafSearch(const string& key);             // find node for key
     void LeafFillEmptySlot(KVLeafNode* leafnode,           // write first unoccupied slot found
                            uint8_t hash,

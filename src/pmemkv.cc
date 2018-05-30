@@ -38,15 +38,22 @@
 namespace pmemkv {
 
 KVEngine* KVEngine::Open(const string& engine, const string& path, const size_t size) {
+    Options options;
+    options.create_if_missing = true;
+    return Open(engine, path, size, options);
+}
+
+KVEngine* KVEngine::Open(const string& engine, const string& path,
+                         const size_t size, const Options options) {
     try {
         if (engine == blackhole::ENGINE) {
             return new blackhole::Blackhole();
         } else if (engine == kvtree::ENGINE) {
-            return new kvtree::KVTree(path, size);
+            return new kvtree::KVTree(path, size, options);
         } else if (engine == kvtree2::ENGINE) {
-            return new kvtree2::KVTree(path, size);
+            return new kvtree2::KVTree(path, size, options);
         } else if (engine == btree::ENGINE) {
-            return new btree::BTreeEngine(path, size);
+            return new btree::BTreeEngine(path, size, options);
         } else {
             return nullptr;
         }
@@ -68,8 +75,30 @@ void KVEngine::Close(KVEngine* kv) {
     }
 }
 
+void KVEngine::OpenCommon(const string& path, size_t size, Options options){
+    try {
+        Open(path);
+        if (options.error_if_exists) {
+            Close();
+            throw std::invalid_argument("pool already exists (error_if_exists == true): " + path);
+        }
+    } catch (pmem::pool_error &pe) {
+        if (options.create_if_missing) {
+            Create(path, size);
+        } else {
+            throw std::invalid_argument("can not open pool (create_if_missing == false): " + path);
+        }
+    }
+}
+
 extern "C" KVEngine* kvengine_open(const char* engine, const char* path, const size_t size) {
     return KVEngine::Open(engine, path, size);
+};
+
+extern "C" KVEngine* kvengine_xopen(const char* engine, const char* path,
+                                   const size_t size,
+                                   const KVEngine::Options options) {
+    return KVEngine::Open(engine, path, size, options);
 };
 
 extern "C" void kvengine_close(KVEngine* kv) {

@@ -33,6 +33,9 @@
 #include <sys/types.h>
 #include <cstdio>
 #include <cstdlib>
+
+#include <libpmempool.h>
+
 #include "leveldb/env.h"
 #include "port/port_posix.h"
 #include "histogram.h"
@@ -390,11 +393,9 @@ public:
                     pmemkv::KVEngine::Close(kv_);
                     kv_ = NULL;
                 }
-                if (FLAGS_db_size_in_gb > 0) {
-                    auto start = g_env->NowMicros();
-                    std::remove(FLAGS_db);
-                    fprintf(stdout, "%-12s : %11.3f millis/op;\n", "removed", ((g_env->NowMicros() - start) * 1e-3));
-                }
+                auto start = g_env->NowMicros();
+                pmempool_rm(FLAGS_db, 0);
+                fprintf(stdout, "%-12s : %11.3f millis/op;\n", "removed", ((g_env->NowMicros() - start) * 1e-3));
             }
 
             if (kv_ == NULL) {
