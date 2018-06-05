@@ -31,8 +31,13 @@
  */
 
 #include "gtest/gtest.h"
+
+#include <libpmempool.h>
+
+#include "../../src/pmemkv.h"
 #include "../../src/engines/btree.h"
 
+using namespace pmemkv;
 using namespace pmemkv::btree;
 
 const string PATH = "/dev/shm/pmemkv";
@@ -45,7 +50,7 @@ public:
     BTreeEngine* kv;
 
     BTreeEngineBaseTest() {
-        std::remove(PATH.c_str());
+        pmempool_rm(PATH.c_str(), 0);
         Open();
     }
 
@@ -60,7 +65,9 @@ public:
 
 protected:
     void Open() {
-        kv = new BTreeEngine(PATH, POOL_SIZE);
+        KVEngine::Options options;
+        options.create_if_missing = true;
+        kv = new BTreeEngine(PATH, POOL_SIZE, options);
     }
 };
 

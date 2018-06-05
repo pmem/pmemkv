@@ -56,9 +56,18 @@ const string LAYOUT = "pmemkv";                            // pool layout identi
 
 class KVEngine {                                           // storage engine implementations
   public:
+    struct Options {
+        bool create_if_missing = false;                    // create persistent pool if it is missing
+        bool error_if_exists = false;                      // raise error if persistent pool exists
+    };
+
     static KVEngine* Open(const string& engine,            // open storage engine
                           const string& path,              // path to persistent pool
                           size_t size);                    // size used when creating pool
+    static KVEngine* Open(const string& engine,            // open storage engine
+                          const string& path,              // path to persistent pool
+                          size_t size,                     // size used when creating pool
+                          Options options);                // open options
     static void Close(KVEngine* kv);                       // close storage engine
 
     virtual string Engine() = 0;                           // engine identifier
@@ -72,6 +81,15 @@ class KVEngine {                                           // storage engine imp
     virtual KVStatus Put(const string& key,                // copy value from std::string
                          const string& value) = 0;
     virtual KVStatus Remove(const string& key) = 0;        // remove value for key
+
+protected:
+    void OpenCommon(const string& path,                    // path to persistent pool
+                    const size_t size,                     // size used when creating pool
+                    const Options options);                // open options
+    virtual void Open(const string& path) {};              // open persistent pool
+    virtual void Create(const string& path,                // create persistent pool
+                        const size_t size) {};
+    virtual void Close() {};                               // close persistent pool
 };
 
 #pragma pack(push, 1)
@@ -97,7 +115,12 @@ typedef struct FFIBuffer FFIBuffer;
 
 KVEngine* kvengine_open(const char* engine,                // open storage engine
                         const char* path,
-                        size_t size);
+                        const size_t size);
+
+KVEngine* kvengine_xopen(const char* engine,               // open storage engine with additional options
+                        const char* path,
+                        const size_t size,
+                        const KVEngine::Options options);
 
 void kvengine_close(KVEngine* kv);                         // close storage engine
 

@@ -44,30 +44,32 @@
 namespace pmemkv {
 namespace kvtree {
 
-KVTree::KVTree(const string& path, const size_t size) : pmpath(path) {
-    if (path.find("/dev/dax") == 0) {
-        LOG("Opening device dax pool, path=" << path);
-        pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
-        pmsize = 0;
-    } else if (access(path.c_str(), F_OK) != 0) {
-        LOG("Creating filesystem pool, path=" << path << ", size=" << to_string(size));
-        pmpool = pool<KVRoot>::create(path.c_str(), LAYOUT, size, S_IRWXU);
-        pmsize = size;
-    } else {
-        LOG("Opening filesystem pool, path=" << path);
-        pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
-        struct stat st;
-        stat(path.c_str(), &st);
-        pmsize = (size_t) st.st_size;
-    }
+KVTree::KVTree(const string& path, const size_t size, const Options options) : pmpath(path) {
+    OpenCommon(path, size, options);
     Recover();
     LOG("Opened ok");
 }
 
-KVTree::~KVTree() {
-    LOG("Closing");
+void KVTree::Open(const string& path) {
+    LOG("Opening pool, path=" << path);
+    pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
+    pmsize = 0;
+}
+
+void KVTree::Create(const string& path, const size_t size) {
+    LOG("Creating pool, path=" << path << ", size=" << to_string(size));
+    pmpool = pool<KVRoot>::create(path.c_str(), LAYOUT, size, S_IRWXU);
+    pmsize = size;
+}
+
+void KVTree::Close() {
+    LOG("Closing pool");
     pmpool.close();
     LOG("Closed ok");
+}
+
+KVTree::~KVTree() {
+    Close();
 }
 
 // ===============================================================================================
