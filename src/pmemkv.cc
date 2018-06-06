@@ -31,7 +31,6 @@
  */
 
 #include "engines/blackhole.h"
-#include "engines/kvtree.h"
 #include "engines/kvtree2.h"
 #include "engines/btree.h"
 
@@ -41,8 +40,6 @@ KVEngine* KVEngine::Open(const string& engine, const string& path, const size_t 
     try {
         if (engine == blackhole::ENGINE) {
             return new blackhole::Blackhole();
-        } else if (engine == kvtree::ENGINE) {
-            return new kvtree::KVTree(path, size);
         } else if (engine == kvtree2::ENGINE) {
             return new kvtree2::KVTree(path, size);
         } else if (engine == btree::ENGINE) {
@@ -59,8 +56,6 @@ void KVEngine::Close(KVEngine* kv) {
     auto engine = kv->Engine();
     if (engine == blackhole::ENGINE) {
         delete (blackhole::Blackhole*) kv;
-    } else if (engine == kvtree::ENGINE) {
-        delete (kvtree::KVTree*) kv;
     } else if (engine == kvtree2::ENGINE) {
         delete (kvtree2::KVTree*) kv;
     } else if (engine == btree::ENGINE) {

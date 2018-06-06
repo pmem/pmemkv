@@ -43,8 +43,7 @@ is easy and encouraged!
 
 | Engine  | Description | Thread-Safe? |
 | ------- | ----------- | ------------ | 
-| [kvtree2](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree) (default) | Hybrid B+ persistent tree (latest version)| No |
-| [kvtree](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree) | Hybrid B+ persistent tree (2017 version) | No |
+| [kvtree2](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree2) (default) | Hybrid B+ persistent tree (latest version)| No |
 | [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes |
 
 <a name="bindings"></a>
