@@ -193,24 +193,24 @@ namespace internal {
         typedef leaf_node_iterator<leaf_node_t, value_type> iterator;
         typedef leaf_node_iterator<const leaf_node_t, const value_type> const_iterator;
 
-        leaf_node_t() : node_t(), consistent_id( 0 ) {
+        leaf_node_t( uint64_t e ) : node_t(), epoch( e ), consistent_id( 0 ), p_consistent_id( 0 ) {
 			assert(std::is_sorted(begin(), end(), [](const_reference a, const_reference b) { return a.first < b.first; }));
 		}
 
-        leaf_node_t( const_reference entry ) : node_t(), consistent_id( 0 ) {
+        leaf_node_t( uint64_t e, const_reference entry ) : node_t(), epoch( e ), consistent_id( 0 ), p_consistent_id( 0 ) {
             entries[0] = entry;
             consistent()->idxs[0] = 0;
             consistent()->_size = 1;
             assert( std::is_sorted( begin(), end(), []( const_reference a, const_reference b ) { return a.first < b.first; } ) );
         }
 
-        leaf_node_t( const_iterator first, const_iterator last, const persistent_ptr<leaf_node_t>& _prev, const persistent_ptr<leaf_node_t>& _next ) : node_t(), consistent_id( 0 ), prev(_prev), next(_next) {
+        leaf_node_t( uint64_t e, const_iterator first, const_iterator last, const persistent_ptr<leaf_node_t>& _prev, const persistent_ptr<leaf_node_t>& _next ) : node_t(), epoch( e ), consistent_id( 0 ), prev(_prev), next(_next), p_consistent_id( 0 ) {
             copy(first, last);
             assert( size() == std::distance(first, last ) );
 			assert(std::is_sorted(begin(), end(), [](const_reference a, const_reference b) { return a.first < b.first; }));
         }
 
-        leaf_node_t( const_reference entry, const_iterator first, const_iterator last, const persistent_ptr<leaf_node_t>& _prev, const persistent_ptr<leaf_node_t>& _next ) : node_t(), consistent_id( 0 ), prev( _prev ), next( _next ) {
+        leaf_node_t( uint64_t e, const_reference entry, const_iterator first, const_iterator last, const persistent_ptr<leaf_node_t>& _prev, const persistent_ptr<leaf_node_t>& _next ) : node_t(), epoch( e ), consistent_id( 0 ), prev( _prev ), next( _next ), p_consistent_id( 0 ) {
             copy_insert( entry, first, last );
             assert( size() == std::distance( first, last ) + 1 );
             assert( std::binary_search( begin(), end(), entry, []( const_reference a, const_reference b ) { return a.first < b.first; }) );
@@ -324,13 +324,23 @@ namespace internal {
             this->prev = p;
         }
 
+        void check_consistency( uint64_t global_epoch ) {
+            if ( global_epoch != epoch ) {
+                consistent_id = p_consistent_id;
+                epoch = global_epoch;
+            }
+        }
+
     private:
-        value_type entries[number_entrys_slots];
-        leaf_entries_t v[2];
+        uint64_t epoch;
         uint32_t consistent_id;
         persistent_ptr<leaf_node_t> prev;
         persistent_ptr<leaf_node_t> next;
-        
+        char padding[64];
+        value_type entries[number_entrys_slots];
+        leaf_entries_t v[2];
+        char padding1[64];
+        uint32_t p_consistent_id;
 
         leaf_entries_t* consistent() {
             assert( consistent_id < 2 );
@@ -349,8 +359,9 @@ namespace internal {
         }
 
         void switch_consistent( pool_base &pop ) {
-            consistent_id = 1 - consistent_id;
-            pop.persist( &consistent_id, sizeof( consistent_id ) );
+            p_consistent_id = consistent_id = 1 - consistent_id;
+            // TODO: need to check if it make sense to use non-temporal store
+            pop.persist( &p_consistent_id, sizeof( p_consistent_id ) );
         }
 
         /**
@@ -376,7 +387,7 @@ namespace internal {
             // update consistent
             switch_consistent( pop );
 
-			assert(std::is_sorted(this->begin(), this->end(), [](const_reference a, const_reference b) { return a.first < b.first; }));
+            assert(std::is_sorted(this->begin(), this->end(), [](const_reference a, const_reference b) { return a.first < b.first; }));
 
             return std::pair<iterator, bool>( iterator( this, position ), true );
         }
@@ -696,6 +707,8 @@ namespace internal {
             }
         }
 
+        uint64_t epoch;
+
         persistent_ptr<node_t> root;
 
         /**
@@ -865,7 +878,9 @@ namespace internal {
 
                 node = cast_inner( node )->get_child( key );
             }
-            return cast_leaf( node ).get();
+            leaf_node_type* leaf = cast_leaf( node ).get();
+            leaf->check_consistency( epoch );
+            return leaf;
         }
 
         // TODO: merge with previous method
@@ -878,7 +893,9 @@ namespace internal {
 
                 node = cast_inner( node )->get_child( key );
             }
-            return cast_leaf( node );
+            leaf_node_persistent_ptr leaf = cast_leaf( node );
+            leaf->check_consistency( epoch );
+            return leaf;
         }
 
         typename path_type::const_iterator find_full_node( const path_type& path ) {
@@ -914,7 +931,7 @@ namespace internal {
 
         template<typename... Args>
         inline persistent_ptr<leaf_node_type> allocate_leaf(pool_base& pop, persistent_ptr<node_t>& node, Args&& ...args) {
-            make_persistent_atomic<leaf_node_type>(pop, cast_leaf(node), args...);
+            make_persistent_atomic<leaf_node_type>(pop, cast_leaf(node), epoch, args...);
             return cast_leaf(node);
         }
 
@@ -950,7 +967,10 @@ namespace internal {
             return pool_base( get_objpool() );
         }
 
-    public:  
+    public:
+        b_tree_base() : epoch( 0 ) {
+        }
+
         std::pair<iterator, bool> insert( const_reference entry) {
             auto pop = get_pool_base();
 
@@ -1028,6 +1048,8 @@ namespace internal {
     template<typename TKey, typename TValue, size_t degree>
     void b_tree_base<TKey, TValue, degree>::garbage_collection() {
         pool_base pop = get_pool_base();
+        ++epoch;
+        //pop.persist( &epoch, sizeof(epoch) );
 
         if (split_node != nullptr) {
             if ( split_node->leaf() ) {
