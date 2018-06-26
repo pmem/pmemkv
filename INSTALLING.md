@@ -26,7 +26,7 @@ Installing on Fedora (Stable PMDK)
 Install required packages:
 
 ```
-su -c 'dnf install autoconf cmake gcc-c++ libpmemobj++-devel nvml-tools'
+su -c 'dnf install autoconf cmake gcc-c++ libpmemobj++-devel pmempool'
 ```
 
 Build pmemkv: (skip proxy steps if you have none)
@@ -48,7 +48,7 @@ Installing on Fedora (Latest PMDK)
 Install required packages:
 
 ```
-su -c 'dnf install autoconf cmake gcc-c++ glib2-devel'
+su -c 'dnf install autoconf cmake doxygen gcc gcc-c++'
 ```
 
 Install latest PMDK: (skip proxy steps if you have none)
@@ -58,6 +58,7 @@ git config --global http.proxy <YOUR PROXY>
 cd ~
 git clone https://github.com/pmem/pmdk.git
 cd pmdk
+make -j8
 su -c 'make install'
 ```
 
