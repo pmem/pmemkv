@@ -45,14 +45,19 @@ class Blackhole : public KVEngine {
     ~Blackhole();                                          // default destructor
 
     string Engine() final { return ENGINE; }               // engine identifier
-    KVStatus Get(int32_t limit,                            // copy value to fixed-size buffer
-                 int32_t keybytes,
-                 int32_t* valuebytes,
-                 const char* key,
-                 char* value) final;
-    KVStatus Get(const string& key,                        // append value to std::string
-                 string* value) final;
-    KVStatus Put(const string& key,                        // copy value from std::string
+
+    using KVEngine::Each;                                  // iterate over all keys & values
+    void Each(void* context,                               // (with context)
+              KVEachCallback* callback) final {}
+
+    KVStatus Exists(const string& key) final;              // does key have a value?
+
+    using KVEngine::Get;                                   // pass value to callback
+    void Get(void* context,                                // (with context)
+             const string& key,
+             KVGetCallback* callback) final;
+
+    KVStatus Put(const string& key,                        // store key and value
                  const string& value) final;
     KVStatus Remove(const string& key) final;              // remove value for key
 };

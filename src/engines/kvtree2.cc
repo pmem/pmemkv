@@ -90,28 +90,15 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
     LOG("Analyzed ok");
 }
 
-KVStatus KVTree::Get(const int32_t limit, const int32_t keybytes, int32_t* valuebytes,
-                     const char* key, char* value) {
-    auto ckey = std::string(key, keybytes);
-    LOG("Get for key=" << ckey);
-    auto leafnode = LeafSearch(ckey);
+KVStatus KVTree::Exists(const string& key) {
+    LOG("Exists for key=" << key);
+    auto leafnode = LeafSearch(key);
     if (leafnode) {
-        const uint8_t hash = PearsonHash(key, (size_t) keybytes);
+        const uint8_t hash = PearsonHash(key.c_str(), key.size());
         for (int slot = LEAF_KEYS; slot--;) {
             if (leafnode->hashes[slot] == hash) {
-                if (leafnode->keys[slot].compare(ckey) == 0) {
-                    auto kv = leafnode->leaf->slots[slot].get_ro();
-                    auto vs = kv.valsize();
-                    *valuebytes = vs;
-                    if (vs <= limit) {
-                        LOG("   found value, slot=" << slot << ", size=" << to_string(vs));
-                        memcpy(value, kv.val(), vs);
-                        return OK;
-                    } else {
-                        LOG("   buffer too small, slot=" << slot << ", size=" << to_string(vs));
-                        return FAILED;
-                    }
-                }
+                if (leafnode->keys[slot].compare(key) == 0)
+                    return OK;
             }
         }
     }
@@ -119,8 +106,8 @@ KVStatus KVTree::Get(const int32_t limit, const int32_t keybytes, int32_t* value
     return NOT_FOUND;
 }
 
-KVStatus KVTree::Get(const string& key, string* value) {
-    LOG("Get for key=" << key.c_str());
+void KVTree::Get(void* context, const string& key, KVGetCallback* callback) {
+    LOG("Get using callback for key=" << key);
     auto leafnode = LeafSearch(key);
     if (leafnode) {
         const uint8_t hash = PearsonHash(key.c_str(), key.size());
@@ -129,14 +116,13 @@ KVStatus KVTree::Get(const string& key, string* value) {
                 if (leafnode->keys[slot].compare(key) == 0) {
                     auto kv = leafnode->leaf->slots[slot].get_ro();
                     LOG("   found value, slot=" << slot << ", size=" << to_string(kv.valsize()));
-                    value->append(kv.val(), kv.valsize());
-                    return OK;
+                    (*callback)(context, kv.valsize(), kv.val());
+                    return;
                 }
             }
         }
     }
     LOG("   could not find key");
-    return NOT_FOUND;
 }
 
 KVStatus KVTree::Put(const string& key, const string& value) {

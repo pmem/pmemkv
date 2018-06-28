@@ -35,7 +35,6 @@
 
 #include <libpmemobj++/transaction.hpp>
 #include <libpmemobj++/make_persistent_atomic.hpp>
-#include <libpmemobj++/detail/common.hpp>
 
 #include "btree.h"
 
@@ -67,30 +66,40 @@ BTreeEngine::~BTreeEngine() {
     LOG("Closed ok");
 }
 
-KVStatus BTreeEngine::Get(const int32_t limit, const int32_t keybytes, int32_t* valuebytes,
-                        const char* key, char* value) {
-    LOG("Get for key=" << key);
-    return NOT_FOUND;
+void BTreeEngine::Each(void* context, KVEachCallback* callback) {
+    LOG("Each");
+    for (auto& iterator : *my_btree) {
+        (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size(),
+                    iterator.first.c_str(), iterator.second.c_str());
+    }
 }
 
-KVStatus BTreeEngine::Get(const string& key, string* value) {
-    LOG("Get for key=" << key.c_str());
-    btree_type::iterator it = my_btree->find( pstring<20>(key) );
-    if ( it == my_btree->end() ) {
-        LOG("Key=" << key.c_str() << " not found");
+KVStatus BTreeEngine::Exists(const string& key) {
+    LOG("Exists for key=" << key);
+    btree_type::iterator it = my_btree->find(pstring<20>(key));
+    if (it == my_btree->end()) {
+        LOG("  key not found");
         return NOT_FOUND;
     }
-    value->append( it->second.c_str(), it->second.size() );
     return OK;
 }
 
+void BTreeEngine::Get(void* context, const string& key, KVGetCallback* callback) {
+    LOG("Get using callback for key=" << key);
+    btree_type::iterator it = my_btree->find(pstring<20>(key));
+    if (it == my_btree->end()) {
+        LOG("  key not found");
+        return;
+    }
+    (*callback)(context, (int32_t) it->second.size(), it->second.c_str());
+}
+
 KVStatus BTreeEngine::Put(const string& key, const string& value) {
-    LOG("Put key=" << key.c_str() << ", value.size=" << to_string(value.size()));
-    std::pair<typename btree_type::iterator, bool> res = my_btree->insert(std::make_pair(pstring<MAX_KEY_SIZE>(key), pstring<MAX_VALUE_SIZE>(value)));
-    if(!res.second) { // Key already exist.
-        // update value
+    LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
+    auto res = my_btree->insert(std::make_pair(pstring<MAX_KEY_SIZE>(key), pstring<MAX_VALUE_SIZE>(value)));
+    if (!res.second) { // key already exists, so update
         typename btree_type::value_type& entry = *res.first;
-        transaction::manual tx( pmpool );
+        transaction::manual tx(pmpool);
         conditional_add_to_tx(&(entry.second));
         entry.second = value;
         transaction::commit();
@@ -99,18 +108,16 @@ KVStatus BTreeEngine::Put(const string& key, const string& value) {
 }
 
 KVStatus BTreeEngine::Remove(const string& key) {
-    LOG("Remove key=" << key.c_str());
+    LOG("Remove key=" << key);
     return FAILED;
 }
 
 void BTreeEngine::Recover() {
     auto root_data = pmpool.get_root();
-
-    if ( root_data->btree_ptr ) {
+    if (root_data->btree_ptr) {
         my_btree = root_data->btree_ptr.get();
         my_btree->garbage_collection();
-    } 
-    else {
+    } else {
         make_persistent_atomic<btree_type>(pmpool, root_data->btree_ptr);
         my_btree = root_data->btree_ptr.get();
     }

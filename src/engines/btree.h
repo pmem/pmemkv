@@ -42,39 +42,42 @@ using pmem::obj::persistent_ptr;
 namespace pmemkv {
 namespace btree {
 
-const string ENGINE = "btree";                         // engine identifier
+const string ENGINE = "btree";                             // engine identifier
 const size_t DEGREE = 64;
 const size_t MAX_KEY_SIZE = 20;
 const size_t MAX_VALUE_SIZE = 200;
 
 class BTreeEngine : public KVEngine {
-  private:
-    typedef persistent::b_tree<pstring<MAX_KEY_SIZE>, pstring<MAX_VALUE_SIZE> , DEGREE> btree_type;
-    struct RootData {
-        persistent_ptr<btree_type> btree_ptr;
-    };    
+  public:
+    BTreeEngine(const string& path, size_t size);          // default constructor
+    ~BTreeEngine();                                        // default destructor
 
+    string Engine() final { return ENGINE; }               // engine identifier
+
+    using KVEngine::Each;                                  // iterate over all keys & values
+    void Each(void* context,                               // (with context)
+              KVEachCallback* callback) final;
+
+    KVStatus Exists(const string& key) final;              // does key have a value?
+
+    using KVEngine::Get;                                   // pass value to callback
+    void Get(void* context,                                // (with context)
+             const string& key,
+             KVGetCallback* callback) final;
+
+    KVStatus Put(const string& key,                        // store key and value
+                 const string& value) final;
+    KVStatus Remove(const string& key) final;              // remove value for key
+  private:
     BTreeEngine(const BTreeEngine&);
     void operator=(const BTreeEngine&);
-  public:
-    BTreeEngine(const string& path, size_t size);               // default constructor
-    ~BTreeEngine();                                             // default destructor
-
-    string Engine() final { return ENGINE; }                    // engine identifier
-    KVStatus Get(int32_t limit,                                 // copy value to fixed-size buffer
-                 int32_t keybytes,
-                 int32_t* valuebytes,
-                 const char* key,
-                 char* value) final;
-    KVStatus Get(const string& key,                             // append value to std::string
-                 string* value) final;
-    KVStatus Put(const string& key,                             // copy value from std::string
-                 const string& value) final;
-    KVStatus Remove(const string& key) final;                   // remove value for key
-  private:
-    void Recover();
-
-    pool<RootData> pmpool;                                      // pool for persistent root
+    typedef persistent::b_tree<pstring<MAX_KEY_SIZE>,
+            pstring<MAX_VALUE_SIZE>, DEGREE> btree_type;
+    struct RootData {
+        persistent_ptr<btree_type> btree_ptr;
+    };
+    void Recover();                                        // reload state from persistent pool
+    pool<RootData> pmpool;                                 // pool for persistent root
     btree_type* my_btree;
 };
 

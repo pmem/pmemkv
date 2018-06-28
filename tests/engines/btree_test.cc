@@ -94,6 +94,8 @@ TEST_F(BTreeEngineTest, BinaryValueTest) {
     ASSERT_TRUE(kv->Get("key1", &value_out) == OK && memcmp(&value[0], &value_out[0], 6) == 0);
 }
 
+// todo add each tests, add exists tests throughout
+
 TEST_F(BTreeEngineTest, EmptyKeyTest) {
     ASSERT_TRUE(kv->Put("", "empty") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put(" ", "single-space") == OK) << pmemobj_errormsg();

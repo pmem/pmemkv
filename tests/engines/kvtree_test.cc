@@ -121,15 +121,30 @@ TEST_F(KVEmptyTest, FailsToCreateInstanceWithTinySize) {
 // TEST SINGLE-LEAF TREE
 // =============================================================================================
 
+TEST_F(KVTest, BasicValueTest) {
+    ASSERT_TRUE(!kv->Exists("key1"));
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Exists("key1"));
+    string value;
+    ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
+}
+
 TEST_F(KVTest, BinaryKeyTest) {
+    ASSERT_TRUE(!kv->Exists("a"));
     ASSERT_TRUE(kv->Put("a", "should_not_change") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Exists("a"));
     string key1 = string("a\0b", 3);
+    ASSERT_TRUE(!kv->Exists(key1));
     ASSERT_TRUE(kv->Put(key1, "stuff") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Exists("a"));
+    ASSERT_TRUE(kv->Exists(key1));
     string value;
     ASSERT_TRUE(kv->Get(key1, &value) == OK && value == "stuff");
     string value2;
     ASSERT_TRUE(kv->Get("a", &value2) == OK && value2 == "should_not_change");
     ASSERT_TRUE(kv->Remove(key1) == OK);
+    ASSERT_TRUE(kv->Exists("a"));
+    ASSERT_TRUE(!kv->Exists(key1));
     string value3;
     ASSERT_TRUE(kv->Get(key1, &value3) == NOT_FOUND);
     ASSERT_TRUE(kv->Get("a", &value3) == OK && value3 == "should_not_change");
@@ -153,8 +168,11 @@ TEST_F(KVTest, EmptyKeyTest) {
     string value1;
     string value2;
     string value3;
+    ASSERT_TRUE(kv->Exists(""));
     ASSERT_TRUE(kv->Get("", &value1) == OK && value1 == "empty");
+    ASSERT_TRUE(kv->Exists(" "));
     ASSERT_TRUE(kv->Get(" ", &value2) == OK && value2 == "single-space");
+    ASSERT_TRUE(kv->Exists("\t\t"));
     ASSERT_TRUE(kv->Get("\t\t", &value3) == OK && value3 == "two-tab");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
@@ -189,6 +207,7 @@ TEST_F(KVTest, GetAppendToExternalValueTest) {
 }
 
 TEST_F(KVTest, GetHeadlessTest) {
+    ASSERT_TRUE(!kv->Exists("waldo"));
     string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
     Analyze();
@@ -203,14 +222,19 @@ TEST_F(KVTest, GetMultipleTest) {
     ASSERT_TRUE(kv->Put("hij", "C3") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("jkl", "D4") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("mno", "E5") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Exists("abc"));
     string value1;
     ASSERT_TRUE(kv->Get("abc", &value1) == OK && value1 == "A1");
+    ASSERT_TRUE(kv->Exists("def"));
     string value2;
     ASSERT_TRUE(kv->Get("def", &value2) == OK && value2 == "B2");
+    ASSERT_TRUE(kv->Exists("hij"));
     string value3;
     ASSERT_TRUE(kv->Get("hij", &value3) == OK && value3 == "C3");
+    ASSERT_TRUE(kv->Exists("jkl"));
     string value4;
     ASSERT_TRUE(kv->Get("jkl", &value4) == OK && value4 == "D4");
+    ASSERT_TRUE(kv->Exists("mno"));
     string value5;
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
     Analyze();
@@ -239,6 +263,7 @@ TEST_F(KVTest, GetMultiple2Test) {
 
 TEST_F(KVTest, GetNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(!kv->Exists("waldo"));
     string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
     Analyze();
@@ -320,6 +345,7 @@ TEST_F(KVTest, PutValuesOfMaximumSizeTest) {
 TEST_F(KVTest, RemoveAllTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
+    ASSERT_TRUE(!kv->Exists("tmpkey"));
     string value;
     ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
     Analyze();
@@ -331,11 +357,14 @@ TEST_F(KVTest, RemoveAllTest) {
 TEST_F(KVTest, RemoveAndInsertTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
+    ASSERT_TRUE(!kv->Exists("tmpkey"));
     string value;
     ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Exists("tmpkey1"));
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
+    ASSERT_TRUE(!kv->Exists("tmpkey1"));
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 1);
@@ -348,8 +377,10 @@ TEST_F(KVTest, RemoveExistingTest) {
     ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK); // ok to remove twice
+    ASSERT_TRUE(!kv->Exists("tmpkey1"));
     string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Exists("tmpkey2"));
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
@@ -368,6 +399,7 @@ TEST_F(KVTest, RemoveHeadlessTest) {
 TEST_F(KVTest, RemoveNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("nada") == OK);
+    ASSERT_TRUE(kv->Exists("key1"));
     Analyze();
     ASSERT_EQ(analysis.leaf_empty, 0);
     ASSERT_EQ(analysis.leaf_prealloc, 0);

@@ -63,6 +63,22 @@ void KVEngine::Close(KVEngine* kv) {
     }
 }
 
+struct GetCallbackContext {
+    KVStatus result;
+    string* value;
+};
+
+KVStatus KVEngine::Get(const string& key, string* value) {
+    GetCallbackContext cxt = {NOT_FOUND, value};
+    auto cb = [](void* context, int32_t vb, const char* v) {
+        const auto c = ((GetCallbackContext*) context);
+        c->result = OK;
+        c->value->append(v, vb);
+    };
+    Get(&cxt, key, cb);
+    return cxt.result;
+};
+
 extern "C" KVEngine* kvengine_open(const char* engine, const char* path, const size_t size) {
     return KVEngine::Open(engine, path, size);
 };
@@ -71,33 +87,27 @@ extern "C" void kvengine_close(KVEngine* kv) {
     return KVEngine::Close(kv);
 };
 
-extern "C" int8_t kvengine_get(KVEngine* kv, const int32_t limit, const int32_t keybytes,
-                               int32_t* valuebytes, const char* key, char* value) {
-    return kv->Get(limit, keybytes, valuebytes, key, value);
+extern "C" void kvengine_each(KVEngine* kv, void* context, KVEachCallback* callback) {
+    return kv->Each(context, callback);
+};
+
+extern "C" int8_t kvengine_exists(KVEngine* kv, int32_t keybytes, const char* key) {
+    return kv->Exists(string(key, (size_t) keybytes));
 }
 
-extern "C" int8_t kvengine_put(KVEngine* kv, const int32_t keybytes, int32_t* valuebytes,
+extern "C" void kvengine_get(KVEngine* kv, void* context, const int32_t keybytes, const char* key,
+                             KVGetCallback* callback) {
+    kv->Get(context, string(key, (size_t) keybytes), callback);
+}
+
+extern "C" int8_t kvengine_put(KVEngine* kv, const int32_t keybytes, const int32_t valuebytes,
                                const char* key, const char* value) {
-    return kv->Put(string(key, (size_t) keybytes), string(value, (size_t) *valuebytes));
+    return kv->Put(string(key, (size_t) keybytes), string(value, (size_t) valuebytes));
 }
 
 extern "C" int8_t kvengine_remove(KVEngine* kv, const int32_t keybytes, const char* key) {
     return kv->Remove(string(key, (size_t) keybytes));
 };
-
-extern "C" int8_t kvengine_get_ffi(FFIBuffer* buf) {
-    return buf->kv->Get(buf->limit, buf->keybytes, &buf->valuebytes,
-                        buf->data, buf->data + buf->keybytes);
-}
-
-extern "C" int8_t kvengine_put_ffi(const FFIBuffer* buf) {
-    return buf->kv->Put(string(buf->data, (size_t) buf->keybytes),
-                        string(buf->data + buf->keybytes, (size_t) buf->valuebytes));
-}
-
-extern "C" int8_t kvengine_remove_ffi(const FFIBuffer* buf) {
-    return buf->kv->Remove(string(buf->data, (size_t) buf->keybytes));
-}
 
 // todo missing test cases for KVEngine static methods & extern C API
 

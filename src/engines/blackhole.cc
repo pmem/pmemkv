@@ -47,24 +47,22 @@ Blackhole::~Blackhole() {
     LOG("Closed ok");
 }
 
-KVStatus Blackhole::Get(const int32_t limit, const int32_t keybytes, int32_t* valuebytes,
-                        const char* key, char* value) {
-    LOG("Get for key=" << key);
+KVStatus Blackhole::Exists(const string& key) {
+    LOG("Exists for key=" << key);
     return NOT_FOUND;
 }
 
-KVStatus Blackhole::Get(const string& key, string* value) {
-    LOG("Get for key=" << key.c_str());
-    return NOT_FOUND;
+void Blackhole::Get(void* context, const string& key, KVGetCallback* callback) {
+    LOG("Get key=" << key);
 }
 
 KVStatus Blackhole::Put(const string& key, const string& value) {
-    LOG("Put key=" << key.c_str() << ", value.size=" << to_string(value.size()));
+    LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
     return OK;
 }
 
 KVStatus Blackhole::Remove(const string& key) {
-    LOG("Remove key=" << key.c_str());
+    LOG("Remove key=" << key);
     return OK;
 }
 
