@@ -41,10 +41,18 @@ is easy and encouraged!
 
 ### Available Engines
 
-| Engine  | Description | Thread-Safe? |
-| ------- | ----------- | ------------ | 
-| [kvtree2](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree2) (default) | Hybrid B+ persistent tree (latest version)| No |
-| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes |
+| Engine  | Description | Stable? | Thread-Safe? | Iteration? |
+| ------- | ----------- | ------- | ------------ | ---------- |
+| [kvtree2](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree2) (default) | Hybrid B+ persistent tree | Yes | No | No |
+| btree | Copy-on-write tree | No | Yes | Yes |
+| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes | Yes | No |
+
+| Engine  | Description | Stable? | Thread-Safe? | Iteration? |
+| ------- | ----------- | ------- | ------------ | ---------- |
+| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes | Yes | Yes |
+| [kvtree2](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree2) (default) | Hybrid B+ persistent tree | Yes | No | No |
+| btree | Copy-on-write B+ persistent tree | No | No | Yes |
+| umap | TBB-optimized unordered map | No | Yes | Yes |
 
 <a name="bindings"></a>
 
