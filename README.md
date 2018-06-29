@@ -46,7 +46,7 @@ is easy and encouraged!
 | [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes | Yes | Yes |
 | [kvtree2](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree2) (default) | Hybrid B+ persistent tree | Yes | No | No |
 | btree | Copy-on-write B+ persistent tree | No | No | Yes |
-| umap | TBB-optimized unordered map | No | Yes | Yes |
+| hashmap | TBB-optimized hash map | No | Yes | Yes |
 
 <a name="bindings"></a>
 
