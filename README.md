@@ -41,12 +41,12 @@ is easy and encouraged!
 
 ### Available Engines
 
-| Engine  | Description | Stable? | Thread-Safe? | Iteration? |
-| ------- | ----------- | ------- | ------------ | ---------- |
-| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes | Yes | Yes |
-| [kvtree2](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree2) (default) | Hybrid B+ persistent tree | Yes | No | No |
-| btree | Copy-on-write B+ persistent tree | No | No | Yes |
-| hashmap | TBB-optimized hash map | No | Yes | Yes |
+| Engine  | Description | Stable? | Thread-Safe? | Each? | Remove? |
+| ------- | ----------- | ------- | ------------ | ----- | ------- |
+| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes | Yes | Yes | Yes |
+| [kvtree2](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree2) (default) | Hybrid B+ persistent tree | Yes | No | No | Yes |
+| btree | Copy-on-write B+ persistent tree | No | No | Yes | No |
+| hashmap | TBB-optimized hash map | No | Yes | Yes | Yes |
 
 <a name="bindings"></a>
 
