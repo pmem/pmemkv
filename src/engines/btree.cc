@@ -109,7 +109,11 @@ KVStatus BTreeEngine::Put(const string& key, const string& value) {
 
 KVStatus BTreeEngine::Remove(const string& key) {
     LOG("Remove key=" << key);
-    return FAILED;
+    size_t result = my_btree->erase(key);
+    if (result == 1) {
+        return OK;
+    } 
+    return NOT_FOUND;
 }
 
 void BTreeEngine::Recover() {
