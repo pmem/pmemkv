@@ -76,15 +76,26 @@ TEST_F(BTreeEngineTest, SimpleTest) {
 }
 
 TEST_F(BTreeEngineTest, BinaryKeyTest) {
+    ASSERT_TRUE(!kv->Exists("a"));
     ASSERT_TRUE(kv->Put("a", "should_not_change") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Exists("a"));
     string key1 = string("a\0b", 3);
+    ASSERT_TRUE(!kv->Exists(key1));
     ASSERT_TRUE(kv->Put(key1, "stuff") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Exists("a"));
+    ASSERT_TRUE(kv->Exists(key1));
     string value;
     ASSERT_TRUE(kv->Get(key1, &value) == OK);
     ASSERT_EQ(value, "stuff");
     string value2;
     ASSERT_TRUE(kv->Get("a", &value2) == OK);
     ASSERT_EQ(value2, "should_not_change");
+    ASSERT_TRUE(kv->Remove(key1) == OK);
+    ASSERT_TRUE(kv->Exists("a"));
+    ASSERT_TRUE(!kv->Exists(key1));
+    string value3;
+    ASSERT_TRUE(kv->Get(key1, &value3) == NOT_FOUND);
+    ASSERT_TRUE(kv->Get("a", &value3) == OK && value3 == "should_not_change");
 }
 
 TEST_F(BTreeEngineTest, BinaryValueTest) {
@@ -103,8 +114,11 @@ TEST_F(BTreeEngineTest, EmptyKeyTest) {
     string value1;
     string value2;
     string value3;
+    ASSERT_TRUE(kv->Exists(""));
     ASSERT_TRUE(kv->Get("", &value1) == OK && value1 == "empty");
+     ASSERT_TRUE(kv->Exists(" "));
     ASSERT_TRUE(kv->Get(" ", &value2) == OK && value2 == "single-space");
+    ASSERT_TRUE(kv->Exists("\t\t"));
     ASSERT_TRUE(kv->Get("\t\t", &value3) == OK && value3 == "two-tab");
 }
 
@@ -127,6 +141,7 @@ TEST_F(BTreeEngineTest, GetAppendToExternalValueTest) {
 }
 
 TEST_F(BTreeEngineTest, GetHeadlessTest) {
+    ASSERT_TRUE(!kv->Exists("waldo"));
     string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
 }
@@ -137,21 +152,25 @@ TEST_F(BTreeEngineTest, GetMultipleTest) {
     ASSERT_TRUE(kv->Put("hij", "C3") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("jkl", "D4") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("mno", "E5") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Exists("abc"));
     string value1;
     ASSERT_TRUE(kv->Get("abc", &value1) == OK && value1 == "A1");
+    ASSERT_TRUE(kv->Exists("def"));
     string value2;
     ASSERT_TRUE(kv->Get("def", &value2) == OK && value2 == "B2");
+    ASSERT_TRUE(kv->Exists("hij"));
     string value3;
     ASSERT_TRUE(kv->Get("hij", &value3) == OK && value3 == "C3");
+    ASSERT_TRUE(kv->Exists("jkl"));
     string value4;
     ASSERT_TRUE(kv->Get("jkl", &value4) == OK && value4 == "D4");
+    ASSERT_TRUE(kv->Exists("mno"));
     string value5;
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
 }
 
 TEST_F(BTreeEngineTest, GetMultiple2Test) {
-    // TODO: enable this test when remove operation is implemented in versiond B tree
-    /*ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("key2", "value2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("key3", "value3") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("key2") == OK);
@@ -161,11 +180,12 @@ TEST_F(BTreeEngineTest, GetMultiple2Test) {
     string value2;
     ASSERT_TRUE(kv->Get("key2", &value2) == NOT_FOUND);
     string value3;
-    ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");*/
+    ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
 }
 
 TEST_F(BTreeEngineTest, GetNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(!kv->Exists("waldo"));
     string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
 }
@@ -236,55 +256,49 @@ TEST_F(BTreeEngineTest, PutValuesOfMaximumSizeTest) {
     // todo finish this when max is decided (#61)
 }
 
-// TODO: enable this test when remove operaation is implemented in versioned B+tree
-/*
 TEST_F(BTreeEngineTest, RemoveAllTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
+    ASSERT_TRUE(!kv->Exists("tmpkey"));
+    string value;
+    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
 }
 
 TEST_F(BTreeEngineTest, RemoveAndInsertTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(!kv->Exists("tmpkey"));
     string value;
+    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Exists("tmpkey1"));
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
+    ASSERT_TRUE(!kv->Exists("tmpkey1"));
+    ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
 }
 
 TEST_F(BTreeEngineTest, RemoveExistingTest) {
     ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
-    ASSERT_TRUE(kv->Remove("tmpkey1") == OK); // ok to remove twice
+    ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND); // ok to remove twice
+    ASSERT_TRUE(!kv->Exists("tmpkey1"));
     string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Exists("tmpkey2"));
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(BTreeEngineTest, RemoveHeadlessTest) {
-    ASSERT_TRUE(kv->Remove("nada") == OK);
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 0);
+    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
 }
 
 TEST_F(BTreeEngineTest, RemoveNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Remove("nada") == OK);
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
-}*/
+    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
+    ASSERT_TRUE(kv->Exists("key1"));
+}
 
 // =============================================================================================
 // TEST RECOVERY OF SINGLE-LEAF TREE
@@ -315,8 +329,6 @@ TEST_F(BTreeEngineTest, GetMultipleAfterRecoveryTest) {
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
 }
 
-// TODO: enable this test when remove operaation is implemented in versioned B+tree
-/*
 TEST_F(BTreeEngineTest, GetMultiple2AfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("key2", "value2") == OK) << pmemobj_errormsg();
@@ -330,7 +342,7 @@ TEST_F(BTreeEngineTest, GetMultiple2AfterRecoveryTest) {
     ASSERT_TRUE(kv->Get("key2", &value2) == NOT_FOUND);
     string value3;
     ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
-}*/
+}
 
 TEST_F(BTreeEngineTest, GetNonexistentAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
@@ -358,29 +370,24 @@ TEST_F(BTreeEngineTest, PutAfterRecoveryTest) {
     ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
 }
 
-// TODO: enable this test when remove operaation is implemented in versioned B+tree
-/*
 TEST_F(BTreeEngineTest, RemoveAllAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     Reopen();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 1);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
+    string value;
+    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
 }
 
 TEST_F(BTreeEngineTest, RemoveAndInsertAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     Reopen();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     string value;
+    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
+    ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
 }
 
 TEST_F(BTreeEngineTest, RemoveExistingAfterRecoveryTest) {
@@ -388,55 +395,31 @@ TEST_F(BTreeEngineTest, RemoveExistingAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
     Reopen();
-    ASSERT_TRUE(kv->Remove("tmpkey1") == OK); // ok to remove twice
+    ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND); // ok to remove twice
     string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
 }
 
 TEST_F(BTreeEngineTest, RemoveHeadlessAfterRecoveryTest) {
     Reopen();
-    ASSERT_TRUE(kv->Remove("nada") == OK);
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 0);
+    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
 }
 
 TEST_F(BTreeEngineTest, RemoveNonexistentAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     Reopen();
-    ASSERT_TRUE(kv->Remove("nada") == OK);
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
+    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
 }
 
 TEST_F(BTreeEngineTest, UsePreallocAfterSingleLeafRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("key1") == OK);
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 1);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
 
     Reopen();
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 1);
-    ASSERT_EQ(analysis.leaf_prealloc, 1);
-    ASSERT_EQ(analysis.leaf_total, 1);
 
     ASSERT_TRUE(kv->Put("key2", "value2") == OK) << pmemobj_errormsg();
-    Analyze();
-    ASSERT_EQ(analysis.leaf_empty, 0);
-    ASSERT_EQ(analysis.leaf_prealloc, 0);
-    ASSERT_EQ(analysis.leaf_total, 1);
-}*/
+}
 
 // =============================================================================================
 // TEST TREE WITH SINGLE INNER NODE
@@ -558,14 +541,13 @@ TEST_F(BTreeEngineTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
     }
 }
 
-// TODO: enable this test when remove operation is implemented in versiond B tree
-/*
 TEST_F(BTreeEngineTest, UsePreallocAfterMultipleLeafRecoveryTest) {
     for (int i = 1; i <= LEAF_ENTRIES + 1; i++)
         ASSERT_EQ(kv->Put(to_string(i), "!"), OK) << pmemobj_errormsg();
     Reopen();
 
-    for (int i = 1; i <= LEAF_ENTRIES; i++) ASSERT_EQ(kv->Remove(to_string(i)), OK);
+    for (int i = 1; i <= LEAF_ENTRIES; i++) 
+        ASSERT_EQ(kv->Remove(to_string(i)), OK);
     Reopen();
 
     ASSERT_EQ(kv->Remove(to_string(LEAF_ENTRIES + 1)), OK);
@@ -574,7 +556,7 @@ TEST_F(BTreeEngineTest, UsePreallocAfterMultipleLeafRecoveryTest) {
     for (int i = 1; i <= LEAF_ENTRIES; i++)
         ASSERT_EQ(kv->Put(to_string(i), "!"), OK) << pmemobj_errormsg();
     ASSERT_EQ(kv->Put(to_string(LEAF_ENTRIES + 1), "!"), OK) << pmemobj_errormsg();
-}*/
+}
 
 // =============================================================================================
 // TEST LARGE TREE
