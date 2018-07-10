@@ -593,8 +593,17 @@ namespace internal {
 
         const persistent_ptr<node_t>& get_child( const_reference key ) const {
             auto it = std::lower_bound( this->begin(), this->end(), key );
-            size_t child_pos = std::distance( this->begin(), it );
-            return this->consistent()->children[child_pos];;
+            return get_left_child(it);
+        }
+
+        const  persistent_ptr<node_t>& get_left_child(const_iterator it) const {
+            size_t child_pos = std::distance(this->begin(), it);
+            return this->consistent()->children[child_pos];
+        }
+
+        const persistent_ptr<node_t>& get_right_child(const_iterator it) const {
+            size_t child_pos = std::distance(this->begin(), it) + 1;
+            return this->consistent()->children[child_pos];
         }
 
         bool full() const {
@@ -796,16 +805,6 @@ namespace internal {
 
         persistent_ptr<node_t> right_child;
 
-        /**
-         * Pointer to the left-most leaf node
-         */
-        persistent_ptr<leaf_node_type> head;
-
-        /**
-        * Pointer to the right-most leaf node
-        */
-        persistent_ptr<leaf_node_type> tail;
-
         void create_new_root(pool_base&, const key_type&, node_persistent_ptr&, node_persistent_ptr& );
 
         std::pair<iterator, bool> insert_descend( pool_base&, const_reference );
@@ -948,7 +947,6 @@ namespace internal {
 
             node_persistent_ptr node = root;
             while (!node->leaf()) {
-
                 node = cast_inner( node )->get_child( key );
             }
             leaf_node_type* leaf = cast_leaf( node ).get();
@@ -978,6 +976,34 @@ namespace internal {
                     return i;
             }
             return i;
+        }
+
+        leaf_node_type* leftmost_leaf() const {
+            if (root == nullptr)
+                return nullptr;
+
+            node_persistent_ptr node = root;
+            while (!node->leaf()) {
+                inner_node_type* inner_node = cast_inner(node).get();
+                node = inner_node->get_left_child(inner_node->begin());
+            }
+            leaf_node_type* leaf = cast_leaf(node).get();
+            leaf->check_consistency(epoch);
+            return leaf;
+        }
+
+        leaf_node_type* rightmost_leaf() const {
+            if (root == nullptr)
+                return nullptr;
+            
+            node_persistent_ptr node = root;
+            while (!node->leaf()) {
+                inner_node_type* inner_node = cast_inner(node).get();
+                node = inner_node->get_left_child(inner_node->end());
+            }
+            leaf_node_type* leaf = cast_leaf(node).get();
+            leaf->check_consistency(epoch);
+            return leaf;
         }
 
         static persistent_ptr<inner_node_type>& cast_inner(persistent_ptr<node_t>& node) {
@@ -1048,9 +1074,7 @@ namespace internal {
             auto pop = get_pool_base();
 
             if ( root == nullptr ) {
-                head = tail = allocate_leaf( pop, root );
-                pop.persist( head );
-                pop.persist( tail );
+                allocate_leaf( pop, root );
             }
             assert( root != nullptr );
 
@@ -1089,22 +1113,20 @@ namespace internal {
         void garbage_collection();
         
         iterator begin() {
-			leaf_node_type* leaf = head.get();
-            return iterator(leaf);
+            return iterator(leftmost_leaf());
         }
 
         iterator end() {
-            leaf_node_type* leaf = tail.get();
+            leaf_node_type* leaf = rightmost_leaf();
             return iterator( leaf, leaf ? leaf->end() : typename leaf_node_type::iterator() );
         }
 
         const_iterator begin() const {
-			const leaf_node_type* leaf = head.get();
-            return const_iterator(leaf);
+            return const_iterator(leftmost_leaf());
         }
 
         const_iterator end() const {
-            const leaf_node_type* leaf = tail.get();
+            const leaf_node_type* leaf = rightmost_leaf();
             return const_iterator( leaf, leaf ? leaf->end() : typename leaf_node_type::const_iterator() );
         }
 
@@ -1187,18 +1209,12 @@ namespace internal {
         persistent_ptr<leaf_node_type> rnode = cast_leaf(right);
         leaf_node_type* current_node = cast_leaf(src_node).get();
 
-        if (current_node->get_prev() == nullptr) {
-            head = lnode;
-            pop.persist( head );
-        } else {
+        if (current_node->get_prev() != nullptr) {
             current_node->get_prev()->set_next( lnode );
             pop.persist( current_node->get_prev()->get_next() );
         }
 
-        if (current_node->get_next() == nullptr) {
-            tail = rnode;
-            pop.persist( tail );
-        } else {
+        if (current_node->get_next() != nullptr) {
             current_node->get_next()->set_prev( rnode );
             pop.persist( current_node->get_next()->get_prev() );
         }
