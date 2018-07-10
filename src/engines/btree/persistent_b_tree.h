@@ -70,10 +70,10 @@ namespace internal {
     };
 
     template <typename TLeafNode, bool is_const>
-    class leaf_node_iterator {
+    class node_iterator {
         typedef TLeafNode leaf_node_type;
         typedef typename std::conditional<is_const, const leaf_node_type*, leaf_node_type*>::type leaf_node_ptr;
-        friend class leaf_node_iterator<leaf_node_type, true>;
+        friend class node_iterator<leaf_node_type, true>;
     
     public:    
         typedef typename leaf_node_type::value_type value_type;
@@ -82,80 +82,80 @@ namespace internal {
         typedef typename std::conditional<is_const, const value_type&, value_type&>::type reference;
         typedef typename std::conditional<is_const, const value_type*, value_type*>::type pointer;
 
-        leaf_node_iterator() : node( nullptr ), position( 0 ) {
+        node_iterator() : node( nullptr ), position( 0 ) {
         }
 
-        leaf_node_iterator(leaf_node_ptr node_ptr, size_t p) : node(node_ptr), position(p) {
+        node_iterator(leaf_node_ptr node_ptr, size_t p) : node(node_ptr), position(p) {
         }
 
-        leaf_node_iterator(const leaf_node_iterator& other) : node(other.node), position(other.position) {
+        node_iterator(const node_iterator& other) : node(other.node), position(other.position) {
         }
 
         template <typename T = void, typename = typename std::enable_if<is_const, T>::type>
-        leaf_node_iterator(const leaf_node_iterator<leaf_node_type, false>& other) : node(other.node), position(other.position) {
+        node_iterator(const node_iterator<leaf_node_type, false>& other) : node(other.node), position(other.position) {
         }
 
-        leaf_node_iterator& operator++() {
+        node_iterator& operator++() {
             ++position;
             return *this;
         }
 
-        leaf_node_iterator operator++( int ) {
-            leaf_node_iterator tmp = *this;
+        node_iterator operator++( int ) {
+            node_iterator tmp = *this;
             ++*this;
             return tmp;
         }
 
-        leaf_node_iterator& operator--() {
+        node_iterator& operator--() {
             assert( position > 0 );
             --position;
             return *this;
         }
 
-        leaf_node_iterator operator--( int ) {
-            leaf_node_iterator tmp = *this;
+        node_iterator operator--( int ) {
+            node_iterator tmp = *this;
             --*this;
             return tmp;
         }
 
-        leaf_node_iterator operator+( size_t off ) const {
-            return leaf_node_iterator( node, position + off );
+        node_iterator operator+( size_t off ) const {
+            return node_iterator( node, position + off );
         }
 
-        leaf_node_iterator operator+=( difference_type off ) {
+        node_iterator operator+=( difference_type off ) {
             position += off;
             return *this;
         }
 
-        leaf_node_iterator operator-( difference_type off ) const {
+        node_iterator operator-( difference_type off ) const {
             assert( node != nullptr );
             assert( position >= off );
-            return leaf_node_iterator( node, position - off );
+            return node_iterator( node, position - off );
         }
 
-        difference_type operator-( const leaf_node_iterator& other ) const {
+        difference_type operator-( const node_iterator& other ) const {
             assert( node != nullptr );
             assert( other.node != nullptr );
             assert( node == other.node );
             return position - other.position;
         }
 
-        bool operator==( const leaf_node_iterator& other ) const {
+        bool operator==( const node_iterator& other ) const {
             return node == other.node && position == other.position;
         }
 
-        bool operator!=( const leaf_node_iterator& other ) const {
+        bool operator!=( const node_iterator& other ) const {
             return !(*this == other);
         }
 
-        bool operator<( const leaf_node_iterator& other ) const {
+        bool operator<( const node_iterator& other ) const {
             assert( node != nullptr );
             assert( other.node != nullptr );
             assert( node == other.node );
             return position < other.position;
         }
 
-        bool operator>( const leaf_node_iterator& other ) const {
+        bool operator>( const node_iterator& other ) const {
             assert( node != nullptr );
             assert( other.node != nullptr );
             assert( node == other.node );
@@ -200,8 +200,8 @@ namespace internal {
         typedef value_type*         pointer;
         typedef const value_type*   const_pointer;
 
-        typedef leaf_node_iterator<leaf_node_t, false> iterator;
-        typedef leaf_node_iterator<leaf_node_t, true> const_iterator;
+        typedef node_iterator<leaf_node_t, false> iterator;
+        typedef node_iterator<leaf_node_t, true> const_iterator;
 
         leaf_node_t( uint64_t e ) : node_t(), epoch( e ), consistent_id( 0 ), p_consistent_id( 0 ) {
 			assert(std::is_sorted(begin(), end(), [](const_reference a, const_reference b) { return a.first < b.first; }));
@@ -491,19 +491,22 @@ namespace internal {
 
     template <typename TKey, uint64_t number_entrys_slots>
     class inner_node_t : public node_t {
+        typedef inner_node_t<TKey, number_entrys_slots> self_type;
     public:
         typedef TKey key_type;
-        typedef key_type& reference;
-        typedef const key_type& const_reference;
-        // TODO: implemenmt STL-like iterator
-        typedef key_type* iterator;
-        typedef const key_type* const_iterator;
+        typedef key_type value_type; // Inner node stores only keys 
+        typedef value_type& reference;
+        typedef const value_type& const_reference;
+        typedef value_type* pointer;
+        typedef const value_type* const_pointer;
+        typedef node_iterator<self_type, false> iterator;
+        typedef node_iterator<self_type, true> const_iterator;
 
     private:
         const static size_t number_children_slots = number_entrys_slots + 1;
 
         struct inner_entries_t {
-            key_type entries[number_entrys_slots];
+            value_type entries[number_entrys_slots];
             persistent_ptr<node_t> children[number_children_slots];
             size_t _size = 0;
         };
@@ -533,12 +536,13 @@ namespace internal {
         }
 
     public:
-        inner_node_t( size_t level, const key_type& key, const persistent_ptr<node_t>& child_0, const persistent_ptr<node_t>& child_1 ) : node_t( level ), consistent_id( 0 ) {
+        inner_node_t( size_t level, const value_type& key, const persistent_ptr<node_t>& child_0, const persistent_ptr<node_t>& child_1 ) : node_t( level ), consistent_id( 0 ) {
             inner_entries_t* consist = consistent();
             consist->entries[0] = key;
             consist->_size++;
             consist->children[0] = child_0;
             consist->children[1] = child_1;
+            assert(std::is_sorted(begin(), end()));
         }
 
         inner_node_t( size_t level, const_iterator first, const_iterator last, const inner_node_t* src ) : node_t( level ), consistent_id( 0 ) {
@@ -547,6 +551,7 @@ namespace internal {
             auto in_cbegin = std::next(src->consistent()->children, std::distance( src->begin(), first ));
             auto in_cend = std::next(in_cbegin, consistent()->_size + 1);
             auto o_clast = std::copy( in_cbegin, in_cend, consistent()->children );
+            assert(std::is_sorted(begin(), end()));
         }
 
         /**
@@ -588,8 +593,17 @@ namespace internal {
 
         const persistent_ptr<node_t>& get_child( const_reference key ) const {
             auto it = std::lower_bound( this->begin(), this->end(), key );
-            size_t child_pos = std::distance( this->begin(), it );
-            return this->consistent()->children[child_pos];;
+            return get_left_child(it);
+        }
+
+        const  persistent_ptr<node_t>& get_left_child(const_iterator it) const {
+            size_t child_pos = std::distance(this->begin(), it);
+            return this->consistent()->children[child_pos];
+        }
+
+        const persistent_ptr<node_t>& get_right_child(const_iterator it) const {
+            size_t child_pos = std::distance(this->begin(), it) + 1;
+            return this->consistent()->children[child_pos];
         }
 
         bool full() const {
@@ -600,11 +614,11 @@ namespace internal {
         * Return begin iterator on an array of keys.
         */
         iterator begin() {
-            return consistent()->entries;
+            return iterator(this, 0);
         }
 
         const_iterator begin() const {
-            return consistent()->entries;
+            return const_iterator(this, 0);
         }
 
         /**
@@ -627,6 +641,28 @@ namespace internal {
 
         const_reference back() const {
             return consistent()->entries[this->size() - 1];
+        }
+
+        reference at(size_t pos) {
+            if (size() <= pos) {
+                throw std::out_of_range("Accessing incorrect element in inner node");
+            }
+            return consistent()->entries[pos];
+        }
+
+        const_reference at(size_t pos) const {
+            if (size() <= pos) {
+                throw std::out_of_range("Accessing incorrect element inner node");
+            }
+            return consistent()->entries[pos];
+        }
+
+        reference operator[](size_t pos) {
+            return consistent()->entries[pos];
+        }
+
+        const_reference operator[](size_t pos) const {
+            return consistent()->entries[pos];
         }
     }; // class inner_node_t
 
@@ -768,16 +804,6 @@ namespace internal {
         persistent_ptr<node_t> left_child;
 
         persistent_ptr<node_t> right_child;
-
-        /**
-         * Pointer to the left-most leaf node
-         */
-        persistent_ptr<leaf_node_type> head;
-
-        /**
-        * Pointer to the right-most leaf node
-        */
-        persistent_ptr<leaf_node_type> tail;
 
         void create_new_root(pool_base&, const key_type&, node_persistent_ptr&, node_persistent_ptr& );
 
@@ -921,7 +947,6 @@ namespace internal {
 
             node_persistent_ptr node = root;
             while (!node->leaf()) {
-
                 node = cast_inner( node )->get_child( key );
             }
             leaf_node_type* leaf = cast_leaf( node ).get();
@@ -951,6 +976,34 @@ namespace internal {
                     return i;
             }
             return i;
+        }
+
+        leaf_node_type* leftmost_leaf() const {
+            if (root == nullptr)
+                return nullptr;
+
+            node_persistent_ptr node = root;
+            while (!node->leaf()) {
+                inner_node_type* inner_node = cast_inner(node).get();
+                node = inner_node->get_left_child(inner_node->begin());
+            }
+            leaf_node_type* leaf = cast_leaf(node).get();
+            leaf->check_consistency(epoch);
+            return leaf;
+        }
+
+        leaf_node_type* rightmost_leaf() const {
+            if (root == nullptr)
+                return nullptr;
+            
+            node_persistent_ptr node = root;
+            while (!node->leaf()) {
+                inner_node_type* inner_node = cast_inner(node).get();
+                node = inner_node->get_left_child(inner_node->end());
+            }
+            leaf_node_type* leaf = cast_leaf(node).get();
+            leaf->check_consistency(epoch);
+            return leaf;
         }
 
         static persistent_ptr<inner_node_type>& cast_inner(persistent_ptr<node_t>& node) {
@@ -1021,9 +1074,7 @@ namespace internal {
             auto pop = get_pool_base();
 
             if ( root == nullptr ) {
-                head = tail = allocate_leaf( pop, root );
-                pop.persist( head );
-                pop.persist( tail );
+                allocate_leaf( pop, root );
             }
             assert( root != nullptr );
 
@@ -1062,22 +1113,20 @@ namespace internal {
         void garbage_collection();
         
         iterator begin() {
-			leaf_node_type* leaf = head.get();
-            return iterator(leaf);
+            return iterator(leftmost_leaf());
         }
 
         iterator end() {
-            leaf_node_type* leaf = tail.get();
+            leaf_node_type* leaf = rightmost_leaf();
             return iterator( leaf, leaf ? leaf->end() : typename leaf_node_type::iterator() );
         }
 
         const_iterator begin() const {
-			const leaf_node_type* leaf = head.get();
-            return const_iterator(leaf);
+            return const_iterator(leftmost_leaf());
         }
 
         const_iterator end() const {
-            const leaf_node_type* leaf = tail.get();
+            const leaf_node_type* leaf = rightmost_leaf();
             return const_iterator( leaf, leaf ? leaf->end() : typename leaf_node_type::const_iterator() );
         }
 
@@ -1160,18 +1209,12 @@ namespace internal {
         persistent_ptr<leaf_node_type> rnode = cast_leaf(right);
         leaf_node_type* current_node = cast_leaf(src_node).get();
 
-        if (current_node->get_prev() == nullptr) {
-            head = lnode;
-            pop.persist( head );
-        } else {
+        if (current_node->get_prev() != nullptr) {
             current_node->get_prev()->set_next( lnode );
             pop.persist( current_node->get_prev()->get_next() );
         }
 
-        if (current_node->get_next() == nullptr) {
-            tail = rnode;
-            pop.persist( tail );
-        } else {
+        if (current_node->get_next() != nullptr) {
             current_node->get_next()->set_prev( rnode );
             pop.persist( current_node->get_next()->get_prev() );
         }
