@@ -66,6 +66,12 @@ BTreeEngine::~BTreeEngine() {
     LOG("Closed ok");
 }
 
+int64_t BTreeEngine::Count() {
+    int64_t result = 0;
+    for (auto& iterator : *my_btree) result++;
+    return result;
+}
+
 void BTreeEngine::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& iterator : *my_btree) {

@@ -46,8 +46,10 @@ class BlackholeTest : public testing::Test {
 
 TEST_F(BlackholeTest, SimpleTest) {
     string value;
+    ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Remove("key1") == OK);
     ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);

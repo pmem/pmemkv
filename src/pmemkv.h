@@ -73,6 +73,8 @@ class KVEngine {                                           // storage engine imp
 
     virtual string Engine() = 0;                           // engine identifier
 
+    virtual int64_t Count() = 0;                           // count all keys
+
     virtual void Each(void* context,                       // iterate over all keys & values
                       KVEachCallback* callback) = 0;
     inline void Each(KVEachCallback* callback) {           // iterate without context
@@ -109,6 +111,8 @@ KVEngine* kvengine_open(const char* engine,                // open storage engin
                         size_t size);
 
 void kvengine_close(KVEngine* kv);                         // close storage engine
+
+int64_t kvengine_count(KVEngine* kv);                      // count all keys
 
 void kvengine_each(KVEngine* kv,                           // iterate over all keys
                    void* context,

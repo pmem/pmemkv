@@ -54,6 +54,8 @@ class BTreeEngine : public KVEngine {
 
     string Engine() final { return ENGINE; }               // engine identifier
 
+    int64_t Count() final;                                 // count all keys
+
     using KVEngine::Each;                                  // iterate over all keys & values
     void Each(void* context,                               // (with context)
               KVEachCallback* callback) final;

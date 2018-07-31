@@ -87,6 +87,10 @@ extern "C" void kvengine_close(KVEngine* kv) {
     return KVEngine::Close(kv);
 };
 
+extern "C" int64_t kvengine_count(KVEngine* kv) {
+    return kv->Count();
+};
+
 extern "C" void kvengine_each(KVEngine* kv, void* context, KVEachCallback* callback) {
     return kv->Each(context, callback);
 };
