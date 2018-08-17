@@ -31,6 +31,7 @@
  */
 
 #include <iostream>
+#include <regex>
 #include <unistd.h>
 
 #include <libpmemobj++/transaction.hpp>
@@ -72,11 +73,42 @@ int64_t BTreeEngine::Count() {
     return result;
 }
 
+int64_t BTreeEngine::CountLike(const string& pattern) {
+    LOG("Count like pattern=" << pattern);
+    try {
+        std::regex p(pattern);
+        int64_t result = 0;
+        for (auto& iterator : *my_btree) {
+            auto key = string(iterator.first.c_str(), (int32_t) iterator.first.size());
+            if (std::regex_match(key, p)) result++;
+        }
+        return result;
+    } catch (std::regex_error) {
+        LOG("Invalid pattern: " << pattern);
+        return 0;
+    }
+}
+
 void BTreeEngine::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& iterator : *my_btree) {
         (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size(),
                     iterator.first.c_str(), iterator.second.c_str());
+    }
+}
+
+void BTreeEngine::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
+    LOG("Each like pattern=" << pattern);
+    try {
+        std::regex p(pattern);
+        for (auto& iterator : *my_btree) {
+            auto key = string(iterator.first.c_str(), (int32_t) iterator.first.size());
+            if (std::regex_match(key, p))
+                (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size(),
+                            iterator.first.c_str(), iterator.second.c_str());
+        }
+    } catch (std::regex_error) {
+        LOG("Invalid pattern: " << pattern);
     }
 }
 
@@ -88,6 +120,22 @@ KVStatus BTreeEngine::Exists(const string& key) {
         return NOT_FOUND;
     }
     return OK;
+}
+
+KVStatus BTreeEngine::ExistsLike(const string& pattern) {
+    LOG("Exists like pattern=" << pattern);
+    try {
+        std::regex p(pattern);
+        for (auto& iterator : *my_btree) {
+            auto key = string(iterator.first.c_str(), (int32_t) iterator.first.size());
+            if (std::regex_match(key, p)) return OK;
+        }
+        LOG("  pattern not found");
+        return NOT_FOUND;
+    } catch (std::regex_error) {
+        LOG("Invalid pattern: " << pattern);
+        return NOT_FOUND;
+    }
 }
 
 void BTreeEngine::Get(void* context, const string& key, KVGetCallback* callback) {

@@ -90,6 +90,24 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
     LOG("Analyzed ok");
 }
 
+int64_t KVTree::Count() {
+    // not implemented
+    return 0;
+}
+
+int64_t KVTree::CountLike(const string& pattern) {
+    // not implemented
+    return 0;
+}
+
+void KVTree::Each(void* context, KVEachCallback* callback) {
+    // not implemented
+}
+
+void KVTree::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
+    // not implemented
+}
+
 KVStatus KVTree::Exists(const string& key) {
     LOG("Exists for key=" << key);
     auto leafnode = LeafSearch(key);
@@ -103,6 +121,11 @@ KVStatus KVTree::Exists(const string& key) {
         }
     }
     LOG("   could not find key");
+    return NOT_FOUND;
+}
+
+KVStatus KVTree::ExistsLike(const string& pattern) {
+    // not implemented
     return NOT_FOUND;
 }
 

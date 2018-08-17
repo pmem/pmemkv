@@ -74,22 +74,31 @@ class KVEngine {                                           // storage engine imp
     virtual string Engine() = 0;                           // engine identifier
 
     virtual int64_t Count() = 0;                           // count all keys
+    virtual int64_t CountLike(const string& pattern) = 0;  // count all keys matching pattern
 
-    virtual void Each(void* context,                       // iterate over all keys & values
-                      KVEachCallback* callback) = 0;
-    inline void Each(KVEachCallback* callback) {           // iterate without context
+    inline void Each(KVEachCallback* callback) {           // iterate over all keys
         Each(nullptr, callback);
     }
+    virtual void Each(void* context,                       // iterate over all keys with context
+                      KVEachCallback* callback) = 0;
+    inline void EachLike(const string& pattern,            // iterate over matching keys
+                         KVEachCallback* callback) {
+        EachLike(pattern, nullptr, callback);
+    }
+    virtual void EachLike(const string& pattern,           // iterate over matching keys with context
+                          void* context,
+                          KVEachCallback* callback) = 0;
 
     virtual KVStatus Exists(const string& key) = 0;        // does key have a value?
+    virtual KVStatus ExistsLike(const string& key) = 0;    // does pattern have a match?
 
-    virtual void Get(void* context,                        // pass value to callback
-                     const string& key,
-                     KVGetCallback* callback) = 0;
-    inline void Get(const string& key,                     // pass value without context
+    inline void Get(const string& key,                     // pass value to callback
                     KVGetCallback* callback) {
         Get(nullptr, key, callback);
     }
+    virtual void Get(void* context,                        // pass value to callback with context
+                     const string& key,
+                     KVGetCallback* callback) = 0;
     KVStatus Get(const string& key, string* value);        // append value to string
 
     virtual KVStatus Put(const string& key,                // store key and value
@@ -114,21 +123,35 @@ void kvengine_close(KVEngine* kv);                         // close storage engi
 
 int64_t kvengine_count(KVEngine* kv);                      // count all keys
 
+int64_t kvengine_count_like(KVEngine* kv,                  // count all keys matching pattern
+                            int32_t patternbytes,
+                            const char* pattern);
+
 void kvengine_each(KVEngine* kv,                           // iterate over all keys
                    void* context,
                    KVEachCallback* callback);
+
+void kvengine_each_like(KVEngine* kv,                      // iterate over matching keys
+                        int32_t patternbytes,
+                        const char* pattern,
+                        void* context,
+                        KVEachCallback* callback);
 
 int8_t kvengine_exists(KVEngine* kv,                       // does key have a value?
                        int32_t keybytes,
                        const char* key);
 
-void kvengine_get(KVEngine* kv,                            // pass value to callback
+int8_t kvengine_exists_like(KVEngine* kv,                  // does pattern have a match?
+                            int32_t patternbytes,
+                            const char* pattern);
+
+void kvengine_get(KVEngine* kv,                            // pass value to callback with context
                   void* context,
                   int32_t keybytes,
                   const char* key,
                   KVGetCallback* callback);
 
-int8_t kvengine_put(KVEngine* kv,                          // copy value from external buffer
+int8_t kvengine_put(KVEngine* kv,                          // store key and value
                     int32_t keybytes,
                     int32_t valuebytes,
                     const char* key,

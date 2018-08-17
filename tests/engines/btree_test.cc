@@ -39,9 +39,9 @@ const string PATH = "/dev/shm/pmemkv";
 const size_t SIZE = 1024ull * 1024ull * 512ull;
 const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
 
-template <size_t POOL_SIZE>
+template<size_t POOL_SIZE>
 class BTreeEngineBaseTest : public testing::Test {
-public:
+  public:
     BTreeEngine* kv;
 
     BTreeEngineBaseTest() {
@@ -58,7 +58,7 @@ public:
         Open();
     }
 
-protected:
+  protected:
     void Open() {
         kv = new BTreeEngine(PATH, POOL_SIZE);
     }
@@ -110,8 +110,6 @@ TEST_F(BTreeEngineTest, BinaryValueTest) {
     string value_out;
     ASSERT_TRUE(kv->Get("key1", &value_out) == OK && memcmp(&value[0], &value_out[0], 6) == 0);
 }
-
-// todo add each tests
 
 TEST_F(BTreeEngineTest, EmptyKeyTest) {
     ASSERT_TRUE(kv->Count() == 0);
@@ -343,6 +341,109 @@ TEST_F(BTreeEngineTest, RemoveNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
     ASSERT_TRUE(kv->Exists("key1"));
+}
+
+TEST_F(BTreeEngineTest, UsesEachTest) {
+    ASSERT_TRUE(kv->Put("1", "2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Count() == 1);
+    ASSERT_TRUE(kv->Put("RR", "记!") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Count() == 2);
+
+    string result;
+    kv->Each(&result, [](void* context, int32_t kb, int32_t vb, const char* k, const char* v) {
+        const auto c = ((string*) context);
+        c->append("<");
+        c->append(string(k, kb));
+        c->append(">,<");
+        c->append(string(v, vb));
+        c->append(">|");
+    });
+    ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");
+}
+
+TEST_F(BTreeEngineTest, UsesLikeTest) {
+    ASSERT_TRUE(kv->Put("10", "10!") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("11", "11!") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("20", "20!") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("21", "21!") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("22", "22!") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("30", "30!") == OK) << pmemobj_errormsg();
+
+    ASSERT_TRUE(kv->ExistsLike(".*"));
+    ASSERT_TRUE(!kv->ExistsLike("A"));
+    ASSERT_TRUE(kv->ExistsLike("10"));
+    ASSERT_TRUE(!kv->ExistsLike("100"));
+    ASSERT_TRUE(kv->ExistsLike("1.*"));
+    ASSERT_TRUE(kv->ExistsLike("2.*"));
+    ASSERT_TRUE(kv->ExistsLike(".*1"));
+
+    ASSERT_TRUE(kv->CountLike(".*") == 6);
+    ASSERT_TRUE(kv->CountLike("A") == 0);
+    ASSERT_TRUE(kv->CountLike("10") == 1);
+    ASSERT_TRUE(kv->CountLike("100") == 0);
+    ASSERT_TRUE(kv->CountLike("1.*") == 2);
+    ASSERT_TRUE(kv->CountLike("2.*") == 3);
+    ASSERT_TRUE(kv->CountLike(".*1") == 2);
+
+    string result;
+    kv->EachLike("1.*", &result, [](void* context, int32_t kb, int32_t vb, const char* k, const char* v) {
+        const auto c = ((string*) context);
+        c->append("<");
+        c->append(string(k, kb));
+        c->append(">,");
+    });
+    kv->EachLike("3.*", &result, [](void* context, int32_t kb, int32_t vb, const char* k, const char* v) {
+        const auto c = ((string*) context);
+        c->append("<");
+        c->append(string(v, vb));
+        c->append(">,");
+    });
+    ASSERT_TRUE(result == "<10>,<11>,<30!>,");
+}
+
+TEST_F(BTreeEngineTest, UsesLikeWithBadPatternTest) {
+    ASSERT_TRUE(kv->Put("10", "10") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("20", "20") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("30", "30") == OK) << pmemobj_errormsg();
+
+    ASSERT_TRUE(!kv->ExistsLike(""));
+    ASSERT_TRUE(!kv->ExistsLike("*"));
+    ASSERT_TRUE(!kv->ExistsLike("("));
+    ASSERT_TRUE(!kv->ExistsLike(")"));
+    ASSERT_TRUE(!kv->ExistsLike("()"));
+    ASSERT_TRUE(!kv->ExistsLike(")("));
+    ASSERT_TRUE(!kv->ExistsLike("["));
+    ASSERT_TRUE(!kv->ExistsLike("]"));
+    ASSERT_TRUE(!kv->ExistsLike("[]"));
+    ASSERT_TRUE(!kv->ExistsLike("]["));
+
+    ASSERT_TRUE(kv->CountLike("") == 0);
+    ASSERT_TRUE(kv->CountLike("*") == 0);
+    ASSERT_TRUE(kv->CountLike("(") == 0);
+    ASSERT_TRUE(kv->CountLike(")") == 0);
+    ASSERT_TRUE(kv->CountLike("()") == 0);
+    ASSERT_TRUE(kv->CountLike(")(") == 0);
+    ASSERT_TRUE(kv->CountLike("[") == 0);
+    ASSERT_TRUE(kv->CountLike("]") == 0);
+    ASSERT_TRUE(kv->CountLike("[]") == 0);
+    ASSERT_TRUE(kv->CountLike("][") == 0);
+
+    auto cb = [](void* context, int32_t kb, int32_t vb, const char* k, const char* v) {
+        const auto c = ((string*) context);
+        c->append("!");
+    };
+    string result;
+    kv->EachLike("", &result, cb);
+    kv->EachLike("*", &result, cb);
+    kv->EachLike("(", &result, cb);
+    kv->EachLike(")", &result, cb);
+    kv->EachLike("()", &result, cb);
+    kv->EachLike(")(", &result, cb);
+    kv->EachLike("[", &result, cb);
+    kv->EachLike("]", &result, cb);
+    kv->EachLike("[]", &result, cb);
+    kv->EachLike("][", &result, cb);
+    ASSERT_TRUE(result == "");
 }
 
 // =============================================================================================

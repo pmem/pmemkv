@@ -77,26 +77,39 @@ KVStatus KVEngine::Get(const string& key, string* value) {
     };
     Get(&cxt, key, cb);
     return cxt.result;
-};
+}
 
 extern "C" KVEngine* kvengine_open(const char* engine, const char* path, const size_t size) {
     return KVEngine::Open(engine, path, size);
-};
+}
 
 extern "C" void kvengine_close(KVEngine* kv) {
     return KVEngine::Close(kv);
-};
+}
 
 extern "C" int64_t kvengine_count(KVEngine* kv) {
     return kv->Count();
-};
+}
+
+extern "C" int64_t kvengine_count_like(KVEngine* kv, const int32_t patternbytes, const char* pattern) {
+    return kv->CountLike(string(pattern, (size_t) patternbytes));
+}
 
 extern "C" void kvengine_each(KVEngine* kv, void* context, KVEachCallback* callback) {
-    return kv->Each(context, callback);
-};
+    kv->Each(context, callback);
+}
+
+extern "C" void kvengine_each_like(KVEngine* kv, const int32_t patternbytes, const char* pattern,
+                                   void* context, KVEachCallback* callback) {
+    kv->EachLike(string(pattern, (size_t) patternbytes), context, callback);
+}
 
 extern "C" int8_t kvengine_exists(KVEngine* kv, int32_t keybytes, const char* key) {
     return kv->Exists(string(key, (size_t) keybytes));
+}
+
+extern "C" int8_t kvengine_exists_like(KVEngine* kv, int32_t patternbytes, const char* pattern) {
+    return kv->ExistsLike(string(pattern, (size_t) patternbytes));
 }
 
 extern "C" void kvengine_get(KVEngine* kv, void* context, const int32_t keybytes, const char* key,
@@ -111,7 +124,7 @@ extern "C" int8_t kvengine_put(KVEngine* kv, const int32_t keybytes, const int32
 
 extern "C" int8_t kvengine_remove(KVEngine* kv, const int32_t keybytes, const char* key) {
     return kv->Remove(string(key, (size_t) keybytes));
-};
+}
 
 // todo missing test cases for KVEngine static methods & extern C API
 
