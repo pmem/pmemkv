@@ -74,8 +74,8 @@ namespace internal {
         typedef TLeafNode leaf_node_type;
         typedef typename std::conditional<is_const, const leaf_node_type*, leaf_node_type*>::type leaf_node_ptr;
         friend class node_iterator<leaf_node_type, true>;
-    
-    public:    
+
+    public:
         typedef typename leaf_node_type::value_type value_type;
         using iterator_category = std::random_access_iterator_tag;
         using difference_type = ptrdiff_t;
@@ -476,7 +476,7 @@ namespace internal {
         }
 
         /**
-         * Remove element pointed by iterator. 
+         * Remove element pointed by iterator.
          */
         void internal_erase(pool_base& pop, iterator it) {
             // update tmp idxs
@@ -486,7 +486,6 @@ namespace internal {
 
             assert(std::is_sorted(this->begin(), this->end(), [](const_reference a, const_reference b) { return a.first < b.first; }));
         }
-
     }; // class leaf_node_t
 
     template <typename TKey, uint64_t number_entrys_slots>
@@ -494,7 +493,7 @@ namespace internal {
         typedef inner_node_t<TKey, number_entrys_slots> self_type;
     public:
         typedef TKey key_type;
-        typedef key_type value_type; // Inner node stores only keys 
+        typedef key_type value_type; // Inner node stores only keys
         typedef value_type& reference;
         typedef const value_type& const_reference;
         typedef value_type* pointer;
@@ -676,7 +675,7 @@ namespace internal {
 	public:
         using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = ptrdiff_t;
-		typedef typename leaf_iterator::value_type value_type;
+        typedef typename leaf_iterator::value_type value_type;
         typedef typename leaf_iterator::reference reference;
         typedef typename leaf_iterator::pointer pointer;
 
@@ -995,7 +994,7 @@ namespace internal {
         leaf_node_type* rightmost_leaf() const {
             if (root == nullptr)
                 return nullptr;
-            
+
             node_persistent_ptr node = root;
             while (!node->leaf()) {
                 inner_node_type* inner_node = cast_inner(node).get();
