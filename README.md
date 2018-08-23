@@ -14,17 +14,26 @@ Rather than being tied to a single language or backing implementation, `pmemkv`
 provides different options for storage engines and language bindings.
 
 <ul>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">Installation</a>
-<ul>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_stable_pmdk">Installing on Fedora (Stable PMDK)</a>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_latest_pmdk">Installing on Fedora (Latest PMDK)</a>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources">Building From Sources</a>
-</ul>
-</li>
+<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">Installation</a></li>
 <li><a href="#engines">Storage Engines</a></li>
 <li><a href="#bindings">Language Bindings</a></li>
-<li><a href="#benchmarking">Benchmarking</a></li>
+<li><a href="#tools">Tools and Utilities</a></li>
 </ul>
+
+<a name="installation"></a>
+
+Installation
+------------
+
+`pmemkv` does not currently provide install packages, but building from sources is not difficult.
+
+<ul>
+<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_stable_pmdk">Installing on Fedora (Stable PMDK)</a></li>
+<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_latest_pmdk">Installing on Fedora (Latest PMDK)</a></li>
+<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources">Building from Sources</a></li>
+</ul>
+
+Our <a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">installation</a> guide also includes help with configuring DAX and pool sets. 
 
 <a name="engines"></a>
 
@@ -126,58 +135,11 @@ in sync with the main `pmemkv` distribution.
 * Node.js - https://github.com/pmem/pmemkv-nodejs
 * Ruby - https://github.com/pmem/pmemkv-ruby
 
-<a name="benchmarking"></a>
+<a name="tools"></a>
 
-Benchmarking
-------------
+Tools and Utilities
+-------------------
 
-The `pmemkv_bench` utility provides some simple read & write benchmarks. This is
-much like the `db_bench` utility included with LevelDB and RocksDB, although the
-list of supported parameters is slightly different.
+Benchmarks, examples and other helpful utilities are available here:
 
-```
-pmemkv_bench
---engine=<name>            (storage engine name, default: kvtree2)
---db=<location>            (path to persistent pool, default: /dev/shm/pmemkv)
-                           (note: file on DAX filesystem, DAX device, or poolset file)
---db_size_in_gb=<integer>  (size of persistent pool to create in GB, default: 0)
-                           (note: always use 0 with poolset or device DAX configs)
---histogram=<0|1>          (show histograms when reporting latencies)
---num=<integer>            (number of keys to place in database, default: 1000000)
---reads=<integer>          (number of read operations, default: 1000000)
---threads=<integer>        (number of concurrent threads, default: 1)
---value_size=<integer>     (size of values in bytes, default: 100)
---benchmarks=<name>,       (comma-separated list of benchmarks to run)
-    fillseq                (load N values in sequential key order)
-    fillrandom             (load N values in random key order)
-    overwrite              (replace N values in random key order)
-    readseq                (read N values in sequential key order)
-    readrandom             (read N values in random key order)
-    readmissing            (read N missing values in random key order)
-    deleteseq              (delete N values in sequential key order)
-    deleterandom           (delete N values in random key order)
-```  
-
-Benchmarking on emulated persistent memory:
-
-```
-PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_bench --db=/dev/shm/pmemkv --db_size_in_gb=1
-```
-
-Benchmarking on filesystem DAX:
-
-```
-PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_bench --db=/mnt/pmem/pmemkv --db_size_in_gb=1
-```
-
-Benchmarking on device DAX:
-
-```
-./bin/pmemkv_bench --db=/dev/dax1.0
-```
-
-Benchmarking with poolset:
-
-```
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_bench --db=~/pmemkv.poolset
-```
+https://github.com/RobDickinson/pmemkv-tools

@@ -58,8 +58,8 @@ git config --global http.proxy <YOUR PROXY>
 cd ~
 git clone https://github.com/pmem/pmdk.git
 cd pmdk
-make -j8
-su -c 'make install'
+NDCTL_ENABLE=n make -j8
+NDCTL_ENABLE=n su -c 'make install'
 ```
 
 Build pmemkv: (skip proxy steps if you have none)
@@ -89,7 +89,7 @@ Building from Sources
 **Building and running tests**
 
 After cloning sources from GitHub, use provided `make` targets for building and running
-tests and example programs.
+tests.
 
 ```
 git clone https://github.com/pmem/pmemkv.git
@@ -97,8 +97,6 @@ cd pmemkv
 
 make                    # build everything and run tests
 make test               # build and run unit tests
-make example            # build and run simple example
-make bench              # build and run benchmarks
 make clean              # remove build files
 ```
 
@@ -193,12 +191,6 @@ pmempool rm --verbose /dev/dax2.0
 pmempool create --layout pmemkv obj /dev/dax2.0
 ```
 
-Now pass the DAX device as a parameter to `pmemkv` like this:
-
-```
-./pmemkv_bench --db=/dev/dax2.0
-```
-
 <a name="filesystem_dax"></a>
 
 Converting Device DAX to Filesystem DAX
@@ -249,12 +241,6 @@ Writing superblocks and filesystem accounting information: done
 [root@ch6_crpnp_81 ~]# mount -o dax /dev/pmem1 /mnt/pmem
 ```
 
-Now pass a filesystem directory as a parameter to `pmemkv` like this:
-
-```
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_bench --db=/mnt/pmem/pmemkv --db_size_in_gb=1
-```
-
 <a name="pool_set"></a>
 
 Using a Pool Set
@@ -272,10 +258,4 @@ Next initialize the pool set:
 
 ```
 pmempool create --layout pmemkv obj ~/pmemkv.poolset
-```
-
-Now pass the pool set as a parameter to `pmemkv` like this:
-
-```
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_bench --db=~/pmemkv.poolset
 ```

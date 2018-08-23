@@ -1,6 +1,6 @@
 prefix=/usr/local
 
-all: clean example test bench
+all: clean test
 
 reset:
 	rm -rf /dev/shm/pmemkv /tmp/pmemkv
@@ -23,16 +23,6 @@ install:
 uninstall:
 	rm -rf $(prefix)/lib/libpmemkv.so
 	rm -rf $(prefix)/include/libpmemkv.h
-
-bench: configure reset
-	cd ./bin && make pmemkv_bench
-	PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_bench --db=/dev/shm/pmemkv --db_size_in_gb=1 --histogram=1
-	rm -rf /dev/shm/pmemkv
-
-example: configure reset
-	cd ./bin && make pmemkv_example
-	PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_example
-	rm -rf /dev/shm/pmemkv
 
 test: configure reset
 	cd ./bin && make pmemkv_test

@@ -130,10 +130,9 @@ Next we'll walk you through the steps of creating a new engine.
     * Add `#include "engines/mytree.h"`
     * Update `KVEngine::Open` to return new `MyTree` instances
     * Update `KVEngine::Close` to delete `MyTree` instances
-* Engine should now work with `pmemkv_bench` and high-level bindings
+* `make` & verify engine now works with high-level bindings
 
 ### Documentation
 
 * In `ENGINES.md`, add `mytree` section
 * In `README.md`, link `mytree` in the table of supported engines
-* Submit blog post on pmem.io
