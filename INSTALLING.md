@@ -59,7 +59,7 @@ cd ~
 git clone https://github.com/pmem/pmdk.git
 cd pmdk
 NDCTL_ENABLE=n make -j8
-NDCTL_ENABLE=n su -c 'make install'
+su -c 'NDCTL_ENABLE=n make install'
 ```
 
 Build pmemkv: (skip proxy steps if you have none)
