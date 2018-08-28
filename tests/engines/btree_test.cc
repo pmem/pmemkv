@@ -69,11 +69,13 @@ typedef BTreeEngineBaseTest<LARGE_SIZE> BTreeEngineLargeTest;
 
 
 TEST_F(BTreeEngineTest, SimpleTest) {
-    string value;
     ASSERT_TRUE(kv->Count() == 0);
+    ASSERT_TRUE(!kv->Exists("key1"));
+    string value;
     ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
+    ASSERT_TRUE(kv->Exists("key1"));
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
 }
 
@@ -108,7 +110,7 @@ TEST_F(BTreeEngineTest, BinaryValueTest) {
     string value("A\0B\0\0C", 6);
     ASSERT_TRUE(kv->Put("key1", value) == OK) << pmemobj_errormsg();
     string value_out;
-    ASSERT_TRUE(kv->Get("key1", &value_out) == OK && memcmp(&value[0], &value_out[0], 6) == 0);
+    ASSERT_TRUE(kv->Get("key1", &value_out) == OK && (value_out.length() == 6) && (value_out == value));
 }
 
 TEST_F(BTreeEngineTest, EmptyKeyTest) {
@@ -556,15 +558,6 @@ TEST_F(BTreeEngineTest, RemoveNonexistentAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     Reopen();
     ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
-}
-
-TEST_F(BTreeEngineTest, UsePreallocAfterSingleLeafRecoveryTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Remove("key1") == OK);
-
-    Reopen();
-
-    ASSERT_TRUE(kv->Put("key2", "value2") == OK) << pmemobj_errormsg();
 }
 
 // =============================================================================================
