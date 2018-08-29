@@ -113,10 +113,6 @@ extern "C" int8_t kvengine_exists(KVEngine* kv, int32_t keybytes, const char* ke
     return kv->Exists(string(key, (size_t) keybytes));
 }
 
-extern "C" int8_t kvengine_exists_like(KVEngine* kv, int32_t patternbytes, const char* pattern) {
-    return kv->ExistsLike(string(pattern, (size_t) patternbytes));
-}
-
 extern "C" void kvengine_get(KVEngine* kv, void* context, const int32_t keybytes, const char* key,
                              KVGetCallback* callback) {
     kv->Get(context, string(key, (size_t) keybytes), callback);

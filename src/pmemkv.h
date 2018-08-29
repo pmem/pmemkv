@@ -90,7 +90,6 @@ class KVEngine {                                           // storage engine imp
                           KVEachCallback* callback) = 0;
 
     virtual KVStatus Exists(const string& key) = 0;        // does key have a value?
-    virtual KVStatus ExistsLike(const string& key) = 0;    // does pattern have a match?
 
     inline void Get(const string& key,                     // pass value to callback
                     KVGetCallback* callback) {

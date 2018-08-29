@@ -371,14 +371,6 @@ TEST_F(BTreeEngineTest, UsesLikeTest) {
     ASSERT_TRUE(kv->Put("22", "22!") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("30", "30!") == OK) << pmemobj_errormsg();
 
-    ASSERT_TRUE(kv->ExistsLike(".*"));
-    ASSERT_TRUE(!kv->ExistsLike("A"));
-    ASSERT_TRUE(kv->ExistsLike("10"));
-    ASSERT_TRUE(!kv->ExistsLike("100"));
-    ASSERT_TRUE(kv->ExistsLike("1.*"));
-    ASSERT_TRUE(kv->ExistsLike("2.*"));
-    ASSERT_TRUE(kv->ExistsLike(".*1"));
-
     ASSERT_TRUE(kv->CountLike(".*") == 6);
     ASSERT_TRUE(kv->CountLike("A") == 0);
     ASSERT_TRUE(kv->CountLike("10") == 1);
@@ -407,17 +399,6 @@ TEST_F(BTreeEngineTest, UsesLikeWithBadPatternTest) {
     ASSERT_TRUE(kv->Put("10", "10") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("20", "20") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("30", "30") == OK) << pmemobj_errormsg();
-
-    ASSERT_TRUE(!kv->ExistsLike(""));
-    ASSERT_TRUE(!kv->ExistsLike("*"));
-    ASSERT_TRUE(!kv->ExistsLike("("));
-    ASSERT_TRUE(!kv->ExistsLike(")"));
-    ASSERT_TRUE(!kv->ExistsLike("()"));
-    ASSERT_TRUE(!kv->ExistsLike(")("));
-    ASSERT_TRUE(!kv->ExistsLike("["));
-    ASSERT_TRUE(!kv->ExistsLike("]"));
-    ASSERT_TRUE(!kv->ExistsLike("[]"));
-    ASSERT_TRUE(!kv->ExistsLike("]["));
 
     ASSERT_TRUE(kv->CountLike("") == 0);
     ASSERT_TRUE(kv->CountLike("*") == 0);

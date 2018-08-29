@@ -122,22 +122,6 @@ KVStatus BTreeEngine::Exists(const string& key) {
     return OK;
 }
 
-KVStatus BTreeEngine::ExistsLike(const string& pattern) {
-    LOG("Exists like pattern=" << pattern);
-    try {
-        std::regex p(pattern);
-        for (auto& iterator : *my_btree) {
-            auto key = string(iterator.first.c_str(), (int32_t) iterator.first.size());
-            if (std::regex_match(key, p)) return OK;
-        }
-        LOG("  pattern not found");
-        return NOT_FOUND;
-    } catch (std::regex_error) {
-        LOG("Invalid pattern: " << pattern);
-        return NOT_FOUND;
-    }
-}
-
 void BTreeEngine::Get(void* context, const string& key, KVGetCallback* callback) {
     LOG("Get using callback for key=" << key);
     btree_type::iterator it = my_btree->find(pstring<20>(key));

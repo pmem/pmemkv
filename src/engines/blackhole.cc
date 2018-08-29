@@ -70,11 +70,6 @@ KVStatus Blackhole::Exists(const string& key) {
     return NOT_FOUND;
 }
 
-KVStatus Blackhole::ExistsLike(const string& pattern) {
-    LOG("Exists like pattern=" << pattern);
-    return NOT_FOUND;
-}
-
 void Blackhole::Get(void* context, const string& key, KVGetCallback* callback) {
     LOG("Get key=" << key);
 }

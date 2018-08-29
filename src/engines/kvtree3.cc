@@ -152,28 +152,6 @@ KVStatus KVTree::Exists(const string& key) {
     return NOT_FOUND;
 }
 
-KVStatus KVTree::ExistsLike(const string& pattern) {
-    LOG("Exists like pattern=" << pattern);
-    try {
-        std::regex p(pattern);
-        auto leaf = pmpool.get_root()->head;
-        while (leaf) {
-            for (int slot = LEAF_KEYS; slot--;) {
-                auto kvslot = leaf->slots[slot].get_ro();
-                if (kvslot.empty() || kvslot.hash() == 0) continue;
-                auto key = string(kvslot.key(), kvslot.get_ks());
-                if (std::regex_match(key, p)) return OK;
-            }
-            leaf = leaf->next;  // advance to next linked leaf
-        }
-        LOG("  pattern not found");
-        return NOT_FOUND;
-    } catch (std::regex_error) {
-        LOG("Invalid pattern: " << pattern);
-        return NOT_FOUND;
-    }
-}
-
 void KVTree::Get(void* context, const string& key, KVGetCallback* callback) {
     LOG("Get using callback for key=" << key);
     auto leafnode = LeafSearch(key);

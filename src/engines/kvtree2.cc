@@ -124,11 +124,6 @@ KVStatus KVTree::Exists(const string& key) {
     return NOT_FOUND;
 }
 
-KVStatus KVTree::ExistsLike(const string& pattern) {
-    // not implemented
-    return NOT_FOUND;
-}
-
 void KVTree::Get(void* context, const string& key, KVGetCallback* callback) {
     LOG("Get using callback for key=" << key);
     auto leafnode = LeafSearch(key);

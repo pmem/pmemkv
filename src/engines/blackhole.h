@@ -58,7 +58,6 @@ class Blackhole : public KVEngine {
                   KVEachCallback* callback) final;
 
     KVStatus Exists(const string& key) final;              // does key have a value?
-    KVStatus ExistsLike(const string& pattern) final;      // does pattern have a match?
 
     using KVEngine::Get;                                   // pass value to callback
     void Get(void* context,                                // pass value to callback with context
