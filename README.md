@@ -50,12 +50,13 @@ is easy and encouraged!
 
 ### Available Engines
 
-| Engine  | Description | Stable? | Thread-Safe? | Each? | Remove? |
+| Engine  | Description | Stable? | Thread-Safe? | Iterable? | Large Values? |
 | ------- | ----------- | ------- | ------------ | ----- | ------- |
-| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes | Yes | Yes | Yes |
-| [kvtree2](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree2) (default) | Hybrid B+ persistent tree | Yes | No | No | Yes |
+| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes | Yes | No | Yes |
+| [kvtree3](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree) | Hybrid B+ persistent tree | Yes | No | Yes | Yes |
+| [kvtree2](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree) | Hybrid B+ persistent tree (old version) | Yes | No | No | Yes |
 | btree | Copy-on-write B+ persistent tree | No | No | Yes | No |
-| hashmap | TBB-optimized hash map | No | Yes | Yes | Yes |
+| hashmap | TBB-optimized hash map (coming soon!) | No | Yes | Yes | Yes |
 
 <a name="bindings"></a>
 
@@ -76,7 +77,7 @@ using namespace pmemkv;
 
 int main() {
     // open the datastore
-    KVEngine* kv = new KVEngine("kvtree2", "/dev/shm/mykv", 8388608);  // 8 MB
+    KVEngine* kv = new KVEngine("kvtree3", "/dev/shm/mykv", 8388608);  // 8 MB
 
     // put new key
     KVStatus s = kv->Put("key1", "value1");
@@ -106,7 +107,7 @@ int main() {
     char value[VAL_LEN];
 
     /* open the datastore */
-    KVEngine* kv = kvengine_open("kvtree2", "/dev/shm/mykv", 8388608);
+    KVEngine* kv = kvengine_open("kvtree3", "/dev/shm/mykv", 8388608);
 
     /* put new key */
     int32_t len = strlen("value1");
