@@ -159,6 +159,7 @@ void KVTree::Get(void* context, const string& key, KVGetCallback* callback) {
         const uint8_t hash = PearsonHash(key.c_str(), key.size());
         for (int slot = LEAF_KEYS; slot--;) {
             if (leafnode->hashes[slot] == hash) {
+                LOG("   found hash match, slot=" << slot);
                 if (leafnode->keys[slot].compare(key) == 0) {
                     auto kv = leafnode->leaf->slots[slot].get_ro();
                     LOG("   found value, slot=" << slot << ", size=" << to_string(kv.valsize()));
@@ -300,11 +301,9 @@ bool KVTree::LeafFillSlotForKey(KVLeafNode* leafnode, const uint8_t hash,
 
 void KVTree::LeafFillSpecificSlot(KVLeafNode* leafnode, const uint8_t hash,
                                   const string& key, const string& value, const int slot) {
-    if (leafnode->hashes[slot] == 0) {
-        leafnode->hashes[slot] = hash;
-        leafnode->keys[slot] = key;
-    }
     leafnode->leaf->slots[slot].get_rw().set(hash, key, value);
+    leafnode->hashes[slot] = hash;
+    leafnode->keys[slot] = key;
 }
 
 void KVTree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,

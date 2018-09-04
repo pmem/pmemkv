@@ -920,14 +920,14 @@ TEST_F(KVFullTest, OutOfSpace5bTest) {
     Validate();
 }
 
-//TEST_F(KVFullTest, OutOfSpace6Test) {
-//    tx_alloc_should_fail = true;
-//    ASSERT_TRUE(kv->Put(LONGSTR, "?") == FAILED);
-//    tx_alloc_should_fail = false;
-//    std::string str;
-//    ASSERT_TRUE(kv->Get(LONGSTR, &str) == NOT_FOUND) << pmemobj_errormsg();
-//    Validate();
-//}
+TEST_F(KVFullTest, OutOfSpace6Test) {
+    tx_alloc_should_fail = true;
+    ASSERT_TRUE(kv->Put(LONGSTR, "?") == FAILED);
+    tx_alloc_should_fail = false;
+    std::string str;
+    ASSERT_TRUE(kv->Get(LONGSTR, &str) == NOT_FOUND);
+    Validate();
+}
 
 TEST_F(KVFullTest, RepeatedRecoveryTest) {
     for (int i = 1; i <= 100; i++) Reopen();
