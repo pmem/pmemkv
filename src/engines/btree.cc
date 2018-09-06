@@ -134,13 +134,24 @@ void BTreeEngine::Get(void* context, const string& key, KVGetCallback* callback)
 
 KVStatus BTreeEngine::Put(const string& key, const string& value) {
     LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
-    auto res = my_btree->insert(std::make_pair(pstring<MAX_KEY_SIZE>(key), pstring<MAX_VALUE_SIZE>(value)));
-    if (!res.second) { // key already exists, so update
-        typename btree_type::value_type& entry = *res.first;
-        transaction::manual tx(pmpool);
-        conditional_add_to_tx(&(entry.second));
-        entry.second = value;
-        transaction::commit();
+    try {
+        auto res = my_btree->insert(std::make_pair(pstring<MAX_KEY_SIZE>(key), pstring<MAX_VALUE_SIZE>(value)));
+        if (!res.second) { // key already exists, so update
+            typename btree_type::value_type& entry = *res.first;
+            transaction::manual tx(pmpool);
+            conditional_add_to_tx(&(entry.second));
+            entry.second = value;
+            transaction::commit();
+        }
+    } catch (std::bad_alloc e) {
+        LOG("Put failed due to exception, " << e.what() );
+        return FAILED;
+    } catch (pmem::transaction_alloc_error e) {
+        LOG("Put failed due to pmem::transaction_alloc_error, " << e.what() );
+        return FAILED;
+    } catch (pmem::transaction_error e) {
+        LOG("Put failed due to pmem::transaction_error, " << e.what() );
+        return FAILED;
     }
     return OK;
 }
