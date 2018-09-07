@@ -352,7 +352,7 @@ TEST_F(BTreeEngineTest, UsesEachTest) {
     ASSERT_TRUE(kv->Count() == 2);
 
     string result;
-    kv->Each(&result, [](void* context, int32_t kb, int32_t vb, const char* k, const char* v) {
+    kv->Each(&result, [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
         const auto c = ((string*) context);
         c->append("<");
         c->append(string(k, kb));
@@ -380,13 +380,13 @@ TEST_F(BTreeEngineTest, UsesLikeTest) {
     ASSERT_TRUE(kv->CountLike(".*1") == 2);
 
     string result;
-    kv->EachLike("1.*", &result, [](void* context, int32_t kb, int32_t vb, const char* k, const char* v) {
+    kv->EachLike("1.*", &result, [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
         const auto c = ((string*) context);
         c->append("<");
         c->append(string(k, kb));
         c->append(">,");
     });
-    kv->EachLike("3.*", &result, [](void* context, int32_t kb, int32_t vb, const char* k, const char* v) {
+    kv->EachLike("3.*", &result, [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
         const auto c = ((string*) context);
         c->append("<");
         c->append(string(v, vb));
@@ -411,7 +411,7 @@ TEST_F(BTreeEngineTest, UsesLikeWithBadPatternTest) {
     ASSERT_TRUE(kv->CountLike("[]") == 0);
     ASSERT_TRUE(kv->CountLike("][") == 0);
 
-    auto cb = [](void* context, int32_t kb, int32_t vb, const char* k, const char* v) {
+    auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
         const auto c = ((string*) context);
         c->append("!");
     };

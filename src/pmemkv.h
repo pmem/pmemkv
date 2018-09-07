@@ -40,8 +40,8 @@ typedef enum {                                             // status enumeration
 
 typedef void(KVEachCallback)(void* context,                // callback function for Each operation
                              int keybytes,
-                             int valuebytes,
                              const char* key,
+                             int valuebytes,
                              const char* value);
 
 typedef void(KVGetCallback)(void* context,                 // callback function for Get operation
@@ -150,10 +150,16 @@ void kvengine_get(KVEngine* kv,                            // pass value to call
                   const char* key,
                   KVGetCallback* callback);
 
+int8_t kvengine_get_copy(KVEngine* kv,                     // copy value to buffer if big enough
+                         int32_t keybytes,
+                         const char* key,
+                         int32_t maxvaluebytes,
+                         char* value);
+
 int8_t kvengine_put(KVEngine* kv,                          // store key and value
                     int32_t keybytes,
-                    int32_t valuebytes,
                     const char* key,
+                    int32_t valuebytes,
                     const char* value);
 
 int8_t kvengine_remove(KVEngine* kv,                       // remove value for key

@@ -118,8 +118,31 @@ extern "C" void kvengine_get(KVEngine* kv, void* context, const int32_t keybytes
     kv->Get(context, string(key, (size_t) keybytes), callback);
 }
 
-extern "C" int8_t kvengine_put(KVEngine* kv, const int32_t keybytes, const int32_t valuebytes,
-                               const char* key, const char* value) {
+struct GetCopyCallbackContext {
+    KVStatus result;
+    int32_t maxvaluebytes;
+    char* value;
+};
+
+extern "C" int8_t kvengine_get_copy(KVEngine* kv, int32_t keybytes, const char* key,
+                                    int32_t maxvaluebytes, char* value) {
+    GetCopyCallbackContext cxt = {NOT_FOUND, maxvaluebytes, value};
+    auto cb = [](void* context, int32_t vb, const char* v) {
+        const auto c = ((GetCopyCallbackContext*) context);
+        if (vb < c->maxvaluebytes) {
+            c->result = OK;
+            memcpy(c->value, v, vb);
+        } else {
+            c->result = FAILED;
+        }
+    };
+    memset(value, 0, maxvaluebytes);
+    kv->Get(&cxt, string(key, (size_t) keybytes), cb);
+    return cxt.result;
+}
+
+extern "C" int8_t kvengine_put(KVEngine* kv, const int32_t keybytes, const char* key,
+                               const int32_t valuebytes, const char* value) {
     return kv->Put(string(key, (size_t) keybytes), string(value, (size_t) valuebytes));
 }
 

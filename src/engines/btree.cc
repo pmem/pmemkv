@@ -92,8 +92,8 @@ int64_t BTreeEngine::CountLike(const string& pattern) {
 void BTreeEngine::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& iterator : *my_btree) {
-        (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size(),
-                    iterator.first.c_str(), iterator.second.c_str());
+        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
+                    (int32_t) iterator.second.size(), iterator.second.c_str());
     }
 }
 
@@ -104,8 +104,8 @@ void BTreeEngine::EachLike(const string& pattern, void* context, KVEachCallback*
         for (auto& iterator : *my_btree) {
             auto key = string(iterator.first.c_str(), (int32_t) iterator.first.size());
             if (std::regex_match(key, p))
-                (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size(),
-                            iterator.first.c_str(), iterator.second.c_str());
+                (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
+                            (int32_t) iterator.second.size(), iterator.second.c_str());
         }
     } catch (std::regex_error) {
         LOG("Invalid pattern: " << pattern);

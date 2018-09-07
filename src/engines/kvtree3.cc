@@ -110,7 +110,7 @@ void KVTree::Each(void* context, KVEachCallback* callback) {
         for (int slot = LEAF_KEYS; slot--;) {
             auto kvslot = leaf->slots[slot].get_ro();
             if (kvslot.empty() || kvslot.hash() == 0) continue;
-            (*callback)(context, kvslot.get_ks(), kvslot.get_vs(), kvslot.key(), kvslot.val());
+            (*callback)(context, kvslot.get_ks(), kvslot.key(), kvslot.get_vs(), kvslot.val());
         }
         leaf = leaf->next;  // advance to next linked leaf
     }
@@ -127,7 +127,7 @@ void KVTree::EachLike(const string& pattern, void* context, KVEachCallback* call
                 if (kvslot.empty() || kvslot.hash() == 0) continue;
                 auto key = string(kvslot.key(), kvslot.get_ks());
                 if (std::regex_match(key, p))
-                    (*callback)(context, kvslot.get_ks(), kvslot.get_vs(), kvslot.key(), kvslot.val());
+                    (*callback)(context, kvslot.get_ks(), kvslot.key(), kvslot.get_vs(), kvslot.val());
             }
             leaf = leaf->next;  // advance to next linked leaf
         }
