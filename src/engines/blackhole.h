@@ -37,36 +37,24 @@
 namespace pmemkv {
 namespace blackhole {
 
-const string ENGINE = "blackhole";                         // engine identifier
+const string ENGINE = "blackhole";
 
 class Blackhole : public KVEngine {
   public:
-    Blackhole();                                           // default constructor
-    ~Blackhole();                                          // default destructor
-
-    string Engine() final { return ENGINE; }               // engine identifier
-
-    int64_t Count() final;                                 // count all keys
-    int64_t CountLike(const string& pattern) final;        // count all keys matching pattern
-
-    using KVEngine::Each;                                  // iterate over all keys
-    void Each(void* context,                               // iterate over all keys with context
-              KVEachCallback* callback) final;
-    using KVEngine::EachLike;                              // iterate over matching keys
-    void EachLike(const string& pattern,                   // iterate over matching keys with context
-                  void* context,
-                  KVEachCallback* callback) final;
-
-    KVStatus Exists(const string& key) final;              // does key have a value?
-
-    using KVEngine::Get;                                   // pass value to callback
-    void Get(void* context,                                // pass value to callback with context
-             const string& key,
-             KVGetCallback* callback) final;
-
-    KVStatus Put(const string& key,                        // store key and value
-                 const string& value) final;
-    KVStatus Remove(const string& key) final;              // remove value for key
+    Blackhole();
+    ~Blackhole();
+    string Engine() final { return ENGINE; }
+    int64_t Count() final;
+    int64_t CountLike(const string& pattern) final;
+    using KVEngine::Each;
+    void Each(void* context, KVEachCallback* callback) final;
+    using KVEngine::EachLike;
+    void EachLike(const string& pattern, void* context, KVEachCallback* callback) final;
+    KVStatus Exists(const string& key) final;
+    using KVEngine::Get;
+    void Get(void* context, const string& key, KVGetCallback* callback) final;
+    KVStatus Put(const string& key, const string& value) final;
+    KVStatus Remove(const string& key) final;
 };
 
 } // namespace blackhole

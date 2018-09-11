@@ -123,24 +123,6 @@ KVStatus HashMapEngine::Exists(const string& key) {
     return OK;
 }
 
-KVStatus HashMapEngine::ExistsLike(const string& pattern) {
-    LOG("Exists like pattern=" << pattern);
-    try {
-        std::regex p(pattern);
-        for(auto it = my_hash_map->begin(); it != my_hash_map->end(); ++it) {
-            auto key = string(it->first.c_str(), it->first.size());
-            if(std::regex_match(key, p)) {
-                return OK;
-            }
-        }
-    } catch (std::regex_error) {
-        LOG("Invalid pattern: " << pattern);
-        return FAILED;
-    }
-    LOG("  pattern not found");
-    return NOT_FOUND;
-}
-
 void HashMapEngine::Get(void* context, const string& key, KVGetCallback* callback) {
     LOG("Get using callback for key=" << key);
     hash_map_type::const_accessor acc;

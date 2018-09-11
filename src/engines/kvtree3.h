@@ -124,57 +124,29 @@ struct KVRecoveredLeaf {                                   // temporary wrapper 
 
 class KVTree : public KVEngine {                           // hybrid B+ tree engine
   public:
-    KVTree(const string& path, size_t size);               // default constructor
-    ~KVTree();                                             // default destructor
-
-    string Engine() final { return ENGINE; }               // engine identifier
-
-    int64_t Count() final;                                 // count all keys
-    int64_t CountLike(const string& pattern) final;        // count all keys matching pattern
-
-    using KVEngine::Each;                                  // iterate over all keys
-    void Each(void* context,                               // iterate over all keys with context
-              KVEachCallback* callback) final;
-    using KVEngine::EachLike;                              // iterate over matching keys
-    void EachLike(const string& pattern,                   // iterate over matching keys with context
-                  void* context,
-                  KVEachCallback* callback) final;
-
-    KVStatus Exists(const string& key) final;              // does key have a value?
-
-    using KVEngine::Get;                                   // pass value to callback
-    void Get(void* context,                                // pass value to callback with context
-             const string& key,
-             KVGetCallback* callback) final;
-
-    KVStatus Put(const string& key,                        // store key and value
-                 const string& value) final;
-    KVStatus Remove(const string& key) final;              // remove value for key
+    KVTree(const string& path, size_t size);
+    ~KVTree();
+    string Engine() final { return ENGINE; }
+    int64_t Count() final;
+    int64_t CountLike(const string& pattern) final;
+    using KVEngine::Each;
+    void Each(void* context, KVEachCallback* callback) final;
+    using KVEngine::EachLike;
+    void EachLike(const string& pattern, void* context, KVEachCallback* callback) final;
+    KVStatus Exists(const string& key) final;
+    using KVEngine::Get;
+    void Get(void* context, const string& key, KVGetCallback* callback) final;
+    KVStatus Put(const string& key, const string& value) final;
+    KVStatus Remove(const string& key) final;
   protected:
-    KVLeafNode* LeafSearch(const string& key);             // find node for key
-    void LeafFillEmptySlot(KVLeafNode* leafnode,           // write first unoccupied slot found
-                           uint8_t hash,
-                           const string& key,
-                           const string& value);
-    bool LeafFillSlotForKey(KVLeafNode* leafnode,          // write slot for matching key if found
-                            uint8_t hash,
-                            const string& key,
-                            const string& value);
-    void LeafFillSpecificSlot(KVLeafNode* leafnode,        // write slot at specific index
-                              uint8_t hash,
-                              const string& key,
-                              const string& value,
-                              int slot);
-    void LeafSplitFull(KVLeafNode* leafnode,               // split full leaf into two leaves
-                       uint8_t hash,
-                       const string& key,
-                       const string& value);
-    void InnerUpdateAfterSplit(KVNode* node,               // update parents after leaf split
-                               unique_ptr<KVNode> newnode,
-                               string* split_key);
-    uint8_t PearsonHash(const char* data,                  // calculate 1-byte hash for string
-                        size_t size);
-    void Recover();                                        // reload state from persistent pool
+    KVLeafNode* LeafSearch(const string& key);
+    void LeafFillEmptySlot(KVLeafNode* leafnode, uint8_t hash, const string& key, const string& value);
+    bool LeafFillSlotForKey(KVLeafNode* leafnode, uint8_t hash, const string& key, const string& value);
+    void LeafFillSpecificSlot(KVLeafNode* leafnode, uint8_t hash, const string& key, const string& value, int slot);
+    void LeafSplitFull(KVLeafNode* leafnode, uint8_t hash, const string& key, const string& value);
+    void InnerUpdateAfterSplit(KVNode* node, unique_ptr<KVNode> newnode, string* split_key);
+    uint8_t PearsonHash(const char* data, size_t size);
+    void Recover();
   private:
     KVTree(const KVTree&);                                 // prevent copying
     void operator=(const KVTree&);                         // prevent assigning

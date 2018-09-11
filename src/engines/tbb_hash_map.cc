@@ -51,6 +51,10 @@ int64_t TbbHashMap::Count() {
     return result;
 }
 
+int64_t TbbHashMap::CountLike(const string& pattern) {
+    LOG("Count like pattern=" << pattern);
+}
+
 KVStatus TbbHashMap::Exists(const string& key) {
     LOG("Exists for key=" << key);
     map_t::const_accessor result;
@@ -64,6 +68,10 @@ void TbbHashMap::Each(void* context, KVEachCallback* callback) {
         (*callback)(context, (int32_t)iterator.first.size(), (int32_t)iterator.second.size(),
                 iterator.first.c_str(), iterator.second.c_str());
     }
+}
+
+void TbbHashMap::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
+    LOG("Each like pattern=" << pattern);
 }
 
 void TbbHashMap::Get(void* context, const string& key, KVGetCallback* callback) {

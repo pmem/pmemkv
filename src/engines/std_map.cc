@@ -51,6 +51,10 @@ int64_t StdMap::Count() {
     return result;
 }
 
+int64_t StdMap::CountLike(const string& pattern) {
+    LOG("Count like pattern=" << pattern);
+}
+
 KVStatus StdMap::Exists(const string& key) {
     LOG("Exists for key=" << key);
     const bool result = pmem_kv_container.find(pmem_string(key.c_str(), key.size(), ch_allocator)) != pmem_kv_container.end();
@@ -63,6 +67,10 @@ void StdMap::Each(void* context, KVEachCallback* callback) {
         (*callback)(context, (int32_t)iterator.first.size(), (int32_t)iterator.second.size(),
                 iterator.first.c_str(), iterator.second.c_str());
     }
+}
+
+void StdMap::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
+    LOG("Each like pattern=" << pattern);
 }
 
 void StdMap::Get(void* context, const string& key, KVGetCallback* callback) {

@@ -42,49 +42,36 @@ using pmem::obj::persistent_ptr;
 namespace pmemkv {
 namespace btree {
 
-const string ENGINE = "btree";                             // engine identifier
+const string ENGINE = "btree";
 const size_t DEGREE = 64;
 const size_t MAX_KEY_SIZE = 20;
 const size_t MAX_VALUE_SIZE = 200;
 
 class BTreeEngine : public KVEngine {
   public:
-    BTreeEngine(const string& path, size_t size);          // default constructor
-    ~BTreeEngine();                                        // default destructor
-
-    string Engine() final { return ENGINE; }               // engine identifier
-
-    int64_t Count() final;                                 // count all keys
-    int64_t CountLike(const string& pattern) final;        // count all keys matching pattern
-
-    using KVEngine::Each;                                  // iterate over all keys
-    void Each(void* context,                               // iterate over all keys with context
-              KVEachCallback* callback) final;
-    using KVEngine::EachLike;                              // iterate over matching keys
-    void EachLike(const string& pattern,                   // iterate over matching keys with context
-                  void* context,
-                  KVEachCallback* callback) final;
-
-    KVStatus Exists(const string& key) final;              // does key have a value?
-
-    using KVEngine::Get;                                   // pass value to callback
-    void Get(void* context,                                // pass value to callback with context
-             const string& key,
-             KVGetCallback* callback) final;
-
-    KVStatus Put(const string& key,                        // store key and value
-                 const string& value) final;
-    KVStatus Remove(const string& key) final;              // remove value for key
+    BTreeEngine(const string& path, size_t size);
+    ~BTreeEngine();
+    string Engine() final { return ENGINE; }
+    int64_t Count() final;
+    int64_t CountLike(const string& pattern) final;
+    using KVEngine::Each;
+    void Each(void* context, KVEachCallback* callback) final;
+    using KVEngine::EachLike;
+    void EachLike(const string& pattern, void* context, KVEachCallback* callback) final;
+    KVStatus Exists(const string& key) final;
+    using KVEngine::Get;
+    void Get(void* context, const string& key, KVGetCallback* callback) final;
+    KVStatus Put(const string& key, const string& value) final;
+    KVStatus Remove(const string& key) final;
   private:
-    BTreeEngine(const BTreeEngine&);
-    void operator=(const BTreeEngine&);
-    typedef persistent::b_tree<pstring<MAX_KEY_SIZE>,
-            pstring<MAX_VALUE_SIZE>, DEGREE> btree_type;
+    typedef persistent::b_tree<pstring<MAX_KEY_SIZE>, pstring<MAX_VALUE_SIZE>, DEGREE> btree_type;
     struct RootData {
         persistent_ptr<btree_type> btree_ptr;
     };
-    void Recover();                                        // reload state from persistent pool
-    pool<RootData> pmpool;                                 // pool for persistent root
+    BTreeEngine(const BTreeEngine&);
+    void operator=(const BTreeEngine&);
+    void Recover();
+    pool<RootData> pmpool;
     btree_type* my_btree;
 };
 

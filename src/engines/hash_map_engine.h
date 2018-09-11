@@ -42,69 +42,52 @@ using pmem::obj::persistent_ptr;
 namespace pmemkv {
 namespace hash_map_engine {
 
-const string ENGINE = "hash_map";                         // engine identifier
+const string ENGINE = "hash_map";
 const size_t MAX_KEY_SIZE = 20;
 const size_t MAX_VALUE_SIZE = 200;
 
-
-template <size_t STR_SIZE>
+template<size_t STR_SIZE>
 struct pstring_hash_compare {
     typedef pstring<STR_SIZE> pstrint_type;
     static const size_t hash_multiplier = 11400714819323198485ULL;
 
-    static size_t hash( const pstrint_type& a ) {
+    static size_t hash(const pstrint_type& a) {
         size_t h = 0;
-        for ( const char* c = a.c_str(); c < a.c_str() + a.size(); ++c ) {
+        for (const char* c = a.c_str(); c < a.c_str() + a.size(); ++c) {
             h = static_cast<size_t>(*c) ^ (h * hash_multiplier);
         }
         return h;
     }
-    static bool equal( const pstrint_type& a, const pstrint_type& b ) { return a == b; }
+    static bool equal(const pstrint_type& a, const pstrint_type& b) { return a == b; }
 };
 
 class HashMapEngine : public KVEngine {
+  public:
+    HashMapEngine(const string& path, size_t size);
+    ~HashMapEngine();
+    string Engine() final { return ENGINE; }
+    int64_t Count() final;
+    int64_t CountLike(const string& pattern) final;
+    using KVEngine::Each;
+    void Each(void* context, KVEachCallback* callback) final;
+    using KVEngine::EachLike;
+    void EachLike(const string& pattern, void* context, KVEachCallback* callback) final;
+    KVStatus Exists(const string& key) final;
+    using KVEngine::Get;
+    void Get(void* context, const string& key, KVGetCallback* callback) final;
+    KVStatus Put(const string& key, const string& value) final;
+    KVStatus Remove(const string& key) final;
   private:
     typedef pstring<MAX_KEY_SIZE> key_type;
     typedef pstring<MAX_VALUE_SIZE> mapped_type;
     typedef pmem::obj::experimental::persistent_concurrent_hash_map<key_type, mapped_type, pstring_hash_compare<MAX_KEY_SIZE> > hash_map_type;
     struct RootData {
         persistent_ptr<hash_map_type> hash_map_ptr;
-    };    
-
+    };
     HashMapEngine(const HashMapEngine&);
     void operator=(const HashMapEngine&);
-  public:
-    HashMapEngine(const string& path, size_t size);               // default constructor
-    ~HashMapEngine();                                             // default destructor
-
-    string Engine() final { return ENGINE; }                    // engine identifier
-
-    int64_t Count() final;                                 // count all keys
-    int64_t CountLike(const string& pattern) final;        // count all keys matching pattern
-
-    using KVEngine::Each;                                  // iterate over all keys
-    void Each(void* context,                               // iterate over all keys with context
-            KVEachCallback* callback) final;
-    using KVEngine::EachLike;                              // iterate over matching keys
-    void EachLike(const string& pattern,                   // iterate over matching keys with context
-            void* context,
-            KVEachCallback* callback) final;
-
-    KVStatus Exists(const string& key) final;              // does key have a value?
-    KVStatus ExistsLike(const string& pattern) final;      // does pattern have a match?
-
-    using KVEngine::Get;                                   // pass value to callback
-    void Get(void* context,                                // pass value to callback with context
-            const string& key,
-            KVGetCallback* callback) final;
-
-    KVStatus Put(const string& key,                             // store key and value
-                 const string& value) final;
-    KVStatus Remove(const string& key) final;                   // remove value for key
-  private:
     void Recover();
-
-    pool<RootData> pmpool;                                      // pool for persistent root
+    pool<RootData> pmpool;
     hash_map_type* my_hash_map;
 };
 
