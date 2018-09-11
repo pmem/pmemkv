@@ -49,7 +49,7 @@ using pmem::detail::conditional_add_to_tx;
 namespace pmemkv {
 namespace btree {
 
-BTreeEngine::BTreeEngine(const string& path, const size_t size) {
+BTree::BTree(const string& path, const size_t size) {
     if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
         LOG("Creating filesystem pool, path=" << path << ", size=" << to_string(size));
         pmpool = pool<RootData>::create(path.c_str(), LAYOUT, size, S_IRWXU);
@@ -61,19 +61,19 @@ BTreeEngine::BTreeEngine(const string& path, const size_t size) {
     LOG("Opened ok");
 }
 
-BTreeEngine::~BTreeEngine() {
+BTree::~BTree() {
     LOG("Closing");
     pmpool.close();
     LOG("Closed ok");
 }
 
-int64_t BTreeEngine::Count() {
+int64_t BTree::Count() {
     int64_t result = 0;
     for (auto& iterator : *my_btree) result++;
     return result;
 }
 
-int64_t BTreeEngine::CountLike(const string& pattern) {
+int64_t BTree::CountLike(const string& pattern) {
     LOG("Count like pattern=" << pattern);
     try {
         std::regex p(pattern);
@@ -89,7 +89,7 @@ int64_t BTreeEngine::CountLike(const string& pattern) {
     }
 }
 
-void BTreeEngine::Each(void* context, KVEachCallback* callback) {
+void BTree::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& iterator : *my_btree) {
         (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
@@ -97,7 +97,7 @@ void BTreeEngine::Each(void* context, KVEachCallback* callback) {
     }
 }
 
-void BTreeEngine::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
+void BTree::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
     LOG("Each like pattern=" << pattern);
     try {
         std::regex p(pattern);
@@ -112,7 +112,7 @@ void BTreeEngine::EachLike(const string& pattern, void* context, KVEachCallback*
     }
 }
 
-KVStatus BTreeEngine::Exists(const string& key) {
+KVStatus BTree::Exists(const string& key) {
     LOG("Exists for key=" << key);
     btree_type::iterator it = my_btree->find(pstring<20>(key));
     if (it == my_btree->end()) {
@@ -122,7 +122,7 @@ KVStatus BTreeEngine::Exists(const string& key) {
     return OK;
 }
 
-void BTreeEngine::Get(void* context, const string& key, KVGetCallback* callback) {
+void BTree::Get(void* context, const string& key, KVGetCallback* callback) {
     LOG("Get using callback for key=" << key);
     btree_type::iterator it = my_btree->find(pstring<20>(key));
     if (it == my_btree->end()) {
@@ -132,7 +132,7 @@ void BTreeEngine::Get(void* context, const string& key, KVGetCallback* callback)
     (*callback)(context, (int32_t) it->second.size(), it->second.c_str());
 }
 
-KVStatus BTreeEngine::Put(const string& key, const string& value) {
+KVStatus BTree::Put(const string& key, const string& value) {
     LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
     try {
         auto res = my_btree->insert(std::make_pair(pstring<MAX_KEY_SIZE>(key), pstring<MAX_VALUE_SIZE>(value)));
@@ -144,28 +144,28 @@ KVStatus BTreeEngine::Put(const string& key, const string& value) {
             transaction::commit();
         }
     } catch (std::bad_alloc e) {
-        LOG("Put failed due to exception, " << e.what() );
+        LOG("Put failed due to exception, " << e.what());
         return FAILED;
     } catch (pmem::transaction_alloc_error e) {
-        LOG("Put failed due to pmem::transaction_alloc_error, " << e.what() );
+        LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
         return FAILED;
     } catch (pmem::transaction_error e) {
-        LOG("Put failed due to pmem::transaction_error, " << e.what() );
+        LOG("Put failed due to pmem::transaction_error, " << e.what());
         return FAILED;
     }
     return OK;
 }
 
-KVStatus BTreeEngine::Remove(const string& key) {
+KVStatus BTree::Remove(const string& key) {
     LOG("Remove key=" << key);
     size_t result = my_btree->erase(key);
     if (result == 1) {
         return OK;
-    } 
+    }
     return NOT_FOUND;
 }
 
-void BTreeEngine::Recover() {
+void BTree::Recover() {
     auto root_data = pmpool.get_root();
     if (root_data->btree_ptr) {
         my_btree = root_data->btree_ptr.get();

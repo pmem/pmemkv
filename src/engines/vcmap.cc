@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Intel Corporation
+ * Copyright 2017-2018, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,46 +35,51 @@
 #include <iostream>
 
 #define DO_LOG 0
-#define LOG(msg) if (DO_LOG) std::cout << "[tbb_hash_map] " << msg << "\n"
+#define LOG(msg) if (DO_LOG) std::cout << "[vcmap] " << msg << "\n"
 
 namespace pmemkv {
-namespace tbb_hash_map {
+namespace vcmap {
 
-TbbHashMap::TbbHashMap(const string& path, size_t size) : kv_allocator(path, size), ch_allocator(kv_allocator),
-    pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator)) { LOG("Opened ok"); }
+VCMap::VCMap(const string& path, size_t size) : kv_allocator(path, size), ch_allocator(kv_allocator),
+             pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator)) {
+    LOG("Opened ok");
+}
 
-TbbHashMap::~TbbHashMap() { LOG("Closed ok"); }
+VCMap::~VCMap() {
+    LOG("Closed ok");
+}
 
-int64_t TbbHashMap::Count() {
+int64_t VCMap::Count() {
+    LOG("Count");
     int64_t result = 0;
-    for (auto& iterator : pmem_kv_container) result++; 
+    for (auto& iterator : pmem_kv_container) result++;
     return result;
 }
 
-int64_t TbbHashMap::CountLike(const string& pattern) {
+int64_t VCMap::CountLike(const string& pattern) {
     LOG("Count like pattern=" << pattern);
 }
 
-KVStatus TbbHashMap::Exists(const string& key) {
+KVStatus VCMap::Exists(const string& key) {
     LOG("Exists for key=" << key);
     map_t::const_accessor result;
     const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
     return (result_found ? OK : NOT_FOUND);
 }
 
-void TbbHashMap::Each(void* context, KVEachCallback* callback) {
+void VCMap::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, (int32_t)iterator.first.size(), (int32_t)iterator.second.size(),
-                iterator.first.c_str(), iterator.second.c_str());
+        (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size(),
+                    iterator.first.c_str(), iterator.second.c_str());
     }
 }
 
-void TbbHashMap::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
+void VCMap::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
     LOG("Each like pattern=" << pattern);
 }
 
-void TbbHashMap::Get(void* context, const string& key, KVGetCallback* callback) {
+void VCMap::Get(void* context, const string& key, KVGetCallback* callback) {
     LOG("Get key=" << key);
     map_t::const_accessor result;
     const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
@@ -85,21 +90,20 @@ void TbbHashMap::Get(void* context, const string& key, KVGetCallback* callback) 
     (*callback)(context, (int32_t) result->second.size(), result->second.c_str());
 }
 
-KVStatus TbbHashMap::Put(const string& key, const string& value) {    
-    LOG("Put key=" << key << ", value.size=" << to_string(value.size()));    
-    map_t::value_type kv_pair { pmem_string(key.c_str(), key.size(), ch_allocator), pmem_string(value.c_str(), value.size(), ch_allocator) };    
+KVStatus VCMap::Put(const string& key, const string& value) {
+    LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
+    map_t::value_type kv_pair{pmem_string(key.c_str(), key.size(), ch_allocator),
+                              pmem_string(value.c_str(), value.size(), ch_allocator)};
     bool result = pmem_kv_container.insert(kv_pair);
-
     if (!result) {
         map_t::accessor result_found;
         pmem_kv_container.find(result_found, kv_pair.first);
         result_found->second = kv_pair.second;
     }
-
     return OK;
 }
 
-KVStatus TbbHashMap::Remove(const string& key) {
+KVStatus VCMap::Remove(const string& key) {
     LOG("Remove key=" << key);
     size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
     if (erased == 1) {
@@ -108,5 +112,5 @@ KVStatus TbbHashMap::Remove(const string& key) {
     return NOT_FOUND;
 }
 
-} // namespace tbb_hash_map
+} // namespace vcmap
 } // namespace pmemkv

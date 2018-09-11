@@ -39,14 +39,14 @@
 #include <scoped_allocator>
 
 namespace pmemkv {
-namespace std_map {
+namespace vmap {
 
-const string ENGINE = "std_map";
+const string ENGINE = "vmap";
 
-class StdMap : public KVEngine {
+class VMap : public KVEngine {
   public:
-    StdMap(const string& path, size_t size);
-    ~StdMap();
+    VMap(const string& path, size_t size);
+    ~VMap();
     string Engine() final { return ENGINE; }
     int64_t Count() final;
     int64_t CountLike(const string& pattern) final;
@@ -63,11 +63,11 @@ class StdMap : public KVEngine {
     typedef pmem::allocator<char> ch_allocator_t;
     typedef std::basic_string<char, std::char_traits<char>, ch_allocator_t> pmem_string;
     typedef pmem::allocator<std::pair<pmem_string, pmem_string> > kv_allocator_t;
-    typedef std::map<pmem_string, pmem_string, std::less<pmem_string>, std::scoped_allocator_adaptor<kv_allocator_t >> map_t;
+    typedef std::map<pmem_string, pmem_string, std::less<pmem_string>, std::scoped_allocator_adaptor<kv_allocator_t>> map_t;
     kv_allocator_t kv_allocator;
     ch_allocator_t ch_allocator;
     map_t pmem_kv_container;
 };
 
-} // namespace std_map
+} // namespace vmap
 } // namespace pmemkv

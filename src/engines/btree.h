@@ -47,10 +47,10 @@ const size_t DEGREE = 64;
 const size_t MAX_KEY_SIZE = 20;
 const size_t MAX_VALUE_SIZE = 200;
 
-class BTreeEngine : public KVEngine {
+class BTree : public KVEngine {
   public:
-    BTreeEngine(const string& path, size_t size);
-    ~BTreeEngine();
+    BTree(const string& path, size_t size);
+    ~BTree();
     string Engine() final { return ENGINE; }
     int64_t Count() final;
     int64_t CountLike(const string& pattern) final;
@@ -68,8 +68,8 @@ class BTreeEngine : public KVEngine {
     struct RootData {
         persistent_ptr<btree_type> btree_ptr;
     };
-    BTreeEngine(const BTreeEngine&);
-    void operator=(const BTreeEngine&);
+    BTree(const BTree&);
+    void operator=(const BTree&);
     void Recover();
     pool<RootData> pmpool;
     btree_type* my_btree;

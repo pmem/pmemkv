@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Intel Corporation
+ * Copyright 2017-2018, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,45 +35,49 @@
 #include <iostream>
 
 #define DO_LOG 0
-#define LOG(msg) if (DO_LOG) std::cout << "[std_map] " << msg << "\n"
+#define LOG(msg) if (DO_LOG) std::cout << "[vmap] " << msg << "\n"
 
 namespace pmemkv {
-namespace std_map {
+namespace vmap {
 
-StdMap::StdMap(const string& path, size_t size) : kv_allocator(path, size), ch_allocator(kv_allocator),
-    pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator)) { LOG("Opened ok"); }
+VMap::VMap(const string& path, size_t size) : kv_allocator(path, size), ch_allocator(kv_allocator),
+           pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator)) {
+    LOG("Opened ok");
+}
 
-StdMap::~StdMap() { LOG("Closed ok"); }
+VMap::~VMap() {
+    LOG("Closed ok");
+}
 
-int64_t StdMap::Count() {
+int64_t VMap::Count() {
     int64_t result = 0;
     for (auto& iterator : pmem_kv_container) result++;
     return result;
 }
 
-int64_t StdMap::CountLike(const string& pattern) {
+int64_t VMap::CountLike(const string& pattern) {
     LOG("Count like pattern=" << pattern);
 }
 
-KVStatus StdMap::Exists(const string& key) {
+KVStatus VMap::Exists(const string& key) {
     LOG("Exists for key=" << key);
-    const bool result = pmem_kv_container.find(pmem_string(key.c_str(), key.size(), ch_allocator)) != pmem_kv_container.end();
-    return (result ? OK : NOT_FOUND);
+    bool r = pmem_kv_container.find(pmem_string(key.c_str(), key.size(), ch_allocator)) != pmem_kv_container.end();
+    return (r ? OK : NOT_FOUND);
 }
 
-void StdMap::Each(void* context, KVEachCallback* callback) {
+void VMap::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, (int32_t)iterator.first.size(), (int32_t)iterator.second.size(),
-                iterator.first.c_str(), iterator.second.c_str());
+        (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size(),
+                    iterator.first.c_str(), iterator.second.c_str());
     }
 }
 
-void StdMap::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
+void VMap::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
     LOG("Each like pattern=" << pattern);
 }
 
-void StdMap::Get(void* context, const string& key, KVGetCallback* callback) {
+void VMap::Get(void* context, const string& key, KVGetCallback* callback) {
     LOG("Get key=" << key);
     const auto pos = pmem_kv_container.find(pmem_string(key.c_str(), key.size(), ch_allocator));
     if (pos == pmem_kv_container.end()) {
@@ -83,13 +87,13 @@ void StdMap::Get(void* context, const string& key, KVGetCallback* callback) {
     (*callback)(context, (int32_t) pos->second.size(), pos->second.c_str());
 }
 
-KVStatus StdMap::Put(const string& key, const string& value) {
-    LOG("Put key=" << key << ", value.size=" << to_string(value.size()));    
-    pmem_kv_container[pmem_string(key.c_str(), key.size(), ch_allocator)] = pmem_string(value.c_str(), value.size(), ch_allocator);    
+KVStatus VMap::Put(const string& key, const string& value) {
+    LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
+    pmem_kv_container[pmem_string(key.c_str(), key.size(), ch_allocator)] = pmem_string(value.c_str(), value.size(), ch_allocator);
     return OK;
 }
 
-KVStatus StdMap::Remove(const string& key) {
+KVStatus VMap::Remove(const string& key) {
     LOG("Remove key=" << key);
     size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
     if (erased == 1) {
@@ -98,5 +102,5 @@ KVStatus StdMap::Remove(const string& key) {
     return NOT_FOUND;
 }
 
-} // namespace std_map
+} // namespace vmap
 } // namespace pmemkv

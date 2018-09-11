@@ -39,14 +39,14 @@
 #include <tbb/concurrent_hash_map.h>
 
 namespace pmemkv {
-namespace tbb_hash_map {
+namespace vcmap {
 
-const string ENGINE = "tbb_hash_map";
+const string ENGINE = "vcmap";
 
-class TbbHashMap : public KVEngine {
+class VCMap : public KVEngine {
   public:
-    TbbHashMap(const string& path, size_t size);
-    ~TbbHashMap();
+    VCMap(const string& path, size_t size);
+    ~VCMap();
     string Engine() final { return ENGINE; }
     int64_t Count() final;
     int64_t CountLike(const string& pattern) final;
@@ -69,5 +69,5 @@ class TbbHashMap : public KVEngine {
     map_t pmem_kv_container;
 };
 
-} // namespace tbb_hash_map
+} // namespace vcmap
 } // namespace pmemkv

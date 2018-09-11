@@ -54,9 +54,10 @@ is easy and encouraged!
 | ------- | ----------- | ------- | ------------ | ----- | ------- |
 | [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes | Yes | No | Yes |
 | [kvtree3](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree) | Hybrid B+ persistent tree | Yes | No | Yes | Yes |
-| [kvtree2](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree) | Hybrid B+ persistent tree (old version) | Yes | No | No | Yes |
-| btree | Copy-on-write B+ persistent tree | No | No | Yes | No |
-| hashmap | TBB-optimized hash map (coming soon!) | No | Yes | Yes | Yes |
+| [btree](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#btree) | Copy-on-write B+ persistent tree | Yes | No | Yes | No |
+| [cmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#cmap) | Concurrent hash map | No | Yes | Yes | Yes |
+| [vmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vmap) | Volatile hash map | No | No | Yes | Yes |
+| [vcmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vcmap) | Volatile concurrent hash map | No | Yes | Yes | Yes |
 
 <a name="bindings"></a>
 

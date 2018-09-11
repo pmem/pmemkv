@@ -3,6 +3,10 @@
 <ul>
 <li><a href="#blackhole">blackhole</a></li>
 <li><a href="#kvtree">kvtree</a></li>
+<li><a href="#btree">btree</a></li>
+<li><a href="#cmap">cmap</a></li>
+<li><a href="#vmap">vmap</a></li>
+<li><a href="#vcmap">vcmap</a></li>
 </ul>
 
 <a name="blackhole"></a>
@@ -98,3 +102,31 @@ keys and values.
 Use of PMDK C++ bindings by `kvtree` was lifted from this example program.
 Many thanks to [@tomaszkapela](https://github.com/tomaszkapela)
 for providing a great example to follow!
+
+<a name="btree"></a>
+
+btree
+-----
+
+Copy-on-write B+ tree
+
+<a name="cmap"></a>
+
+cmap
+----
+
+Concurrent hashmap based on TBB-optimized container (coming soon!)
+
+<a name="vmap"></a>
+
+vmap
+----
+
+Volatile hashmap (coming soon!)
+
+<a name="vcmap"></a>
+
+vcmap
+-----
+
+Volatile concurrent hashmap (coming soon!)

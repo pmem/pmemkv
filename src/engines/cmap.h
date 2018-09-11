@@ -40,9 +40,9 @@ using pmem::obj::pool;
 using pmem::obj::persistent_ptr;
 
 namespace pmemkv {
-namespace hash_map_engine {
+namespace cmap {
 
-const string ENGINE = "hash_map";
+const string ENGINE = "cmap";
 const size_t MAX_KEY_SIZE = 20;
 const size_t MAX_VALUE_SIZE = 200;
 
@@ -61,10 +61,10 @@ struct pstring_hash_compare {
     static bool equal(const pstrint_type& a, const pstrint_type& b) { return a == b; }
 };
 
-class HashMapEngine : public KVEngine {
+class CMap : public KVEngine {
   public:
-    HashMapEngine(const string& path, size_t size);
-    ~HashMapEngine();
+    CMap(const string& path, size_t size);
+    ~CMap();
     string Engine() final { return ENGINE; }
     int64_t Count() final;
     int64_t CountLike(const string& pattern) final;
@@ -84,12 +84,12 @@ class HashMapEngine : public KVEngine {
     struct RootData {
         persistent_ptr<hash_map_type> hash_map_ptr;
     };
-    HashMapEngine(const HashMapEngine&);
-    void operator=(const HashMapEngine&);
+    CMap(const CMap&);
+    void operator=(const CMap&);
     void Recover();
     pool<RootData> pmpool;
     hash_map_type* my_hash_map;
 };
 
-} // namespace hash_map_engine
+} // namespace cmap
 } // namespace pmemkv
