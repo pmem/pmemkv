@@ -38,7 +38,7 @@
 #include <libpmemobj++/make_persistent_atomic.hpp>
 #include <libpmemobj++/detail/common.hpp>
 
-#include "hash_map_engine.h"
+#include "cmap.h"
 
 #define DO_LOG 0
 #define LOG(msg) if (DO_LOG) std::cout << "[hash_map] " << msg << "\n"
