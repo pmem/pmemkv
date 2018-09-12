@@ -84,8 +84,7 @@ int main() {
 
     LOG("Putting new key");
     KVStatus s = kv->Put("key1", "value1");
-    assert(s == OK);
-    assert(kv->Count() == 1);
+    assert(s == OK && kv->Count() == 1);
 
     LOG("Reading key back");
     string value;
@@ -101,13 +100,10 @@ int main() {
 
     LOG("Removing existing key");
     s = kv->Remove("key1");
-    assert(s == OK);
-    assert(!kv->Exists("key1"));
+    assert(s == OK && !kv->Exists("key1"));
 
     LOG("Closing datastore");
     delete kv;
-
-    LOG("Finished successfully");
     return 0;
 }
 ```
@@ -135,8 +131,7 @@ int main() {
     char* key1 = "key1";
     char* value1 = "value1";
     KVStatus s = kvengine_put(kv, strlen(key1), key1, strlen(value1), value1);
-    assert(s == OK);
-    assert(kvengine_count(kv) == 1);
+    assert(s == OK && kvengine_count(kv) == 1);
 
     LOG("Reading key back");
     char val[MAX_VAL_LEN];
@@ -154,13 +149,10 @@ int main() {
 
     LOG("Removing existing key");
     s = kvengine_remove(kv, strlen(key1), key1);
-    assert(s == OK);
-    assert(kvengine_exists(kv, strlen(key1), key1) == NOT_FOUND);
+    assert(s == OK && kvengine_exists(kv, strlen(key1), key1) == NOT_FOUND);
 
     LOG("Closing datastore");
     kvengine_close(kv);
-
-    LOG("Finished successfully");
     return 0;
 }
 ```
