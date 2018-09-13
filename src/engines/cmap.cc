@@ -92,8 +92,8 @@ int64_t CMap::CountLike(const string& pattern) {
 void CMap::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto it = my_hash_map->begin(); it != my_hash_map->end(); ++it) {
-        (*callback)(context, (int32_t) it->first.size(), (int32_t) it->second.size(),
-                    it->first.c_str(), it->second.c_str());
+        (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
+                (int32_t) it->second.size(), it->second.c_str());
     }
 }
 
@@ -104,8 +104,8 @@ void CMap::EachLike(const string& pattern, void* context, KVEachCallback* callba
         for (auto it = my_hash_map->begin(); it != my_hash_map->end(); ++it) {
             auto key = string(it->first.c_str(), it->first.size());
             if (std::regex_match(key, p)) {
-                (*callback)(context, (int32_t) it->first.size(), (int32_t) it->second.size(),
-                            it->first.c_str(), it->second.c_str());
+                (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
+                        (int32_t) it->second.size(), it->second.c_str());
             }
         }
     } catch (std::regex_error) {
