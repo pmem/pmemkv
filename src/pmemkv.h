@@ -44,6 +44,11 @@ typedef void(KVEachCallback)(void* context,                // callback function 
                              int valuebytes,
                              const char* value);
 
+typedef void(KVEachFunction)(int keybytes,
+                             const char* key,
+                             int valuebytes,
+                             const char* value);
+
 typedef void(KVGetCallback)(void* context,                 // callback function for Get operation
                             int valuebytes,
                             const char* value);
@@ -79,12 +84,15 @@ class KVEngine {                                           // storage engine imp
     inline void Each(KVEachCallback* callback) {           // iterate over all keys
         Each(nullptr, callback);
     }
+    void Each(std::function<KVEachFunction> f);
     virtual void Each(void* context,                       // iterate over all keys with context
                       KVEachCallback* callback) = 0;
     inline void EachLike(const string& pattern,            // iterate over matching keys
                          KVEachCallback* callback) {
         EachLike(pattern, nullptr, callback);
     }
+    void EachLike(const string& pattern,
+                  std::function<KVEachFunction> f);
     virtual void EachLike(const string& pattern,           // iterate over matching keys with context
                           void* context,
                           KVEachCallback* callback) = 0;

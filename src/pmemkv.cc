@@ -68,6 +68,24 @@ void KVEngine::Close(KVEngine* kv) {
     }
 }
 
+void KVEngine::Each(const std::function<KVEachFunction> f) {
+    std::function<KVEachFunction> localf = f;
+    auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+        const auto c = ((std::function<KVEachFunction>*) context);
+        c->operator()(kb, k, vb, v);
+    };
+    Each(&localf, cb);
+}
+
+void KVEngine::EachLike(const string& pattern, const std::function<KVEachFunction> f) {
+    std::function<KVEachFunction> localf = f;
+    auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+        const auto c = ((std::function<KVEachFunction>*) context);
+        c->operator()(kb, k, vb, v);
+    };
+    EachLike(pattern, &localf, cb);
+}
+
 struct GetCallbackContext {
     KVStatus result;
     string* value;
