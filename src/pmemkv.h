@@ -32,26 +32,15 @@
 
 #pragma once
 
-typedef enum {                                             // status enumeration
-    FAILED = -1,                                           // operation failed
-    NOT_FOUND = 0,                                         // key not located
-    OK = 1                                                 // successful completion
+typedef enum {
+    FAILED = -1,
+    NOT_FOUND = 0,
+    OK = 1
 } KVStatus;
 
-typedef void(KVEachCallback)(void* context,                // callback function for Each operation
-                             int keybytes,
-                             const char* key,
-                             int valuebytes,
-                             const char* value);
-
-typedef void(KVEachFunction)(int keybytes,
-                             const char* key,
-                             int valuebytes,
-                             const char* value);
-
-typedef void(KVGetCallback)(void* context,                 // callback function for Get operation
-                            int valuebytes,
-                            const char* value);
+typedef void(KVEachCallback)(void* context, int keybytes, const char* key, int valuebytes, const char* value);
+typedef void(KVEachFunction)(int keybytes, const char* key, int valuebytes, const char* value);
+typedef void(KVGetCallback)(void* context, int valuebytes, const char* value);
 
 #ifdef __cplusplus
 
@@ -67,50 +56,34 @@ using std::to_string;
 
 namespace pmemkv {
 
-const string LAYOUT = "pmemkv";                            // pool layout identifier
+const string LAYOUT = "pmemkv";
 
-class KVEngine {                                           // storage engine implementations
+class KVEngine {
   public:
-    static KVEngine* Open(const string& engine,            // open storage engine
-                          const string& path,              // path to persistent pool
-                          size_t size);                    // size used when creating pool
-    static void Close(KVEngine* kv);                       // close storage engine
+    static KVEngine* Open(const string& engine, const string& path, size_t size);
+    static void Close(KVEngine* kv);
 
-    virtual string Engine() = 0;                           // engine identifier
+    virtual string Engine() = 0;
 
-    virtual int64_t Count() = 0;                           // count all keys
-    virtual int64_t CountLike(const string& pattern) = 0;  // count all keys matching pattern
+    virtual int64_t Count() = 0;
+    virtual int64_t CountLike(const string& pattern) = 0;
 
-    inline void Each(KVEachCallback* callback) {           // iterate over all keys
-        Each(nullptr, callback);
-    }
+    virtual void Each(void* context, KVEachCallback* callback) = 0;
+    inline void Each(KVEachCallback* callback) { Each(nullptr, callback); }
     void Each(std::function<KVEachFunction> f);
-    virtual void Each(void* context,                       // iterate over all keys with context
-                      KVEachCallback* callback) = 0;
-    inline void EachLike(const string& pattern,            // iterate over matching keys
-                         KVEachCallback* callback) {
-        EachLike(pattern, nullptr, callback);
-    }
-    void EachLike(const string& pattern,
-                  std::function<KVEachFunction> f);
-    virtual void EachLike(const string& pattern,           // iterate over matching keys with context
-                          void* context,
-                          KVEachCallback* callback) = 0;
 
-    virtual KVStatus Exists(const string& key) = 0;        // does key have a value?
+    virtual void EachLike(const string& pattern, void* context, KVEachCallback* callback) = 0;
+    inline void EachLike(const string& pattern, KVEachCallback* callback) { EachLike(pattern, nullptr, callback); }
+    void EachLike(const string& pattern, std::function<KVEachFunction> f);
 
-    inline void Get(const string& key,                     // pass value to callback
-                    KVGetCallback* callback) {
-        Get(nullptr, key, callback);
-    }
-    virtual void Get(void* context,                        // pass value to callback with context
-                     const string& key,
-                     KVGetCallback* callback) = 0;
-    KVStatus Get(const string& key, string* value);        // append value to string
+    virtual KVStatus Exists(const string& key) = 0;
 
-    virtual KVStatus Put(const string& key,                // store key and value
-                         const string& value) = 0;
-    virtual KVStatus Remove(const string& key) = 0;        // remove value for key
+    virtual void Get(void* context, const string& key, KVGetCallback* callback) = 0;
+    inline void Get(const string& key, KVGetCallback* callback) { Get(nullptr, key, callback); }
+    KVStatus Get(const string& key, string* value);
+
+    virtual KVStatus Put(const string& key, const string& value) = 0;
+    virtual KVStatus Remove(const string& key) = 0;
 };
 
 extern "C" {
@@ -119,60 +92,21 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 
-struct KVEngine;                                           // define types as simple structs
+struct KVEngine;
 typedef struct KVEngine KVEngine;
 
-KVEngine* kvengine_open(const char* engine,                // open storage engine
-                        const char* path,
-                        size_t size);
-
-void kvengine_close(KVEngine* kv);                         // close storage engine
-
-int64_t kvengine_count(KVEngine* kv);                      // count all keys
-
-int64_t kvengine_count_like(KVEngine* kv,                  // count all keys matching pattern
-                            int32_t patternbytes,
-                            const char* pattern);
-
-void kvengine_each(KVEngine* kv,                           // iterate over all keys
-                   void* context,
-                   KVEachCallback* callback);
-
-void kvengine_each_like(KVEngine* kv,                      // iterate over matching keys
-                        int32_t patternbytes,
-                        const char* pattern,
-                        void* context,
-                        KVEachCallback* callback);
-
-int8_t kvengine_exists(KVEngine* kv,                       // does key have a value?
-                       int32_t keybytes,
-                       const char* key);
-
-int8_t kvengine_exists_like(KVEngine* kv,                  // does pattern have a match?
-                            int32_t patternbytes,
-                            const char* pattern);
-
-void kvengine_get(KVEngine* kv,                            // pass value to callback with context
-                  void* context,
-                  int32_t keybytes,
-                  const char* key,
-                  KVGetCallback* callback);
-
-int8_t kvengine_get_copy(KVEngine* kv,                     // copy value to buffer if big enough
-                         int32_t keybytes,
-                         const char* key,
-                         int32_t maxvaluebytes,
-                         char* value);
-
-int8_t kvengine_put(KVEngine* kv,                          // store key and value
-                    int32_t keybytes,
-                    const char* key,
-                    int32_t valuebytes,
-                    const char* value);
-
-int8_t kvengine_remove(KVEngine* kv,                       // remove value for key
-                       int32_t keybytes,
-                       const char* key);
+KVEngine* kvengine_open(const char* engine, const char* path, size_t size);
+void kvengine_close(KVEngine* kv);
+int64_t kvengine_count(KVEngine* kv);
+int64_t kvengine_count_like(KVEngine* kv, int32_t patternbytes, const char* pattern);
+void kvengine_each(KVEngine* kv, void* context, KVEachCallback* callback);
+void kvengine_each_like(KVEngine* kv, int32_t patternbytes, const char* pattern, void* context, KVEachCallback* cb);
+int8_t kvengine_exists(KVEngine* kv, int32_t keybytes, const char* key);
+int8_t kvengine_exists_like(KVEngine* kv, int32_t patternbytes, const char* pattern);
+void kvengine_get(KVEngine* kv, void* context, int32_t keybytes, const char* key, KVGetCallback* callback);
+int8_t kvengine_get_copy(KVEngine* kv, int32_t keybytes, const char* key, int32_t maxvaluebytes, char* value);
+int8_t kvengine_put(KVEngine* kv, int32_t keybytes, const char* key, int32_t valuebytes, const char* value);
+int8_t kvengine_remove(KVEngine* kv, int32_t keybytes, const char* key);
 
 #ifdef __cplusplus
 }
