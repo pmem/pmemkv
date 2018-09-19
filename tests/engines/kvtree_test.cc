@@ -386,6 +386,21 @@ TEST_F(KVTreeTest, RemoveNonexistentTest) {
     ASSERT_TRUE(kv->Exists("key1"));
 }
 
+TEST_F(KVTreeTest, UsesAllTest) {
+    ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Count() == 1);
+    ASSERT_TRUE(kv->Put("2", "1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Count() == 2);
+
+    string result;
+    kv->All([&result](int kb, const char* k) {
+        result.append("<");
+        result.append(string(k, kb));
+        result.append(">,");
+    });
+    ASSERT_TRUE(result == "<2>,<记!>,");
+}
+
 TEST_F(KVTreeTest, UsesEachTest) {
     ASSERT_TRUE(kv->Put("RR", "记!") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
@@ -393,7 +408,7 @@ TEST_F(KVTreeTest, UsesEachTest) {
     ASSERT_TRUE(kv->Count() == 2);
 
     string result;
-    kv->Each([&result](int32_t kb, const char* k, int32_t vb, const char* v) {
+    kv->Each([&result](int kb, const char* k, int vb, const char* v) {
         result.append("<");
         result.append(string(k, kb));
         result.append(">,<");
@@ -420,12 +435,12 @@ TEST_F(KVTreeTest, UsesLikeTest) {
     ASSERT_TRUE(kv->CountLike(".*1") == 2);
 
     string result;
-    kv->EachLike("1.*", [&result](int32_t kb, const char* k, int32_t vb, const char* v) {
+    kv->EachLike("1.*", [&result](int kb, const char* k, int vb, const char* v) {
         result.append("<");
         result.append(string(k, kb));
         result.append(">,");
     });
-    kv->EachLike("3.*", &result, [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+    kv->EachLike("3.*", &result, [](void* context, int kb, const char* k, int vb, const char* v) {
         const auto c = ((string*) context);
         c->append("<");
         c->append(string(v, vb));
@@ -450,7 +465,7 @@ TEST_F(KVTreeTest, UsesLikeWithBadPatternTest) {
     ASSERT_TRUE(kv->CountLike("[]") == 0);
     ASSERT_TRUE(kv->CountLike("][") == 0);
 
-    auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+    auto cb = [](void* context, int kb, const char* k, int vb, const char* v) {
         const auto c = ((string*) context);
         c->append("!");
     };

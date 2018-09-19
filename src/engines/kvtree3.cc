@@ -67,6 +67,19 @@ KVTree::~KVTree() {
 // KEY/VALUE METHODS
 // ===============================================================================================
 
+void KVTree::All(void* context, KVAllCallback* callback) {
+    LOG("All");
+    auto leaf = pmpool.get_root()->head;
+    while (leaf) {
+        for (int slot = LEAF_KEYS; slot--;) {
+            auto kvslot = leaf->slots[slot].get_ro();
+            if (kvslot.empty() || kvslot.hash() == 0) continue;
+            (*callback)(context, kvslot.get_ks(), kvslot.key());
+        }
+        leaf = leaf->next;  // advance to next linked leaf
+    }
+}
+
 int64_t KVTree::Count() {
     int64_t result = 0;
     auto leaf = pmpool.get_root()->head;

@@ -90,6 +90,10 @@ void KVTree::Analyze(KVTreeAnalysis& analysis) {
     LOG("Analyzed ok");
 }
 
+void KVTree::All(void* context, KVAllCallback* callback) {
+    // not implemented
+}
+
 int64_t KVTree::Count() {
     // not implemented
     return 0;

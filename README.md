@@ -94,7 +94,7 @@ int main() {
     LOG("Iterating existing keys");
     kv->Put("key2", "value2");
     kv->Put("key3", "value3");
-    kv->Each([](int32_t kb, const char* k, int32_t vb, const char* v) {
+    kv->All([](int kb, const char* k) {
         LOG("  visited: " << k);
     });
 
@@ -119,7 +119,7 @@ int main() {
 #define LOG(msg) printf("%s\n", msg)
 #define MAX_VAL_LEN 64
 
-void MyEachCallback(void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+void MyCallback(void* context, int kb, const char* k) {
     printf("   visited: %s\n", k);
 }
 
@@ -145,7 +145,7 @@ int main() {
     char* value3 = "value3";
     kvengine_put(kv, strlen(key2), key2, strlen(value2), value2);
     kvengine_put(kv, strlen(key3), key3, strlen(value3), value3);
-    kvengine_each(kv, NULL, &MyEachCallback);
+    kvengine_all(kv, NULL, &MyCallback);
 
     LOG("Removing existing key");
     s = kvengine_remove(kv, strlen(key1), key1);

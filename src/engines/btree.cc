@@ -67,6 +67,13 @@ BTree::~BTree() {
     LOG("Closed ok");
 }
 
+void BTree::All(void* context, KVAllCallback* callback) {
+    LOG("All");
+    for (auto& iterator : *my_btree) {
+        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str());
+    }
+}
+
 int64_t BTree::Count() {
     int64_t result = 0;
     for (auto& iterator : *my_btree) result++;

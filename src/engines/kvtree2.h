@@ -136,6 +136,9 @@ class KVTree : public KVEngine {                           // hybrid B+ tree eng
 
     string Engine() final { return ENGINE; }               // engine identifier
 
+    using KVEngine::All;
+    void All(void* context, KVAllCallback* cb) final;
+
     int64_t Count() final;                                 // count all keys
     int64_t CountLike(const string& pattern) final;        // count all keys matching pattern
 

@@ -68,6 +68,15 @@ void KVEngine::Close(KVEngine* kv) {
     }
 }
 
+void KVEngine::All(const std::function<KVAllFunction> f) {
+    std::function<KVAllFunction> localf = f;
+    auto cb = [](void* context, int32_t kb, const char* k) {
+        const auto c = ((std::function<KVAllFunction>*) context);
+        c->operator()(kb, k);
+    };
+    All(&localf, cb);
+}
+
 void KVEngine::Each(const std::function<KVEachFunction> f) {
     std::function<KVEachFunction> localf = f;
     auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
@@ -108,6 +117,10 @@ extern "C" KVEngine* kvengine_open(const char* engine, const char* path, const s
 
 extern "C" void kvengine_close(KVEngine* kv) {
     return KVEngine::Close(kv);
+}
+
+extern "C" void kvengine_all(KVEngine* kv, void* context, KVAllCallback* callback) {
+    kv->All(context, callback);
 }
 
 extern "C" int64_t kvengine_count(KVEngine* kv) {

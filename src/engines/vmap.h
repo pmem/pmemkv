@@ -48,6 +48,8 @@ class VMap : public KVEngine {
     VMap(const string& path, size_t size);
     ~VMap();
     string Engine() final { return ENGINE; }
+    using KVEngine::All;
+    void All(void* context, KVAllCallback* callback) final;
     int64_t Count() final;
     int64_t CountLike(const string& pattern) final;
     using KVEngine::Each;

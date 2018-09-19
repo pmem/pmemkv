@@ -49,6 +49,13 @@ VCMap::~VCMap() {
     LOG("Closed ok");
 }
 
+void VCMap::All(void* context, KVAllCallback* callback) {
+    LOG("All");
+    for (auto& iterator : pmem_kv_container) {
+        (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size());
+    }
+}
+
 int64_t VCMap::Count() {
     LOG("Count");
     int64_t result = 0;
@@ -58,13 +65,6 @@ int64_t VCMap::Count() {
 
 int64_t VCMap::CountLike(const string& pattern) {
     LOG("Count like pattern=" << pattern);
-}
-
-KVStatus VCMap::Exists(const string& key) {
-    LOG("Exists for key=" << key);
-    map_t::const_accessor result;
-    const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
-    return (result_found ? OK : NOT_FOUND);
 }
 
 void VCMap::Each(void* context, KVEachCallback* callback) {
@@ -77,6 +77,13 @@ void VCMap::Each(void* context, KVEachCallback* callback) {
 
 void VCMap::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
     LOG("Each like pattern=" << pattern);
+}
+
+KVStatus VCMap::Exists(const string& key) {
+    LOG("Exists for key=" << key);
+    map_t::const_accessor result;
+    const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
+    return (result_found ? OK : NOT_FOUND);
 }
 
 void VCMap::Get(void* context, const string& key, KVGetCallback* callback) {

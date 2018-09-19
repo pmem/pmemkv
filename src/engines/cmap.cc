@@ -68,6 +68,13 @@ CMap::~CMap() {
     LOG("Closed ok");
 }
 
+void CMap::All(void* context, KVAllCallback* callback) {
+    LOG("All");
+    for (auto it = my_hash_map->begin(); it != my_hash_map->end(); ++it) {
+        (*callback)(context, (int32_t) it->first.size(), it->first.c_str());
+    }
+}
+
 int64_t CMap::Count() {
     LOG("Count");
     return std::distance(my_hash_map->begin(), my_hash_map->end());

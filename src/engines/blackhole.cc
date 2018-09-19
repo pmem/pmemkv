@@ -47,6 +47,10 @@ Blackhole::~Blackhole() {
     LOG("Closed ok");
 }
 
+void Blackhole::All(void* context, KVAllCallback* callback) {
+    LOG("All");
+}
+
 int64_t Blackhole::Count() {
     LOG("Count");
     return 0;

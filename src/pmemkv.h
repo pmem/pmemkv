@@ -38,6 +38,8 @@ typedef enum {
     OK = 1
 } KVStatus;
 
+typedef void(KVAllCallback)(void* context, int keybytes, const char* key);
+typedef void(KVAllFunction)(int keybytes, const char* key);
 typedef void(KVEachCallback)(void* context, int keybytes, const char* key, int valuebytes, const char* value);
 typedef void(KVEachFunction)(int keybytes, const char* key, int valuebytes, const char* value);
 typedef void(KVGetCallback)(void* context, int valuebytes, const char* value);
@@ -64,6 +66,10 @@ class KVEngine {
     static void Close(KVEngine* kv);
 
     virtual string Engine() = 0;
+
+    virtual void All(void* context, KVAllCallback* callback) = 0;
+    inline void All(KVAllCallback* callback) { All(nullptr, callback); }
+    void All(std::function<KVAllFunction> f);
 
     virtual int64_t Count() = 0;
     virtual int64_t CountLike(const string& pattern) = 0;
@@ -97,6 +103,7 @@ typedef struct KVEngine KVEngine;
 
 KVEngine* kvengine_open(const char* engine, const char* path, size_t size);
 void kvengine_close(KVEngine* kv);
+void kvengine_all(KVEngine* kv, void* context, KVAllCallback* callback);
 int64_t kvengine_count(KVEngine* kv);
 int64_t kvengine_count_like(KVEngine* kv, int32_t patternbytes, const char* pattern);
 void kvengine_each(KVEngine* kv, void* context, KVEachCallback* callback);

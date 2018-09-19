@@ -344,6 +344,22 @@ TEST_F(BTreeTest, RemoveNonexistentTest) {
     ASSERT_TRUE(kv->Exists("key1"));
 }
 
+TEST_F(BTreeTest, UsesAllTest) {
+    ASSERT_TRUE(kv->Put("2", "1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Count() == 1);
+    ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Count() == 2);
+
+    string result;
+    kv->All(&result, [](void* context, int kb, const char* k) {
+        const auto c = ((string*) context);
+        c->append("<");
+        c->append(string(k, kb));
+        c->append(">,");
+    });
+    ASSERT_TRUE(result == "<记!>,<2>,");
+}
+
 TEST_F(BTreeTest, UsesEachTest) {
     ASSERT_TRUE(kv->Put("1", "2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
@@ -351,7 +367,7 @@ TEST_F(BTreeTest, UsesEachTest) {
     ASSERT_TRUE(kv->Count() == 2);
 
     string result;
-    kv->Each(&result, [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+    kv->Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
         const auto c = ((string*) context);
         c->append("<");
         c->append(string(k, kb));
@@ -379,13 +395,13 @@ TEST_F(BTreeTest, UsesLikeTest) {
     ASSERT_TRUE(kv->CountLike(".*1") == 2);
 
     string result;
-    kv->EachLike("1.*", &result, [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+    kv->EachLike("1.*", &result, [](void* context, int kb, const char* k, int vb, const char* v) {
         const auto c = ((string*) context);
         c->append("<");
         c->append(string(k, kb));
         c->append(">,");
     });
-    kv->EachLike("3.*", &result, [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+    kv->EachLike("3.*", &result, [](void* context, int kb, const char* k, int vb, const char* v) {
         const auto c = ((string*) context);
         c->append("<");
         c->append(string(v, vb));
@@ -410,7 +426,7 @@ TEST_F(BTreeTest, UsesLikeWithBadPatternTest) {
     ASSERT_TRUE(kv->CountLike("[]") == 0);
     ASSERT_TRUE(kv->CountLike("][") == 0);
 
-    auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+    auto cb = [](void* context, int kb, const char* k, int vb, const char* v) {
         const auto c = ((string*) context);
         c->append("!");
     };
