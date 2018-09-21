@@ -188,7 +188,7 @@ void KVTree::Get(void* context, const string& key, KVGetCallback* callback) {
 KVStatus KVTree::Put(const string& key, const string& value) {
     LOG("Put key=" << key.c_str() << ", value.size=" << to_string(value.size()));
     try {
-        const uint8_t hash = PearsonHash(key.c_str(), key.size());
+        const auto hash = PearsonHash(key.c_str(), key.size());
         auto leafnode = LeafSearch(key);
         if (!leafnode) {
             LOG("   adding head leaf");
@@ -215,9 +215,14 @@ KVStatus KVTree::Put(const string& key, const string& value) {
             LeafSplitFull(leafnode, hash, key, value);
         }
         return OK;
-    } catch (pmem::transaction_alloc_error) {
+    } catch (std::bad_alloc e) {
+        LOG("Put failed due to exception, " << e.what());
         return FAILED;
-    } catch (pmem::transaction_error) {
+    } catch (pmem::transaction_alloc_error e) {
+        LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+        return FAILED;
+    } catch (pmem::transaction_error e) {
+        LOG("Put failed due to pmem::transaction_error, " << e.what());
         return FAILED;
     }
 }
@@ -227,24 +232,35 @@ KVStatus KVTree::Remove(const string& key) {
     auto leafnode = LeafSearch(key);
     if (!leafnode) {
         LOG("   head not present");
-        return OK;
+        return NOT_FOUND;
     }
-    const uint8_t hash = PearsonHash(key.c_str(), key.size());
-    for (int slot = LEAF_KEYS; slot--;) {
-        if (leafnode->hashes[slot] == hash) {
-            if (leafnode->keys[slot].compare(key) == 0) {
-                LOG("   freeing slot=" << slot);
-                leafnode->hashes[slot] = 0;
-                leafnode->keys[slot].clear();
-                auto leaf = leafnode->leaf;
-                transaction::exec_tx(pmpool, [&] {
-                    leaf->slots[slot].get_rw().clear();
-                });
-                break;  // no duplicate keys allowed
+    try {
+        const auto hash = PearsonHash(key.c_str(), key.size());
+        for (int slot = LEAF_KEYS; slot--;) {
+            if (leafnode->hashes[slot] == hash) {
+                if (leafnode->keys[slot].compare(key) == 0) {
+                    LOG("   freeing slot=" << slot);
+                    leafnode->hashes[slot] = 0;
+                    leafnode->keys[slot].clear();
+                    auto leaf = leafnode->leaf;
+                    transaction::exec_tx(pmpool, [&] {
+                        leaf->slots[slot].get_rw().clear();
+                    });
+                    return OK; // no duplicate keys allowed
+                }
             }
         }
+        return NOT_FOUND;
+    } catch (std::bad_alloc e) {
+        LOG("Put failed due to exception, " << e.what());
+        return FAILED;
+    } catch (pmem::transaction_alloc_error e) {
+        LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+        return FAILED;
+    } catch (pmem::transaction_error e) {
+        LOG("Put failed due to pmem::transaction_error, " << e.what());
+        return FAILED;
     }
-    return OK;
 }
 
 // ===============================================================================================

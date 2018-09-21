@@ -325,10 +325,6 @@ TEST_F(KVTreeTest, PutValuesOfDifferentSizesTest) {
     ASSERT_TRUE(kv->Get("E", &value5) == OK && value5 == "123456789ABCDEFGHI");
 }
 
-TEST_F(KVTreeTest, PutValuesOfMaximumSizeTest) {
-    // todo finish this when max is decided (#61)
-}
-
 TEST_F(KVTreeTest, RemoveAllTest) {
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
@@ -367,7 +363,7 @@ TEST_F(KVTreeTest, RemoveExistingTest) {
     ASSERT_TRUE(kv->Count() == 2);
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
     ASSERT_TRUE(kv->Count() == 1);
-    ASSERT_TRUE(kv->Remove("tmpkey1") == OK); // ok to remove twice
+    ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND);
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(!kv->Exists("tmpkey1"));
     string value;
@@ -377,12 +373,12 @@ TEST_F(KVTreeTest, RemoveExistingTest) {
 }
 
 TEST_F(KVTreeTest, RemoveHeadlessTest) {
-    ASSERT_TRUE(kv->Remove("nada") == OK);
+    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
 }
 
 TEST_F(KVTreeTest, RemoveNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Remove("nada") == OK);
+    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
     ASSERT_TRUE(kv->Exists("key1"));
 }
 
@@ -578,7 +574,7 @@ TEST_F(KVTreeTest, RemoveExistingAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
     Reopen();
-    ASSERT_TRUE(kv->Remove("tmpkey1") == OK); // ok to remove twice
+    ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND);
     string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
@@ -586,13 +582,13 @@ TEST_F(KVTreeTest, RemoveExistingAfterRecoveryTest) {
 
 TEST_F(KVTreeTest, RemoveHeadlessAfterRecoveryTest) {
     Reopen();
-    ASSERT_TRUE(kv->Remove("nada") == OK);
+    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
 }
 
 TEST_F(KVTreeTest, RemoveNonexistentAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     Reopen();
-    ASSERT_TRUE(kv->Remove("nada") == OK);
+    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
 }
 
 // =============================================================================================

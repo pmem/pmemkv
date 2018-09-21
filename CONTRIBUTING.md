@@ -22,7 +22,7 @@ Code Style
 
 * Start with [Google C++ Style](https://google.github.io/styleguide/cppguide.html)
 * Indent 4 spaces, 8 spaces for continuation
-* Max 100 chars per line
+* Max 120 chars per line
 * Space after '*' and '&' (rather than before)
 
 <a name="pull_requests"></a>

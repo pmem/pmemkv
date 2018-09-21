@@ -283,10 +283,6 @@ TEST_F(BTreeTest, PutValuesOfDifferentSizesTest) {
     ASSERT_TRUE(kv->Get("E", &value5) == OK && value5 == "123456789ABCDEFGHI");
 }
 
-TEST_F(BTreeTest, PutValuesOfMaximumSizeTest) {
-    // todo finish this when max is decided (#61)
-}
-
 TEST_F(BTreeTest, RemoveAllTest) {
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
@@ -325,7 +321,7 @@ TEST_F(BTreeTest, RemoveExistingTest) {
     ASSERT_TRUE(kv->Count() == 2);
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
     ASSERT_TRUE(kv->Count() == 1);
-    ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND); // ok to remove twice
+    ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND);
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(!kv->Exists("tmpkey1"));
     string value;
@@ -539,7 +535,7 @@ TEST_F(BTreeTest, RemoveExistingAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
     Reopen();
-    ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND); // ok to remove twice
+    ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND);
     string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
@@ -682,23 +678,6 @@ TEST_F(BTreeTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     ASSERT_TRUE(kv->Count() == SINGLE_INNER_LIMIT);
-}
-
-TEST_F(BTreeTest, UsePreallocAfterMultipleLeafRecoveryTest) {
-    for (int i = 1; i <= LEAF_ENTRIES + 1; i++)
-        ASSERT_EQ(kv->Put(to_string(i), "!"), OK) << pmemobj_errormsg();
-    Reopen();
-
-    for (int i = 1; i <= LEAF_ENTRIES; i++)
-        ASSERT_EQ(kv->Remove(to_string(i)), OK);
-    Reopen();
-
-    ASSERT_EQ(kv->Remove(to_string(LEAF_ENTRIES + 1)), OK);
-    Reopen();
-
-    for (int i = 1; i <= LEAF_ENTRIES; i++)
-        ASSERT_EQ(kv->Put(to_string(i), "!"), OK) << pmemobj_errormsg();
-    ASSERT_EQ(kv->Put(to_string(LEAF_ENTRIES + 1), "!"), OK) << pmemobj_errormsg();
 }
 
 // =============================================================================================
