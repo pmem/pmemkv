@@ -163,7 +163,6 @@ These bindings are maintained in separate GitHub repos, but are still kept
 in sync with the main `pmemkv` distribution.
  
 * Java - https://github.com/pmem/pmemkv-java
-* JNI - https://github.com/pmem/pmemkv-jni
 * Node.js - https://github.com/pmem/pmemkv-nodejs
 * Ruby - https://github.com/pmem/pmemkv-ruby
 
