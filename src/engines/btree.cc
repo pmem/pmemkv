@@ -31,7 +31,6 @@
  */
 
 #include <iostream>
-#include <regex>
 #include <unistd.h>
 
 #include <libpmemobj++/transaction.hpp>
@@ -80,42 +79,11 @@ int64_t BTree::Count() {
     return result;
 }
 
-int64_t BTree::CountLike(const string& pattern) {
-    LOG("Count like pattern=" << pattern);
-    try {
-        std::regex p(pattern);
-        int64_t result = 0;
-        for (auto& iterator : *my_btree) {
-            auto key = string(iterator.first.c_str(), (int32_t) iterator.first.size());
-            if (std::regex_match(key, p)) result++;
-        }
-        return result;
-    } catch (std::regex_error) {
-        LOG("Invalid pattern: " << pattern);
-        return 0;
-    }
-}
-
 void BTree::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& iterator : *my_btree) {
         (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
                     (int32_t) iterator.second.size(), iterator.second.c_str());
-    }
-}
-
-void BTree::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
-    LOG("Each like pattern=" << pattern);
-    try {
-        std::regex p(pattern);
-        for (auto& iterator : *my_btree) {
-            auto key = string(iterator.first.c_str(), (int32_t) iterator.first.size());
-            if (std::regex_match(key, p))
-                (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
-                            (int32_t) iterator.second.size(), iterator.second.c_str());
-        }
-    } catch (std::regex_error) {
-        LOG("Invalid pattern: " << pattern);
     }
 }
 

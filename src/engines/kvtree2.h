@@ -140,15 +140,10 @@ class KVTree : public KVEngine {                           // hybrid B+ tree eng
     void All(void* context, KVAllCallback* cb) final;
 
     int64_t Count() final;                                 // count all keys
-    int64_t CountLike(const string& pattern) final;        // count all keys matching pattern
 
     using KVEngine::Each;                                  // iterate over all keys
     void Each(void* context,                               // iterate over all keys with context
               KVEachCallback* callback) final;
-    using KVEngine::EachLike;                              // iterate over matching keys
-    void EachLike(const string& pattern,                   // iterate over matching keys with context
-                  void* context,
-                  KVEachCallback* callback) final;
 
     KVStatus Exists(const string& key) final;              // does key have a value?
 

@@ -31,7 +31,6 @@
  */
 
 #include <iostream>
-#include <regex>
 #include <unistd.h>
 
 #include <libpmemobj++/transaction.hpp>
@@ -80,43 +79,11 @@ int64_t CMap::Count() {
     return std::distance(my_hash_map->begin(), my_hash_map->end());
 }
 
-int64_t CMap::CountLike(const string& pattern) {
-    LOG("Count like pattern=" << pattern);
-    try {
-        std::regex p(pattern);
-        int64_t result = 0;
-        for (auto it = my_hash_map->begin(); it != my_hash_map->end(); ++it) {
-            auto key = string(it->first.c_str(), it->first.size());
-            if (std::regex_match(key, p)) ++result;
-        }
-        return result;
-    } catch (std::regex_error) {
-        LOG("Invalid pattern: " << pattern);
-        return 0;
-    }
-}
-
 void CMap::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto it = my_hash_map->begin(); it != my_hash_map->end(); ++it) {
         (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
                 (int32_t) it->second.size(), it->second.c_str());
-    }
-}
-
-void CMap::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
-    LOG("Each like pattern=" << pattern);
-    try {
-        std::regex p(pattern);
-        for (auto it = my_hash_map->begin(); it != my_hash_map->end(); ++it) {
-            auto key = string(it->first.c_str(), it->first.size());
-            if (std::regex_match(key, p)) {
-                (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
-                        (int32_t) it->second.size(), it->second.c_str());
-            }
-        }
-    } catch (std::regex_error) {
-        LOG("Invalid pattern: " << pattern);
     }
 }
 

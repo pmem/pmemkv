@@ -35,7 +35,6 @@
 #include <cstring>
 #include <iostream>
 #include <list>
-#include <regex>
 #include <unistd.h>
 #include "kvtree3.h"
 
@@ -94,28 +93,6 @@ int64_t KVTree::Count() {
     return result;
 }
 
-int64_t KVTree::CountLike(const string& pattern) {
-    LOG("Count like pattern=" << pattern);
-    try {
-        std::regex p(pattern);
-        int64_t result = 0;
-        auto leaf = pmpool.get_root()->head;
-        while (leaf) {
-            for (int slot = LEAF_KEYS; slot--;) {
-                auto kvslot = leaf->slots[slot].get_ro();
-                if (kvslot.empty() || kvslot.hash() == 0) continue;
-                auto key = string(kvslot.key(), kvslot.get_ks());
-                if (std::regex_match(key, p)) result++;
-            }
-            leaf = leaf->next;  // advance to next linked leaf
-        }
-        return result;
-    } catch (std::regex_error) {
-        LOG("Invalid pattern: " << pattern);
-        return 0;
-    }
-}
-
 void KVTree::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     auto leaf = pmpool.get_root()->head;
@@ -126,26 +103,6 @@ void KVTree::Each(void* context, KVEachCallback* callback) {
             (*callback)(context, kvslot.get_ks(), kvslot.key(), kvslot.get_vs(), kvslot.val());
         }
         leaf = leaf->next;  // advance to next linked leaf
-    }
-}
-
-void KVTree::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
-    LOG("Each like pattern=" << pattern);
-    try {
-        std::regex p(pattern);
-        auto leaf = pmpool.get_root()->head;
-        while (leaf) {
-            for (int slot = LEAF_KEYS; slot--;) {
-                auto kvslot = leaf->slots[slot].get_ro();
-                if (kvslot.empty() || kvslot.hash() == 0) continue;
-                auto key = string(kvslot.key(), kvslot.get_ks());
-                if (std::regex_match(key, p))
-                    (*callback)(context, kvslot.get_ks(), kvslot.key(), kvslot.get_vs(), kvslot.val());
-            }
-            leaf = leaf->next;  // advance to next linked leaf
-        }
-    } catch (std::regex_error) {
-        LOG("Invalid pattern: " << pattern);
     }
 }
 

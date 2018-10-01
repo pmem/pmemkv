@@ -86,15 +86,6 @@ void KVEngine::Each(const std::function<KVEachFunction> f) {
     Each(&localf, cb);
 }
 
-void KVEngine::EachLike(const string& pattern, const std::function<KVEachFunction> f) {
-    std::function<KVEachFunction> localf = f;
-    auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
-        const auto c = ((std::function<KVEachFunction>*) context);
-        c->operator()(kb, k, vb, v);
-    };
-    EachLike(pattern, &localf, cb);
-}
-
 struct GetCallbackContext {
     KVStatus result;
     string* value;
@@ -127,17 +118,8 @@ extern "C" int64_t kvengine_count(KVEngine* kv) {
     return kv->Count();
 }
 
-extern "C" int64_t kvengine_count_like(KVEngine* kv, const int32_t patternbytes, const char* pattern) {
-    return kv->CountLike(string(pattern, (size_t) patternbytes));
-}
-
 extern "C" void kvengine_each(KVEngine* kv, void* context, KVEachCallback* callback) {
     kv->Each(context, callback);
-}
-
-extern "C" void kvengine_each_like(KVEngine* kv, const int32_t patternbytes, const char* pattern,
-                                   void* context, KVEachCallback* callback) {
-    kv->EachLike(string(pattern, (size_t) patternbytes), context, callback);
 }
 
 extern "C" int8_t kvengine_exists(KVEngine* kv, int32_t keybytes, const char* key) {

@@ -47,11 +47,8 @@ class Blackhole : public KVEngine {
     using KVEngine::All;
     void All(void* context, KVAllCallback* callback) final;
     int64_t Count() final;
-    int64_t CountLike(const string& pattern) final;
     using KVEngine::Each;
     void Each(void* context, KVEachCallback* callback) final;
-    using KVEngine::EachLike;
-    void EachLike(const string& pattern, void* context, KVEachCallback* callback) final;
     KVStatus Exists(const string& key) final;
     using KVEngine::Get;
     void Get(void* context, const string& key, KVGetCallback* callback) final;

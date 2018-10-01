@@ -99,16 +99,7 @@ int64_t KVTree::Count() {
     return 0;
 }
 
-int64_t KVTree::CountLike(const string& pattern) {
-    // not implemented
-    return 0;
-}
-
 void KVTree::Each(void* context, KVEachCallback* callback) {
-    // not implemented
-}
-
-void KVTree::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
     // not implemented
 }
 

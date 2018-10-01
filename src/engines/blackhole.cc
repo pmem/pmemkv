@@ -56,17 +56,8 @@ int64_t Blackhole::Count() {
     return 0;
 }
 
-int64_t Blackhole::CountLike(const string& pattern) {
-    LOG("Count like pattern=" << pattern);
-    return 0;
-}
-
 void Blackhole::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
-}
-
-void Blackhole::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
-    LOG("Each like pattern=" << pattern);
 }
 
 KVStatus Blackhole::Exists(const string& key) {

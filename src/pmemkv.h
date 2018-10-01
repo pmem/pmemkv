@@ -72,15 +72,10 @@ class KVEngine {
     void All(std::function<KVAllFunction> f);
 
     virtual int64_t Count() = 0;
-    virtual int64_t CountLike(const string& pattern) = 0;
 
     virtual void Each(void* context, KVEachCallback* callback) = 0;
     inline void Each(KVEachCallback* callback) { Each(nullptr, callback); }
     void Each(std::function<KVEachFunction> f);
-
-    virtual void EachLike(const string& pattern, void* context, KVEachCallback* callback) = 0;
-    inline void EachLike(const string& pattern, KVEachCallback* callback) { EachLike(pattern, nullptr, callback); }
-    void EachLike(const string& pattern, std::function<KVEachFunction> f);
 
     virtual KVStatus Exists(const string& key) = 0;
 
@@ -105,11 +100,8 @@ KVEngine* kvengine_open(const char* engine, const char* path, size_t size);
 void kvengine_close(KVEngine* kv);
 void kvengine_all(KVEngine* kv, void* context, KVAllCallback* callback);
 int64_t kvengine_count(KVEngine* kv);
-int64_t kvengine_count_like(KVEngine* kv, int32_t patternbytes, const char* pattern);
 void kvengine_each(KVEngine* kv, void* context, KVEachCallback* callback);
-void kvengine_each_like(KVEngine* kv, int32_t patternbytes, const char* pattern, void* context, KVEachCallback* cb);
 int8_t kvengine_exists(KVEngine* kv, int32_t keybytes, const char* key);
-int8_t kvengine_exists_like(KVEngine* kv, int32_t patternbytes, const char* pattern);
 void kvengine_get(KVEngine* kv, void* context, int32_t keybytes, const char* key, KVGetCallback* callback);
 int8_t kvengine_get_copy(KVEngine* kv, int32_t keybytes, const char* key, int32_t maxvaluebytes, char* value);
 int8_t kvengine_put(KVEngine* kv, int32_t keybytes, const char* key, int32_t valuebytes, const char* value);

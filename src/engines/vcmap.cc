@@ -63,20 +63,12 @@ int64_t VCMap::Count() {
     return result;
 }
 
-int64_t VCMap::CountLike(const string& pattern) {
-    LOG("Count like pattern=" << pattern);
-}
-
 void VCMap::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& iterator : pmem_kv_container) {
         (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size(),
                     iterator.first.c_str(), iterator.second.c_str());
     }
-}
-
-void VCMap::EachLike(const string& pattern, void* context, KVEachCallback* callback) {
-    LOG("Each like pattern=" << pattern);
 }
 
 KVStatus VCMap::Exists(const string& key) {
