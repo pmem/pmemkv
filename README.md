@@ -173,4 +173,4 @@ Tools and Utilities
 
 Benchmarks, examples and other helpful utilities are available here:
 
-https://github.com/RobDickinson/pmemkv-tools
+https://github.com/pmem/pmemkv-tools
