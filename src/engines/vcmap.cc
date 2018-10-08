@@ -52,22 +52,20 @@ VCMap::~VCMap() {
 void VCMap::All(void* context, KVAllCallback* callback) {
     LOG("All");
     for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size());
+        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str());
     }
 }
 
 int64_t VCMap::Count() {
     LOG("Count");
-    int64_t result = 0;
-    for (auto& iterator : pmem_kv_container) result++;
-    return result;
+    return pmem_kv_container.size();
 }
 
 void VCMap::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size(),
-                    iterator.first.c_str(), iterator.second.c_str());
+        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
+                (int32_t) iterator.second.size(), iterator.second.c_str());
     }
 }
 
