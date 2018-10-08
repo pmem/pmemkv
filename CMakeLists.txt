@@ -52,6 +52,14 @@ find_package(PkgConfig QUIET)
 include(ExternalProject)
 include(FindThreads)
 include(FindMemkind)
+include(TBBGet)
+
+tbb_get(TBB_ROOT tbb_root CONFIG_DIR TBB_DIR)
+find_package(TBB COMPONENTS tbb)
+
+if(TBB_FOUND)
+	add_definitions(-D__PMEMKV_WITH_TBB)
+endif()
 
 if(MEMKIND_FOUND)
 	add_definitions(-D__PMEMKV_WITH_MEMKIND)
@@ -61,6 +69,14 @@ if(MEMKIND_FOUND)
 	set(TEST_FILES ${TEST_FILES}
 		tests/engines/vmap_test.cc
 	)
+	if(TBB_FOUND)
+		set(SOURCE_FILES ${SOURCE_FILES}
+			src/engines/vcmap.h src/engines/vcmap.cc
+		)
+		set(TEST_FILES ${TEST_FILES}
+			tests/engines/vcmap_test.cc
+		)
+	endif()
 endif()
 
 set(GTEST_URL ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
@@ -96,7 +112,7 @@ link_directories(${PMEMOBJ++_LIBRARY_DIRS})
 include_directories(${MEMKIND_INCLUDE_DIR})
 
 add_library(pmemkv SHARED ${SOURCE_FILES})
-target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES} ${MEMKIND_LIBRARY})
+target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES} ${MEMKIND_LIBRARY} ${TBB_IMPORTED_TARGETS})
 
 add_executable(pmemkv_test ${TEST_FILES})
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
