@@ -52,21 +52,19 @@ VMap::~VMap() {
 void VMap::All(void* context, KVAllCallback* callback) {
     LOG("All");
     for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size());
+        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str());
     }
 }
 
 int64_t VMap::Count() {
-    int64_t result = 0;
-    for (auto& iterator : pmem_kv_container) result++;
-    return result;
+    return pmem_kv_container.size();
 }
 
 void VMap::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, (int32_t) iterator.first.size(), (int32_t) iterator.second.size(),
-                    iterator.first.c_str(), iterator.second.c_str());
+        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
+                (int32_t) iterator.second.size(), iterator.second.c_str());
     }
 }
 
@@ -88,7 +86,8 @@ void VMap::Get(void* context, const string& key, KVGetCallback* callback) {
 
 KVStatus VMap::Put(const string& key, const string& value) {
     LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
-    pmem_kv_container[pmem_string(key.c_str(), key.size(), ch_allocator)] = pmem_string(value.c_str(), value.size(), ch_allocator);
+    pmem_kv_container[pmem_string(key.c_str(), key.size(), ch_allocator)] = 
+        pmem_string(value.c_str(), value.size(), ch_allocator);
     return OK;
 }
 
