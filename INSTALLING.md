@@ -10,69 +10,12 @@ Contents
 --------
 
 <ul>
-<li><a href="#fedora_stable_pmdk">Installing on Fedora (Stable PMDK)</a></li>
-<li><a href="#fedora_latest_pmdk">Installing on Fedora (Latest PMDK)</a></li>
 <li><a href="#building_from_sources">Building from Sources</a></li>
+<li><a href="#fedora">Installing on Fedora</a></li>
 <li><a href="#device_dax">Converting Filesystem DAX to Device DAX</a></li>
 <li><a href="#filesystem_dax">Converting Device DAX to Filesystem DAX</a></li>
 <li><a href="#pool_set">Using a Pool Set</a></li>
 </ul>
-
-<a name="fedora_stable_pmdk"></a>
-
-Installing on Fedora (Stable PMDK)
-----------------------------------
-
-Install required packages:
-
-```
-su -c 'dnf install autoconf cmake gcc-c++ libpmemobj++-devel pmempool'
-```
-
-Build pmemkv: (skip proxy steps if you have none)
-
-```
-git config --global http.proxy <YOUR PROXY>
-cd ~
-git clone https://github.com/pmem/pmemkv.git
-cd pmemkv
-export HTTP_PROXY="<YOUR PROXY>"
-export HTTPS_PROXY="<YOUR PROXY>"
-make
-```
-<a name="fedora_latest_pmdk"></a>
-
-Installing on Fedora (Latest PMDK)
-----------------------------------
-
-Install required packages:
-
-```
-su -c 'dnf install autoconf cmake doxygen gcc gcc-c++'
-```
-
-Install latest PMDK: (skip proxy steps if you have none)
-
-```
-git config --global http.proxy <YOUR PROXY>
-cd ~
-git clone https://github.com/pmem/pmdk.git
-cd pmdk
-NDCTL_ENABLE=n make -j8
-su -c 'NDCTL_ENABLE=n make install'
-```
-
-Build pmemkv: (skip proxy steps if you have none)
-
-```
-cd ~
-git clone https://github.com/pmem/pmemkv.git
-cd pmemkv
-export HTTP_PROXY="<YOUR PROXY>"
-export HTTPS_PROXY="<YOUR PROXY>"
-export PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig
-make
-```
 
 <a name="building_from_sources"></a>
 
@@ -82,9 +25,9 @@ Building from Sources
 **Prerequisites**
 
 * 64-bit Linux (OSX and Windows are not yet supported)
-* [PMDK](https://github.com/pmem/pmdk) (install binary package or build from source)
-* `make` and `cmake` (version 3.6 or higher)
-* `g++` (version 5.4 or higher)
+* [memkind](https://github.com/memkind/memkind) - volatile memory manager
+* [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit
+* [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings for PMDK
 
 **Building and running tests**
 
@@ -92,7 +35,7 @@ After cloning sources from GitHub, use provided `make` targets for building and 
 tests.
 
 ```
-git clone https://github.com/pmem/pmemkv.git
+git clone https://github.com/pmem/pmemkv
 cd pmemkv
 
 make                    # build everything and run tests
@@ -128,6 +71,69 @@ cd mybuild
 cmake ~/pmemkv
 make
 PMEM_IS_PMEM_FORCE=1 ./pmemkv_test
+```
+
+<a name="fedora"></a>
+
+Installing on Fedora
+--------------------
+
+Install required packages:
+
+```
+su -c 'dnf install autoconf automake cmake daxctl-devel doxygen gcc gcc-c++ libtool ndctl-devel numactl-devel'
+```
+
+Configure for proxy if necessary:
+
+```
+git config --global http.proxy <YOUR PROXY>
+export HTTP_PROXY="<YOUR PROXY>"
+export HTTPS_PROXY="<YOUR PROXY>"
+```
+
+Install latest PMDK:
+
+```
+cd ~
+git clone https://github.com/pmem/pmdk
+cd pmdk
+make -j8
+su -c 'make install'
+export PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig
+```
+
+Install latest PMDK C++ bindings:
+
+```
+cd ~
+git clone https://github.com/pmem/libpmemobj-cpp
+cd libpmemobj-cpp
+mkdir build
+cd build
+cmake ..
+make
+su -c 'make install'
+```
+
+Install latest memkind:
+
+```
+cd ~
+git clone https://github.com/memkind/memkind
+cd memkind
+./build.sh
+su -c 'make install'
+```
+
+Build pmemkv:
+
+```
+cd ~
+git clone https://github.com/pmem/pmemkv
+cd pmemkv
+make
+su -c 'make install'
 ```
 
 <a name="device_dax"></a>
