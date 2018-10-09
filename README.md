@@ -25,15 +25,13 @@ provides different options for storage engines and language bindings.
 Installation
 ------------
 
-`pmemkv` does not currently provide install packages, but building from sources is not difficult.
+`pmemkv` does not currently provide install packages, but our <a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">installation</a> guide provides detailed instructions, including configuring DAX and pool sets. 
 
 <ul>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_stable_pmdk">Installing on Fedora (Stable PMDK)</a></li>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora_latest_pmdk">Installing on Fedora (Latest PMDK)</a></li>
+<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora">Installing on Fedora</a></li>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources">Building from Sources</a></li>
 </ul>
 
-Our <a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">installation</a> guide also includes help with configuring DAX and pool sets. 
 
 <a name="engines"></a>
 
