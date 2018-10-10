@@ -34,12 +34,8 @@
 #include "engines/kvtree2.h"
 #include "engines/kvtree3.h"
 #include "engines/btree.h"
-#ifdef __PMEMKV_WITH_MEMKIND
 #include "engines/vmap.h"
-#ifdef __PMEMKV_WITH_TBB
 #include "engines/vcmap.h"
-#endif //__PMEMKV_WITH_TBB
-#endif // __PMEMKV_WITH_MEMKIND
 
 namespace pmemkv {
 
@@ -53,14 +49,10 @@ KVEngine* KVEngine::Open(const string& engine, const string& path, const size_t 
             return new kvtree3::KVTree(path, size);
         } else if (engine == btree::ENGINE) {
             return new btree::BTree(path, size);
-#ifdef __PMEMKV_WITH_MEMKIND
         } else if(engine == vmap::ENGINE) {
             return new vmap::VMap(path, size);
-#ifdef __PMEMKV_WITH_TBB
         } else if(engine == vcmap::ENGINE) {
             return new vcmap::VCMap(path, size);
-#endif //__PMEMKV_WITH_TBB
-#endif // __PMEMKV_WITH_MEMKIND
         } else {
             return nullptr;
         }
@@ -79,14 +71,10 @@ void KVEngine::Close(KVEngine* kv) {
         delete (kvtree3::KVTree*) kv;
     } else if (engine == btree::ENGINE) {
         delete (btree::BTree*) kv;
-#ifdef __PMEMKV_WITH_MEMKIND
     } else if(engine == vmap::ENGINE) {
         delete (vmap::VMap*) kv;
-#ifdef __PMEMKV_WITH_TBB
     } else if(engine == vcmap::ENGINE) {
         delete (vcmap::VCMap*) kv;
-#endif //__PMEMKV_WITH_TBB
-#endif // __PMEMKV_WITH_MEMKIND
     }
 }
 

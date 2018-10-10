@@ -39,11 +39,15 @@ set(SOURCE_FILES src/pmemkv.cc src/pmemkv.h
     src/engines/kvtree3.h src/engines/kvtree3.cc
     src/engines/btree.h src/engines/btree.cc
     src/engines/btree/persistent_b_tree.h src/engines/btree/pstring.h
+	src/engines/vmap.h src/engines/vmap.cc
+	src/engines/vcmap.h src/engines/vcmap.cc
 )
 set(TEST_FILES tests/pmemkv_test.cc tests/mock_tx_alloc.cc
 	tests/engines/blackhole_test.cc
 	tests/engines/btree_test.cc
 	tests/engines/kvtree_test.cc
+	tests/engines/vmap_test.cc
+	tests/engines/vcmap_test.cc
 )
 set(3RDPARTY ${PROJECT_SOURCE_DIR}/3rdparty)
 set(GTEST_VERSION 1.7.0)
@@ -54,30 +58,12 @@ include(FindThreads)
 include(FindMemkind)
 include(TBBGet)
 
+if(NOT MEMKIND_FOUND)
+	message(FATAL_ERROR "Memkind library not found")
+endif()
+
 tbb_get(TBB_ROOT tbb_root CONFIG_DIR TBB_DIR)
-find_package(TBB COMPONENTS tbb)
-
-if(TBB_FOUND)
-	add_definitions(-D__PMEMKV_WITH_TBB)
-endif()
-
-if(MEMKIND_FOUND)
-	add_definitions(-D__PMEMKV_WITH_MEMKIND)
-	set(SOURCE_FILES ${SOURCE_FILES}
-		src/engines/vmap.h src/engines/vmap.cc
-	)
-	set(TEST_FILES ${TEST_FILES}
-		tests/engines/vmap_test.cc
-	)
-	if(TBB_FOUND)
-		set(SOURCE_FILES ${SOURCE_FILES}
-			src/engines/vcmap.h src/engines/vcmap.cc
-		)
-		set(TEST_FILES ${TEST_FILES}
-			tests/engines/vcmap_test.cc
-		)
-	endif()
-endif()
+find_package(TBB REQUIRED COMPONENTS tbb)
 
 set(GTEST_URL ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
 if(EXISTS ${GTEST_URL})
@@ -106,13 +92,11 @@ else()
     find_package(PMEMOBJ++ REQUIRED)
 endif()
 
-include_directories(${PMEMOBJ++_INCLUDE_DIRS})
+include_directories(${PMEMOBJ++_INCLUDE_DIRS} ${MEMKIND_INCLUDE_DIRS})
 link_directories(${PMEMOBJ++_LIBRARY_DIRS})
 
-include_directories(${MEMKIND_INCLUDE_DIR})
-
 add_library(pmemkv SHARED ${SOURCE_FILES})
-target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES} ${MEMKIND_LIBRARY} ${TBB_IMPORTED_TARGETS})
+target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES} ${MEMKIND_LIBRARIES} ${TBB_IMPORTED_TARGETS})
 
 add_executable(pmemkv_test ${TEST_FILES})
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
