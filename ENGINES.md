@@ -4,7 +4,6 @@
 <li><a href="#blackhole">blackhole</a></li>
 <li><a href="#kvtree">kvtree</a></li>
 <li><a href="#btree">btree</a></li>
-<li><a href="#cmap">cmap</a></li>
 <li><a href="#vmap">vmap</a></li>
 <li><a href="#vcmap">vcmap</a></li>
 </ul>
@@ -109,13 +108,6 @@ btree
 -----
 
 Copy-on-write B+ tree
-
-<a name="cmap"></a>
-
-cmap
-----
-
-Concurrent hashmap based on TBB-optimized container (coming soon!)
 
 <a name="vmap"></a>
 
