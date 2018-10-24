@@ -3,7 +3,6 @@
 <ul>
 <li><a href="#blackhole">blackhole</a></li>
 <li><a href="#kvtree">kvtree</a></li>
-<li><a href="#btree">btree</a></li>
 <li><a href="#vmap">vmap</a></li>
 <li><a href="#vcmap">vcmap</a></li>
 </ul>
@@ -101,13 +100,6 @@ keys and values.
 Use of PMDK C++ bindings by `kvtree` was lifted from this example program.
 Many thanks to [@tomaszkapela](https://github.com/tomaszkapela)
 for providing a great example to follow!
-
-<a name="btree"></a>
-
-btree
------
-
-Copy-on-write B+ tree
 
 <a name="vmap"></a>
 
