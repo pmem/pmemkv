@@ -52,9 +52,9 @@ is easy and encouraged!
 | ------- | ----------- | ------- | ------------ | ----- | ------- |
 | [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes | Yes | No | Yes |
 | [kvtree3](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree) | Hybrid B+ persistent tree | Yes | No | Yes | Yes |
-| [btree](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#btree) | Copy-on-write B+ persistent tree | No | No | Yes | No |
 | [vmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vmap) | Volatile hash map | No | No | Yes | Yes |
 | [vcmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vcmap) | Volatile concurrent hash map | No | Yes | Yes | Yes |
+| btree | Copy-on-write B+ persistent tree | No | No | Yes | No |
 
 <a name="bindings"></a>
 
