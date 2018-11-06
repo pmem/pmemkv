@@ -91,6 +91,8 @@ else()
     find_package(PMEMOBJ++ REQUIRED)
 endif()
 
+find_package(RapidJSON)
+
 include_directories(${PMEMOBJ++_INCLUDE_DIRS} ${MEMKIND_INCLUDE_DIRS})
 link_directories(${PMEMOBJ++_LIBRARY_DIRS})
 

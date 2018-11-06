@@ -25,9 +25,10 @@ Building from Sources
 **Prerequisites**
 
 * 64-bit Linux (OSX and Windows are not yet supported)
-* [memkind](https://github.com/memkind/memkind) - volatile memory manager
+* [memkind](https://github.com/memkind/memkind) - Volatile memory manager
 * [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit
 * [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings for PMDK
+* [RapidJSON](https://github.com/tencent/rapidjson) - JSON parser
 
 **Building and running tests**
 
@@ -81,7 +82,7 @@ Installing on Fedora
 Install required packages:
 
 ```
-su -c 'dnf install autoconf automake cmake daxctl-devel doxygen gcc gcc-c++ libtool ndctl-devel numactl-devel'
+su -c 'dnf install autoconf automake cmake daxctl-devel doxygen gcc gcc-c++ libtool ndctl-devel numactl-devel rapidjson-devel'
 ```
 
 Configure for proxy if necessary:

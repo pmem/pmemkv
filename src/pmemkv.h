@@ -52,6 +52,7 @@ typedef void(KVGetCallback)(void* context, int valuebytes, const char* value);
 #include <libpmemobj++/persistent_ptr.hpp>
 #include <libpmemobj++/pool.hpp>
 #include <libpmemobj++/transaction.hpp>
+#include "rapidjson/document.h"
 
 using std::string;
 using std::to_string;
