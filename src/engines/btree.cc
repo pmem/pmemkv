@@ -57,13 +57,13 @@ BTree::BTree(const string& path, const size_t size) {
         pmpool = pool<RootData>::open(path.c_str(), LAYOUT);
     }
     Recover();
-    LOG("Opened ok");
+    LOG("Started ok");
 }
 
 BTree::~BTree() {
-    LOG("Closing");
+    LOG("Stopping");
     pmpool.close();
-    LOG("Closed ok");
+    LOG("Stopped ok");
 }
 
 void BTree::All(void* context, KVAllCallback* callback) {

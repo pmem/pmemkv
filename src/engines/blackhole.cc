@@ -40,11 +40,11 @@ namespace pmemkv {
 namespace blackhole {
 
 Blackhole::Blackhole() {
-    LOG("Opened ok");
+    LOG("Started ok");
 }
 
 Blackhole::~Blackhole() {
-    LOG("Closed ok");
+    LOG("Stopped ok");
 }
 
 void Blackhole::All(void* context, KVAllCallback* callback) {

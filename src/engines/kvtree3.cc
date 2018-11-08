@@ -53,13 +53,13 @@ KVTree::KVTree(const string& path, const size_t size) : pmpath(path) {
         pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
     }
     Recover();
-    LOG("Opened ok");
+    LOG("Started ok");
 }
 
 KVTree::~KVTree() {
-    LOG("Closing");
+    LOG("Stopping");
     pmpool.close();
-    LOG("Closed ok");
+    LOG("Stopped ok");
 }
 
 // ===============================================================================================

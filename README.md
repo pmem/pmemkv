@@ -25,7 +25,9 @@ provides different options for storage engines and language bindings.
 Installation
 ------------
 
-`pmemkv` does not currently provide install packages, but our <a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">installation</a> guide provides detailed instructions, including configuring DAX and pool sets. 
+`pmemkv` does not currently provide install packages, but our
+<a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">installation</a> guide
+provides detailed instructions, including configuring DAX and pool sets. 
 
 <ul>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora">Installing on Fedora</a></li>
@@ -51,7 +53,7 @@ is easy and encouraged!
 | Engine  | Description | Stable? | Thread-Safe? | Iterable? | Large Values? |
 | ------- | ----------- | ------- | ------------ | ----- | ------- |
 | [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes | Yes | No | Yes |
-| [kvtree3](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree) | Hybrid B+ persistent tree | Yes | No | Yes | Yes |
+| [kvtree3](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree3) | Hybrid B+ persistent tree | Yes | No | Yes | Yes |
 | [vmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vmap) | Volatile hash map | No | No | Yes | Yes |
 | [vcmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vcmap) | Volatile concurrent hash map | No | Yes | Yes | Yes |
 | btree | Copy-on-write B+ persistent tree | No | No | Yes | No |
@@ -61,7 +63,8 @@ is easy and encouraged!
 Language Bindings
 -----------------
 
-`pmemkv` is written in C and C++. Developers can either use native C++ classes directly, or use our `extern "C"` API, or use one of several high-level language bindings that are based on the `extern "C"` API.
+`pmemkv` is written in C and C++. Developers can either use native C++ classes directly, or use our `extern "C"` API,
+or use one of several high-level language bindings that are based on the `extern "C"` API.
 
 ![pmemkv-bindings](https://user-images.githubusercontent.com/913363/34419334-6d6252fc-ebc0-11e7-9a34-d78591fb8c40.png)
 
@@ -76,8 +79,8 @@ Language Bindings
 using namespace pmemkv;
 
 int main() {
-    LOG("Opening datastore");
-    KVEngine* kv = KVEngine::Open("kvtree3", "/dev/shm/pmemkv", 1073741824);  // 1 GB pool
+    LOG("Starting engine");
+    KVEngine* kv = KVEngine::Start("kvtree3", "{\"path\":\"/dev/shm/pmemkv\"}");
 
     LOG("Putting new key");
     KVStatus s = kv->Put("key1", "value1");
@@ -99,7 +102,7 @@ int main() {
     s = kv->Remove("key1");
     assert(s == OK && !kv->Exists("key1"));
 
-    LOG("Closing datastore");
+    LOG("Stopping engine");
     delete kv;
     return 0;
 }
@@ -121,8 +124,8 @@ void MyCallback(void* context, int kb, const char* k) {
 }
 
 int main() {
-    LOG("Opening datastore");
-    KVEngine* kv = kvengine_open("kvtree3", "/dev/shm/pmemkv", 1073741824);  // 1 GB pool
+    LOG("Starting engine");
+    KVEngine* kv = kvengine_start("kvtree3", "{\"path\":\"/dev/shm/pmemkv\"}");
 
     LOG("Putting new key");
     char* key1 = "key1";
@@ -148,8 +151,8 @@ int main() {
     s = kvengine_remove(kv, strlen(key1), key1);
     assert(s == OK && kvengine_exists(kv, strlen(key1), key1) == NOT_FOUND);
 
-    LOG("Closing datastore");
-    kvengine_close(kv);
+    LOG("Stopping engine");
+    kvengine_stop(kv);
     return 0;
 }
 ```

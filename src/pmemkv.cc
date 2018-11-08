@@ -38,27 +38,33 @@
 
 namespace pmemkv {
 
-KVEngine* KVEngine::Open(const string& engine, const string& path, const size_t size) {
+KVEngine* KVEngine::Start(const string& engine, const string& config) {
     try {
         if (engine == blackhole::ENGINE) {
             return new blackhole::Blackhole();
-        } else if (engine == kvtree3::ENGINE) {
-            return new kvtree3::KVTree(path, size);
-        } else if (engine == btree::ENGINE) {
-            return new btree::BTree(path, size);
-        } else if(engine == vmap::ENGINE) {
-            return new vmap::VMap(path, size);
-        } else if(engine == vcmap::ENGINE) {
-            return new vcmap::VCMap(path, size);
-        } else {
-            return nullptr;
+        } else {  // handle traditional engines expecting path & size params
+            rapidjson::Document d;
+            d.Parse(config.c_str());  // todo handle invalid JSON
+            if (!d.HasMember("path")) return nullptr;
+            auto path = d["path"].GetString();
+            size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;  // todo invalid num?
+            if (engine == kvtree3::ENGINE) {
+                return new kvtree3::KVTree(path, size);
+            } else if (engine == btree::ENGINE) {
+                return new btree::BTree(path, size);
+            } else if (engine == vmap::ENGINE) {
+                return new vmap::VMap(path, size);
+            } else if (engine == vcmap::ENGINE) {
+                return new vcmap::VCMap(path, size);
+            }
         }
+        return nullptr;
     } catch (...) {
         return nullptr;
     }
 }
 
-void KVEngine::Close(KVEngine* kv) {
+void KVEngine::Stop(KVEngine* kv) {
     auto engine = kv->Engine();
     if (engine == blackhole::ENGINE) {
         delete (blackhole::Blackhole*) kv;
@@ -66,9 +72,9 @@ void KVEngine::Close(KVEngine* kv) {
         delete (kvtree3::KVTree*) kv;
     } else if (engine == btree::ENGINE) {
         delete (btree::BTree*) kv;
-    } else if(engine == vmap::ENGINE) {
+    } else if (engine == vmap::ENGINE) {
         delete (vmap::VMap*) kv;
-    } else if(engine == vcmap::ENGINE) {
+    } else if (engine == vcmap::ENGINE) {
         delete (vcmap::VCMap*) kv;
     }
 }
@@ -107,12 +113,12 @@ KVStatus KVEngine::Get(const string& key, string* value) {
     return cxt.result;
 }
 
-extern "C" KVEngine* kvengine_open(const char* engine, const char* path, const size_t size) {
-    return KVEngine::Open(engine, path, size);
+extern "C" KVEngine* kvengine_start(const char* engine, const char* config) {
+    return KVEngine::Start(engine, config);
 }
 
-extern "C" void kvengine_close(KVEngine* kv) {
-    return KVEngine::Close(kv);
+extern "C" void kvengine_stop(KVEngine* kv) {
+    return KVEngine::Stop(kv);
 }
 
 extern "C" void kvengine_all(KVEngine* kv, void* context, KVAllCallback* callback) {

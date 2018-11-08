@@ -63,8 +63,8 @@ const string LAYOUT = "pmemkv";
 
 class KVEngine {
   public:
-    static KVEngine* Open(const string& engine, const string& path, size_t size);
-    static void Close(KVEngine* kv);
+    static KVEngine* Start(const string& engine, const string& config);
+    static void Stop(KVEngine* kv);
 
     virtual string Engine() = 0;
 
@@ -97,8 +97,8 @@ extern "C" {
 struct KVEngine;
 typedef struct KVEngine KVEngine;
 
-KVEngine* kvengine_open(const char* engine, const char* path, size_t size);
-void kvengine_close(KVEngine* kv);
+KVEngine* kvengine_start(const char* engine, const char* config);
+void kvengine_stop(KVEngine* kv);
 void kvengine_all(KVEngine* kv, void* context, KVAllCallback* callback);
 int64_t kvengine_count(KVEngine* kv);
 void kvengine_each(KVEngine* kv, void* context, KVEachCallback* callback);

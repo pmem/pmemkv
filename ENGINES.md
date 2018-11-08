@@ -2,7 +2,7 @@
 
 <ul>
 <li><a href="#blackhole">blackhole</a></li>
-<li><a href="#kvtree">kvtree</a></li>
+<li><a href="#kvtree3">kvtree3</a></li>
 <li><a href="#vmap">vmap</a></li>
 <li><a href="#vcmap">vcmap</a></li>
 </ul>
@@ -12,23 +12,52 @@
 blackhole
 ---------
 
-This engine accepts an unlimited amount of data, but never returns anything.
+A volatile concurrent engine that accepts an unlimited amount of data, but never returns anything.
+
 * `Put` and `Remove` always returns `OK`
 * `Get` always returns `NOT_FOUND`
+* `All` and `Each` never trigger callbacks
+
+### Configuration
+
+No required configuration parameters.  JSON configuration is never parsed.
+
+### Internals
 
 Internally, `blackhole` does not use a persistent pool or any durable structures. The intended
 use this engine is to profile and tune high-level bindings, and similar cases when persistence
 should be intentionally skipped.
 
-<a name="kvtree"></a>
+<a name="kvtree3"></a>
 
-kvtree
-------
+kvtree3
+-------
+
+A persistent single-threaded engine, backed by a read-optimized B+ tree.
+
+### Configuration
+
+Configuration must specify a `path` to a PMDK persistent pool, which can be a file (on a DAX filesystem),
+a DAX device, or a PMDK poolset file.
+
+```
+{ "path" : "my-pool" }
+```
+
+Configuration may optionally specify a `size` in bytes.
+If omitted the default value of 1073741824 bytes (1GB) is applied.
+This value cannot be smaller than 8388608 (8MB).
+
+```
+{ "path" : "my-pool", "size" : 1073741824 }
+```
+
+### Internals
 
 Internally, `kvtree` uses a hybrid fingerprinted B+ tree implementation. Rather than keeping
 inner and leaf nodes of the tree in persistent memory, `kvtree` uses a hybrid structure where
 inner nodes are kept in DRAM and leaf nodes only are kept in persistent memory. Though `kvtree`
-has to recover all inner nodes when the datastore is first opened, searches are performed in 
+has to recover all inner nodes when the engine is started, searches are performed in 
 DRAM except for a final read from persistent memory.
 
 ![pmemkv-intro](https://cloud.githubusercontent.com/assets/913363/25543024/289f06d8-2c12-11e7-86e4-a1f0df891659.png)
@@ -37,8 +66,6 @@ Leaf nodes in `kvtree` contain multiple key-value pairs, indexed using 1-byte fi
 ([Pearson hashes](https://en.wikipedia.org/wiki/Pearson_hashing)) that speed locating
 a given key. Leaf modifications are accelerated using
 [zero-copy updates](http://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html). 
-
-The `kvtree` engine is intended for single-threaded workloads and is not thread-safe.
 
 ### Related Work
 
@@ -51,7 +78,7 @@ implementation. The biggest difference is that the `pmse`
 tree keeps inner and leaf nodes in persistent memory,
 where `kvtree` keeps inner nodes in DRAM and leaf nodes in
 persistent memory. (This means that `kvtree` has to recover
-all inner nodes when the datastore is first opened)
+all inner nodes when the engine is started)
 
 **FPTree**
 
@@ -106,11 +133,40 @@ for providing a great example to follow!
 vmap
 ----
 
-Volatile hashmap (coming soon!)
+A volatile single-threaded engine, backed by memkind.
+
+### Configuration
+
+Configuration must specify a `path` to a local directory where temporary files will be created.
+For best performance this directory should reside on a DAX-enabled filesystem.
+
+```
+{ "path" : "my-directory" }
+```
+
+Configuration may optionally specify a `size` in bytes.
+If omitted the default value of 1073741824 bytes (1GB) is applied.
+This value cannot be smaller than 8388608 (8MB).
+
+```
+{ "path" : "my-path", "size" : 1073741824 }
+```
+
+### Internals
+
+(add full description here)
 
 <a name="vcmap"></a>
 
 vcmap
 -----
 
-Volatile concurrent hashmap (coming soon!)
+A volatile concurrent engine, backed by memkind.
+
+### Configuration
+
+(same as the `vmap` engine)
+
+### Internals
+
+(add full description here)

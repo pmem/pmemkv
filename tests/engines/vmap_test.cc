@@ -45,20 +45,20 @@ public:
     VMap* kv;
 
     VMapBaseTest() {
-        Open();
+        Start();
     }
 
     ~VMapBaseTest() {
         delete kv;
     }
 
-    void Reopen() {
+    void Restart() {
         delete kv;
-        Open();
+        Start();
     }
 
 protected:
-    void Open() {
+    void Start() {
         kv = new VMap(PATH, POOL_SIZE);
     }
 };
@@ -379,7 +379,7 @@ TEST_F(VMapTest, UsesEachTest) {
 // =============================================================================================
 
 TEST_F(VMapTest, GetHeadlessAfterRecoveryTest) {
-    Reopen();
+    Restart();
     string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
 }
@@ -388,7 +388,7 @@ TEST_F(VMapTest, GetMultipleAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("abc", "A1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("def", "B2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("hij", "C3") == OK) << pmemobj_errormsg();
-    Reopen();
+    Restart();
     ASSERT_TRUE(kv->Put("jkl", "D4") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("mno", "E5") == OK) << pmemobj_errormsg();
     string value1;
@@ -409,7 +409,7 @@ TEST_F(VMapTest, GetMultiple2AfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key3", "value3") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("key2") == OK);
     ASSERT_TRUE(kv->Put("key3", "VALUE3") == OK) << pmemobj_errormsg();
-    Reopen();
+    Restart();
     string value1;
     ASSERT_TRUE(kv->Get("key1", &value1) == NOT_FOUND);
     string value2;
@@ -420,7 +420,7 @@ TEST_F(VMapTest, GetMultiple2AfterRecoveryTest) {
 
 TEST_F(VMapTest, GetNonexistentAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
-    Reopen();
+    Restart();
     string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
 }
@@ -433,7 +433,7 @@ TEST_F(VMapTest, PutAfterRecoveryTest) {
     string new_value;
     ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK) << pmemobj_errormsg();           // same size
     ASSERT_TRUE(kv->Get("key1", &new_value) == OK && new_value == "VALUE1");
-    Reopen();
+    Restart();
 
     string new_value2;
     ASSERT_TRUE(kv->Put("key1", "new_value") == OK) << pmemobj_errormsg();        // longer size
@@ -446,7 +446,7 @@ TEST_F(VMapTest, PutAfterRecoveryTest) {
 
 TEST_F(VMapTest, RemoveAllAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
-    Reopen();
+    Restart();
     ASSERT_TRUE(kv->Remove("tmpkey") == NOT_FOUND);
     string value;
     ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
@@ -454,7 +454,7 @@ TEST_F(VMapTest, RemoveAllAfterRecoveryTest) {
 
 TEST_F(VMapTest, RemoveAndInsertAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
-    Reopen();
+    Restart();
     ASSERT_TRUE(kv->Remove("tmpkey") == NOT_FOUND);
     string value;
     ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
@@ -468,7 +468,7 @@ TEST_F(VMapTest, RemoveExistingAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
-    Reopen();
+    Restart();
     ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND); // ok to remove twice
     string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
@@ -476,13 +476,13 @@ TEST_F(VMapTest, RemoveExistingAfterRecoveryTest) {
 }
 
 TEST_F(VMapTest, RemoveHeadlessAfterRecoveryTest) {
-    Reopen();
+    Restart();
     ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
 }
 
 TEST_F(VMapTest, RemoveNonexistentAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
-    Reopen();
+    Restart();
     ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
 }
 
