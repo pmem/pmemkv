@@ -68,7 +68,7 @@ KVTree::~KVTree() {
 
 void KVTree::All(void* context, KVAllCallback* callback) {
     LOG("All");
-    auto leaf = pmpool.get_root()->head;
+    auto leaf = pmpool.root()->head;
     while (leaf) {
         for (int slot = LEAF_KEYS; slot--;) {
             auto kvslot = leaf->slots[slot].get_ro();
@@ -81,7 +81,7 @@ void KVTree::All(void* context, KVAllCallback* callback) {
 
 int64_t KVTree::Count() {
     int64_t result = 0;
-    auto leaf = pmpool.get_root()->head;
+    auto leaf = pmpool.root()->head;
     while (leaf) {
         for (int slot = LEAF_KEYS; slot--;) {
             auto kvslot = leaf->slots[slot].get_ro();
@@ -95,7 +95,7 @@ int64_t KVTree::Count() {
 
 void KVTree::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
-    auto leaf = pmpool.get_root()->head;
+    auto leaf = pmpool.root()->head;
     while (leaf) {
         for (int slot = LEAF_KEYS; slot--;) {
             auto kvslot = leaf->slots[slot].get_ro();
@@ -151,12 +151,12 @@ KVStatus KVTree::Put(const string& key, const string& value) {
             LOG("   adding head leaf");
             unique_ptr<KVLeafNode> new_node(new KVLeafNode());
             new_node->is_leaf = true;
-            transaction::exec_tx(pmpool, [&] {
+            transaction::run(pmpool, [&] {
                 if (!leaves_prealloc.empty()) {
                     new_node->leaf = leaves_prealloc.back();
                     leaves_prealloc.pop_back();
                 } else {
-                    auto root = pmpool.get_root();
+                    auto root = pmpool.root();
                     auto old_head = root->head;
                     auto new_leaf = make_persistent<KVLeaf>();
                     root->head = new_leaf;
@@ -200,7 +200,7 @@ KVStatus KVTree::Remove(const string& key) {
                     leafnode->hashes[slot] = 0;
                     leafnode->keys[slot].clear();
                     auto leaf = leafnode->leaf;
-                    transaction::exec_tx(pmpool, [&] {
+                    transaction::run(pmpool, [&] {
                         leaf->slots[slot].get_rw().clear();
                     });
                     return OK; // no duplicate keys allowed
@@ -278,7 +278,7 @@ bool KVTree::LeafFillSlotForKey(KVLeafNode* leafnode, const uint8_t hash,
     int slot = key_match_slot >= 0 ? key_match_slot : last_empty_slot;
     if (slot >= 0) {
         LOG("   filling slot=" << slot);
-        transaction::exec_tx(pmpool, [&] {
+        transaction::run(pmpool, [&] {
             LeafFillSpecificSlot(leafnode, hash, key, value, slot);
         });
     }
@@ -307,14 +307,14 @@ void KVTree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
     unique_ptr<KVLeafNode> new_leafnode(new KVLeafNode());
     new_leafnode->parent = leafnode->parent;
     new_leafnode->is_leaf = true;
-    transaction::exec_tx(pmpool, [&] {
+    transaction::run(pmpool, [&] {
         persistent_ptr<KVLeaf> new_leaf;
         if (!leaves_prealloc.empty()) {
             new_leaf = leaves_prealloc.back();
             new_leafnode->leaf = new_leaf;
             leaves_prealloc.pop_back();
         } else {
-            auto root = pmpool.get_root();
+            auto root = pmpool.root();
             auto old_head = root->head;
             new_leaf = make_persistent<KVLeaf>();
             root->head = new_leaf;
@@ -408,7 +408,7 @@ void KVTree::Recover() {
 
     // traverse persistent leaves to build list of leaves to recover
     std::list<KVRecoveredLeaf> leaves;
-    auto leaf = pmpool.get_root()->head;
+    auto leaf = pmpool.root()->head;
     while (leaf) {
         unique_ptr<KVLeafNode> leafnode(new KVLeafNode());
         leafnode->leaf = leaf;

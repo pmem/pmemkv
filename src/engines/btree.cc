@@ -149,7 +149,7 @@ KVStatus BTree::Remove(const string& key) {
 }
 
 void BTree::Recover() {
-    auto root_data = pmpool.get_root();
+    auto root_data = pmpool.root();
     if (root_data->btree_ptr) {
         my_btree = root_data->btree_ptr.get();
         my_btree->garbage_collection();

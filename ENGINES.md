@@ -91,7 +91,7 @@ differs from FPTree in several important areas:
 
 1. `kvtree` is written using PMDK C++ bindings, which exerts influence on
 its design and implementation. `kvtree` uses generic PMDK transactions
-(ie. `transaction::exec_tx()` closures), there is no need for micro-logging
+(ie. `transaction::run()` closures), there is no need for micro-logging
 structures as described in the FPTree paper to make internal delete and
 split operations safe. `kvtree` also adjusts sizes of data structures
 (to fit PMDK primitive types) for best cache-line optimization.
