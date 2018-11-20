@@ -64,7 +64,7 @@ void VMap::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& iterator : pmem_kv_container) {
         (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
-                (int32_t) iterator.second.size(), iterator.second.c_str());
+                    (int32_t) iterator.second.size(), iterator.second.c_str());
     }
 }
 
@@ -86,18 +86,37 @@ void VMap::Get(void* context, const string& key, KVGetCallback* callback) {
 
 KVStatus VMap::Put(const string& key, const string& value) {
     LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
-    pmem_kv_container[pmem_string(key.c_str(), key.size(), ch_allocator)] = 
-        pmem_string(value.c_str(), value.size(), ch_allocator);
-    return OK;
+    try {
+        pmem_kv_container[pmem_string(key.c_str(), key.size(), ch_allocator)] =
+                pmem_string(value.c_str(), value.size(), ch_allocator);
+        return OK;
+    } catch (std::bad_alloc e) {
+        LOG("Put failed due to exception, " << e.what());
+        return FAILED;
+    } catch (pmem::transaction_alloc_error e) {
+        LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+        return FAILED;
+    } catch (pmem::transaction_error e) {
+        LOG("Put failed due to pmem::transaction_error, " << e.what());
+        return FAILED;
+    }
 }
 
 KVStatus VMap::Remove(const string& key) {
     LOG("Remove key=" << key);
-    size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
-    if (erased == 1) {
-        return OK;
+    try {
+        size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
+        return (erased == 1) ? OK : NOT_FOUND;
+    } catch (std::bad_alloc e) {
+        LOG("Put failed due to exception, " << e.what());
+        return FAILED;
+    } catch (pmem::transaction_alloc_error e) {
+        LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+        return FAILED;
+    } catch (pmem::transaction_error e) {
+        LOG("Put failed due to pmem::transaction_error, " << e.what());
+        return FAILED;
     }
-    return NOT_FOUND;
 }
 
 } // namespace vmap

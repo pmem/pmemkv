@@ -89,24 +89,43 @@ void VCMap::Get(void* context, const string& key, KVGetCallback* callback) {
 
 KVStatus VCMap::Put(const string& key, const string& value) {
     LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
-    map_t::value_type kv_pair{pmem_string(key.c_str(), key.size(), ch_allocator),
-                              pmem_string(value.c_str(), value.size(), ch_allocator)};
-    bool result = pmem_kv_container.insert(kv_pair);
-    if (!result) {
-        map_t::accessor result_found;
-        pmem_kv_container.find(result_found, kv_pair.first);
-        result_found->second = kv_pair.second;
+    try {
+        map_t::value_type kv_pair{pmem_string(key.c_str(), key.size(), ch_allocator),
+                                  pmem_string(value.c_str(), value.size(), ch_allocator)};
+        bool result = pmem_kv_container.insert(kv_pair);
+        if (!result) {
+            map_t::accessor result_found;
+            pmem_kv_container.find(result_found, kv_pair.first);
+            result_found->second = kv_pair.second;
+        }
+        return OK;
+    } catch (std::bad_alloc e) {
+        LOG("Put failed due to exception, " << e.what());
+        return FAILED;
+    } catch (pmem::transaction_alloc_error e) {
+        LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+        return FAILED;
+    } catch (pmem::transaction_error e) {
+        LOG("Put failed due to pmem::transaction_error, " << e.what());
+        return FAILED;
     }
-    return OK;
 }
 
 KVStatus VCMap::Remove(const string& key) {
     LOG("Remove key=" << key);
-    size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
-    if (erased == 1) {
-        return OK;
+    try {
+        size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
+        return (erased == 1) ? OK : NOT_FOUND;
+    } catch (std::bad_alloc e) {
+        LOG("Put failed due to exception, " << e.what());
+        return FAILED;
+    } catch (pmem::transaction_alloc_error e) {
+        LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+        return FAILED;
+    } catch (pmem::transaction_error e) {
+        LOG("Put failed due to pmem::transaction_error, " << e.what());
+        return FAILED;
     }
-    return NOT_FOUND;
 }
 
 } // namespace vcmap
