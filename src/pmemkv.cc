@@ -44,18 +44,24 @@ KVEngine* KVEngine::Start(const string& engine, const string& config) {
             return new blackhole::Blackhole();
         } else {  // handle traditional engines expecting path & size params
             rapidjson::Document d;
-            d.Parse(config.c_str());  // todo handle invalid JSON
-            if (!d.HasMember("path")) return nullptr;
+            if (d.Parse(config.c_str()).HasParseError()) return nullptr;
+            if (!d.HasMember("path") || !d["path"].IsString()) return nullptr;
+            if (d.HasMember("size") && !d["size"].IsInt64()) return nullptr;
             auto path = d["path"].GetString();
-            size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;  // todo invalid num?
+            size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;
             if (engine == kvtree3::ENGINE) {
                 return new kvtree3::KVTree(path, size);
             } else if (engine == btree::ENGINE) {
                 return new btree::BTree(path, size);
-            } else if (engine == vmap::ENGINE) {
-                return new vmap::VMap(path, size);
-            } else if (engine == vcmap::ENGINE) {
-                return new vcmap::VCMap(path, size);
+            } else if ((engine == vmap::ENGINE) || (engine == vcmap::ENGINE)) {
+                struct stat info;
+                stat(path, &info);
+                if (!(info.st_mode & S_IFDIR)) return nullptr;
+                if (engine == vmap::ENGINE) {
+                    return new vmap::VMap(path, size);
+                } else if (engine == vcmap::ENGINE) {
+                    return new vcmap::VCMap(path, size);
+                }
             }
         }
         return nullptr;
