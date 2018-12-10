@@ -35,7 +35,7 @@
 #include "engines/btree.h"
 #include "engines/vmap.h"
 #include "engines/vcmap.h"
-
+#include "engines/caching.h"
 namespace pmemkv {
 
 KVEngine* KVEngine::Start(const string& engine, const string& config) {
@@ -51,6 +51,8 @@ KVEngine* KVEngine::Start(const string& engine, const string& config) {
             size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;
             if (engine == kvtree3::ENGINE) {
                 return new kvtree3::KVTree(path, size);
+	    } else if (engine == caching::ENGINE) {
+                return new caching::CachingEngine(config);
             } else if (engine == btree::ENGINE) {
                 return new btree::BTree(path, size);
             } else if ((engine == vmap::ENGINE) || (engine == vcmap::ENGINE)) {
@@ -78,6 +80,8 @@ void KVEngine::Stop(KVEngine* kv) {
         delete (kvtree3::KVTree*) kv;
     } else if (engine == btree::ENGINE) {
         delete (btree::BTree*) kv;
+    } else if (engine == caching::ENGINE) {
+        delete (caching::CachingEngine*) kv;
     } else if (engine == vmap::ENGINE) {
         delete (vmap::VMap*) kv;
     } else if (engine == vcmap::ENGINE) {

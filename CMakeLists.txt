@@ -38,8 +38,9 @@ set(SOURCE_FILES src/pmemkv.cc src/pmemkv.h
     src/engines/kvtree3.h src/engines/kvtree3.cc
     src/engines/btree.h src/engines/btree.cc
     src/engines/btree/persistent_b_tree.h src/engines/btree/pstring.h
-	src/engines/vmap.h src/engines/vmap.cc
-	src/engines/vcmap.h src/engines/vcmap.cc
+    src/engines/vmap.h src/engines/vmap.cc
+    src/engines/vcmap.h src/engines/vcmap.cc
+    src/engines/caching.h src/engines/caching.cc
 )
 set(TEST_FILES tests/pmemkv_test.cc tests/mock_tx_alloc.cc
 	tests/engines/blackhole_test.cc
@@ -47,6 +48,7 @@ set(TEST_FILES tests/pmemkv_test.cc tests/mock_tx_alloc.cc
 	tests/engines/kvtree_test.cc
 	tests/engines/vmap_test.cc
 	tests/engines/vcmap_test.cc
+    	tests/engines/caching_test.cc
 )
 set(3RDPARTY ${PROJECT_SOURCE_DIR}/3rdparty)
 set(GTEST_VERSION 1.7.0)
@@ -92,12 +94,16 @@ else()
 endif()
 
 find_package(RapidJSON)
-
-include_directories(${PMEMOBJ++_INCLUDE_DIRS} ${MEMKIND_INCLUDE_DIRS})
+set(LIB_ACL $ENV{HOME}/acl/lib_acl)
+set(LIB_ACL_CPP $ENV{HOME}/acl/lib_acl_cpp)
+set(MEMCACHED_INCLUDE $ENV{HOME}/libmemcached-1.0.18)
+set(RAPIDJSON $ENV{HOME})
+include_directories(${PMEMOBJ++_INCLUDE_DIRS} ${MEMKIND_INCLUDE_DIRS} ${MEMCACHED_INCLUDE} ${LIB_ACL_CPP}/include/acl_cpp ${LIB_ACL}/include ${RAPIDJSON}) 
 link_directories(${PMEMOBJ++_LIBRARY_DIRS})
 
 add_library(pmemkv SHARED ${SOURCE_FILES})
 target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES} ${MEMKIND_LIBRARIES} ${TBB_IMPORTED_TARGETS})
 
 add_executable(pmemkv_test ${TEST_FILES})
-target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
+set(LIB_PROTOCOL $ENV{HOME}/acl/lib_protocol/lib)
+target_link_libraries(pmemkv_test pmemkv libgtest -L${LIB_ACL_CPP}/lib  acl_cpp -L${LIB_PROTOCOL} protocol -L${LIB_ACL}/lib acl -L../../lib/linux64  pthread memcached ${CMAKE_DL_LIBS})
