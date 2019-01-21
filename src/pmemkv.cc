@@ -36,17 +36,30 @@
 #include "engines/vmap.h"
 #include "engines/vcmap.h"
 
+using std::runtime_error;
+
 namespace pmemkv {
 
 KVEngine* KVEngine::Start(const string& engine, const string& config) {
+    auto cb = [](void* context, const char* engine, const char* config, const char* msg) {
+        throw runtime_error(msg);
+    };
+    return Start(nullptr, engine.c_str(), config.c_str(), cb);
+}
+
+KVEngine* KVEngine::Start(void* context, const char* engine, const char* config, KVStartFailureCallback* onfail) {
     try {
         if (engine == blackhole::ENGINE) {
             return new blackhole::Blackhole();
         } else {  // handle traditional engines expecting path & size params
             rapidjson::Document d;
-            if (d.Parse(config.c_str()).HasParseError()) return nullptr;
-            if (!d.HasMember("path") || !d["path"].IsString()) return nullptr;
-            if (d.HasMember("size") && !d["size"].IsInt64()) return nullptr;
+            if (d.Parse(config).HasParseError()) {
+                throw runtime_error("Config could not be parsed as JSON");
+            } else if (!d.HasMember("path") || !d["path"].IsString()) {
+                throw runtime_error("Config does not include valid path string");
+            } else if (d.HasMember("size") && !d["size"].IsInt64()) {
+                throw runtime_error("Config does not include valid size integer");
+            }
             auto path = d["path"].GetString();
             size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;
             if (engine == kvtree3::ENGINE) {
@@ -55,17 +68,18 @@ KVEngine* KVEngine::Start(const string& engine, const string& config) {
                 return new btree::BTree(path, size);
             } else if ((engine == vmap::ENGINE) || (engine == vcmap::ENGINE)) {
                 struct stat info;
-                stat(path, &info);
-                if (!(info.st_mode & S_IFDIR)) return nullptr;
-                if (engine == vmap::ENGINE) {
+                if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
+                    throw runtime_error("Config path is not an existing directory");
+                } else if (engine == vmap::ENGINE) {
                     return new vmap::VMap(path, size);
                 } else if (engine == vcmap::ENGINE) {
                     return new vcmap::VCMap(path, size);
                 }
             }
         }
-        return nullptr;
-    } catch (...) {
+        throw runtime_error("Unknown engine name");
+    } catch (std::exception& e) {
+        (*onfail)(context, engine, config, e.what());
         return nullptr;
     }
 }
@@ -119,8 +133,9 @@ KVStatus KVEngine::Get(const string& key, string* value) {
     return cxt.result;
 }
 
-extern "C" KVEngine* kvengine_start(const char* engine, const char* config) {
-    return KVEngine::Start(engine, config);
+extern "C" KVEngine* kvengine_start(void* context, const char* engine, const char* config,
+                                    KVStartFailureCallback* callback) {
+    return KVEngine::Start(context, engine, config, callback);
 }
 
 extern "C" void kvengine_stop(KVEngine* kv) {

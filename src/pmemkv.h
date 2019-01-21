@@ -43,6 +43,7 @@ typedef void(KVAllFunction)(int keybytes, const char* key);
 typedef void(KVEachCallback)(void* context, int keybytes, const char* key, int valuebytes, const char* value);
 typedef void(KVEachFunction)(int keybytes, const char* key, int valuebytes, const char* value);
 typedef void(KVGetCallback)(void* context, int valuebytes, const char* value);
+typedef void(KVStartFailureCallback)(void* context, const char* engine, const char* config, const char* msg);
 
 #ifdef __cplusplus
 
@@ -64,6 +65,7 @@ const string LAYOUT = "pmemkv";
 class KVEngine {
   public:
     static KVEngine* Start(const string& engine, const string& config);
+    static KVEngine* Start(void* context, const char* engine, const char* config, KVStartFailureCallback* callback);
     static void Stop(KVEngine* kv);
 
     virtual string Engine() = 0;
@@ -97,7 +99,7 @@ extern "C" {
 struct KVEngine;
 typedef struct KVEngine KVEngine;
 
-KVEngine* kvengine_start(const char* engine, const char* config);
+KVEngine* kvengine_start(void* context, const char* engine, const char* config, KVStartFailureCallback* callback);
 void kvengine_stop(KVEngine* kv);
 void kvengine_all(KVEngine* kv, void* context, KVAllCallback* callback);
 int64_t kvengine_count(KVEngine* kv);

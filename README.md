@@ -112,6 +112,7 @@ int main() {
 
 ```c
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "libpmemkv.h"
@@ -119,13 +120,18 @@ int main() {
 #define LOG(msg) printf("%s\n", msg)
 #define MAX_VAL_LEN 64
 
-void MyCallback(void* context, int kb, const char* k) {
+void StartFailureCallback(void* context, const char* engine, const char* config, const char* msg) {
+    printf("ERROR: %s\n", msg);
+    exit(-1);
+}
+
+void AllCallback(void* context, int kb, const char* k) {
     printf("   visited: %s\n", k);
 }
 
 int main() {
     LOG("Starting engine");
-    KVEngine* kv = kvengine_start("kvtree3", "{\"path\":\"/dev/shm/pmemkv\"}");
+    KVEngine* kv = kvengine_start(NULL, "kvtree3", "{\"path\":\"/dev/shm/pmemkv\"}", &StartFailureCallback);
 
     LOG("Putting new key");
     char* key1 = "key1";
@@ -145,7 +151,7 @@ int main() {
     char* value3 = "value3";
     kvengine_put(kv, strlen(key2), key2, strlen(value2), value2);
     kvengine_put(kv, strlen(key3), key3, strlen(value3), value3);
-    kvengine_all(kv, NULL, &MyCallback);
+    kvengine_all(kv, NULL, &AllCallback);
 
     LOG("Removing existing key");
     s = kvengine_remove(kv, strlen(key1), key1);
