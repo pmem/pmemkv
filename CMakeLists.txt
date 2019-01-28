@@ -33,6 +33,12 @@ project(pmemkv)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+
+option(EXPERIMENTAL "use experimental features" OFF)
+if(EXPERIMENTAL)
+    add_definitions(-DEXPERIMENTAL)
+endif(EXPERIMENTAL)
+
 set(SOURCE_FILES src/pmemkv.cc src/pmemkv.h
     src/engines/blackhole.h src/engines/blackhole.cc
     src/engines/kvtree3.h src/engines/kvtree3.cc
@@ -101,3 +107,5 @@ target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES} ${MEMKIND_LIBRARIES} ${TBB_I
 
 add_executable(pmemkv_test ${TEST_FILES})
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
+
+unset(EXPERIMENTAL CACHE)

@@ -32,9 +32,11 @@
 
 #include "engines/blackhole.h"
 #include "engines/kvtree3.h"
-#include "engines/btree.h"
 #include "engines/vmap.h"
 #include "engines/vcmap.h"
+#ifdef EXPERIMENTAL
+#include "engines/btree.h"
+#endif
 
 using std::runtime_error;
 
@@ -64,8 +66,10 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
             size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;
             if (engine == kvtree3::ENGINE) {
                 return new kvtree3::KVTree(path, size);
+#ifdef EXPERIMENTAL
             } else if (engine == btree::ENGINE) {
                 return new btree::BTree(path, size);
+#endif
             } else if ((engine == vmap::ENGINE) || (engine == vcmap::ENGINE)) {
                 struct stat info;
                 if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
@@ -90,8 +94,10 @@ void KVEngine::Stop(KVEngine* kv) {
         delete (blackhole::Blackhole*) kv;
     } else if (engine == kvtree3::ENGINE) {
         delete (kvtree3::KVTree*) kv;
+#ifdef EXPERIMENTAL
     } else if (engine == btree::ENGINE) {
         delete (btree::BTree*) kv;
+#endif
     } else if (engine == vmap::ENGINE) {
         delete (vmap::VMap*) kv;
     } else if (engine == vcmap::ENGINE) {

@@ -30,6 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef EXPERIMENTAL
+
 #pragma once
 
 #include "../pmemkv.h"
@@ -76,3 +78,5 @@ class BTree : public KVEngine {
 
 } // namespace btree
 } // namespace pmemkv
+
+#endif

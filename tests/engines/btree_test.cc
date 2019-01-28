@@ -30,6 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef EXPERIMENTAL
+
 #include "gtest/gtest.h"
 #include "../../src/engines/btree.h"
 
@@ -681,3 +683,5 @@ TEST_F(BTreeLargeTest, LargeDescendingAfterRecoveryTest) {
     }
     ASSERT_TRUE(kv->Count() == LARGE_LIMIT);
 }
+
+#endif

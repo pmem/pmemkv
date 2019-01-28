@@ -30,6 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef EXPERIMENTAL
+
 #include <iostream>
 #include <unistd.h>
 
@@ -161,3 +163,5 @@ void BTree::Recover() {
 
 } // namespace btree
 } // namespace pmemkv
+
+#endif
