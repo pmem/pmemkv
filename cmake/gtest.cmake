@@ -28,48 +28,23 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 3.5)
-project(pmemkv)
+set(GTEST_VERSION 1.7.0)
+set(GTEST_URL ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+if(EXISTS ${GTEST_URL})
+    # do nothing
+else()
+    execute_process(COMMAND wget -O ${GTEST_URL} https://github.com/google/googletest/archive/release-${GTEST_VERSION}.zip)
+endif()
 
-option(EXPERIMENTAL "use experimental features" OFF)
-if(EXPERIMENTAL)
-    add_definitions(-DEXPERIMENTAL)
-endif(EXPERIMENTAL)
+ExternalProject_Add(gtest URL ${GTEST_URL} PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest INSTALL_COMMAND ""
+                    CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
 
-set(SOURCE_FILES src/pmemkv.cc src/pmemkv.h
-    src/engines/blackhole.h src/engines/blackhole.cc
-    src/engines/kvtree3.h src/engines/kvtree3.cc
-    src/engines/btree.h src/engines/btree.cc
-    src/engines/btree/persistent_b_tree.h src/engines/btree/pstring.h
-    src/engines/vmap.h src/engines/vmap.cc
-    src/engines/vcmap.h src/engines/vcmap.cc
-)
-set(TEST_FILES tests/pmemkv_test.cc tests/mock_tx_alloc.cc
-    tests/engines/blackhole_test.cc
-    tests/engines/btree_test.cc
-    tests/engines/kvtree_test.cc
-    tests/engines/vmap_test.cc
-    tests/engines/vcmap_test.cc
-)
+ExternalProject_Get_Property(gtest source_dir binary_dir)
 
-include(ExternalProject)
-include(FindThreads)
-include(gtest)
-include(memkind)
-include(pmemobj++)
-include(rapidjson)
-include(tbb)
+add_library(libgtest IMPORTED STATIC GLOBAL)
 
-include_directories("${source_dir}/include" ${PMEMOBJ++_INCLUDE_DIRS} ${MEMKIND_INCLUDE_DIRS})
-link_directories(${PMEMOBJ++_LIBRARY_DIRS})
+add_dependencies(libgtest gtest)
 
-add_library(pmemkv SHARED ${SOURCE_FILES})
-target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES} ${MEMKIND_LIBRARIES} ${TBB_IMPORTED_TARGETS})
-
-add_executable(pmemkv_test ${TEST_FILES})
-target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
-
-unset(EXPERIMENTAL CACHE)
+set_target_properties(libgtest PROPERTIES "IMPORTED_LOCATION" "${binary_dir}/libgtest.a"
+                      "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}")
