@@ -55,6 +55,7 @@ set(TEST_FILES tests/pmemkv_test.cc tests/mock_tx_alloc.cc
     tests/engines/vcmap_test.cc
 )
 
+find_package(PkgConfig QUIET)
 include(ExternalProject)
 include(FindThreads)
 include(gtest)
