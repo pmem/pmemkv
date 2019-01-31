@@ -1,4 +1,7 @@
 # pmemkv
+
+[![Build Status](https://travis-ci.org/pmem/pmemkv.svg?branch=master)](https://travis-ci.org/pmem/pmemkv)
+
 Key/Value Datastore for Persistent Memory
 
 *This is experimental pre-release software and should not be used in
