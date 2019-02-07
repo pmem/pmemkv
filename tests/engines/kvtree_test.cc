@@ -121,6 +121,9 @@ TEST_F(KVTreeTest, SimpleTest) {
     value = "";
     kv->Get("key1", [&](int vb, const char* v) { value.append(v, vb); });
     ASSERT_TRUE(value == "value1");
+    value = "";
+    kv->Get("key1", [&](const string& v) { value.append(v); });
+    ASSERT_TRUE(value == "value1");
 }
 
 TEST_F(KVTreeTest, BinaryKeyTest) {

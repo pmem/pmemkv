@@ -61,6 +61,10 @@ using std::to_string;
 
 namespace pmemkv {
 
+typedef void(KVAllStringFunction)(const string& key);
+typedef void(KVEachStringFunction)(const string& key, const string& value);
+typedef void(KVGetStringFunction)(const string& value);
+
 const string LAYOUT = "pmemkv";
 
 class KVEngine {
@@ -74,18 +78,21 @@ class KVEngine {
     virtual void All(void* context, KVAllCallback* callback) = 0;
     inline void All(KVAllCallback* callback) { All(nullptr, callback); }
     void All(std::function<KVAllFunction> f);
+    void All(std::function<KVAllStringFunction> f);
 
     virtual int64_t Count() = 0;
 
     virtual void Each(void* context, KVEachCallback* callback) = 0;
     inline void Each(KVEachCallback* callback) { Each(nullptr, callback); }
     void Each(std::function<KVEachFunction> f);
+    void Each(std::function<KVEachStringFunction> f);
 
     virtual KVStatus Exists(const string& key) = 0;
 
     virtual void Get(void* context, const string& key, KVGetCallback* callback) = 0;
     inline void Get(const string& key, KVGetCallback* callback) { Get(nullptr, key, callback); }
     void Get(const string& key, std::function<KVGetFunction> f);
+    void Get(const string& key, std::function<KVGetStringFunction> f);
     KVStatus Get(const string& key, string* value);
 
     virtual KVStatus Put(const string& key, const string& value) = 0;

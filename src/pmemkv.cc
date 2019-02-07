@@ -114,11 +114,29 @@ void KVEngine::All(const std::function<KVAllFunction> f) {
     All(&localf, cb);
 }
 
+void KVEngine::All(const std::function<KVAllStringFunction> f) {
+    std::function<KVAllStringFunction> localf = f;
+    auto cb = [](void* context, int32_t kb, const char* k) {
+        const auto c = ((std::function<KVAllStringFunction>*) context);
+        c->operator()(string(k, kb));
+    };
+    All(&localf, cb);
+}
+
 void KVEngine::Each(const std::function<KVEachFunction> f) {
     std::function<KVEachFunction> localf = f;
     auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
         const auto c = ((std::function<KVEachFunction>*) context);
         c->operator()(kb, k, vb, v);
+    };
+    Each(&localf, cb);
+}
+
+void KVEngine::Each(const std::function<KVEachStringFunction> f) {
+    std::function<KVEachStringFunction> localf = f;
+    auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+        const auto c = ((std::function<KVEachStringFunction>*) context);
+        c->operator()(string(k, kb), string(v, vb));
     };
     Each(&localf, cb);
 }
@@ -144,6 +162,15 @@ void KVEngine::Get(const string& key, std::function<KVGetFunction> f) {
     auto cb = [](void* context, int vb, const char* v) {
         const auto c = ((std::function<KVGetFunction>*) context);
         c->operator()(vb, v);
+    };
+    Get(&localf, key, cb);
+}
+
+void KVEngine::Get(const string& key, std::function<KVGetStringFunction> f) {
+    std::function<KVGetStringFunction> localf = f;
+    auto cb = [](void* context, int vb, const char* v) {
+        const auto c = ((std::function<KVGetStringFunction>*) context);
+        c->operator()(string(v, vb));
     };
     Get(&localf, key, cb);
 }
