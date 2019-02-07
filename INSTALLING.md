@@ -138,8 +138,8 @@ su -c 'make install'
 
 <a name="experimental"></a>
 
-Building Experimental Engines
------------------------------
+Using Experimental Engines
+--------------------------
 
 First build or install `pmemkv` as described above.
 
