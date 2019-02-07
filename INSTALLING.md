@@ -154,7 +154,8 @@ tar -xvf libmemcached-0.21.tar.gz
 mv libmemcached-0.21 libmemcached
 cd libmemcached
 ./configure
-make && make install
+make
+su -c 'make install'
 ```
 
 Install client libraries for Redis:
