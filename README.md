@@ -30,8 +30,9 @@ Installation
 provides detailed instructions, including configuring DAX and pool sets. 
 
 <ul>
+<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources">Building From Sources</a></li>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora">Installing on Fedora</a></li>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources">Building from Sources</a></li>
+<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental">Using Experimental Engines</a></li>
 </ul>
 
 
@@ -50,13 +51,14 @@ is easy and encouraged!
 
 ### Available Engines
 
-| Engine  | Description | Stable? | Thread-Safe? | Iterable? | Large Values? |
-| ------- | ----------- | ------- | ------------ | ----- | ------- |
-| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | Yes | Yes | No | Yes |
-| [kvtree3](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree3) | Hybrid B+ persistent tree | Yes | No | Yes | Yes |
-| [vmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vmap) | Volatile hash map | No | No | Yes | Yes |
-| [vcmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vcmap) | Volatile concurrent hash map | No | Yes | Yes | Yes |
-| btree | Copy-on-write B+ persistent tree | No | No | Yes | No |
+| Engine  | Description | Experimental? | Concurrent? | Sorted? |
+| ------- | ----------- | ------------- | ----------- | ------- |
+| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | No | Yes | No |
+| [kvtree3](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree3) | Hybrid B+ persistent tree | No | No | No |
+| [vmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vmap) | Volatile hash map | No | No | Yes |
+| [vcmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vcmap) | Volatile concurrent hash map | No | Yes | No |
+| btree | Copy-on-write B+ persistent tree | Yes | No | Yes |
+| caching | Caching for remote Memcached or Redis server | Yes | Yes | - |
 
 <a name="bindings"></a>
 
@@ -94,7 +96,7 @@ int main() {
     LOG("Iterating existing keys");
     kv->Put("key2", "value2");
     kv->Put("key3", "value3");
-    kv->All([](int kb, const char* k) {
+    kv->All([](const string& k) {
         LOG("  visited: " << k);
     });
 

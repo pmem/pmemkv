@@ -36,6 +36,7 @@
 #include "engines/vcmap.h"
 #ifdef EXPERIMENTAL
 #include "engines/btree.h"
+#include "engines/caching.h"
 #endif
 
 using std::runtime_error;
@@ -53,6 +54,10 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
     try {
         if (engine == blackhole::ENGINE) {
             return new blackhole::Blackhole();
+#ifdef EXPERIMENTAL
+        } else if (engine == caching::ENGINE) {
+            return new caching::CachingEngine(config);
+#endif
         } else {  // handle traditional engines expecting path & size params
             rapidjson::Document d;
             if (d.Parse(config).HasParseError()) {
@@ -97,6 +102,8 @@ void KVEngine::Stop(KVEngine* kv) {
 #ifdef EXPERIMENTAL
     } else if (engine == btree::ENGINE) {
         delete (btree::BTree*) kv;
+    } else if (engine == caching::ENGINE) {
+        delete (caching::CachingEngine*) kv;
 #endif
     } else if (engine == vmap::ENGINE) {
         delete (vmap::VMap*) kv;

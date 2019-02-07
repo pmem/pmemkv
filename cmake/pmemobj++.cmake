@@ -34,3 +34,6 @@ else()
     find_package(PMEMOBJ++ REQUIRED)
 endif()
 
+include_directories(${PMEMOBJ++_INCLUDE_DIRS})
+link_directories(${PMEMOBJ++_LIBRARY_DIRS})
+target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES})

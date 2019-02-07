@@ -12,6 +12,7 @@ Contents
 <ul>
 <li><a href="#building_from_sources">Building from Sources</a></li>
 <li><a href="#fedora">Installing on Fedora</a></li>
+<li><a href="#experimental">Using Experimental Engines</a></li>
 <li><a href="#pool_set">Using a Pool Set</a></li>
 </ul>
 
@@ -33,7 +34,7 @@ Building from Sources
 After cloning sources from GitHub, use provided `make` targets for building and running
 tests.
 
-```
+```sh
 git clone https://github.com/pmem/pmemkv
 cd pmemkv
 
@@ -46,14 +47,14 @@ make clean              # remove build files
 
 To package `pmemkv` as a shared library and install on your system:
  
-```
+```sh
 sudo make install       # install to /usr/local/{include,lib}
 sudo make uninstall     # remove shared library and headers
 ```
 
 To install this library into other locations, use the `prefix` variable like this:
 
-```
+```sh
 sudo make install prefix=/usr/local
 sudo make uninstall prefix=/usr/local
 ```
@@ -63,7 +64,7 @@ sudo make uninstall prefix=/usr/local
 If the standard build does not suit your needs, create your own
 out-of-source build and run tests like this:
 
-```
+```sh
 cd ~
 mkdir mybuild
 cd mybuild
@@ -79,13 +80,13 @@ Installing on Fedora
 
 Install required packages:
 
-```
+```sh
 su -c 'dnf install autoconf automake cmake daxctl-devel doxygen gcc gcc-c++ libtool ndctl-devel numactl-devel rapidjson-devel'
 ```
 
 Configure for proxy if necessary:
 
-```
+```sh
 git config --global http.proxy <YOUR PROXY>
 export HTTP_PROXY="<YOUR PROXY>"
 export HTTPS_PROXY="<YOUR PROXY>"
@@ -93,7 +94,7 @@ export HTTPS_PROXY="<YOUR PROXY>"
 
 Install latest PMDK:
 
-```
+```sh
 cd ~
 git clone https://github.com/pmem/pmdk
 cd pmdk
@@ -104,7 +105,7 @@ export PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig
 
 Install latest PMDK C++ bindings:
 
-```
+```sh
 cd ~
 git clone https://github.com/pmem/libpmemobj-cpp
 cd libpmemobj-cpp
@@ -117,7 +118,7 @@ su -c 'make install'
 
 Install latest memkind:
 
-```
+```sh
 cd ~
 git clone https://github.com/memkind/memkind
 cd memkind
@@ -127,13 +128,58 @@ su -c 'make install'
 
 Build pmemkv:
 
-```
+```sh
 cd ~
 git clone https://github.com/pmem/pmemkv
 cd pmemkv
 make
 su -c 'make install'
 ```
+
+<a name="experimental"></a>
+
+Building Experimental Engines
+-----------------------------
+
+First build or install `pmemkv` as described above.
+
+Install client libraries for Memcached:
+
+```sh
+cd ~
+mkdir work
+cd work
+wget https://launchpad.net/libmemcached/1.0/0.21/+download/libmemcached-0.21.tar.gz
+tar -xvf libmemcached-0.21.tar.gz
+mv libmemcached-0.21 libmemcached
+cd libmemcached
+./configure
+make && make install
+```
+
+Install client libraries for Redis:
+
+```sh
+cd ~
+mkdir work
+cd work
+git clone https://github.com/acl-dev/acl.git
+mv acl libacl
+cd libacl/lib_acl_cpp
+make
+cd ../lib_acl
+make
+cd ../lib_protocol
+make
+```
+
+Edit `CMakeLists.txt` to enable experimental features:
+
+```sh
+option(EXPERIMENTAL "use experimental features" ON)
+```
+
+Now `make` will include experimental engines and other features that are not available by default.
 
 <a name="pool_set"></a>
 
@@ -150,6 +196,6 @@ PMEMPOOLSET
 
 Next initialize the pool set:
 
-```
+```sh
 pmempool create --layout pmemkv obj ~/pmemkv.poolset
 ```

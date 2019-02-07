@@ -28,19 +28,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-set(GTEST_VERSION 1.7.0)
-set(GTEST_URL ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
-if(NOT EXISTS ${GTEST_URL})
-    execute_process(COMMAND wget -O ${GTEST_URL} https://github.com/google/googletest/archive/release-${GTEST_VERSION}.zip)
-endif()
-
-ExternalProject_Add(gtest URL ${GTEST_URL} PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest INSTALL_COMMAND ""
-                    CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
-ExternalProject_Get_Property(gtest source_dir binary_dir)
-add_library(libgtest IMPORTED STATIC GLOBAL)
-add_dependencies(libgtest gtest)
-set_target_properties(libgtest PROPERTIES "IMPORTED_LOCATION" "${binary_dir}/libgtest.a"
-                      "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}")
-
-include_directories("${source_dir}/include")
-target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
+set(MEMCACHED_INCLUDE $ENV{HOME}/work/libmemcached)
+include_directories(${MEMCACHED_INCLUDE})
+target_link_libraries(pmemkv pthread memcached)
