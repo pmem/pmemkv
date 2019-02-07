@@ -43,6 +43,7 @@ typedef void(KVAllFunction)(int keybytes, const char* key);
 typedef void(KVEachCallback)(void* context, int keybytes, const char* key, int valuebytes, const char* value);
 typedef void(KVEachFunction)(int keybytes, const char* key, int valuebytes, const char* value);
 typedef void(KVGetCallback)(void* context, int valuebytes, const char* value);
+typedef void(KVGetFunction)(int valuebytes, const char* value);
 typedef void(KVStartFailureCallback)(void* context, const char* engine, const char* config, const char* msg);
 
 #ifdef __cplusplus
@@ -84,6 +85,7 @@ class KVEngine {
 
     virtual void Get(void* context, const string& key, KVGetCallback* callback) = 0;
     inline void Get(const string& key, KVGetCallback* callback) { Get(nullptr, key, callback); }
+    void Get(const string& key, std::function<KVGetFunction> f);
     KVStatus Get(const string& key, string* value);
 
     virtual KVStatus Put(const string& key, const string& value) = 0;

@@ -139,6 +139,15 @@ KVStatus KVEngine::Get(const string& key, string* value) {
     return cxt.result;
 }
 
+void KVEngine::Get(const string& key, std::function<KVGetFunction> f) {
+    std::function<KVGetFunction> localf = f;
+    auto cb = [](void* context, int vb, const char* v) {
+        const auto c = ((std::function<KVGetFunction>*) context);
+        c->operator()(vb, v);
+    };
+    Get(&localf, key, cb);
+}
+
 extern "C" KVEngine* kvengine_start(void* context, const char* engine, const char* config,
                                     KVStartFailureCallback* callback) {
     return KVEngine::Start(context, engine, config, callback);
