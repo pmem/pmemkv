@@ -68,7 +68,7 @@ Language Bindings
 `pmemkv` is written in C and C++. Developers can either use native C++ classes directly, or use our `extern "C"` API,
 or use one of several high-level language bindings that are based on the `extern "C"` API.
 
-![pmemkv-bindings](https://user-images.githubusercontent.com/913363/52808294-bc842200-304a-11e9-99b4-cf0884ef57da.png)
+![pmemkv-bindings](https://user-images.githubusercontent.com/913363/52880816-4651ef00-3120-11e9-9ab4-7eb006b4c7f5.png)
 
 ### C++ Example
 
