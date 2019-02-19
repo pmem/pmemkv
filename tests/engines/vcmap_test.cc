@@ -41,31 +41,24 @@ const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
 
 template<size_t POOL_SIZE>
 class VCMapBaseTest : public testing::Test {
-public:
+  public:
     VCMap* kv;
 
     VCMapBaseTest() {
-        Start();
+        kv = new VCMap(PATH, POOL_SIZE);
     }
 
     ~VCMapBaseTest() {
         delete kv;
-    }
-
-    void Restart() {
-        delete kv;
-        Start();
-    }
-
-protected:
-    void Start() {
-        kv = new VCMap(PATH, POOL_SIZE);
     }
 };
 
 using VCMapTest = VCMapBaseTest<SIZE>;
 using VCMapLargeTest = VCMapBaseTest<LARGE_SIZE>;
 
+// =============================================================================================
+// TEST SMALL COLLECTIONS
+// =============================================================================================
 
 TEST_F(VCMapTest, SimpleTest) {
     ASSERT_TRUE(kv->Count() == 0);
@@ -76,6 +69,12 @@ TEST_F(VCMapTest, SimpleTest) {
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(kv->Exists("key1"));
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
+    value = "";
+    kv->Get("key1", [&](int vb, const char* v) { value.append(v, vb); });
+    ASSERT_TRUE(value == "value1");
+    value = "";
+    kv->Get("key1", [&](const string& v) { value.append(v); });
+    ASSERT_TRUE(value == "value1");
 }
 
 TEST_F(VCMapTest, BinaryKeyTest) {
@@ -375,119 +374,7 @@ TEST_F(VCMapTest, UsesEachTest) {
 }
 
 // =============================================================================================
-// TEST RECOVERY OF SINGLE-LEAF TREE
-// =============================================================================================
-
-TEST_F(VCMapTest, GetHeadlessAfterRecoveryTest) {
-    Restart();
-    string value;
-    ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
-}
-
-TEST_F(VCMapTest, GetMultipleAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("abc", "A1") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Put("def", "B2") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Put("hij", "C3") == OK) << pmemobj_errormsg();
-    Restart();
-    ASSERT_TRUE(kv->Put("jkl", "D4") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Put("mno", "E5") == OK) << pmemobj_errormsg();
-    string value1;
-    ASSERT_TRUE(kv->Get("abc", &value1) == NOT_FOUND);
-    string value2;
-    ASSERT_TRUE(kv->Get("def", &value2) == NOT_FOUND);
-    string value3;
-    ASSERT_TRUE(kv->Get("hij", &value3) == NOT_FOUND);
-    string value4;
-    ASSERT_TRUE(kv->Get("jkl", &value4) == OK && value4 == "D4");
-    string value5;
-    ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
-}
-
-TEST_F(VCMapTest, GetMultiple2AfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Put("key2", "value2") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Put("key3", "value3") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Remove("key2") == OK);
-    ASSERT_TRUE(kv->Put("key3", "VALUE3") == OK) << pmemobj_errormsg();
-    Restart();
-    string value1;
-    ASSERT_TRUE(kv->Get("key1", &value1) == NOT_FOUND);
-    string value2;
-    ASSERT_TRUE(kv->Get("key2", &value2) == NOT_FOUND);
-    string value3;
-    ASSERT_TRUE(kv->Get("key3", &value3) == NOT_FOUND);
-}
-
-TEST_F(VCMapTest, GetNonexistentAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
-    Restart();
-    string value;
-    ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
-}
-
-TEST_F(VCMapTest, PutAfterRecoveryTest) {
-    string value;
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
-
-    string new_value;
-    ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK) << pmemobj_errormsg();           // same size
-    ASSERT_TRUE(kv->Get("key1", &new_value) == OK && new_value == "VALUE1");
-    Restart();
-
-    string new_value2;
-    ASSERT_TRUE(kv->Put("key1", "new_value") == OK) << pmemobj_errormsg();        // longer size
-    ASSERT_TRUE(kv->Get("key1", &new_value2) == OK && new_value2 == "new_value");
-
-    string new_value3;
-    ASSERT_TRUE(kv->Put("key1", "?") == OK) << pmemobj_errormsg();                // shorter size
-    ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
-}
-
-TEST_F(VCMapTest, RemoveAllAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
-    Restart();
-    ASSERT_TRUE(kv->Remove("tmpkey") == NOT_FOUND);
-    string value;
-    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
-}
-
-TEST_F(VCMapTest, RemoveAndInsertAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
-    Restart();
-    ASSERT_TRUE(kv->Remove("tmpkey") == NOT_FOUND);
-    string value;
-    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
-    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
-    ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
-}
-
-TEST_F(VCMapTest, RemoveExistingAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
-    Restart();
-    ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND); // ok to remove twice
-    string value;
-    ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
-    ASSERT_TRUE(kv->Get("tmpkey2", &value) == NOT_FOUND);
-}
-
-TEST_F(VCMapTest, RemoveHeadlessAfterRecoveryTest) {
-    Restart();
-    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
-}
-
-TEST_F(VCMapTest, RemoveNonexistentAfterRecoveryTest) {
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
-    Restart();
-    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
-}
-
-// =============================================================================================
-// TEST LARGE TREE
+// TEST LARGE COLLECTIONS
 // =============================================================================================
 
 const int LARGE_LIMIT = 4000000;
