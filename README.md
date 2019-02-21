@@ -82,7 +82,7 @@ using namespace pmemkv;
 
 int main() {
     LOG("Starting engine");
-    KVEngine* kv = KVEngine::Start("kvtree3", "{\"path\":\"/dev/shm/pmemkv\"}");
+    KVEngine* kv = KVEngine::Start("vmap", "{\"path\":\"/dev/shm/\"}");
 
     LOG("Putting new key");
     KVStatus s = kv->Put("key1", "value1");
@@ -133,7 +133,7 @@ void AllCallback(void* context, int kb, const char* k) {
 
 int main() {
     LOG("Starting engine");
-    KVEngine* kv = kvengine_start(NULL, "kvtree3", "{\"path\":\"/dev/shm/pmemkv\"}", &StartFailureCallback);
+    KVEngine* kv = kvengine_start(NULL, "vmap", "{\"path\":\"/dev/shm/\"}", &StartFailureCallback);
 
     LOG("Putting new key");
     char* key1 = "key1";
