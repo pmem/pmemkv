@@ -43,6 +43,8 @@ using std::runtime_error;
 
 namespace pmemkv {
 
+// STATIC METHOD IMPLEMENTATIONS
+
 KVEngine* KVEngine::Start(const string& engine, const string& config) {
     auto cb = [](void* context, const char* engine, const char* config, const char* msg) {
         throw runtime_error(msg);
@@ -112,40 +114,106 @@ void KVEngine::Stop(KVEngine* kv) {
     }
 }
 
+// API METHOD IMPLEMENTATIONS
+
+auto cb_all_function = [](void* context, int32_t kb, const char* k) {
+    const auto c = ((std::function<KVAllFunction>*) context);
+    c->operator()(kb, k);
+};
+
+auto cb_all_string_function = [](void* context, int32_t kb, const char* k) {
+    const auto c = ((std::function<KVAllStringFunction>*) context);
+    c->operator()(string(k, kb));
+};
+
+auto cb_each_function = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+    const auto c = ((std::function<KVEachFunction>*) context);
+    c->operator()(kb, k, vb, v);
+};
+
+auto cb_each_string_function = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+    const auto c = ((std::function<KVEachStringFunction>*) context);
+    c->operator()(string(k, kb), string(v, vb));
+};
+
 void KVEngine::All(const std::function<KVAllFunction> f) {
-    std::function<KVAllFunction> localf = f;
-    auto cb = [](void* context, int32_t kb, const char* k) {
-        const auto c = ((std::function<KVAllFunction>*) context);
-        c->operator()(kb, k);
-    };
-    All(&localf, cb);
+    auto localf = f;
+    All(&localf, cb_all_function);
 }
 
 void KVEngine::All(const std::function<KVAllStringFunction> f) {
-    std::function<KVAllStringFunction> localf = f;
-    auto cb = [](void* context, int32_t kb, const char* k) {
-        const auto c = ((std::function<KVAllStringFunction>*) context);
-        c->operator()(string(k, kb));
-    };
-    All(&localf, cb);
+    auto localf = f;
+    All(&localf, cb_all_string_function);
+}
+
+void KVEngine::AllAbove(const string& key, const std::function<KVAllFunction> f) {
+    auto localf = f;
+    AllAbove(&localf, key, cb_all_function);
+}
+
+void KVEngine::AllAbove(const string& key, const std::function<KVAllStringFunction> f) {
+    auto localf = f;
+    AllAbove(&localf, key, cb_all_string_function);
+}
+
+void KVEngine::AllBelow(const string& key, const std::function<KVAllFunction> f) {
+    auto localf = f;
+    AllBelow(&localf, key, cb_all_function);
+}
+
+void KVEngine::AllBelow(const string& key, const std::function<KVAllStringFunction> f) {
+    auto localf = f;
+    AllBelow(&localf, key, cb_all_string_function);
+}
+
+void KVEngine::AllBetween(const string& key1, const string& key2, const std::function<KVAllFunction> f) {
+    auto localf = f;
+    AllBetween(&localf, key1, key2, cb_all_function);
+}
+
+void KVEngine::AllBetween(const string& key1, const string& key2, const std::function<KVAllStringFunction> f) {
+    auto localf = f;
+    AllBetween(&localf, key1, key2, cb_all_string_function);
 }
 
 void KVEngine::Each(const std::function<KVEachFunction> f) {
-    std::function<KVEachFunction> localf = f;
-    auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
-        const auto c = ((std::function<KVEachFunction>*) context);
-        c->operator()(kb, k, vb, v);
-    };
-    Each(&localf, cb);
+    auto localf = f;
+    Each(&localf, cb_each_function);
 }
 
 void KVEngine::Each(const std::function<KVEachStringFunction> f) {
-    std::function<KVEachStringFunction> localf = f;
-    auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
-        const auto c = ((std::function<KVEachStringFunction>*) context);
-        c->operator()(string(k, kb), string(v, vb));
-    };
-    Each(&localf, cb);
+    auto localf = f;
+    Each(&localf, cb_each_string_function);
+}
+
+void KVEngine::EachAbove(const string& key, const std::function<KVEachFunction> f) {
+    auto localf = f;
+    EachAbove(&localf, key, cb_each_function);
+}
+
+void KVEngine::EachAbove(const string& key, const std::function<KVEachStringFunction> f) {
+    auto localf = f;
+    EachAbove(&localf, key, cb_each_string_function);
+}
+
+void KVEngine::EachBelow(const string& key, const std::function<KVEachFunction> f) {
+    auto localf = f;
+    EachBelow(&localf, key, cb_each_function);
+}
+
+void KVEngine::EachBelow(const string& key, const std::function<KVEachStringFunction> f) {
+    auto localf = f;
+    EachBelow(&localf, key, cb_each_string_function);
+}
+
+void KVEngine::EachBetween(const string& key1, const string& key2, const std::function<KVEachFunction> f) {
+    auto localf = f;
+    EachBetween(&localf, key1, key2, cb_each_function);
+}
+
+void KVEngine::EachBetween(const string& key1, const string& key2, const std::function<KVEachStringFunction> f) {
+    auto localf = f;
+    EachBetween(&localf, key1, key2, cb_each_string_function);
 }
 
 struct GetCallbackContext {
@@ -182,6 +250,8 @@ void KVEngine::Get(const string& key, std::function<KVGetStringFunction> f) {
     Get(&localf, key, cb);
 }
 
+// EXTERN C IMPLEMENTATION
+
 extern "C" KVEngine* kvengine_start(void* context, const char* engine, const char* config,
                                     KVStartFailureCallback* callback) {
     return KVEngine::Start(context, engine, config, callback);
@@ -191,25 +261,62 @@ extern "C" void kvengine_stop(KVEngine* kv) {
     return KVEngine::Stop(kv);
 }
 
-extern "C" void kvengine_all(KVEngine* kv, void* context, KVAllCallback* callback) {
-    kv->All(context, callback);
+extern "C" void kvengine_all(KVEngine* kv, void* context, KVAllCallback* c) {
+    kv->All(context, c);
+}
+
+extern "C" void kvengine_all_above(KVEngine* kv, void* context, int32_t kb, const char* k, KVAllCallback* c) {
+    kv->AllAbove(context, string(k, (size_t) kb), c);
+}
+
+extern "C" void kvengine_all_below(KVEngine* kv, void* context, int32_t kb, const char* k, KVAllCallback* c) {
+    kv->AllBelow(context, string(k, (size_t) kb), c);
+}
+
+extern "C" void kvengine_all_between(KVEngine* kv, void* context, int32_t kb1, const char* k1,
+                                     int32_t kb2, const char* k2, KVAllCallback* c) {
+    kv->AllBetween(context, string(k1, (size_t) kb1), string(k2, (size_t) kb2), c);
 }
 
 extern "C" int64_t kvengine_count(KVEngine* kv) {
     return kv->Count();
 }
 
-extern "C" void kvengine_each(KVEngine* kv, void* context, KVEachCallback* callback) {
-    kv->Each(context, callback);
+extern "C" int64_t kvengine_count_above(KVEngine* kv, int32_t kb, const char* k) {
+    return kv->CountAbove(string(k, (size_t) kb));
 }
 
-extern "C" int8_t kvengine_exists(KVEngine* kv, int32_t keybytes, const char* key) {
-    return kv->Exists(string(key, (size_t) keybytes));
+extern "C" int64_t kvengine_count_below(KVEngine* kv, int32_t kb, const char* k) {
+    return kv->CountBelow(string(k, (size_t) kb));
 }
 
-extern "C" void kvengine_get(KVEngine* kv, void* context, const int32_t keybytes, const char* key,
-                             KVGetCallback* callback) {
-    kv->Get(context, string(key, (size_t) keybytes), callback);
+extern "C" int64_t kvengine_count_between(KVEngine* kv, int32_t kb1, const char* k1, int32_t kb2, const char* k2) {
+    return kv->CountBetween(string(k1, (size_t) kb1), string(k2, (size_t) kb2));
+}
+
+extern "C" void kvengine_each(KVEngine* kv, void* context, KVEachCallback* c) {
+    kv->Each(context, c);
+}
+
+extern "C" void kvengine_each_above(KVEngine* kv, void* context, int32_t kb, const char* k, KVEachCallback* c) {
+    kv->EachAbove(context, string(k, (size_t) kb), c);
+}
+
+extern "C" void kvengine_each_below(KVEngine* kv, void* context, int32_t kb, const char* k, KVEachCallback* c) {
+    kv->EachBelow(context, string(k, (size_t) kb), c);
+}
+
+extern "C" void kvengine_each_between(KVEngine* kv, void* context, int32_t kb1, const char* k1,
+                                      int32_t kb2, const char* k2, KVEachCallback* c) {
+    kv->EachBetween(context, string(k1, (size_t) kb1), string(k2, (size_t) kb2), c);
+}
+
+extern "C" int8_t kvengine_exists(KVEngine* kv, int32_t kb, const char* k) {
+    return kv->Exists(string(k, (size_t) kb));
+}
+
+extern "C" void kvengine_get(KVEngine* kv, void* context, const int32_t kb, const char* k, KVGetCallback* c) {
+    kv->Get(context, string(k, (size_t) kb), c);
 }
 
 struct GetCopyCallbackContext {
@@ -218,8 +325,7 @@ struct GetCopyCallbackContext {
     char* value;
 };
 
-extern "C" int8_t kvengine_get_copy(KVEngine* kv, int32_t keybytes, const char* key,
-                                    int32_t maxvaluebytes, char* value) {
+extern "C" int8_t kvengine_get_copy(KVEngine* kv, int32_t kb, const char* k, int32_t maxvaluebytes, char* value) {
     GetCopyCallbackContext cxt = {NOT_FOUND, maxvaluebytes, value};
     auto cb = [](void* context, int32_t vb, const char* v) {
         const auto c = ((GetCopyCallbackContext*) context);
@@ -231,17 +337,16 @@ extern "C" int8_t kvengine_get_copy(KVEngine* kv, int32_t keybytes, const char* 
         }
     };
     memset(value, 0, maxvaluebytes);
-    kv->Get(&cxt, string(key, (size_t) keybytes), cb);
+    kv->Get(&cxt, string(k, (size_t) kb), cb);
     return cxt.result;
 }
 
-extern "C" int8_t kvengine_put(KVEngine* kv, const int32_t keybytes, const char* key,
-                               const int32_t valuebytes, const char* value) {
-    return kv->Put(string(key, (size_t) keybytes), string(value, (size_t) valuebytes));
+extern "C" int8_t kvengine_put(KVEngine* kv, const int32_t kb, const char* k, const int32_t vb, const char* v) {
+    return kv->Put(string(k, (size_t) kb), string(v, (size_t) vb));
 }
 
-extern "C" int8_t kvengine_remove(KVEngine* kv, const int32_t keybytes, const char* key) {
-    return kv->Remove(string(key, (size_t) keybytes));
+extern "C" int8_t kvengine_remove(KVEngine* kv, const int32_t kb, const char* k) {
+    return kv->Remove(string(k, (size_t) kb));
 }
 
 // todo missing test cases for KVEngine static methods & extern C API

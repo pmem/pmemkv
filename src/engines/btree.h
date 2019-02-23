@@ -53,17 +53,34 @@ class BTree : public KVEngine {
   public:
     BTree(const string& path, size_t size);
     ~BTree();
+
     string Engine() final { return ENGINE; }
-    using KVEngine::All;
     void All(void* context, KVAllCallback* callback) final;
+    void AllAbove(void* context, const string& key, KVAllCallback* callback) final {};
+    void AllBelow(void* context, const string& key, KVAllCallback* callback) final {};
+    void AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) final {};
     int64_t Count() final;
-    using KVEngine::Each;
+    int64_t CountAbove(const string& key) final { return 0; };
+    int64_t CountBelow(const string& key) final { return 0; };
+    int64_t CountBetween(const string& key1, const string& key2) final { return 0; };
     void Each(void* context, KVEachCallback* callback) final;
+    void EachAbove(void* context, const string& key, KVEachCallback* callback) final {};
+    void EachBelow(void* context, const string& key, KVEachCallback* callback) final {};
+    void EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) final {};
     KVStatus Exists(const string& key) final;
-    using KVEngine::Get;
     void Get(void* context, const string& key, KVGetCallback* callback) final;
     KVStatus Put(const string& key, const string& value) final;
     KVStatus Remove(const string& key) final;
+
+    using KVEngine::All;
+    using KVEngine::AllAbove;
+    using KVEngine::AllBelow;
+    using KVEngine::AllBetween;
+    using KVEngine::Each;
+    using KVEngine::EachAbove;
+    using KVEngine::EachBelow;
+    using KVEngine::EachBetween;
+    using KVEngine::Get;
   private:
     typedef persistent::b_tree<pstring<MAX_KEY_SIZE>, pstring<MAX_VALUE_SIZE>, DEGREE> btree_type;
     struct RootData {

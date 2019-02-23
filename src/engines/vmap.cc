@@ -51,8 +51,29 @@ VMap::~VMap() {
 
 void VMap::All(void* context, KVAllCallback* callback) {
     LOG("All");
-    for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str());
+    for (auto& it : pmem_kv_container) (*callback)(context, (int32_t) it.first.size(), it.first.c_str());
+}
+
+void VMap::AllAbove(void* context, const string& key, KVAllCallback* callback) {
+    LOG("AllAbove for key=" << key);
+    auto it = pmem_kv_container.upper_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    auto end = pmem_kv_container.end();
+    for (; it != end; it++) (*callback)(context, (int32_t) it->first.size(), it->first.c_str());
+}
+
+void VMap::AllBelow(void* context, const string& key, KVAllCallback* callback) {
+    LOG("AllBelow for key=" << key);
+    auto it = pmem_kv_container.begin();
+    auto end = pmem_kv_container.lower_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    for (; it != end; it++) (*callback)(context, (int32_t) it->first.size(), it->first.c_str());
+}
+
+void VMap::AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) {
+    LOG("AllBetween for key1=" << key1 << ", key2=" << key2);
+    if (key1 < key2) {
+        auto it = pmem_kv_container.upper_bound(pmem_string(key1.c_str(), key1.size(), ch_allocator));
+        auto end = pmem_kv_container.lower_bound(pmem_string(key2.c_str(), key2.size(), ch_allocator));
+        for (; it != end; it++) (*callback)(context, (int32_t) it->first.size(), it->first.c_str());
     }
 }
 
@@ -60,11 +81,68 @@ int64_t VMap::Count() {
     return pmem_kv_container.size();
 }
 
+int64_t VMap::CountAbove(const string& key) {
+    LOG("CountAbove for key=" << key);
+    int64_t result = 0;
+    auto it = pmem_kv_container.upper_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    auto end = pmem_kv_container.end();
+    for (; it != end; it++) result++;
+    return result;
+}
+
+int64_t VMap::CountBelow(const string& key) {
+    LOG("CountBelow for key=" << key);
+    int64_t result = 0;
+    auto it = pmem_kv_container.begin();
+    auto end = pmem_kv_container.lower_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    for (; it != end; it++) result++;
+    return result;
+}
+
+int64_t VMap::CountBetween(const string& key1, const string& key2) {
+    LOG("CountBetween for key1=" << key1 << ", key2=" << key2);
+    int64_t result = 0;
+    if (key1 < key2) {
+        auto it = pmem_kv_container.upper_bound(pmem_string(key1.c_str(), key1.size(), ch_allocator));
+        auto end = pmem_kv_container.lower_bound(pmem_string(key2.c_str(), key2.size(), ch_allocator));
+        for (; it != end; it++) result++;
+    }
+    return result;
+}
+
 void VMap::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
-    for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
-                    (int32_t) iterator.second.size(), iterator.second.c_str());
+    for (auto& it : pmem_kv_container)
+        (*callback)(context, (int32_t) it.first.size(), it.first.c_str(),
+                    (int32_t) it.second.size(), it.second.c_str());
+}
+
+void VMap::EachAbove(void* context, const string& key, KVEachCallback* callback) {
+    LOG("EachAbove for key=" << key);
+    auto it = pmem_kv_container.upper_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    auto end = pmem_kv_container.end();
+    for (; it != end; it++)
+        (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
+                    (int32_t) it->second.size(), it->second.c_str());
+}
+
+void VMap::EachBelow(void* context, const string& key, KVEachCallback* callback) {
+    LOG("EachBelow for key=" << key);
+    auto it = pmem_kv_container.begin();
+    auto end = pmem_kv_container.lower_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    for (; it != end; it++)
+        (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
+                    (int32_t) it->second.size(), it->second.c_str());
+}
+
+void VMap::EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) {
+    LOG("EachBetween for key1=" << key1 << ", key2=" << key2);
+    if (key1 < key2) {
+        auto it = pmem_kv_container.upper_bound(pmem_string(key1.c_str(), key1.size(), ch_allocator));
+        auto end = pmem_kv_container.lower_bound(pmem_string(key2.c_str(), key2.size(), ch_allocator));
+        for (; it != end; it++)
+            (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
+                        (int32_t) it->second.size(), it->second.c_str());
     }
 }
 

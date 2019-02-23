@@ -43,17 +43,34 @@ class Blackhole : public KVEngine {
   public:
     Blackhole();
     ~Blackhole();
+
     string Engine() final { return ENGINE; }
-    using KVEngine::All;
     void All(void* context, KVAllCallback* callback) final;
+    void AllAbove(void* context, const string& key, KVAllCallback* callback) final;
+    void AllBelow(void* context, const string& key, KVAllCallback* callback) final;
+    void AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) final;
     int64_t Count() final;
-    using KVEngine::Each;
+    int64_t CountAbove(const string& key) final;
+    int64_t CountBelow(const string& key) final;
+    int64_t CountBetween(const string& key1, const string& key2) final;
     void Each(void* context, KVEachCallback* callback) final;
+    void EachAbove(void* context, const string& key, KVEachCallback* callback) final;
+    void EachBelow(void* context, const string& key, KVEachCallback* callback) final;
+    void EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) final;
     KVStatus Exists(const string& key) final;
-    using KVEngine::Get;
     void Get(void* context, const string& key, KVGetCallback* callback) final;
     KVStatus Put(const string& key, const string& value) final;
     KVStatus Remove(const string& key) final;
+
+    using KVEngine::All;
+    using KVEngine::AllAbove;
+    using KVEngine::AllBelow;
+    using KVEngine::AllBetween;
+    using KVEngine::Each;
+    using KVEngine::EachAbove;
+    using KVEngine::EachBelow;
+    using KVEngine::EachBetween;
+    using KVEngine::Get;
 };
 
 } // namespace blackhole

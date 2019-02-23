@@ -76,21 +76,45 @@ class KVEngine {
     virtual string Engine() = 0;
 
     virtual void All(void* context, KVAllCallback* callback) = 0;
-    inline void All(KVAllCallback* callback) { All(nullptr, callback); }
     void All(std::function<KVAllFunction> f);
     void All(std::function<KVAllStringFunction> f);
 
+    virtual void AllAbove(void* context, const string& key, KVAllCallback* callback) = 0;
+    void AllAbove(const string& key, std::function<KVAllFunction> f);
+    void AllAbove(const string& key, std::function<KVAllStringFunction> f);
+
+    virtual void AllBelow(void* context, const string& key, KVAllCallback* callback) = 0;
+    void AllBelow(const string& key, std::function<KVAllFunction> f);
+    void AllBelow(const string& key, std::function<KVAllStringFunction> f);
+
+    virtual void AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) = 0;
+    void AllBetween(const string& key1, const string& key2, std::function<KVAllFunction> f);
+    void AllBetween(const string& key1, const string& key2, std::function<KVAllStringFunction> f);
+
     virtual int64_t Count() = 0;
+    virtual int64_t CountAbove(const string& key) = 0;
+    virtual int64_t CountBelow(const string& key) = 0;
+    virtual int64_t CountBetween(const string& key1, const string& key2) = 0;
 
     virtual void Each(void* context, KVEachCallback* callback) = 0;
-    inline void Each(KVEachCallback* callback) { Each(nullptr, callback); }
     void Each(std::function<KVEachFunction> f);
     void Each(std::function<KVEachStringFunction> f);
+
+    virtual void EachAbove(void* context, const string& key, KVEachCallback* callback) = 0;
+    void EachAbove(const string& key, std::function<KVEachFunction> f);
+    void EachAbove(const string& key, std::function<KVEachStringFunction> f);
+
+    virtual void EachBelow(void* context, const string& key, KVEachCallback* callback) = 0;
+    void EachBelow(const string& key, std::function<KVEachFunction> f);
+    void EachBelow(const string& key, std::function<KVEachStringFunction> f);
+
+    virtual void EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) = 0;
+    void EachBetween(const string& key1, const string& key2, std::function<KVEachFunction> f);
+    void EachBetween(const string& key1, const string& key2, std::function<KVEachStringFunction> f);
 
     virtual KVStatus Exists(const string& key) = 0;
 
     virtual void Get(void* context, const string& key, KVGetCallback* callback) = 0;
-    inline void Get(const string& key, KVGetCallback* callback) { Get(nullptr, key, callback); }
     void Get(const string& key, std::function<KVGetFunction> f);
     void Get(const string& key, std::function<KVGetStringFunction> f);
     KVStatus Get(const string& key, string* value);
@@ -110,14 +134,29 @@ typedef struct KVEngine KVEngine;
 
 KVEngine* kvengine_start(void* context, const char* engine, const char* config, KVStartFailureCallback* callback);
 void kvengine_stop(KVEngine* kv);
-void kvengine_all(KVEngine* kv, void* context, KVAllCallback* callback);
+
+void kvengine_all(KVEngine* kv, void* context, KVAllCallback* c);
+void kvengine_all_above(KVEngine* kv, void* context, int32_t kb, const char* k, KVAllCallback* c);
+void kvengine_all_below(KVEngine* kv, void* context, int32_t kb, const char* k, KVAllCallback* c);
+void kvengine_all_between(KVEngine* kv, void* context, int32_t kb1, const char* k1,
+                          int32_t kb2, const char* k2, KVAllCallback* c);
+
 int64_t kvengine_count(KVEngine* kv);
-void kvengine_each(KVEngine* kv, void* context, KVEachCallback* callback);
-int8_t kvengine_exists(KVEngine* kv, int32_t keybytes, const char* key);
-void kvengine_get(KVEngine* kv, void* context, int32_t keybytes, const char* key, KVGetCallback* callback);
-int8_t kvengine_get_copy(KVEngine* kv, int32_t keybytes, const char* key, int32_t maxvaluebytes, char* value);
-int8_t kvengine_put(KVEngine* kv, int32_t keybytes, const char* key, int32_t valuebytes, const char* value);
-int8_t kvengine_remove(KVEngine* kv, int32_t keybytes, const char* key);
+int64_t kvengine_count_above(KVEngine* kv, int32_t kb, const char* k);
+int64_t kvengine_count_below(KVEngine* kv, int32_t kb, const char* k);
+int64_t kvengine_count_between(KVEngine* kv, int32_t kb1, const char* k1, int32_t kb2, const char* k2);
+
+void kvengine_each(KVEngine* kv, void* context, KVEachCallback* c);
+void kvengine_each_above(KVEngine* kv, void* context, int32_t kb, const char* k, KVEachCallback* c);
+void kvengine_each_below(KVEngine* kv, void* context, int32_t kb, const char* k, KVEachCallback* c);
+void kvengine_each_between(KVEngine* kv, void* context, int32_t kb1, const char* k1,
+                           int32_t kb2, const char* k2, KVEachCallback* c);
+
+int8_t kvengine_exists(KVEngine* kv, int32_t kb, const char* k);
+void kvengine_get(KVEngine* kv, void* context, int32_t kb, const char* k, KVGetCallback* c);
+int8_t kvengine_get_copy(KVEngine* kv, int32_t kb, const char* k, int32_t maxvaluebytes, char* value);
+int8_t kvengine_put(KVEngine* kv, int32_t kb, const char* k, int32_t vb, const char* v);
+int8_t kvengine_remove(KVEngine* kv, int32_t kb, const char* k);
 
 #ifdef __cplusplus
 }

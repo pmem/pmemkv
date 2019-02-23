@@ -340,39 +340,321 @@ TEST_F(VMapTest, RemoveNonexistentTest) {
 }
 
 TEST_F(VMapTest, UsesAllTest) {
-    ASSERT_TRUE(kv->Put("2", "1") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Count() == 1);
+    ASSERT_TRUE(kv->Put("1", "one") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("2", "two") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Count() == 2);
 
-    string result;
-    kv->All(&result, [](void* context, int kb, const char* k) {
+    string x;
+    kv->All([&](const string& k) { x.append("<").append(k).append(">,"); });
+    ASSERT_TRUE(x == "<1>,<2>,<记!>,");
+
+    x = "";
+    kv->All([&](int kb, const char* k) { x.append("<").append(string(k, kb)).append(">,"); });
+    ASSERT_TRUE(x == "<1>,<2>,<记!>,");
+
+    x = "";
+    kv->All(&x, [](void* context, int kb, const char* k) {
         const auto c = ((string*) context);
-        c->append("<");
-        c->append(string(k, kb));
-        c->append(">,");
+        c->append("<").append(string(k, kb)).append(">,");
     });
-    ASSERT_TRUE(result == "<2>,<记!>,");
+    ASSERT_TRUE(x == "<1>,<2>,<记!>,");
+}
+
+TEST_F(VMapTest, UsesAllAboveTest) {
+    ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("B", "4") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BB", "5") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BC", "6") == OK) << pmemobj_errormsg();
+
+    string x;
+    kv->AllAbove("B", [&](const string& k) { x.append(k).append(","); });
+    ASSERT_TRUE(x == "BB,BC,");
+
+    x = "";
+    kv->AllAbove("", [&](const string& k) { x.append(k).append(","); });
+    ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,");
+
+    x = "";
+    kv->AllAbove("ZZZ", [&](const string& k) { x.append(k).append(","); });
+    ASSERT_TRUE(x.empty());
+
+    x = "";
+    kv->AllAbove("B", [&](int kb, const char* k) { x.append(string(k, kb)).append(","); });
+    ASSERT_TRUE(x == "BB,BC,");
+
+    ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
+    x = "";
+    kv->AllAbove(&x, "B", [](void* context, int kb, const char* k) {
+        const auto c = ((string*) context);
+        c->append(string(k, kb)).append(",");
+    });
+    ASSERT_TRUE(x == "BB,BC,记!,");
+}
+
+TEST_F(VMapTest, UsesAllBelowTest) {
+    ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("B", "4") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BB", "5") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BC", "6") == OK) << pmemobj_errormsg();
+
+    string x;
+    kv->AllBelow("B", [&](const string& k) { x.append(k).append(","); });
+    ASSERT_TRUE(x == "A,AB,AC,");
+
+    x = "";
+    kv->AllBelow("", [&](const string& k) { x.append(k).append(","); });
+    ASSERT_TRUE(x.empty());
+
+    x = "";
+    kv->AllBelow("ZZZZ", [&](const string& k) { x.append(k).append(","); });
+    ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,");
+
+    x = "";
+    kv->AllBelow("B", [&](int kb, const char* k) { x.append(string(k, kb)).append(","); });
+    ASSERT_TRUE(x == "A,AB,AC,");
+
+    ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
+    x = "";
+    kv->AllBelow(&x, "\xFF", [](void* context, int kb, const char* k) {
+        const auto c = ((string*) context);
+        c->append(string(k, kb)).append(",");
+    });
+    ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,记!,");
+}
+
+TEST_F(VMapTest, UsesAllBetweenTest) {
+    ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("B", "4") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BB", "5") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BC", "6") == OK) << pmemobj_errormsg();
+
+    string x;
+    kv->AllBetween("A", "B", [&](const string& k) { x.append(k).append(","); });
+    ASSERT_TRUE(x == "AB,AC,");
+
+    x = "";
+    kv->AllBetween("", "ZZZ", [&](const string& k) { x.append(k).append(","); });
+    ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,");
+
+    x = "";
+    kv->AllBetween("", "A", [&](const string& k) { x.append(k).append(","); });
+    ASSERT_TRUE(x.empty());
+
+    x = "";
+    kv->AllBetween("", "B", [&](const string& k) { x.append(k).append(","); });
+    ASSERT_TRUE(x == "A,AB,AC,");
+
+    x = "";
+    kv->AllBetween("B", "ZZZ", [&](const string& k) { x.append(k).append(","); });
+    ASSERT_TRUE(x == "BB,BC,");
+
+    x = "";
+    kv->AllBetween("", "", [&](const string& k) { x.append("<").append(k).append(">,"); });
+    kv->AllBetween("A", "A", [&](const string& k) { x.append("<").append(k).append(">,"); });
+    kv->AllBetween("AC", "A", [&](const string& k) { x.append("<").append(k).append(">,"); });
+    kv->AllBetween("B", "A", [&](const string& k) { x.append("<").append(k).append(">,"); });
+    kv->AllBetween("BD", "A", [&](const string& k) { x.append("<").append(k).append(">,"); });
+    kv->AllBetween("ZZZ", "B", [&](const string& k) { x.append("<").append(k).append(">,"); });
+    ASSERT_TRUE(x.empty());
+
+    x = "";
+    kv->AllBetween("A", "B", [&](int kb, const char* k) { x.append(string(k, kb)).append(","); });
+    ASSERT_TRUE(x == "AB,AC,");
+
+    ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
+    x = "";
+    kv->AllBetween(&x, "B", "\xFF", [](void* context, int kb, const char* k) {
+        const auto c = ((string*) context);
+        c->append(string(k, kb)).append(",");
+    });
+    ASSERT_TRUE(x == "BB,BC,记!,");
+}
+
+TEST_F(VMapTest, UsesCountTest) {
+    ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("B", "4") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BB", "5") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BC", "6") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BD", "7") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Count() == 7);
+
+    ASSERT_TRUE(kv->CountAbove("") == 7);
+    ASSERT_TRUE(kv->CountAbove("A") == 6);
+    ASSERT_TRUE(kv->CountAbove("B") == 3);
+    ASSERT_TRUE(kv->CountAbove("BC") == 1);
+    ASSERT_TRUE(kv->CountAbove("BD") == 0);
+    ASSERT_TRUE(kv->CountAbove("Z") == 0);
+
+    ASSERT_TRUE(kv->CountBelow("") == 0);
+    ASSERT_TRUE(kv->CountBelow("A") == 0);
+    ASSERT_TRUE(kv->CountBelow("B") == 3);
+    ASSERT_TRUE(kv->CountBelow("BD") == 6);
+    ASSERT_TRUE(kv->CountBelow("ZZZZZ") == 7);
+
+    ASSERT_TRUE(kv->CountBetween("", "ZZZZ") == 7);
+    ASSERT_TRUE(kv->CountBetween("", "A") == 0);
+    ASSERT_TRUE(kv->CountBetween("", "B") == 3);
+    ASSERT_TRUE(kv->CountBetween("A", "B") == 2);
+    ASSERT_TRUE(kv->CountBetween("B", "ZZZZ") == 3);
+
+    ASSERT_TRUE(kv->CountBetween("", "") == 0);
+    ASSERT_TRUE(kv->CountBetween("A", "A") == 0);
+    ASSERT_TRUE(kv->CountBetween("AC", "A") == 0);
+    ASSERT_TRUE(kv->CountBetween("B", "A") == 0);
+    ASSERT_TRUE(kv->CountBetween("BD", "A") == 0);
+    ASSERT_TRUE(kv->CountBetween("ZZZ", "B") == 0);
 }
 
 TEST_F(VMapTest, UsesEachTest) {
-    ASSERT_TRUE(kv->Put("1", "2") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Count() == 1);
-    ASSERT_TRUE(kv->Put("RR", "记!") == OK) << pmemobj_errormsg();
-    ASSERT_TRUE(kv->Count() == 2);
+    ASSERT_TRUE(kv->Put("1", "one") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("2", "two") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
 
-    string result;
-    kv->Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
-            const auto c = ((string*) context);
-            c->append("<");
-            c->append(string(k, kb));
-            c->append(">,<");
-            c->append(string(v, vb));
-            c->append(">|");
+    string x;
+    kv->Each([&](const string& k, const string& v) {
+        x.append("<").append(k).append(">,<").append(v).append(">|");
     });
-    ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");
+    ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
+
+    x = "";
+    kv->Each([&](int kb, const char* k, int vb, const char* v) {
+        x.append("<").append(string(k, kb)).append(">,<").append(string(v, vb)).append(">|");
+    });
+    ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
+
+    x = "";
+    kv->Each(&x, [](void* context, int kb, const char* k, int vb, const char* v) {
+        const auto c = ((string*) context);
+        c->append("<").append(string(k, kb)).append(">,<").append(string(v, vb)).append(">|");
+    });
+    ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
 }
 
+TEST_F(VMapTest, UsesEachAboveTest) {
+    ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("B", "4") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BB", "5") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BC", "6") == OK) << pmemobj_errormsg();
+
+    string x;
+    kv->EachAbove("B", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    ASSERT_TRUE(x == "BB,5|BC,6|");
+
+    x = "";
+    kv->EachAbove("", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
+
+    x = "";
+    kv->EachAbove("ZZZ", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    ASSERT_TRUE(x.empty());
+
+    x = "";
+    kv->EachAbove("B", [&](int kb, const char* k, int vb, const char* v) {
+        x.append(string(k, kb)).append(",").append(string(v, vb)).append("|");
+    });
+    ASSERT_TRUE(x == "BB,5|BC,6|");
+
+    ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
+    x = "";
+    kv->EachAbove(&x, "B", [](void* context, int kb, const char* k, int vb, const char* v) {
+        const auto c = ((string*) context);
+        c->append(string(k, kb)).append(",").append(string(v, vb)).append("|");
+    });
+    ASSERT_TRUE(x == "BB,5|BC,6|记!,RR|");
+}
+
+TEST_F(VMapTest, UsesEachBelowTest) {
+    ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("B", "4") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BB", "5") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BC", "6") == OK) << pmemobj_errormsg();
+
+    string x;
+    kv->EachBelow("AC", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    ASSERT_TRUE(x == "A,1|AB,2|");
+
+    x = "";
+    kv->EachBelow("", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    ASSERT_TRUE(x.empty());
+
+    x = "";
+    kv->EachBelow("ZZZZ", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
+
+    x = "";
+    kv->EachBelow("AC", [&](int kb, const char* k, int vb, const char* v) {
+        x.append(string(k, kb)).append(",").append(string(v, vb)).append("|");
+    });
+    ASSERT_TRUE(x == "A,1|AB,2|");
+
+    ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
+    x = "";
+    kv->EachBelow(&x, "\xFF", [](void* context, int kb, const char* k, int vb, const char* v) {
+        const auto c = ((string*) context);
+        c->append(string(k, kb)).append(",").append(string(v, vb)).append("|");
+    });
+    ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|");
+}
+
+TEST_F(VMapTest, UsesEachBetweenTest) {
+    ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("B", "4") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BB", "5") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("BC", "6") == OK) << pmemobj_errormsg();
+
+    string x;
+    kv->EachBetween("A", "B", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    ASSERT_TRUE(x == "AB,2|AC,3|");
+
+    x = "";
+    kv->EachBetween("", "ZZZ", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
+
+    x = "";
+    kv->EachBetween("", "A", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    ASSERT_TRUE(x.empty());
+
+    x = "";
+    kv->EachBetween("", "B", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    ASSERT_TRUE(x == "A,1|AB,2|AC,3|");
+
+    x = "";
+    kv->EachBetween("", "", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    kv->EachBetween("A", "A", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    kv->EachBetween("AC", "A", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    kv->EachBetween("B", "A", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    kv->EachBetween("BD", "A", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    kv->EachBetween("ZZZ", "A", [&](const string& k, const string& v) { x.append(k).append(",").append(v).append("|"); });
+    ASSERT_TRUE(x.empty());
+
+    x = "";
+    kv->EachBetween("A", "B", [&](int kb, const char* k, int vb, const char* v) {
+        x.append(string(k, kb)).append(",").append(string(v, vb)).append("|");
+    });
+    ASSERT_TRUE(x == "AB,2|AC,3|");
+
+    ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
+    x = "";
+    kv->EachBetween(&x, "B", "\xFF", [](void* context, int kb, const char* k, int vb, const char* v) {
+        const auto c = ((string*) context);
+        c->append(string(k, kb)).append(",").append(string(v, vb)).append("|");
+    });
+    ASSERT_TRUE(x == "BB,5|BC,6|记!,RR|");
+}
 
 // =============================================================================================
 // TEST LARGE COLLECTIONS
