@@ -33,7 +33,7 @@
 #ifdef EXPERIMENTAL
 
 #include "gtest/gtest.h"
-#include "../../src/engines/caching.h"
+#include "../../src/engines-experimental/caching.h"
 #include "lib_acl.hpp"
 #include <libmemcached/memcached.h>
 using namespace pmemkv;

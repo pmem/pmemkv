@@ -31,12 +31,12 @@
  */
 
 #include "engines/blackhole.h"
-#include "engines/kvtree3.h"
+#include "engines-experimental/kvtree3.h" // todo move inside EXPERIMENTAL ifdef after cmap is available
 #include "engines/vmap.h"
 #include "engines/vcmap.h"
 #ifdef EXPERIMENTAL
-#include "engines/btree.h"
-#include "engines/caching.h"
+#include "engines-experimental/btree.h"
+#include "engines-experimental/caching.h"
 #endif
 
 using std::runtime_error;

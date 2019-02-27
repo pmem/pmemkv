@@ -38,21 +38,21 @@ endif(EXPERIMENTAL)
 
 set(SOURCE_FILES src/pmemkv.cc src/pmemkv.h
     src/engines/blackhole.h src/engines/blackhole.cc
-    src/engines/kvtree3.h src/engines/kvtree3.cc
-    src/engines/btree.h src/engines/btree.cc
-    src/engines/btree/persistent_b_tree.h src/engines/btree/pstring.h
     src/engines/vmap.h src/engines/vmap.cc
     src/engines/vcmap.h src/engines/vcmap.cc
-    src/engines/caching.h src/engines/caching.cc
+    src/engines-experimental/kvtree3.h src/engines-experimental/kvtree3.cc
+    src/engines-experimental/btree.h src/engines-experimental/btree.cc
+    src/engines-experimental/btree/persistent_b_tree.h src/engines-experimental/btree/pstring.h
+    src/engines-experimental/caching.h src/engines-experimental/caching.cc
 )
 
 set(TEST_FILES tests/pmemkv_test.cc tests/mock_tx_alloc.cc
     tests/engines/blackhole_test.cc
-    tests/engines/btree_test.cc
-    tests/engines/kvtree_test.cc
     tests/engines/vmap_test.cc
     tests/engines/vcmap_test.cc
-    tests/engines/caching_test.cc
+    tests/engines-experimental/kvtree_test.cc
+    tests/engines-experimental/btree_test.cc
+    tests/engines-experimental/caching_test.cc
 )
 
 set(CMAKE_CXX_STANDARD 11)
@@ -67,8 +67,8 @@ include(pmemobj++)
 include(rapidjson)
 include(tbb)
 if(EXPERIMENTAL)
-    include(memcached)
-    include(redis)
+    include(memcached-experimental)
+    include(redis-experimental)
 endif(EXPERIMENTAL)
 
 add_executable(pmemkv_test ${TEST_FILES})
