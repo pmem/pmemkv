@@ -46,9 +46,9 @@ using pmem::obj::delete_persistent;
 using pmem::obj::pool;
 
 namespace pmemkv {
-namespace kvtree3 {
+namespace tree3 {
 
-const string ENGINE = "kvtree3";                           // engine identifier
+const string ENGINE = "tree3";                             // engine identifier
 
 #define INNER_KEYS 4                                       // maximum keys for inner nodes
 #define INNER_KEYS_MIDPOINT (INNER_KEYS / 2)               // halfway point within the node
@@ -122,10 +122,10 @@ struct KVRecoveredLeaf {                                   // temporary wrapper 
     string max_key;                                        // highest sorting key present
 };
 
-class KVTree : public KVEngine {                           // hybrid B+ tree engine
+class Tree : public KVEngine {                             // hybrid B+ tree engine
   public:
-    KVTree(const string& path, size_t size);
-    ~KVTree();
+    Tree(const string& path, size_t size);
+    ~Tree();
 
     string Engine() final { return ENGINE; }
     void All(void* context, KVAllCallback* callback) final;
@@ -164,13 +164,13 @@ class KVTree : public KVEngine {                           // hybrid B+ tree eng
     uint8_t PearsonHash(const char* data, size_t size);
     void Recover();
   private:
-    KVTree(const KVTree&);                                 // prevent copying
-    void operator=(const KVTree&);                         // prevent assigning
+    Tree(const Tree&);                                     // prevent copying
+    void operator=(const Tree&);                           // prevent assigning
     vector<persistent_ptr<KVLeaf>> leaves_prealloc;        // persisted but unused leaves
     const string pmpath;                                   // path when constructed
     pool<KVRoot> pmpool;                                   // pool for persistent root
     unique_ptr<KVNode> tree_top;                           // pointer to uppermost inner node
 };
 
-} // namespace kvtree
+} // namespace tree3
 } // namespace pmemkv

@@ -31,36 +31,36 @@
  */
 
 #include "gtest/gtest.h"
-#include "../../src/engines/vmap.h"
+#include "../../src/engines/vsmap.h"
 
-using namespace pmemkv::vmap;
+using namespace pmemkv::vsmap;
 
 const string PATH = "/dev/shm";
 const size_t SIZE = 1024ull * 1024ull * 512ull;
 const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
 
 template<size_t POOL_SIZE>
-class VMapBaseTest : public testing::Test {
+class VSMapBaseTest : public testing::Test {
 public:
-    VMap* kv;
+    VSMap* kv;
 
-    VMapBaseTest() {
-        kv = new VMap(PATH, POOL_SIZE);
+    VSMapBaseTest() {
+        kv = new VSMap(PATH, POOL_SIZE);
     }
 
-    ~VMapBaseTest() {
+    ~VSMapBaseTest() {
         delete kv;
     }
 };
 
-using VMapTest = VMapBaseTest<SIZE>;
-using VMapLargeTest = VMapBaseTest<LARGE_SIZE>;
+using VSMapTest = VSMapBaseTest<SIZE>;
+using VSMapLargeTest = VSMapBaseTest<LARGE_SIZE>;
 
 // =============================================================================================
 // TEST SMALL COLLECTIONS
 // =============================================================================================
 
-TEST_F(VMapTest, SimpleTest) {
+TEST_F(VSMapTest, SimpleTest) {
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(!kv->Exists("key1"));
     string value;
@@ -77,7 +77,7 @@ TEST_F(VMapTest, SimpleTest) {
     ASSERT_TRUE(value == "value1");
 }
 
-TEST_F(VMapTest, BinaryKeyTest) {
+TEST_F(VSMapTest, BinaryKeyTest) {
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(!kv->Exists("a"));
     ASSERT_TRUE(kv->Put("a", "should_not_change") == OK) << pmemobj_errormsg();
@@ -104,14 +104,14 @@ TEST_F(VMapTest, BinaryKeyTest) {
     ASSERT_TRUE(kv->Get("a", &value3) == OK && value3 == "should_not_change");
 }
 
-TEST_F(VMapTest, BinaryValueTest) {
+TEST_F(VSMapTest, BinaryValueTest) {
     string value("A\0B\0\0C", 6);
     ASSERT_TRUE(kv->Put("key1", value) == OK) << pmemobj_errormsg();
     string value_out;
     ASSERT_TRUE(kv->Get("key1", &value_out) == OK && (value_out.length() == 6) && (value_out == value));
 }
 
-TEST_F(VMapTest, EmptyKeyTest) {
+TEST_F(VSMapTest, EmptyKeyTest) {
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(kv->Put("", "empty") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
@@ -130,7 +130,7 @@ TEST_F(VMapTest, EmptyKeyTest) {
     ASSERT_TRUE(kv->Get("\t\t", &value3) == OK && value3 == "two-tab");
 }
 
-TEST_F(VMapTest, EmptyValueTest) {
+TEST_F(VSMapTest, EmptyValueTest) {
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(kv->Put("empty", "") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
@@ -146,19 +146,19 @@ TEST_F(VMapTest, EmptyValueTest) {
     ASSERT_TRUE(kv->Get("two-tab", &value3) == OK && value3 == "\t\t");
 }
 
-TEST_F(VMapTest, GetAppendToExternalValueTest) {
+TEST_F(VSMapTest, GetAppendToExternalValueTest) {
     ASSERT_TRUE(kv->Put("key1", "cool") == OK) << pmemobj_errormsg();
     string value = "super";
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "supercool");
 }
 
-TEST_F(VMapTest, GetHeadlessTest) {
+TEST_F(VSMapTest, GetHeadlessTest) {
     ASSERT_TRUE(!kv->Exists("waldo"));
     string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
 }
 
-TEST_F(VMapTest, GetMultipleTest) {
+TEST_F(VSMapTest, GetMultipleTest) {
     ASSERT_TRUE(kv->Put("abc", "A1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("def", "B2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("hij", "C3") == OK) << pmemobj_errormsg();
@@ -182,7 +182,7 @@ TEST_F(VMapTest, GetMultipleTest) {
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
 }
 
-TEST_F(VMapTest, GetMultiple2Test) {
+TEST_F(VSMapTest, GetMultiple2Test) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("key2", "value2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("key3", "value3") == OK) << pmemobj_errormsg();
@@ -197,14 +197,14 @@ TEST_F(VMapTest, GetMultiple2Test) {
     ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
 }
 
-TEST_F(VMapTest, GetNonexistentTest) {
+TEST_F(VSMapTest, GetNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(!kv->Exists("waldo"));
     string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
 }
 
-TEST_F(VMapTest, PutTest) {
+TEST_F(VSMapTest, PutTest) {
     ASSERT_TRUE(kv->Count() == 0);
 
     string value;
@@ -228,7 +228,7 @@ TEST_F(VMapTest, PutTest) {
     ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
 }
 
-TEST_F(VMapTest, PutKeysOfDifferentSizesTest) {
+TEST_F(VSMapTest, PutKeysOfDifferentSizesTest) {
     string value;
     ASSERT_TRUE(kv->Put("123456789ABCDE", "A") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
@@ -255,7 +255,7 @@ TEST_F(VMapTest, PutKeysOfDifferentSizesTest) {
     ASSERT_TRUE(kv->Get("123456789ABCDEFGHI", &value5) == OK && value5 == "E");
 }
 
-TEST_F(VMapTest, PutValuesOfDifferentSizesTest) {
+TEST_F(VSMapTest, PutValuesOfDifferentSizesTest) {
     string value;
     ASSERT_TRUE(kv->Put("A", "123456789ABCDE") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
@@ -282,7 +282,7 @@ TEST_F(VMapTest, PutValuesOfDifferentSizesTest) {
     ASSERT_TRUE(kv->Get("E", &value5) == OK && value5 == "123456789ABCDEFGHI");
 }
 
-TEST_F(VMapTest, RemoveAllTest) {
+TEST_F(VSMapTest, RemoveAllTest) {
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
@@ -293,7 +293,7 @@ TEST_F(VMapTest, RemoveAllTest) {
     ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
 }
 
-TEST_F(VMapTest, RemoveAndInsertTest) {
+TEST_F(VSMapTest, RemoveAndInsertTest) {
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
@@ -312,7 +312,7 @@ TEST_F(VMapTest, RemoveAndInsertTest) {
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
 }
 
-TEST_F(VMapTest, RemoveExistingTest) {
+TEST_F(VSMapTest, RemoveExistingTest) {
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
@@ -329,17 +329,17 @@ TEST_F(VMapTest, RemoveExistingTest) {
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
 }
 
-TEST_F(VMapTest, RemoveHeadlessTest) {
+TEST_F(VSMapTest, RemoveHeadlessTest) {
     ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
 }
 
-TEST_F(VMapTest, RemoveNonexistentTest) {
+TEST_F(VSMapTest, RemoveNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
     ASSERT_TRUE(kv->Exists("key1"));
 }
 
-TEST_F(VMapTest, UsesAllTest) {
+TEST_F(VSMapTest, UsesAllTest) {
     ASSERT_TRUE(kv->Put("1", "one") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("2", "two") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
@@ -360,7 +360,7 @@ TEST_F(VMapTest, UsesAllTest) {
     ASSERT_TRUE(x == "<1>,<2>,<记!>,");
 }
 
-TEST_F(VMapTest, UsesAllAboveTest) {
+TEST_F(VSMapTest, UsesAllAboveTest) {
     ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
@@ -393,7 +393,7 @@ TEST_F(VMapTest, UsesAllAboveTest) {
     ASSERT_TRUE(x == "BB,BC,记!,");
 }
 
-TEST_F(VMapTest, UsesAllBelowTest) {
+TEST_F(VSMapTest, UsesAllBelowTest) {
     ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
@@ -426,7 +426,7 @@ TEST_F(VMapTest, UsesAllBelowTest) {
     ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,记!,");
 }
 
-TEST_F(VMapTest, UsesAllBetweenTest) {
+TEST_F(VSMapTest, UsesAllBetweenTest) {
     ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
@@ -476,7 +476,7 @@ TEST_F(VMapTest, UsesAllBetweenTest) {
     ASSERT_TRUE(x == "BB,BC,记!,");
 }
 
-TEST_F(VMapTest, UsesCountTest) {
+TEST_F(VSMapTest, UsesCountTest) {
     ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
@@ -513,7 +513,7 @@ TEST_F(VMapTest, UsesCountTest) {
     ASSERT_TRUE(kv->CountBetween("ZZZ", "B") == 0);
 }
 
-TEST_F(VMapTest, UsesEachTest) {
+TEST_F(VSMapTest, UsesEachTest) {
     ASSERT_TRUE(kv->Put("1", "one") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("2", "two") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("记!", "RR") == OK) << pmemobj_errormsg();
@@ -538,7 +538,7 @@ TEST_F(VMapTest, UsesEachTest) {
     ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
 }
 
-TEST_F(VMapTest, UsesEachAboveTest) {
+TEST_F(VSMapTest, UsesEachAboveTest) {
     ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
@@ -573,7 +573,7 @@ TEST_F(VMapTest, UsesEachAboveTest) {
     ASSERT_TRUE(x == "BB,5|BC,6|记!,RR|");
 }
 
-TEST_F(VMapTest, UsesEachBelowTest) {
+TEST_F(VSMapTest, UsesEachBelowTest) {
     ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
@@ -608,7 +608,7 @@ TEST_F(VMapTest, UsesEachBelowTest) {
     ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|");
 }
 
-TEST_F(VMapTest, UsesEachBetweenTest) {
+TEST_F(VSMapTest, UsesEachBetweenTest) {
     ASSERT_TRUE(kv->Put("A", "1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AB", "2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("AC", "3") == OK) << pmemobj_errormsg();
@@ -662,7 +662,7 @@ TEST_F(VMapTest, UsesEachBetweenTest) {
 
 const int LARGE_LIMIT = 4000000;
 
-TEST_F(VMapLargeTest, LargeAscendingTest) {
+TEST_F(VSMapLargeTest, LargeAscendingTest) {
     for (int i = 1; i <= LARGE_LIMIT; i++) {
         string istr = to_string(i);
         ASSERT_TRUE(kv->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
@@ -677,7 +677,7 @@ TEST_F(VMapLargeTest, LargeAscendingTest) {
     ASSERT_TRUE(kv->Count() == LARGE_LIMIT);
 }
 
-TEST_F(VMapLargeTest, LargeDescendingTest) {
+TEST_F(VSMapLargeTest, LargeDescendingTest) {
     for (int i = LARGE_LIMIT; i >= 1; i--) {
         string istr = to_string(i);
         ASSERT_TRUE(kv->Put(istr, ("ABC" + istr)) == OK) << pmemobj_errormsg();

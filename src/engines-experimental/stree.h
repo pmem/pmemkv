@@ -35,24 +35,24 @@
 #pragma once
 
 #include "../pmemkv.h"
-#include "btree/persistent_b_tree.h"
-#include "btree/pstring.h"
+#include "stree/persistent_b_tree.h"
+#include "stree/pstring.h"
 
 using pmem::obj::pool;
 using pmem::obj::persistent_ptr;
 
 namespace pmemkv {
-namespace btree {
+namespace stree {
 
-const string ENGINE = "btree";
+const string ENGINE = "stree";
 const size_t DEGREE = 64;
 const size_t MAX_KEY_SIZE = 20;
 const size_t MAX_VALUE_SIZE = 200;
 
-class BTree : public KVEngine {
+class STree : public KVEngine {
   public:
-    BTree(const string& path, size_t size);
-    ~BTree();
+    STree(const string& path, size_t size);
+    ~STree();
 
     string Engine() final { return ENGINE; }
     void All(void* context, KVAllCallback* callback) final;
@@ -86,14 +86,14 @@ class BTree : public KVEngine {
     struct RootData {
         persistent_ptr<btree_type> btree_ptr;
     };
-    BTree(const BTree&);
-    void operator=(const BTree&);
+    STree(const STree&);
+    void operator=(const STree&);
     void Recover();
     pool<RootData> pmpool;
     btree_type* my_btree;
 };
 
-} // namespace btree
+} // namespace stree
 } // namespace pmemkv
 
 #endif

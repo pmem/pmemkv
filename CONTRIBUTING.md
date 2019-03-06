@@ -5,6 +5,7 @@
 <li><a href="#style">Code Style</a></li>
 <li><a href="#pull_requests">Submitting Pull Requests</a></li>
 <li><a href="#engines">Creating New Engines</a></li>
+<li><a href="#experimental">Creating Experimental Engines</a></li>
 </ul>
 
 <a name="issues"></a>
@@ -83,9 +84,9 @@ Creating New Engines
 
 There are several motivations to create a `pmemkv` storage engine:
 
-* Using a completely different implementation strategy than already exists
-* Trying out a signifcant change to an existing engine without disruption
-* Sharing an experimental engine that isn't even finished yet
+* Using a new/different implementation strategy
+* Trying out a signifcant change to an existing engine
+* Creating a new version of an existing engine with some tweaks
 
 Next we'll walk you through the steps of creating a new engine.
 
@@ -94,7 +95,11 @@ Next we'll walk you through the steps of creating a new engine.
 * Relatively short (users will have to type this!)
 * Formatted in all lower-case
 * No whitespace or special characters
-* For this example: `mytree`
+* Names should use common prefixes to denote capabilities:
+  - prefix of "v" denotes volatile (persistent if omitted), appears first
+  - prefix of "c" denotes concurrent (single-threaded if omitted), appears second
+  - prefix of "s" denotes sorted (unsorted if omitted), appears last
+* For this example: `mytree` (persistent, single-threaded, unsorted)
 
 ### Creating Engine Header
 
@@ -120,7 +125,7 @@ Next we'll walk you through the steps of creating a new engine.
 
 * In `CMakeLists.txt`:
     * Add `src/engines/mytree.h` and `src/engines/mytree.cc` to `SOURCE_FILES`
-    * Add `tests/mytree_test.cc` to `pmemkv_test` executable
+    * Add `tests/engines/mytree_test.cc` to `pmemkv_test` executable
     * Use `pkg_check_modules` and/or `find_package` for upstream libraries
 * `make` should now run to completion without errors
 
@@ -136,3 +141,38 @@ Next we'll walk you through the steps of creating a new engine.
 
 * In `ENGINES.md`, add `mytree` section
 * In `README.md`, link `mytree` in the table of supported engines
+
+<a name="experimental"></a>
+
+Creating Experimental Engines
+-----------------------------
+
+The instructions above describe creating an engine that is included in the `pmemkv` build by default.
+There is also the option of creating experimental engines that are not ready to include by default.
+These include engines that are still being actively developed, optimized, reviewed or documented.
+
+Experimental engines are unsupported prototypes, but are still expected to have proper automated tests,
+and for all defined tests to pass.
+
+### Experimental Code
+
+Use the `EXPERIMENTAL` conditional define to exclude code from the default build.
+
+```
+#ifdef EXPERIMENTAL
+...
+#endif
+```
+
+### Experimental Build Assets
+
+Extend this existing section in `CMakeLists.txt` if your experimental engine requires libraries that
+are not yet included in the default build.
+
+```
+if(EXPERIMENTAL)
+    include(foo-experimental)
+endif(EXPERIMENTAL)
+```
+
+As noted in the example above, the experimental CMake module should use `-experimental` in the file name.

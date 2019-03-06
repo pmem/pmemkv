@@ -39,14 +39,14 @@
 #include <scoped_allocator>
 
 namespace pmemkv {
-namespace vmap {
+namespace vsmap {
 
-const string ENGINE = "vmap";
+const string ENGINE = "vsmap";
 
-class VMap : public KVEngine {
+class VSMap : public KVEngine {
   public:
-    VMap(const string& path, size_t size);
-    ~VMap();
+    VSMap(const string& path, size_t size);
+    ~VSMap();
 
     string Engine() final { return ENGINE; }
     void All(void* context, KVAllCallback* callback) final;
@@ -85,5 +85,5 @@ class VMap : public KVEngine {
     map_t pmem_kv_container;
 };
 
-} // namespace vmap
+} // namespace vsmap
 } // namespace pmemkv

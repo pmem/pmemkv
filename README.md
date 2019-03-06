@@ -11,12 +11,12 @@ Overview
 
 `pmemkv` is a local/embedded key-value datastore optimized for persistent memory.
 Rather than being tied to a single language or backing implementation, `pmemkv`
-provides different options for storage engines and language bindings.
+provides different options for language bindings and storage engines.
 
 <ul>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">Installation</a></li>
-<li><a href="#engines">Storage Engines</a></li>
 <li><a href="#bindings">Language Bindings</a></li>
+<li><a href="#engines">Storage Engines</a></li>
 <li><a href="#tools">Tools and Utilities</a></li>
 </ul>
 
@@ -27,7 +27,7 @@ Installation
 
 `pmemkv` does not currently provide install packages, but our
 <a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">installation</a> guide
-provides detailed instructions, including configuring DAX and pool sets. 
+provides detailed instructions, including use of experimental engines and pool sets. 
 
 <ul>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources">Building From Sources</a></li>
@@ -35,38 +35,12 @@ provides detailed instructions, including configuring DAX and pool sets.
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental">Using Experimental Engines</a></li>
 </ul>
 
-
-<a name="engines"></a>
-
-Storage Engines
----------------
-
-`pmemkv` provides multiple storage engines with vastly different implementations. Since all
-engines conform to the same common API, any engine can be used with common `pmemkv` utilities
-and language bindings. Engines are requested at runtime by name.
-[Contributing a new engine](https://github.com/pmem/pmemkv/blob/master/CONTRIBUTING.md#engines)
-is easy and encouraged!
-
-![pmemkv-engines](https://user-images.githubusercontent.com/913363/34419331-68619cfe-ebc0-11e7-9443-fa13dc9decbb.png)
-
-### Available Engines
-
-| Engine  | Description | Experimental? | Concurrent? | Sorted? |
-| ------- | ----------- | ------------- | ----------- | ------- |
-| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | No | Yes | No |
-| [kvtree3](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#kvtree3) | Hybrid B+ persistent tree | No | No | No |
-| [vmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vmap) | Volatile hash map | No | No | Yes |
-| [vcmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vcmap) | Volatile concurrent hash map | No | Yes | No |
-| btree | Copy-on-write B+ persistent tree | Yes | No | Yes |
-| caching | Caching for remote Memcached or Redis server | Yes | Yes | - |
-
 <a name="bindings"></a>
 
 Language Bindings
 -----------------
 
-`pmemkv` is written in C and C++. Developers can either use native C++ classes directly, or use our `extern "C"` API,
-or use one of several high-level language bindings that are based on the `extern "C"` API.
+`pmemkv` is written in C/C++ and includes bindings for Java, Ruby, and Node.js applications.
 
 ![pmemkv-bindings](https://user-images.githubusercontent.com/913363/52880816-4651ef00-3120-11e9-9ab4-7eb006b4c7f5.png)
 
@@ -82,7 +56,7 @@ using namespace pmemkv;
 
 int main() {
     LOG("Starting engine");
-    KVEngine* kv = KVEngine::Start("vmap", "{\"path\":\"/dev/shm/\"}");
+    KVEngine* kv = KVEngine::Start("vsmap", "{\"path\":\"/dev/shm/\"}");
 
     LOG("Putting new key");
     KVStatus s = kv->Put("key1", "value1");
@@ -133,7 +107,7 @@ void AllCallback(void* context, int kb, const char* k) {
 
 int main() {
     LOG("Starting engine");
-    KVEngine* kv = kvengine_start(NULL, "vmap", "{\"path\":\"/dev/shm/\"}", &StartFailureCallback);
+    KVEngine* kv = kvengine_start(NULL, "vsmap", "{\"path\":\"/dev/shm/\"}", &StartFailureCallback);
 
     LOG("Putting new key");
     char* key1 = "key1";
@@ -173,6 +147,25 @@ in sync with the main `pmemkv` distribution.
 * Java - https://github.com/pmem/pmemkv-java
 * Node.js - https://github.com/pmem/pmemkv-nodejs
 * Ruby - https://github.com/pmem/pmemkv-ruby
+
+<a name="engines"></a>
+
+Storage Engines
+---------------
+
+`pmemkv` provides multiple storage engines that conform to the same common API, so every engine can be used with
+all language bindings and utilities. Engines are loaded by name at runtime.
+
+| Engine Name  | Description | Experimental? | Concurrent? | Sorted? |
+| ------------ | ----------- | ------------- | ----------- | ------- |
+| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | No | Yes | No |
+| [vsmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vsmap) | Volatile sorted hash map | No | No | Yes |
+| [vcmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vcmap) | Volatile concurrent hash map | No | Yes | No |
+| [tree3](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#tree3) | Persistent B+ tree | No | No | No |
+| stree | Sorted persistent B+ tree | Yes | No | Yes |
+| caching | Caching for remote Memcached or Redis server | Yes | Yes | - |
+
+[Contributing a new engine](https://github.com/pmem/pmemkv/blob/master/CONTRIBUTING.md#engines) is easy and encouraged!
 
 <a name="tools"></a>
 

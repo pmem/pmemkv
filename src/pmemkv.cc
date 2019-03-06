@@ -31,11 +31,11 @@
  */
 
 #include "engines/blackhole.h"
-#include "engines-experimental/kvtree3.h" // todo move inside EXPERIMENTAL ifdef after cmap is available
-#include "engines/vmap.h"
+#include "engines-experimental/tree3.h" // todo move inside EXPERIMENTAL ifdef after cmap is available
+#include "engines/vsmap.h"
 #include "engines/vcmap.h"
 #ifdef EXPERIMENTAL
-#include "engines-experimental/btree.h"
+#include "engines-experimental/stree.h"
 #include "engines-experimental/caching.h"
 #endif
 
@@ -71,18 +71,18 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
             }
             auto path = d["path"].GetString();
             size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;
-            if (engine == kvtree3::ENGINE) {
-                return new kvtree3::KVTree(path, size);
+            if (engine == tree3::ENGINE) {
+                return new tree3::Tree(path, size);
 #ifdef EXPERIMENTAL
-            } else if (engine == btree::ENGINE) {
-                return new btree::BTree(path, size);
+            } else if (engine == stree::ENGINE) {
+                return new stree::STree(path, size);
 #endif
-            } else if ((engine == vmap::ENGINE) || (engine == vcmap::ENGINE)) {
+            } else if ((engine == vsmap::ENGINE) || (engine == vcmap::ENGINE)) {
                 struct stat info;
                 if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
                     throw runtime_error("Config path is not an existing directory");
-                } else if (engine == vmap::ENGINE) {
-                    return new vmap::VMap(path, size);
+                } else if (engine == vsmap::ENGINE) {
+                    return new vsmap::VSMap(path, size);
                 } else if (engine == vcmap::ENGINE) {
                     return new vcmap::VCMap(path, size);
                 }
@@ -99,16 +99,16 @@ void KVEngine::Stop(KVEngine* kv) {
     auto engine = kv->Engine();
     if (engine == blackhole::ENGINE) {
         delete (blackhole::Blackhole*) kv;
-    } else if (engine == kvtree3::ENGINE) {
-        delete (kvtree3::KVTree*) kv;
+    } else if (engine == tree3::ENGINE) {
+        delete (tree3::Tree*) kv;
 #ifdef EXPERIMENTAL
-    } else if (engine == btree::ENGINE) {
-        delete (btree::BTree*) kv;
+    } else if (engine == stree::ENGINE) {
+        delete (stree::STree*) kv;
     } else if (engine == caching::ENGINE) {
         delete (caching::CachingEngine*) kv;
 #endif
-    } else if (engine == vmap::ENGINE) {
-        delete (vmap::VMap*) kv;
+    } else if (engine == vsmap::ENGINE) {
+        delete (vsmap::VSMap*) kv;
     } else if (engine == vcmap::ENGINE) {
         delete (vcmap::VCMap*) kv;
     }

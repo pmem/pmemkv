@@ -30,45 +30,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "vmap.h"
+#include "vsmap.h"
 
 #include <iostream>
 
 #define DO_LOG 0
-#define LOG(msg) if (DO_LOG) std::cout << "[vmap] " << msg << "\n"
+#define LOG(msg) if (DO_LOG) std::cout << "[vsmap] " << msg << "\n"
 
 namespace pmemkv {
-namespace vmap {
+namespace vsmap {
 
-VMap::VMap(const string& path, size_t size) : kv_allocator(path, size), ch_allocator(kv_allocator),
-           pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator)) {
+VSMap::VSMap(const string& path, size_t size) : kv_allocator(path, size), ch_allocator(kv_allocator),
+             pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator)) {
     LOG("Started ok");
 }
 
-VMap::~VMap() {
+VSMap::~VSMap() {
     LOG("Stopped ok");
 }
 
-void VMap::All(void* context, KVAllCallback* callback) {
+void VSMap::All(void* context, KVAllCallback* callback) {
     LOG("All");
     for (auto& it : pmem_kv_container) (*callback)(context, (int32_t) it.first.size(), it.first.c_str());
 }
 
-void VMap::AllAbove(void* context, const string& key, KVAllCallback* callback) {
+void VSMap::AllAbove(void* context, const string& key, KVAllCallback* callback) {
     LOG("AllAbove for key=" << key);
     auto it = pmem_kv_container.upper_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
     auto end = pmem_kv_container.end();
     for (; it != end; it++) (*callback)(context, (int32_t) it->first.size(), it->first.c_str());
 }
 
-void VMap::AllBelow(void* context, const string& key, KVAllCallback* callback) {
+void VSMap::AllBelow(void* context, const string& key, KVAllCallback* callback) {
     LOG("AllBelow for key=" << key);
     auto it = pmem_kv_container.begin();
     auto end = pmem_kv_container.lower_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
     for (; it != end; it++) (*callback)(context, (int32_t) it->first.size(), it->first.c_str());
 }
 
-void VMap::AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) {
+void VSMap::AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) {
     LOG("AllBetween for key1=" << key1 << ", key2=" << key2);
     if (key1 < key2) {
         auto it = pmem_kv_container.upper_bound(pmem_string(key1.c_str(), key1.size(), ch_allocator));
@@ -77,11 +77,11 @@ void VMap::AllBetween(void* context, const string& key1, const string& key2, KVA
     }
 }
 
-int64_t VMap::Count() {
+int64_t VSMap::Count() {
     return pmem_kv_container.size();
 }
 
-int64_t VMap::CountAbove(const string& key) {
+int64_t VSMap::CountAbove(const string& key) {
     LOG("CountAbove for key=" << key);
     int64_t result = 0;
     auto it = pmem_kv_container.upper_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
@@ -90,7 +90,7 @@ int64_t VMap::CountAbove(const string& key) {
     return result;
 }
 
-int64_t VMap::CountBelow(const string& key) {
+int64_t VSMap::CountBelow(const string& key) {
     LOG("CountBelow for key=" << key);
     int64_t result = 0;
     auto it = pmem_kv_container.begin();
@@ -99,7 +99,7 @@ int64_t VMap::CountBelow(const string& key) {
     return result;
 }
 
-int64_t VMap::CountBetween(const string& key1, const string& key2) {
+int64_t VSMap::CountBetween(const string& key1, const string& key2) {
     LOG("CountBetween for key1=" << key1 << ", key2=" << key2);
     int64_t result = 0;
     if (key1 < key2) {
@@ -110,14 +110,14 @@ int64_t VMap::CountBetween(const string& key1, const string& key2) {
     return result;
 }
 
-void VMap::Each(void* context, KVEachCallback* callback) {
+void VSMap::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto& it : pmem_kv_container)
         (*callback)(context, (int32_t) it.first.size(), it.first.c_str(),
                     (int32_t) it.second.size(), it.second.c_str());
 }
 
-void VMap::EachAbove(void* context, const string& key, KVEachCallback* callback) {
+void VSMap::EachAbove(void* context, const string& key, KVEachCallback* callback) {
     LOG("EachAbove for key=" << key);
     auto it = pmem_kv_container.upper_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
     auto end = pmem_kv_container.end();
@@ -126,7 +126,7 @@ void VMap::EachAbove(void* context, const string& key, KVEachCallback* callback)
                     (int32_t) it->second.size(), it->second.c_str());
 }
 
-void VMap::EachBelow(void* context, const string& key, KVEachCallback* callback) {
+void VSMap::EachBelow(void* context, const string& key, KVEachCallback* callback) {
     LOG("EachBelow for key=" << key);
     auto it = pmem_kv_container.begin();
     auto end = pmem_kv_container.lower_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
@@ -135,7 +135,7 @@ void VMap::EachBelow(void* context, const string& key, KVEachCallback* callback)
                     (int32_t) it->second.size(), it->second.c_str());
 }
 
-void VMap::EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) {
+void VSMap::EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) {
     LOG("EachBetween for key1=" << key1 << ", key2=" << key2);
     if (key1 < key2) {
         auto it = pmem_kv_container.upper_bound(pmem_string(key1.c_str(), key1.size(), ch_allocator));
@@ -146,13 +146,13 @@ void VMap::EachBetween(void* context, const string& key1, const string& key2, KV
     }
 }
 
-KVStatus VMap::Exists(const string& key) {
+KVStatus VSMap::Exists(const string& key) {
     LOG("Exists for key=" << key);
     bool r = pmem_kv_container.find(pmem_string(key.c_str(), key.size(), ch_allocator)) != pmem_kv_container.end();
     return (r ? OK : NOT_FOUND);
 }
 
-void VMap::Get(void* context, const string& key, KVGetCallback* callback) {
+void VSMap::Get(void* context, const string& key, KVGetCallback* callback) {
     LOG("Get key=" << key);
     const auto pos = pmem_kv_container.find(pmem_string(key.c_str(), key.size(), ch_allocator));
     if (pos == pmem_kv_container.end()) {
@@ -162,7 +162,7 @@ void VMap::Get(void* context, const string& key, KVGetCallback* callback) {
     (*callback)(context, (int32_t) pos->second.size(), pos->second.c_str());
 }
 
-KVStatus VMap::Put(const string& key, const string& value) {
+KVStatus VSMap::Put(const string& key, const string& value) {
     LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
     try {
         pmem_kv_container[pmem_string(key.c_str(), key.size(), ch_allocator)] =
@@ -180,7 +180,7 @@ KVStatus VMap::Put(const string& key, const string& value) {
     }
 }
 
-KVStatus VMap::Remove(const string& key) {
+KVStatus VSMap::Remove(const string& key) {
     LOG("Remove key=" << key);
     try {
         size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
@@ -197,5 +197,5 @@ KVStatus VMap::Remove(const string& key) {
     }
 }
 
-} // namespace vmap
+} // namespace vsmap
 } // namespace pmemkv

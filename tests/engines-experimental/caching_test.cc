@@ -38,12 +38,12 @@
 #include <libmemcached/memcached.h>
 using namespace pmemkv;
 
-//const string ENGINE = "btree";
-const string ENGINE = "kvtree3";
+//const string ENGINE = "stree";
+const string ENGINE = "tree3";
 const string PATH = "/dev/shm/pmemkv";
 
 //const string ENGINE = "vcmap";
-//const string ENGINE = "vmap";
+//const string ENGINE = "vsmap";
 //const string PATH = "/dev/shm";
 
 class CachingTest : public testing::Test {
@@ -218,11 +218,11 @@ TEST_F(CachingTest, SimpleEachTest) {
         c->append(">|");
     });
 
-    if (ENGINE == "kvtree3")
+    if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key4>,<value4>|<key3>,<value3>|<key2>,<value2>|<key1>,<value1>|");
     else if (ENGINE == "vcmap")
         ASSERT_TRUE(result == "<key1>,<value1>|<key4>,<value4>|<key3>,<value3>|<key2>,<value2>|");
-    else if (ENGINE == "vmap")
+    else if (ENGINE == "vsmap")
         ASSERT_TRUE(result == "<key1>,<value1>|<key2>,<value2>|<key3>,<value3>|<key4>,<value4>|");
     else
         ASSERT_TRUE(result == "<key1>,<value1>|<key2>,<value2>|<key3>,<value3>|<key4>,<value4>|");
@@ -290,11 +290,11 @@ TEST_F(CachingTest, EachZeroTTL) {
         c->append(">|");
     });
 
-    if (ENGINE == "kvtree3")
+    if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key4>,<value4>|<key3>,<value3>|<key2>,<value2>|<key1>,<value1>|");
     else if (ENGINE == "vcmap")
         ASSERT_TRUE(result == "<key1>,<value1>|<key4>,<value4>|<key3>,<value3>|<key2>,<value2>|");
-    else if (ENGINE == "vmap")
+    else if (ENGINE == "vsmap")
         ASSERT_TRUE(result == "<key1>,<value1>|<key2>,<value2>|<key3>,<value3>|<key4>,<value4>|");
     else
         ASSERT_TRUE(result == "<key1>,<value1>|<key2>,<value2>|<key3>,<value3>|<key4>,<value4>|");
@@ -342,11 +342,11 @@ TEST_F(CachingTest, SimpleAll) {
         c->append(">,");
     });
 
-    if (ENGINE == "kvtree3")
+    if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key4>,<key3>,");
     else if (ENGINE == "vcmap")
         ASSERT_TRUE(result == "<key4>,<key3>,");
-    else if (ENGINE == "vmap")
+    else if (ENGINE == "vsmap")
         ASSERT_TRUE(result == "<key3>,<key4>,");
     else
         ASSERT_TRUE(result == "<key3>,<key4>,");
@@ -371,11 +371,11 @@ TEST_F(CachingTest, SimpleZeroTTLAll) {
         c->append(">,");
     });
 
-    if (ENGINE == "kvtree3")
+    if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key4>,<key3>,<key2>,<key1>,");
     else if (ENGINE == "vcmap")
         ASSERT_TRUE(result == "<key1>,<key4>,<key3>,<key2>,");
-    else if (ENGINE == "vmap")
+    else if (ENGINE == "vsmap")
         ASSERT_TRUE(result == "<key1>,<key2>,<key3>,<key4>,");
     else
         ASSERT_TRUE(result == "<key1>,<key2>,<key3>,<key4>,");
@@ -461,11 +461,11 @@ TEST_F(CachingTest, Redis_Integration) {
         c->append(">|");
     });
 
-    if (ENGINE == "kvtree3")
+    if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key2>,<value2>|<key1>,<value1>|<key3>,<value3>|");
     else if (ENGINE == "vcmap")
         ASSERT_TRUE(result == "<key3>,<value3>|<key2>,<value2>|<key1>,<value1>|");
-    else if (ENGINE == "vmap")
+    else if (ENGINE == "vsmap")
         ASSERT_TRUE(result == "<key1>,<value1>|<key2>,<value2>|<key3>,<value3>|");
     else
         ASSERT_TRUE(result == "<key1>,<value1>|<key2>,<value2>|<key3>,<value3>|");
@@ -498,11 +498,11 @@ TEST_F(CachingTest, Redis_Integration) {
         c->append(">,");
     });
 
-    if (ENGINE == "kvtree3")
+    if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key2>,<key1>,");
     else if (ENGINE == "vcmap")
         ASSERT_TRUE(result == "<key2>,<key1>,");
-    else if (ENGINE == "vmap")
+    else if (ENGINE == "vsmap")
         ASSERT_TRUE(result == "<key1>,<key2>,");
     else
         ASSERT_TRUE(result == "<key1>,<key2>,");
@@ -601,11 +601,11 @@ TEST_F(CachingTest, Memcached_Integration) {
         c->append(">|");
     });
 
-    if (ENGINE == "kvtree3")
+    if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key2>,<value2>|<key3>,<value3>|<key1>,<value1>|");
     else if (ENGINE == "vcmap")
         ASSERT_TRUE(result == "<key3>,<value3>|<key2>,<value2>|<key1>,<value1>|");
-    else if (ENGINE == "vmap")
+    else if (ENGINE == "vsmap")
         ASSERT_TRUE(result == "<key1>,<value1>|<key2>,<value2>|<key3>,<value3>|");
     else
         ASSERT_TRUE(result == "<key1>,<value1>|<key2>,<value2>|<key3>,<value3>|");
@@ -638,11 +638,11 @@ TEST_F(CachingTest, Memcached_Integration) {
         c->append(">,");
     });
 
-    if (ENGINE == "kvtree3")
+    if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key2>,<key1>,");
     else if (ENGINE == "vcmap")
         ASSERT_TRUE(result == "<key2>,<key1>,");
-    else if (ENGINE == "vmap")
+    else if (ENGINE == "vsmap")
         ASSERT_TRUE(result == "<key1>,<key2>,");
     else
         ASSERT_TRUE(result == "<key1>,<key2>,");
