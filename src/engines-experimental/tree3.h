@@ -167,7 +167,6 @@ class Tree : public KVEngine {                             // hybrid B+ tree eng
     Tree(const Tree&);                                     // prevent copying
     void operator=(const Tree&);                           // prevent assigning
     vector<persistent_ptr<KVLeaf>> leaves_prealloc;        // persisted but unused leaves
-    const string pmpath;                                   // path when constructed
     pool<KVRoot> pmpool;                                   // pool for persistent root
     unique_ptr<KVNode> tree_top;                           // pointer to uppermost inner node
 };
