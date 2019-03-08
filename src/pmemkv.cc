@@ -46,10 +46,14 @@ namespace pmemkv {
 // STATIC METHOD IMPLEMENTATIONS
 
 KVEngine* KVEngine::Start(const string& engine, const string& config) {
-    auto cb = [](void* context, const char* engine, const char* config, const char* msg) {
+    return Start(nullptr, engine, config);
+}
+
+KVEngine* KVEngine::Start(void* context, const string& engine, const string& config) {
+    auto cb = [](void* cxt, const char* engine, const char* config, const char* msg) {
         throw runtime_error(msg);
     };
-    return Start(nullptr, engine.c_str(), config.c_str(), cb);
+    return Start(context, engine.c_str(), config.c_str(), cb);
 }
 
 KVEngine* KVEngine::Start(void* context, const char* engine, const char* config, KVStartFailureCallback* onfail) {
