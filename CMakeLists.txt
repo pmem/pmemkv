@@ -40,7 +40,7 @@ set(SOURCE_FILES src/pmemkv.cc src/pmemkv.h
     src/engines/blackhole.h src/engines/blackhole.cc
     src/engines/vsmap.h src/engines/vsmap.cc
     src/engines/vcmap.h src/engines/vcmap.cc
-	src/engines/cmap.h src/engines/cmap.cc
+    src/engines/cmap.h src/engines/cmap.cc
     src/engines-experimental/tree3.h src/engines-experimental/tree3.cc
     src/engines-experimental/stree.h src/engines-experimental/stree.cc
     src/engines-experimental/stree/persistent_b_tree.h src/engines-experimental/stree/pstring.h
@@ -51,7 +51,7 @@ set(TEST_FILES tests/pmemkv_test.cc tests/mock_tx_alloc.cc
     tests/engines/blackhole_test.cc
     tests/engines/vsmap_test.cc
     tests/engines/vcmap_test.cc
-	tests/engines/cmap_test.cc
+    tests/engines/cmap_test.cc
     tests/engines-experimental/tree_test.cc
     tests/engines-experimental/stree_test.cc
     tests/engines-experimental/caching_test.cc

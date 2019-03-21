@@ -42,16 +42,16 @@
 namespace std {
 template<>
 struct hash<pmem::obj::experimental::string> {
-    template <unsigned u, unsigned long long ull >
+    template<unsigned u, unsigned long long ull>
     struct select_size_t_constant {
-        static const size_t value = (size_t)((sizeof(size_t)==sizeof(u)) ? u : ull);
+        static const size_t value = (size_t) ((sizeof(size_t) == sizeof(u)) ? u : ull);
     };
 
     static const size_t hash_multiplier = select_size_t_constant<2654435769U, 11400714819323198485ULL>::value;
 
-    size_t operator()(const pmem::obj::experimental::string &str) {
+    size_t operator()(const pmem::obj::experimental::string& str) {
         size_t h = 0;
-        for(size_t i = 0; i < str.size(); ++i) {
+        for (size_t i = 0; i < str.size(); ++i) {
             h = static_cast<size_t>(str[i]) ^ (h * hash_multiplier);
         }
         return h;
@@ -106,13 +106,10 @@ class CMap : public KVEngine {
     struct RootData {
         pmem::obj::persistent_ptr<map_t> map_ptr;
     };
-
     using pool_t = pmem::obj::pool<RootData>;
 
     void Recover();
-
     pool_t pmpool;
-
     map_t* container;
 };
 

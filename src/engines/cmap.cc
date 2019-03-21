@@ -32,11 +32,7 @@
 
 #include "cmap.h"
 
-#include <iostream>
 #include <unistd.h>
-
-#include <libpmemobj++/transaction.hpp>
-#include <libpmemobj++/make_persistent.hpp>
 
 #define DO_LOG 0
 #define LOG(msg) if (DO_LOG) std::cout << "[cmap] " << msg << "\n"
@@ -79,7 +75,7 @@ void CMap::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
     for (auto it = container->begin(); it != container->end(); ++it) {
         (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
-                (int32_t) it->second.size(), it->second.c_str());
+                    (int32_t) it->second.size(), it->second.c_str());
     }
 }
 
