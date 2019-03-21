@@ -34,6 +34,7 @@
 #include "engines-experimental/tree3.h" // todo move inside EXPERIMENTAL ifdef after cmap is available
 #include "engines/vsmap.h"
 #include "engines/vcmap.h"
+#include "engines/cmap.h"
 #ifdef EXPERIMENTAL
 #include "engines-experimental/stree.h"
 #include "engines-experimental/caching.h"
@@ -90,6 +91,8 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
                 } else if (engine == vcmap::ENGINE) {
                     return new vcmap::VCMap(path, size);
                 }
+            } else if (engine == cmap::ENGINE) {
+                return new cmap::CMap(path, size);
             }
         }
         throw runtime_error("Unknown engine name");
@@ -115,6 +118,8 @@ void KVEngine::Stop(KVEngine* kv) {
         delete (vsmap::VSMap*) kv;
     } else if (engine == vcmap::ENGINE) {
         delete (vcmap::VCMap*) kv;
+    } else if (engine == cmap::ENGINE) {
+        delete (cmap::CMap*) kv;
     }
 }
 
