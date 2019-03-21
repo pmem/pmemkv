@@ -2,6 +2,7 @@
 
 <ul>
 <li><a href="#blackhole">blackhole</a></li>
+<li><a href="#cmap">cmap</a></li>
 <li><a href="#vsmap">vsmap</a></li>
 <li><a href="#vcmap">vcmap</a></li>
 <li><a href="#tree3">tree3</a></li>
@@ -27,6 +28,34 @@ No required configuration parameters.  JSON configuration is never parsed.
 Internally, `blackhole` does not use a persistent pool or any durable structures. The intended
 use this engine is to profile and tune high-level bindings, and similar cases when persistence
 should be intentionally skipped.
+
+<a name="cmap"></a>
+
+cmap
+-----
+
+A persistent concurrent engine, backed by a hashmap.
+
+### Configuration
+
+Configuration must specify a `path` to a PMDK persistent pool, which can be a file (on a DAX filesystem),
+a DAX device, or a PMDK poolset file.
+
+```
+{ "path" : "my-pool" }
+```
+
+Configuration may optionally specify a `size` in bytes.
+If omitted the default value of 1073741824 bytes (1GB) is applied.
+This value cannot be smaller than 8388608 (8MB).
+
+```
+{ "path" : "my-pool", "size" : 1073741824 }
+```
+
+### Internals
+
+(add full description here)
 
 <a name="vsmap"></a>
 
