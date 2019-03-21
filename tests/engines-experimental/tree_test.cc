@@ -65,7 +65,7 @@ public:
 
 private:
     void Start() {
-        kv = new Tree(PATH, SIZE);
+        kv = new Tree(nullptr, PATH, SIZE);
     }
 };
 
@@ -74,13 +74,24 @@ private:
 // =============================================================================================
 
 TEST_F(TreeEmptyTest, CreateInstanceTest) {
-    Tree *kv = new Tree(PATH, PMEMOBJ_MIN_POOL);
+    Tree *kv = new Tree(nullptr, PATH, PMEMOBJ_MIN_POOL);
+    delete kv;
+}
+
+struct Context {
+    int64_t count;
+};
+
+TEST_F(TreeEmptyTest, CreateInstanceWithContextTest) {
+    Context cxt = {42};
+    Tree* kv = new Tree(&cxt, PATH, PMEMOBJ_MIN_POOL);
+    ASSERT_TRUE(((Context*) (kv->EngineContext()))->count == 42);
     delete kv;
 }
 
 TEST_F(TreeEmptyTest, FailsToCreateInstanceWithInvalidPath) {
     try {
-        new Tree("/tmp/123/234/345/456/567/678/nope.nope", PMEMOBJ_MIN_POOL);
+        new Tree(nullptr, "/tmp/123/234/345/456/567/678/nope.nope", PMEMOBJ_MIN_POOL);
         FAIL();
     } catch (...) {
         // do nothing, expected to happen
@@ -89,7 +100,7 @@ TEST_F(TreeEmptyTest, FailsToCreateInstanceWithInvalidPath) {
 
 TEST_F(TreeEmptyTest, FailsToCreateInstanceWithHugeSize) {
     try {
-        new Tree(PATH, 9223372036854775807);   // 9.22 exabytes
+        new Tree(nullptr, PATH, 9223372036854775807);   // 9.22 exabytes
         FAIL();
     } catch (...) {
         // do nothing, expected to happen
@@ -98,7 +109,7 @@ TEST_F(TreeEmptyTest, FailsToCreateInstanceWithHugeSize) {
 
 TEST_F(TreeEmptyTest, FailsToCreateInstanceWithTinySize) {
     try {
-        new Tree(PATH, PMEMOBJ_MIN_POOL - 1);  // too small
+        new Tree(nullptr, PATH, PMEMOBJ_MIN_POOL - 1);  // too small
         FAIL();
     } catch (...) {
         // do nothing, expected to happen
@@ -743,7 +754,7 @@ public:
 
     void Restart() {
         delete kv;
-        kv = new Tree(PATH, SIZE);
+        kv = new Tree(nullptr, PATH, SIZE);
     }
 
     void Validate() {
@@ -775,7 +786,7 @@ private:
             ASSERT_TRUE(std::system(("cp -f " + PATH_CACHED + " " + PATH).c_str()) == 0);
         } else {
             std::cout << "!!! creating cached copy at " << PATH_CACHED << "\n";
-            Tree *kvt = new Tree(PATH, SIZE);
+            Tree *kvt = new Tree(nullptr, PATH, SIZE);
             for (int i = 1; i <= LARGE_LIMIT; i++) {
                 string istr = to_string(i);
                 ASSERT_TRUE(kvt->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
@@ -783,7 +794,7 @@ private:
             delete kvt;
             ASSERT_TRUE(std::system(("cp -f " + PATH + " " + PATH_CACHED).c_str()) == 0);
         }
-        kv = new Tree(PATH, SIZE);
+        kv = new Tree(nullptr, PATH, SIZE);
     }
 };
 

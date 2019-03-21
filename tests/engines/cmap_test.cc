@@ -58,7 +58,7 @@ class CMapBaseTest : public testing::Test {
     }
   protected:
     void Start() {
-        kv = new CMap(PATH, POOL_SIZE);
+        kv = new CMap(nullptr, PATH, POOL_SIZE);
     }
 };
 

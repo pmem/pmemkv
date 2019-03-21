@@ -124,10 +124,11 @@ struct KVRecoveredLeaf {                                   // temporary wrapper 
 
 class Tree : public KVEngine {                             // hybrid B+ tree engine
   public:
-    Tree(const string& path, size_t size);
+    Tree(void* context, const string& path, size_t size);
     ~Tree();
 
     string Engine() final { return ENGINE; }
+    void* EngineContext() { return engine_context; }
     void All(void* context, KVAllCallback* callback) final;
     void AllAbove(void* context, const string& key, KVAllCallback* callback) final {};
     void AllBelow(void* context, const string& key, KVAllCallback* callback) final {};
@@ -166,6 +167,7 @@ class Tree : public KVEngine {                             // hybrid B+ tree eng
   private:
     Tree(const Tree&);                                     // prevent copying
     void operator=(const Tree&);                           // prevent assigning
+    void* engine_context;                                  // context when started
     vector<persistent_ptr<KVLeaf>> leaves_prealloc;        // persisted but unused leaves
     pool<KVRoot> pmpool;                                   // pool for persistent root
     unique_ptr<KVNode> tree_top;                           // pointer to uppermost inner node

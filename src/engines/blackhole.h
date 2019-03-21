@@ -41,10 +41,11 @@ const string ENGINE = "blackhole";
 
 class Blackhole : public KVEngine {
   public:
-    Blackhole();
+    Blackhole(void* context);
     ~Blackhole();
 
     string Engine() final { return ENGINE; }
+    void* EngineContext() { return engine_context; }
     void All(void* context, KVAllCallback* callback) final;
     void AllAbove(void* context, const string& key, KVAllCallback* callback) final;
     void AllBelow(void* context, const string& key, KVAllCallback* callback) final;
@@ -71,6 +72,8 @@ class Blackhole : public KVEngine {
     using KVEngine::EachBelow;
     using KVEngine::EachBetween;
     using KVEngine::Get;
+  private:
+    void* engine_context;
 };
 
 } // namespace blackhole

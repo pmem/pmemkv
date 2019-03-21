@@ -39,7 +39,7 @@
 namespace pmemkv {
 namespace blackhole {
 
-Blackhole::Blackhole() {
+Blackhole::Blackhole(void* context) : engine_context(context) {
     LOG("Started ok");
 }
 

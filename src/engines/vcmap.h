@@ -45,10 +45,11 @@ const string ENGINE = "vcmap";
 
 class VCMap : public KVEngine {
   public:
-    VCMap(const string& path, size_t size);
+    VCMap(void* context, const string& path, size_t size);
     ~VCMap();
 
     string Engine() final { return ENGINE; }
+    void* EngineContext() { return engine_context; }
     void All(void* context, KVAllCallback* callback) final;
     void AllAbove(void* context, const string& key, KVAllCallback* callback) final {};
     void AllBelow(void* context, const string& key, KVAllCallback* callback) final {};
@@ -80,6 +81,7 @@ class VCMap : public KVEngine {
     typedef std::basic_string<char, std::char_traits<char>, ch_allocator_t> pmem_string;
     typedef pmem::allocator<std::pair<pmem_string, pmem_string> > kv_allocator_t;
     typedef tbb::concurrent_hash_map <pmem_string, pmem_string, tbb::tbb_hash_compare<pmem_string>, std::scoped_allocator_adaptor<kv_allocator_t>> map_t;
+    void* engine_context;
     kv_allocator_t kv_allocator;
     ch_allocator_t ch_allocator;
     map_t pmem_kv_container;

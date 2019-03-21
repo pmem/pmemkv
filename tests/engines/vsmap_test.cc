@@ -45,7 +45,7 @@ public:
     VSMap* kv;
 
     VSMapBaseTest() {
-        kv = new VSMap(PATH, POOL_SIZE);
+        kv = new VSMap(nullptr, PATH, POOL_SIZE);
     }
 
     ~VSMapBaseTest() {

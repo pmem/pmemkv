@@ -49,7 +49,7 @@
 namespace pmemkv {
 namespace caching {
 
-CachingEngine::CachingEngine(const string& config) {
+CachingEngine::CachingEngine(void* context, const string& config) : engine_context(context) {
     if (!readConfig(config) || !(basePtr = KVEngine::Start(subEngine, subEngineConfig)))
         throw "CachingEngine Exception"; // todo propagate start exceptions properly
     LOG("Started ok");

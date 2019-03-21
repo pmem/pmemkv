@@ -60,10 +60,10 @@ KVEngine* KVEngine::Start(void* context, const string& engine, const string& con
 KVEngine* KVEngine::Start(void* context, const char* engine, const char* config, KVStartFailureCallback* onfail) {
     try {
         if (engine == blackhole::ENGINE) {
-            return new blackhole::Blackhole();
+            return new blackhole::Blackhole(context);
 #ifdef EXPERIMENTAL
         } else if (engine == caching::ENGINE) {
-            return new caching::CachingEngine(config);
+            return new caching::CachingEngine(context, config);
 #endif
         } else {  // handle traditional engines expecting path & size params
             rapidjson::Document d;
@@ -77,22 +77,22 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
             auto path = d["path"].GetString();
             size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;
             if (engine == tree3::ENGINE) {
-                return new tree3::Tree(path, size);
+                return new tree3::Tree(context, path, size);
 #ifdef EXPERIMENTAL
             } else if (engine == stree::ENGINE) {
-                return new stree::STree(path, size);
+                return new stree::STree(context, path, size);
 #endif
             } else if ((engine == vsmap::ENGINE) || (engine == vcmap::ENGINE)) {
                 struct stat info;
                 if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
                     throw runtime_error("Config path is not an existing directory");
                 } else if (engine == vsmap::ENGINE) {
-                    return new vsmap::VSMap(path, size);
+                    return new vsmap::VSMap(context, path, size);
                 } else if (engine == vcmap::ENGINE) {
-                    return new vcmap::VCMap(path, size);
+                    return new vcmap::VCMap(context, path, size);
                 }
             } else if (engine == cmap::ENGINE) {
-                return new cmap::CMap(path, size);
+                return new cmap::CMap(context, path, size);
             }
         }
         throw runtime_error("Unknown engine name");

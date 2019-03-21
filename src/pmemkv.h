@@ -75,6 +75,7 @@ class KVEngine {
     static void Stop(KVEngine* kv);
 
     virtual string Engine() = 0;
+    virtual void* EngineContext() = 0;
 
     virtual void All(void* context, KVAllCallback* callback) = 0;
     void All(std::function<KVAllFunction> f);

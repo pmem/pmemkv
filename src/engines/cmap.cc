@@ -40,7 +40,7 @@
 namespace pmemkv {
 namespace cmap {
 
-CMap::CMap(const string& path, size_t size) {
+CMap::CMap(void* context, const string& path, size_t size) : engine_context(context) {
     if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
         LOG("Creating filesystem pool, path=" << path << ", size=" << to_string(size));
         pmpool = pool_t::create(path.c_str(), LAYOUT, size, S_IRWXU);

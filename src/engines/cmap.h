@@ -66,13 +66,14 @@ const string ENGINE = "cmap";
 
 class CMap : public KVEngine {
   public:
-    CMap(const string& path, size_t size);
+    CMap(void* context, const string& path, size_t size);
     ~CMap();
 
     CMap(const CMap&) = delete;
     CMap& operator=(const CMap&) = delete;
 
     string Engine() final { return ENGINE; }
+    void* EngineContext() { return engine_context; }
     void All(void* context, KVAllCallback* callback) final;
     void AllAbove(void* context, const string& key, KVAllCallback* callback) final {}
     void AllBelow(void* context, const string& key, KVAllCallback* callback) final {}
@@ -109,6 +110,7 @@ class CMap : public KVEngine {
     using pool_t = pmem::obj::pool<RootData>;
 
     void Recover();
+    void* engine_context;
     pool_t pmpool;
     map_t* container;
 };

@@ -50,7 +50,7 @@ using pmem::detail::conditional_add_to_tx;
 namespace pmemkv {
 namespace stree {
 
-STree::STree(const string& path, const size_t size) {
+STree::STree(void* context, const string& path, const size_t size) : engine_context(context) {
     if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
         LOG("Creating filesystem pool, path=" << path << ", size=" << to_string(size));
         pmpool = pool<RootData>::create(path.c_str(), LAYOUT, size, S_IRWXU);

@@ -62,7 +62,7 @@ class STreeBaseTest : public testing::Test {
 
   protected:
     void Start() {
-        kv = new STree(PATH, POOL_SIZE);
+        kv = new STree(nullptr, PATH, POOL_SIZE);
     }
 };
 

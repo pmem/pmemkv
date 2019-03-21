@@ -44,10 +44,11 @@ static int ttl;  // todo move into private field
 
 class CachingEngine : public KVEngine {
   public:
-    CachingEngine(const string& config);
+    CachingEngine(void* context, const string& config);
     ~CachingEngine();
 
     string Engine() final { return ENGINE; }
+    void* EngineContext() { return engine_context; }
     void All(void* context, KVAllCallback* callback) final;
     void AllAbove(void* context, const string& key, KVAllCallback* callback) final {};
     void AllBelow(void* context, const string& key, KVAllCallback* callback) final {};
@@ -80,6 +81,7 @@ class CachingEngine : public KVEngine {
     bool getFromRemoteMemcached(const string& key, string& value);
     bool getKey(const string& key, string& valueField, bool api_flag);
 
+    void* engine_context;
     int attempts;
     KVEngine* basePtr;
     string host;

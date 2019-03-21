@@ -40,7 +40,8 @@
 namespace pmemkv {
 namespace vsmap {
 
-VSMap::VSMap(const string& path, size_t size) : kv_allocator(path, size), ch_allocator(kv_allocator),
+VSMap::VSMap(void* context, const string& path, size_t size) : engine_context(context),
+             kv_allocator(path, size), ch_allocator(kv_allocator),
              pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator)) {
     LOG("Started ok");
 }

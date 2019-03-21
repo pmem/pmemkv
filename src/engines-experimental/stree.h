@@ -51,10 +51,11 @@ const size_t MAX_VALUE_SIZE = 200;
 
 class STree : public KVEngine {
   public:
-    STree(const string& path, size_t size);
+    STree(void* context, const string& path, size_t size);
     ~STree();
 
     string Engine() final { return ENGINE; }
+    void* EngineContext() { return engine_context; }
     void All(void* context, KVAllCallback* callback) final;
     void AllAbove(void* context, const string& key, KVAllCallback* callback) final {};
     void AllBelow(void* context, const string& key, KVAllCallback* callback) final {};
@@ -89,6 +90,7 @@ class STree : public KVEngine {
     STree(const STree&);
     void operator=(const STree&);
     void Recover();
+    void* engine_context;
     pool<RootData> pmpool;
     btree_type* my_btree;
 };

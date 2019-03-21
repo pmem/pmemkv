@@ -45,7 +45,7 @@ class VCMapBaseTest : public testing::Test {
     VCMap* kv;
 
     VCMapBaseTest() {
-        kv = new VCMap(PATH, POOL_SIZE);
+        kv = new VCMap(nullptr, PATH, POOL_SIZE);
     }
 
     ~VCMapBaseTest() {

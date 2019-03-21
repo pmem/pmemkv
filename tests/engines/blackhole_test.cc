@@ -39,7 +39,7 @@ class BlackholeTest : public testing::Test {
   public:
     Blackhole* kv;
 
-    BlackholeTest() { kv = new Blackhole(); }
+    BlackholeTest() { kv = new Blackhole(nullptr); }
 
     ~BlackholeTest() {}
 };
