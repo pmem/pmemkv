@@ -1,0 +1,120 @@
+/*
+ * Copyright 2017-2019, Intel Corporation
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *
+ *     * Neither the name of the copyright holder nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "../pmemkv.h"
+
+#include <libpmemobj++/pool.hpp>
+#include <libpmemobj++/persistent_ptr.hpp>
+#include <libpmemobj++/experimental/string.hpp>
+#include <libpmemobj++/experimental/concurrent_hash_map.hpp>
+
+namespace std {
+template<>
+struct hash<pmem::obj::experimental::string> {
+    template <unsigned u, unsigned long long ull >
+    struct select_size_t_constant {
+        static const size_t value = (size_t)((sizeof(size_t)==sizeof(u)) ? u : ull);
+    };
+
+    static const size_t hash_multiplier = select_size_t_constant<2654435769U, 11400714819323198485ULL>::value;
+
+    size_t operator()(const pmem::obj::experimental::string &str) {
+        size_t h = 0;
+        for(size_t i = 0; i < str.size(); ++i) {
+            h = static_cast<size_t>(str[i]) ^ (h * hash_multiplier);
+        }
+        return h;
+    }
+};
+}
+
+namespace pmemkv {
+namespace cmap {
+
+const string ENGINE = "cmap";
+
+class CMap : public KVEngine {
+  public:
+    CMap(const string& path, size_t size);
+    ~CMap();
+
+    CMap(const CMap&) = delete;
+    CMap& operator=(const CMap&) = delete;
+
+    string Engine() final { return ENGINE; }
+    void All(void* context, KVAllCallback* callback) final;
+    void AllAbove(void* context, const string& key, KVAllCallback* callback) final {}
+    void AllBelow(void* context, const string& key, KVAllCallback* callback) final {}
+    void AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) final {}
+    int64_t Count() final;
+    int64_t CountAbove(const string& key) final { return 0; }
+    int64_t CountBelow(const string& key) final { return 0; }
+    int64_t CountBetween(const string& key1, const string& key2) final { return 0; }
+    void Each(void* context, KVEachCallback* callback) final;
+    void EachAbove(void* context, const string& key, KVEachCallback* callback) final {}
+    void EachBelow(void* context, const string& key, KVEachCallback* callback) final {}
+    void EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) final {}
+    KVStatus Exists(const string& key) final;
+    void Get(void* context, const string& key, KVGetCallback* callback) final;
+    KVStatus Put(const string& key, const string& value) final;
+    KVStatus Remove(const string& key) final;
+
+    using KVEngine::All;
+    using KVEngine::AllAbove;
+    using KVEngine::AllBelow;
+    using KVEngine::AllBetween;
+    using KVEngine::Each;
+    using KVEngine::EachAbove;
+    using KVEngine::EachBelow;
+    using KVEngine::EachBetween;
+    using KVEngine::Get;
+  private:
+    using string_t = pmem::obj::experimental::string;
+    using map_t = pmem::obj::experimental::concurrent_hash_map<string_t, string_t>;
+
+    struct RootData {
+        pmem::obj::persistent_ptr<map_t> map_ptr;
+    };
+
+    using pool_t = pmem::obj::pool<RootData>;
+
+    void Recover();
+
+    pool_t pmpool;
+
+    map_t* container;
+};
+
+} // namespace cmap
+} // namespace pmemkv
