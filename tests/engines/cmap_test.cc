@@ -383,6 +383,119 @@ TEST_F(CMapTest, UsesEachTest) {
 }
 
 // =============================================================================================
+// TEST RECOVERY
+// =============================================================================================
+
+TEST_F(CMapTest, GetHeadlessAfterRecoveryTest) {
+    Restart();
+    string value;
+    ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
+}
+
+
+TEST_F(CMapTest, GetMultipleAfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("abc", "A1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("def", "B2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("hij", "C3") == OK) << pmemobj_errormsg();
+    Restart();
+    ASSERT_TRUE(kv->Put("jkl", "D4") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("mno", "E5") == OK) << pmemobj_errormsg();
+    string value1;
+    ASSERT_TRUE(kv->Get("abc", &value1) == OK && value1 == "A1");
+    string value2;
+    ASSERT_TRUE(kv->Get("def", &value2) == OK && value2 == "B2");
+    string value3;
+    ASSERT_TRUE(kv->Get("hij", &value3) == OK && value3 == "C3");
+    string value4;
+    ASSERT_TRUE(kv->Get("jkl", &value4) == OK && value4 == "D4");
+    string value5;
+    ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
+}
+
+TEST_F(CMapTest, GetMultiple2AfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("key2", "value2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("key3", "value3") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Remove("key2") == OK);
+    ASSERT_TRUE(kv->Put("key3", "VALUE3") == OK) << pmemobj_errormsg();
+    Restart();
+    string value1;
+    ASSERT_TRUE(kv->Get("key1", &value1) == OK && value1 == "value1");
+    string value2;
+    ASSERT_TRUE(kv->Get("key2", &value2) == NOT_FOUND);
+    string value3;
+    ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
+}
+
+TEST_F(CMapTest, GetNonexistentAfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
+    Restart();
+    string value;
+    ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
+}
+
+TEST_F(CMapTest, PutAfterRecoveryTest) {
+    string value;
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
+
+    string new_value;
+    ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK) << pmemobj_errormsg();           // same size
+    ASSERT_TRUE(kv->Get("key1", &new_value) == OK && new_value == "VALUE1");
+    Restart();
+
+    string new_value2;
+    ASSERT_TRUE(kv->Put("key1", "new_value") == OK) << pmemobj_errormsg();        // longer size
+    ASSERT_TRUE(kv->Get("key1", &new_value2) == OK && new_value2 == "new_value");
+
+    string new_value3;
+    ASSERT_TRUE(kv->Put("key1", "?") == OK) << pmemobj_errormsg();                // shorter size
+    ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
+}
+
+TEST_F(CMapTest, RemoveAllAfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
+    Restart();
+    ASSERT_TRUE(kv->Remove("tmpkey") == OK);
+    string value;
+    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
+}
+
+TEST_F(CMapTest, RemoveAndInsertAfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
+    Restart();
+    ASSERT_TRUE(kv->Remove("tmpkey") == OK);
+    string value;
+    ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
+    ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
+}
+
+TEST_F(CMapTest, RemoveExistingAfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Put("tmpkey2", "tmpvalue2") == OK) << pmemobj_errormsg();
+    ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
+    Restart();
+    ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND);
+    string value;
+    ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
+}
+
+TEST_F(CMapTest, RemoveHeadlessAfterRecoveryTest) {
+    Restart();
+    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
+}
+
+TEST_F(CMapTest, RemoveNonexistentAfterRecoveryTest) {
+    ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
+    Restart();
+    ASSERT_TRUE(kv->Remove("nada") == NOT_FOUND);
+}
+
+// =============================================================================================
 // TEST LARGE COLLECTIONS
 // =============================================================================================
 
@@ -403,6 +516,22 @@ TEST_F(CMapLargeTest, LargeAscendingTest) {
     ASSERT_TRUE(kv->Count() == LARGE_LIMIT);
 }
 
+TEST_F(CMapLargeTest, LargeAscendingAfterRecoveryTest) {
+    for (int i = 1; i <= LARGE_LIMIT; i++) {
+        string istr = to_string(i);
+        ASSERT_TRUE(kv->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
+        string value;
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
+    }
+    Restart();
+    for (int i = 1; i <= LARGE_LIMIT; i++) {
+        string istr = to_string(i);
+        string value;
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
+    }
+    ASSERT_TRUE(kv->Count() == LARGE_LIMIT);
+}
+
 TEST_F(CMapLargeTest, LargeDescendingTest) {
     for (int i = LARGE_LIMIT; i >= 1; i--) {
         string istr = to_string(i);
@@ -410,6 +539,22 @@ TEST_F(CMapLargeTest, LargeDescendingTest) {
         string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
+    for (int i = LARGE_LIMIT; i >= 1; i--) {
+        string istr = to_string(i);
+        string value;
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
+    }
+    ASSERT_TRUE(kv->Count() == LARGE_LIMIT);
+}
+
+TEST_F(CMapLargeTest, LargeDescendingAfterRecoveryTest) {
+    for (int i = LARGE_LIMIT; i >= 1; i--) {
+        string istr = to_string(i);
+        ASSERT_TRUE(kv->Put(istr, ("ABC" + istr)) == OK) << pmemobj_errormsg();
+        string value;
+        ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
+    }
+    Restart();
     for (int i = LARGE_LIMIT; i >= 1; i--) {
         string istr = to_string(i);
         string value;

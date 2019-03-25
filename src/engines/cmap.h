@@ -33,23 +33,23 @@
 #pragma once
 
 #include "../pmemkv.h"
+#include "../polymorphic_string.h"
 
 #include <libpmemobj++/pool.hpp>
 #include <libpmemobj++/persistent_ptr.hpp>
-#include <libpmemobj++/experimental/string.hpp>
 #include <libpmemobj++/experimental/concurrent_hash_map.hpp>
 
 namespace std {
 template<>
-struct hash<pmem::obj::experimental::string> {
-    template<unsigned u, unsigned long long ull>
+struct hash<pmemkv::polymorphic_string> {
+    template <unsigned u, unsigned long long ull >
     struct select_size_t_constant {
         static const size_t value = (size_t) ((sizeof(size_t) == sizeof(u)) ? u : ull);
     };
 
     static const size_t hash_multiplier = select_size_t_constant<2654435769U, 11400714819323198485ULL>::value;
 
-    size_t operator()(const pmem::obj::experimental::string& str) {
+    size_t operator()(const pmemkv::polymorphic_string &str) {
         size_t h = 0;
         for (size_t i = 0; i < str.size(); ++i) {
             h = static_cast<size_t>(str[i]) ^ (h * hash_multiplier);
@@ -101,7 +101,7 @@ class CMap : public KVEngine {
     using KVEngine::EachBetween;
     using KVEngine::Get;
   private:
-    using string_t = pmem::obj::experimental::string;
+    using string_t = pmemkv::polymorphic_string;
     using map_t = pmem::obj::experimental::concurrent_hash_map<string_t, string_t>;
 
     struct RootData {
