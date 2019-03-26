@@ -39,8 +39,8 @@ set -e
 
 git clone https://github.com/pmem/libpmemobj-cpp
 cd libpmemobj-cpp
-# master (right after 1.6) with hash map; March 18th
-git checkout d4206a821d7cfa176fb1b27253295d364d2335da
+# master (after 1.6) with hash map and pmem string; March 21th
+git checkout 8d86c76c81167d9e352158ad87f169f554e5d794
 
 mkdir build
 cd build
