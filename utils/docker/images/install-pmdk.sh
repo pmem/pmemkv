@@ -38,8 +38,8 @@ set -e
 
 git clone https://github.com/pmem/pmdk
 cd pmdk
-# stable-1.6; 1.6-rc3
-git checkout d41159e25485f484f8238145e2c5dc280b6c868e
+# stable-1.6
+git checkout 695e6eba28c53a69a0ef7bad3cc0f45c21ef3e00 
 
 make BUILD_PACKAGE_CHECK=n $1
 if [ "$1" = "dpkg" ]; then
