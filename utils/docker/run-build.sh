@@ -42,8 +42,7 @@ cd $WORKDIR
 PREFIX=/usr/local
 
 # make & install
-#XXX: temporarily: without test!
-make clean configure reset sharedlib
+make
 echo $USERPASS | sudo -S make install
 
 # verify installed package
