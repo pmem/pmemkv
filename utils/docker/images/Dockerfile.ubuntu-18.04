@@ -1,6 +1,5 @@
-#!/usr/bin/env bash
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2016-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,27 +30,68 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# run-build.sh - is called inside a Docker container,
-#                starts pmemkv build with tests.
+# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
+#              environment prepared for running pmemkv build and tests.
 #
 
-set -e
-echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
+# Pull base image
+FROM ubuntu:18.04
+MAINTAINER robert.a.dickinson@intel.com
 
-cd $WORKDIR
-PREFIX=/usr/local
+# Update the Apt cache and install basic tools
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common \
+	autoconf \
+	automake \
+	clang \
+	cmake \
+	debhelper \
+	devscripts \
+	doxygen \
+	gcc \
+	g++ \
+	git \
+	libdaxctl-dev \
+	libjson-c-dev \
+	libkmod-dev \
+	libncurses5-dev \
+	libndctl-dev \
+	libnuma-dev \
+	libtool \
+	libudev-dev \
+	libunwind8-dev \
+	numactl \
+	pkg-config \
+	rapidjson-dev \
+	sudo \
+	wget \
+	whois \
+ && rm -rf /var/lib/apt/lists/*
 
-# make & install
-#XXX: temporarily: without test!
-make clean configure reset sharedlib
-echo $USERPASS | sudo -S make install
+# Install valgrind
+#COPY install-valgrind.sh install-valgrind.sh
+#RUN ./install-valgrind.sh
 
-# verify installed package
-LIBFILE=$PREFIX/lib/libpmemkv.so
-HEADERFILE=$PREFIX/include/libpmemkv.h
+# Install pmdk
+COPY install-pmdk.sh install-pmdk.sh
+RUN ./install-pmdk.sh dpkg
 
-if [[ -f $LIBFILE && -f $HEADERFILE ]]; then
-	echo "Correctly installed"
-else
-	echo "Installation not successful"
-fi
+# Install pmdk c++ bindings
+COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
+RUN ./install-libpmemobj-cpp.sh DEB
+
+# Install memkind
+COPY install-memkind.sh install-memkind.sh
+RUN ./install-memkind.sh
+
+# Add user
+ENV USER user
+ENV USERPASS pass
+RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
+USER $USER
+
+# Set required environment variables
+ENV OS ubuntu
+ENV OS_VER 18.04
+ENV PACKAGE_MANAGER dpkg
+ENV NOTTY 1

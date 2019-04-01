@@ -51,7 +51,6 @@ RUN dnf update -y \
 	gcc-c++ \
 	gdb \
 	git \
-	hub \
 	libtool \
 	make \
 	man \
