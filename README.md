@@ -150,6 +150,7 @@ in sync with the main `pmemkv` distribution.
 * Java - https://github.com/pmem/pmemkv-java
 * Node.js - https://github.com/pmem/pmemkv-nodejs
 * Ruby - https://github.com/pmem/pmemkv-ruby
+* Python - https://github.com/pmem/pmemkv-python (coming soon!)
 
 <a name="engines"></a>
 
