@@ -12,6 +12,7 @@ Contents
 <ul>
 <li><a href="#building_from_sources">Building from Sources</a></li>
 <li><a href="#fedora">Installing on Fedora</a></li>
+<li><a href="#ubuntu">Installing on Ubuntu</a></li>
 <li><a href="#experimental">Using Experimental Engines</a></li>
 <li><a href="#pool_set">Using a Pool Set</a></li>
 </ul>
@@ -135,6 +136,68 @@ git clone https://github.com/pmem/pmemkv
 cd pmemkv
 make
 su -c 'make install'
+```
+
+<a name="ubuntu"></a>
+
+Installing on Ubuntu
+--------------------
+
+Install required packages:
+
+```sh
+sudo apt install autoconf automake cmake libdaxctl-dev doxygen gcc g++ libtool libndctl-dev libnuma-dev rapidjson-dev libtbb-dev
+```
+
+Configure for proxy if necessary:
+
+```sh
+git config --global http.proxy <YOUR PROXY>
+export HTTP_PROXY="<YOUR PROXY>"
+export HTTPS_PROXY="<YOUR PROXY>"
+```
+
+Install latest PMDK:
+
+```sh
+cd ~
+git clone https://github.com/pmem/pmdk
+cd pmdk
+make -j8
+sudo make install
+```
+
+Install latest PMDK C++ bindings:
+
+```sh
+cd ~
+git clone https://github.com/pmem/libpmemobj-cpp
+cd libpmemobj-cpp
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+```
+
+Install latest memkind:
+
+```sh
+cd ~
+git clone https://github.com/memkind/memkind
+cd memkind
+./build.sh
+sudo make install
+```
+
+Build pmemkv:
+
+```sh
+cd ~
+git clone https://github.com/pmem/pmemkv
+cd pmemkv
+make
+sudo make install
 ```
 
 <a name="experimental"></a>
