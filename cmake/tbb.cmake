@@ -311,4 +311,3 @@ endfunction()
 
 tbb_get(TBB_ROOT tbb_root CONFIG_DIR TBB_DIR)
 find_package(TBB REQUIRED COMPONENTS tbb)
-target_link_libraries(pmemkv ${TBB_IMPORTED_TARGETS})

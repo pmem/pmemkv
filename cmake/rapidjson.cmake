@@ -48,4 +48,3 @@ endif()
 
 include_directories(${RapidJSON_INCLUDE_DIRS})
 link_directories(${RapidJSON_LIBRARY_DIRS})
-target_link_libraries(pmemkv ${RapidJSON_LIBRARIES})

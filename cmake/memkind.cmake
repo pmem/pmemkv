@@ -52,4 +52,3 @@ endif()
 
 link_directories(${MEMKIND_LIBRARY_DIRS})
 include_directories(${MEMKIND_INCLUDE_DIRS})
-target_link_libraries(pmemkv ${MEMKIND_LIBRARIES})
