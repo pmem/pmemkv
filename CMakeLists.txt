@@ -62,6 +62,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 find_package(PkgConfig QUIET)
 include(ExternalProject)
 include(FindThreads)
+include(CheckCXXSourceCompiles)
 
 add_library(pmemkv SHARED ${SOURCE_FILES})
 include(memkind)
