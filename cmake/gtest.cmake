@@ -43,4 +43,3 @@ set_target_properties(libgtest PROPERTIES "IMPORTED_LOCATION" "${binary_dir}/lib
                       "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}")
 
 include_directories("${source_dir}/include")
-target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})

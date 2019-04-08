@@ -29,11 +29,37 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 if(PKG_CONFIG_FOUND)
+# XXX uncomment when libpmemobj-cpp 1.7 is released
+#    pkg_check_modules(PMEMOBJ++ REQUIRED libpmemobj++>=1.7)
     pkg_check_modules(PMEMOBJ++ REQUIRED libpmemobj++)
 else()
     find_package(PMEMOBJ++ REQUIRED)
 endif()
 
+set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
+set(CMAKE_REQUIRED_INCLUDES ${PMEMOBJ++_INCLUDE_DIRS})
+CHECK_CXX_SOURCE_COMPILES(
+	"#include <libpmemobj++/experimental/string.hpp>
+	int main() {}"
+	PMEM_STRING_PRESENT)
+set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
+
+if(NOT PMEM_STRING_PRESENT)
+	message(FATAL_ERROR "libpmemobj++/experimental/string.hpp not found (available in libpmemobj-cpp >= 1.6")
+endif()
+
+# XXX make it optional?
+set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
+set(CMAKE_REQUIRED_INCLUDES ${PMEMOBJ++_INCLUDE_DIRS})
+CHECK_CXX_SOURCE_COMPILES(
+	"#include <libpmemobj++/experimental/concurrent_hash_map.hpp>
+	int main() {}"
+	PMEM_CONCURRENT_HASH_MAP_PRESENT)
+set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
+
+if(NOT PMEM_CONCURRENT_HASH_MAP_PRESENT)
+	message(FATAL_ERROR "libpmemobj++/experimental/concurrent_hash_map.hpp not found (available in libpmemobj-cpp > 1.6")
+endif()
+
 include_directories(${PMEMOBJ++_INCLUDE_DIRS})
 link_directories(${PMEMOBJ++_LIBRARY_DIRS})
-target_link_libraries(pmemkv ${PMEMOBJ++_LIBRARIES})

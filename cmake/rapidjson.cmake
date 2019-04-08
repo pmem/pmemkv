@@ -28,4 +28,23 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-find_package(RapidJSON REQUIRED)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(RapidJSON RapidJSON)
+endif()
+
+if(NOT RapidJSON_FOUND)
+    # try old method
+    find_package(RapidJSON REQUIRED)
+
+    if(RapidJSON_FOUND)
+        set(RapidJSON_LIBRARIES ${RapidJSON_LIBRARY})
+        set(RapidJSON_INCLUDE_DIRS ${RapidJSON_INCLUDE_DIR})
+    endif()
+endif()
+
+if(NOT RapidJSON_FOUND)
+    message(FATAL_ERROR "RapidJSON library not found")
+endif()
+
+include_directories(${RapidJSON_INCLUDE_DIRS})
+link_directories(${RapidJSON_LIBRARY_DIRS})

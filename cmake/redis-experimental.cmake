@@ -28,9 +28,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# FIXME hardcoded paths is a VERY bad idea
 set(LIB_ACL $ENV{HOME}/work/libacl/lib_acl)
 set(LIB_ACL_CPP $ENV{HOME}/work/libacl/lib_acl_cpp)
 set(LIB_PROTOCOL $ENV{HOME}/work/libacl/lib_protocol/lib)
 
 include_directories(${LIB_ACL}/include ${LIB_ACL_CPP}/include/acl_cpp)
-target_link_libraries(pmemkv -L${LIB_ACL_CPP}/lib acl_cpp -L${LIB_PROTOCOL} protocol -L${LIB_ACL}/lib acl)
+link_directories(${LIB_ACL_CPP}/lib ${LIB_PROTOCOL} ${LIB_ACL}/lib)

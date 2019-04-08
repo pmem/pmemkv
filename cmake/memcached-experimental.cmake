@@ -28,6 +28,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# FIXME hardcoded path is a VERY bad idea
 set(MEMCACHED_INCLUDE $ENV{HOME}/work/libmemcached)
+
 include_directories(${MEMCACHED_INCLUDE})
-target_link_libraries(pmemkv pthread memcached)

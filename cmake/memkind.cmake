@@ -28,19 +28,27 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-include(FindPackageHandleStandardArgs)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(MEMKIND memkind)
+endif()
 
-find_path(MEMKIND_INCLUDE_DIR pmem_allocator.h)
-find_library(MEMKIND_LIBRARY NAMES memkind libmemkind)
-mark_as_advanced(MEMKIND_LIBRARY MEMKIND_INCLUDE_DIR)
-find_package_handle_standard_args(MEMKIND DEFAULT_MSG MEMKIND_INCLUDE_DIR MEMKIND_LIBRARY)
+if(NOT MEMKIND_FOUND)
+    # try old method
+    include(FindPackageHandleStandardArgs)
+    find_path(MEMKIND_INCLUDE_DIR pmem_allocator.h)
+    find_library(MEMKIND_LIBRARY NAMES memkind libmemkind)
+    mark_as_advanced(MEMKIND_LIBRARY MEMKIND_INCLUDE_DIR)
+    find_package_handle_standard_args(MEMKIND DEFAULT_MSG MEMKIND_INCLUDE_DIR MEMKIND_LIBRARY)
 
-if(MEMKIND_FOUND)
-    set(MEMKIND_LIBRARIES ${MEMKIND_LIBRARY})
-    set(MEMKIND_INCLUDE_DIRS ${MEMKIND_INCLUDE_DIR})
-else()
+    if(MEMKIND_FOUND)
+        set(MEMKIND_LIBRARIES ${MEMKIND_LIBRARY})
+        set(MEMKIND_INCLUDE_DIRS ${MEMKIND_INCLUDE_DIR})
+    endif()
+endif()
+
+if(NOT MEMKIND_FOUND)
     message(FATAL_ERROR "Memkind library not found")
 endif()
 
+link_directories(${MEMKIND_LIBRARY_DIRS})
 include_directories(${MEMKIND_INCLUDE_DIRS})
-target_link_libraries(pmemkv ${MEMKIND_LIBRARIES})
