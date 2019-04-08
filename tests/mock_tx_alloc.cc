@@ -54,3 +54,17 @@ PMEMoid pmemobj_tx_alloc(size_t size, uint64_t type_num) {
 
     return real(size, type_num);
 }
+
+PMEMoid pmemobj_tx_xalloc(size_t size, uint64_t type_num, uint64_t flags) {
+    static auto real = (decltype(pmemobj_tx_xalloc)*)dlsym(RTLD_NEXT, "pmemobj_tx_xalloc");
+
+    if (real == nullptr)
+        abort();
+
+    if (tx_alloc_should_fail) {
+        errno = ENOMEM;
+        return OID_NULL;
+    }
+
+    return real(size, type_num, flags);
+}

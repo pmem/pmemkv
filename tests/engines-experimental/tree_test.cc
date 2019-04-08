@@ -741,7 +741,6 @@ TEST_F(TreeTest, LargeDescendingAfterRecoveryTest) {
 // TEST RUNNING OUT OF SPACE
 // =============================================================================================
 
-/* TEMPORARILY DISABLED -- todo https://github.com/pmem/pmemkv/issues/157
 class TreeFullTest : public testing::Test {
 public:
     Tree *kv;
@@ -895,4 +894,3 @@ TEST_F(TreeFullTest, RepeatedRecoveryTest) {
     for (int i = 1; i <= 100; i++) Restart();
     Validate();
 }
-*/
