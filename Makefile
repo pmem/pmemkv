@@ -13,8 +13,13 @@ configure:
 	mkdir -p ./bin
 	cd ./bin && cmake .. -DCMAKE_BUILD_TYPE=Release
 
-sharedlib:
+build: configure
 	cd ./bin && make pmemkv
+
+test: configure reset
+	cd ./bin && make pmemkv_test
+	PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_test
+	$(MAKE) reset
 
 install:
 	cp ./bin/libpmemkv.so $(prefix)/lib
@@ -23,8 +28,3 @@ install:
 uninstall:
 	rm -rf $(prefix)/lib/libpmemkv.so
 	rm -rf $(prefix)/include/libpmemkv.h
-
-test: configure reset
-	cd ./bin && make pmemkv_test
-	PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_test
-	rm -rf /dev/shm/pmemkv /tmp/pmemkv

@@ -40,9 +40,10 @@ tests.
 git clone https://github.com/pmem/pmemkv
 cd pmemkv
 
-make                    # build everything and run tests
-make test               # build and run unit tests
-make clean              # remove build files
+make                    # build everything and run all tests
+make clean              # remove all build & temporary files
+make build              # build shared library without running tests
+make test               # rebuild shared library and run all tests
 ```
 
 **Managing shared library**
