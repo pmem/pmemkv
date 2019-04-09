@@ -38,8 +38,8 @@ set -e
 
 git clone https://github.com/memkind/memkind
 cd memkind
-# 1.8.0
-git checkout v1.8.0
+# 1.9.0
+git checkout v1.9.0
 
 ./build.sh
 sudo make install
