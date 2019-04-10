@@ -39,6 +39,7 @@ if(NOT RapidJSON_FOUND)
     if(RapidJSON_FOUND)
         set(RapidJSON_LIBRARIES ${RapidJSON_LIBRARY})
         set(RapidJSON_INCLUDE_DIRS ${RapidJSON_INCLUDE_DIR})
+        message(STATUS "RapidJSON library found the old way (w/o pkg-config)")
     endif()
 endif()
 

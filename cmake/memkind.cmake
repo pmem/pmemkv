@@ -43,6 +43,7 @@ if(NOT MEMKIND_FOUND)
     if(MEMKIND_FOUND)
         set(MEMKIND_LIBRARIES ${MEMKIND_LIBRARY})
         set(MEMKIND_INCLUDE_DIRS ${MEMKIND_INCLUDE_DIR})
+        message(STATUS "Memkind library found the old way (w/o pkg-config)")
     endif()
 endif()
 
