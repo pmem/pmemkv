@@ -42,7 +42,13 @@ cd $WORKDIR
 PREFIX=/usr/local
 
 # make & install
-make
+mkdir bin
+cd bin
+cmake .. -DCMAKE_BUILD_TYPE=Release \
+	-DTBB_DIR=/opt/tbb/cmake \
+	-DCMAKE_INSTALL_PREFIX=$PREFIX
+cd ..
+make test
 echo $USERPASS | sudo -S make install
 
 # verify installed package

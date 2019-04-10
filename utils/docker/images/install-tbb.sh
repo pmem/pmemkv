@@ -1,4 +1,6 @@
-# Copyright 2017-2019, Intel Corporation
+#!/usr/bin/env bash
+#
+# Copyright 2018-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,21 +30,17 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-if(PKG_CONFIG_FOUND)
-	pkg_check_modules(TBB tbb)
-endif()
+#
+# install-tbb.sh - installs tbb library
+#
 
-if(NOT TBB_FOUND)
-	# find_package without unsetting this var is not working correctly
-	unset(TBB_FOUND CACHE)
-	find_package(TBB COMPONENTS tbb)
-
-	if(TBB_FOUND)
-		message(STATUS "TBB package found without pkg-config")
-	endif()
-endif()
-
-if(NOT TBB_FOUND)
-	message(FATAL_ERROR "TBB not found. Please set TBB_DIR CMake variable if TBB \
-is installed in a non-standard directory, like: -DTBB_DIR=<path_to_tbb_cmake_dir>")
-endif()
+mkdir tbb
+cd tbb
+# Download and save tbb packages
+wget https://github.com/01org/tbb/releases/download/2019_U5/tbb2019_20190320oss_lin.tgz
+tar -xzf tbb2019_20190320oss_lin.tgz
+sudo rm -rf /opt/tbb
+sudo mkdir /opt/tbb
+sudo mv tbb2019_20190320oss/* /opt/tbb/.
+cd ..
+rm -rf tbb
