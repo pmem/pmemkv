@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2018-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,32 +31,17 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# run-build.sh - is called inside a Docker container,
-#                starts pmemkv build with tests.
+# install-tbb.sh - installs tbb library
 #
 
-set -e
-echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
-
-cd $WORKDIR
-PREFIX=/usr/local
-
-# make & install
-mkdir bin
-cd bin
-cmake .. -DCMAKE_BUILD_TYPE=Release \
-	-DTBB_DIR=/opt/tbb/cmake \
-	-DCMAKE_INSTALL_PREFIX=$PREFIX
+mkdir tbb
+cd tbb
+# Download and save tbb packages
+wget https://github.com/01org/tbb/releases/download/2019_U5/tbb2019_20190320oss_lin.tgz
+tar -xzf tbb2019_20190320oss_lin.tgz
+sudo rm -rf /opt/tbb
+sudo mkdir /opt/tbb
+sudo mv tbb2019_20190320oss/* /opt/tbb/.
 cd ..
-make test
-echo $USERPASS | sudo -S make install
+rm -rf tbb
 
-# verify installed package
-LIBFILE=$PREFIX/lib/libpmemkv.so
-HEADERFILE=$PREFIX/include/libpmemkv.h
-
-if [[ -f $LIBFILE && -f $HEADERFILE ]]; then
-	echo "Correctly installed"
-else
-	echo "Installation not successful"
-fi

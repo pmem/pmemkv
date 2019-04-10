@@ -29,7 +29,7 @@ Building from Sources
 * [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings for PMDK
 * [memkind](https://github.com/memkind/memkind) - Volatile memory manager
 * [RapidJSON](https://github.com/tencent/rapidjson) - JSON parser
-* [TBB](https://github.com/01org/tbb) - Thread Building Blocks
+* [TBB](https://github.com/01org/tbb) - Thread Building Blocks; if you want to install it in a non-standard path, please run CMake with additional parameter ```-DTBB_DIR=<path_to_tbb_cmake>```
 
 **Building and running tests**
 
