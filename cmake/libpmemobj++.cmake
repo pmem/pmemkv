@@ -30,14 +30,17 @@
 
 if(PKG_CONFIG_FOUND)
 # XXX uncomment when libpmemobj-cpp 1.7 is released
-#    pkg_check_modules(PMEMOBJ++ REQUIRED libpmemobj++>=1.7)
-    pkg_check_modules(PMEMOBJ++ REQUIRED libpmemobj++)
+#    pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++>=1.7)
+    pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++)
 else()
-    find_package(PMEMOBJ++ REQUIRED)
+	# find_package without unsetting this var is not working correctly
+	unset(LIBPMEMOBJ++_FOUND CACHE)
+	find_package(LIBPMEMOBJ++ REQUIRED libpmemobj++)
+	message(STATUS "libpmemobj++ found the old way (w/o pkg-config)")
 endif()
 
 set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
-set(CMAKE_REQUIRED_INCLUDES ${PMEMOBJ++_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_INCLUDES ${LIBPMEMOBJ++_INCLUDE_DIRS})
 CHECK_CXX_SOURCE_COMPILES(
 	"#include <libpmemobj++/experimental/string.hpp>
 	int main() {}"
@@ -50,7 +53,7 @@ endif()
 
 # XXX make it optional?
 set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
-set(CMAKE_REQUIRED_INCLUDES ${PMEMOBJ++_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_INCLUDES ${LIBPMEMOBJ++_INCLUDE_DIRS})
 CHECK_CXX_SOURCE_COMPILES(
 	"#include <libpmemobj++/experimental/concurrent_hash_map.hpp>
 	int main() {}"
@@ -61,5 +64,5 @@ if(NOT PMEM_CONCURRENT_HASH_MAP_PRESENT)
 	message(FATAL_ERROR "libpmemobj++/experimental/concurrent_hash_map.hpp not found (available in libpmemobj-cpp > 1.6")
 endif()
 
-include_directories(${PMEMOBJ++_INCLUDE_DIRS})
-link_directories(${PMEMOBJ++_LIBRARY_DIRS})
+include_directories(${LIBPMEMOBJ++_INCLUDE_DIRS})
+link_directories(${LIBPMEMOBJ++_LIBRARY_DIRS})
