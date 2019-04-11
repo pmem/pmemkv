@@ -29,17 +29,28 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(GTEST_VERSION 1.7.0)
-set(GTEST_URL ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
-if(NOT EXISTS ${GTEST_URL})
-    execute_process(COMMAND wget -O ${GTEST_URL} https://github.com/google/googletest/archive/release-${GTEST_VERSION}.zip)
-endif()
+set(GTEST_SHA256HASH b58cb7547a28b2c718d1e38aee18a3659c9e3ff52440297e965f5edffe34b6d0)
 
-ExternalProject_Add(gtest URL ${GTEST_URL} PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest INSTALL_COMMAND ""
-                    CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
+if (EXISTS ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
+    set(GTEST_URL ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
+else ()
+    set(GTEST_URL https://github.com/google/googletest/archive/release-${GTEST_VERSION}.zip)
+endif ()
+
+ExternalProject_Add(
+    gtest
+    URL ${GTEST_URL}
+    URL_HASH SHA256=${GTEST_SHA256HASH}
+    DOWNLOAD_NAME googletest-${GTEST_VERSION}.zip
+    DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
+    INSTALL_COMMAND ""
+    CMAKE_ARGS -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+)
+
 ExternalProject_Get_Property(gtest source_dir binary_dir)
 add_library(libgtest IMPORTED STATIC GLOBAL)
 add_dependencies(libgtest gtest)
 set_target_properties(libgtest PROPERTIES "IMPORTED_LOCATION" "${binary_dir}/libgtest.a"
                       "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}")
-
 include_directories("${source_dir}/include")
