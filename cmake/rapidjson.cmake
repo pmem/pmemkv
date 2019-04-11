@@ -34,6 +34,9 @@ endif()
 
 if(NOT RapidJSON_FOUND)
     # try old method
+
+    # find_package without unsetting this var is not working correctly
+    unset(RapidJSON_FOUND CACHE)
     find_package(RapidJSON REQUIRED)
 
     if(RapidJSON_FOUND)
