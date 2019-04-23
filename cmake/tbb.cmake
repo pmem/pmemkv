@@ -39,7 +39,6 @@ if(NOT TBB_FOUND)
 
 	if(TBB_FOUND)
 		set(TBB_LIBRARIES ${TBB_LIBRARY})
-		set(TBB_INCLUDE_DIRS ${TBB_INCLUDE_DIR})
 		message(STATUS "TBB package found without pkg-config")
 	endif()
 endif()
