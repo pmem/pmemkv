@@ -38,8 +38,6 @@ if(NOT TBB_FOUND)
 	find_package(TBB COMPONENTS tbb)
 
 	if(TBB_FOUND)
-		set(TBB_LIBRARIES ${TBB_LIBRARY})
-		set(TBB_INCLUDE_DIRS ${TBB_INCLUDE_DIR})
 		message(STATUS "TBB package found without pkg-config")
 	endif()
 endif()
@@ -48,5 +46,3 @@ if(NOT TBB_FOUND)
 	message(FATAL_ERROR "TBB not found. Please set TBB_DIR CMake variable if TBB \
 is installed in a non-standard directory, like: -DTBB_DIR=<path_to_tbb_cmake_dir>")
 endif()
-
-include_directories(${TBB_INCLUDE_DIRS})
