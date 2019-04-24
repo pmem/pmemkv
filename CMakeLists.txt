@@ -80,9 +80,9 @@ target_link_libraries(pmemkv ${MEMKIND_LIBRARIES})
 target_link_libraries(pmemkv ${RapidJSON_LIBRARIES})
 
 if(TBB_IMPORTED_TARGETS)
-	target_link_libraries(pmemkv ${TBB_IMPORTED_TARGETS})
+    target_link_libraries(pmemkv ${TBB_IMPORTED_TARGETS})
 else()
-	target_link_libraries(pmemkv tbb)
+    target_link_libraries(pmemkv tbb)
 endif(TBB_IMPORTED_TARGETS)
 
 if(EXPERIMENTAL)
