@@ -1,6 +1,9 @@
+.*
+!.gitignore
+!.gitattributes
+!.travis.yml
 *.d
-.DS_Store
-.idea/
-bin/
+/bin/
+/build/
 cmake-build-debug/
-googletest-*.zip
+/googletest-*.zip
