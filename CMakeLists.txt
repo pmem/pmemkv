@@ -71,16 +71,6 @@ set(SOURCE_FILES src/pmemkv.cc src/pmemkv.h
     src/engines-experimental/caching.h src/engines-experimental/caching.cc
 )
 
-set(TEST_FILES tests/pmemkv_test.cc tests/mock_tx_alloc.cc
-    tests/engines/blackhole_test.cc
-    tests/engines/vsmap_test.cc
-    tests/engines/vcmap_test.cc
-    tests/engines/cmap_test.cc
-    tests/engines-experimental/tree_test.cc
-    tests/engines-experimental/stree_test.cc
-    tests/engines-experimental/caching_test.cc
-)
-
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 find_package(PkgConfig QUIET)
@@ -92,7 +82,6 @@ include(memkind)
 include(libpmemobj++)
 include(rapidjson)
 include(tbb)
-include(gtest)
 if(EXPERIMENTAL)
     include(memcached-experimental)
     include(redis-experimental)
@@ -134,7 +123,7 @@ if(EXPERIMENTAL)
     target_link_libraries(pmemkv acl_cpp protocol acl)
 endif(EXPERIMENTAL)
 
-add_executable(pmemkv_test ${TEST_FILES})
-target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
+enable_testing()
+add_subdirectory(tests)
 
 unset(EXPERIMENTAL CACHE)
