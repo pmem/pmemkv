@@ -18,7 +18,7 @@ build: configure
 
 test: configure reset
 	cd ./bin && make pmemkv_test
-	PMEM_IS_PMEM_FORCE=1 ./bin/pmemkv_test
+	PMEM_IS_PMEM_FORCE=1 ./bin/tests/pmemkv_test
 	$(MAKE) reset
 
 install:
