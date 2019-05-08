@@ -73,7 +73,8 @@ function(test name filter tracer)
 		-P ${CMAKE_CURRENT_SOURCE_DIR}/run-one-test.cmake)
 
 	set_tests_properties(${name} PROPERTIES
-		ENVIRONMENT "LC_ALL=C;PATH=$ENV{PATH};PMEM_IS_PMEM_FORCE=1")
+		ENVIRONMENT "LC_ALL=C;PATH=$ENV{PATH};PMEM_IS_PMEM_FORCE=1"
+		TIMEOUT 300)
 endfunction()
 
 set(TEST_FILES
@@ -93,4 +94,23 @@ include(gtest)
 add_executable(pmemkv_test ${TEST_FILES})
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
 
-test("all-pmemkv-tests" all-pmemkv-tests none)
+# parse tests source files to get the list of all tests
+set(all_tests "")
+foreach(file IN ITEMS ${TEST_FILES})
+	file(STRINGS ${file} tests REGEX "^TEST_F")
+	string(REPLACE "TEST_F(" "" tests "${tests}")
+	string(REPLACE ", " "." tests "${tests}")
+	string(REPLACE ") {" " " tests "${tests}")
+	string(CONCAT all_tests ${all_tests} ${tests})
+endforeach(file)
+string(REPLACE " " ";" list_all_tests "${all_tests}")
+
+# set excluded tests
+set(excluded_tests STreeTest STreeLargeTest CachingTest)
+
+foreach(test IN ITEMS ${list_all_tests})
+	string(REGEX REPLACE "[.].+" "" test_group ${test})
+	if(NOT ${test_group} IN_LIST excluded_tests)
+		test("${test}" ${test} none)
+	endif()
+endforeach(test)
