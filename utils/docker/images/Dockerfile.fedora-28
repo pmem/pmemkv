@@ -66,8 +66,8 @@ RUN dnf update -y \
 && dnf clean all
 
 # Install valgrind
-#COPY install-valgrind.sh install-valgrind.sh
-#RUN ./install-valgrind.sh
+COPY install-valgrind.sh install-valgrind.sh
+RUN ./install-valgrind.sh
 
 # Install pmdk
 COPY install-pmdk.sh install-pmdk.sh

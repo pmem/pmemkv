@@ -69,8 +69,8 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # Install valgrind
-#COPY install-valgrind.sh install-valgrind.sh
-#RUN ./install-valgrind.sh
+COPY install-valgrind.sh install-valgrind.sh
+RUN ./install-valgrind.sh
 
 # Install pmdk
 COPY install-pmdk.sh install-pmdk.sh
