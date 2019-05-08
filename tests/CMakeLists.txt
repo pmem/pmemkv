@@ -105,9 +105,19 @@ string(REPLACE " " ";" list_all_tests "${all_tests}")
 # set excluded tests
 set(excluded_tests STreeTest STreeLargeTest CachingTest)
 
+# set helgrind tests
+set(helgrind_tests
+	BlackholeTest
+	CMapTest
+	VCMapTest
+	VSMapTest)
+
 foreach(test IN ITEMS ${list_all_tests})
 	string(REGEX REPLACE "[.].+" "" test_group ${test})
 	if(NOT ${test_group} IN_LIST excluded_tests)
 		test("${test}" ${test} none)
+	endif()
+	if(${test_group} IN_LIST helgrind_tests)
+		test("${test}-helgrind" ${test} helgrind)
 	endif()
 endforeach(test)
