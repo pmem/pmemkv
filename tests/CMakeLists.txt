@@ -103,10 +103,23 @@ set(FILE_ALL_TESTS ${CMAKE_CURRENT_BINARY_DIR}/all_tests.txt)
 file(WRITE ${FILE_TEST_FILES} "${TEST_FILES}")
 file(WRITE ${FILE_ALL_TESTS} "${list_all_tests}")
 
+# set valgrind tests
+set(valgrind_tests
+	BlackholeTest
+	CMapTest
+	VCMapTest
+	VSMapTest)
+
 # add a test checking generated tests
 set(TEST_CHECK "checked-generated-tests")
 test(${TEST_CHECK} ${TEST_CHECK} ${TEST_CHECK} none)
 
 foreach(test IN ITEMS ${list_all_tests})
+	string(REGEX REPLACE "[.].+" "" test_group ${test})
 	test("run-one-test" ${test} ${test} none)
+	if(${test_group} IN_LIST valgrind_tests)
+		test("run-one-test" "${test}-pmemcheck" ${test} pmemcheck)
+		test("run-one-test" "${test}-helgrind" ${test} helgrind)
+		test("run-one-test" "${test}-drd" ${test} drd)
+	endif()
 endforeach(test)
