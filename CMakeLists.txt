@@ -31,6 +31,30 @@
 cmake_minimum_required(VERSION 3.5)
 project(pmemkv)
 
+function(find_pmemcheck)
+	set(ENV{PATH} ${VALGRIND_PREFIX}/bin:$ENV{PATH})
+	execute_process(COMMAND valgrind --tool=pmemcheck --help
+			RESULT_VARIABLE VALGRIND_PMEMCHECK_RET
+			OUTPUT_QUIET
+			ERROR_QUIET)
+	if(VALGRIND_PMEMCHECK_RET)
+		set(VALGRIND_PMEMCHECK_FOUND 0 CACHE INTERNAL "")
+	else()
+		set(VALGRIND_PMEMCHECK_FOUND 1 CACHE INTERNAL "")
+	endif()
+
+	if(VALGRIND_PMEMCHECK_FOUND)
+		execute_process(COMMAND valgrind --tool=pmemcheck true
+				ERROR_VARIABLE PMEMCHECK_OUT
+				OUTPUT_QUIET)
+
+		string(REGEX MATCH ".*pmemcheck-([0-9.]+),.*" PMEMCHECK_OUT "${PMEMCHECK_OUT}")
+		set(PMEMCHECK_VERSION ${CMAKE_MATCH_1} CACHE INTERNAL "")
+	else()
+		message(WARNING "Valgrind pmemcheck NOT found.")
+	endif()
+endfunction()
+
 option(EXPERIMENTAL "use experimental features" OFF)
 if(EXPERIMENTAL)
     add_definitions(-DEXPERIMENTAL)
@@ -73,6 +97,23 @@ if(EXPERIMENTAL)
     include(memcached-experimental)
     include(redis-experimental)
 endif(EXPERIMENTAL)
+
+if(PKG_CONFIG_FOUND)
+	pkg_check_modules(VALGRIND QUIET valgrind)
+else()
+	find_package(VALGRIND QUIET)
+endif()
+
+if(VALGRIND_FOUND)
+	include_directories(${VALGRIND_INCLUDE_DIRS})
+	find_pmemcheck()
+
+	if(NOT VALGRIND_PMEMCHECK_FOUND)
+		message(WARNING "Valgrind pmemcheck not found. Some tests will be skipped.")
+	endif()
+else()
+	message(WARNING "Valgrind not found. Some tests will be skipped.")
+endif()
 
 add_library(pmemkv SHARED ${SOURCE_FILES})
 target_link_libraries(pmemkv ${LIBPMEMOBJ++_LIBRARIES})
