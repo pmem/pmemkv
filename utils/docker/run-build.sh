@@ -47,8 +47,9 @@ cd bin
 cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX
+make -j2
+ctest --output-on-failure
 cd ..
-make test
 echo $USERPASS | sudo -S make install
 
 # verify installed package
