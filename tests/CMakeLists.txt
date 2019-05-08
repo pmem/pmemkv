@@ -112,10 +112,31 @@ set(FILE_ALL_TESTS ${CMAKE_CURRENT_BINARY_DIR}/list_all_tests.txt)
 file(WRITE ${FILE_TEST_FILES} "${TEST_FILES}")
 file(WRITE ${FILE_ALL_TESTS} "${list_all_tests}")
 
+# set groups of tests to be run with Valgrind's memcheck and pmemcheck tools
+set(memcheck_tests
+	BlackholeTest
+	CMapTest
+	VCMapTest
+	VSMapTest)
+
+# set groups of tests to be run with Valgrind's helgrind and drd tools
+set(helgrind_drd_tests
+	CMapTest
+	VCMapTest)
+
 # add a test checking generated tests
 set(TEST_CHECK "check-generated-tests")
 test(${TEST_CHECK} ${TEST_CHECK} ${TEST_CHECK} none)
 
 foreach(test IN ITEMS ${list_all_tests})
 	test("run-one-test" ${test} ${test} none)
+	string(REGEX REPLACE "[.].+" "" test_group ${test})
+	if(${test_group} IN_LIST memcheck_tests)
+		test("run-one-test" "${test}-memcheck" ${test} memcheck)
+		test("run-one-test" "${test}-pmemcheck" ${test} pmemcheck)
+	endif()
+	if(${test_group} IN_LIST helgrind_drd_tests)
+		test("run-one-test" "${test}-helgrind" ${test} helgrind)
+		test("run-one-test" "${test}-drd" ${test} drd)
+	endif()
 endforeach(test)
