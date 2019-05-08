@@ -29,10 +29,16 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-include(${SRC_DIR}/helpers.cmake)
-
-setup()
-
-execute(0 ${CMAKE_CURRENT_BINARY_DIR}/pmemkv_test --gtest_filter=${TEST_NAME})
-
-cleanup()
+# parse tests source files to get the list of all tests
+function(get_tests dir test_files output)
+	set(all_tests "")
+	foreach(file IN ITEMS ${test_files})
+		file(STRINGS ${dir}/${file} tests REGEX "^TEST_F")
+		string(REPLACE "TEST_F(" "" tests "${tests}")
+		string(REPLACE ", " "." tests "${tests}")
+		string(REPLACE ") {" " " tests "${tests}")
+		string(CONCAT all_tests ${all_tests} ${tests})
+	endforeach(file)
+	string(REPLACE " " ";" list_all_tests "${all_tests}")
+	set(${output} "${list_all_tests}" PARENT_SCOPE)
+endfunction()

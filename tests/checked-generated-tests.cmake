@@ -30,9 +30,22 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 include(${SRC_DIR}/helpers.cmake)
+include(${SRC_DIR}/common.cmake)
 
 setup()
 
-execute(0 ${CMAKE_CURRENT_BINARY_DIR}/pmemkv_test --gtest_filter=${TEST_NAME})
+file(READ ${FILE_TEST_FILES} TEST_FILES)
+file(READ ${FILE_ALL_TESTS} all_tests_saved)
+
+get_tests("${SRC_DIR}" "${TEST_FILES}" all_tests_read)
+
+string(COMPARE EQUAL "${all_tests_saved}" "${all_tests_read}" tests_lists_equal)
+
+if(tests_lists_equal)
+	message(STATUS "Passed (tests found in the current source files match generated tests)")
+else()
+	message(FATAL_ERROR
+		"FAILED! Tests found in the current source files do NOT match generated tests - please regenerate CMake files.")
+endif()
 
 cleanup()
