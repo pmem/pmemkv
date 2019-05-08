@@ -33,6 +33,6 @@ include(${SRC_DIR}/helpers.cmake)
 
 setup()
 
-execute(0 ${TEST_DIR}/pmemkv_test)
+execute(0 ${TEST_DIR}/pmemkv_test --gtest_filter=${TEST_NAME})
 
 cleanup()
