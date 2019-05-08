@@ -105,9 +105,19 @@ string(REPLACE " " ";" list_all_tests "${all_tests}")
 # set excluded tests
 set(excluded_tests STreeTest STreeLargeTest CachingTest)
 
+# set memcheck tests
+set(memcheck_tests
+	BlackholeTest
+	CMapTest
+	VCMapTest
+	VSMapTest)
+
 foreach(test IN ITEMS ${list_all_tests})
 	string(REGEX REPLACE "[.].+" "" test_group ${test})
 	if(NOT ${test_group} IN_LIST excluded_tests)
 		test("${test}" ${test} none)
+	endif()
+	if(${test_group} IN_LIST memcheck_tests)
+		test("${test}-memcheck" ${test} memcheck)
 	endif()
 endforeach(test)
