@@ -41,7 +41,7 @@ class BlackholeTest : public testing::Test {
 
     BlackholeTest() { kv = new Blackhole(nullptr); }
 
-    ~BlackholeTest() {}
+    ~BlackholeTest() { delete kv; }
 };
 
 TEST_F(BlackholeTest, SimpleTest) {
