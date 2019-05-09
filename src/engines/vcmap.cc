@@ -31,6 +31,7 @@
  */
 
 #include "vcmap.h"
+#include <libpmemobj++/transaction.hpp>
 
 #include <iostream>
 

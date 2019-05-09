@@ -32,6 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "../../src/engines/vcmap.h"
+#include <libpmemobj.h>
 
 using namespace pmemkv::vcmap;
 

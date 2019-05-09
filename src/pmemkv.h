@@ -49,12 +49,7 @@ typedef void(KVStartFailureCallback)(void* context, const char* engine, const ch
 #ifdef __cplusplus
 
 #include <string>
-#include <libpmemobj++/make_persistent.hpp>
-#include <libpmemobj++/make_persistent_array.hpp>
-#include <libpmemobj++/persistent_ptr.hpp>
-#include <libpmemobj++/pool.hpp>
-#include <libpmemobj++/transaction.hpp>
-#include "rapidjson/document.h"
+#include <functional>
 
 using std::string;
 using std::to_string;

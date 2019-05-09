@@ -30,6 +30,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <libpmemobj++/make_persistent.hpp>
+#include <libpmemobj++/make_persistent_array.hpp>
+#include <libpmemobj++/persistent_ptr.hpp>
+#include <libpmemobj++/pool.hpp>
+#include <libpmemobj++/transaction.hpp>
+#include <rapidjson/document.h>
+
 #include "engines/blackhole.h"
 #include "engines-experimental/tree3.h" // todo move inside EXPERIMENTAL ifdef after cmap is available
 #include "engines/vsmap.h"
