@@ -55,7 +55,7 @@ This value cannot be smaller than 8388608 (8MB).
 
 ### Internals
 
-(add full description here)
+Internally the engine uses persistent concurrent hash map and persistent string from [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) library. Persistent sring is used as a key and a value types.
 
 <a name="vsmap"></a>
 
@@ -83,7 +83,7 @@ This value cannot be smaller than 8388608 (8MB).
 
 ### Internals
 
-(add full description here)
+The engine is built on top of [std::map](https://en.cppreference.com/w/cpp/container/map). The map uses [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/man/pmemallocator.3) to allocate memory. The [std::basic_string](https://en.cppreference.com/w/cpp/string/basic_string) with [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/man/pmemallocator.3) is used as a key and a value types.
 
 <a name="vcmap"></a>
 
@@ -98,7 +98,7 @@ A volatile concurrent engine, backed by memkind.
 
 ### Internals
 
-(add full description here)
+The engine is built on top of [tbb::concurrent_hash_map](https://www.threadingbuildingblocks.org/docs/help/reference/containers_overview/concurrent_hash_map_cls.html) data structure. The hash map uses [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/man/pmemallocator.3) to allocate memory. The [std::basic_string](https://en.cppreference.com/w/cpp/string/basic_string) with [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/man/pmemallocator.3) is used as a key and a value types.
 
 <a name="tree3"></a>
 
