@@ -51,6 +51,7 @@ RUN apt-get update \
 	gcc \
 	g++ \
 	git \
+	libc6-dbg \
 	libdaxctl-dev \
 	libjson-c-dev \
 	libkmod-dev \

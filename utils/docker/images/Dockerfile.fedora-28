@@ -65,6 +65,9 @@ RUN dnf update -y \
 	which \
 && dnf clean all
 
+# Install glibc-debuginfo
+RUN dnf debuginfo-install -y glibc
+
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
 RUN ./install-valgrind.sh
