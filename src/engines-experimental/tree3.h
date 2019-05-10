@@ -33,6 +33,14 @@
 #pragma once
 
 #include <vector>
+#include <memory>
+#include <libpmemobj++/p.hpp>
+#include <libpmemobj++/persistent_ptr.hpp>
+#include <libpmemobj++/make_persistent.hpp>
+#include <libpmemobj++/make_persistent_array.hpp>
+#include <libpmemobj++/transaction.hpp>
+#include <libpmemobj++/pool.hpp>
+
 #include "../pmemkv.h"
 
 using std::move;
