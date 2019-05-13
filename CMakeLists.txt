@@ -98,9 +98,6 @@ if(EXPERIMENTAL)
     include(redis-experimental)
 endif(EXPERIMENTAL)
 
-# set PKG_CONFIG_PATH
-set(ENV{PKG_CONFIG_PATH} "/usr/local/lib/pkgconfig/:${PKG_CONFIG_PATH}")
-
 if(PKG_CONFIG_FOUND)
 	pkg_check_modules(VALGRIND QUIET valgrind)
 else()

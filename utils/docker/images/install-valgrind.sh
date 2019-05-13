@@ -41,7 +41,7 @@ cd valgrind
 # valgrind v3.14 with pmemcheck
 git checkout 332b3975989d9130486d09493a9571528d66eaf7
 ./autogen.sh
-./configure
+./configure --prefix=/usr
 make
 sudo make install
 cd ..
