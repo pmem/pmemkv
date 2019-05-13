@@ -30,6 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef EXPERIMENTAL
+
 #pragma once
 
 #include <vector>
@@ -183,3 +185,5 @@ class Tree : public KVEngine {                             // hybrid B+ tree eng
 
 } // namespace tree3
 } // namespace pmemkv
+
+#endif
