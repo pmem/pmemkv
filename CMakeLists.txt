@@ -108,7 +108,6 @@ else()
 endif()
 
 if(VALGRIND_FOUND)
-	include_directories(${VALGRIND_INCLUDE_DIRS})
 	find_pmemcheck()
 
 	if(NOT VALGRIND_PMEMCHECK_FOUND)
@@ -122,6 +121,11 @@ add_library(pmemkv SHARED ${SOURCE_FILES})
 target_link_libraries(pmemkv ${LIBPMEMOBJ++_LIBRARIES})
 target_link_libraries(pmemkv ${MEMKIND_LIBRARIES})
 target_link_libraries(pmemkv ${RapidJSON_LIBRARIES})
+
+target_include_directories(pmemkv PRIVATE src/valgrind)
+
+# Enable libpmemobj-cpp valgrind annotations
+target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_ENABLED=1)
 
 if(TBB_IMPORTED_TARGETS)
     target_link_libraries(pmemkv ${TBB_IMPORTED_TARGETS})
