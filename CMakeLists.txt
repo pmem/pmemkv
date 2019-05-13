@@ -123,6 +123,17 @@ target_link_libraries(pmemkv ${LIBPMEMOBJ++_LIBRARIES})
 target_link_libraries(pmemkv ${MEMKIND_LIBRARIES})
 target_link_libraries(pmemkv ${RapidJSON_LIBRARIES})
 
+if(VALGRIND_FOUND)
+	include_directories(${VALGRIND_INCLUDE_DIRS})
+	target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_MEMCHECK_ENABLED=1)
+	target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_HELGRIND_ENABLED=1)
+	target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_DRD_ENABLED=1)
+
+	if(VALGRIND_PMEMCHECK_FOUND)
+		target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_PMEMCHECK_ENABLED=1)
+	endif()
+endif()
+
 if(TBB_IMPORTED_TARGETS)
     target_link_libraries(pmemkv ${TBB_IMPORTED_TARGETS})
 else()
