@@ -31,11 +31,11 @@ Code Style
 Submitting Pull Requests
 ------------------------
 
-We take outside code contributions to `pmemkv` through GitHub pull requests.
+We take outside code contributions to `PMEMKV` through GitHub pull requests.
 
 **NOTE: If you do decide to implement code changes and contribute them,
-please make sure you agree your contribution can be made available
-under the [BSD-style License used for the PMDK](https://github.com/pmem/pmdk/blob/master/LICENSE).**
+please make sure you agree your contribution can be made available under the
+[BSD-style License used for PMEMKV](https://github.com/pmem/pmemkv/blob/master/LICENSE).**
 
 **NOTE: Submitting your changes also means that you certify the following:**
 
@@ -71,8 +71,8 @@ In case of any doubt, the gatekeeper may ask you to certify the above in writing
 i.e. via email or by including a `Signed-off-by:` line at the bottom
 of your commit comments.
 
-To improve tracking of who is the author of a contribution, we kindly ask you
-to use your real name (not an alias) when committing your changes to the NVM Library:
+To improve tracking of who is the author of the contribution, we kindly ask you
+to use your real name (not an alias) when committing your changes to PMEMKV:
 ```
 Author: Random J Developer <random@developer.example.org>
 ```
@@ -85,7 +85,7 @@ Creating New Engines
 There are several motivations to create a `pmemkv` storage engine:
 
 * Using a new/different implementation strategy
-* Trying out a signifcant change to an existing engine
+* Trying out a significant change to an existing engine
 * Creating a new version of an existing engine with some tweaks
 
 Next we'll walk you through the steps of creating a new engine.
