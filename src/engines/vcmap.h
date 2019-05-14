@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "../pmemkv.h"
+#include "../libpmemkv.h"
 #include "pmem_allocator.h"
 #include <string>
 #include <scoped_allocator>

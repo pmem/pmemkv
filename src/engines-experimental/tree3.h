@@ -41,7 +41,7 @@
 #include <libpmemobj++/transaction.hpp>
 #include <libpmemobj++/pool.hpp>
 
-#include "../pmemkv.h"
+#include "../libpmemkv.h"
 
 using std::move;
 using std::unique_ptr;
