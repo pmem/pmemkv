@@ -71,7 +71,6 @@ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DCOVERAGE=$COVERAGE
 make -j2
 ctest --output-on-failure
-cd ..
 echo $USERPASS | sudo -S make install
 
 if [ "$COVERAGE" == "1" ]; then
@@ -79,7 +78,6 @@ if [ "$COVERAGE" == "1" ]; then
 fi
 
 # verify installed package
-LIBFILE=$PREFIX/lib/libpmemkv.so
 HEADERFILE=$PREFIX/include/libpmemkv.h
 
 if [[ -f $LIBFILE && -f $HEADERFILE ]]; then

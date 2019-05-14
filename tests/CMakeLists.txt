@@ -101,7 +101,7 @@ include(gtest)
 include(get_tests.cmake)
 
 add_executable(pmemkv_test ${TEST_FILES})
-target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
+target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS} ${TBB_LIBRARIES} ${LIBPMEMOBJ++_LIBRARIES})
 
 # parse tests source files to get the list of all tests
 get_tests(${CMAKE_CURRENT_SOURCE_DIR} "${TEST_FILES}" list_all_tests)

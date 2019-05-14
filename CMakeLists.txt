@@ -65,7 +65,7 @@ if(EXPERIMENTAL)
     add_definitions(-DEXPERIMENTAL)
 endif(EXPERIMENTAL)
 
-set(SOURCE_FILES src/pmemkv.cc src/pmemkv.h
+set(SOURCE_FILES src/libpmemkv.cc src/libpmemkv.h
     src/engines/blackhole.h src/engines/blackhole.cc
     src/engines/vsmap.h src/engines/vsmap.cc
     src/engines/vcmap.h src/engines/vcmap.cc
@@ -83,6 +83,8 @@ find_package(PkgConfig QUIET)
 include(ExternalProject)
 include(FindThreads)
 include(CheckCXXSourceCompiles)
+include(GNUInstallDirs)
+
 
 include(memkind)
 include(libpmemobj++)
@@ -110,27 +112,38 @@ else()
 endif()
 
 add_library(pmemkv SHARED ${SOURCE_FILES})
-target_link_libraries(pmemkv ${LIBPMEMOBJ++_LIBRARIES})
-target_link_libraries(pmemkv ${MEMKIND_LIBRARIES})
-target_link_libraries(pmemkv ${RapidJSON_LIBRARIES})
+
+target_link_libraries(pmemkv PRIVATE ${LIBPMEMOBJ++_LIBRARIES}
+                                    ${MEMKIND_LIBRARIES}
+                                    ${RapidJSON_LIBRARIES}
+                                    ${TBB_LIBRARIES})
 
 target_include_directories(pmemkv PRIVATE src/valgrind)
 
 # Enable libpmemobj-cpp valgrind annotations
 target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_ENABLED=1)
 
-if(TBB_IMPORTED_TARGETS)
-    target_link_libraries(pmemkv ${TBB_IMPORTED_TARGETS})
-else()
-    target_link_libraries(pmemkv tbb)
-endif(TBB_IMPORTED_TARGETS)
-
 if(EXPERIMENTAL)
-    target_link_libraries(pmemkv ${CMAKE_THREAD_LIBS_INIT} memcached)
-    target_link_libraries(pmemkv acl_cpp protocol acl)
+    target_link_libraries(pmemkv PRIVATE ${CMAKE_THREAD_LIBS_INIT} memcached)
+    target_link_libraries(pmemkv PRIVATE acl_cpp protocol acl)
 endif(EXPERIMENTAL)
 
 enable_testing()
 add_subdirectory(tests)
+
+set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER src/libpmemkv.h)
+
+install(TARGETS pmemkv
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+configure_file(
+	"${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+	IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 unset(EXPERIMENTAL CACHE)
