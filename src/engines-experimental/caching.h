@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "../pmemkv.h"
+#include "../libpmemkv.h"
 
 namespace pmemkv {
 namespace caching {
