@@ -40,6 +40,8 @@ if(NOT TBB_FOUND)
 	if(TBB_FOUND)
 		message(STATUS "TBB package found without pkg-config")
 	endif()
+
+	set(TBB_LIBRARIES ${TBB_IMPORTED_TARGETS})
 endif()
 
 if(NOT TBB_FOUND)
