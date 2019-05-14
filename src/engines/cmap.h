@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "../pmemkv.h"
+#include "../libpmemkv.h"
 #include "../polymorphic_string.h"
 
 #include <libpmemobj++/pool.hpp>

@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "../pmemkv.h"
+#include "../libpmemkv.h"
 #include "stree/persistent_b_tree.h"
 #include "stree/pstring.h"
 
