@@ -33,8 +33,6 @@ if(PKG_CONFIG_FOUND)
 #    pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++>=1.7)
     pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++)
 else()
-	# find_package without unsetting this var is not working correctly
-	unset(LIBPMEMOBJ++_FOUND CACHE)
 	find_package(LIBPMEMOBJ++ REQUIRED libpmemobj++)
 	message(STATUS "libpmemobj++ found the old way (w/o pkg-config)")
 endif()
@@ -48,10 +46,9 @@ CHECK_CXX_SOURCE_COMPILES(
 set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
 
 if(NOT PMEM_STRING_PRESENT)
-	message(FATAL_ERROR "libpmemobj++/experimental/string.hpp not found (available in libpmemobj-cpp >= 1.6")
+	message(FATAL_ERROR "libpmemobj++/experimental/string.hpp not found (available in libpmemobj-cpp >= 1.6)")
 endif()
 
-# XXX make it optional?
 set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
 set(CMAKE_REQUIRED_INCLUDES ${LIBPMEMOBJ++_INCLUDE_DIRS})
 CHECK_CXX_SOURCE_COMPILES(
