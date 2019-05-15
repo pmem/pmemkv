@@ -64,6 +64,10 @@ if [[ "$command" == "" ]]; then
 	command="./run-build.sh";
 fi
 
+if [ "$COVERAGE" = "1" ]; then
+	docker_opts="${docker_opts} `bash <(curl -s https://codecov.io/env)`";
+fi
+
 if [ -n "$DNS_SERVER" ]; then DNS_SETTING=" --dns=$DNS_SERVER "; fi
 
 

@@ -45,6 +45,7 @@ RUN apt-get update \
 	automake \
 	clang \
 	cmake \
+	curl \
 	debhelper \
 	devscripts \
 	doxygen \
