@@ -57,11 +57,34 @@ fi
 
 chmod -R a+w $HOST_WORKDIR
 
+if [[ "$TRAVIS_EVENT_TYPE" == "cron" || "$TRAVIS_BRANCH" == "coverity_scan" ]]; then
+	if [[ "$TYPE" != "coverity" ]]; then
+		echo "Skipping non-Coverity job for cron/Coverity build"
+		exit 0
+	fi
+else
+	if [[ "$TYPE" == "coverity" ]]; then
+		echo "Skipping Coverity job for non cron/Coverity build"
+		exit 0
+	fi
+fi
+
 imageName=${DOCKERHUB_REPO}:${OS}-${OS_VER}
 containerName=pmemkv-${OS}-${OS_VER}
 
 if [[ "$command" == "" ]]; then
-	command="./run-build.sh";
+	case $TYPE in
+		normal)
+			command="./run-build.sh";
+			;;
+		coverity)
+			command="./run-coverity.sh";
+			;;
+	esac
+fi
+
+if [ "$COVERAGE" == "1" ]; then
+	docker_opts="${docker_opts} `bash <(curl -s https://codecov.io/env)`";
 fi
 
 if [ -n "$DNS_SERVER" ]; then DNS_SETTING=" --dns=$DNS_SERVER "; fi
@@ -96,6 +119,8 @@ docker run --privileged=true --name=$containerName -ti \
 	--env TRAVIS_REPO_SLUG=$TRAVIS_REPO_SLUG \
 	--env TRAVIS_BRANCH=$TRAVIS_BRANCH \
 	--env TRAVIS_EVENT_TYPE=$TRAVIS_EVENT_TYPE \
+	--env COVERITY_SCAN_TOKEN=$COVERITY_SCAN_TOKEN \
+	--env COVERITY_SCAN_NOTIFICATION_EMAIL=$COVERITY_SCAN_NOTIFICATION_EMAIL \
 	--env TEST_BUILD=$TEST_BUILD \
 	-v $HOST_WORKDIR:$WORKDIR \
 	-v /etc/localtime:/etc/localtime \

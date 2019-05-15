@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 #
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2018-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,74 +31,38 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#              environment prepared for running pmemkv build and tests.
+# run-coverity.sh - runs the Coverity scan build
 #
 
-# Pull base image
-FROM ubuntu:18.04
-MAINTAINER robert.a.dickinson@intel.com
+set -e
 
-# Update the Apt cache and install basic tools
-RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common \
-	autoconf \
-	automake \
-	clang \
-	cmake \
-	curl \
-	debhelper \
-	devscripts \
-	doxygen \
-	gcc \
-	g++ \
-	git \
-	libc6-dbg \
-	libdaxctl-dev \
-	libjson-c-dev \
-	libkmod-dev \
-	libncurses5-dev \
-	libndctl-dev \
-	libnuma-dev \
-	libtool \
-	libudev-dev \
-	libunwind8-dev \
-	numactl \
-	pkg-config \
-	rapidjson-dev \
-	sudo \
-	wget \
-	whois \
- && rm -rf /var/lib/apt/lists/*
+cd $WORKDIR
 
-# Install valgrind
-COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug
 
-# Install pmdk
-COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh dpkg
+export COVERITY_SCAN_PROJECT_NAME="$TRAVIS_REPO_SLUG"
+[[ "$TRAVIS_EVENT_TYPE" == "cron" ]] \
+	&& export COVERITY_SCAN_BRANCH_PATTERN="master" \
+	|| export COVERITY_SCAN_BRANCH_PATTERN="coverity_scan"
+export COVERITY_SCAN_BUILD_COMMAND="make"
 
-# Install pmdk c++ bindings
-COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh DEB
+# Run the Coverity scan
 
-# Install memkind
-COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh
+# XXX: Patch the Coverity script.
+# Recently, this script regularly exits with an error, even though
+# the build is successfully submitted.  Probably because the status code
+# is missing in response, or it's not 201.
+# Changes:
+# 1) change the expected status code to 200 and
+# 2) print the full response string.
+#
+# This change should be reverted when the Coverity script is fixed.
+#
+# The previous version was:
+# curl -s https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh | bash
 
-# Install Intel TBB
-COPY install-tbb.sh install-tbb.sh
-RUN ./install-tbb.sh
-
-# Add user
-ENV USER user
-ENV USERPASS pass
-RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
-USER $USER
-
-# Set required environment variables
-ENV OS ubuntu
-ENV OS_VER 18.04
-ENV PACKAGE_MANAGER dpkg
-ENV NOTTY 1
+wget https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh
+patch < ../utils/docker/0001-travis-fix-travisci_build_coverity_scan.sh.patch
+bash ./travisci_build_coverity_scan.sh
