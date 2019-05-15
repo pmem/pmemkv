@@ -42,7 +42,7 @@ const string ENGINE = "blackhole";
 class Blackhole : public KVEngine {
   public:
     Blackhole(void* context);
-    ~Blackhole();
+    virtual ~Blackhole();
 
     string Engine() final { return ENGINE; }
     void* EngineContext() { return engine_context; }

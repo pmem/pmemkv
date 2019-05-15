@@ -46,7 +46,7 @@ const string ENGINE = "vsmap";
 class VSMap : public KVEngine {
   public:
     VSMap(void* context, const string& path, size_t size);
-    ~VSMap();
+    virtual ~VSMap();
 
     string Engine() final { return ENGINE; }
     void* EngineContext() { return engine_context; }
