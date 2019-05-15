@@ -99,9 +99,6 @@ typedef
       VG_USERREQ__ENABLE_ADDR_ERROR_REPORTING_IN_RANGE,
       VG_USERREQ__DISABLE_ADDR_ERROR_REPORTING_IN_RANGE,
 
-      VG_USERREQ__CHECK_MEM_IS_UNADDRESSABLE,
-      VG_USERREQ__CHECK_MEM_IS_UNDEFINED,
-
       /* This is just for memcheck's internal use - don't use it */
       _VG_USERREQ__MEMCHECK_RECORD_OVERLAP_ERROR 
          = VG_USERREQ_TOOL_BASE('M','C') + 256
@@ -187,21 +184,6 @@ typedef
       (volatile unsigned char *)&(__lvalue),                     \
                       (unsigned long)(sizeof (__lvalue)))
 
-/* Check that memory at _qzz_addr is unaddressable for _qzz_len bytes.
-   If any byte in this range is addressable, Valgrind returns the
-   address of the first offending byte. Otherwise it returns zero. */
-#define VALGRIND_CHECK_MEM_IS_UNADDRESSABLE(_qzz_addr,_qzz_len)    \
-    VALGRIND_DO_CLIENT_REQUEST_EXPR(0,                             \
-                            VG_USERREQ__CHECK_MEM_IS_UNADDRESSABLE,\
-                            (_qzz_addr), (_qzz_len), 0, 0, 0)
-
-/* Check that memory at _qzz_addr is undefined for _qzz_len bytes. If any
-   byte in this range is defined or unaddressable, Valgrind returns the
-   address of the first offending byte. Otherwise it returns zero. */
-#define VALGRIND_CHECK_MEM_IS_UNDEFINED(_qzz_addr,_qzz_len)        \
-    VALGRIND_DO_CLIENT_REQUEST_EXPR(0,                             \
-                            VG_USERREQ__CHECK_MEM_IS_UNDEFINED,    \
-                            (_qzz_addr), (_qzz_len), 0, 0, 0)
 
 /* Do a full memory leak check (like --leak-check=full) mid-execution. */
 #define VALGRIND_DO_LEAK_CHECK                                   \
