@@ -64,6 +64,8 @@ const string LAYOUT = "pmemkv";
 
 class KVEngine {
   public:
+    ~KVEngine();
+
     static KVEngine* Start(void* context, const char* engine, const char* config, KVStartFailureCallback* callback);
     static KVEngine* Start(void* context, const string& engine, const string& config);
     static KVEngine* Start(const string& engine, const string& config);
