@@ -55,6 +55,11 @@ function(find_pmemcheck)
 	endif()
 endfunction()
 
+option(COVERAGE "run coverage test" OFF)
+if(COVERAGE)
+       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage")
+endif()
+
 option(EXPERIMENTAL "use experimental features" OFF)
 if(EXPERIMENTAL)
     add_definitions(-DEXPERIMENTAL)
