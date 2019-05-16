@@ -26,7 +26,7 @@ No required configuration parameters.  JSON configuration is never parsed.
 ### Internals
 
 Internally, `blackhole` does not use a persistent pool or any durable structures. The intended
-use this engine is to profile and tune high-level bindings, and similar cases when persistence
+use of this engine is to profile and tune high-level bindings, and similar cases when persistence
 should be intentionally skipped.
 
 <a name="cmap"></a>
@@ -78,7 +78,7 @@ If omitted the default value of 1073741824 bytes (1GB) is applied.
 This value cannot be smaller than 8388608 (8MB).
 
 ```
-{ "path" : "my-path", "size" : 1073741824 }
+{ "path" : "my-directory", "size" : 1073741824 }
 ```
 
 ### Internals
@@ -163,7 +163,7 @@ differs from FPTree in several important areas:
 
 1. `tree3` is written using PMDK C++ bindings, which exerts influence on
 its design and implementation. `tree3` uses generic PMDK transactions
-(ie. `transaction::run()` closures), there is no need for micro-logging
+(i.e. `transaction::run()` closures), there is no need for micro-logging
 structures as described in the FPTree paper to make internal delete and
 split operations safe. `tree3` also adjusts sizes of data structures
 (to fit PMDK primitive types) for best cache-line optimization.
