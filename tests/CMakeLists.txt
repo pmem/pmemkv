@@ -76,6 +76,8 @@ function(test cmake_file test_name test_filter tracer)
 			-DBIN_DIR=${TEST_DIR}/${test_filter}-${tracer}
 			-DCONFIG=$<CONFIG>
 			-DTRACER=${tracer}
+			-DFILE_TEST_FILES=${FILE_TEST_FILES}
+			-DFILE_ALL_TESTS=${FILE_ALL_TESTS}
 			-P ${CMAKE_CURRENT_SOURCE_DIR}/${cmake_file}.cmake)
 
 	set_tests_properties(${test_name} PROPERTIES
@@ -96,8 +98,24 @@ set(TEST_FILES
 )
 
 include(gtest)
+include(get_tests.cmake)
 
 add_executable(pmemkv_test ${TEST_FILES})
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
 
-test("run-one-test" "all-pmemkv-tests" all-pmemkv-tests none)
+# parse tests source files to get the list of all tests
+get_tests(${CMAKE_CURRENT_SOURCE_DIR} "${TEST_FILES}" list_all_tests)
+
+# save lists of source files and all tests in files to check them in the first test
+set(FILE_TEST_FILES ${CMAKE_CURRENT_BINARY_DIR}/test_files.txt)
+set(FILE_ALL_TESTS ${CMAKE_CURRENT_BINARY_DIR}/list_all_tests.txt)
+file(WRITE ${FILE_TEST_FILES} "${TEST_FILES}")
+file(WRITE ${FILE_ALL_TESTS} "${list_all_tests}")
+
+# add a test checking generated tests
+set(TEST_CHECK "check-generated-tests")
+test(${TEST_CHECK} ${TEST_CHECK} ${TEST_CHECK} none)
+
+foreach(test IN ITEMS ${list_all_tests})
+	test("run-one-test" ${test} ${test} none)
+endforeach(test)
