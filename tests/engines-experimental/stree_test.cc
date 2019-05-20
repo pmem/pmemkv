@@ -30,8 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef EXPERIMENTAL
-
 #include "gtest/gtest.h"
 #include "../../src/engines-experimental/stree.h"
 
@@ -683,5 +681,3 @@ TEST_F(STreeLargeTest, LargeDescendingAfterRecoveryTest) {
     }
     ASSERT_TRUE(kv->Count() == LARGE_LIMIT);
 }
-
-#endif

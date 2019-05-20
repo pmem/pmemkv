@@ -69,12 +69,17 @@ set(SOURCE_FILES src/pmemkv.cc src/pmemkv.h
     src/engines/blackhole.h src/engines/blackhole.cc
     src/engines/vsmap.h src/engines/vsmap.cc
     src/engines/vcmap.h src/engines/vcmap.cc
-    src/engines/cmap.h src/engines/cmap.cc
-    src/engines-experimental/tree3.h src/engines-experimental/tree3.cc
-    src/engines-experimental/stree.h src/engines-experimental/stree.cc
-    src/engines-experimental/stree/persistent_b_tree.h src/engines-experimental/stree/pstring.h
-    src/engines-experimental/caching.h src/engines-experimental/caching.cc
+	src/engines/cmap.h src/engines/cmap.cc
 )
+
+if(EXPERIMENTAL)
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/tree3.h src/engines-experimental/tree3.cc
+		src/engines-experimental/stree.h src/engines-experimental/stree.cc
+		src/engines-experimental/stree/persistent_b_tree.h src/engines-experimental/stree/pstring.h
+		src/engines-experimental/caching.h src/engines-experimental/caching.cc
+	)
+endif(EXPERIMENTAL)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -127,7 +132,7 @@ endif(TBB_IMPORTED_TARGETS)
 
 if(EXPERIMENTAL)
     target_link_libraries(pmemkv ${CMAKE_THREAD_LIBS_INIT} memcached)
-    target_link_libraries(pmemkv acl_cpp protocol acl)
+	target_link_libraries(pmemkv acl_cpp protocol acl)
 endif(EXPERIMENTAL)
 
 enable_testing()
