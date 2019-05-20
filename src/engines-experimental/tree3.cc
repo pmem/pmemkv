@@ -30,8 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef EXPERIMENTAL
-
 #include <algorithm>
 #include <cassert>
 #include <cstring>
@@ -570,5 +568,3 @@ void KVInnerNode::assert_invariants() {
 
 } // namespace tree3
 } // namespace pmemkv
-
-#endif
