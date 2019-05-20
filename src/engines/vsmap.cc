@@ -42,8 +42,7 @@ namespace pmemkv {
 namespace vsmap {
 
 VSMap::VSMap(void* context, const string& path, size_t size) : engine_context(context),
-             kv_allocator(path, size), ch_allocator(kv_allocator),
-             pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator)) {
+             kv_allocator(path, size), pmem_kv_container(kv_allocator) {
     LOG("Started ok");
 }
 
@@ -58,7 +57,7 @@ void VSMap::All(void* context, KVAllCallback* callback) {
 
 void VSMap::AllAbove(void* context, const string& key, KVAllCallback* callback) {
     LOG("AllAbove for key=" << key);
-    auto it = pmem_kv_container.upper_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    auto it = pmem_kv_container.upper_bound(key_type(key.c_str(), key.size(), kv_allocator));
     auto end = pmem_kv_container.end();
     for (; it != end; it++) (*callback)(context, (int32_t) it->first.size(), it->first.c_str());
 }
@@ -66,15 +65,15 @@ void VSMap::AllAbove(void* context, const string& key, KVAllCallback* callback) 
 void VSMap::AllBelow(void* context, const string& key, KVAllCallback* callback) {
     LOG("AllBelow for key=" << key);
     auto it = pmem_kv_container.begin();
-    auto end = pmem_kv_container.lower_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    auto end = pmem_kv_container.lower_bound(key_type(key.c_str(), key.size(), kv_allocator));
     for (; it != end; it++) (*callback)(context, (int32_t) it->first.size(), it->first.c_str());
 }
 
 void VSMap::AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) {
     LOG("AllBetween for key1=" << key1 << ", key2=" << key2);
     if (key1 < key2) {
-        auto it = pmem_kv_container.upper_bound(pmem_string(key1.c_str(), key1.size(), ch_allocator));
-        auto end = pmem_kv_container.lower_bound(pmem_string(key2.c_str(), key2.size(), ch_allocator));
+        auto it = pmem_kv_container.upper_bound(key_type(key1.c_str(), key1.size(), kv_allocator));
+        auto end = pmem_kv_container.lower_bound(key_type(key2.c_str(), key2.size(), kv_allocator));
         for (; it != end; it++) (*callback)(context, (int32_t) it->first.size(), it->first.c_str());
     }
 }
@@ -86,7 +85,7 @@ int64_t VSMap::Count() {
 int64_t VSMap::CountAbove(const string& key) {
     LOG("CountAbove for key=" << key);
     int64_t result = 0;
-    auto it = pmem_kv_container.upper_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    auto it = pmem_kv_container.upper_bound(key_type(key.c_str(), key.size(), kv_allocator));
     auto end = pmem_kv_container.end();
     for (; it != end; it++) result++;
     return result;
@@ -96,7 +95,7 @@ int64_t VSMap::CountBelow(const string& key) {
     LOG("CountBelow for key=" << key);
     int64_t result = 0;
     auto it = pmem_kv_container.begin();
-    auto end = pmem_kv_container.lower_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    auto end = pmem_kv_container.lower_bound(key_type(key.c_str(), key.size(), kv_allocator));
     for (; it != end; it++) result++;
     return result;
 }
@@ -105,8 +104,8 @@ int64_t VSMap::CountBetween(const string& key1, const string& key2) {
     LOG("CountBetween for key1=" << key1 << ", key2=" << key2);
     int64_t result = 0;
     if (key1 < key2) {
-        auto it = pmem_kv_container.upper_bound(pmem_string(key1.c_str(), key1.size(), ch_allocator));
-        auto end = pmem_kv_container.lower_bound(pmem_string(key2.c_str(), key2.size(), ch_allocator));
+        auto it = pmem_kv_container.upper_bound(key_type(key1.c_str(), key1.size(), kv_allocator));
+        auto end = pmem_kv_container.lower_bound(key_type(key2.c_str(), key2.size(), kv_allocator));
         for (; it != end; it++) result++;
     }
     return result;
@@ -121,7 +120,7 @@ void VSMap::Each(void* context, KVEachCallback* callback) {
 
 void VSMap::EachAbove(void* context, const string& key, KVEachCallback* callback) {
     LOG("EachAbove for key=" << key);
-    auto it = pmem_kv_container.upper_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    auto it = pmem_kv_container.upper_bound(key_type(key.c_str(), key.size(), kv_allocator));
     auto end = pmem_kv_container.end();
     for (; it != end; it++)
         (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
@@ -131,7 +130,7 @@ void VSMap::EachAbove(void* context, const string& key, KVEachCallback* callback
 void VSMap::EachBelow(void* context, const string& key, KVEachCallback* callback) {
     LOG("EachBelow for key=" << key);
     auto it = pmem_kv_container.begin();
-    auto end = pmem_kv_container.lower_bound(pmem_string(key.c_str(), key.size(), ch_allocator));
+    auto end = pmem_kv_container.lower_bound(key_type(key.c_str(), key.size(), kv_allocator));
     for (; it != end; it++)
         (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
                     (int32_t) it->second.size(), it->second.c_str());
@@ -140,8 +139,8 @@ void VSMap::EachBelow(void* context, const string& key, KVEachCallback* callback
 void VSMap::EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) {
     LOG("EachBetween for key1=" << key1 << ", key2=" << key2);
     if (key1 < key2) {
-        auto it = pmem_kv_container.upper_bound(pmem_string(key1.c_str(), key1.size(), ch_allocator));
-        auto end = pmem_kv_container.lower_bound(pmem_string(key2.c_str(), key2.size(), ch_allocator));
+        auto it = pmem_kv_container.upper_bound(key_type(key1.c_str(), key1.size(), kv_allocator));
+        auto end = pmem_kv_container.lower_bound(key_type(key2.c_str(), key2.size(), kv_allocator));
         for (; it != end; it++)
             (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
                         (int32_t) it->second.size(), it->second.c_str());
@@ -150,13 +149,13 @@ void VSMap::EachBetween(void* context, const string& key1, const string& key2, K
 
 KVStatus VSMap::Exists(const string& key) {
     LOG("Exists for key=" << key);
-    bool r = pmem_kv_container.find(pmem_string(key.c_str(), key.size(), ch_allocator)) != pmem_kv_container.end();
+    bool r = pmem_kv_container.find(key_type(key.c_str(), key.size(), kv_allocator)) != pmem_kv_container.end();
     return (r ? OK : NOT_FOUND);
 }
 
 void VSMap::Get(void* context, const string& key, KVGetCallback* callback) {
     LOG("Get key=" << key);
-    const auto pos = pmem_kv_container.find(pmem_string(key.c_str(), key.size(), ch_allocator));
+    const auto pos = pmem_kv_container.find(key_type(key.c_str(), key.size(), kv_allocator));
     if (pos == pmem_kv_container.end()) {
         LOG("  key not found");
         return;
@@ -167,8 +166,8 @@ void VSMap::Get(void* context, const string& key, KVGetCallback* callback) {
 KVStatus VSMap::Put(const string& key, const string& value) {
     LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
     try {
-        pmem_kv_container[pmem_string(key.c_str(), key.size(), ch_allocator)] =
-                pmem_string(value.c_str(), value.size(), ch_allocator);
+        pmem_kv_container[key_type(key.c_str(), key.size(), kv_allocator)] =
+                mapped_type(value.c_str(), value.size(), kv_allocator);
         return OK;
     } catch (std::bad_alloc e) {
         LOG("Put failed due to exception, " << e.what());
@@ -185,7 +184,7 @@ KVStatus VSMap::Put(const string& key, const string& value) {
 KVStatus VSMap::Remove(const string& key) {
     LOG("Remove key=" << key);
     try {
-        size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
+        size_t erased = pmem_kv_container.erase(key_type(key.c_str(), key.size(), kv_allocator));
         return (erased == 1) ? OK : NOT_FOUND;
     } catch (std::bad_alloc e) {
         LOG("Put failed due to exception, " << e.what());

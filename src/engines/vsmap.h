@@ -77,14 +77,16 @@ class VSMap : public KVEngine {
     using KVEngine::EachBetween;
     using KVEngine::Get;
   private:
-    typedef pmem::allocator<char> ch_allocator_t;
-    typedef std::basic_string<char, std::char_traits<char>, ch_allocator_t> pmem_string;
-    typedef pmem::allocator<std::pair<pmem_string, pmem_string> > kv_allocator_t;
-    typedef std::map<pmem_string, pmem_string, std::less<pmem_string>, std::scoped_allocator_adaptor<kv_allocator_t>> map_t;
+    using storage_type = std::basic_string<char, std::char_traits<char>, pmem::allocator<char> >;
+
+    using key_type = storage_type;
+    using mapped_type = storage_type;
+    using map_allocator_type = pmem::allocator<std::pair<key_type, mapped_type> >;
+    using map_type = std::map<key_type, mapped_type, std::less<key_type>, std::scoped_allocator_adaptor<map_allocator_type>>;
+
     void* engine_context;
-    kv_allocator_t kv_allocator;
-    ch_allocator_t ch_allocator;
-    map_t pmem_kv_container;
+    map_allocator_type kv_allocator;
+    map_type pmem_kv_container;
 };
 
 } // namespace vsmap
