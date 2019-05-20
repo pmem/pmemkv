@@ -37,6 +37,7 @@
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/document.h>
 #include <unistd.h>
 #include "caching.h"
 
