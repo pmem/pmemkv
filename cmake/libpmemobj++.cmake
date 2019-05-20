@@ -58,7 +58,7 @@ CHECK_CXX_SOURCE_COMPILES(
 set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
 
 if(NOT PMEM_CONCURRENT_HASH_MAP_PRESENT)
-	message(FATAL_ERROR "libpmemobj++/experimental/concurrent_hash_map.hpp not found (available in libpmemobj-cpp > 1.6")
+	message(FATAL_ERROR "libpmemobj++/experimental/concurrent_hash_map.hpp not found (available in libpmemobj-cpp > 1.6)")
 endif()
 
 include_directories(${LIBPMEMOBJ++_INCLUDE_DIRS})
