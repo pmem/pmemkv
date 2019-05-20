@@ -87,6 +87,7 @@ set(TEST_FILES tests/pmemkv_test.cc tests/mock_tx_alloc.cc
 )
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 find_package(PkgConfig QUIET)
 include(ExternalProject)

@@ -1,4 +1,6 @@
-# Copyright 2017-2019, Intel Corporation
+#!/usr/bin/env bash
+#
+# Copyright 2018-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,38 +30,39 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-if(PKG_CONFIG_FOUND)
-# XXX uncomment when libpmemobj-cpp 1.7 is released
-#	pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++>=1.7)
-	pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++)
-else()
-	find_package(LIBPMEMOBJ++ REQUIRED libpmemobj++)
-	message(STATUS "libpmemobj++ found the old way (w/o pkg-config)")
-endif()
+#
+# run-coverity.sh - runs the Coverity scan build
+#
 
-set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
-set(CMAKE_REQUIRED_INCLUDES ${LIBPMEMOBJ++_INCLUDE_DIRS})
-CHECK_CXX_SOURCE_COMPILES(
-	"#include <libpmemobj++/experimental/string.hpp>
-	int main() {}"
-	PMEM_STRING_PRESENT)
-set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
+set -e
 
-if(NOT PMEM_STRING_PRESENT)
-	message(FATAL_ERROR "libpmemobj++/experimental/string.hpp not found (available in libpmemobj-cpp >= 1.6)")
-endif()
+cd $WORKDIR
 
-set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
-set(CMAKE_REQUIRED_INCLUDES ${LIBPMEMOBJ++_INCLUDE_DIRS})
-CHECK_CXX_SOURCE_COMPILES(
-	"#include <libpmemobj++/experimental/concurrent_hash_map.hpp>
-	int main() {}"
-	PMEM_CONCURRENT_HASH_MAP_PRESENT)
-set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Debug
 
-if(NOT PMEM_CONCURRENT_HASH_MAP_PRESENT)
-	message(FATAL_ERROR "libpmemobj++/experimental/concurrent_hash_map.hpp not found (available in libpmemobj-cpp > 1.6")
-endif()
+export COVERITY_SCAN_PROJECT_NAME="$TRAVIS_REPO_SLUG"
+[[ "$TRAVIS_EVENT_TYPE" == "cron" ]] \
+	&& export COVERITY_SCAN_BRANCH_PATTERN="master" \
+	|| export COVERITY_SCAN_BRANCH_PATTERN="coverity_scan"
+export COVERITY_SCAN_BUILD_COMMAND="make"
 
-include_directories(${LIBPMEMOBJ++_INCLUDE_DIRS})
-link_directories(${LIBPMEMOBJ++_LIBRARY_DIRS})
+# Run the Coverity scan
+
+# XXX: Patch the Coverity script.
+# Recently, this script regularly exits with an error, even though
+# the build is successfully submitted.  Probably because the status code
+# is missing in response, or it's not 201.
+# Changes:
+# 1) change the expected status code to 200 and
+# 2) print the full response string.
+#
+# This change should be reverted when the Coverity script is fixed.
+#
+# The previous version was:
+# curl -s https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh | bash
+
+wget https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh
+patch < ../utils/docker/0001-travis-fix-travisci_build_coverity_scan.sh.patch
+bash ./travisci_build_coverity_scan.sh

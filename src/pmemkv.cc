@@ -51,6 +51,8 @@ using std::runtime_error;
 
 namespace pmemkv {
 
+KVEngine::~KVEngine() { }
+
 // STATIC METHOD IMPLEMENTATIONS
 
 KVEngine* KVEngine::Start(const string& engine, const string& config) {
