@@ -89,19 +89,48 @@ set(TEST_FILES
 	pmemkv_test.cc
 	mock_tx_alloc.cc
 	engines/blackhole_test.cc
-	engines/vsmap_test.cc
-	engines/vcmap_test.cc
-	engines/cmap_test.cc
-	engines-experimental/tree_test.cc
-	engines-experimental/stree_test.cc
-	engines-experimental/caching_test.cc
 )
+# add each engine's tests source separately
+if(ENABLE_VSMAP_ENGINE)
+	list(APPEND TEST_FILES
+		engines/vsmap_test.cc
+	)
+endif()
+if(ENABLE_VCMAP_ENGINE)
+	list(APPEND TEST_FILES
+		engines/vcmap_test.cc
+	)
+endif()
+if(ENABLE_CMAP_ENGINE)
+	list(APPEND TEST_FILES
+		engines/cmap_test.cc
+	)
+endif()
+if(ENABLE_CACHING_ENGINE)
+	list(APPEND TEST_FILES
+		engines-experimental/caching_test.cc
+	)
+endif()
+if(ENABLE_STREE_ENGINE)
+	list(APPEND TEST_FILES
+		engines-experimental/stree_test.cc
+	)
+endif()
+if(ENABLE_TREE3_ENGINE)
+	list(APPEND TEST_FILES
+		engines-experimental/tree_test.cc
+	)
+endif()
 
 include(gtest)
 include(get_tests.cmake)
 
 add_executable(pmemkv_test ${TEST_FILES})
-target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS} ${TBB_LIBRARIES} ${LIBPMEMOBJ++_LIBRARIES})
+
+target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS} ${TBB_LIBRARIES})
+if(ENABLE_VSMAP_ENGINE OR ENABLE_VCMAP_ENGINE OR ENABLE_CMAP_ENGINE OR ENABLE_STREE_ENGINE OR ENABLE_TREE3_ENGINE)
+	target_link_libraries(pmemkv_test ${LIBPMEMOBJ++_LIBRARIES})
+endif()
 
 # parse tests source files to get the list of all tests
 get_tests(${CMAKE_CURRENT_SOURCE_DIR} "${TEST_FILES}" list_all_tests)
