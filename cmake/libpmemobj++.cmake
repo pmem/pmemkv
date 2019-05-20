@@ -38,24 +38,27 @@ else()
 endif()
 
 set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
+set(SAVED_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+
 set(CMAKE_REQUIRED_INCLUDES ${LIBPMEMOBJ++_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_FLAGS "--std=c++11 -Wno-error -c")
+
 CHECK_CXX_SOURCE_COMPILES(
 	"#include <libpmemobj++/experimental/string.hpp>
 	int main() {}"
 	PMEM_STRING_PRESENT)
-set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
 
 if(NOT PMEM_STRING_PRESENT)
 	message(FATAL_ERROR "libpmemobj++/experimental/string.hpp not found (available in libpmemobj-cpp >= 1.6)")
 endif()
 
-set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
-set(CMAKE_REQUIRED_INCLUDES ${LIBPMEMOBJ++_INCLUDE_DIRS})
 CHECK_CXX_SOURCE_COMPILES(
 	"#include <libpmemobj++/experimental/concurrent_hash_map.hpp>
 	int main() {}"
 	PMEM_CONCURRENT_HASH_MAP_PRESENT)
+
 set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
+set(CMAKE_REQUIRED_FLAGS ${SAVED_CMAKE_REQUIRED_FLAGS})
 
 if(NOT PMEM_CONCURRENT_HASH_MAP_PRESENT)
 	message(FATAL_ERROR "libpmemobj++/experimental/concurrent_hash_map.hpp not found (available in libpmemobj-cpp > 1.6")
