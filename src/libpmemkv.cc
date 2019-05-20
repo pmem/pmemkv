@@ -30,21 +30,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <libpmemobj++/make_persistent.hpp>
-#include <libpmemobj++/make_persistent_array.hpp>
-#include <libpmemobj++/persistent_ptr.hpp>
-#include <libpmemobj++/pool.hpp>
-#include <libpmemobj++/transaction.hpp>
 #include <rapidjson/document.h>
+#if defined(ENGINE_VSMAP) || defined(ENGINE_VCMAP)
+#include <sys/stat.h>
+#endif
 
 #include "engines/blackhole.h"
+#if defined(ENGINE_VSMAP)
 #include "engines/vsmap.h"
+#endif
+#if defined(ENGINE_VCMAP)
 #include "engines/vcmap.h"
+#endif
+#if defined(ENGINE_CMAP)
 #include "engines/cmap.h"
-#ifdef EXPERIMENTAL
-#include "engines-experimental/tree3.h"
-#include "engines-experimental/stree.h"
+#endif
+#ifdef ENGINE_CACHING
 #include "engines-experimental/caching.h"
+#endif
+#ifdef ENGINE_STREE
+#include "engines-experimental/stree.h"
+#endif
+#ifdef ENGINE_TREE3
+#include "engines-experimental/tree3.h"
 #endif
 
 using std::runtime_error;
@@ -70,7 +78,7 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
     try {
         if (engine == blackhole::ENGINE) {
             return new blackhole::Blackhole(context);
-#ifdef EXPERIMENTAL
+#ifdef ENGINE_CACHING
         } else if (engine == caching::ENGINE) {
             return new caching::CachingEngine(context, config);
 #endif
@@ -85,26 +93,38 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
             }
             auto path = d["path"].GetString();
             size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;
-#ifdef EXPERIMENTAL
+#ifdef ENGINE_TREE3
             if (engine == tree3::ENGINE) {
                 return new tree3::Tree(context, path, size);
-            } else if (engine == stree::ENGINE) {
+            }
+#elif defined(ENGINE_STREE)
+            if (engine == stree::ENGINE) {
                 return new stree::STree(context, path, size);
-            } else if ((engine == vsmap::ENGINE) || (engine == vcmap::ENGINE)) {
-#else
-	    if ((engine == vsmap::ENGINE) || (engine == vcmap::ENGINE)) {
+            }
 #endif
-		struct stat info;
+
+#if defined(ENGINE_VSMAP)
+            struct stat info;
+            if (engine == vsmap::ENGINE) {
                 if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
                     throw runtime_error("Config path is not an existing directory");
-                } else if (engine == vsmap::ENGINE) {
-                    return new vsmap::VSMap(context, path, size);
-                } else if (engine == vcmap::ENGINE) {
-                    return new vcmap::VCMap(context, path, size);
                 }
-            } else if (engine == cmap::ENGINE) {
+                return new vsmap::VSMap(context, path, size);
+            }
+#elif defined(ENGINE_VCMAP)
+            struct stat info;
+            if (engine == vcmap::ENGINE) {
+                if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
+                    throw runtime_error("Config path is not an existing directory");
+                }
+                return new vcmap::VCMap(context, path, size);
+            }
+#endif
+#ifdef ENGINE_CMAP
+            if (engine == cmap::ENGINE) {
                 return new cmap::CMap(context, path, size);
             }
+#endif
         }
         throw runtime_error("Unknown engine name");
     } catch (std::exception& e) {
@@ -117,20 +137,25 @@ void KVEngine::Stop(KVEngine* kv) {
     auto engine = kv->Engine();
     if (engine == blackhole::ENGINE) {
         delete (blackhole::Blackhole*) kv;
-#ifdef EXPERIMENTAL
+#if defined(ENGINE_TREE3)
     } else if (engine == tree3::ENGINE) {
         delete (tree3::Tree*) kv;
+#elif defined(ENGINE_STREE)
     } else if (engine == stree::ENGINE) {
         delete (stree::STree*) kv;
+#elif defined(ENGINE_CACHING)
     } else if (engine == caching::ENGINE) {
         delete (caching::CachingEngine*) kv;
-#endif
+#elif defined(ENGINE_VSMAP)
     } else if (engine == vsmap::ENGINE) {
         delete (vsmap::VSMap*) kv;
+#elif defined(ENGINE_VCMAP)
     } else if (engine == vcmap::ENGINE) {
         delete (vcmap::VCMap*) kv;
+#elif defined(ENGINE_CMAP)
     } else if (engine == cmap::ENGINE) {
         delete (cmap::CMap*) kv;
+#endif
     }
 }
 
