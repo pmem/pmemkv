@@ -61,9 +61,21 @@ if(COVERAGE)
 endif()
 
 option(EXPERIMENTAL "use experimental features" OFF)
+option(ENABLE_CACHING_ENGINE "enable installation and testing of CachingEngine (depends on EXPERIMENTAL)" OFF)
+option(ENABLE_STREE_ENGINE "enable installation and testing of STree engine (depends on EXPERIMENTAL)" ON)
+option(ENABLE_TREE3_ENGINE "enable installation and testing of Tree engine (depends on EXPERIMENTAL)" ON)
 if(EXPERIMENTAL)
     add_definitions(-DEXPERIMENTAL)
 endif(EXPERIMENTAL)
+if(ENABLE_CACHING_ENGINE)
+    add_definitions(-DENABLE_CACHING_ENGINE)
+endif(ENABLE_CACHING_ENGINE)
+if(ENABLE_STREE_ENGINE)
+    add_definitions(-DENABLE_STREE_ENGINE)
+endif(ENABLE_STREE_ENGINE)
+if(ENABLE_TREE3_ENGINE)
+    add_definitions(-DENABLE_TREE3_ENGINE)
+endif(ENABLE_TREE3_ENGINE)
 
 set(SOURCE_FILES src/pmemkv.cc src/pmemkv.h
     src/engines/blackhole.h src/engines/blackhole.cc
@@ -79,18 +91,33 @@ set(TEST_FILES tests/pmemkv_test.cc tests/mock_tx_alloc.cc
 )
 
 if(EXPERIMENTAL)
-	list(APPEND SOURCE_FILES
-		src/engines-experimental/tree3.h src/engines-experimental/tree3.cc
-		src/engines-experimental/stree.h src/engines-experimental/stree.cc
-		src/engines-experimental/stree/persistent_b_tree.h src/engines-experimental/stree/pstring.h
-		src/engines-experimental/caching.h src/engines-experimental/caching.cc
-	)
+	if(ENABLE_CACHING_ENGINE)
+		list(APPEND SOURCE_FILES
+			src/engines-experimental/caching.h src/engines-experimental/caching.cc
+		)
+		list(APPEND TEST_FILES
+			tests/engines-experimental/caching_test.cc
+		)
+	endif(ENABLE_CACHING_ENGINE)
 
-	list(APPEND TEST_FILES
-		tests/engines-experimental/tree_test.cc
-		tests/engines-experimental/stree_test.cc
-		tests/engines-experimental/caching_test.cc
-	)
+	if(ENABLE_STREE_ENGINE)
+		list(APPEND SOURCE_FILES
+			src/engines-experimental/stree.h src/engines-experimental/stree.cc
+			src/engines-experimental/stree/persistent_b_tree.h src/engines-experimental/stree/pstring.h
+		)
+		list(APPEND TEST_FILES
+			tests/engines-experimental/stree_test.cc
+		)
+	endif(ENABLE_STREE_ENGINE)
+
+	if(ENABLE_TREE3_ENGINE)
+		list(APPEND SOURCE_FILES
+			src/engines-experimental/tree3.h src/engines-experimental/tree3.cc
+		)
+		list(APPEND TEST_FILES
+			tests/engines-experimental/tree_test.cc
+		)
+	endif(ENABLE_TREE3_ENGINE)
 endif(EXPERIMENTAL)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -106,7 +133,7 @@ include(libpmemobj++)
 include(rapidjson)
 include(tbb)
 include(gtest)
-if(EXPERIMENTAL)
+if(EXPERIMENTAL AND ENABLE_CACHING_ENGINE)
     include(memcached-experimental)
     include(redis-experimental)
 endif(EXPERIMENTAL)
@@ -143,7 +170,7 @@ else()
     target_link_libraries(pmemkv tbb)
 endif(TBB_IMPORTED_TARGETS)
 
-if(EXPERIMENTAL)
+if(EXPERIMENTAL AND ENABLE_CACHING_ENGINE)
     target_link_libraries(pmemkv ${CMAKE_THREAD_LIBS_INIT} memcached)
 	target_link_libraries(pmemkv acl_cpp protocol acl)
 endif(EXPERIMENTAL)
