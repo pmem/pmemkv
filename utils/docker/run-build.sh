@@ -38,6 +38,27 @@
 set -e
 echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
 
+function cleanup() {
+	find . -name ".coverage" -exec rm {} \;
+	find . -name "coverage.xml" -exec rm {} \;
+	find . -name "*.gcov" -exec rm {} \;
+	find . -name "*.gcda" -exec rm {} \;
+}
+
+function upload_codecov() {
+	clang_used=$(cmake -LA -N . | grep CMAKE_CXX_COMPILER | grep clang | wc -c)
+
+	if [[ $clang_used > 0 ]]; then
+		gcovexe="llvm-cov gcov"
+	else
+		gcovexe="gcov"
+	fi
+
+	# the output is redundant in this case, i.e. we rely on parsed report from codecov on github
+	bash <(curl -s https://codecov.io/bash) -c -F $1 -x "$gcovexe"
+	cleanup
+}
+
 cd $WORKDIR
 PREFIX=/usr/local
 
@@ -46,10 +67,15 @@ mkdir bin
 cd bin
 cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DTBB_DIR=/opt/tbb/cmake \
-	-DCMAKE_INSTALL_PREFIX=$PREFIX
+	-DCMAKE_INSTALL_PREFIX=$PREFIX \
+	-DCOVERAGE=$COVERAGE
 cd ..
 make test
 echo $USERPASS | sudo -S make install
+
+if [ "$COVERAGE" == "1" ]; then
+	upload_codecov tests
+fi
 
 # verify installed package
 LIBFILE=$PREFIX/lib/libpmemkv.so
