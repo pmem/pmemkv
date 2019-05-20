@@ -89,13 +89,38 @@ set(TEST_FILES
 	pmemkv_test.cc
 	mock_tx_alloc.cc
 	engines/blackhole_test.cc
-	engines/vsmap_test.cc
-	engines/vcmap_test.cc
-	engines/cmap_test.cc
-	engines-experimental/tree_test.cc
-	engines-experimental/stree_test.cc
-	engines-experimental/caching_test.cc
 )
+# Add each engine's tests source separately
+if(ENABLE_VSMAP_ENGINE)
+	list(APPEND TEST_FILES
+		engines/vsmap_test.cc
+	)
+endif(ENABLE_VSMAP_ENGINE)
+if(ENABLE_VCMAP_ENGINE)
+	list(APPEND TEST_FILES
+		engines/vcmap_test.cc
+	)
+endif(ENABLE_VCMAP_ENGINE)
+if(ENABLE_CMAP_ENGINE)
+	list(APPEND TEST_FILES
+		engines/cmap_test.cc
+	)
+endif(ENABLE_CMAP_ENGINE)
+if(ENABLE_CACHING_ENGINE)
+	list(APPEND TEST_FILES
+		engines-experimental/caching_test.cc
+	)
+endif(ENABLE_CACHING_ENGINE)
+if(ENABLE_STREE_ENGINE)
+	list(APPEND TEST_FILES
+		engines-experimental/stree_test.cc
+	)
+endif(ENABLE_STREE_ENGINE)
+if(ENABLE_TREE3_ENGINE)
+	list(APPEND TEST_FILES
+		engines-experimental/tree_test.cc
+	)
+endif(ENABLE_TREE3_ENGINE)
 
 include(gtest)
 include(get_tests.cmake)

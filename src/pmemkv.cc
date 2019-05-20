@@ -41,10 +41,14 @@
 #include "engines/vsmap.h"
 #include "engines/vcmap.h"
 #include "engines/cmap.h"
-#ifdef EXPERIMENTAL
-#include "engines-experimental/tree3.h"
-#include "engines-experimental/stree.h"
+#if defined(EXPERIMENTAL) && defined(ENABLE_CACHING_ENGINE)
 #include "engines-experimental/caching.h"
+#endif
+#if defined(EXPERIMENTAL) && defined(ENABLE_STREE_ENGINE)
+#include "engines-experimental/stree.h"
+#endif
+#if defined(EXPERIMENTAL) && defined(ENABLE_TREE3_ENGINE)
+#include "engines-experimental/tree3.h"
 #endif
 
 using std::runtime_error;
@@ -70,7 +74,7 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
     try {
         if (engine == blackhole::ENGINE) {
             return new blackhole::Blackhole(context);
-#ifdef EXPERIMENTAL
+#if defined(EXPERIMENTAL) && defined(ENABLE_CACHING_ENGINE)
         } else if (engine == caching::ENGINE) {
             return new caching::CachingEngine(context, config);
 #endif
@@ -85,16 +89,17 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
             }
             auto path = d["path"].GetString();
             size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;
-#ifdef EXPERIMENTAL
+#if defined(EXPERIMENTAL) && defined(ENABLE_TREE3_ENGINE)
             if (engine == tree3::ENGINE) {
                 return new tree3::Tree(context, path, size);
-            } else if (engine == stree::ENGINE) {
+            }
+#elif defined(EXPERIMENTAL) && defined(ENABLE_STREE_ENGINE)
+            if (engine == stree::ENGINE) {
                 return new stree::STree(context, path, size);
-            } else if ((engine == vsmap::ENGINE) || (engine == vcmap::ENGINE)) {
-#else
-	    if ((engine == vsmap::ENGINE) || (engine == vcmap::ENGINE)) {
+            }
 #endif
-		struct stat info;
+	        if ((engine == vsmap::ENGINE) || (engine == vcmap::ENGINE)) {
+		        struct stat info;
                 if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
                     throw runtime_error("Config path is not an existing directory");
                 } else if (engine == vsmap::ENGINE) {
@@ -117,11 +122,13 @@ void KVEngine::Stop(KVEngine* kv) {
     auto engine = kv->Engine();
     if (engine == blackhole::ENGINE) {
         delete (blackhole::Blackhole*) kv;
-#ifdef EXPERIMENTAL
+#if defined(EXPERIMENTAL) && defined(ENABLE_TREE3_ENGINE)
     } else if (engine == tree3::ENGINE) {
         delete (tree3::Tree*) kv;
+#elif defined(EXPERIMENTAL) && defined(ENABLE_STREE_ENGINE)
     } else if (engine == stree::ENGINE) {
         delete (stree::STree*) kv;
+#elif defined(EXPERIMENTAL) && defined(ENABLE_CACHING_ENGINE)
     } else if (engine == caching::ENGINE) {
         delete (caching::CachingEngine*) kv;
 #endif
