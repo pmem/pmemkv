@@ -30,8 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef EXPERIMENTAL
-
 #pragma once
 
 #include "../libpmemkv.h"
@@ -97,5 +95,3 @@ class STree : public KVEngine {
 
 } // namespace stree
 } // namespace pmemkv
-
-#endif
