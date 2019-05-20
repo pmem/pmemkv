@@ -1,3 +1,4 @@
+#
 # Copyright 2017-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
@@ -73,26 +74,79 @@ if(COVERAGE)
        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage")
 endif()
 
-option(EXPERIMENTAL "use experimental features" OFF)
-if(EXPERIMENTAL)
-    add_definitions(-DEXPERIMENTAL)
-endif(EXPERIMENTAL)
+# Each engine can be enabled separately
+# By default all experimental engines are turned off
+option(ENGINE_VSMAP "enable VSMap engine" ON)
+option(ENGINE_VCMAP "enable VCMap engine" ON)
+option(ENGINE_CMAP "enable CMap engine" ON)
+option(ENGINE_CACHING "enable experimental CachingEngine" OFF)
+option(ENGINE_STREE "enable experimental STree engine" OFF)
+option(ENGINE_TREE3 "enable experimental Tree engine" OFF)
 
-set(SOURCE_FILES src/libpmemkv.cc src/libpmemkv.h
-    src/engines/blackhole.h src/engines/blackhole.cc
-    src/engines/vsmap.h src/engines/vsmap.cc
-    src/engines/vcmap.h src/engines/vcmap.cc
-	src/engines/cmap.h src/engines/cmap.cc
+if(ENGINE_VSMAP)
+    add_definitions(-DENGINE_VSMAP)
+endif()
+if(ENGINE_VCMAP)
+    add_definitions(-DENGINE_VCMAP)
+endif()
+if(ENGINE_CMAP)
+    add_definitions(-DENGINE_CMAP)
+endif()
+if(ENGINE_CACHING)
+    add_definitions(-DENGINE_CACHING)
+endif()
+if(ENGINE_STREE)
+    add_definitions(-DENGINE_STREE)
+endif()
+if(ENGINE_TREE3)
+    add_definitions(-DENGINE_TREE3)
+endif()
+
+set(SOURCE_FILES
+	src/libpmemkv.cc
+	src/libpmemkv.h
+	src/engines/blackhole.cc
+	src/engines/blackhole.h
 )
-
-if(EXPERIMENTAL)
+# Add each engine source separately
+if(ENGINE_VSMAP)
 	list(APPEND SOURCE_FILES
-		src/engines-experimental/tree3.h src/engines-experimental/tree3.cc
-		src/engines-experimental/stree.h src/engines-experimental/stree.cc
-		src/engines-experimental/stree/persistent_b_tree.h src/engines-experimental/stree/pstring.h
-		src/engines-experimental/caching.h src/engines-experimental/caching.cc
+		src/engines/vsmap.h
+		src/engines/vsmap.cc
 	)
-endif(EXPERIMENTAL)
+endif()
+if(ENGINE_VCMAP)
+	list(APPEND SOURCE_FILES
+		src/engines/vcmap.h
+		src/engines/vcmap.cc
+	)
+endif()
+if(ENGINE_CMAP)
+	list(APPEND SOURCE_FILES
+		src/engines/cmap.h
+		src/engines/cmap.cc
+	)
+endif()
+if(ENGINE_CACHING)
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/caching.h
+		src/engines-experimental/caching.cc
+	)
+endif()
+if(ENGINE_STREE)
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/stree.h
+		src/engines-experimental/stree.cc
+		src/engines-experimental/stree/persistent_b_tree.h
+		src/engines-experimental/stree/pstring.h
+	)
+endif()
+if(ENGINE_TREE3)
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/tree3.h
+		src/engines-experimental/tree3.cc
+	)
+endif()
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -103,15 +157,20 @@ include(FindThreads)
 include(CheckCXXSourceCompiles)
 include(GNUInstallDirs)
 
-
-include(memkind)
-include(libpmemobj++)
 include(rapidjson)
-include(tbb)
-if(EXPERIMENTAL)
+if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3)
+	include(libpmemobj++)
+endif()
+if(ENGINE_VSMAP OR ENGINE_VCMAP)
+	include(memkind)
+endif()
+if(ENGINE_VCMAP OR ENGINE_CMAP)
+	include(tbb)
+endif()
+if(ENGINE_CACHING)
     include(memcached-experimental)
     include(redis-experimental)
-endif(EXPERIMENTAL)
+endif()
 
 if(PKG_CONFIG_FOUND)
 	pkg_check_modules(VALGRIND QUIET valgrind)
@@ -131,20 +190,24 @@ endif()
 
 add_library(pmemkv SHARED ${SOURCE_FILES})
 
-target_link_libraries(pmemkv PRIVATE ${LIBPMEMOBJ++_LIBRARIES}
-                                    ${MEMKIND_LIBRARIES}
-                                    ${RapidJSON_LIBRARIES}
-                                    ${TBB_LIBRARIES})
+target_link_libraries(pmemkv PRIVATE ${RapidJSON_LIBRARIES})
+if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3)
+	target_link_libraries(pmemkv PRIVATE ${LIBPMEMOBJ++_LIBRARIES})
+endif()
+if(ENGINE_VSMAP OR ENGINE_VCMAP)
+	target_link_libraries(pmemkv PRIVATE ${MEMKIND_LIBRARIES})
+endif()
+if(ENGINE_VCMAP OR ENGINE_CMAP)
+	target_link_libraries(pmemkv PRIVATE ${TBB_LIBRARIES})
+endif()
+if(ENGINE_CACHING)
+	target_link_libraries(pmemkv PRIVATE ${CMAKE_THREAD_LIBS_INIT} memcached)
+	target_link_libraries(pmemkv PRIVATE acl_cpp protocol acl)
+endif()
 
 target_include_directories(pmemkv PRIVATE src/valgrind)
-
 # Enable libpmemobj-cpp valgrind annotations
 target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_ENABLED=1)
-
-if(EXPERIMENTAL)
-    target_link_libraries(pmemkv PRIVATE ${CMAKE_THREAD_LIBS_INIT} memcached)
-    target_link_libraries(pmemkv PRIVATE acl_cpp protocol acl)
-endif(EXPERIMENTAL)
 
 enable_testing()
 add_subdirectory(tests)
@@ -163,5 +226,3 @@ configure_file(
 
 add_custom_target(uninstall
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-
-unset(EXPERIMENTAL CACHE)
