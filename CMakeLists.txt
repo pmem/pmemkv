@@ -55,6 +55,19 @@ function(find_pmemcheck)
 	endif()
 endfunction()
 
+# set the default build type
+if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+	set(DEFAULT_BUILD_TYPE "Debug")
+else()
+	set(DEFAULT_BUILD_TYPE "RelWithDebInfo")
+endif()
+
+if(NOT CMAKE_BUILD_TYPE)
+	message(STATUS "Setting build type to the default one (${DEFAULT_BUILD_TYPE})")
+	set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}"
+		CACHE STRING "Choose a type of build (Debug, Release or RelWithDebInfo)" FORCE)
+endif()
+
 option(COVERAGE "run coverage test" OFF)
 if(COVERAGE)
        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage")
