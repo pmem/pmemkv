@@ -44,34 +44,34 @@ using pmem::obj::persistent_ptr;
 namespace pmemkv {
 namespace stree {
 
-const string ENGINE = "stree";
+const std::string ENGINE = "stree";
 const size_t DEGREE = 64;
 const size_t MAX_KEY_SIZE = 20;
 const size_t MAX_VALUE_SIZE = 200;
 
 class STree : public KVEngine {
   public:
-    STree(void* context, const string& path, size_t size);
+    STree(void* context, const std::string& path, size_t size);
     ~STree();
 
-    string Engine() final { return ENGINE; }
+    std::string Engine() final { return ENGINE; }
     void* EngineContext() { return engine_context; }
     void All(void* context, KVAllCallback* callback) final;
-    void AllAbove(void* context, const string& key, KVAllCallback* callback) final {};
-    void AllBelow(void* context, const string& key, KVAllCallback* callback) final {};
-    void AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) final {};
+    void AllAbove(void* context, const std::string& key, KVAllCallback* callback) final {};
+    void AllBelow(void* context, const std::string& key, KVAllCallback* callback) final {};
+    void AllBetween(void* context, const std::string& key1, const std::string& key2, KVAllCallback* callback) final {};
     int64_t Count() final;
-    int64_t CountAbove(const string& key) final { return 0; };
-    int64_t CountBelow(const string& key) final { return 0; };
-    int64_t CountBetween(const string& key1, const string& key2) final { return 0; };
+    int64_t CountAbove(const std::string& key) final { return 0; };
+    int64_t CountBelow(const std::string& key) final { return 0; };
+    int64_t CountBetween(const std::string& key1, const std::string& key2) final { return 0; };
     void Each(void* context, KVEachCallback* callback) final;
-    void EachAbove(void* context, const string& key, KVEachCallback* callback) final {};
-    void EachBelow(void* context, const string& key, KVEachCallback* callback) final {};
-    void EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) final {};
-    KVStatus Exists(const string& key) final;
-    void Get(void* context, const string& key, KVGetCallback* callback) final;
-    KVStatus Put(const string& key, const string& value) final;
-    KVStatus Remove(const string& key) final;
+    void EachAbove(void* context, const std::string& key, KVEachCallback* callback) final {};
+    void EachBelow(void* context, const std::string& key, KVEachCallback* callback) final {};
+    void EachBetween(void* context, const std::string& key1, const std::string& key2, KVEachCallback* callback) final {};
+    KVStatus Exists(const std::string& key) final;
+    void Get(void* context, const std::string& key, KVGetCallback* callback) final;
+    KVStatus Put(const std::string& key, const std::string& value) final;
+    KVStatus Remove(const std::string& key) final;
 
     using KVEngine::All;
     using KVEngine::AllAbove;

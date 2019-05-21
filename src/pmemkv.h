@@ -51,75 +51,72 @@ typedef void(KVStartFailureCallback)(void* context, const char* engine, const ch
 #include <string>
 #include <functional>
 
-using std::string;
-using std::to_string;
-
 namespace pmemkv {
 
-typedef void(KVAllStringFunction)(const string& key);
-typedef void(KVEachStringFunction)(const string& key, const string& value);
-typedef void(KVGetStringFunction)(const string& value);
+typedef void(KVAllStringFunction)(const std::string& key);
+typedef void(KVEachStringFunction)(const std::string& key, const std::string& value);
+typedef void(KVGetStringFunction)(const std::string& value);
 
-const string LAYOUT = "pmemkv";
+const std::string LAYOUT = "pmemkv";
 
 class KVEngine {
   public:
     virtual ~KVEngine();
 
     static KVEngine* Start(void* context, const char* engine, const char* config, KVStartFailureCallback* callback);
-    static KVEngine* Start(void* context, const string& engine, const string& config);
-    static KVEngine* Start(const string& engine, const string& config);
+    static KVEngine* Start(void* context, const std::string& engine, const std::string& config);
+    static KVEngine* Start(const std::string& engine, const std::string& config);
     static void Stop(KVEngine* kv);
 
-    virtual string Engine() = 0;
+    virtual std::string Engine() = 0;
     virtual void* EngineContext() = 0;
 
     virtual void All(void* context, KVAllCallback* callback) = 0;
     void All(std::function<KVAllFunction> f);
     void All(std::function<KVAllStringFunction> f);
 
-    virtual void AllAbove(void* context, const string& key, KVAllCallback* callback) = 0;
-    void AllAbove(const string& key, std::function<KVAllFunction> f);
-    void AllAbove(const string& key, std::function<KVAllStringFunction> f);
+    virtual void AllAbove(void* context, const std::string& key, KVAllCallback* callback) = 0;
+    void AllAbove(const std::string& key, std::function<KVAllFunction> f);
+    void AllAbove(const std::string& key, std::function<KVAllStringFunction> f);
 
-    virtual void AllBelow(void* context, const string& key, KVAllCallback* callback) = 0;
-    void AllBelow(const string& key, std::function<KVAllFunction> f);
-    void AllBelow(const string& key, std::function<KVAllStringFunction> f);
+    virtual void AllBelow(void* context, const std::string& key, KVAllCallback* callback) = 0;
+    void AllBelow(const std::string& key, std::function<KVAllFunction> f);
+    void AllBelow(const std::string& key, std::function<KVAllStringFunction> f);
 
-    virtual void AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) = 0;
-    void AllBetween(const string& key1, const string& key2, std::function<KVAllFunction> f);
-    void AllBetween(const string& key1, const string& key2, std::function<KVAllStringFunction> f);
+    virtual void AllBetween(void* context, const std::string& key1, const std::string& key2, KVAllCallback* callback) = 0;
+    void AllBetween(const std::string& key1, const std::string& key2, std::function<KVAllFunction> f);
+    void AllBetween(const std::string& key1, const std::string& key2, std::function<KVAllStringFunction> f);
 
     virtual int64_t Count() = 0;
-    virtual int64_t CountAbove(const string& key) = 0;
-    virtual int64_t CountBelow(const string& key) = 0;
-    virtual int64_t CountBetween(const string& key1, const string& key2) = 0;
+    virtual int64_t CountAbove(const std::string& key) = 0;
+    virtual int64_t CountBelow(const std::string& key) = 0;
+    virtual int64_t CountBetween(const std::string& key1, const std::string& key2) = 0;
 
     virtual void Each(void* context, KVEachCallback* callback) = 0;
     void Each(std::function<KVEachFunction> f);
     void Each(std::function<KVEachStringFunction> f);
 
-    virtual void EachAbove(void* context, const string& key, KVEachCallback* callback) = 0;
-    void EachAbove(const string& key, std::function<KVEachFunction> f);
-    void EachAbove(const string& key, std::function<KVEachStringFunction> f);
+    virtual void EachAbove(void* context, const std::string& key, KVEachCallback* callback) = 0;
+    void EachAbove(const std::string& key, std::function<KVEachFunction> f);
+    void EachAbove(const std::string& key, std::function<KVEachStringFunction> f);
 
-    virtual void EachBelow(void* context, const string& key, KVEachCallback* callback) = 0;
-    void EachBelow(const string& key, std::function<KVEachFunction> f);
-    void EachBelow(const string& key, std::function<KVEachStringFunction> f);
+    virtual void EachBelow(void* context, const std::string& key, KVEachCallback* callback) = 0;
+    void EachBelow(const std::string& key, std::function<KVEachFunction> f);
+    void EachBelow(const std::string& key, std::function<KVEachStringFunction> f);
 
-    virtual void EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) = 0;
-    void EachBetween(const string& key1, const string& key2, std::function<KVEachFunction> f);
-    void EachBetween(const string& key1, const string& key2, std::function<KVEachStringFunction> f);
+    virtual void EachBetween(void* context, const std::string& key1, const std::string& key2, KVEachCallback* callback) = 0;
+    void EachBetween(const std::string& key1, const std::string& key2, std::function<KVEachFunction> f);
+    void EachBetween(const std::string& key1, const std::string& key2, std::function<KVEachStringFunction> f);
 
-    virtual KVStatus Exists(const string& key) = 0;
+    virtual KVStatus Exists(const std::string& key) = 0;
 
-    virtual void Get(void* context, const string& key, KVGetCallback* callback) = 0;
-    void Get(const string& key, std::function<KVGetFunction> f);
-    void Get(const string& key, std::function<KVGetStringFunction> f);
-    KVStatus Get(const string& key, string* value);
+    virtual void Get(void* context, const std::string& key, KVGetCallback* callback) = 0;
+    void Get(const std::string& key, std::function<KVGetFunction> f);
+    void Get(const std::string& key, std::function<KVGetStringFunction> f);
+    KVStatus Get(const std::string& key, std::string* value);
 
-    virtual KVStatus Put(const string& key, const string& value) = 0;
-    virtual KVStatus Remove(const string& key) = 0;
+    virtual KVStatus Put(const std::string& key, const std::string& value) = 0;
+    virtual KVStatus Remove(const std::string& key) = 0;
 };
 
 extern "C" {

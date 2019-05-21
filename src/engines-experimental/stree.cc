@@ -50,9 +50,9 @@ using pmem::detail::conditional_add_to_tx;
 namespace pmemkv {
 namespace stree {
 
-STree::STree(void* context, const string& path, const size_t size) : engine_context(context) {
+STree::STree(void* context, const std::string& path, const size_t size) : engine_context(context) {
     if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
-        LOG("Creating filesystem pool, path=" << path << ", size=" << to_string(size));
+        LOG("Creating filesystem pool, path=" << path << ", size=" << std::to_string(size));
         pmpool = pool<RootData>::create(path.c_str(), LAYOUT, size, S_IRWXU);
     } else {
         LOG("Opening pool, path=" << path);
@@ -89,7 +89,7 @@ void STree::Each(void* context, KVEachCallback* callback) {
     }
 }
 
-KVStatus STree::Exists(const string& key) {
+KVStatus STree::Exists(const std::string& key) {
     LOG("Exists for key=" << key);
     btree_type::iterator it = my_btree->find(pstring<20>(key));
     if (it == my_btree->end()) {
@@ -99,7 +99,7 @@ KVStatus STree::Exists(const string& key) {
     return OK;
 }
 
-void STree::Get(void* context, const string& key, KVGetCallback* callback) {
+void STree::Get(void* context, const std::string& key, KVGetCallback* callback) {
     LOG("Get using callback for key=" << key);
     btree_type::iterator it = my_btree->find(pstring<20>(key));
     if (it == my_btree->end()) {
@@ -109,8 +109,8 @@ void STree::Get(void* context, const string& key, KVGetCallback* callback) {
     (*callback)(context, (int32_t) it->second.size(), it->second.c_str());
 }
 
-KVStatus STree::Put(const string& key, const string& value) {
-    LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
+KVStatus STree::Put(const std::string& key, const std::string& value) {
+    LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
     try {
         auto result = my_btree->insert(std::make_pair(pstring<MAX_KEY_SIZE>(key), pstring<MAX_VALUE_SIZE>(value)));
         if (!result.second) { // key already exists, so update
@@ -133,7 +133,7 @@ KVStatus STree::Put(const string& key, const string& value) {
     }
 }
 
-KVStatus STree::Remove(const string& key) {
+KVStatus STree::Remove(const std::string& key) {
     LOG("Remove key=" << key);
     try {
         auto result = my_btree->erase(key);

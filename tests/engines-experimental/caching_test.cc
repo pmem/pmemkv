@@ -39,8 +39,8 @@
 using namespace pmemkv;
 
 //const string ENGINE = "stree";
-const string ENGINE = "tree3";
-const string PATH = "/dev/shm/pmemkv";
+const std::string ENGINE = "tree3";
+const std::string PATH = "/dev/shm/pmemkv";
 
 //const string ENGINE = "vcmap";
 //const string ENGINE = "vsmap";
@@ -65,7 +65,7 @@ TEST_F(CachingTest, PutKeyValue) {
 
 TEST_F(CachingTest, PutUpdateValue) {
     ASSERT_TRUE(kv = KVEngine::Start("caching", "{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" + ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Exists("key1") == OK);
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
@@ -77,7 +77,7 @@ TEST_F(CachingTest, PutUpdateValue) {
 
 TEST_F(CachingTest, PutKeywithinTTL) {
     ASSERT_TRUE(kv = KVEngine::Start("caching", "{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" + ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     sleep(1);
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
@@ -99,7 +99,7 @@ TEST_F(CachingTest, EmptyKeyTest) {
     ASSERT_TRUE(kv->Put(" ", "single-space") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("\t\t", "two-tab") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("&*", " ") == OK) << pmemobj_errormsg();
-    string value1, value2, value3, value4;
+    std::string value1, value2, value3, value4;
     ASSERT_TRUE(kv->Exists(""));
     ASSERT_TRUE(kv->Get("", &value1) == OK && value1 == "empty");
     ASSERT_TRUE(kv->Exists(" "));
@@ -115,7 +115,7 @@ TEST_F(CachingTest, EmptyValueTest) {
     ASSERT_TRUE(kv->Put("empty", "") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("single-space", " ") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("two-tab", "\t\t") == OK) << pmemobj_errormsg();
-    string value1, value2, value3;
+    std::string value1, value2, value3;
     ASSERT_TRUE(kv->Get("empty", &value1) == OK && value1 == "");
     ASSERT_TRUE(kv->Get("single-space", &value2) == OK && value2 == " ");
     ASSERT_TRUE(kv->Get("two-tab", &value3) == OK && value3 == "\t\t");
@@ -138,7 +138,7 @@ TEST_F(CachingTest, SimpleMemcached) {
     if (rc == MEMCACHED_SUCCESS)
         rc = memcached_set(memc, key, strlen(key), value1, strlen(value1), (time_t) 0, (uint32_t) 0);
 
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1"); // getting the key from remote
     ASSERT_TRUE(kv->Exists("key1") == OK);
 }
@@ -153,7 +153,7 @@ TEST_F(CachingTest, SimpleRedis) {
     acl::redis cmd(&client);
     cmd.set("key1", "value1");
 
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
 }
 
@@ -179,7 +179,7 @@ TEST_F(CachingTest, UnknownLocalMemcachedKey) {
     }
     ASSERT_TRUE(return_value == NULL); //key is not present in memcached
 
-    string val;
+    std::string val;
     ASSERT_TRUE(kv->Get("key1", &val) == NOT_FOUND);
 }
 
@@ -194,7 +194,7 @@ TEST_F(CachingTest, UnknownLocalRedisKey) {
     cmd.del("key1");
     ASSERT_TRUE(cmd.exists("key1") == 0);
 
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
 }
 
@@ -208,13 +208,13 @@ TEST_F(CachingTest, SimpleEachTest) {
     ASSERT_TRUE(kv->Put("key4", "value4") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 4);
 
-    string result;
+    std::string result;
     kv->Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,<");
-        c->append(string(v, vb));
+        c->append(std::string(v, vb));
         c->append(">|");
     });
 
@@ -239,13 +239,13 @@ TEST_F(CachingTest, EachTTLValidExpired) {
     sleep(2);
     ASSERT_TRUE(kv->Put("key5", "value5") == OK) << pmemobj_errormsg();
 
-    string result;
+    std::string result;
     kv->Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,<");
-        c->append(string(v, vb));
+        c->append(std::string(v, vb));
         c->append(">|");
     });
     ASSERT_TRUE(result == "<key5>,<value5>|");
@@ -255,13 +255,13 @@ TEST_F(CachingTest, EachTTLValidExpired) {
 TEST_F(CachingTest, EachEmptyCache) {
     ASSERT_TRUE(kv = KVEngine::Start("caching", "{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" + ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
     ASSERT_TRUE(kv->Count() == 0);
-    string result;
+    std::string result;
     kv->Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,<");
-        c->append(string(v, vb));
+        c->append(std::string(v, vb));
         c->append(">|");
     });
     ASSERT_TRUE(result == "");
@@ -280,13 +280,13 @@ TEST_F(CachingTest, EachZeroTTL) {
     sleep(1);
     ASSERT_TRUE(kv->Count() == 4);
 
-    string result;
+    std::string result;
     kv->Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,<");
-        c->append(string(v, vb));
+        c->append(std::string(v, vb));
         c->append(">|");
     });
 
@@ -334,11 +334,11 @@ TEST_F(CachingTest, SimpleAll) {
     ASSERT_TRUE(kv->Put("key3", "value3") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("key4", "value4") == OK) << pmemobj_errormsg();
 
-    string result;
+    std::string result;
     kv->All(&result, [](void* context, int kb, const char* k) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,");
     });
 
@@ -363,11 +363,11 @@ TEST_F(CachingTest, SimpleZeroTTLAll) {
     ASSERT_TRUE(kv->Put("key3", "value3") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("key4", "value4") == OK) << pmemobj_errormsg();
 
-    string result;
+    std::string result;
     kv->All(&result, [](void* context, int kb, const char* k) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,");
     });
 
@@ -414,7 +414,7 @@ TEST_F(CachingTest, Redis_Integration) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
 
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
     ASSERT_TRUE(kv->Remove("key1") == OK);
     ASSERT_TRUE(kv->Exists("key1") == NOT_FOUND);
@@ -451,13 +451,13 @@ TEST_F(CachingTest, Redis_Integration) {
     ASSERT_TRUE(kv->Get("key3", &value) == OK && value == "value3");
     ASSERT_TRUE(kv->Exists("key3") == OK);
 
-    string result;
+    std::string result;
     kv->Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,<");
-        c->append(string(v, vb));
+        c->append(std::string(v, vb));
         c->append(">|");
     });
 
@@ -473,11 +473,11 @@ TEST_F(CachingTest, Redis_Integration) {
     sleep(2);
     result = "";
     kv->Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,<");
-        c->append(string(v, vb));
+        c->append(std::string(v, vb));
         c->append(">|");
     });
     ASSERT_TRUE(result == "");
@@ -492,9 +492,9 @@ TEST_F(CachingTest, Redis_Integration) {
 
     result = "";
     kv->All(&result, [](void* context, int kb, const char* k) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,");
     });
 
@@ -510,9 +510,9 @@ TEST_F(CachingTest, Redis_Integration) {
     sleep(2);
     result = "";
     kv->All(&result, [](void* context, int kb, const char* k) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,");
     });
     ASSERT_TRUE(result == "");
@@ -540,7 +540,7 @@ TEST_F(CachingTest, Memcached_Integration) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
 
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
     ASSERT_TRUE(kv->Remove("key1") == OK);
     ASSERT_TRUE(kv->Exists("key1") == NOT_FOUND);
@@ -591,13 +591,13 @@ TEST_F(CachingTest, Memcached_Integration) {
     ASSERT_TRUE(kv->Get("key3", &value) == OK && value == "value3");
     ASSERT_TRUE(kv->Exists("key3") == OK);
 
-    string result;
+    std::string result;
     kv->Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,<");
-        c->append(string(v, vb));
+        c->append(std::string(v, vb));
         c->append(">|");
     });
 
@@ -613,11 +613,11 @@ TEST_F(CachingTest, Memcached_Integration) {
     sleep(2);
     result = "";
     kv->Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,<");
-        c->append(string(v, vb));
+        c->append(std::string(v, vb));
         c->append(">|");
     });
     ASSERT_TRUE(result == "");
@@ -632,9 +632,9 @@ TEST_F(CachingTest, Memcached_Integration) {
 
     result = "";
     kv->All(&result, [](void* context, int kb, const char* k) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,");
     });
 
@@ -650,9 +650,9 @@ TEST_F(CachingTest, Memcached_Integration) {
     sleep(2);
     result = "";
     kv->All(&result, [](void* context, int kb, const char* k) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append("<");
-        c->append(string(k, kb));
+        c->append(std::string(k, kb));
         c->append(">,");
     });
     ASSERT_TRUE(result == "");
@@ -681,7 +681,7 @@ TEST_F(CachingTest, Memcached_Integration) {
 
 TEST_F(CachingTest, LargeTTL) {
     ASSERT_TRUE(kv = KVEngine::Start("caching", "{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":999999999,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" + ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     sleep(1);
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
