@@ -51,6 +51,7 @@ Language Bindings
 ### C++ Example
 
 ```cpp
+#include <cassert>
 #include <iostream>
 #include "libpmemkv.h"
 
