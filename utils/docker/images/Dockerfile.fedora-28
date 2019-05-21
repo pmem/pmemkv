@@ -36,7 +36,7 @@
 
 # Pull base image
 FROM fedora:28
-MAINTAINER robert.a.dickinson@intel.com
+MAINTAINER lukasz.stolarczuk@intel.com
 
 # Install basic tools
 RUN dnf update -y \
