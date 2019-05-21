@@ -36,6 +36,32 @@
 #
 
 set -e
+
+function test_installed() {
+	rm -rf /tmp/test_installed
+	mkdir /tmp/test_installed
+	cd /tmp/test_installed
+
+	cmake $WORKDIR/utils/docker/test_installed
+
+	# exit on error
+	if [[ $? != 0 ]]; then
+		cd -
+		return 1
+	fi
+
+	make
+	./test_installed
+
+	# exit on error
+	if [[ $? != 0 ]]; then
+		cd -
+		return 1
+	fi
+
+	cd -
+}
+
 echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
 
 function cleanup() {
@@ -62,6 +88,11 @@ function upload_codecov() {
 cd $WORKDIR
 PREFIX=/usr/local
 
+# Make sure there is no pmemkv currently installed
+echo "---------------------------- Error expected! ------------------------------"
+test_installed && exit 1
+echo "---------------------------------------------------------------------------"
+
 # make & install
 mkdir bin
 cd bin
@@ -71,7 +102,6 @@ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DCOVERAGE=$COVERAGE
 make -j2
 ctest --output-on-failure
-cd ..
 echo $USERPASS | sudo -S make install
 
 if [ "$COVERAGE" == "1" ]; then
@@ -79,11 +109,11 @@ if [ "$COVERAGE" == "1" ]; then
 fi
 
 # verify installed package
-LIBFILE=$PREFIX/lib/libpmemkv.so
-HEADERFILE=$PREFIX/include/libpmemkv.h
+test_installed
 
-if [[ -f $LIBFILE && -f $HEADERFILE ]]; then
-	echo "Correctly installed"
-else
-	echo "Installation not successful"
-fi
+echo $USERPASS | sudo -S make uninstall
+
+# Make sure uninstall worked
+echo "---------------------------- Error expected! ------------------------------"
+test_installed && exit 1
+echo "---------------------------------------------------------------------------"
