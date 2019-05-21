@@ -34,10 +34,12 @@
 
 #include <ctime>
 #include <iostream>
+#include <list>
 #include <lib_acl.hpp>
 #include <libmemcached/memcached.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/writer.h>
+#include <rapidjson/document.h>
 #include <rapidjson/ostreamwrapper.h>
 #include <unistd.h>
 #include "caching.h"
