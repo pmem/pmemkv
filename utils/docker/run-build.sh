@@ -69,8 +69,9 @@ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE
+make -j2
+ctest --output-on-failure
 cd ..
-make test
 echo $USERPASS | sudo -S make install
 
 if [ "$COVERAGE" == "1" ]; then
