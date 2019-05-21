@@ -51,15 +51,15 @@ void Blackhole::All(void* context, KVAllCallback* callback) {
     LOG("All");
 }
 
-void Blackhole::AllAbove(void* context, const string& key, KVAllCallback* callback) {
+void Blackhole::AllAbove(void* context, const std::string& key, KVAllCallback* callback) {
     LOG("AllAbove for key=" << key);
 }
 
-void Blackhole::AllBelow(void* context, const string& key, KVAllCallback* callback) {
+void Blackhole::AllBelow(void* context, const std::string& key, KVAllCallback* callback) {
     LOG("AllBelow for key=" << key);
 }
 
-void Blackhole::AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) {
+void Blackhole::AllBetween(void* context, const std::string& key1, const std::string& key2, KVAllCallback* callback) {
     LOG("AllBetween for key1=" << key1 << ", key2=" << key2);
 }
 
@@ -68,17 +68,17 @@ int64_t Blackhole::Count() {
     return 0;
 }
 
-int64_t Blackhole::CountAbove(const string& key) {
+int64_t Blackhole::CountAbove(const std::string& key) {
     LOG("CountAbove for key=" << key);
     return 0;
 }
 
-int64_t Blackhole::CountBelow(const string& key) {
+int64_t Blackhole::CountBelow(const std::string& key) {
     LOG("CountBelow for key=" << key);
     return 0;
 }
 
-int64_t Blackhole::CountBetween(const string& key1, const string& key2) {
+int64_t Blackhole::CountBetween(const std::string& key1, const std::string& key2) {
     LOG("CountBetween for key1=" << key1 << ", key2=" << key2);
     return 0;
 }
@@ -87,33 +87,33 @@ void Blackhole::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
 }
 
-void Blackhole::EachAbove(void* context, const string& key, KVEachCallback* callback) {
+void Blackhole::EachAbove(void* context, const std::string& key, KVEachCallback* callback) {
     LOG("EachAbove for key=" << key);
 }
 
-void Blackhole::EachBelow(void* context, const string& key, KVEachCallback* callback) {
+void Blackhole::EachBelow(void* context, const std::string& key, KVEachCallback* callback) {
     LOG("EachBelow for key=" << key);
 }
 
-void Blackhole::EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) {
+void Blackhole::EachBetween(void* context, const std::string& key1, const std::string& key2, KVEachCallback* callback) {
     LOG("EachBetween for key1=" << key1 << ", key2=" << key2);
 }
 
-KVStatus Blackhole::Exists(const string& key) {
+KVStatus Blackhole::Exists(const std::string& key) {
     LOG("Exists for key=" << key);
     return NOT_FOUND;
 }
 
-void Blackhole::Get(void* context, const string& key, KVGetCallback* callback) {
+void Blackhole::Get(void* context, const std::string& key, KVGetCallback* callback) {
     LOG("Get key=" << key);
 }
 
-KVStatus Blackhole::Put(const string& key, const string& value) {
-    LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
+KVStatus Blackhole::Put(const std::string& key, const std::string& value) {
+    LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
     return OK;
 }
 
-KVStatus Blackhole::Remove(const string& key) {
+KVStatus Blackhole::Remove(const std::string& key) {
     LOG("Remove key=" << key);
     return OK;
 }

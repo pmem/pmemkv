@@ -41,7 +41,7 @@
 namespace pmemkv {
 namespace vcmap {
 
-VCMap::VCMap(void* context, const string& path, size_t size) : engine_context(context),
+VCMap::VCMap(void* context, const std::string& path, size_t size) : engine_context(context),
              kv_allocator(path, size), ch_allocator(kv_allocator),
              pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator)) {
     LOG("Started ok");
@@ -71,14 +71,14 @@ void VCMap::Each(void* context, KVEachCallback* callback) {
     }
 }
 
-KVStatus VCMap::Exists(const string& key) {
+KVStatus VCMap::Exists(const std::string& key) {
     LOG("Exists for key=" << key);
     map_t::const_accessor result;
     const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
     return (result_found ? OK : NOT_FOUND);
 }
 
-void VCMap::Get(void* context, const string& key, KVGetCallback* callback) {
+void VCMap::Get(void* context, const std::string& key, KVGetCallback* callback) {
     LOG("Get key=" << key);
     map_t::const_accessor result;
     const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
@@ -89,8 +89,8 @@ void VCMap::Get(void* context, const string& key, KVGetCallback* callback) {
     (*callback)(context, (int32_t) result->second.size(), result->second.c_str());
 }
 
-KVStatus VCMap::Put(const string& key, const string& value) {
-    LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
+KVStatus VCMap::Put(const std::string& key, const std::string& value) {
+    LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
     try {
         map_t::value_type kv_pair{pmem_string(key.c_str(), key.size(), ch_allocator),
                                   pmem_string(value.c_str(), value.size(), ch_allocator)};
@@ -113,7 +113,7 @@ KVStatus VCMap::Put(const string& key, const string& value) {
     }
 }
 
-KVStatus VCMap::Remove(const string& key) {
+KVStatus VCMap::Remove(const std::string& key) {
     LOG("Remove key=" << key);
     try {
         size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
