@@ -36,7 +36,7 @@
 
 # Pull base image
 FROM ubuntu:18.04
-MAINTAINER robert.a.dickinson@intel.com
+MAINTAINER lukasz.stolarczuk@intel.com
 
 # Update the Apt cache and install basic tools
 RUN apt-get update \
