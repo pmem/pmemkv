@@ -33,18 +33,26 @@ Building from Sources
 
 **Building and running tests**
 
-After cloning sources from GitHub, use provided `make` targets for building and running
-tests.
+After cloning sources from GitHub, use provided `make` targets
+for building and running tests.
 
 ```sh
 git clone https://github.com/pmem/pmemkv
 cd pmemkv
-
-make                    # build everything and run all tests
-make clean              # remove all build & temporary files
-make build              # build shared library without running tests
-make test               # rebuild shared library and run all tests
+mkdir ./bin
+cd ./bin
+cmake ..                # run CMake
+make                    # build everything
+make test               # run all tests
 ```
+
+Instead of the last command (`make test`) you can run
+
+```sh
+ctest --output-on-failure
+```
+
+to see the output of failed tests.
 
 **Managing shared library**
 

@@ -66,6 +66,7 @@ PREFIX=/usr/local
 mkdir bin
 cd bin
 cmake .. -DCMAKE_BUILD_TYPE=Release \
+	-DTEST_DIR=/dev/shm \
 	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE
