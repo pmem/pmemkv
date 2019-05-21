@@ -30,6 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef EXPERIMENTAL
+
 #include "gtest/gtest.h"
 #include "../mock_tx_alloc.h"
 #include "../../src/engines-experimental/tree3.h"
@@ -894,3 +896,5 @@ TEST_F(TreeFullTest, RepeatedRecoveryTest) {
     for (int i = 1; i <= 100; i++) Restart();
     Validate();
 }
+
+#endif
