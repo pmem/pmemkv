@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # Copyright 2019, Intel Corporation
 #
@@ -30,60 +29,23 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#
-# run-build.sh - is called inside a Docker container,
-#                starts pmemkv build with tests.
-#
+include(${SRC_DIR}/helpers.cmake)
+include(${SRC_DIR}/get_tests.cmake)
 
-set -e
-echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
+setup()
 
-function cleanup() {
-	find . -name ".coverage" -exec rm {} \;
-	find . -name "coverage.xml" -exec rm {} \;
-	find . -name "*.gcov" -exec rm {} \;
-	find . -name "*.gcda" -exec rm {} \;
-}
+file(READ ${FILE_TEST_FILES} TEST_FILES)
+file(READ ${FILE_ALL_TESTS} all_tests_saved)
 
-function upload_codecov() {
-	clang_used=$(cmake -LA -N . | grep CMAKE_CXX_COMPILER | grep clang | wc -c)
+get_tests("${SRC_DIR}" "${TEST_FILES}" all_tests_read)
 
-	if [[ $clang_used > 0 ]]; then
-		gcovexe="llvm-cov gcov"
-	else
-		gcovexe="gcov"
-	fi
+string(COMPARE EQUAL "${all_tests_saved}" "${all_tests_read}" tests_lists_equal)
 
-	# the output is redundant in this case, i.e. we rely on parsed report from codecov on github
-	bash <(curl -s https://codecov.io/bash) -c -F $1 -x "$gcovexe"
-	cleanup
-}
+if(tests_lists_equal)
+	message(STATUS "Passed (tests found in the current source files match generated tests)")
+else()
+	message(FATAL_ERROR
+		"FAILED! Tests found in the current source files do NOT match generated tests - please regenerate CMake files.")
+endif()
 
-cd $WORKDIR
-PREFIX=/usr/local
-
-# make & install
-mkdir bin
-cd bin
-cmake .. -DCMAKE_BUILD_TYPE=Release \
-	-DTBB_DIR=/opt/tbb/cmake \
-	-DCMAKE_INSTALL_PREFIX=$PREFIX \
-	-DCOVERAGE=$COVERAGE
-make -j2
-ctest --output-on-failure
-cd ..
-echo $USERPASS | sudo -S make install
-
-if [ "$COVERAGE" == "1" ]; then
-	upload_codecov tests
-fi
-
-# verify installed package
-LIBFILE=$PREFIX/lib/libpmemkv.so
-HEADERFILE=$PREFIX/include/libpmemkv.h
-
-if [[ -f $LIBFILE && -f $HEADERFILE ]]; then
-	echo "Correctly installed"
-else
-	echo "Installation not successful"
-fi
+cleanup()
