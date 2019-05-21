@@ -35,6 +35,7 @@
 #include "gtest/gtest.h"
 #include "../../src/engines-experimental/caching.h"
 #include "lib_acl.hpp"
+#include <libpmemobj.h>
 #include <libmemcached/memcached.h>
 using namespace pmemkv;
 
