@@ -55,6 +55,10 @@ function(find_pmemcheck)
 	endif()
 endfunction()
 
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 option(COVERAGE "run coverage test" OFF)
 if(COVERAGE)
        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage")
