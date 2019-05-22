@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 #
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,77 +31,32 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#              environment prepared for running pmemkv build and tests.
+# run-bindings.sh - runs bindings
 #
 
-# Pull base image
-FROM ubuntu:18.04
-MAINTAINER lukasz.stolarczuk@intel.com
+set -e
+echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
 
-# Update the Apt cache and install basic tools
-RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common \
-	autoconf \
-	automake \
-	clang \
-	cmake \
-	curl \
-	debhelper \
-	devscripts \
-	doxygen \
-	gcc \
-	g++ \
-	git \
-	libc6-dbg \
-	libdaxctl-dev \
-	libjson-c-dev \
-	libkmod-dev \
-	libncurses5-dev \
-	libndctl-dev \
-	libnuma-dev \
-	libtool \
-	libudev-dev \
-	libunwind8-dev \
-	maven \
-	numactl \
-	openjdk-8-jdk \
-	pkg-config \
-	rapidjson-dev \
-	ruby \
-	sudo \
-	wget \
-	whois \
- && rm -rf /var/lib/apt/lists/*
+cd $WORKDIR
+PREFIX=/usr/local
 
-# Install valgrind
-COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
 
-# Install pmdk
-COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh dpkg
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release \
+	-DTBB_DIR=/opt/tbb/cmake \
+	-DCMAKE_INSTALL_PREFIX=$PREFIX
+make -j2
+echo $USERPASS | sudo -S make install
 
-# Install pmdk c++ bindings
-COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh DEB
-
-# Install memkind
-COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh
-
-# Install Intel TBB
-COPY install-tbb.sh install-tbb.sh
-RUN ./install-tbb.sh
-
-# Add user
-ENV USER user
-ENV USERPASS pass
-RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
-USER $USER
-
-# Set required environment variables
-ENV OS ubuntu
-ENV OS_VER 18.04
-ENV PACKAGE_MANAGER dpkg
-ENV NOTTY 1
+cd ~
+git clone https://github.com/pmem/pmemkv-jni.git
+cd pmemkv-jni
+make
+echo $USERPASS | sudo -S make install
+cd ..
+git clone https://github.com/pmem/pmemkv-java.git
+cd pmemkv-java
+LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ mvn install
