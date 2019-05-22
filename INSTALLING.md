@@ -51,15 +51,18 @@ make test               # rebuild shared library and run all tests
 To package `pmemkv` as a shared library and install on your system:
  
 ```sh
-sudo make install       # install to /usr/local/{include,lib}
+sudo make install       # install shared library to default location: /usr/local
 sudo make uninstall     # remove shared library and headers
 ```
 
-To install this library into other locations, use the `prefix` variable like this:
+To install this library into other locations, pass appropriate value to cmake
+using CMAKE_INSTALL_PREFIX variable like this:
 
 ```sh
-sudo make install prefix=/usr/local
-sudo make uninstall prefix=/usr/local
+...
+cmake -DCMAKE_INSTALL_PREFIX=/usr
+sudo make install 	# install to path specified by CMAKE_INSTALL_PREFIX
+sudo make uninstall 	# remove shared library and headers
 ```
 
 **Out-of-source builds**
