@@ -13,6 +13,7 @@ env:
     - TYPE=normal OS=ubuntu OS_VER=18.04 PUSH_IMAGE=1
     - TYPE=coverity OS=ubuntu OS_VER=18.04
     - TYPE=normal OS=ubuntu OS_VER=18.04 COVERAGE=1
+    - TYPE=bindings OS=ubuntu OS_VER=18.04
 
 before_install:
   - echo $TRAVIS_COMMIT_RANGE
