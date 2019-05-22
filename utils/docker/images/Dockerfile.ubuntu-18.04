@@ -65,6 +65,7 @@ RUN apt-get update \
 	numactl \
 	pkg-config \
 	rapidjson-dev \
+	ruby \
 	sudo \
 	wget \
 	whois \
