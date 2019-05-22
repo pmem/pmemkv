@@ -48,7 +48,10 @@ struct hash<pmemkv::polymorphic_string> {
         static const size_t value = (size_t) ((sizeof(size_t) == sizeof(u)) ? u : ull);
     };
 
-    static const size_t hash_multiplier = select_size_t_constant<2654435769U, 11400714819323198485ULL>::value;
+
+    static const uint32_t hash_multiplier32 = 2654435769U;
+    static const uint64_t hash_multiplier64 = 11400714819323198485ULL;
+    static const size_t hash_multiplier = select_size_t_constant<hash_multiplier32, hash_multiplier64>::value;
 
     size_t operator()(const pmemkv::polymorphic_string &str) {
         size_t h = 0;
