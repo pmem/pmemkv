@@ -43,12 +43,8 @@
 namespace std {
 template<>
 struct hash<pmemkv::polymorphic_string> {
-    template <unsigned u, unsigned long long ull >
-    struct select_size_t_constant {
-        static const size_t value = (size_t) ((sizeof(size_t) == sizeof(u)) ? u : ull);
-    };
-
-    static const size_t hash_multiplier = select_size_t_constant<2654435769U, 11400714819323198485ULL>::value;
+    /* hash multiplier is a large fibonachi number */
+    static const size_t hash_multiplier = 11400714819323198485ULL;
 
     size_t operator()(const pmemkv::polymorphic_string &str) {
         size_t h = 0;
