@@ -80,6 +80,9 @@ if [[ "$command" == "" ]]; then
 		coverity)
 			command="./run-coverity.sh";
 			;;
+		bindings)
+			command="./run-bindings.sh";
+			;;
 	esac
 fi
 
