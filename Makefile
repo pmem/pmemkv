@@ -21,10 +21,8 @@ test: configure reset
 	cd ./bin && ctest --output-on-failure
 	$(MAKE) reset
 
-install:
-	cp ./bin/libpmemkv.so $(prefix)/lib
-	cp ./src/pmemkv.h $(prefix)/include/libpmemkv.h
+install: configure
+	cd ./bin && make install
 
-uninstall:
-	rm -rf $(prefix)/lib/libpmemkv.so
-	rm -rf $(prefix)/include/libpmemkv.h
+uninstall: configure
+	cd ./bin && make uninstall
