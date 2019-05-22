@@ -71,3 +71,9 @@ cd ~
 git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
 LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ mvn install
+cd ~
+
+git clone https://github.com/pmem/pmemkv-nodejs.git
+cd pmemkv-nodejs
+npm install --save
+LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ npm test
