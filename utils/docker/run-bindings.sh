@@ -35,22 +35,35 @@
 #
 
 set -e
-echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
 
 cd $WORKDIR
 PREFIX=/usr/local
 
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
+
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release \
+cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX
 make -j2
 echo $USERPASS | sudo -S make install
-
 cd ~
+
 echo $USERPASS | sudo -S gem install bundler -v '< 2.0'
 git clone https://github.com/pmem/pmemkv-ruby.git
 cd pmemkv-ruby
 echo $USERPASS | sudo -S bundle install
 LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ bundle exec rspec
+cd ~
+
+git clone https://github.com/pmem/pmemkv-jni.git
+cd pmemkv-jni
+make
+echo $USERPASS | sudo -S make install
+cd ..
+
+git clone https://github.com/pmem/pmemkv-java.git
+cd pmemkv-java
+LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ mvn install
