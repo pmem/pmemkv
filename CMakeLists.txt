@@ -31,6 +31,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(pmemkv)
 
+# set version of pmemkv
+set(VERSION 0.1)
+
 function(find_pmemcheck)
 	set(ENV{PATH} ${VALGRIND_PREFIX}/bin:$ENV{PATH})
 	execute_process(COMMAND valgrind --tool=pmemcheck --help
@@ -92,6 +95,8 @@ set(SOURCE_FILES src/libpmemkv.cc src/libpmemkv.h
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.6)
+
 find_package(PkgConfig QUIET)
 include(ExternalProject)
 include(FindThreads)
@@ -141,8 +146,9 @@ if(EXPERIMENTAL)
     target_link_libraries(pmemkv PRIVATE acl_cpp protocol acl)
 endif(EXPERIMENTAL)
 
-enable_testing()
-add_subdirectory(tests)
+configure_file(libpmemkv.pc.in libpmemkv.pc)
+install(FILES ${CMAKE_BINARY_DIR}/libpmemkv.pc
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER src/libpmemkv.h)
 
@@ -158,5 +164,8 @@ configure_file(
 
 add_custom_target(uninstall
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
+enable_testing()
+add_subdirectory(tests)
 
 unset(EXPERIMENTAL CACHE)
