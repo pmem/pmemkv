@@ -212,7 +212,7 @@ target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_ENABLED=1)
 enable_testing()
 add_subdirectory(tests)
 
-set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER src/libpmemkv.h)
+set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER "src/libpmemkv.h;src/libpmemkv.hpp")
 
 install(TARGETS pmemkv
 		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
