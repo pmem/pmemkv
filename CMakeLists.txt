@@ -204,7 +204,7 @@ configure_file(libpmemkv.pc.in libpmemkv.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/libpmemkv.pc
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
-set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER src/libpmemkv.h)
+set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER "src/libpmemkv.h;src/libpmemkv.hpp")
 
 install(TARGETS pmemkv
 		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
