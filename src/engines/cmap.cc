@@ -59,7 +59,7 @@ CMap::~CMap() {
     LOG("Stopped ok");
 }
 
-void CMap::All(void* context, KVAllCallback* callback) {
+void CMap::All(void* context, AllCallback* callback) {
     LOG("All");
     for (auto it = container->begin(); it != container->end(); ++it) {
         (*callback)(context, (int32_t) it->first.size(), it->first.c_str());
@@ -71,7 +71,7 @@ int64_t CMap::Count() {
     return container->size();
 }
 
-void CMap::Each(void* context, KVEachCallback* callback) {
+void CMap::Each(void* context, EachCallback* callback) {
     LOG("Each");
     for (auto it = container->begin(); it != container->end(); ++it) {
         (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
@@ -79,12 +79,12 @@ void CMap::Each(void* context, KVEachCallback* callback) {
     }
 }
 
-KVStatus CMap::Exists(const std::string& key) {
+Status CMap::Exists(const std::string& key) {
     LOG("Exists for key=" << key);
     return container->count(key) == 1 ? OK : NOT_FOUND;
 }
 
-void CMap::Get(void* context, const std::string& key, KVGetCallback* callback) {
+void CMap::Get(void* context, const std::string& key, GetCallback* callback) {
     LOG("Get key=" << key);
     map_t::const_accessor result;
     bool found = container->find(result, key);
@@ -95,7 +95,7 @@ void CMap::Get(void* context, const std::string& key, KVGetCallback* callback) {
     (*callback)(context, (int32_t) result->second.size(), result->second.c_str());
 }
 
-KVStatus CMap::Put(const std::string& key, const std::string& value) {
+Status CMap::Put(const std::string& key, const std::string& value) {
     LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
     try {
         map_t::accessor acc;
@@ -116,7 +116,7 @@ KVStatus CMap::Put(const std::string& key, const std::string& value) {
     return OK;
 }
 
-KVStatus CMap::Remove(const std::string& key) {
+Status CMap::Remove(const std::string& key) {
     LOG("Remove key=" << key);
     try {
         bool erased = container->erase(key);
