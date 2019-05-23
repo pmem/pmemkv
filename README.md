@@ -51,8 +51,9 @@ Language Bindings
 ### C++ Example
 
 ```cpp
+#include <cassert>
 #include <iostream>
-#include "libpmemkv.h"
+#include <libpmemkv.h>
 
 #define LOG(msg) std::cout << msg << "\n"
 
@@ -95,7 +96,7 @@ int main() {
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "libpmemkv.h"
+#include <libpmemkv.h>
 
 #define LOG(msg) printf("%s\n", msg)
 #define MAX_VAL_LEN 64
