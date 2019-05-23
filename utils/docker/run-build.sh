@@ -87,3 +87,40 @@ else
 	echo "Installation not successful"
 	exit 1
 fi
+
+# verify if each engine is building properly
+engines_flags=(
+	ENABLE_VSMAP_ENGINE
+	ENABLE_VCMAP_ENGINE
+	ENABLE_CMAP_ENGINE
+	# XXX: caching engine is broken, need to be fixed
+	# ENABLE_CACHING_ENGINE
+	ENABLE_STREE_ENGINE
+	ENABLE_TREE3_ENGINE
+	# the last item is to test all engines disable
+	BLACKHOLE_TEST
+)
+
+for engine_flag in "${engines_flags[@]}"
+do
+	cd $WORKDIR/build
+	rm -rf *
+	# testing each engine separately; disabling default engines
+	cmake .. -DTBB_DIR=/opt/tbb/cmake \
+		-DENABLE_VSMAP_ENGINE=OFF \
+		-DENABLE_VCMAP_ENGINE=OFF \
+		-DENABLE_CMAP_ENGINE=OFF \
+		-D$engine_flag=ON
+	make -j
+done
+
+# testing all engines turned on
+cd $WORKDIR/build
+rm -rf *
+cmake .. -DTBB_DIR=/opt/tbb/cmake \
+	-DENABLE_VSMAP_ENGINE=ON \
+	-DENABLE_VCMAP_ENGINE=ON \
+	-DENABLE_CMAP_ENGINE=ON \
+	-DENABLE_STREE_ENGINE=ON \
+	-DENABLE_TREE3_ENGINE=ON
+make -j
