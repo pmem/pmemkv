@@ -6,6 +6,8 @@
 <li><a href="#vsmap">vsmap</a></li>
 <li><a href="#vcmap">vcmap</a></li>
 <li><a href="#tree3">tree3</a></li>
+<li><a href="#stree">stree</a></li>
+<li><a href="#caching">caching</a></li>
 </ul>
 
 <a name="blackhole"></a>
@@ -14,6 +16,7 @@ blackhole
 ---------
 
 A volatile concurrent engine that accepts an unlimited amount of data, but never returns anything.
+It is always enabled (no CMake option is specified to enable/disable this engine).
 
 * `Put` and `Remove` always returns `OK`
 * `Get` always returns `NOT_FOUND`
@@ -29,12 +32,17 @@ Internally, `blackhole` does not use a persistent pool or any durable structures
 use of this engine is to profile and tune high-level bindings, and similar cases when persistence
 should be intentionally skipped.
 
+### Prerequisites
+
+No additional packages required.
+
 <a name="cmap"></a>
 
 cmap
 -----
 
 A persistent concurrent engine, backed by a hashmap.
+It is enabled by default. It can be disabled in CMake using the `ENGINE_CMAP` option.
 
 ### Configuration
 
@@ -57,12 +65,17 @@ This value cannot be smaller than 8388608 (8MB).
 
 Internally the engine uses persistent concurrent hash map and persistent string from [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) library. Persistent string is used as a type of a key and a value.
 
+### Prerequisites
+
+TBB and libpmemobj-cpp packages required.
+
 <a name="vsmap"></a>
 
 vsmap
 -----
 
 A volatile single-threaded sorted engine, backed by memkind.
+It is enabled by default. It can be disabled in CMake using the `ENGINE_VSMAP` option.
 
 ### Configuration
 
@@ -85,12 +98,17 @@ This value cannot be smaller than 8388608 (8MB).
 
 The engine is built on top of [std::map](https://en.cppreference.com/w/cpp/container/map). The map uses [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) to allocate memory. The [std::basic_string](https://en.cppreference.com/w/cpp/string/basic_string) with [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) is used as a type of a key and a value.
 
+### Prerequisites
+
+Memkind and libpmemobj-cpp packages required.
+
 <a name="vcmap"></a>
 
 vcmap
 -----
 
 A volatile concurrent engine, backed by memkind.
+It is enabled by default. It can be disabled in CMake using the `ENGINE_VCMAP` option.
 
 ### Configuration
 
@@ -100,12 +118,17 @@ A volatile concurrent engine, backed by memkind.
 
 The engine is built on top of [tbb::concurrent_hash_map](https://www.threadingbuildingblocks.org/docs/help/reference/containers_overview/concurrent_hash_map_cls.html) data structure. The hash map uses [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) to allocate memory. The [std::basic_string](https://en.cppreference.com/w/cpp/string/basic_string) with [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) is used as a type of a key and a value.
 
+### Prerequisites
+
+Memkind, TBB and libpmemobj-cpp packages required.
+
 <a name="tree3"></a>
 
 tree3
 -----
 
 A persistent single-threaded engine, backed by a read-optimized B+ tree.
+It is disabled by default. It can be enabled in CMake using the `ENGINE_TREE3` option.
 
 ### Configuration
 
@@ -137,9 +160,54 @@ DRAM except for a final read from persistent memory.
 Leaf nodes in `tree3` contain multiple key-value pairs, indexed using 1-byte fingerprints
 ([Pearson hashes](https://en.wikipedia.org/wiki/Pearson_hashing)) that speed locating
 a given key. Leaf modifications are accelerated using
-[zero-copy updates](http://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html). 
+[zero-copy updates](http://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html).
+
+### Prerequisites
+
+Libpmemobj-cpp package required.
+
+<a name="stree"></a>
+
+stree
+---------
+
+(TBD)
+It is disabled by default. It can be enabled in CMake using the `ENGINE_STREE` option.
+
+### Configuration
+
+(TBD)
+
+### Internals
+
+(TBD)
+
+### Prerequisites
+
+Libpmemobj-cpp package required.
+
+<a name="caching"></a>
+
+caching
+---------
+
+(TBD)
+It is disabled by default. It can be enabled in CMake using the `ENGINE_CACHING` option.
+
+### Configuration
+
+(TBD)
+
+### Internals
+
+(TBD)
+
+### Prerequisites
+
+Memcached and libacl packages required (<a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental">see here for installation guide</a>).
 
 ### Related Work
+---------
 
 **pmse**
 
