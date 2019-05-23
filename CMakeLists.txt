@@ -141,8 +141,9 @@ if(EXPERIMENTAL)
     target_link_libraries(pmemkv PRIVATE acl_cpp protocol acl)
 endif(EXPERIMENTAL)
 
-enable_testing()
-add_subdirectory(tests)
+configure_file(pmemkv.pc.in pmemkv.pc)
+install(FILES ${CMAKE_BINARY_DIR}/pmemkv.pc
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER src/libpmemkv.h)
 
@@ -158,5 +159,8 @@ configure_file(
 
 add_custom_target(uninstall
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
+enable_testing()
+add_subdirectory(tests)
 
 unset(EXPERIMENTAL CACHE)
