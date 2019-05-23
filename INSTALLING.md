@@ -33,18 +33,23 @@ Building from Sources
 
 **Building and running tests**
 
-After cloning sources from GitHub, use provided `make` targets for building and running
-tests.
-
 ```sh
 git clone https://github.com/pmem/pmemkv
 cd pmemkv
-
-make                    # build everything and run all tests
-make clean              # remove all build & temporary files
-make build              # build shared library without running tests
-make test               # rebuild shared library and run all tests
+mkdir ./build
+cd ./build
+cmake ..                # run CMake
+make                    # build everything
+make test               # run all tests
 ```
+
+Instead of the last command (`make test`) you can run
+
+```sh
+ctest --output-on-failure
+```
+
+to see the output of failed tests.
 
 **Managing shared library**
 
@@ -71,9 +76,9 @@ out-of-source build and run tests like this:
 cd ~
 mkdir mybuild
 cd mybuild
-cmake ~/pmemkv
+cmake ~/pmemkv       # this directory should contain the source code of pmemkv
 make
-PMEM_IS_PMEM_FORCE=1 ./pmemkv_test
+make test            # or 'ctest --output-on-failure'
 ```
 
 <a name="fedora"></a>
@@ -84,7 +89,8 @@ Installing on Fedora
 Install required packages:
 
 ```sh
-su -c 'dnf install autoconf automake cmake daxctl-devel doxygen gcc gcc-c++ libtool ndctl-devel numactl-devel rapidjson-devel tbb-devel'
+su -c 'dnf install autoconf automake cmake daxctl-devel doxygen gcc gcc-c++ \
+	libtool ndctl-devel numactl-devel rapidjson-devel tbb-devel'
 ```
 
 Configure for proxy if necessary:
