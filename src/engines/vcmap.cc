@@ -51,7 +51,7 @@ VCMap::~VCMap() {
     LOG("Stopped ok");
 }
 
-void VCMap::All(void* context, KVAllCallback* callback) {
+void VCMap::All(void* context, AllCallback* callback) {
     LOG("All");
     for (auto& iterator : pmem_kv_container) {
         (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str());
@@ -63,7 +63,7 @@ int64_t VCMap::Count() {
     return pmem_kv_container.size();
 }
 
-void VCMap::Each(void* context, KVEachCallback* callback) {
+void VCMap::Each(void* context, EachCallback* callback) {
     LOG("Each");
     for (auto& iterator : pmem_kv_container) {
         (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
@@ -71,14 +71,14 @@ void VCMap::Each(void* context, KVEachCallback* callback) {
     }
 }
 
-KVStatus VCMap::Exists(const std::string& key) {
+Status VCMap::Exists(const std::string& key) {
     LOG("Exists for key=" << key);
     map_t::const_accessor result;
     const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
     return (result_found ? OK : NOT_FOUND);
 }
 
-void VCMap::Get(void* context, const std::string& key, KVGetCallback* callback) {
+void VCMap::Get(void* context, const std::string& key, GetCallback* callback) {
     LOG("Get key=" << key);
     map_t::const_accessor result;
     const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
@@ -89,7 +89,7 @@ void VCMap::Get(void* context, const std::string& key, KVGetCallback* callback) 
     (*callback)(context, (int32_t) result->second.size(), result->second.c_str());
 }
 
-KVStatus VCMap::Put(const std::string& key, const std::string& value) {
+Status VCMap::Put(const std::string& key, const std::string& value) {
     LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
     try {
         map_t::value_type kv_pair{pmem_string(key.c_str(), key.size(), ch_allocator),
@@ -113,7 +113,7 @@ KVStatus VCMap::Put(const std::string& key, const std::string& value) {
     }
 }
 
-KVStatus VCMap::Remove(const std::string& key) {
+Status VCMap::Remove(const std::string& key) {
     LOG("Remove key=" << key);
     try {
         size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
