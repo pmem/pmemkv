@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "../libpmemkv.h"
+#include "../engine.h"
 #include "pmem_allocator.h"
 #include <string>
 #include <scoped_allocator>
@@ -43,7 +43,7 @@ namespace vcmap {
 
 const std::string ENGINE = "vcmap";
 
-class VCMap : public KVEngine {
+class VCMap : public pmem::kv::EngineBase {
   public:
     VCMap(void* context, const std::string& path, size_t size);
     ~VCMap();

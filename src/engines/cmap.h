@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "../libpmemkv.h"
+#include "../engine.h"
 #include "../polymorphic_string.h"
 
 #include <libpmemobj++/pool.hpp>
@@ -65,7 +65,7 @@ namespace cmap {
 
 const std::string ENGINE = "cmap";
 
-class CMap : public KVEngine {
+class CMap : public pmem::kv::EngineBase {
   public:
     CMap(void* context, const std::string& path, size_t size);
     ~CMap();

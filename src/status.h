@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2019, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,36 +30,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "../../src/engines/blackhole.h"
+#ifndef PMEMKV_STATUS_H
+#define PMEMKV_STATUS_H
 
-using namespace pmem::kv;
+typedef enum {
+    PMEMKV_OK,
+    PMEMKV_FAILED,
+    PMEMKV_NOT_FOUND
+} pmemkv_status;
 
-class BlackholeTest : public testing::Test {
-  public:
-    Blackhole* kv;
-
-    BlackholeTest() { kv = new Blackhole(); }
-
-    ~BlackholeTest() { delete kv; }
-};
-
-TEST_F(BlackholeTest, SimpleTest) {
-    std::string value;
-    ASSERT_TRUE(kv->Count() == 0);
-    kv->Get(nullptr, "key1", 
-        [](void *ctx, int valuebytes, const char* value){
-            ASSERT_TRUE(false); 
-    });
-    ASSERT_TRUE(kv->Put("key1", "value1") == PMEMKV_OK);
-    ASSERT_TRUE(kv->Count() == 0);
-    kv->Get(nullptr, "key1", 
-        [](void *ctx, int valuebytes, const char* value){
-            ASSERT_TRUE(false); 
-    });
-    ASSERT_TRUE(kv->Remove("key1") == PMEMKV_OK);
-    kv->Get(nullptr, "key1", 
-        [](void *ctx, int valuebytes, const char* value){
-            ASSERT_TRUE(false); 
-    });
-}
+#endif /* PMEMKV_STATUS_H */

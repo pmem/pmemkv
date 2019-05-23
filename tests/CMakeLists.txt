@@ -89,12 +89,12 @@ set(TEST_FILES
 	pmemkv_test.cc
 	mock_tx_alloc.cc
 	engines/blackhole_test.cc
-	engines/vsmap_test.cc
-	engines/vcmap_test.cc
-	engines/cmap_test.cc
-	engines-experimental/tree_test.cc
-	engines-experimental/stree_test.cc
-	engines-experimental/caching_test.cc
+#	engines/vsmap_test.cc
+#	engines/vcmap_test.cc
+#	engines/cmap_test.cc
+#	engines-experimental/tree_test.cc
+#	engines-experimental/stree_test.cc
+#	engines-experimental/caching_test.cc
 )
 
 include(gtest)

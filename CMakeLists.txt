@@ -80,13 +80,13 @@ endif(EXPERIMENTAL)
 
 set(SOURCE_FILES src/libpmemkv.cc src/libpmemkv.h
     src/engines/blackhole.h src/engines/blackhole.cc
-    src/engines/vsmap.h src/engines/vsmap.cc
-    src/engines/vcmap.h src/engines/vcmap.cc
-    src/engines/cmap.h src/engines/cmap.cc
-    src/engines-experimental/tree3.h src/engines-experimental/tree3.cc
-    src/engines-experimental/stree.h src/engines-experimental/stree.cc
-    src/engines-experimental/stree/persistent_b_tree.h src/engines-experimental/stree/pstring.h
-    src/engines-experimental/caching.h src/engines-experimental/caching.cc
+#    src/engines/vsmap.h src/engines/vsmap.cc
+#    src/engines/vcmap.h src/engines/vcmap.cc
+#    src/engines/cmap.h src/engines/cmap.cc
+#    src/engines-experimental/tree3.h src/engines-experimental/tree3.cc
+#    src/engines-experimental/stree.h src/engines-experimental/stree.cc
+#    src/engines-experimental/stree/persistent_b_tree.h src/engines-experimental/stree/pstring.h
+#    src/engines-experimental/caching.h src/engines-experimental/caching.cc
 )
 
 set(CMAKE_CXX_STANDARD 11)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2019, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,132 +30,53 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-typedef enum {
-    FAILED = -1,
-    NOT_FOUND = 0,
-    OK = 1
-} KVStatus;
-
-typedef void(KVAllCallback)(void* context, int keybytes, const char* key);
-typedef void(KVAllFunction)(int keybytes, const char* key);
-typedef void(KVEachCallback)(void* context, int keybytes, const char* key, int valuebytes, const char* value);
-typedef void(KVEachFunction)(int keybytes, const char* key, int valuebytes, const char* value);
-typedef void(KVGetCallback)(void* context, int valuebytes, const char* value);
-typedef void(KVGetFunction)(int valuebytes, const char* value);
-typedef void(KVStartFailureCallback)(void* context, const char* engine, const char* config, const char* msg);
+#ifndef LIBPMEMKV_H
+#define LIBPMEMKV_H
 
 #ifdef __cplusplus
-
-#include <string>
-#include <functional>
-
-namespace pmemkv {
-
-typedef void(KVAllStringFunction)(const std::string& key);
-typedef void(KVEachStringFunction)(const std::string& key, const std::string& value);
-typedef void(KVGetStringFunction)(const std::string& value);
-
-const std::string LAYOUT = "pmemkv";
-
-class KVEngine {
-  public:
-    virtual ~KVEngine();
-
-    static KVEngine* Start(void* context, const char* engine, const char* config, KVStartFailureCallback* callback);
-    static KVEngine* Start(void* context, const std::string& engine, const std::string& config);
-    static KVEngine* Start(const std::string& engine, const std::string& config);
-    static void Stop(KVEngine* kv);
-
-    virtual std::string Engine() = 0;
-    virtual void* EngineContext() = 0;
-
-    virtual void All(void* context, KVAllCallback* callback) = 0;
-    void All(std::function<KVAllFunction> f);
-    void All(std::function<KVAllStringFunction> f);
-
-    virtual void AllAbove(void* context, const std::string& key, KVAllCallback* callback) = 0;
-    void AllAbove(const std::string& key, std::function<KVAllFunction> f);
-    void AllAbove(const std::string& key, std::function<KVAllStringFunction> f);
-
-    virtual void AllBelow(void* context, const std::string& key, KVAllCallback* callback) = 0;
-    void AllBelow(const std::string& key, std::function<KVAllFunction> f);
-    void AllBelow(const std::string& key, std::function<KVAllStringFunction> f);
-
-    virtual void AllBetween(void* context, const std::string& key1, const std::string& key2, KVAllCallback* callback) = 0;
-    void AllBetween(const std::string& key1, const std::string& key2, std::function<KVAllFunction> f);
-    void AllBetween(const std::string& key1, const std::string& key2, std::function<KVAllStringFunction> f);
-
-    virtual int64_t Count() = 0;
-    virtual int64_t CountAbove(const std::string& key) = 0;
-    virtual int64_t CountBelow(const std::string& key) = 0;
-    virtual int64_t CountBetween(const std::string& key1, const std::string& key2) = 0;
-
-    virtual void Each(void* context, KVEachCallback* callback) = 0;
-    void Each(std::function<KVEachFunction> f);
-    void Each(std::function<KVEachStringFunction> f);
-
-    virtual void EachAbove(void* context, const std::string& key, KVEachCallback* callback) = 0;
-    void EachAbove(const std::string& key, std::function<KVEachFunction> f);
-    void EachAbove(const std::string& key, std::function<KVEachStringFunction> f);
-
-    virtual void EachBelow(void* context, const std::string& key, KVEachCallback* callback) = 0;
-    void EachBelow(const std::string& key, std::function<KVEachFunction> f);
-    void EachBelow(const std::string& key, std::function<KVEachStringFunction> f);
-
-    virtual void EachBetween(void* context, const std::string& key1, const std::string& key2, KVEachCallback* callback) = 0;
-    void EachBetween(const std::string& key1, const std::string& key2, std::function<KVEachFunction> f);
-    void EachBetween(const std::string& key1, const std::string& key2, std::function<KVEachStringFunction> f);
-
-    virtual KVStatus Exists(const std::string& key) = 0;
-
-    virtual void Get(void* context, const std::string& key, KVGetCallback* callback) = 0;
-    void Get(const std::string& key, std::function<KVGetFunction> f);
-    void Get(const std::string& key, std::function<KVGetStringFunction> f);
-    KVStatus Get(const std::string& key, std::string* value);
-
-    virtual KVStatus Put(const std::string& key, const std::string& value) = 0;
-    virtual KVStatus Remove(const std::string& key) = 0;
-};
-
 extern "C" {
 #endif
 
 #include <stdint.h>
 #include <stddef.h>
 
-struct KVEngine;
-typedef struct KVEngine KVEngine;
+#include "status.h"
 
-KVEngine* kvengine_start(void* context, const char* engine, const char* config, KVStartFailureCallback* callback);
-void kvengine_stop(KVEngine* kv);
+typedef struct pmemkv_engine pmemkv_engine;
 
-void kvengine_all(KVEngine* kv, void* context, KVAllCallback* c);
-void kvengine_all_above(KVEngine* kv, void* context, int32_t kb, const char* k, KVAllCallback* c);
-void kvengine_all_below(KVEngine* kv, void* context, int32_t kb, const char* k, KVAllCallback* c);
-void kvengine_all_between(KVEngine* kv, void* context, int32_t kb1, const char* k1,
-                          int32_t kb2, const char* k2, KVAllCallback* c);
+typedef void(pmemkv_all_callback_t)(void* context, int keybytes, const char* key);
+typedef void(pmemkv_each_callback_t)(void* context, int keybytes, const char* key, int valuebytes, const char* value);
+typedef void(pmemkv_get_callback_t)(void* context, int valuebytes, const char* value);
+typedef void(pmemkv_start_failure_callback_t)(void* context, const char* engine, const char* config, const char* msg);
 
-int64_t kvengine_count(KVEngine* kv);
-int64_t kvengine_count_above(KVEngine* kv, int32_t kb, const char* k);
-int64_t kvengine_count_below(KVEngine* kv, int32_t kb, const char* k);
-int64_t kvengine_count_between(KVEngine* kv, int32_t kb1, const char* k1, int32_t kb2, const char* k2);
+pmemkv_engine* pmemkv_start(void* context, const char* engine, const char* config, pmemkv_start_failure_callback_t* callback);
+void pmemkv_stop(pmemkv_engine* kv);
 
-void kvengine_each(KVEngine* kv, void* context, KVEachCallback* c);
-void kvengine_each_above(KVEngine* kv, void* context, int32_t kb, const char* k, KVEachCallback* c);
-void kvengine_each_below(KVEngine* kv, void* context, int32_t kb, const char* k, KVEachCallback* c);
-void kvengine_each_between(KVEngine* kv, void* context, int32_t kb1, const char* k1,
-                           int32_t kb2, const char* k2, KVEachCallback* c);
+void pmemkv_all(pmemkv_engine* kv, void* context, pmemkv_all_callback_t* c);
+void pmemkv_all_above(pmemkv_engine* kv, void* context, int32_t kb, const char* k, pmemkv_all_callback_t* c);
+void pmemkv_all_below(pmemkv_engine* kv, void* context, int32_t kb, const char* k, pmemkv_all_callback_t* c);
+void pmemkv_all_between(pmemkv_engine* kv, void* context, int32_t kb1, const char* k1,
+                          int32_t kb2, const char* k2, pmemkv_all_callback_t* c);
 
-int8_t kvengine_exists(KVEngine* kv, int32_t kb, const char* k);
-void kvengine_get(KVEngine* kv, void* context, int32_t kb, const char* k, KVGetCallback* c);
-int8_t kvengine_get_copy(KVEngine* kv, int32_t kb, const char* k, int32_t maxvaluebytes, char* value);
-int8_t kvengine_put(KVEngine* kv, int32_t kb, const char* k, int32_t vb, const char* v);
-int8_t kvengine_remove(KVEngine* kv, int32_t kb, const char* k);
+int64_t pmemkv_count(pmemkv_engine* kv);
+int64_t pmemkv_count_above(pmemkv_engine* kv, int32_t kb, const char* k);
+int64_t pmemkv_count_below(pmemkv_engine* kv, int32_t kb, const char* k);
+int64_t pmemkv_count_between(pmemkv_engine* kv, int32_t kb1, const char* k1, int32_t kb2, const char* k2);
+
+void pmemkv_each(pmemkv_engine* kv, void* context, pmemkv_each_callback_t* c);
+void pmemkv_each_above(pmemkv_engine* kv, void* context, int32_t kb, const char* k, pmemkv_each_callback_t* c);
+void pmemkv_each_below(pmemkv_engine* kv, void* context, int32_t kb, const char* k, pmemkv_each_callback_t* c);
+void pmemkv_each_between(pmemkv_engine* kv, void* context, int32_t kb1, const char* k1,
+                           int32_t kb2, const char* k2, pmemkv_each_callback_t* c);
+
+int8_t pmemkv_exists(pmemkv_engine* kv, int32_t kb, const char* k);
+void pmemkv_get(pmemkv_engine* kv, void* context, int32_t kb, const char* k, pmemkv_get_callback_t* c);
+int8_t pmemkv_get_copy(pmemkv_engine* kv, int32_t kb, const char* k, int32_t maxvaluebytes, char* value);
+int8_t pmemkv_put(pmemkv_engine* kv, int32_t kb, const char* k, int32_t vb, const char* v);
+int8_t pmemkv_remove(pmemkv_engine* kv, int32_t kb, const char* k);
 
 #ifdef __cplusplus
-}
-
-} // namespace pmemkv
+} /* end extern "C" */
 #endif
+
+#endif /* LIBPMEMKV_H */
