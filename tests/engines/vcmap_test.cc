@@ -46,13 +46,23 @@ class VCMapBaseTest : public testing::Test {
     KVEngine* kv;
 
     VCMapBaseTest() {
-        char config[255];
-        auto n = sprintf(config, "{\"path\": \"%s\", \"size\" : %lu}", PATH.c_str(), POOL_SIZE);
+        size_t size = POOL_SIZE;
+        int ret = 0;
 
-        if (n < 0)
-            throw std::runtime_error("sprintf failed");
+        pmemkv_config *cfg = pmemkv_config_new();
 
-        kv = new KVEngine("vcmap", config);
+        if (cfg == nullptr)
+            throw std::runtime_error("creating config failed");
+
+        ret += pmemkv_config_put(cfg, "path", PATH.c_str(), PATH.size() + 1);
+        ret += pmemkv_config_put(cfg, "size", &size, sizeof(size));
+
+        if (ret != 0)
+            throw std::runtime_error("puttinh value to config failed");
+
+        kv = new KVEngine("vcmap", cfg);
+
+        pmemkv_config_delete(cfg);
     }
 
     ~VCMapBaseTest() {

@@ -43,14 +43,21 @@ const std::string PATH = "/dev/shm/pmemkv";
 const std::string PATH_CACHED = "/tmp/pmemkv";
 const size_t SIZE = ((size_t) (1024 * 1024 * 1104));
 
-static std::string getConfig(const std::string &path, size_t size) {
-    char config[255];
-    auto n = sprintf(config, "{\"path\": \"%s\", \"size\" : %lu}", path.c_str(), size);
+static std::unique_ptr<pmemkv_config, decltype(&pmemkv_config_delete)> getConfig(const std::string &path, size_t size) {
+        int ret = 0;
 
-    if (n < 0)
-            throw std::runtime_error("sprintf failed");
+        pmemkv_config *cfg = pmemkv_config_new();
 
-    return std::string(config);
+        if (cfg == nullptr)
+            throw std::runtime_error("creating config failed");
+
+        ret += pmemkv_config_put(cfg, "path", path.c_str(), path.size() + 1);
+        ret += pmemkv_config_put(cfg, "size", &size, sizeof(size));
+
+        if (ret != 0)
+            throw std::runtime_error("putting value to config failed");
+
+        return std::unique_ptr<pmemkv_config, decltype(&pmemkv_config_delete)>(cfg, &pmemkv_config_delete);
 }
 
 class TreeEmptyTest : public testing::Test {
@@ -79,7 +86,7 @@ public:
     }
   protected:
     void Start() {
-        kv = new KVEngine("tree3", getConfig(PATH, SIZE));
+        kv = new KVEngine("tree3", getConfig(PATH, SIZE).get());
     }
 };
 
@@ -88,7 +95,7 @@ public:
 // =============================================================================================
 
 TEST_F(TreeEmptyTest, CreateInstanceTest) {
-    KVEngine *kv = new KVEngine("tree3", getConfig(PATH, PMEMOBJ_MIN_POOL));
+    KVEngine *kv = new KVEngine("tree3", getConfig(PATH, PMEMOBJ_MIN_POOL).get());
     delete kv;
 }
 
@@ -98,14 +105,14 @@ struct Context {
 
 TEST_F(TreeEmptyTest, CreateInstanceWithContextTest) {
     Context cxt = {42};
-    KVEngine* kv = new KVEngine(&cxt, "tree3", getConfig(PATH, PMEMOBJ_MIN_POOL), nullptr);
+    KVEngine* kv = new KVEngine(&cxt, "tree3", getConfig(PATH, PMEMOBJ_MIN_POOL).get(), nullptr);
     ASSERT_TRUE(((Context*) (kv->EngineContext()))->count == 42);
     delete kv;
 }
 
 TEST_F(TreeEmptyTest, FailsToCreateInstanceWithInvalidPath) {
     try {
-        new KVEngine("tree3", getConfig("/tmp/123/234/345/456/567/678/nope.nope", PMEMOBJ_MIN_POOL));
+        new KVEngine("tree3", getConfig("/tmp/123/234/345/456/567/678/nope.nope", PMEMOBJ_MIN_POOL).get());
         FAIL();
     } catch (...) {
         // do nothing, expected to happen
@@ -114,7 +121,7 @@ TEST_F(TreeEmptyTest, FailsToCreateInstanceWithInvalidPath) {
 
 TEST_F(TreeEmptyTest, FailsToCreateInstanceWithHugeSize) {
     try {
-        new KVEngine("tree3", getConfig(PATH, 9223372036854775807));   // 9.22 exabytes
+        new KVEngine("tree3", getConfig(PATH, 9223372036854775807).get());   // 9.22 exabytes
         FAIL();
     } catch (...) {
         // do nothing, expected to happen
@@ -123,7 +130,7 @@ TEST_F(TreeEmptyTest, FailsToCreateInstanceWithHugeSize) {
 
 TEST_F(TreeEmptyTest, FailsToCreateInstanceWithTinySize) {
     try {
-        new KVEngine("tree3", getConfig(PATH, PMEMOBJ_MIN_POOL - 1));  // too small
+        new KVEngine("tree3", getConfig(PATH, PMEMOBJ_MIN_POOL - 1).get());  // too small
         FAIL();
     } catch (...) {
         // do nothing, expected to happen
@@ -768,7 +775,7 @@ public:
 
     void Restart() {
         delete kv;
-        kv = new KVEngine("tree3", getConfig(PATH, SIZE));
+        kv = new KVEngine("tree3", getConfig(PATH, SIZE).get());
     }
 
     void Validate() {
@@ -800,7 +807,7 @@ private:
             ASSERT_TRUE(std::system(("cp -f " + PATH_CACHED + " " + PATH).c_str()) == 0);
         } else {
             std::cout << "!!! creating cached copy at " << PATH_CACHED << "\n";
-            KVEngine *kvt = new KVEngine("tree3", getConfig(PATH, SIZE));
+            KVEngine *kvt = new KVEngine("tree3", getConfig(PATH, SIZE).get());
             for (int i = 1; i <= LARGE_LIMIT; i++) {
                 std::string istr = std::to_string(i);
                 ASSERT_TRUE(kvt->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
@@ -808,7 +815,7 @@ private:
             delete kvt;
             ASSERT_TRUE(std::system(("cp -f " + PATH + " " + PATH_CACHED).c_str()) == 0);
         }
-        kv = new KVEngine("tree3", getConfig(PATH, SIZE));
+        kv = new KVEngine("tree3", getConfig(PATH, SIZE).get());
     }
 };
 

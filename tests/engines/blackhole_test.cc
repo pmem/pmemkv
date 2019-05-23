@@ -39,7 +39,7 @@ class BlackholeTest : public testing::Test {
   public:
     KVEngine kv;
 
-    BlackholeTest(): kv("blackhole", "") {}
+    BlackholeTest(): kv("blackhole", nullptr) {}
 };
 
 TEST_F(BlackholeTest, SimpleTest) {
