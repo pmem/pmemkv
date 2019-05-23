@@ -62,7 +62,9 @@ RUN apt-get update \
 	libtool \
 	libudev-dev \
 	libunwind8-dev \
+	maven \
 	numactl \
+	openjdk-8-jdk \
 	pkg-config \
 	rapidjson-dev \
 	ruby \
