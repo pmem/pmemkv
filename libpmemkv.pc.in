@@ -1,0 +1,12 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@
+version=@VERSION@
+includedir=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: pmemkv
+Description: pmemkv - Key/Value Datastore for Persistent Memory
+Version: @VERSION@
+URL: http://github.com/pmem/pmemkv
+Requires.private: RapidJSON memkind tbb libpmemobj++
+Libs: -L@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@ -lpmemkv
+Cflags: -I@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_INCLUDEDIR@
