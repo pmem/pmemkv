@@ -206,9 +206,24 @@ sudo make install
 Using Experimental Engines
 --------------------------
 
-First build or install `pmemkv` as described above.
+To enable experimental engine(s) edit `CMakeLists.txt`, e.g.:
 
-Install client libraries for Memcached:
+```sh
+option(ENABLE_CACHING_ENGINE "enable installation and testing of experimental CachingEngine" ON)
+```
+
+or just use adequate CMake parameter:
+
+```sh
+cmake .. -DENABLE_CACHING_ENGINE=ON
+```
+
+Now build will include selected experimental engine(s) and other features that are not available by default.
+
+Currently additional libraries are required only for Caching engine. If you want to use it
+you are required to follow these instructions:
+
+First build or install `pmemkv` as described above. Then, install client libraries for Memcached:
 
 ```sh
 cd ~
@@ -238,14 +253,6 @@ make
 cd ../lib_protocol
 make
 ```
-
-Edit `CMakeLists.txt` to enable experimental features:
-
-```sh
-option(EXPERIMENTAL "use experimental features" ON)
-```
-
-Now `make` will include experimental engines and other features that are not available by default.
 
 <a name="pool_set"></a>
 

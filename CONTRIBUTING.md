@@ -124,10 +124,15 @@ Next we'll walk you through the steps of creating a new engine.
 ### Updating Build System
 
 * In `CMakeLists.txt`:
+    * Add build option for the new engine with name like ENABLE_MYTREE_ENGINE
+    and use it to ifdef all includes, dependencies and linking you may add
+    * Add definition of the new option, like -DENABLE_MYTREE_ENGINE, so it can
+    be used to ifdef engine-specific code (e.g. in pmemkv header)
     * Add `src/engines/mytree.h` and `src/engines/mytree.cc` to `SOURCE_FILES`
-    * Add `tests/engines/mytree_test.cc` to `pmemkv_test` executable
     * Use `pkg_check_modules` and/or `find_package` for upstream libraries
-* `make` should now run to completion without errors
+* In `CMakeLists.txt` in subdirectory `tests`:
+    * Add `engines/mytree_test.cc` to `TEST_FILES`
+* CMake build and `make test` should now run to completion without errors
 
 ### Updating KVEngine
 
@@ -135,7 +140,7 @@ Next we'll walk you through the steps of creating a new engine.
     * Add `#include "engines/mytree.h"`
     * Update `KVEngine::Start` to return new `MyTree` instances
     * Update `KVEngine::Stop` to delete `MyTree` instances
-* `make` & verify engine now works with high-level bindings
+* Build & verify engine now works with high-level bindings
 
 ### Documentation
 
@@ -147,32 +152,31 @@ Next we'll walk you through the steps of creating a new engine.
 Creating Experimental Engines
 -----------------------------
 
-The instructions above describe creating an engine that is included in the `pmemkv` build by default.
-There is also the option of creating experimental engines that are not ready to include by default.
-These include engines that are still being actively developed, optimized, reviewed or documented.
+The instructions above describe creating an engine that is considered stable. If you want,
+you can mark an engine as experimental and not include it in build, by default.
 
-Experimental engines are unsupported prototypes, but are still expected to have proper automated tests,
-and for all defined tests to pass.
+Experimental engines are unsupported prototypes. These include engines that are still being actively
+developed, optimized, reviewed or documented, but are still expected to have proper automated tests
+(and they all pass).
 
 ### Experimental Code
 
-Use the `EXPERIMENTAL` conditional define to exclude code from the default build.
+In `src` and `tests` directories there are subdirectories `engines-experimental`, in which all
+experimental source files should be placed.
 
-```
-#ifdef EXPERIMENTAL
-...
-#endif
-```
+The same as for all engines, each engine-specific code in common source files should be ifdef'd using
+(newly) defined option (ENABLE_MYTREE_ENGINE, in this case).
 
 ### Experimental Build Assets
 
-Extend this existing section in `CMakeLists.txt` if your experimental engine requires libraries that
+Extend existing section in `CMakeLists.txt` if your experimental engine requires libraries that
 are not yet included in the default build.
 
 ```
-if(EXPERIMENTAL)
+if(ENABLE_MYTREE_ENGINE)
     include(foo-experimental)
-endif(EXPERIMENTAL)
+endif()
 ```
 
-As noted in the example above, the experimental CMake module should use `-experimental` in the file name.
+As noted in the example above, the experimental CMake module should use `-experimental` suffix
+in the file name.
