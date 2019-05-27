@@ -35,6 +35,7 @@
 #include "lib_acl.hpp"
 #include <libpmemobj.h>
 #include <libmemcached/memcached.h>
+#include <libpmemobj/base.h>
 using namespace pmemkv;
 
 //const string ENGINE = "stree";
