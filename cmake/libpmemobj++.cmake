@@ -29,9 +29,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 if(PKG_CONFIG_FOUND)
-# XXX uncomment when libpmemobj-cpp 1.7 is released
-#	pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++>=1.7)
-	pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++)
+	pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++>=${LIBPMEMOBJ_CPP_REQUIRED_VERSION})
 else()
 	find_package(LIBPMEMOBJ++ REQUIRED libpmemobj++)
 	message(STATUS "libpmemobj++ found the old way (w/o pkg-config)")

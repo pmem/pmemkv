@@ -32,29 +32,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(pmemkv)
 
-function(find_pmemcheck)
-	set(ENV{PATH} ${VALGRIND_PREFIX}/bin:$ENV{PATH})
-	execute_process(COMMAND valgrind --tool=pmemcheck --help
-			RESULT_VARIABLE VALGRIND_PMEMCHECK_RET
-			OUTPUT_QUIET
-			ERROR_QUIET)
-	if(VALGRIND_PMEMCHECK_RET)
-		set(VALGRIND_PMEMCHECK_FOUND 0 CACHE INTERNAL "")
-	else()
-		set(VALGRIND_PMEMCHECK_FOUND 1 CACHE INTERNAL "")
-	endif()
-
-	if(VALGRIND_PMEMCHECK_FOUND)
-		execute_process(COMMAND valgrind --tool=pmemcheck true
-				ERROR_VARIABLE PMEMCHECK_OUT
-				OUTPUT_QUIET)
-
-		string(REGEX MATCH ".*pmemcheck-([0-9.]+),.*" PMEMCHECK_OUT "${PMEMCHECK_OUT}")
-		set(PMEMCHECK_VERSION ${CMAKE_MATCH_1} CACHE INTERNAL "")
-	else()
-		message(WARNING "Valgrind pmemcheck NOT found.")
-	endif()
-endfunction()
+include(cmake/helpers.cmake)
+set_version(VERSION)
 
 # set the default build type
 if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
@@ -151,6 +130,8 @@ endif()
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.6)
+
 find_package(PkgConfig QUIET)
 include(ExternalProject)
 include(FindThreads)
@@ -158,18 +139,25 @@ include(CheckCXXSourceCompiles)
 include(GNUInstallDirs)
 
 include(rapidjson)
+set(PKG_REQUIRES "RapidJSON")
+
 if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3 OR ENGINE_CACHING)
 	include(libpmemobj++)
+	set(PKG_REQUIRES "${PKG_REQUIRES} libpmemobj++ >= ${LIBPMEMOBJ_CPP_REQUIRED_VERSION}")
 endif()
 if(ENGINE_VSMAP OR ENGINE_VCMAP)
 	include(memkind)
+	set(PKG_REQUIRES "${PKG_REQUIRES} memkind")
 endif()
 if(ENGINE_VCMAP OR ENGINE_CMAP)
 	include(tbb)
+	set(PKG_REQUIRES "${PKG_REQUIRES} tbb")
 endif()
 if(ENGINE_CACHING)
 	include(memcached-experimental)
 	include(redis-experimental)
+	# XXX consider adding
+	# set(PKG_REQUIRES "${PKG_REQUIRES} libmemcached")
 endif()
 
 if(PKG_CONFIG_FOUND)
@@ -211,6 +199,10 @@ target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_ENABLED=1)
 
 enable_testing()
 add_subdirectory(tests)
+
+configure_file(libpmemkv.pc.in libpmemkv.pc @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/libpmemkv.pc
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER src/libpmemkv.h)
 
