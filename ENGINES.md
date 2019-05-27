@@ -204,7 +204,7 @@ Enabled in CMake by option ENGINE_CACHING.
 
 ### Prerequisites
 
-Memcached and libacl packages required (<a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental">see here for installation guide</a>).
+Memcached, libacl (<a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental">see here for installation guide</a>) and libpmemobj-cpp packages required.
 
 ### Related Work
 ---------
