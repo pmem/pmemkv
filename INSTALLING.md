@@ -27,7 +27,7 @@ Building from Sources
 * 64-bit Linux (OSX and Windows are not yet supported)
 * [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit
 * [RapidJSON](https://github.com/tencent/rapidjson) - JSON parser
-* [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings for PMDK (required by CMAP, VCMAP, VSMAP, TREE3 and STREE engines)
+* [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings for PMDK (required by all engines except blackhole)
 * [TBB](https://github.com/01org/tbb) - Thread Building Blocks (requiered by cmap & vcmap engines)
 * [memkind](https://github.com/memkind/memkind) - Volatile memory manager (required by vsmap & vcmap engines)
 
