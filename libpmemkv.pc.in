@@ -1,0 +1,12 @@
+version=@VERSION@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@
+includedir=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: pmemkv
+Description: pmemkv - Key/Value Datastore for Persistent Memory
+Version: ${version}
+URL: http://github.com/pmem/pmemkv
+Requires.private: @PKG_REQUIRES@
+Libs: -L${libdir} -lpmemkv
+Cflags: -I${includedir}
