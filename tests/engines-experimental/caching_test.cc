@@ -34,6 +34,7 @@
 #include "../../src/engines-experimental/caching.h"
 #include "lib_acl.hpp"
 #include <libmemcached/memcached.h>
+#include <libpmemobj/base.h>
 using namespace pmemkv;
 
 //const string ENGINE = "stree";
