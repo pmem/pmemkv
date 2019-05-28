@@ -56,8 +56,8 @@ to see the output of failed tests.
 To package `pmemkv` as a shared library and install on your system:
 
 ```sh
-sudo make install       # install shared library to the default location: /usr/local
-sudo make uninstall     # remove shared library and headers
+sudo make install		# install shared library to the default location: /usr/local
+sudo make uninstall		# remove shared library and headers
 ```
 
 To install this library into other locations, pass appropriate value to cmake
@@ -65,8 +65,8 @@ using CMAKE_INSTALL_PREFIX variable like this:
 
 ```sh
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr
-sudo make install 	# install to path specified by CMAKE_INSTALL_PREFIX
-sudo make uninstall 	# remove shared library and headers from path specified by CMAKE_INSTALL_PREFIX
+sudo make install		# install to path specified by CMAKE_INSTALL_PREFIX
+sudo make uninstall		# remove shared library and headers from path specified by CMAKE_INSTALL_PREFIX
 ```
 
 **Out-of-source builds**
@@ -155,7 +155,8 @@ Installing on Ubuntu
 Install required packages:
 
 ```sh
-sudo apt install autoconf automake cmake libdaxctl-dev doxygen gcc g++ libtool libndctl-dev libnuma-dev rapidjson-dev libtbb-dev
+sudo apt install autoconf automake cmake libdaxctl-dev doxygen gcc g++ \
+	libtool libndctl-dev libnuma-dev rapidjson-dev libtbb-dev
 ```
 
 Configure for proxy if necessary:
