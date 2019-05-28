@@ -31,10 +31,10 @@
  */
 
 #include "gtest/gtest.h"
-#include "../../src/engines/vcmap.h"
+#include "../../src/libpmemkv.hpp"
 #include <libpmemobj.h>
 
-using namespace pmemkv::vcmap;
+using namespace pmemkv;
 
 const std::string PATH = "/dev/shm";
 const size_t SIZE = 1024ull * 1024ull * 512ull;
@@ -43,10 +43,16 @@ const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
 template<size_t POOL_SIZE>
 class VCMapBaseTest : public testing::Test {
   public:
-    VCMap* kv;
+    KVEngine* kv;
 
     VCMapBaseTest() {
-        kv = new VCMap(nullptr, PATH, POOL_SIZE);
+        char config[255];
+        auto n = sprintf(config, "{\"path\": \"%s\", \"size\" : %lu}", PATH.c_str(), POOL_SIZE);
+
+        if (n < 0)
+            throw std::runtime_error("sprintf failed");
+
+        kv = new KVEngine("vcmap", config);
     }
 
     ~VCMapBaseTest() {
