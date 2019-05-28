@@ -31,26 +31,24 @@
  */
 
 #include "gtest/gtest.h"
-#include "../../src/engines/blackhole.h"
+#include "../../src/libpmemkv.hpp"
 
-using namespace pmemkv::blackhole;
+using namespace pmemkv;
 
 class BlackholeTest : public testing::Test {
   public:
-    Blackhole* kv;
+    KVEngine kv;
 
-    BlackholeTest() { kv = new Blackhole(nullptr); }
-
-    ~BlackholeTest() { delete kv; }
+    BlackholeTest(): kv("blackhole", "") {}
 };
 
 TEST_F(BlackholeTest, SimpleTest) {
     std::string value;
-    ASSERT_TRUE(kv->Count() == 0);
-    ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
-    ASSERT_TRUE(kv->Put("key1", "value1") == OK);
-    ASSERT_TRUE(kv->Count() == 0);
-    ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
-    ASSERT_TRUE(kv->Remove("key1") == OK);
-    ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv.Count() == 0);
+    ASSERT_TRUE(kv.Get("key1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv.Put("key1", "value1") == OK);
+    ASSERT_TRUE(kv.Count() == 0);
+    ASSERT_TRUE(kv.Get("key1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv.Remove("key1") == OK);
+    ASSERT_TRUE(kv.Get("key1", &value) == NOT_FOUND);
 }
