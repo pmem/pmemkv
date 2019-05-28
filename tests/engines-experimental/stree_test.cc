@@ -31,8 +31,11 @@
  */
 
 #include "gtest/gtest.h"
+#include "../../src/libpmemkv.hpp"
 #include "../../src/engines-experimental/stree.h"
+#include <libpmemobj.h>
 
+using namespace pmemkv;
 using namespace pmemkv::stree;
 
 const std::string PATH = "/dev/shm/pmemkv";
@@ -42,7 +45,7 @@ const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
 template<size_t POOL_SIZE>
 class STreeBaseTest : public testing::Test {
   public:
-    STree* kv;
+    KVEngine* kv;
 
     STreeBaseTest() {
         std::remove(PATH.c_str());
@@ -52,15 +55,19 @@ class STreeBaseTest : public testing::Test {
     ~STreeBaseTest() {
         delete kv;
     }
-
     void Restart() {
         delete kv;
         Start();
     }
-
   protected:
     void Start() {
-        kv = new STree(nullptr, PATH, POOL_SIZE);
+        char config[255];
+        auto n = sprintf(config, "{\"path\": \"%s\", \"size\" : %lu}", PATH.c_str(), POOL_SIZE);
+
+        if (n < 0)
+            throw std::runtime_error("sprintf failed");
+
+        kv = new KVEngine("stree", config);
     }
 };
 
