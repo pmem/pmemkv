@@ -31,9 +31,12 @@
  */
 
 #include "gtest/gtest.h"
-#include "../../src/engines/cmap.h"
+#include "../../src/libpmemkv.hpp"
+#include <libpmemobj.h>
 
-using namespace pmemkv::cmap;
+#include <cstdio>
+
+using namespace pmemkv;
 
 const std::string PATH = "/dev/shm/pmemkv";
 const size_t SIZE = 1024ull * 1024ull * 512ull;
@@ -42,7 +45,7 @@ const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
 template<size_t POOL_SIZE>
 class CMapBaseTest : public testing::Test {
   public:
-    CMap* kv;
+    KVEngine* kv;
 
     CMapBaseTest() {
         std::remove(PATH.c_str());
@@ -58,7 +61,13 @@ class CMapBaseTest : public testing::Test {
     }
   protected:
     void Start() {
-        kv = new CMap(nullptr, PATH, POOL_SIZE);
+        char config[255];
+        auto n = sprintf(config, "{\"path\": \"%s\", \"size\" : %lu}", PATH.c_str(), POOL_SIZE);
+
+        if (n < 0)
+            throw std::runtime_error("sprintf failed");
+
+        kv = new KVEngine("cmap", config);
     }
 };
 
