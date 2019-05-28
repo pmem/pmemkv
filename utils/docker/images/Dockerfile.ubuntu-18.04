@@ -39,16 +39,20 @@ FROM ubuntu:18.04
 MAINTAINER lukasz.stolarczuk@intel.com
 
 # Update the Apt cache and install basic tools
-RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common \
+RUN apt-get update --no-install-recommends
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+	apt-utils
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	autoconf \
 	automake \
+	build-essential \
 	clang \
 	cmake \
 	curl \
 	debhelper \
 	devscripts \
 	doxygen \
+	fakeroot \
 	gcc \
 	g++ \
 	git \
@@ -66,6 +70,7 @@ RUN apt-get update \
 	pkg-config \
 	rapidjson-dev \
 	ruby \
+	software-properties-common \
 	sudo \
 	wget \
 	whois \
