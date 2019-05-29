@@ -35,7 +35,6 @@
 #include <libpmemobj++/persistent_ptr.hpp>
 #include <libpmemobj++/pool.hpp>
 #include <libpmemobj++/transaction.hpp>
-#include <rapidjson/document.h>
 
 #include "engines/blackhole.h"
 #include "engines/vsmap.h"
@@ -47,6 +46,63 @@
 #include "engines-experimental/caching.h"
 #endif
 
+#include <unordered_map>
+#include <vector>
+
+struct pmemkv_config {
+	std::unordered_map<std::string, std::vector<char>> umap;
+};
+
+extern "C" {
+
+pmemkv_config *
+pmemkv_config_new(void)
+{
+	return new pmemkv_config;
+}
+
+void
+pmemkv_config_delete(pmemkv_config *config)
+{
+	delete config;
+}
+
+void
+pmemkv_config_put(pmemkv_config *config, const char *key,
+			const void *value, size_t value_len)
+{
+	std::string mkey(key);
+	std::vector<char> v((char *)value, (char *)value + value_len);
+
+	config->umap.insert({mkey, v});
+}
+
+ssize_t
+pmemkv_config_get(pmemkv_config *config, const char *key,
+			void *buffer, size_t buffer_len,
+			size_t *value_len)
+{
+	std::string mkey(key);
+	auto found = config->umap.find(mkey);
+
+	if (found == config->umap.end())
+		return -1;
+
+	auto mvalue = found->second;
+	size_t len = 0;
+
+	if (buffer) {
+		len = (buffer_len < mvalue.size()) ? buffer_len : mvalue.size();
+		memcpy(buffer, mvalue.data(), len);
+	}
+
+	if (value_len)
+		*value_len = mvalue.size();
+
+	return len;
+}
+}
+
 using std::runtime_error;
 
 namespace pmemkv {
@@ -55,18 +111,18 @@ KVEngine::~KVEngine() { }
 
 // STATIC METHOD IMPLEMENTATIONS
 
-KVEngine* KVEngine::Start(const string& engine, const string& config) {
+KVEngine* KVEngine::Start(const string& engine, pmemkv_config *config) {
     return Start(nullptr, engine, config);
 }
 
-KVEngine* KVEngine::Start(void* context, const string& engine, const string& config) {
-    auto cb = [](void* cxt, const char* engine, const char* config, const char* msg) {
+KVEngine* KVEngine::Start(void* context, const string& engine, pmemkv_config *config) {
+    auto cb = [](void* cxt, const char* engine, pmemkv_config *config, const char* msg) {
         throw runtime_error(msg);
     };
-    return Start(context, engine.c_str(), config.c_str(), cb);
+    return Start(context, engine.c_str(), config, cb);
 }
 
-KVEngine* KVEngine::Start(void* context, const char* engine, const char* config, KVStartFailureCallback* onfail) {
+KVEngine* KVEngine::Start(void* context, const char* engine, pmemkv_config *config, KVStartFailureCallback* onfail) {
     try {
         if (engine == blackhole::ENGINE) {
             return new blackhole::Blackhole(context);
@@ -75,16 +131,20 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
             return new caching::CachingEngine(context, config);
 #endif
         } else {  // handle traditional engines expecting path & size params
-            rapidjson::Document d;
-            if (d.Parse(config).HasParseError()) {
-                throw runtime_error("Config could not be parsed as JSON");
-            } else if (!d.HasMember("path") || !d["path"].IsString()) {
-                throw runtime_error("Config does not include valid path string");
-            } else if (d.HasMember("size") && !d["size"].IsInt64()) {
-                throw runtime_error("Config does not include valid size integer");
-            }
-            auto path = d["path"].GetString();
-            size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;
+            size_t length;
+            if (pmemkv_config_get(config, "path", NULL, 0, &length))
+                    throw std::runtime_error("Config does not include 'path' entry");
+            char path[length];
+            if (pmemkv_config_get(config, "path", path, length, NULL) != length)
+                    throw std::runtime_error("Cannot get the 'path' entry");
+
+            if (pmemkv_config_get(config, "size", NULL, 0, &length))
+                    throw std::runtime_error("Config does not include 'size'");
+            if (length != sizeof(size_t))
+                    throw std::runtime_error("Wrong size of the 'size' entry");
+            size_t size;
+            if (pmemkv_config_get(config, "size", &size, length, NULL) != length)
+                    throw std::runtime_error("Cannot get the 'size' entry");
 #ifdef EXPERIMENTAL
             if (engine == tree3::ENGINE) {
                 return new tree3::Tree(context, path, size);
@@ -272,7 +332,7 @@ void KVEngine::Get(const string& key, std::function<KVGetStringFunction> f) {
 
 // EXTERN C IMPLEMENTATION
 
-extern "C" KVEngine* kvengine_start(void* context, const char* engine, const char* config,
+extern "C" KVEngine* kvengine_start(void* context, const char* engine, pmemkv_config *config,
                                     KVStartFailureCallback* callback) {
     return KVEngine::Start(context, engine, config, callback);
 }
