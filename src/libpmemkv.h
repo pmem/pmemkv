@@ -38,13 +38,25 @@ typedef enum {
     OK = 1
 } KVStatus;
 
+#include <cstddef>
+
+typedef struct pmemkv_config_s pmemkv_config_t;
+
+pmemkv_config_t* pmemkv_config_new(void);
+void pmemkv_config_delete(pmemkv_config_t* config);
+int pmemkv_config_put(pmemkv_config_t* config, const char* key,
+			const void* value, size_t value_len);
+size_t pmemkv_config_get(pmemkv_config_t* config, const char* key,
+			void* buffer, size_t buffer_len,
+			size_t *value_len);
+
 typedef void(KVAllCallback)(void* context, int keybytes, const char* key);
 typedef void(KVAllFunction)(int keybytes, const char* key);
 typedef void(KVEachCallback)(void* context, int keybytes, const char* key, int valuebytes, const char* value);
 typedef void(KVEachFunction)(int keybytes, const char* key, int valuebytes, const char* value);
 typedef void(KVGetCallback)(void* context, int valuebytes, const char* value);
 typedef void(KVGetFunction)(int valuebytes, const char* value);
-typedef void(KVStartFailureCallback)(void* context, const char* engine, const char* config, const char* msg);
+typedef void(KVStartFailureCallback)(void* context, const char* engine, pmemkv_config_t* config, const char* msg);
 
 #ifdef __cplusplus
 
@@ -66,9 +78,9 @@ class KVEngine {
   public:
     virtual ~KVEngine();
 
-    static KVEngine* Start(void* context, const char* engine, const char* config, KVStartFailureCallback* callback);
-    static KVEngine* Start(void* context, const string& engine, const string& config);
-    static KVEngine* Start(const string& engine, const string& config);
+    static KVEngine* Start(void* context, const char* engine, pmemkv_config_t* config, KVStartFailureCallback* callback);
+    static KVEngine* Start(void* context, const string& engine, pmemkv_config_t* config);
+    static KVEngine* Start(const string& engine, pmemkv_config_t* config);
     static void Stop(KVEngine* kv);
 
     virtual string Engine() = 0;
@@ -131,7 +143,7 @@ extern "C" {
 struct KVEngine;
 typedef struct KVEngine KVEngine;
 
-KVEngine* kvengine_start(void* context, const char* engine, const char* config, KVStartFailureCallback* callback);
+KVEngine* kvengine_start(void* context, const char* engine, pmemkv_config_t* config, KVStartFailureCallback* callback);
 void kvengine_stop(KVEngine* kv);
 
 void kvengine_all(KVEngine* kv, void* context, KVAllCallback* c);
