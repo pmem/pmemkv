@@ -58,6 +58,147 @@
 #include "engines-experimental/tree3.h"
 #endif
 
+#include <unordered_map>
+#include <vector>
+#include <memory>
+#include <iostream>
+
+struct pmemkv_config {
+	std::unordered_map<std::string, std::vector<char>> umap;
+};
+
+extern "C" {
+
+pmemkv_config *
+pmemkv_config_new(void)
+{
+	try { return new pmemkv_config; } catch(...) { return nullptr; }
+}
+
+void
+pmemkv_config_delete(pmemkv_config *config)
+{
+	delete config;
+}
+
+int
+pmemkv_config_put(pmemkv_config *config, const char *key,
+			const void *value, size_t value_size)
+{
+	try {
+		std::string mkey(key);
+		std::vector<char> v((char *)value, (char *)value + value_size);
+		config->umap.insert({mkey, v});
+	} catch (...) {
+		return -1;
+	}
+
+	return 0;
+}
+
+ssize_t
+pmemkv_config_get(pmemkv_config *config, const char *key,
+			void *buffer, size_t buffer_len,
+			size_t *value_size)
+{
+	size_t len = 0;
+
+	try {
+		std::string mkey(key);
+		auto found = config->umap.find(mkey);
+
+		if (found == config->umap.end())
+			return -1;
+
+		auto mvalue = found->second;
+
+		if (buffer) {
+			len = (buffer_len < mvalue.size()) ? buffer_len : mvalue.size();
+			memcpy(buffer, mvalue.data(), len);
+		}
+
+		if (value_size)
+			*value_size = mvalue.size();
+	} catch (...) {
+		return -1;
+	}
+
+	return len;
+}
+
+const char *
+pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
+{
+	rapidjson::Document doc;
+	rapidjson::Value::ConstMemberIterator itr;
+	const char *err_msg = NULL;
+
+	union data {
+		unsigned uint;
+		int sint;
+		uint64_t uint64;
+		int64_t sint64;
+		double db;
+	} data;
+
+	assert(config && jsonconfig);
+
+	try {
+		if (doc.Parse(jsonconfig).HasParseError()) {
+			err_msg = "Input string is not a valid JSON";
+			throw std::runtime_error(err_msg);
+		}
+
+		if (!doc.HasMember("path") || !doc["path"].IsString())
+			err_msg = "JSON does not contain a valid path string";
+		else if (doc.HasMember("size") && !doc["size"].IsInt64())
+			err_msg = "'size' in JSON is not a valid 64-bit integer";
+
+		if (err_msg)
+			throw std::runtime_error(err_msg);
+
+		for (itr = doc.MemberBegin(); itr != doc.MemberEnd(); ++itr) {
+			const void *value = &data;
+			size_t value_size;
+			if (itr->value.IsString()) {
+				value = itr->value.GetString();
+				value_size = itr->value.GetStringLength() + 1;
+			} else if (itr->value.IsUint()) {
+				data.uint = itr->value.GetUint();
+				value_size = 4;
+			} else if (itr->value.IsInt()) {
+				data.sint = itr->value.GetInt();
+				value_size = 4;
+			} else if (itr->value.IsUint64()) {
+				data.uint64 = itr->value.GetUint64();
+				value_size = 8;
+			} else if (itr->value.IsInt64()) {
+				data.sint64 = itr->value.GetInt64();
+				value_size = 8;
+			} else if (itr->value.IsDouble()) {
+				data.db = itr->value.GetDouble();
+				value_size = 8;
+			} else {
+				err_msg = "Unknown data type in JSON string";
+				throw std::runtime_error(err_msg);
+			}
+
+			pmemkv_config_put(config,
+					itr->name.GetString(),
+					value,
+					value_size);
+		}
+	} catch (const std::exception &exc) {
+		std::cerr << exc.what() << "\n";
+		if (!err_msg)
+			err_msg = exc.what();
+	}
+
+	return err_msg;
+}
+
+} /* extern "C" */
+
 using std::runtime_error;
 
 namespace pmemkv {
@@ -66,18 +207,18 @@ KVEngine::~KVEngine() { }
 
 // STATIC METHOD IMPLEMENTATIONS
 
-KVEngine* KVEngine::Start(const std::string& engine, const std::string& config) {
+KVEngine* KVEngine::Start(const std::string& engine, pmemkv_config *config) {
     return Start(nullptr, engine, config);
 }
 
-KVEngine* KVEngine::Start(void* context, const std::string& engine, const std::string& config) {
-    auto cb = [](void* cxt, const char* engine, const char* config, const char* msg) {
+KVEngine* KVEngine::Start(void* context, const std::string& engine, pmemkv_config *config) {
+    auto cb = [](void* cxt, const char* engine, pmemkv_config *config, const char* msg) {
         throw runtime_error(msg);
     };
-    return Start(context, engine.c_str(), config.c_str(), cb);
+    return Start(context, engine.c_str(), config, cb);
 }
 
-KVEngine* KVEngine::Start(void* context, const char* engine, const char* config, KVStartFailureCallback* onfail) {
+KVEngine* KVEngine::Start(void* context, const char* engine, pmemkv_config *config, KVStartFailureCallback* onfail) {
     try {
         if (engine == blackhole::ENGINE) {
             return new blackhole::Blackhole(context);
@@ -88,50 +229,49 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
         }
 #endif
         // handle traditional engines expecting path & size params
-        rapidjson::Document d;
-        if (d.Parse(config).HasParseError()) {
-            throw runtime_error("Config could not be parsed as JSON");
-        } else if (!d.HasMember("path") || !d["path"].IsString()) {
-            throw runtime_error("Config does not include valid path string");
-        } else if (d.HasMember("size") && !d["size"].IsInt64()) {
-            throw runtime_error("Config does not include valid size integer");
-        }
-        auto path = d["path"].GetString();
-        size_t size = d.HasMember("size") ? (size_t) d["size"].GetInt64() : 1073741824;
+        size_t length;
+        if (pmemkv_config_get(config, "path", NULL, 0, &length))
+                throw std::runtime_error("Config does not contain a 'path' entry");
+        auto path = std::unique_ptr<char[]>(new char [length]);
+        if (pmemkv_config_get(config, "path", path.get(), length, NULL) != length)
+                throw std::runtime_error("Cannot get a 'path' string from the config");
+
+        size_t size = 0;
+        pmemkv_config_get(config, "size", &size, sizeof(size_t), NULL);
 #ifdef ENGINE_TREE3
         if (engine == tree3::ENGINE) {
-            return new tree3::Tree(context, path, size);
+            return new tree3::Tree(context, path.get(), size);
         }
 #endif
 
 #ifdef ENGINE_STREE
         if (engine == stree::ENGINE) {
-            return new stree::STree(context, path, size);
+            return new stree::STree(context, path.get(), size);
         }
 #endif
 
 #if defined(ENGINE_VSMAP) || defined(ENGINE_VCMAP)
         struct stat info;
-        if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
+        if ((stat(path.get(), &info) < 0) || !S_ISDIR(info.st_mode)) {
             throw runtime_error("Config path is not an existing directory");
         }
 #endif
 
 #ifdef ENGINE_VSMAP
         if (engine == vsmap::ENGINE) {
-            return new vsmap::VSMap(context, path, size);
+            return new vsmap::VSMap(context, path.get(), size);
         }
 #endif
 
 #ifdef ENGINE_VCMAP
         if (engine == vcmap::ENGINE) {
-            return new vcmap::VCMap(context, path, size);
+            return new vcmap::VCMap(context, path.get(), size);
         }
 #endif
 
 #ifdef ENGINE_CMAP
         if (engine == cmap::ENGINE) {
-            return new cmap::CMap(context, path, size);
+            return new cmap::CMap(context, path.get(), size);
         }
 #endif
         throw runtime_error("Unknown engine name");
@@ -314,7 +454,7 @@ void KVEngine::Get(const std::string& key, std::function<KVGetStringFunction> f)
 
 // EXTERN C IMPLEMENTATION
 
-extern "C" KVEngine* kvengine_start(void* context, const char* engine, const char* config,
+extern "C" KVEngine* kvengine_start(void* context, const char* engine, pmemkv_config *config,
                                     KVStartFailureCallback* callback) {
     return KVEngine::Start(context, engine, config, callback);
 }
