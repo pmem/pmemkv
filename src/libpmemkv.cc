@@ -170,6 +170,7 @@ pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 			} else if (itr->value.IsDouble()) {
 				data.db = itr->value.GetDouble();
 			} else {
+				std::runtime_error("Unknown data type in JSON string");
 				return -1;
 			}
 
@@ -178,7 +179,8 @@ pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 					&data,
 					itr->value.Size());
 		}
-	} catch (...) {
+	} catch (const std::exception &exc) {
+		std::runtime_error(exc.what());
 		return -1;
 	}
 
