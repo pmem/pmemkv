@@ -39,28 +39,23 @@ FROM ubuntu:18.04
 MAINTAINER lukasz.stolarczuk@intel.com
 
 # Update the Apt cache and install basic tools
-RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common \
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	autoconf \
 	automake \
+	build-essential \
 	clang \
 	cmake \
 	curl \
 	debhelper \
 	devscripts \
-	doxygen \
-	gcc \
-	g++ \
+	fakeroot \
 	git \
 	libc6-dbg \
 	libdaxctl-dev \
-	libjson-c-dev \
-	libkmod-dev \
-	libncurses5-dev \
 	libndctl-dev \
 	libnuma-dev \
 	libtool \
-	libudev-dev \
 	libunwind8-dev \
 	numactl \
 	pkg-config \
