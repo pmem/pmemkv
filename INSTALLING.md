@@ -26,10 +26,10 @@ Building from Sources
 
 * 64-bit Linux (OSX and Windows are not yet supported)
 * [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit
-* [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings for PMDK
-* [memkind](https://github.com/memkind/memkind) - Volatile memory manager
 * [RapidJSON](https://github.com/tencent/rapidjson) - JSON parser
-* [TBB](https://github.com/01org/tbb) - Thread Building Blocks
+* [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings for PMDK (required by all engines except blackhole)
+* [TBB](https://github.com/01org/tbb) - Thread Building Blocks (requiered by cmap & vcmap engines)
+* [memkind](https://github.com/memkind/memkind) - Volatile memory manager (required by vsmap & vcmap engines)
 
 **Building and running tests**
 
@@ -214,9 +214,18 @@ sudo make install
 Using Experimental Engines
 --------------------------
 
-First build or install `pmemkv` as described above.
+To enable experimental engine(s) use adequate CMake parameter, e.g.:
 
-Install client libraries for Memcached:
+```sh
+cmake .. -DENGINE_CACHING=ON
+```
+
+Now build will contain selected experimental engine(s) and their dependencies, that are not available by default.
+
+Additional libraries (not listed above, in prerequisites section) are required only by caching engine. If you want to use it
+you need to follow these instructions:
+
+First build and install `pmemkv` as described above. Then, install client libraries for Memcached:
 
 ```sh
 cd ~
@@ -246,14 +255,6 @@ make
 cd ../lib_protocol
 make
 ```
-
-Edit `CMakeLists.txt` to enable experimental features:
-
-```sh
-option(EXPERIMENTAL "use experimental features" ON)
-```
-
-Now `make` will include experimental engines and other features that are not available by default.
 
 <a name="pool_set"></a>
 

@@ -30,8 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef EXPERIMENTAL
-
 #include <iostream>
 #include <unistd.h>
 
@@ -163,5 +161,3 @@ void STree::Recover() {
 
 } // namespace stree
 } // namespace pmemkv
-
-#endif

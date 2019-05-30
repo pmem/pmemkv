@@ -30,13 +30,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef EXPERIMENTAL
-
 #include "gtest/gtest.h"
 #include "../../src/engines-experimental/caching.h"
 #include "lib_acl.hpp"
 #include <libpmemobj.h>
 #include <libmemcached/memcached.h>
+#include <libpmemobj/base.h>
 using namespace pmemkv;
 
 //const string ENGINE = "stree";
@@ -690,5 +689,3 @@ TEST_F(CachingTest, LargeTTL) {
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(kv->Exists("key1") == OK);
 }
-
-#endif

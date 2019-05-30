@@ -30,8 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef EXPERIMENTAL
-
 #pragma once
 
 #include "../libpmemkv.h"
@@ -100,5 +98,3 @@ bool valueFieldConversion(std::string dateValue);
 
 } // namespace caching
 } // namespace pmemkv
-
-#endif

@@ -30,8 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef EXPERIMENTAL
-
 #include <ctime>
 #include <iostream>
 #include <list>
@@ -293,5 +291,3 @@ bool valueFieldConversion(std::string dateValue) {
 
 } // namespace caching
 } // namespace pmemkv
-
-#endif
