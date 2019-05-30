@@ -42,7 +42,7 @@ static int ttl;  // todo move into private field
 
 class CachingEngine : public KVEngine {
   public:
-    CachingEngine(void* context, const std::string& config);
+    CachingEngine(void* context, pmemkv_config *config);
     ~CachingEngine();
 
     std::string Engine() final { return ENGINE; }
@@ -74,7 +74,8 @@ class CachingEngine : public KVEngine {
     using KVEngine::EachBetween;
     using KVEngine::Get;
   private:
-    bool readConfig(const std::string& config);
+    bool getString(pmemkv_config *config, const char *key, std::string& str);
+    bool readConfig(pmemkv_config *config);
     bool getFromRemoteRedis(const std::string& key, std::string& value);
     bool getFromRemoteMemcached(const std::string& key, std::string& value);
     bool getKey(const std::string& key, std::string& valueField, bool api_flag);
