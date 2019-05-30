@@ -36,9 +36,6 @@
 #include <iostream>
 #include <lib_acl.hpp>
 #include <libmemcached/memcached.h>
-#include <rapidjson/istreamwrapper.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/ostreamwrapper.h>
 #include <unistd.h>
 #include "caching.h"
 
@@ -49,8 +46,8 @@
 namespace pmemkv {
 namespace caching {
 
-CachingEngine::CachingEngine(void* context, const string& config) : engine_context(context) {
-    if (!readConfig(config) || !(basePtr = KVEngine::Start(subEngine, subEngineConfig)))
+CachingEngine::CachingEngine(void* context, pmemkv_config *config) : engine_context(context) {
+    if (!readConfig(config) || !(basePtr = KVEngine::Start(subEngine, config)))
         throw "CachingEngine Exception"; // todo propagate start exceptions properly
     LOG("Started ok");
 }
@@ -61,35 +58,66 @@ CachingEngine::~CachingEngine() {
     LOG("Stopped ok");
 }
 
-bool CachingEngine::readConfig(const string& config) {
-    rapidjson::Document d;
-    if (d.Parse(config.c_str()).HasParseError()) return false; // todo throw specific exceptions
-    if (!d.HasMember("subengine") || !d["subengine"].IsString()) return false;
-    if (!d.HasMember("subengine_config") || !d["subengine_config"].IsObject()) return false;
-    if (!d["subengine_config"].HasMember("path") || !d["subengine_config"]["path"].IsString()) return false;
-    if (!d.HasMember("host") || !d["host"].IsString()) return false;
-    if (!d.HasMember("port") || !d["port"].IsInt()) return false;
-    if (!d.HasMember("remote_type") || !d["remote_type"].IsString()) return false;
-    if (!d.HasMember("remote_user") || !d["remote_user"].IsString()) return false;
-    if (!d.HasMember("remote_pwd") || !d["remote_pwd"].IsString()) return false;
-    if (!d.HasMember("remote_url") || !d["remote_url"].IsString()) return false;
-    if (!d.HasMember("attempts") || !d["attempts"].IsInt()) return false;
-    if (d.HasMember("ttl") && !d["ttl"].IsUint()) return false;
+bool CachingEngine::get_string(pmemkv_config *config, const char *key,
+				string& str)
+{
+	size_t length;
 
-    rapidjson::StringBuffer sb;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
-    d["subengine_config"].Accept(writer);
-    subEngineConfig = sb.GetString();
-    subEngine = d["subengine"].GetString();
-    remoteType = d["remote_type"].GetString();
-    remoteUser = d["remote_user"].GetString();
-    remotePasswd = d["remote_pwd"].GetString();
-    remoteUrl = d["remote_url"].GetString();
-    ttl = d.HasMember("ttl") ? d["ttl"].GetInt() : 0;
-    host = d["host"].GetString();
-    port = d["port"].GetInt();
-    attempts = d["attempts"].GetInt();
-    return true;
+	if (pmemkv_config_get(config, key, NULL, 0, &length) == -1)
+		return false;
+
+	char c_str[length];
+	if (pmemkv_config_get(config, key, c_str, length, NULL) != length)
+		return false;
+
+	str = string(c_str);
+	return true;
+}
+
+bool CachingEngine::readConfig(pmemkv_config *config)
+{
+	if (!get_string(config, "subengine", subEngine))
+		return false;
+
+	if (!get_string(config, "remote_type", remoteType))
+		return false;
+
+	if (!get_string(config, "remote_user", remoteUser))
+		return false;
+
+	if (!get_string(config, "remote_pwd", remotePasswd))
+		return false;
+
+	if (!get_string(config, "remote_url", remoteUrl))
+		return false;
+
+	if (!get_string(config, "host", host))
+		return false;
+
+	size_t length;
+	if (pmemkv_config_get(config, "ttl", NULL, 0, &length))
+		return false;
+	if (length != sizeof(int))
+		return false;
+	if (pmemkv_config_get(config, "ttl", &ttl, length, NULL) != length)
+		return false;
+
+	if (pmemkv_config_get(config, "port", NULL, 0, &length))
+		return false;
+	if (length != sizeof(unsigned long int))
+		return false;
+	if (pmemkv_config_get(config, "port", &port, length, NULL) != length)
+		return false;
+
+	if (pmemkv_config_get(config, "attempts", NULL, 0, &length))
+		return false;
+	if (length != sizeof(int))
+		return false;
+	if (pmemkv_config_get(config, "attempts", &attempts,
+					length, NULL) != length)
+		return false;
+
+	return true;
 }
 
 void CachingEngine::All(void* context, KVAllCallback* callback) {
