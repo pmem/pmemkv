@@ -38,8 +38,8 @@
 
 using namespace pmemkv::tree3;
 
-const string PATH = "/dev/shm/pmemkv";
-const string PATH_CACHED = "/tmp/pmemkv";
+const std::string PATH = "/dev/shm/pmemkv";
+const std::string PATH_CACHED = "/tmp/pmemkv";
 const size_t SIZE = ((size_t) (1024 * 1024 * 1104));
 
 class TreeEmptyTest : public testing::Test {
@@ -125,7 +125,7 @@ TEST_F(TreeEmptyTest, FailsToCreateInstanceWithTinySize) {
 TEST_F(TreeTest, SimpleTest) {
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(!kv->Exists("key1"));
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("key1", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
@@ -135,7 +135,7 @@ TEST_F(TreeTest, SimpleTest) {
     kv->Get("key1", [&](int vb, const char* v) { value.append(v, vb); });
     ASSERT_TRUE(value == "value1");
     value = "";
-    kv->Get("key1", [&](const string& v) { value.append(v); });
+    kv->Get("key1", [&](const std::string& v) { value.append(v); });
     ASSERT_TRUE(value == "value1");
 }
 
@@ -145,31 +145,31 @@ TEST_F(TreeTest, BinaryKeyTest) {
     ASSERT_TRUE(kv->Put("a", "should_not_change") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(kv->Exists("a"));
-    string key1 = string("a\0b", 3);
+    std::string key1 = std::string("a\0b", 3);
     ASSERT_TRUE(!kv->Exists(key1));
     ASSERT_TRUE(kv->Put(key1, "stuff") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 2);
     ASSERT_TRUE(kv->Exists("a"));
     ASSERT_TRUE(kv->Exists(key1));
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get(key1, &value) == OK);
     ASSERT_EQ(value, "stuff");
-    string value2;
+    std::string value2;
     ASSERT_TRUE(kv->Get("a", &value2) == OK);
     ASSERT_EQ(value2, "should_not_change");
     ASSERT_TRUE(kv->Remove(key1) == OK);
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(kv->Exists("a"));
     ASSERT_TRUE(!kv->Exists(key1));
-    string value3;
+    std::string value3;
     ASSERT_TRUE(kv->Get(key1, &value3) == NOT_FOUND);
     ASSERT_TRUE(kv->Get("a", &value3) == OK && value3 == "should_not_change");
 }
 
 TEST_F(TreeTest, BinaryValueTest) {
-    string value("A\0B\0\0C", 6);
+    std::string value("A\0B\0\0C", 6);
     ASSERT_TRUE(kv->Put("key1", value) == OK) << pmemobj_errormsg();
-    string value_out;
+    std::string value_out;
     ASSERT_TRUE(kv->Get("key1", &value_out) == OK && (value_out.length() == 6) && (value_out == value));
 }
 
@@ -181,9 +181,9 @@ TEST_F(TreeTest, EmptyKeyTest) {
     ASSERT_TRUE(kv->Count() == 2);
     ASSERT_TRUE(kv->Put("\t\t", "two-tab") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 3);
-    string value1;
-    string value2;
-    string value3;
+    std::string value1;
+    std::string value2;
+    std::string value3;
     ASSERT_TRUE(kv->Exists(""));
     ASSERT_TRUE(kv->Get("", &value1) == OK && value1 == "empty");
     ASSERT_TRUE(kv->Exists(" "));
@@ -200,9 +200,9 @@ TEST_F(TreeTest, EmptyValueTest) {
     ASSERT_TRUE(kv->Count() == 2);
     ASSERT_TRUE(kv->Put("two-tab", "\t\t") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 3);
-    string value1;
-    string value2;
-    string value3;
+    std::string value1;
+    std::string value2;
+    std::string value3;
     ASSERT_TRUE(kv->Get("empty", &value1) == OK && value1 == "");
     ASSERT_TRUE(kv->Get("single-space", &value2) == OK && value2 == " ");
     ASSERT_TRUE(kv->Get("two-tab", &value3) == OK && value3 == "\t\t");
@@ -210,13 +210,13 @@ TEST_F(TreeTest, EmptyValueTest) {
 
 TEST_F(TreeTest, GetAppendToExternalValueTest) {
     ASSERT_TRUE(kv->Put("key1", "cool") == OK) << pmemobj_errormsg();
-    string value = "super";
+    std::string value = "super";
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "supercool");
 }
 
 TEST_F(TreeTest, GetHeadlessTest) {
     ASSERT_TRUE(!kv->Exists("waldo"));
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
 }
 
@@ -228,19 +228,19 @@ TEST_F(TreeTest, GetMultipleTest) {
     ASSERT_TRUE(kv->Put("mno", "E5") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 5);
     ASSERT_TRUE(kv->Exists("abc"));
-    string value1;
+    std::string value1;
     ASSERT_TRUE(kv->Get("abc", &value1) == OK && value1 == "A1");
     ASSERT_TRUE(kv->Exists("def"));
-    string value2;
+    std::string value2;
     ASSERT_TRUE(kv->Get("def", &value2) == OK && value2 == "B2");
     ASSERT_TRUE(kv->Exists("hij"));
-    string value3;
+    std::string value3;
     ASSERT_TRUE(kv->Get("hij", &value3) == OK && value3 == "C3");
     ASSERT_TRUE(kv->Exists("jkl"));
-    string value4;
+    std::string value4;
     ASSERT_TRUE(kv->Get("jkl", &value4) == OK && value4 == "D4");
     ASSERT_TRUE(kv->Exists("mno"));
-    string value5;
+    std::string value5;
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
 }
 
@@ -251,94 +251,94 @@ TEST_F(TreeTest, GetMultiple2Test) {
     ASSERT_TRUE(kv->Remove("key2") == OK);
     ASSERT_TRUE(kv->Put("key3", "VALUE3") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 2);
-    string value1;
+    std::string value1;
     ASSERT_TRUE(kv->Get("key1", &value1) == OK && value1 == "value1");
-    string value2;
+    std::string value2;
     ASSERT_TRUE(kv->Get("key2", &value2) == NOT_FOUND);
-    string value3;
+    std::string value3;
     ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
 }
 
 TEST_F(TreeTest, GetNonexistentTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(!kv->Exists("waldo"));
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
 }
 
 TEST_F(TreeTest, PutTest) {
     ASSERT_TRUE(kv->Count() == 0);
 
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
 
-    string new_value;
+    std::string new_value;
     ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK) << pmemobj_errormsg();           // same size
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(kv->Get("key1", &new_value) == OK && new_value == "VALUE1");
 
-    string new_value2;
+    std::string new_value2;
     ASSERT_TRUE(kv->Put("key1", "new_value") == OK) << pmemobj_errormsg();        // longer size
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(kv->Get("key1", &new_value2) == OK && new_value2 == "new_value");
 
-    string new_value3;
+    std::string new_value3;
     ASSERT_TRUE(kv->Put("key1", "?") == OK) << pmemobj_errormsg();                // shorter size
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
 }
 
 TEST_F(TreeTest, PutKeysOfDifferentSizesTest) {
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Put("123456789ABCDE", "A") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(kv->Get("123456789ABCDE", &value) == OK && value == "A");
 
-    string value2;
+    std::string value2;
     ASSERT_TRUE(kv->Put("123456789ABCDEF", "B") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 2);
     ASSERT_TRUE(kv->Get("123456789ABCDEF", &value2) == OK && value2 == "B");
 
-    string value3;
+    std::string value3;
     ASSERT_TRUE(kv->Put("12345678ABCDEFG", "C") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 3);
     ASSERT_TRUE(kv->Get("12345678ABCDEFG", &value3) == OK && value3 == "C");
 
-    string value4;
+    std::string value4;
     ASSERT_TRUE(kv->Put("123456789", "D") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 4);
     ASSERT_TRUE(kv->Get("123456789", &value4) == OK && value4 == "D");
 
-    string value5;
+    std::string value5;
     ASSERT_TRUE(kv->Put("123456789ABCDEFGHI", "E") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 5);
     ASSERT_TRUE(kv->Get("123456789ABCDEFGHI", &value5) == OK && value5 == "E");
 }
 
 TEST_F(TreeTest, PutValuesOfDifferentSizesTest) {
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Put("A", "123456789ABCDE") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(kv->Get("A", &value) == OK && value == "123456789ABCDE");
 
-    string value2;
+    std::string value2;
     ASSERT_TRUE(kv->Put("B", "123456789ABCDEF") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 2);
     ASSERT_TRUE(kv->Get("B", &value2) == OK && value2 == "123456789ABCDEF");
 
-    string value3;
+    std::string value3;
     ASSERT_TRUE(kv->Put("C", "12345678ABCDEFG") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 3);
     ASSERT_TRUE(kv->Get("C", &value3) == OK && value3 == "12345678ABCDEFG");
 
-    string value4;
+    std::string value4;
     ASSERT_TRUE(kv->Put("D", "123456789") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 4);
     ASSERT_TRUE(kv->Get("D", &value4) == OK && value4 == "123456789");
 
-    string value5;
+    std::string value5;
     ASSERT_TRUE(kv->Put("E", "123456789ABCDEFGHI") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 5);
     ASSERT_TRUE(kv->Get("E", &value5) == OK && value5 == "123456789ABCDEFGHI");
@@ -351,7 +351,7 @@ TEST_F(TreeTest, RemoveAllTest) {
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(!kv->Exists("tmpkey"));
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
 }
 
@@ -362,7 +362,7 @@ TEST_F(TreeTest, RemoveAndInsertTest) {
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
     ASSERT_TRUE(kv->Count() == 0);
     ASSERT_TRUE(!kv->Exists("tmpkey"));
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 1);
@@ -385,7 +385,7 @@ TEST_F(TreeTest, RemoveExistingTest) {
     ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND);
     ASSERT_TRUE(kv->Count() == 1);
     ASSERT_TRUE(!kv->Exists("tmpkey1"));
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Exists("tmpkey2"));
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
@@ -407,10 +407,10 @@ TEST_F(TreeTest, UsesAllTest) {
     ASSERT_TRUE(kv->Put("2", "1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 2);
 
-    string result;
+    std::string result;
     kv->All([&result](int kb, const char* k) {
         result.append("<");
-        result.append(string(k, kb));
+        result.append(std::string(k, kb));
         result.append(">,");
     });
     ASSERT_TRUE(result == "<2>,<记!>,");
@@ -422,12 +422,12 @@ TEST_F(TreeTest, UsesEachTest) {
     ASSERT_TRUE(kv->Put("1", "2") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Count() == 2);
 
-    string result;
+    std::string result;
     kv->Each([&result](int kb, const char* k, int vb, const char* v) {
         result.append("<");
-        result.append(string(k, kb));
+        result.append(std::string(k, kb));
         result.append(">,<");
-        result.append(string(v, vb));
+        result.append(std::string(v, vb));
         result.append(">|");
     });
     ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");
@@ -439,7 +439,7 @@ TEST_F(TreeTest, UsesEachTest) {
 
 TEST_F(TreeTest, GetHeadlessAfterRecoveryTest) {
     Restart();
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
 }
 
@@ -450,15 +450,15 @@ TEST_F(TreeTest, GetMultipleAfterRecoveryTest) {
     Restart();
     ASSERT_TRUE(kv->Put("jkl", "D4") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Put("mno", "E5") == OK) << pmemobj_errormsg();
-    string value1;
+    std::string value1;
     ASSERT_TRUE(kv->Get("abc", &value1) == OK && value1 == "A1");
-    string value2;
+    std::string value2;
     ASSERT_TRUE(kv->Get("def", &value2) == OK && value2 == "B2");
-    string value3;
+    std::string value3;
     ASSERT_TRUE(kv->Get("hij", &value3) == OK && value3 == "C3");
-    string value4;
+    std::string value4;
     ASSERT_TRUE(kv->Get("jkl", &value4) == OK && value4 == "D4");
-    string value5;
+    std::string value5;
     ASSERT_TRUE(kv->Get("mno", &value5) == OK && value5 == "E5");
 }
 
@@ -469,36 +469,36 @@ TEST_F(TreeTest, GetMultiple2AfterRecoveryTest) {
     ASSERT_TRUE(kv->Remove("key2") == OK);
     ASSERT_TRUE(kv->Put("key3", "VALUE3") == OK) << pmemobj_errormsg();
     Restart();
-    string value1;
+    std::string value1;
     ASSERT_TRUE(kv->Get("key1", &value1) == OK && value1 == "value1");
-    string value2;
+    std::string value2;
     ASSERT_TRUE(kv->Get("key2", &value2) == NOT_FOUND);
-    string value3;
+    std::string value3;
     ASSERT_TRUE(kv->Get("key3", &value3) == OK && value3 == "VALUE3");
 }
 
 TEST_F(TreeTest, GetNonexistentAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     Restart();
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("waldo", &value) == NOT_FOUND);
 }
 
 TEST_F(TreeTest, PutAfterRecoveryTest) {
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Put("key1", "value1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("key1", &value) == OK && value == "value1");
 
-    string new_value;
+    std::string new_value;
     ASSERT_TRUE(kv->Put("key1", "VALUE1") == OK) << pmemobj_errormsg();           // same size
     ASSERT_TRUE(kv->Get("key1", &new_value) == OK && new_value == "VALUE1");
     Restart();
 
-    string new_value2;
+    std::string new_value2;
     ASSERT_TRUE(kv->Put("key1", "new_value") == OK) << pmemobj_errormsg();        // longer size
     ASSERT_TRUE(kv->Get("key1", &new_value2) == OK && new_value2 == "new_value");
 
-    string new_value3;
+    std::string new_value3;
     ASSERT_TRUE(kv->Put("key1", "?") == OK) << pmemobj_errormsg();                // shorter size
     ASSERT_TRUE(kv->Get("key1", &new_value3) == OK && new_value3 == "?");
 }
@@ -507,7 +507,7 @@ TEST_F(TreeTest, RemoveAllAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     Restart();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
 }
 
@@ -515,7 +515,7 @@ TEST_F(TreeTest, RemoveAndInsertAfterRecoveryTest) {
     ASSERT_TRUE(kv->Put("tmpkey", "tmpvalue1") == OK) << pmemobj_errormsg();
     Restart();
     ASSERT_TRUE(kv->Remove("tmpkey") == OK);
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("tmpkey", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Put("tmpkey1", "tmpvalue1") == OK) << pmemobj_errormsg();
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == OK && value == "tmpvalue1");
@@ -529,7 +529,7 @@ TEST_F(TreeTest, RemoveExistingAfterRecoveryTest) {
     ASSERT_TRUE(kv->Remove("tmpkey1") == OK);
     Restart();
     ASSERT_TRUE(kv->Remove("tmpkey1") == NOT_FOUND);
-    string value;
+    std::string value;
     ASSERT_TRUE(kv->Get("tmpkey1", &value) == NOT_FOUND);
     ASSERT_TRUE(kv->Get("tmpkey2", &value) == OK && value == "tmpvalue2");
 }
@@ -553,14 +553,14 @@ const int SINGLE_INNER_LIMIT = LEAF_KEYS * (INNER_KEYS - 1);
 
 TEST_F(TreeTest, SingleInnerNodeAscendingTest) {
     for (int i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
-        string value;
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     for (int i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     ASSERT_TRUE(kv->Count() == SINGLE_INNER_LIMIT);
@@ -568,14 +568,14 @@ TEST_F(TreeTest, SingleInnerNodeAscendingTest) {
 
 TEST_F(TreeTest, SingleInnerNodeAscendingTest2) {
     for (int i = 0; i < SINGLE_INNER_LIMIT; i++) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
-        string value;
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     for (int i = 0; i < SINGLE_INNER_LIMIT; i++) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     ASSERT_TRUE(kv->Count() == SINGLE_INNER_LIMIT);
@@ -583,14 +583,14 @@ TEST_F(TreeTest, SingleInnerNodeAscendingTest2) {
 
 TEST_F(TreeTest, SingleInnerNodeDescendingTest) {
     for (int i = (10000 + SINGLE_INNER_LIMIT); i > 10000; i--) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
-        string value;
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     for (int i = (10000 + SINGLE_INNER_LIMIT); i > 10000; i--) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     ASSERT_TRUE(kv->Count() == SINGLE_INNER_LIMIT);
@@ -598,14 +598,14 @@ TEST_F(TreeTest, SingleInnerNodeDescendingTest) {
 
 TEST_F(TreeTest, SingleInnerNodeDescendingTest2) {
     for (int i = SINGLE_INNER_LIMIT; i > 0; i--) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
-        string value;
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     for (int i = SINGLE_INNER_LIMIT; i > 0; i--) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     ASSERT_TRUE(kv->Count() == SINGLE_INNER_LIMIT);
@@ -617,13 +617,13 @@ TEST_F(TreeTest, SingleInnerNodeDescendingTest2) {
 
 TEST_F(TreeTest, SingleInnerNodeAscendingAfterRecoveryTest) {
     for (int i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
     }
     Restart();
     for (int i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     ASSERT_TRUE(kv->Count() == SINGLE_INNER_LIMIT);
@@ -631,13 +631,13 @@ TEST_F(TreeTest, SingleInnerNodeAscendingAfterRecoveryTest) {
 
 TEST_F(TreeTest, SingleInnerNodeAscendingAfterRecoveryTest2) {
     for (int i = 0; i < SINGLE_INNER_LIMIT; i++) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
     }
     Restart();
     for (int i = 0; i < SINGLE_INNER_LIMIT; i++) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     ASSERT_TRUE(kv->Count() == SINGLE_INNER_LIMIT);
@@ -645,13 +645,13 @@ TEST_F(TreeTest, SingleInnerNodeAscendingAfterRecoveryTest2) {
 
 TEST_F(TreeTest, SingleInnerNodeDescendingAfterRecoveryTest) {
     for (int i = (10000 + SINGLE_INNER_LIMIT); i > 10000; i--) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
     }
     Restart();
     for (int i = (10000 + SINGLE_INNER_LIMIT); i > 10000; i--) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     ASSERT_TRUE(kv->Count() == SINGLE_INNER_LIMIT);
@@ -659,13 +659,13 @@ TEST_F(TreeTest, SingleInnerNodeDescendingAfterRecoveryTest) {
 
 TEST_F(TreeTest, SingleInnerNodeDescendingAfterRecoveryTest2) {
     for (int i = SINGLE_INNER_LIMIT; i > 0; i--) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, istr) == OK) << pmemobj_errormsg();
     }
     Restart();
     for (int i = SINGLE_INNER_LIMIT; i > 0; i--) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == istr);
     }
     ASSERT_TRUE(kv->Count() == SINGLE_INNER_LIMIT);
@@ -679,14 +679,14 @@ const int LARGE_LIMIT = 4000000;
 
 TEST_F(TreeTest, LargeAscendingTest) {
     for (int i = 1; i <= LARGE_LIMIT; i++) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
-        string value;
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
     }
     for (int i = 1; i <= LARGE_LIMIT; i++) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
     }
     ASSERT_TRUE(kv->Count() == LARGE_LIMIT);
@@ -694,14 +694,14 @@ TEST_F(TreeTest, LargeAscendingTest) {
 
 TEST_F(TreeTest, LargeDescendingTest) {
     for (int i = LARGE_LIMIT; i >= 1; i--) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, ("ABC" + istr)) == OK) << pmemobj_errormsg();
-        string value;
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
     for (int i = LARGE_LIMIT; i >= 1; i--) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
     ASSERT_TRUE(kv->Count() == LARGE_LIMIT);
@@ -713,13 +713,13 @@ TEST_F(TreeTest, LargeDescendingTest) {
 
 TEST_F(TreeTest, LargeAscendingAfterRecoveryTest) {
     for (int i = 1; i <= LARGE_LIMIT; i++) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
     }
     Restart();
     for (int i = 1; i <= LARGE_LIMIT; i++) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
     }
     ASSERT_TRUE(kv->Count() == LARGE_LIMIT);
@@ -727,13 +727,13 @@ TEST_F(TreeTest, LargeAscendingAfterRecoveryTest) {
 
 TEST_F(TreeTest, LargeDescendingAfterRecoveryTest) {
     for (int i = LARGE_LIMIT; i >= 1; i--) {
-        string istr = to_string(i);
+        std::string istr = std::to_string(i);
         ASSERT_TRUE(kv->Put(istr, ("ABC" + istr)) == OK) << pmemobj_errormsg();
     }
     Restart();
     for (int i = LARGE_LIMIT; i >= 1; i--) {
-        string istr = to_string(i);
-        string value;
+        std::string istr = std::to_string(i);
+        std::string value;
         ASSERT_TRUE(kv->Get(istr, &value) == OK && value == ("ABC" + istr));
     }
     ASSERT_TRUE(kv->Count() == LARGE_LIMIT);
@@ -761,23 +761,23 @@ public:
 
     void Validate() {
         for (int i = 1; i <= LARGE_LIMIT; i++) {
-            string istr = to_string(i);
-            string value;
+            std::string istr = std::to_string(i);
+            std::string value;
             ASSERT_TRUE(kv->Get(istr, &value) == OK && value == (istr + "!"));
         }
 
         Restart();
 
         ASSERT_TRUE(kv->Put("1", "!1") == OK);
-        string value;
+        std::string value;
         ASSERT_TRUE(kv->Get("1", &value) == OK && value == ("!1"));
         ASSERT_TRUE(kv->Put("1", "1!") == OK);
-        string value2;
+        std::string value2;
         ASSERT_TRUE(kv->Get("1", &value2) == OK && value2 == ("1!"));
 
         for (int i = 1; i <= LARGE_LIMIT; i++) {
-            string istr = to_string(i);
-            string value3;
+            std::string istr = std::to_string(i);
+            std::string value3;
             ASSERT_TRUE(kv->Get(istr, &value3) == OK && value3 == (istr + "!"));
         }
     }
@@ -790,7 +790,7 @@ private:
             std::cout << "!!! creating cached copy at " << PATH_CACHED << "\n";
             Tree *kvt = new Tree(nullptr, PATH, SIZE);
             for (int i = 1; i <= LARGE_LIMIT; i++) {
-                string istr = to_string(i);
+                std::string istr = std::to_string(i);
                 ASSERT_TRUE(kvt->Put(istr, (istr + "!")) == OK) << pmemobj_errormsg();
             }
             delete kvt;
@@ -800,7 +800,7 @@ private:
     }
 };
 
-const string LONGSTR = "123456789A123456789A123456789A123456789A123456789A123456789A123456789A";
+const std::string LONGSTR = "123456789A123456789A123456789A123456789A123456789A123456789A123456789A";
 
 TEST_F(TreeFullTest, OutOfSpace1Test) {
     tx_alloc_should_fail = true;
@@ -847,7 +847,7 @@ TEST_F(TreeFullTest, OutOfSpace3bTest) {
 
 TEST_F(TreeFullTest, OutOfSpace4aTest) {
     tx_alloc_should_fail = true;
-    ASSERT_TRUE(kv->Put(to_string(LARGE_LIMIT + 1), "1") == FAILED);
+    ASSERT_TRUE(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == FAILED);
     tx_alloc_should_fail = false;
     Validate();
 }
@@ -855,7 +855,7 @@ TEST_F(TreeFullTest, OutOfSpace4aTest) {
 TEST_F(TreeFullTest, OutOfSpace4bTest) {
     tx_alloc_should_fail = true;
     for (int i = 0; i <= 99999; i++) {
-        ASSERT_TRUE(kv->Put(to_string(LARGE_LIMIT + 1), "1") == FAILED);
+        ASSERT_TRUE(kv->Put(std::to_string(LARGE_LIMIT + 1), "1") == FAILED);
     }
     tx_alloc_should_fail = false;
     ASSERT_TRUE(kv->Remove("98765") == OK);

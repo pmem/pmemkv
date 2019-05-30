@@ -34,10 +34,12 @@
 
 #include <ctime>
 #include <iostream>
+#include <list>
 #include <lib_acl.hpp>
 #include <libmemcached/memcached.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/writer.h>
+#include <rapidjson/document.h>
 #include <rapidjson/ostreamwrapper.h>
 #include <unistd.h>
 #include "caching.h"
@@ -49,7 +51,7 @@
 namespace pmemkv {
 namespace caching {
 
-CachingEngine::CachingEngine(void* context, const string& config) : engine_context(context) {
+CachingEngine::CachingEngine(void* context, const std::string& config) : engine_context(context) {
     if (!readConfig(config) || !(basePtr = KVEngine::Start(subEngine, subEngineConfig)))
         throw "CachingEngine Exception"; // todo propagate start exceptions properly
     LOG("Started ok");
@@ -61,7 +63,7 @@ CachingEngine::~CachingEngine() {
     LOG("Stopped ok");
 }
 
-bool CachingEngine::readConfig(const string& config) {
+bool CachingEngine::readConfig(const std::string& config) {
     rapidjson::Document d;
     if (d.Parse(config.c_str()).HasParseError()) return false; // todo throw specific exceptions
     if (!d.HasMember("subengine") || !d["subengine"].IsString()) return false;
@@ -118,19 +120,19 @@ int64_t CachingEngine::Count() {
 struct EachCacheCallbackContext {
     void* context;
     KVEachCallback* cBack;
-    std::list<string>* expiredKeys;
+    std::list<std::string>* expiredKeys;
 };
 
 void CachingEngine::Each(void* context, KVEachCallback* callback) {
     LOG("Each");
-    std::list<string> removingKeys;
+    std::list<std::string> removingKeys;
     EachCacheCallbackContext cxt = {context, callback, &removingKeys};
 
     auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
         const auto c = ((EachCacheCallbackContext*) context);
-        string localValue = v;
-        string timeStamp = localValue.substr(0, 14);
-        string value = localValue.substr(14);
+        std::string localValue = v;
+        std::string timeStamp = localValue.substr(0, 14);
+        std::string value = localValue.substr(14);
         // TTL from config is ZERO or if the key is valid
         if (!ttl || valueFieldConversion(timeStamp)) {
             (*c->cBack)(c->context, kb, k, value.length(), value.c_str());
@@ -146,32 +148,32 @@ void CachingEngine::Each(void* context, KVEachCallback* callback) {
     }
 }
 
-KVStatus CachingEngine::Exists(const string& key) {
+KVStatus CachingEngine::Exists(const std::string& key) {
     LOG("Exists for key=" << key);
     KVStatus status = NOT_FOUND;
-    string value;
+    std::string value;
     if (getKey(key, value, true))
         status = OK;
     return status;
     // todo fold into single return statement
 }
 
-void CachingEngine::Get(void* context, const string& key, KVGetCallback* callback) {
+void CachingEngine::Get(void* context, const std::string& key, KVGetCallback* callback) {
     LOG("Get key=" << key);
-    string value;
+    std::string value;
     if (getKey(key, value, false)) (*callback)(context, (int32_t) value.size(), value.c_str());
 }
 
-bool CachingEngine::getKey(const string& key, string& valueField, bool api_flag) {
+bool CachingEngine::getKey(const std::string& key, std::string& valueField, bool api_flag) {
     auto cb = [](void* context, int32_t vb, const char* v) {
-        const auto c = ((string*) context);
+        const auto c = ((std::string*) context);
         c->append(v, vb);
     };
-    string value;
+    std::string value;
     basePtr->Get(&value, key, cb);
     bool timeValidFlag;
     if (!value.empty()) {
-        string timeStamp = value.substr(0, 14);
+        std::string timeStamp = value.substr(0, 14);
         valueField = value.substr(14);
         timeValidFlag = valueFieldConversion(timeStamp);
     }
@@ -188,7 +190,7 @@ bool CachingEngine::getKey(const string& key, string& valueField, bool api_flag)
     return true;
 }
 
-bool CachingEngine::getFromRemoteMemcached(const string& key, string& value) {
+bool CachingEngine::getFromRemoteMemcached(const std::string& key, std::string& value) {
     LOG("getFromRemoteMemcached");
     bool retValue = false;
     memcached_server_st* servers = NULL;
@@ -217,10 +219,10 @@ bool CachingEngine::getFromRemoteMemcached(const string& key, string& value) {
     return retValue;
 }
 
-bool CachingEngine::getFromRemoteRedis(const string& key, string& value) {
+bool CachingEngine::getFromRemoteRedis(const std::string& key, std::string& value) {
     LOG("getFromRemoteRedis");
     bool retValue = false;
-    string hostport = host + ":" + to_string(port);
+    std::string hostport = host + ":" + std::to_string(port);
     acl::string addr(hostport.c_str()), passwd;
     acl::acl_cpp_init();  // todo reuse connection
     acl::redis_client client(addr.c_str(), 0, 0);
@@ -243,15 +245,15 @@ bool CachingEngine::getFromRemoteRedis(const string& key, string& value) {
     return retValue;
 }
 
-KVStatus CachingEngine::Put(const string& key, const string& value) {
-    LOG("Put key=" << key << ", value.size=" << to_string(value.size()));
+KVStatus CachingEngine::Put(const std::string& key, const std::string& value) {
+    LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
     const time_t curSysTime = time(0);
-    const string curTime = getTimeStamp(curSysTime);
-    const string ValueWithCurTime = curTime + value;
+    const std::string curTime = getTimeStamp(curSysTime);
+    const std::string ValueWithCurTime = curTime + value;
     return basePtr->Put(key, ValueWithCurTime);
 }
 
-KVStatus CachingEngine::Remove(const string& key) {
+KVStatus CachingEngine::Remove(const std::string& key) {
     LOG("Remove key=" << key);
     return basePtr->Remove(key);
 }
@@ -263,13 +265,13 @@ time_t convertTimeToEpoch(const char* theTime, const char* format) {
     return mktime(&tmTime);
 }
 
-string getTimeStamp(const time_t epochTime, const char* format) {
+std::string getTimeStamp(const time_t epochTime, const char* format) {
     char timestamp[64] = {0};
     strftime(timestamp, sizeof(timestamp), format, localtime(&epochTime));
     return timestamp;
 }
 
-bool valueFieldConversion(string dateValue) {
+bool valueFieldConversion(std::string dateValue) {
     bool timeValidFlag = false;
     if (ttl > ZERO) {
         const time_t now = convertTimeToEpoch(dateValue.c_str());
@@ -281,7 +283,7 @@ bool valueFieldConversion(string dateValue) {
         std::strftime(ttlTimeStr, 80, "%Y%m%d%H%M%S", &then_tm);
 
         const time_t curTime = time(0);
-        string curTimeStr = getTimeStamp(curTime);
+        std::string curTimeStr = getTimeStamp(curTime);
 
         if (ttlTimeStr >= curTimeStr)
             timeValidFlag = true;

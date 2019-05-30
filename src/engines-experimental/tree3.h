@@ -58,7 +58,7 @@ using pmem::obj::pool;
 namespace pmemkv {
 namespace tree3 {
 
-const string ENGINE = "tree3";                             // engine identifier
+const std::string ENGINE = "tree3";                        // engine identifier
 
 #define INNER_KEYS 4                                       // maximum keys for inner nodes
 #define INNER_KEYS_MIDPOINT (INNER_KEYS / 2)               // halfway point within the node
@@ -79,7 +79,7 @@ class KVSlot {
     const uint32_t valsize() const { return get_vs(); }
     const uint32_t valsize_direct(char *p) const { return *((uint32_t *)(p + sizeof(uint32_t))); }
     void clear();
-    void set(const uint8_t hash, const string& key, const string& value);
+    void set(const uint8_t hash, const std::string& key, const std::string& value);
     void set_ph(uint8_t v) {*((uint8_t *)((char *)(kv.get()) + sizeof(uint32_t) + sizeof(uint32_t))) = v;}
     void set_ph_direct(char *p, uint8_t v) {*((uint8_t *)(p + sizeof(uint32_t) + sizeof(uint32_t))) = v;}
     void set_ks(uint32_t v) {*((uint32_t *)(kv.get())) = v;}
@@ -116,45 +116,45 @@ struct KVNode {                                            // volatile nodes of 
 
 struct KVInnerNode final : KVNode {                        // volatile inner nodes of the tree
     uint8_t keycount;                                      // count of keys in this node
-    string keys[INNER_KEYS + 1];                           // child keys plus one overflow slot
+    std::string keys[INNER_KEYS + 1];                      // child keys plus one overflow slot
     unique_ptr<KVNode> children[INNER_KEYS + 2];           // child nodes plus one overflow slot
     void assert_invariants();
 };
 
 struct KVLeafNode final : KVNode {                         // volatile leaf nodes of the tree
     uint8_t hashes[LEAF_KEYS];                             // Pearson hashes of keys
-    string keys[LEAF_KEYS];                                // keys stored in this leaf
+    std::string keys[LEAF_KEYS];                           // keys stored in this leaf
     persistent_ptr<KVLeaf> leaf;                           // pointer to persistent leaf
 };
 
 struct KVRecoveredLeaf {                                   // temporary wrapper used for recovery
     unique_ptr<KVLeafNode> leafnode;                       // leaf node being recovered
-    string max_key;                                        // highest sorting key present
+    std::string max_key;                                   // highest sorting key present
 };
 
 class Tree : public KVEngine {                             // hybrid B+ tree engine
   public:
-    Tree(void* context, const string& path, size_t size);
+    Tree(void* context, const std::string& path, size_t size);
     ~Tree();
 
-    string Engine() final { return ENGINE; }
+    std::string Engine() final { return ENGINE; }
     void* EngineContext() { return engine_context; }
     void All(void* context, KVAllCallback* callback) final;
-    void AllAbove(void* context, const string& key, KVAllCallback* callback) final {};
-    void AllBelow(void* context, const string& key, KVAllCallback* callback) final {};
-    void AllBetween(void* context, const string& key1, const string& key2, KVAllCallback* callback) final {};
+    void AllAbove(void* context, const std::string& key, KVAllCallback* callback) final {};
+    void AllBelow(void* context, const std::string& key, KVAllCallback* callback) final {};
+    void AllBetween(void* context, const std::string& key1, const std::string& key2, KVAllCallback* callback) final {};
     int64_t Count() final;
-    int64_t CountAbove(const string& key) final { return 0; };
-    int64_t CountBelow(const string& key) final { return 0; };
-    int64_t CountBetween(const string& key1, const string& key2) final { return 0; };
+    int64_t CountAbove(const std::string& key) final { return 0; };
+    int64_t CountBelow(const std::string& key) final { return 0; };
+    int64_t CountBetween(const std::string& key1, const std::string& key2) final { return 0; };
     void Each(void* context, KVEachCallback* callback) final;
-    void EachAbove(void* context, const string& key, KVEachCallback* callback) final {};
-    void EachBelow(void* context, const string& key, KVEachCallback* callback) final {};
-    void EachBetween(void* context, const string& key1, const string& key2, KVEachCallback* callback) final {};
-    KVStatus Exists(const string& key) final;
-    void Get(void* context, const string& key, KVGetCallback* callback) final;
-    KVStatus Put(const string& key, const string& value) final;
-    KVStatus Remove(const string& key) final;
+    void EachAbove(void* context, const std::string& key, KVEachCallback* callback) final {};
+    void EachBelow(void* context, const std::string& key, KVEachCallback* callback) final {};
+    void EachBetween(void* context, const std::string& key1, const std::string& key2, KVEachCallback* callback) final {};
+    KVStatus Exists(const std::string& key) final;
+    void Get(void* context, const std::string& key, KVGetCallback* callback) final;
+    KVStatus Put(const std::string& key, const std::string& value) final;
+    KVStatus Remove(const std::string& key) final;
 
     using KVEngine::All;
     using KVEngine::AllAbove;
@@ -166,12 +166,12 @@ class Tree : public KVEngine {                             // hybrid B+ tree eng
     using KVEngine::EachBetween;
     using KVEngine::Get;
   protected:
-    KVLeafNode* LeafSearch(const string& key);
-    void LeafFillEmptySlot(KVLeafNode* leafnode, uint8_t hash, const string& key, const string& value);
-    bool LeafFillSlotForKey(KVLeafNode* leafnode, uint8_t hash, const string& key, const string& value);
-    void LeafFillSpecificSlot(KVLeafNode* leafnode, uint8_t hash, const string& key, const string& value, int slot);
-    void LeafSplitFull(KVLeafNode* leafnode, uint8_t hash, const string& key, const string& value);
-    void InnerUpdateAfterSplit(KVNode* node, unique_ptr<KVNode> newnode, string* split_key);
+    KVLeafNode* LeafSearch(const std::string& key);
+    void LeafFillEmptySlot(KVLeafNode* leafnode, uint8_t hash, const std::string& key, const std::string& value);
+    bool LeafFillSlotForKey(KVLeafNode* leafnode, uint8_t hash, const std::string& key, const std::string& value);
+    void LeafFillSpecificSlot(KVLeafNode* leafnode, uint8_t hash, const std::string& key, const std::string& value, int slot);
+    void LeafSplitFull(KVLeafNode* leafnode, uint8_t hash, const std::string& key, const std::string& value);
+    void InnerUpdateAfterSplit(KVNode* node, unique_ptr<KVNode> newnode, std::string* split_key);
     uint8_t PearsonHash(const char* data, size_t size);
     void Recover();
   private:

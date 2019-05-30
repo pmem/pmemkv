@@ -54,6 +54,7 @@ Language Bindings
 #include <cassert>
 #include <iostream>
 #include <libpmemkv.h>
+#include <string>
 
 #define LOG(msg) std::cout << msg << "\n"
 
@@ -68,14 +69,14 @@ int main() {
     assert(s == OK && kv->Count() == 1);
 
     LOG("Reading key back");
-    string value;
+    std::string value;
     s = kv->Get("key1", &value);
     assert(s == OK && value == "value1");
 
     LOG("Iterating existing keys");
     kv->Put("key2", "value2");
     kv->Put("key3", "value3");
-    kv->All([](const string& k) {
+    kv->All([](const std::string& k) {
         LOG("  visited: " << k);
     });
 
