@@ -36,7 +36,8 @@
 #include <libpmemobj++/experimental/string.hpp>
 #include <libpmemobj++/p.hpp>
 
-namespace pmemkv {
+namespace pmem {
+namespace kv {
 class polymorphic_string {
 public:
     using pmem_string = pmem::obj::experimental::string;
@@ -99,7 +100,7 @@ public:
         return is_pmem.get_ro() ? pstr[n] : str[n];
     }
 
-    const char* c_str() const {
+    const char *c_str() const {
         return is_pmem.get_ro() ? pstr.c_str() : str.c_str();
     }
 
@@ -156,4 +157,5 @@ bool operator!=(const polymorphic_string& lhs, const polymorphic_string& rhs) {
 }
 */
 
-} // namespace pmemkv
+} /* namespace kv */
+} /* namespace pmem */
