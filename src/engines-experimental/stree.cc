@@ -45,10 +45,10 @@ using pmem::obj::make_persistent_atomic;
 using pmem::obj::transaction;
 using pmem::detail::conditional_add_to_tx;
 
-namespace pmemkv {
-namespace stree {
+namespace pmem {
+namespace kv {
 
-STree::STree(void* context, const std::string& path, const size_t size) : engine_context(context) {
+stree::stree(void *context, const std::string& path, const size_t size) : engine_context(context) {
     if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
         LOG("Creating filesystem pool, path=" << path << ", size=" << std::to_string(size));
         pmpool = pool<RootData>::create(path.c_str(), LAYOUT, size, S_IRWXU);
@@ -60,34 +60,34 @@ STree::STree(void* context, const std::string& path, const size_t size) : engine
     LOG("Started ok");
 }
 
-STree::~STree() {
+stree::~stree() {
     LOG("Stopping");
     pmpool.close();
     LOG("Stopped ok");
 }
 
-void STree::All(void* context, AllCallback* callback) {
+void stree::all(void *context, all_callback* callback) {
     LOG("All");
     for (auto& iterator : *my_btree) {
-        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str());
+        (*callback)(context, iterator.first.size(), iterator.first.c_str());
     }
 }
 
-int64_t STree::Count() {
-    int64_t result = 0;
+std::size_t stree::count() {
+    std::size_t result = 0;
     for (auto& iterator : *my_btree) result++;
     return result;
 }
 
-void STree::Each(void* context, EachCallback* callback) {
+void stree::each(void *context, each_callback* callback) {
     LOG("Each");
     for (auto& iterator : *my_btree) {
-        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
-                    (int32_t) iterator.second.size(), iterator.second.c_str());
+        (*callback)(context, iterator.first.size(), iterator.first.c_str(),
+                    iterator.second.size(), iterator.second.c_str());
     }
 }
 
-status STree::Exists(const std::string& key) {
+status stree::exists(const std::string& key) {
     LOG("Exists for key=" << key);
     btree_type::iterator it = my_btree->find(pstring<20>(key));
     if (it == my_btree->end()) {
@@ -97,17 +97,17 @@ status STree::Exists(const std::string& key) {
     return OK;
 }
 
-void STree::Get(void* context, const std::string& key, GetCallback* callback) {
+void stree::get(void *context, const std::string& key, get_callback* callback) {
     LOG("Get using callback for key=" << key);
     btree_type::iterator it = my_btree->find(pstring<20>(key));
     if (it == my_btree->end()) {
         LOG("  key not found");
         return;
     }
-    (*callback)(context, (int32_t) it->second.size(), it->second.c_str());
+    (*callback)(context, it->second.size(), it->second.c_str());
 }
 
-status STree::Put(const std::string& key, const std::string& value) {
+status stree::put(const std::string& key, const std::string& value) {
     LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
     try {
         auto result = my_btree->insert(std::make_pair(pstring<MAX_KEY_SIZE>(key), pstring<MAX_VALUE_SIZE>(value)));
@@ -131,7 +131,7 @@ status STree::Put(const std::string& key, const std::string& value) {
     }
 }
 
-status STree::Remove(const std::string& key) {
+status stree::remove(const std::string& key) {
     LOG("Remove key=" << key);
     try {
         auto result = my_btree->erase(key);
@@ -148,7 +148,7 @@ status STree::Remove(const std::string& key) {
     }
 }
 
-void STree::Recover() {
+void stree::Recover() {
     auto root_data = pmpool.root();
     if (root_data->btree_ptr) {
         my_btree = root_data->btree_ptr.get();

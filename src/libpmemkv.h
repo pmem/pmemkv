@@ -44,43 +44,43 @@ typedef enum {
     FAILED = -1,
     NOT_FOUND = 0,
     OK = 1,
-} KVStatus;
+} pmemkv_status;
 
 typedef struct pmemkv_db pmemkv_db;
 
-typedef void KVAllCallback(void* context, int keybytes, const char* key);
-typedef void KVEachCallback(void* context, int keybytes, const char* key, int valuebytes, const char* value);
-typedef void KVGetCallback(void* context, int valuebytes, const char* value);
-typedef void KVStartFailureCallback(void* context, const char* engine, const char* config, const char* msg);
+typedef void pmemkv_all_callback(void *context, size_t keybytes, const char *key);
+typedef void pmemkv_each_callback(void *context, size_t keybytes, const char *key, size_t valuebytes, const char *value);
+typedef void pmemkv_get_callback(void *context, size_t valuebytes, const char *value);
+typedef void pmemkv_start_failure_callback(void *context, const char *engine, const char *config, const char *msg);
 
-pmemkv_db* kvengine_start(void* context, const char* engine, const char* config, KVStartFailureCallback* onfail);
-void kvengine_stop(pmemkv_db* kv);
+pmemkv_db* pmemkv_new(void *context, const char *engine, const char *config, pmemkv_start_failure_callback* onfail);
+void pmemkv_delete(pmemkv_db* kv);
 
-void kvengine_all(pmemkv_db* kv, void* context, KVAllCallback* c);
-void kvengine_all_above(pmemkv_db* kv, void* context, int32_t kb, const char* k, KVAllCallback* c);
-void kvengine_all_below(pmemkv_db* kv, void* context, int32_t kb, const char* k, KVAllCallback* c);
-void kvengine_all_between(pmemkv_db* kv, void* context, int32_t kb1, const char* k1,
-                          int32_t kb2, const char* k2, KVAllCallback* c);
+void pmemkv_all(pmemkv_db* kv, void *context, pmemkv_all_callback* c);
+void pmemkv_all_above(pmemkv_db* kv, void *context, size_t kb, const char *k, pmemkv_all_callback* c);
+void pmemkv_all_below(pmemkv_db* kv, void *context, size_t kb, const char *k, pmemkv_all_callback* c);
+void pmemkv_all_between(pmemkv_db* kv, void *context, size_t kb1, const char *k1,
+                          size_t kb2, const char *k2, pmemkv_all_callback* c);
 
-int64_t kvengine_count(pmemkv_db* kv);
-int64_t kvengine_count_above(pmemkv_db* kv, int32_t kb, const char* k);
-int64_t kvengine_count_below(pmemkv_db* kv, int32_t kb, const char* k);
-int64_t kvengine_count_between(pmemkv_db* kv, int32_t kb1, const char* k1, int32_t kb2, const char* k2);
+size_t pmemkv_count(pmemkv_db* kv);
+size_t pmemkv_count_above(pmemkv_db* kv, size_t kb, const char *k);
+size_t pmemkv_count_below(pmemkv_db* kv, size_t kb, const char *k);
+size_t pmemkv_count_between(pmemkv_db* kv, size_t kb1, const char *k1, size_t kb2, const char *k2);
 
-void kvengine_each(pmemkv_db* kv, void* context, KVEachCallback* c);
-void kvengine_each_above(pmemkv_db* kv, void* context, int32_t kb, const char* k, KVEachCallback* c);
-void kvengine_each_below(pmemkv_db* kv, void* context, int32_t kb, const char* k, KVEachCallback* c);
-void kvengine_each_between(pmemkv_db* kv, void* context, int32_t kb1, const char* k1,
-                           int32_t kb2, const char* k2, KVEachCallback* c);
+void pmemkv_each(pmemkv_db* kv, void *context, pmemkv_each_callback* c);
+void pmemkv_each_above(pmemkv_db* kv, void *context, size_t kb, const char *k, pmemkv_each_callback* c);
+void pmemkv_each_below(pmemkv_db* kv, void *context, size_t kb, const char *k, pmemkv_each_callback* c);
+void pmemkv_each_between(pmemkv_db* kv, void *context, size_t kb1, const char *k1,
+                           size_t kb2, const char *k2, pmemkv_each_callback* c);
 
-int8_t kvengine_exists(pmemkv_db* kv, int32_t kb, const char* k);
-void kvengine_get(pmemkv_db* kv, void* context, int32_t kb, const char* k, KVGetCallback* c);
-int8_t kvengine_get_copy(pmemkv_db* kv, int32_t kb, const char* k, int32_t maxvaluebytes, char* value);
-int8_t kvengine_put(pmemkv_db* kv, int32_t kb, const char* k, int32_t vb, const char* v);
-int8_t kvengine_remove(pmemkv_db* kv, int32_t kb, const char* k);
+pmemkv_status pmemkv_exists(pmemkv_db* kv, size_t kb, const char *k);
+void pmemkv_get(pmemkv_db* kv, void *context, size_t kb, const char *k, pmemkv_get_callback* c);
+pmemkv_status pmemkv_get_copy(pmemkv_db* kv, size_t kb, const char *k, size_t maxvaluebytes, char* value);
+pmemkv_status pmemkv_put(pmemkv_db* kv, size_t kb, const char *k, size_t vb, const char *v);
+pmemkv_status pmemkv_remove(pmemkv_db* kv, size_t kb, const char *k);
 
 // XXX: remove when config structure is merged
-void *kvengine_engine_context(pmemkv_db* kv);
+void *pmemkv_engine_context(pmemkv_db* kv);
 
 #ifdef __cplusplus
 } /* end extern "C" */

@@ -41,10 +41,10 @@
 #define DO_LOG 0
 #define LOG(msg) if (DO_LOG) std::cout << "[tree3] " << msg << "\n"
 
-namespace pmemkv {
-namespace tree3 {
+namespace pmem {
+namespace kv {
 
-Tree::Tree(void* context, const std::string& path, const size_t size) : engine_context(context) {
+tree::tree(void *context, const std::string& path, const size_t size) : engine_context(context) {
     if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
         LOG("Creating filesystem pool, path=" << path << ", size=" << std::to_string(size));
         pmpool = pool<KVRoot>::create(path.c_str(), LAYOUT, size, S_IRWXU);
@@ -56,7 +56,7 @@ Tree::Tree(void* context, const std::string& path, const size_t size) : engine_c
     LOG("Started ok");
 }
 
-Tree::~Tree() {
+tree::~tree() {
     LOG("Stopping");
     pmpool.close();
     LOG("Stopped ok");
@@ -66,7 +66,7 @@ Tree::~Tree() {
 // KEY/VALUE METHODS
 // ===============================================================================================
 
-void Tree::All(void* context, AllCallback* callback) {
+void tree::all(void *context, all_callback* callback) {
     LOG("All");
     auto leaf = pmpool.root()->head;
     while (leaf) {
@@ -79,8 +79,8 @@ void Tree::All(void* context, AllCallback* callback) {
     }
 }
 
-int64_t Tree::Count() {
-    int64_t result = 0;
+std::size_t tree::count() {
+    std::size_t result = 0;
     auto leaf = pmpool.root()->head;
     while (leaf) {
         for (int slot = LEAF_KEYS; slot--;) {
@@ -93,7 +93,7 @@ int64_t Tree::Count() {
     return result;
 }
 
-void Tree::Each(void* context, EachCallback* callback) {
+void tree::each(void *context, each_callback* callback) {
     LOG("Each");
     auto leaf = pmpool.root()->head;
     while (leaf) {
@@ -106,7 +106,7 @@ void Tree::Each(void* context, EachCallback* callback) {
     }
 }
 
-status Tree::Exists(const std::string& key) {
+status tree::exists(const std::string& key) {
     LOG("Exists for key=" << key);
     auto leafnode = LeafSearch(key);
     if (leafnode) {
@@ -122,7 +122,7 @@ status Tree::Exists(const std::string& key) {
     return NOT_FOUND;
 }
 
-void Tree::Get(void* context, const std::string& key, GetCallback* callback) {
+void tree::get(void *context, const std::string& key, get_callback* callback) {
     LOG("Get using callback for key=" << key);
     auto leafnode = LeafSearch(key);
     if (leafnode) {
@@ -142,7 +142,7 @@ void Tree::Get(void* context, const std::string& key, GetCallback* callback) {
     LOG("   could not find key");
 }
 
-status Tree::Put(const std::string& key, const std::string& value) {
+status tree::put(const std::string& key, const std::string& value) {
     LOG("Put key=" << key.c_str() << ", value.size=" << std::to_string(value.size()));
     try {
         const auto hash = PearsonHash(key.c_str(), key.size());
@@ -184,7 +184,7 @@ status Tree::Put(const std::string& key, const std::string& value) {
     }
 }
 
-status Tree::Remove(const std::string& key) {
+status tree::remove(const std::string& key) {
     LOG("Remove key=" << key.c_str());
     auto leafnode = LeafSearch(key);
     if (!leafnode) {
@@ -224,7 +224,7 @@ status Tree::Remove(const std::string& key) {
 // PROTECTED LEAF METHODS
 // ===============================================================================================
 
-KVLeafNode* Tree::LeafSearch(const std::string& key) {
+KVLeafNode* tree::LeafSearch(const std::string& key) {
     KVNode* node = tree_top.get();
     if (node == nullptr) return nullptr;
     bool matched;
@@ -247,7 +247,7 @@ KVLeafNode* Tree::LeafSearch(const std::string& key) {
     return (KVLeafNode*) node;
 }
 
-void Tree::LeafFillEmptySlot(KVLeafNode* leafnode, const uint8_t hash,
+void tree::LeafFillEmptySlot(KVLeafNode* leafnode, const uint8_t hash,
                              const std::string& key, const std::string& value) {
     for (int slot = LEAF_KEYS; slot--;) {
         if (leafnode->hashes[slot] == 0) {
@@ -257,7 +257,7 @@ void Tree::LeafFillEmptySlot(KVLeafNode* leafnode, const uint8_t hash,
     }
 }
 
-bool Tree::LeafFillSlotForKey(KVLeafNode* leafnode, const uint8_t hash,
+bool tree::LeafFillSlotForKey(KVLeafNode* leafnode, const uint8_t hash,
                               const std::string& key, const std::string& value) {
     // scan for empty/matching slots
     int last_empty_slot = -1;
@@ -285,14 +285,14 @@ bool Tree::LeafFillSlotForKey(KVLeafNode* leafnode, const uint8_t hash,
     return slot >= 0;
 }
 
-void Tree::LeafFillSpecificSlot(KVLeafNode* leafnode, const uint8_t hash,
+void tree::LeafFillSpecificSlot(KVLeafNode* leafnode, const uint8_t hash,
                                 const std::string& key, const std::string& value, const int slot) {
     leafnode->leaf->slots[slot].get_rw().set(hash, key, value);
     leafnode->hashes[slot] = hash;
     leafnode->keys[slot] = key;
 }
 
-void Tree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
+void tree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
                          const std::string& key, const std::string& value) {
     std::string keys[LEAF_KEYS + 1];
     keys[LEAF_KEYS] = key;
@@ -338,7 +338,7 @@ void Tree::LeafSplitFull(KVLeafNode* leafnode, const uint8_t hash,
     InnerUpdateAfterSplit(leafnode, move(new_leafnode), &split_key);
 }
 
-void Tree::InnerUpdateAfterSplit(KVNode* node, unique_ptr<KVNode> new_node, std::string* split_key) {
+void tree::InnerUpdateAfterSplit(KVNode* node, unique_ptr<KVNode> new_node, std::string* split_key) {
     if (!node->parent) {
         assert(node == tree_top.get());
         LOG("   creating new top node for split_key=" << *split_key);
@@ -403,7 +403,7 @@ void Tree::InnerUpdateAfterSplit(KVNode* node, unique_ptr<KVNode> new_node, std:
 // PROTECTED LIFECYCLE METHODS
 // ===============================================================================================
 
-void Tree::Recover() {
+void tree::Recover() {
     LOG("Recovering");
 
     // traverse persistent leaves to build list of leaves to recover
@@ -422,7 +422,7 @@ void Tree::Recover() {
             if (kvslot.empty()) continue;
             leafnode->hashes[slot] = kvslot.hash();
             if (leafnode->hashes[slot] == 0) continue;
-            const char* key = kvslot.key();
+            const char *key = kvslot.key();
             if (empty_leaf) {
                 max_key = std::string(kvslot.key(), kvslot.get_ks());
                 empty_leaf = false;
@@ -496,7 +496,7 @@ const uint8_t PEARSON_LOOKUP_TABLE[256] = {
 };
 
 // Modified Pearson hashing algorithm from RFC 3074
-uint8_t Tree::PearsonHash(const char* data, const size_t size) {
+uint8_t tree::PearsonHash(const char *data, const size_t size) {
     auto hash = (uint8_t) size;
     for (size_t i = size; i > 0;) {
         hash = PEARSON_LOOKUP_TABLE[hash ^ data[--i]];

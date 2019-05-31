@@ -38,47 +38,47 @@
 #define DO_LOG 0
 #define LOG(msg) if (DO_LOG) std::cout << "[vcmap] " << msg << "\n"
 
-namespace pmemkv {
-namespace vcmap {
+namespace pmem {
+namespace kv {
 
-VCMap::VCMap(void* context, const std::string& path, size_t size) : engine_context(context),
+vcmap::vcmap(void *context, const std::string& path, size_t size) : engine_context(context),
              kv_allocator(path, size), ch_allocator(kv_allocator),
              pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator)) {
     LOG("Started ok");
 }
 
-VCMap::~VCMap() {
+vcmap::~vcmap() {
     LOG("Stopped ok");
 }
 
-void VCMap::All(void* context, AllCallback* callback) {
+void vcmap::all(void *context, all_callback* callback) {
     LOG("All");
     for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str());
+        (*callback)(context, iterator.first.size(), iterator.first.c_str());
     }
 }
 
-int64_t VCMap::Count() {
+std::size_t vcmap::count() {
     LOG("Count");
     return pmem_kv_container.size();
 }
 
-void VCMap::Each(void* context, EachCallback* callback) {
+void vcmap::each(void *context, each_callback* callback) {
     LOG("Each");
     for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
-                (int32_t) iterator.second.size(), iterator.second.c_str());
+        (*callback)(context, iterator.first.size(), iterator.first.c_str(),
+                iterator.second.size(), iterator.second.c_str());
     }
 }
 
-status VCMap::Exists(const std::string& key) {
+status vcmap::exists(const std::string& key) {
     LOG("Exists for key=" << key);
     map_t::const_accessor result;
     const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
     return (result_found ? OK : NOT_FOUND);
 }
 
-void VCMap::Get(void* context, const std::string& key, GetCallback* callback) {
+void vcmap::get(void *context, const std::string& key, get_callback* callback) {
     LOG("Get key=" << key);
     map_t::const_accessor result;
     const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
@@ -86,10 +86,10 @@ void VCMap::Get(void* context, const std::string& key, GetCallback* callback) {
         LOG("  key not found");
         return;
     }
-    (*callback)(context, (int32_t) result->second.size(), result->second.c_str());
+    (*callback)(context, result->second.size(), result->second.c_str());
 }
 
-status VCMap::Put(const std::string& key, const std::string& value) {
+status vcmap::put(const std::string& key, const std::string& value) {
     LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
     try {
         map_t::value_type kv_pair{pmem_string(key.c_str(), key.size(), ch_allocator),
@@ -113,7 +113,7 @@ status VCMap::Put(const std::string& key, const std::string& value) {
     }
 }
 
-status VCMap::Remove(const std::string& key) {
+status vcmap::remove(const std::string& key) {
     LOG("Remove key=" << key);
     try {
         size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
