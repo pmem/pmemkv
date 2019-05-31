@@ -46,16 +46,16 @@
 #define LOG(msg) if (DO_LOG) std::cout << "[caching] " << msg << "\n"
 #define ZERO 0
 
-namespace pmemkv {
-namespace caching {
+namespace pmem {
+namespace kv {
 
-CachingEngine::CachingEngine(void* context, pmemkv_config *config) : engine_context(context) {
-    if (!readConfig(config) || !(basePtr = new KVEngine(subEngine, config)))
-        throw "CachingEngine Exception"; // todo propagate start exceptions properly
+caching::caching(void *context, pmemkv_config *config) : context(context) {
+    if (!readConfig(config) || !(basePtr = new db(subEngine, config)))
+        throw "caching Exception"; // todo propagate start exceptions properly
     LOG("Started ok");
 }
 
-CachingEngine::~CachingEngine() {
+caching::~caching() {
     LOG("Stopping");
     if (basePtr) delete basePtr;
     LOG("Stopped ok");
@@ -112,23 +112,23 @@ bool CachingEngine::readConfig(pmemkv_config *config)
 	return true;
 }
 
-void CachingEngine::All(void* context, AllCallback* callback) {
+void caching::all(void *context, all_callback* callback) {
     LOG("All");
     int result = 0;
-    Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
+    each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
         auto c = ((int*) context);
         (*c)++;
     });
     if (result > 0 && basePtr) {
-        basePtr->All(context, callback);
+        basePtr->all(context, callback);
     }
     // todo refactor as single callback (Each --> All)
 }
 
-int64_t CachingEngine::Count() {
+std::size_t caching::count() {
     LOG("Count");
     int result = 0;
-    Each(&result, [](void* context, int kb, const char* k, int vb, const char* v) {
+    each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
         auto c = ((int*) context);
         (*c)++;
     });
@@ -136,59 +136,59 @@ int64_t CachingEngine::Count() {
 }
 
 struct EachCacheCallbackContext {
-    void* context;
-    EachCallback* cBack;
+    void *context;
+    each_callback* cBack;
     std::list<std::string>* expiredKeys;
 };
 
-void CachingEngine::Each(void* context, EachCallback* callback) {
+void caching::each(void *context, each_callback* callback) {
     LOG("Each");
     std::list<std::string> removingKeys;
     EachCacheCallbackContext cxt = {context, callback, &removingKeys};
 
-    auto cb = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
+    auto cb = [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
         const auto c = ((EachCacheCallbackContext*) context);
         std::string localValue = v;
         std::string timeStamp = localValue.substr(0, 14);
         std::string value = localValue.substr(14);
         // TTL from config is ZERO or if the key is valid
         if (!ttl || valueFieldConversion(timeStamp)) {
-            (*c->cBack)(c->context, kb, k, value.length(), value.c_str());
+            (*c->cBack)(c->context, k, kb, value.c_str(), value.length());
         } else {
             c->expiredKeys->push_back(k);
         }
     };
 
     if (basePtr) {  // todo bail earlier if null
-        basePtr->Each(&cxt, cb);
+        basePtr->each(&cxt, cb);
         for (const auto& itr : removingKeys)
-            basePtr->Remove(itr);
+            basePtr->remove(itr);
     }
 }
 
-status CachingEngine::Exists(const std::string& key) {
+status caching::exists(const std::string& key) {
     LOG("Exists for key=" << key);
-    status s = NOT_FOUND;
+    status s = status::NOT_FOUND;
     std::string value;
     if (getKey(key, value, true))
-        s = OK;
+        s = status::OK;
     return s;
     // todo fold into single return statement
 }
 
-void CachingEngine::Get(void* context, const std::string& key, GetCallback* callback) {
+void caching::get(void *context, const std::string& key, get_callback* callback) {
     LOG("Get key=" << key);
     std::string value;
-    if (getKey(key, value, false)) (*callback)(context, (int32_t) value.size(), value.c_str());
+    if (getKey(key, value, false)) (*callback)(context, value.c_str(), value.size());
 }
 
-bool CachingEngine::getKey(const std::string& key, std::string& valueField, bool api_flag) {
-    auto cb = [](void* context, int32_t vb, const char* v) {
+bool caching::getKey(const std::string& key, std::string& valueField, bool api_flag) {
+    auto cb = [](void *context, const char *v, size_t vb) {
         const auto c = ((std::string*) context);
         c->append(v, vb);
     };
     std::string value;
-    basePtr->Get(&value, key, cb);
+    basePtr->get(&value, key, cb);
     bool timeValidFlag;
     if (!value.empty()) {
         std::string timeStamp = value.substr(0, 14);
@@ -204,11 +204,11 @@ bool CachingEngine::getKey(const std::string& key, std::string& valueField, bool
             (remoteType != "Redis" && remoteType != "Memcached"))
             return false;
     }
-    Put(key, valueField);
+    put(key, valueField);
     return true;
 }
 
-bool CachingEngine::getFromRemoteMemcached(const std::string& key, std::string& value) {
+bool caching::getFromRemoteMemcached(const std::string& key, std::string& value) {
     LOG("getFromRemoteMemcached");
     bool retValue = false;
     memcached_server_st* servers = NULL;
@@ -237,7 +237,7 @@ bool CachingEngine::getFromRemoteMemcached(const std::string& key, std::string& 
     return retValue;
 }
 
-bool CachingEngine::getFromRemoteRedis(const std::string& key, std::string& value) {
+bool caching::getFromRemoteRedis(const std::string& key, std::string& value) {
     LOG("getFromRemoteRedis");
     bool retValue = false;
     std::string hostport = host + ":" + std::to_string(port);
@@ -263,27 +263,27 @@ bool CachingEngine::getFromRemoteRedis(const std::string& key, std::string& valu
     return retValue;
 }
 
-status CachingEngine::Put(const std::string& key, const std::string& value) {
+status caching::put(const std::string& key, const std::string& value) {
     LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
     const time_t curSysTime = time(0);
     const std::string curTime = getTimeStamp(curSysTime);
     const std::string ValueWithCurTime = curTime + value;
-    return basePtr->Put(key, ValueWithCurTime);
+    return basePtr->put(key, ValueWithCurTime);
 }
 
-status CachingEngine::Remove(const std::string& key) {
+status caching::remove(const std::string& key) {
     LOG("Remove key=" << key);
-    return basePtr->Remove(key);
+    return basePtr->remove(key);
 }
 
-time_t convertTimeToEpoch(const char* theTime, const char* format) {
+time_t convertTimeToEpoch(const char *theTime, const char *format) {
     std::tm tmTime;
     memset(&tmTime, 0, sizeof(tmTime));
     strptime(theTime, format, &tmTime);
     return mktime(&tmTime);
 }
 
-std::string getTimeStamp(const time_t epochTime, const char* format) {
+std::string getTimeStamp(const time_t epochTime, const char *format) {
     char timestamp[64] = {0};
     strftime(timestamp, sizeof(timestamp), format, localtime(&epochTime));
     return timestamp;
@@ -309,5 +309,5 @@ bool valueFieldConversion(std::string dateValue) {
     return timeValidFlag;
 }
 
-} // namespace caching
-} // namespace pmemkv
+} // namespace kv
+} // namespace pmem

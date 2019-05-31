@@ -34,38 +34,36 @@
 
 #include "../engine.h"
 
-namespace pmemkv {
+namespace pmem {
+namespace kv {
 
-class KVEngine;
+class db;
 
-namespace caching {
-
-const std::string ENGINE = "caching";
 static int ttl;  // todo move into private field
 
-class CachingEngine : public engine_base {
+class caching : public engine_base {
   public:
-    CachingEngine(void* context, pmemkv_config *config);
-    ~CachingEngine();
+    caching(void* context, pmemkv_config *config);
+    ~caching();
 
-    std::string Engine() final { return ENGINE; }
-    void* EngineContext() { return engine_context; }
-    void All(void* context, AllCallback* callback) final;
-    void AllAbove(void* context, const std::string& key, AllCallback* callback) final {};
-    void AllBelow(void* context, const std::string& key, AllCallback* callback) final {};
-    void AllBetween(void* context, const std::string& key1, const std::string& key2, AllCallback* callback) final {};
-    int64_t Count() final;
-    int64_t CountAbove(const std::string& key) final { return 0; };
-    int64_t CountBelow(const std::string& key) final { return 0; };
-    int64_t CountBetween(const std::string& key1, const std::string& key2) final { return 0; };
-    void Each(void* context, EachCallback* callback) final;
-    void EachAbove(void* context, const std::string& key, EachCallback* callback) final {};
-    void EachBelow(void* context, const std::string& key, EachCallback* callback) final {};
-    void EachBetween(void* context, const std::string& key1, const std::string& key2, EachCallback* callback) final {};
-    status Exists(const std::string& key) final;
-    void Get(void* context, const std::string& key, GetCallback* callback) final;
-    status Put(const std::string& key, const std::string& value) final;
-    status Remove(const std::string& key) final;
+    std::string name() final { return "caching"; }
+    void *engine_context() { return context; }
+    void all(void *context, all_callback* callback) final;
+    void all_above(void *context, const std::string& key, all_callback* callback) final {};
+    void all_below(void *context, const std::string& key, all_callback* callback) final {};
+    void all_between(void *context, const std::string& key1, const std::string& key2, all_callback* callback) final {};
+    std::size_t count() final;
+    std::size_t count_above(const std::string& key) final { return 0; };
+    std::size_t count_below(const std::string& key) final { return 0; };
+    std::size_t count_between(const std::string& key1, const std::string& key2) final { return 0; };
+    void each(void *context, each_callback* callback) final;
+    void each_above(void *context, const std::string& key, each_callback* callback) final {};
+    void each_below(void *context, const std::string& key, each_callback* callback) final {};
+    void each_between(void *context, const std::string& key1, const std::string& key2, each_callback* callback) final {};
+    status exists(const std::string& key) final;
+    void get(void *context, const std::string& key, get_callback* callback) final;
+    status put(const std::string& key, const std::string& value) final;
+    status remove(const std::string& key) final;
   private:
     bool getString(pmemkv_config *config, const char *key, std::string &str);
     bool readConfig(pmemkv_config *config);
@@ -73,9 +71,9 @@ class CachingEngine : public engine_base {
     bool getFromRemoteMemcached(const std::string& key, std::string& value);
     bool getKey(const std::string& key, std::string& valueField, bool api_flag);
 
-    void* engine_context;
+    void *context;
     int attempts;
-    KVEngine* basePtr;
+    db* basePtr;
     std::string host;
     unsigned long int port;
     std::string remoteType;
@@ -86,9 +84,9 @@ class CachingEngine : public engine_base {
     std::string subEngineConfig;
 };
 
-time_t convertTimeToEpoch(const char* theTime, const char* format = "%Y%m%d%H%M%S");
-std::string getTimeStamp(time_t epochTime, const char* format = "%Y%m%d%H%M%S");
+time_t convertTimeToEpoch(const char *theTime, const char *format = "%Y%m%d%H%M%S");
+std::string getTimeStamp(time_t epochTime, const char *format = "%Y%m%d%H%M%S");
 bool valueFieldConversion(std::string dateValue);
 
-} // namespace caching
-} // namespace pmemkv
+} /* namespace kv */
+} /* namespace pmem */
