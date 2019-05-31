@@ -91,12 +91,12 @@ typedef
       _VG_USERREQ__HG_PTHREAD_RWLOCK_DESTROY_PRE, /* pth_rwlk_t* */
       _VG_USERREQ__HG_PTHREAD_RWLOCK_LOCK_PRE,    /* pth_rwlk_t*, long isW */
       _VG_USERREQ__HG_PTHREAD_RWLOCK_ACQUIRED,    /* void*, long isW */
-      _VG_USERREQ__HG_PTHREAD_RWLOCK_RELEASED,    /* void* */
+      _VG_USERREQ__HG_PTHREAD_RWLOCK_RELEASED,    /* void **/
       _VG_USERREQ__HG_PTHREAD_RWLOCK_UNLOCK_POST, /* pth_rwlk_t* */
       _VG_USERREQ__HG_POSIX_SEM_INIT_POST,        /* sem_t*, ulong value */
       _VG_USERREQ__HG_POSIX_SEM_DESTROY_PRE,      /* sem_t* */
-      _VG_USERREQ__HG_POSIX_SEM_RELEASED,         /* void* */
-      _VG_USERREQ__HG_POSIX_SEM_ACQUIRED,         /* void* */
+      _VG_USERREQ__HG_POSIX_SEM_RELEASED,         /* void **/
+      _VG_USERREQ__HG_POSIX_SEM_ACQUIRED,         /* void **/
       _VG_USERREQ__HG_PTHREAD_BARRIER_INIT_PRE,   /* pth_bar_t*, ulong, ulong */
       _VG_USERREQ__HG_PTHREAD_BARRIER_WAIT_PRE,   /* pth_bar_t* */
       _VG_USERREQ__HG_PTHREAD_BARRIER_DESTROY_PRE, /* pth_bar_t* */
@@ -682,7 +682,7 @@ typedef
 */
 
 /* Report that we may have a benign race at "pointer", with size
-   "sizeof(*(pointer))". "pointer" must be a non-void* pointer.  Insert at the
+   "sizeof(*(pointer))". "pointer" must be a non-void *pointer.  Insert at the
    point where "pointer" has been allocated, preferably close to the point
    where the race happens.  See also ANNOTATE_BENIGN_RACE_STATIC.
 
