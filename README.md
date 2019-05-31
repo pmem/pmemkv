@@ -55,36 +55,38 @@ Language Bindings
 ```cpp
 #include <cassert>
 #include <iostream>
-#include <libpmemkv.h>
+#include <libpmemkv.hpp>
 #include <string>
 
 #define LOG(msg) std::cout << msg << "\n"
 
-using namespace pmemkv;
+using namespace pmem::kv;
 
 int main() {
     LOG("Starting engine");
-    KVEngine* kv = KVEngine::Start("vsmap", "{\"path\":\"/dev/shm/\"}");
+    db *kv = new db("vsmap", "{\"path\":\"/dev/shm/\"}");
 
     LOG("Putting new key");
-    KVStatus s = kv->Put("key1", "value1");
-    assert(s == OK && kv->Count() == 1);
+    status s = kv->put("key1", "value1");
+    assert(s == status::OK && kv->count() == 1);
 
     LOG("Reading key back");
     std::string value;
-    s = kv->Get("key1", &value);
-    assert(s == OK && value == "value1");
+    s = kv->get("key1", &value);
+    assert(s == status::OK && value == "value1");
 
     LOG("Iterating existing keys");
-    kv->Put("key2", "value2");
-    kv->Put("key3", "value3");
-    kv->All([](const std::string& k) {
+    kv->put("key2", "value2");
+    kv->put("key3", "value3");
+    kv->all([](const std::string& k) {
         LOG("  visited: " << k);
     });
 
     LOG("Removing existing key");
-    s = kv->Remove("key1");
-    assert(s == OK && !kv->Exists("key1"));
+    s = kv->remove("key1");
+    assert(s == status::OK);
+    s = kv->exists("key1");
+    assert(s == status::NOT_FOUND);
 
     LOG("Stopping engine");
     delete kv;
@@ -104,45 +106,46 @@ int main() {
 #define LOG(msg) printf("%s\n", msg)
 #define MAX_VAL_LEN 64
 
-void StartFailureCallback(void* context, const char* engine, const char* config, const char* msg) {
+void start_failure_callback(void *context, const char *engine, const char *config, const char *msg) {
     printf("ERROR: %s\n", msg);
     exit(-1);
 }
 
-void AllCallback(void* context, int kb, const char* k) {
+void all_callback(void *context, const char *k, size_t kb) {
     printf("   visited: %s\n", k);
 }
 
 int main() {
     LOG("Starting engine");
-    KVEngine* kv = kvengine_start(NULL, "vsmap", "{\"path\":\"/dev/shm/\"}", &StartFailureCallback);
+
+    pmemkv_db *kv = pmemkv_new(NULL, "vsmap", "{\"path\":\"/dev/shm/\"}", &start_failure_callback);
 
     LOG("Putting new key");
     char* key1 = "key1";
     char* value1 = "value1";
-    KVStatus s = kvengine_put(kv, strlen(key1), key1, strlen(value1), value1);
-    assert(s == OK && kvengine_count(kv) == 1);
+    pmemkv_status s = pmemkv_put(kv, key1, strlen(key1), value1, strlen(value1));
+    assert(s == PMEMKV_STATUS_OK && pmemkv_count(kv) == 1);
 
     LOG("Reading key back");
     char val[MAX_VAL_LEN];
-    s = kvengine_get_copy(kv, strlen(key1), key1, MAX_VAL_LEN, val);
-    assert(s == OK && !strcmp(val, "value1"));
+    s = pmemkv_get_copy(kv, key1, strlen(key1), val, MAX_VAL_LEN);
+    assert(s == PMEMKV_STATUS_OK && !strcmp(val, "value1"));
 
     LOG("Iterating existing keys");
     char* key2 = "key2";
     char* value2 = "value2";
     char* key3 = "key3";
     char* value3 = "value3";
-    kvengine_put(kv, strlen(key2), key2, strlen(value2), value2);
-    kvengine_put(kv, strlen(key3), key3, strlen(value3), value3);
-    kvengine_all(kv, NULL, &AllCallback);
+    pmemkv_put(kv, key2, strlen(key2), value2, strlen(value2));
+    pmemkv_put(kv, key3, strlen(key3), value3, strlen(value3));
+    pmemkv_all(kv, NULL, &all_callback);
 
     LOG("Removing existing key");
-    s = kvengine_remove(kv, strlen(key1), key1);
-    assert(s == OK && kvengine_exists(kv, strlen(key1), key1) == NOT_FOUND);
+    s = pmemkv_remove(kv, key1, strlen(key1));
+    assert(s == PMEMKV_STATUS_OK && pmemkv_exists(kv, key1, strlen(key1)) == PMEMKV_STATUS_NOT_FOUND);
 
     LOG("Stopping engine");
-    kvengine_stop(kv);
+    pmemkv_delete(kv);
     return 0;
 }
 ```

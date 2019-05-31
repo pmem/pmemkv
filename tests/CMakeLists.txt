@@ -113,7 +113,7 @@ if(ENGINE_STREE)
 	list(APPEND TEST_FILES engines-experimental/stree_test.cc)
 endif()
 if(ENGINE_TREE3)
-	list(APPEND TEST_FILES engines-experimental/tree_test.cc)
+	list(APPEND TEST_FILES engines-experimental/tree3_test.cc)
 endif()
 
 include(gtest)
