@@ -37,10 +37,10 @@
 #define DO_LOG 0
 #define LOG(msg) if (DO_LOG) std::cout << "[cmap] " << msg << "\n"
 
-namespace pmemkv {
-namespace cmap {
+namespace pmem {
+namespace kv {
 
-CMap::CMap(void* context, const std::string& path, size_t size) : engine_context(context) {
+cmap::cmap(void *context, const std::string& path, size_t size) : context(context) {
     if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
         LOG("Creating filesystem pool, path=" << path << ", size=" << std::to_string(size));
         pmpool = pool_t::create(path.c_str(), LAYOUT, size, S_IRWXU);
@@ -53,38 +53,38 @@ CMap::CMap(void* context, const std::string& path, size_t size) : engine_context
     Recover();
 }
 
-CMap::~CMap() {
+cmap::~cmap() {
     LOG("Stopping");
     pmpool.close();
     LOG("Stopped ok");
 }
 
-void CMap::All(void* context, AllCallback* callback) {
+void cmap::all(void *context, all_callback* callback) {
     LOG("All");
     for (auto it = container->begin(); it != container->end(); ++it) {
-        (*callback)(context, (int32_t) it->first.size(), it->first.c_str());
+        (*callback)(context, it->first.c_str(), it->first.size());
     }
 }
 
-int64_t CMap::Count() {
+std::size_t cmap::count() {
     LOG("Count");
     return container->size();
 }
 
-void CMap::Each(void* context, EachCallback* callback) {
+void cmap::each(void *context, each_callback* callback) {
     LOG("Each");
     for (auto it = container->begin(); it != container->end(); ++it) {
-        (*callback)(context, (int32_t) it->first.size(), it->first.c_str(),
-                    (int32_t) it->second.size(), it->second.c_str());
+        (*callback)(context, it->first.c_str(), it->first.size(),
+                    it->second.c_str(), it->second.size());
     }
 }
 
-status CMap::Exists(const std::string& key) {
+status cmap::exists(const std::string& key) {
     LOG("Exists for key=" << key);
-    return container->count(key) == 1 ? OK : NOT_FOUND;
+    return container->count(key) == 1 ?status::OK : status::NOT_FOUND;
 }
 
-void CMap::Get(void* context, const std::string& key, GetCallback* callback) {
+void cmap::get(void *context, const std::string& key, get_callback* callback) {
     LOG("Get key=" << key);
     map_t::const_accessor result;
     bool found = container->find(result, key);
@@ -92,10 +92,10 @@ void CMap::Get(void* context, const std::string& key, GetCallback* callback) {
         LOG("  key not found");
         return;
     }
-    (*callback)(context, (int32_t) result->second.size(), result->second.c_str());
+    (*callback)(context, result->second.c_str(), result->second.size());
 }
 
-status CMap::Put(const std::string& key, const std::string& value) {
+status cmap::put(const std::string& key, const std::string& value) {
     LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
     try {
         map_t::accessor acc;
@@ -107,27 +107,27 @@ status CMap::Put(const std::string& key, const std::string& value) {
         }
     } catch (std::bad_alloc e) {
         LOG("Put failed due to exception, " << e.what());
-        return FAILED;
+        return status::FAILED;
     } catch (pmem::transaction_error e) {
         LOG("Put failed due to pmem::transaction_error, " << e.what());
-        return FAILED;
+        return status::FAILED;
     }
 
-    return OK;
+    return status::OK;
 }
 
-status CMap::Remove(const std::string& key) {
+status cmap::remove(const std::string& key) {
     LOG("Remove key=" << key);
     try {
         bool erased = container->erase(key);
-        return erased ? OK : NOT_FOUND;
+        return erased ? status::OK : status::NOT_FOUND;
     } catch (std::runtime_error e) {
         LOG("Remove failed due to exception, " << e.what());
-        return FAILED;
+        return status::FAILED;
     }
 }
 
-void CMap::Recover() {
+void cmap::Recover() {
     auto root_data = pmpool.root();
     if (root_data->map_ptr) {
         container = root_data->map_ptr.get();

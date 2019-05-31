@@ -33,22 +33,22 @@
 #include "gtest/gtest.h"
 #include "../../src/libpmemkv.hpp"
 
-using namespace pmemkv;
+using namespace pmem::kv;
 
 class BlackholeTest : public testing::Test {
   public:
-    KVEngine kv;
+    db kv;
 
     BlackholeTest(): kv("blackhole", "") {}
 };
 
 TEST_F(BlackholeTest, SimpleTest) {
     std::string value;
-    ASSERT_TRUE(kv.Count() == 0);
-    ASSERT_TRUE(kv.Get("key1", &value) == NOT_FOUND);
-    ASSERT_TRUE(kv.Put("key1", "value1") == OK);
-    ASSERT_TRUE(kv.Count() == 0);
-    ASSERT_TRUE(kv.Get("key1", &value) == NOT_FOUND);
-    ASSERT_TRUE(kv.Remove("key1") == OK);
-    ASSERT_TRUE(kv.Get("key1", &value) == NOT_FOUND);
+    ASSERT_TRUE(kv.count() == 0);
+    ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
+    ASSERT_TRUE(kv.put("key1", "value1") == status::OK);
+    ASSERT_TRUE(kv.count() == 0);
+    ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
+    ASSERT_TRUE(kv.remove("key1") == status::OK);
+    ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
 }
