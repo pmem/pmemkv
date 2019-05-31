@@ -58,7 +58,7 @@ public:
         return *this;
     }
 
-    const char* c_str() const {
+    const char *c_str() const {
         return str;
     }
 
@@ -74,16 +74,16 @@ public:
         return str + _size;
     }
 
-    const char* begin() const {
+    const char *begin() const {
         return str;
     }
 
-    const char* end() const {
+    const char *end() const {
         return str + _size;
     }
 
 private:
-    void init(const char* src, size_t size) {
+    void init(const char *src, size_t size) {
         if(size > CAPACITY) throw std::length_error("size exceed pstring capacity");
         memcpy(str, src, size);
         str[size] = '\0';
