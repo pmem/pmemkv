@@ -33,12 +33,9 @@
 #include <ctime>
 #include <iostream>
 #include <list>
+#include <memory>
 #include <lib_acl.hpp>
 #include <libmemcached/memcached.h>
-#include <rapidjson/istreamwrapper.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/document.h>
-#include <rapidjson/ostreamwrapper.h>
 #include <unistd.h>
 #include "caching.h"
 
@@ -49,8 +46,8 @@
 namespace pmemkv {
 namespace caching {
 
-CachingEngine::CachingEngine(void* context, const std::string& config) : engine_context(context) {
-    if (!readConfig(config) || !(basePtr = KVEngine::Start(subEngine, subEngineConfig)))
+CachingEngine::CachingEngine(void* context, pmemkv_config *config) : engine_context(context) {
+    if (!readConfig(config) || !(basePtr = KVEngine::Start(subEngine, config)))
         throw "CachingEngine Exception"; // todo propagate start exceptions properly
     LOG("Started ok");
 }
@@ -61,35 +58,55 @@ CachingEngine::~CachingEngine() {
     LOG("Stopped ok");
 }
 
-bool CachingEngine::readConfig(const std::string& config) {
-    rapidjson::Document d;
-    if (d.Parse(config.c_str()).HasParseError()) return false; // todo throw specific exceptions
-    if (!d.HasMember("subengine") || !d["subengine"].IsString()) return false;
-    if (!d.HasMember("subengine_config") || !d["subengine_config"].IsObject()) return false;
-    if (!d["subengine_config"].HasMember("path") || !d["subengine_config"]["path"].IsString()) return false;
-    if (!d.HasMember("host") || !d["host"].IsString()) return false;
-    if (!d.HasMember("port") || !d["port"].IsInt()) return false;
-    if (!d.HasMember("remote_type") || !d["remote_type"].IsString()) return false;
-    if (!d.HasMember("remote_user") || !d["remote_user"].IsString()) return false;
-    if (!d.HasMember("remote_pwd") || !d["remote_pwd"].IsString()) return false;
-    if (!d.HasMember("remote_url") || !d["remote_url"].IsString()) return false;
-    if (!d.HasMember("attempts") || !d["attempts"].IsInt()) return false;
-    if (d.HasMember("ttl") && !d["ttl"].IsUint()) return false;
+bool CachingEngine::getString(pmemkv_config *config, const char *key,
+				std::string &str)
+{
+	size_t length;
 
-    rapidjson::StringBuffer sb;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
-    d["subengine_config"].Accept(writer);
-    subEngineConfig = sb.GetString();
-    subEngine = d["subengine"].GetString();
-    remoteType = d["remote_type"].GetString();
-    remoteUser = d["remote_user"].GetString();
-    remotePasswd = d["remote_pwd"].GetString();
-    remoteUrl = d["remote_url"].GetString();
-    ttl = d.HasMember("ttl") ? d["ttl"].GetInt() : 0;
-    host = d["host"].GetString();
-    port = d["port"].GetInt();
-    attempts = d["attempts"].GetInt();
-    return true;
+	if (pmemkv_config_get(config, key, NULL, 0, &length) == -1)
+		return false;
+
+	auto c_str = std::unique_ptr<char[]>(new char [length]);
+	if (pmemkv_config_get(config, key, c_str.get(), length, NULL) != length)
+		return false;
+
+	str = std::string(c_str.get(), length);
+
+	return true;
+}
+
+bool CachingEngine::readConfig(pmemkv_config *config)
+{
+	if (!getString(config, "subengine", subEngine))
+		return false;
+
+	if (!getString(config, "remote_type", remoteType))
+		return false;
+
+	if (!getString(config, "remote_user", remoteUser))
+		return false;
+
+	if (!getString(config, "remote_pwd", remotePasswd))
+		return false;
+
+	if (!getString(config, "remote_url", remoteUrl))
+		return false;
+
+	if (!getString(config, "host", host))
+		return false;
+
+	if (pmemkv_config_get(config, "ttl", &ttl, sizeof(int), NULL) != sizeof(int))
+		ttl = 0;
+
+	if (pmemkv_config_get(config, "port", &port, sizeof(unsigned long int),
+				NULL) != sizeof(unsigned long int))
+		return false;
+
+	if (pmemkv_config_get(config, "attempts", &attempts, sizeof(int),
+				NULL) != sizeof(int))
+		return false;
+
+	return true;
 }
 
 void CachingEngine::All(void* context, KVAllCallback* callback) {
