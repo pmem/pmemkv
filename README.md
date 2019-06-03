@@ -53,16 +53,16 @@ Language Bindings
 ```cpp
 #include <cassert>
 #include <iostream>
-#include <libpmemkv.h>
+#include <libpmemkv.hpp>
 #include <string>
 
 #define LOG(msg) std::cout << msg << "\n"
 
-using namespace pmemkv;
+using namespace pmem::kv;
 
 int main() {
     LOG("Starting engine");
-    KVEngine* kv = KVEngine::Start("vsmap", "{\"path\":\"/dev/shm/\"}");
+    db *kv = new db("vsmap", "{\"path\":\"/dev/shm/\"}");
 
     LOG("Putting new key");
     pmemkv_status s = kv->put("key1", "value1");
@@ -102,18 +102,18 @@ int main() {
 #define LOG(msg) printf("%s\n", msg)
 #define MAX_VAL_LEN 64
 
-void StartFailureCallback(void *context, const char *engine, const char *config, const char *msg) {
+void start_failure_callback(void *context, const char *engine, const char *config, const char *msg) {
     printf("ERROR: %s\n", msg);
     exit(-1);
 }
 
-void all_callback(void *context, int kb, const char *k) {
+void all_callback(void *context, size_t kb, const char *k) {
     printf("   visited: %s\n", k);
 }
 
 int main() {
     LOG("Starting engine");
-    KVEngine* kv = pmemkv_new(NULL, "vsmap", "{\"path\":\"/dev/shm/\"}", &StartFailureCallback);
+    pmemkv_db* kv = pmemkv_new(NULL, "vsmap", "{\"path\":\"/dev/shm/\"}", &start_failure_callback);
 
     LOG("Putting new key");
     char* key1 = "key1";
