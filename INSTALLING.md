@@ -137,15 +137,7 @@ cd memkind
 su -c 'make install'
 ```
 
-Build pmemkv:
-
-```sh
-cd ~
-git clone https://github.com/pmem/pmemkv
-cd pmemkv
-make
-su -c 'make install'
-```
+<a href="#building_from_sources">Build and install pmemkv.</a>
 
 <a name="ubuntu"></a>
 
@@ -199,15 +191,7 @@ cd memkind
 sudo make install
 ```
 
-Build pmemkv:
-
-```sh
-cd ~
-git clone https://github.com/pmem/pmemkv
-cd pmemkv
-make
-sudo make install
-```
+<a href="#building_from_sources">Build and install pmemkv.</a>
 
 <a name="experimental"></a>
 
