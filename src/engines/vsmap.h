@@ -60,7 +60,7 @@ class vsmap : public engine_base {
     void each_above(void *context, const std::string& key, each_callback* callback) final;
     void each_below(void *context, const std::string& key, each_callback* callback) final;
     void each_between(void *context, const std::string& key1, const std::string& key2, each_callback* callback) final;
-    status exists(const std::string& key) final;
+    bool exists(const std::string& key) final;
     void get(void *context, const std::string& key, get_callback* callback) final;
     status put(const std::string& key, const std::string& value) final;
     status remove(const std::string& key) final;

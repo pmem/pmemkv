@@ -149,13 +149,10 @@ void caching_engine::each(void *context, each_callback* callback) {
     }
 }
 
-status caching_engine::exists(const std::string& key) {
+bool caching_engine::exists(const std::string& key) {
     LOG("Exists for key=" << key);
-    status s = status::NOT_FOUND;
     std::string value;
-    if (getKey(key, value, true))
-        s = status::OK;
-    return s;
+    return getKey(key, value, true);
     // todo fold into single return statement
 }
 

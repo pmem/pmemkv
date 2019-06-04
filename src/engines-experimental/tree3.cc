@@ -106,7 +106,7 @@ void tree::each(void *context, each_callback* callback) {
     }
 }
 
-status tree::exists(const std::string& key) {
+bool tree::exists(const std::string& key) {
     LOG("Exists for key=" << key);
     auto leafnode = LeafSearch(key);
     if (leafnode) {
@@ -114,12 +114,12 @@ status tree::exists(const std::string& key) {
         for (int slot = LEAF_KEYS; slot--;) {
             if (leafnode->hashes[slot] == hash) {
                 if (leafnode->keys[slot].compare(key) == 0)
-                    return status::OK;
+                    return true;
             }
         }
     }
     LOG("   could not find key");
-    return status::NOT_FOUND;
+    return false;
 }
 
 void tree::get(void *context, const std::string& key, get_callback* callback) {

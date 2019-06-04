@@ -77,7 +77,7 @@ class engine_base {
 
     virtual void each_between(void *context, const std::string& key1, const std::string& key2, each_callback* callback) = 0;
 
-    virtual status exists(const std::string& key) = 0;
+    virtual bool exists(const std::string& key) = 0;
 
     virtual void get(void *context, const std::string& key, get_callback* callback) = 0;
 

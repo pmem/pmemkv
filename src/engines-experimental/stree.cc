@@ -87,14 +87,10 @@ void stree::each(void *context, each_callback* callback) {
     }
 }
 
-status stree::exists(const std::string& key) {
+bool stree::exists(const std::string& key) {
     LOG("Exists for key=" << key);
     btree_type::iterator it = my_btree->find(pstring<20>(key));
-    if (it == my_btree->end()) {
-        LOG("  key not found");
-        return status::NOT_FOUND;
-    }
-    return status::OK;
+    return it != my_btree->end();
 }
 
 void stree::get(void *context, const std::string& key, get_callback* callback) {

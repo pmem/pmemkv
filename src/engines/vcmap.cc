@@ -71,11 +71,11 @@ void vcmap::each(void *context, each_callback* callback) {
     }
 }
 
-status vcmap::exists(const std::string& key) {
+bool vcmap::exists(const std::string& key) {
     LOG("Exists for key=" << key);
     map_t::const_accessor result;
     const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
-    return (result_found ? status::OK : status::NOT_FOUND);
+    return result_found;
 }
 
 void vcmap::get(void *context, const std::string& key, get_callback* callback) {

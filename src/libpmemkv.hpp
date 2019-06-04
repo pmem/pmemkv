@@ -109,7 +109,7 @@ public:
 	void each_between(const std::string& key1, const std::string& key2, std::function<each_function> f);
 	void each_between(const std::string& key1, const std::string& key2, std::function<each_string_function> f);
 
-	status exists(const std::string& key);
+	bool exists(const std::string& key);
 
 	void get(void *context, const std::string& key, get_callback* callback);
 	void get(const std::string& key, std::function<get_function> f);
@@ -298,8 +298,8 @@ inline void db::each_between(const std::string& key1, const std::string& key2, s
 	pmemkv_each_between(this->_db, &f, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callKVEachStringFunction);
 }
 
-inline status db::exists(const std::string& key) {
-	return (status) pmemkv_exists(this->_db, key.c_str(), key.size());
+inline bool db::exists(const std::string& key) {
+	return pmemkv_exists(this->_db, key.c_str(), key.size());
 }
 
 inline void db::get(void *context, const std::string& key, get_callback* callback) {

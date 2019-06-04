@@ -79,9 +79,9 @@ void cmap::each(void *context, each_callback* callback) {
     }
 }
 
-status cmap::exists(const std::string& key) {
+bool cmap::exists(const std::string& key) {
     LOG("Exists for key=" << key);
-    return container->count(key) == 1 ?status::OK : status::NOT_FOUND;
+    return container->count(key) == 1;
 }
 
 void cmap::get(void *context, const std::string& key, get_callback* callback) {

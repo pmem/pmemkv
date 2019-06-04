@@ -182,8 +182,8 @@ void pmemkv_each_between(pmemkv_db *db, void *context, const char *k1, size_t kb
     reinterpret_cast<pmem::kv::engine_base*>(db)->each_between(context, std::string(k1, (size_t) kb1), std::string(k2, (size_t) kb2), c);
 }
 
-pmemkv_status pmemkv_exists(pmemkv_db *db, const char *k, size_t kb) {
-    return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base*>(db)->exists(std::string(k, (size_t) kb));
+int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb) {
+    return reinterpret_cast<pmem::kv::engine_base*>(db)->exists(std::string(k, (size_t) kb));
 }
 
 void pmemkv_get(pmemkv_db *db, void *context, const char *k, size_t kb, pmemkv_get_callback* c) {

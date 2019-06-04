@@ -147,10 +147,9 @@ void vsmap::each_between(void *context, const std::string& key1, const std::stri
     }
 }
 
-status vsmap::exists(const std::string& key) {
+bool vsmap::exists(const std::string& key) {
     LOG("Exists for key=" << key);
-    bool r = pmem_kv_container.find(key_type(key.c_str(), key.size(), kv_allocator)) != pmem_kv_container.end();
-    return (r ? status::OK : status::NOT_FOUND);
+    return pmem_kv_container.find(key_type(key.c_str(), key.size(), kv_allocator)) != pmem_kv_container.end();
 }
 
 void vsmap::get(void *context, const std::string& key, get_callback* callback) {

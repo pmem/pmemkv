@@ -99,9 +99,9 @@ void blackhole::each_between(void *context, const std::string& key1, const std::
     LOG("EachBetween for key1=" << key1 << ", key2=" << key2);
 }
 
-status blackhole::exists(const std::string& key) {
+bool blackhole::exists(const std::string& key) {
     LOG("Exists for key=" << key);
-    return status::NOT_FOUND;
+    return false;
 }
 
 void blackhole::get(void *context, const std::string& key, get_callback* callback) {
