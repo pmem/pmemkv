@@ -143,6 +143,9 @@ Build pmemkv:
 cd ~
 git clone https://github.com/pmem/pmemkv
 cd pmemkv
+mkdir ./build
+cd ./build
+cmake ..
 make
 su -c 'make install'
 ```
@@ -205,6 +208,9 @@ Build pmemkv:
 cd ~
 git clone https://github.com/pmem/pmemkv
 cd pmemkv
+mkdir ./build
+cd ./build
+cmake ..
 make
 sudo make install
 ```
