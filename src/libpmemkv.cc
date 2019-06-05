@@ -110,6 +110,12 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
         }
 #endif
 
+#ifdef ENGINE_CMAP
+        if (engine == cmap::ENGINE) {
+            return new cmap::CMap(context, path, size);
+        }
+#endif
+
 #if defined(ENGINE_VSMAP) || defined(ENGINE_VCMAP)
         struct stat info;
         if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
@@ -126,12 +132,6 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
 #ifdef ENGINE_VCMAP
         if (engine == vcmap::ENGINE) {
             return new vcmap::VCMap(context, path, size);
-        }
-#endif
-
-#ifdef ENGINE_CMAP
-        if (engine == cmap::ENGINE) {
-            return new cmap::CMap(context, path, size);
         }
 #endif
         throw runtime_error("Unknown engine name");
