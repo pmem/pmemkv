@@ -67,29 +67,29 @@ const std::string ENGINE = "tree3";                        // engine identifier
 class KVSlot {
   public:
     uint8_t hash() const { return get_ph(); }
-    uint8_t hash_direct(char *p) const { return *((uint8_t *)(p + sizeof(uint32_t) + sizeof(uint32_t))); }
+    static uint8_t hash_direct(char *p) { return *((uint8_t *)(p + sizeof(uint32_t) + sizeof(uint32_t))); }
     const char* key() const { return ((char *)(kv.get()) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)); }
-    const char* key_direct(char *p) const { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)); }
+    static const char* key_direct(char *p) { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)); }
     const uint32_t keysize() const { return get_ks(); }
-    const uint32_t keysize_direct(char *p) const { return *((uint32_t *)(p)); }
+    static const uint32_t keysize_direct(char *p) { return *((uint32_t *)(p)); }
     const char* val() const { return ((char *)(kv.get()) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + get_ks() + 1); }
-    const char* val_direct(char *p) const { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + *((uint32_t *)(p)) + 1); }
+    static const char* val_direct(char *p) { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + *((uint32_t *)(p)) + 1); }
     const uint32_t valsize() const { return get_vs(); }
-    const uint32_t valsize_direct(char *p) const { return *((uint32_t *)(p + sizeof(uint32_t))); }
+    static const uint32_t valsize_direct(char *p) { return *((uint32_t *)(p + sizeof(uint32_t))); }
     void clear();
     void set(const uint8_t hash, const std::string& key, const std::string& value);
     void set_ph(uint8_t v) {*((uint8_t *)((char *)(kv.get()) + sizeof(uint32_t) + sizeof(uint32_t))) = v;}
-    void set_ph_direct(char *p, uint8_t v) {*((uint8_t *)(p + sizeof(uint32_t) + sizeof(uint32_t))) = v;}
+    static void set_ph_direct(char *p, uint8_t v) {*((uint8_t *)(p + sizeof(uint32_t) + sizeof(uint32_t))) = v;}
     void set_ks(uint32_t v) {*((uint32_t *)(kv.get())) = v;}
-    void set_ks_direct(char * p, uint32_t v) {*((uint32_t *)(p)) = v;}
+    static void set_ks_direct(char * p, uint32_t v) {*((uint32_t *)(p)) = v;}
     void set_vs(uint32_t v) {*((uint32_t *)((char *)(kv.get()) + sizeof(uint32_t))) = v;}
-    void set_vs_direct(char *p, uint32_t v) {*((uint32_t *)((char *)(p) + sizeof(uint32_t))) = v;}
+    static void set_vs_direct(char *p, uint32_t v) {*((uint32_t *)((char *)(p) + sizeof(uint32_t))) = v;}
     uint8_t get_ph() const {return *((uint8_t *)((char *)(kv.get()) + sizeof(uint32_t) + sizeof(uint32_t)));}
-    uint8_t get_ph_direct(char *p) const {return *((uint8_t *)((char *)(p) + sizeof(uint32_t) + sizeof(uint32_t)));}
+    static uint8_t get_ph_direct(char *p) {return *((uint8_t *)((char *)(p) + sizeof(uint32_t) + sizeof(uint32_t)));}
     uint32_t get_ks() const {return *((uint32_t *)(kv.get()));}
-    uint32_t get_ks_direct(char *p) const {return *((uint32_t *)(p));}
+    static uint32_t get_ks_direct(char *p) {return *((uint32_t *)(p));}
     uint32_t get_vs() const {return *((uint32_t *)((char *)(kv.get()) + sizeof(uint32_t)));}
-    uint32_t get_vs_direct(char *p) const {return *((uint32_t *)((char *)(p) + sizeof(uint32_t)));}
+    static uint32_t get_vs_direct(char *p) {return *((uint32_t *)((char *)(p) + sizeof(uint32_t)));}
     bool empty();
   private:
     persistent_ptr<char[]> kv;                             // buffer for key & value
