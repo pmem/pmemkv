@@ -110,21 +110,22 @@ KVEngine* KVEngine::Start(void* context, const char* engine, const char* config,
         }
 #endif
 
-#if defined(ENGINE_VSMAP) || defined(ENGINE_VCMAP)
-        struct stat info;
-        if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
-            throw runtime_error("Config path is not an existing directory");
-        }
-#endif
-
 #ifdef ENGINE_VSMAP
         if (engine == vsmap::ENGINE) {
+            struct stat info;
+            if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
+                throw runtime_error("Config path is not an existing directory");
+            }
             return new vsmap::VSMap(context, path, size);
         }
 #endif
 
 #ifdef ENGINE_VCMAP
         if (engine == vcmap::ENGINE) {
+            struct stat info;
+            if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
+                throw runtime_error("Config path is not an existing directory");
+            }
             return new vcmap::VCMap(context, path, size);
         }
 #endif
