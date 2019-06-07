@@ -69,7 +69,8 @@ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DTEST_DIR=/dev/shm \
 	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
-	-DCOVERAGE=$COVERAGE
+	-DCOVERAGE=$COVERAGE \
+	-DDEVELOPER_MODE=1
 make -j2
 ctest --output-on-failure
 echo $USERPASS | sudo -S make install
