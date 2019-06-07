@@ -57,7 +57,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	libnuma-dev \
 	libtool \
 	libunwind8-dev \
+	maven \
 	numactl \
+	openjdk-8-jdk \
 	pkg-config \
 	rapidjson-dev \
 	ruby-dev \
