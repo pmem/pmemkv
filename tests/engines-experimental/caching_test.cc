@@ -209,14 +209,14 @@ TEST_F(CachingTest, SimpleEachTest) {
     ASSERT_TRUE(kv->count() == 4);
 
     std::string result;
-    kv->each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-        const auto c = ((std::string*) context);
+    kv->each([](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,<");
         c->append(std::string(v, vb));
         c->append(">|");
-    });
+    }, &result);
 
     if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key4>,<value4>|<key3>,<value3>|<key2>,<value2>|<key1>,<value1>|");
@@ -240,14 +240,14 @@ TEST_F(CachingTest, EachTTLValidExpired) {
     ASSERT_TRUE(kv->put("key5", "value5") == status::OK) << pmemobj_errormsg();
 
     std::string result;
-    kv->each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-        const auto c = ((std::string*) context);
+    kv->each([](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,<");
         c->append(std::string(v, vb));
         c->append(">|");
-    });
+    }, &result);
     ASSERT_TRUE(result == "<key5>,<value5>|");
     ASSERT_TRUE(kv->count() == 1);
 }
@@ -256,14 +256,14 @@ TEST_F(CachingTest, EachEmptyCache) {
     ASSERT_TRUE(kv = new db("caching", "{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" + ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
     ASSERT_TRUE(kv->count() == 0);
     std::string result;
-    kv->each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-        const auto c = ((std::string*) context);
+    kv->each([](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,<");
         c->append(std::string(v, vb));
         c->append(">|");
-    });
+    }, &result);
     ASSERT_TRUE(result == "");
     ASSERT_TRUE(kv->count() == 0);
 }
@@ -281,14 +281,14 @@ TEST_F(CachingTest, EachZeroTTL) {
     ASSERT_TRUE(kv->count() == 4);
 
     std::string result;
-    kv->each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-        const auto c = ((std::string*) context);
+    kv->each([](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,<");
         c->append(std::string(v, vb));
         c->append(">|");
-    });
+    }, &result);
 
     if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key4>,<value4>|<key3>,<value3>|<key2>,<value2>|<key1>,<value1>|");
@@ -335,12 +335,12 @@ TEST_F(CachingTest, SimpleAll) {
     ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
 
     std::string result;
-    kv->all(&result, [](void *context, const char *k, size_t kb) {
-        const auto c = ((std::string*) context);
+    kv->all([](const char *k, size_t kb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,");
-    });
+    }, &result);
 
     if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key4>,<key3>,");
@@ -364,12 +364,12 @@ TEST_F(CachingTest, SimpleZeroTTLAll) {
     ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
 
     std::string result;
-    kv->all(&result, [](void *context, const char *k, size_t kb) {
-        const auto c = ((std::string*) context);
+    kv->all([](const char *k, size_t kb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,");
-    });
+    }, &result);
 
     if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key4>,<key3>,<key2>,<key1>,");
@@ -452,14 +452,14 @@ TEST_F(CachingTest, Redis_Integration) {
     ASSERT_TRUE(kv->exists("key3") == status::OK);
 
     std::string result;
-    kv->each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-        const auto c = ((std::string*) context);
+    kv->each([](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,<");
         c->append(std::string(v, vb));
         c->append(">|");
-    });
+    }, &result);
 
     if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key2>,<value2>|<key1>,<value1>|<key3>,<value3>|");
@@ -472,14 +472,14 @@ TEST_F(CachingTest, Redis_Integration) {
 
     sleep(2);
     result = "";
-    kv->each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-        const auto c = ((std::string*) context);
+    kv->each([](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,<");
         c->append(std::string(v, vb));
         c->append(">|");
-    });
+    }, &result);
     ASSERT_TRUE(result == "");
     ASSERT_TRUE(kv->count() == 0);
 
@@ -491,12 +491,12 @@ TEST_F(CachingTest, Redis_Integration) {
     ASSERT_TRUE(kv->get("key3", &value) == status::NOT_FOUND);
 
     result = "";
-    kv->all(&result, [](void *context, const char *k, size_t kb) {
-        const auto c = ((std::string*) context);
+    kv->all([](const char *k, size_t kb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,");
-    });
+    }, &result);
 
     if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key2>,<key1>,");
@@ -509,12 +509,12 @@ TEST_F(CachingTest, Redis_Integration) {
 
     sleep(2);
     result = "";
-    kv->all(&result, [](void *context, const char *k, size_t kb) {
-        const auto c = ((std::string*) context);
+    kv->all([](const char *k, size_t kb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,");
-    });
+    }, &result);
     ASSERT_TRUE(result == "");
     ASSERT_TRUE(kv->count() == 0);
 
@@ -592,14 +592,14 @@ TEST_F(CachingTest, Memcached_Integration) {
     ASSERT_TRUE(kv->exists("key3") == status::OK);
 
     std::string result;
-    kv->each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-        const auto c = ((std::string*) context);
+    kv->each([](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,<");
         c->append(std::string(v, vb));
         c->append(">|");
-    });
+    }, &result);
 
     if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key2>,<value2>|<key3>,<value3>|<key1>,<value1>|");
@@ -612,14 +612,14 @@ TEST_F(CachingTest, Memcached_Integration) {
 
     sleep(2);
     result = "";
-    kv->each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-        const auto c = ((std::string*) context);
+    kv->each([](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,<");
         c->append(std::string(v, vb));
         c->append(">|");
-    });
+    }, &result);
     ASSERT_TRUE(result == "");
     ASSERT_TRUE(kv->count() == 0);
 
@@ -631,12 +631,12 @@ TEST_F(CachingTest, Memcached_Integration) {
     ASSERT_TRUE(kv->get("key3", &value) == status::NOT_FOUND);
 
     result = "";
-    kv->all(&result, [](void *context, const char *k, size_t kb) {
-        const auto c = ((std::string*) context);
+    kv->all([](const char *k, size_t kb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,");
-    });
+    }, &result);
 
     if (ENGINE == "tree3")
         ASSERT_TRUE(result == "<key2>,<key1>,");
@@ -649,12 +649,12 @@ TEST_F(CachingTest, Memcached_Integration) {
 
     sleep(2);
     result = "";
-    kv->all(&result, [](void *context, const char *k, size_t kb) {
-        const auto c = ((std::string*) context);
+    kv->all([](const char *k, size_t kb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,");
-    });
+    }, &result);
     ASSERT_TRUE(result == "");
     ASSERT_TRUE(kv->count() == 0);
 

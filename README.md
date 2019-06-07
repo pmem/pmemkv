@@ -111,7 +111,7 @@ void start_failure_callback(void *context, const char *engine, const char *confi
     exit(-1);
 }
 
-void all_callback(void *context, const char *k, size_t kb) {
+void all_callback(const char *k, size_t kb, void *arg) {
     printf("   visited: %s\n", k);
 }
 

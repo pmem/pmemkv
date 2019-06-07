@@ -59,10 +59,10 @@ cmap::~cmap() {
     LOG("Stopped ok");
 }
 
-void cmap::all(void *context, all_callback* callback) {
+void cmap::all(all_callback* callback, void *arg) {
     LOG("All");
     for (auto it = container->begin(); it != container->end(); ++it) {
-        (*callback)(context, it->first.c_str(), it->first.size());
+        (*callback)(it->first.c_str(), it->first.size(), arg);
     }
 }
 
@@ -71,11 +71,11 @@ std::size_t cmap::count() {
     return container->size();
 }
 
-void cmap::each(void *context, each_callback* callback) {
+void cmap::each(each_callback* callback, void *arg) {
     LOG("Each");
     for (auto it = container->begin(); it != container->end(); ++it) {
-        (*callback)(context, it->first.c_str(), it->first.size(),
-                    it->second.c_str(), it->second.size());
+        (*callback)(it->first.c_str(), it->first.size(),
+                    it->second.c_str(), it->second.size(), arg);
     }
 }
 
@@ -84,7 +84,7 @@ status cmap::exists(const std::string& key) {
     return container->count(key) == 1 ? status::OK : status::NOT_FOUND;
 }
 
-void cmap::get(void *context, const std::string& key, get_callback* callback) {
+void cmap::get(const std::string& key, get_callback* callback, void *arg) {
     LOG("Get key=" << key);
     map_t::const_accessor result;
     bool found = container->find(result, key);
@@ -92,7 +92,7 @@ void cmap::get(void *context, const std::string& key, get_callback* callback) {
         LOG("  key not found");
         return;
     }
-    (*callback)(context, result->second.c_str(), result->second.size());
+    (*callback)(result->second.c_str(), result->second.size(), arg);
 }
 
 status cmap::put(const std::string& key, const std::string& value) {

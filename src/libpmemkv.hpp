@@ -70,19 +70,19 @@ public:
 
 	void *engine_context();
 
-	void all(void *context, all_callback* callback);
+	void all(all_callback* callback, void *arg);
 	void all(std::function<all_function> f);
 	void all(std::function<all_string_function> f);
 
-	void all_above(void *context, const std::string& key, all_callback* callback);
+	void all_above(const std::string& key, all_callback* callback, void *arg);
 	void all_above(const std::string& key, std::function<all_function> f);
 	void all_above(const std::string& key, std::function<all_string_function> f);
 
-	void all_below(void *context, const std::string& key, all_callback* callback);
+	void all_below(const std::string& key, all_callback* callback, void *arg);
 	void all_below(const std::string& key, std::function<all_function> f);
 	void all_below(const std::string& key, std::function<all_string_function> f);
 
-	void all_between(void *context, const std::string& key1, const std::string& key2, all_callback* callback);
+	void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg);
 	void all_between(const std::string& key1, const std::string& key2, std::function<all_function> f);
 	void all_between(const std::string& key1, const std::string& key2, std::function<all_string_function> f);
 
@@ -91,25 +91,25 @@ public:
 	std::size_t count_below(const std::string& key);
 	std::size_t count_between(const std::string& key1, const std::string& key2);
 
-	void each(void *context, each_callback* callback);
+	void each(each_callback* callback, void *arg);
 	void each(std::function<each_function> f);
 	void each(std::function<each_string_function> f);
 
-	void each_above(void *context, const std::string& key, each_callback* callback);
+	void each_above(const std::string& key, each_callback* callback, void *arg);
 	void each_above(const std::string& key, std::function<each_function> f);
 	void each_above(const std::string& key, std::function<each_string_function> f);
 
-	void each_below(void *context, const std::string& key, each_callback* callback);
+	void each_below(const std::string& key, each_callback* callback, void *arg);
 	void each_below(const std::string& key, std::function<each_function> f);
 	void each_below(const std::string& key, std::function<each_string_function> f);
 
-	void each_between(void *context, const std::string& key1, const std::string& key2, each_callback* callback);
+	void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg);
 	void each_between(const std::string& key1, const std::string& key2, std::function<each_function> f);
 	void each_between(const std::string& key1, const std::string& key2, std::function<each_string_function> f);
 
 	status exists(const std::string& key);
 
-	void get(void *context, const std::string& key, get_callback* callback);
+	void get(const std::string& key, get_callback* callback, void *arg);
 	void get(const std::string& key, std::function<get_function> f);
 	void get(const std::string& key, std::function<get_string_function> f);
 	status get(const std::string& key, std::string* value);
@@ -127,37 +127,37 @@ private:
  * C and C++ functions use different calling conventions.
  */
 extern "C" {
-	static inline void callKVAllFunction(void *context, const char *key, size_t keybytes) {
-		(*reinterpret_cast<std::function<all_function>*>(context))(key, keybytes);
+	static inline void callKVAllFunction(const char *key, size_t keybytes, void *arg) {
+		(*reinterpret_cast<std::function<all_function>*>(arg))(key, keybytes);
 	}
 
-	static inline void callKVAllStringFunction(void *context, const char *key, size_t keybytes) {
-		(*reinterpret_cast<std::function<all_string_function>*>(context))(std::string(key, keybytes));
+	static inline void callKVAllStringFunction(const char *key, size_t keybytes, void *arg) {
+		(*reinterpret_cast<std::function<all_string_function>*>(arg))(std::string(key, keybytes));
 	}
 
-	static inline void callKVEachFunction(void *context, const char *key, size_t keybytes, const char *value, size_t valuebytes) {
-		(*reinterpret_cast<std::function<each_function>*>(context))(key, keybytes, value, valuebytes);
+	static inline void callKVEachFunction(const char *key, size_t keybytes, const char *value, size_t valuebytes, void *arg) {
+		(*reinterpret_cast<std::function<each_function>*>(arg))(key, keybytes, value, valuebytes);
 	}
 
-	static inline void callKVEachStringFunction(void *context, const char *key, size_t keybytes, const char *value, size_t valuebytes) {
-		(*reinterpret_cast<std::function<each_string_function>*>(context))(std::string(key, keybytes), std::string(value, valuebytes));
+	static inline void callKVEachStringFunction(const char *key, size_t keybytes, const char *value, size_t valuebytes, void *arg) {
+		(*reinterpret_cast<std::function<each_string_function>*>(arg))(std::string(key, keybytes), std::string(value, valuebytes));
 	}
 
-	static inline void callKVGetFunction(void *context, const char *value, size_t valuebytes) {
-		(*reinterpret_cast<std::function<get_function>*>(context))(value, valuebytes);
+	static inline void callKVGetFunction(const char *value, size_t valuebytes, void *arg) {
+		(*reinterpret_cast<std::function<get_function>*>(arg))(value, valuebytes);
 	}
 
-	static inline void callKVGetStringFunction(void *context, const char *value, size_t valuebytes) {
-		(*reinterpret_cast<std::function<all_string_function>*>(context))(std::string(value, valuebytes));
+	static inline void callKVGetStringFunction(const char *value, size_t valuebytes, void *arg) {
+		(*reinterpret_cast<std::function<all_string_function>*>(arg))(std::string(value, valuebytes));
 	}
 
-	static inline void callGet(void *context, const char *v, size_t vb) {
-		auto c = reinterpret_cast<std::pair<status, std::string*>*>(context);
+	static inline void callGet(const char *v, size_t vb, void *arg) {
+		auto c = reinterpret_cast<std::pair<status, std::string*>*>(arg);
 		c->first = status::OK;
 		c->second->append(v, vb);
 	}
 
-	static inline void callOnStartCallback(void* context, const char* engine, pmemkv_config *config, const char* msg) {
+	static inline void callOnStartCallback(void *context, const char* engine, pmemkv_config *config, const char* msg){
 		auto *string = reinterpret_cast<std::string*>(context);
 		*string = msg;
 	}
@@ -167,16 +167,16 @@ inline void *db::engine_context() {
 	return pmemkv_engine_context(this->_db);
 }
 
-inline void db::all(void *context, all_callback* callback) {
-	pmemkv_all(this->_db, context, callback);
+inline void db::all(all_callback* callback, void *arg) {
+	pmemkv_all(this->_db, callback, arg);
 }
 
 inline void db::all(std::function<all_function> f) {
-	pmemkv_all(this->_db, &f, callKVAllFunction);
+	pmemkv_all(this->_db, callKVAllFunction, &f);
 }
 
 inline void db::all(std::function<all_string_function> f) {
-	pmemkv_all(this->_db, &f, callKVAllStringFunction);
+	pmemkv_all(this->_db, callKVAllStringFunction, &f);
 }
 
 inline db::db(void *context, const std::string& engine_name, pmemkv_config *config, start_failure_callback* callback) {
@@ -195,40 +195,40 @@ inline db::~db() {
 	pmemkv_close(this->_db);
 }
 
-inline void db::all_above(void *context, const std::string& key, all_callback* callback) {
-	pmemkv_all_above(this->_db, context, key.c_str(), key.size(), callback);
+inline void db::all_above(const std::string& key, all_callback* callback, void *arg) {
+	pmemkv_all_above(this->_db, key.c_str(), key.size(), callback, arg);
 }
 
 inline void db::all_above(const std::string& key, std::function<all_function> f) {
-	pmemkv_all_above(this->_db, &f, key.c_str(), key.size(), callKVAllFunction);
+	pmemkv_all_above(this->_db, key.c_str(), key.size(), callKVAllFunction, &f);
 }
 
 inline void db::all_above(const std::string& key, std::function<all_string_function> f) {
-	pmemkv_all_above(this->_db, &f, key.c_str(), key.size(), callKVAllStringFunction);
+	pmemkv_all_above(this->_db, key.c_str(), key.size(), callKVAllStringFunction, &f);
 }
 
-inline void db::all_below(void *context, const std::string& key, all_callback* callback) {
-	pmemkv_all_below(this->_db, context, key.c_str(), key.size(), callback);
+inline void db::all_below(const std::string& key, all_callback* callback, void *arg) {
+	pmemkv_all_below(this->_db, key.c_str(), key.size(), callback, arg);
 }
 
 inline void db::all_below(const std::string& key, std::function<all_function> f) {
-	pmemkv_all_below(this->_db, &f, key.c_str(), key.size(), callKVAllFunction);
+	pmemkv_all_below(this->_db, key.c_str(), key.size(), callKVAllFunction, &f);
 }
 
 inline void db::all_below(const std::string& key, std::function<all_string_function> f) {
-	pmemkv_all_below(this->_db, &f, key.c_str(), key.size(), callKVAllStringFunction);
+	pmemkv_all_below(this->_db, key.c_str(), key.size(), callKVAllStringFunction, &f);
 }
 
-inline void db::all_between(void *context, const std::string& key1, const std::string& key2, all_callback* callback) {
-	pmemkv_all_between(this->_db, context, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callback);
+inline void db::all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) {
+	pmemkv_all_between(this->_db, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callback, arg);
 }
 
 inline void db::all_between(const std::string& key1, const std::string& key2, std::function<all_function> f) {
-	pmemkv_all_between(this->_db, &f, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callKVAllFunction);
+	pmemkv_all_between(this->_db, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callKVAllFunction, &f);
 }
 
 inline void db::all_between(const std::string& key1, const std::string& key2, std::function<all_string_function> f) {
-	pmemkv_all_between(this->_db, &f, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callKVAllStringFunction);
+	pmemkv_all_between(this->_db, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callKVAllStringFunction, &f);
 }
 
 inline std::size_t db::count() {
@@ -247,74 +247,74 @@ inline std::size_t db::count_between(const std::string& key1, const std::string&
 	return pmemkv_count_between(this->_db, key1.c_str(), key1.size(), key2.c_str(), key2.size());
 }
 
-inline void db::each(void *context, each_callback* callback) {
-	pmemkv_each(this->_db, context, callback);
+inline void db::each(each_callback* callback, void *arg) {
+	pmemkv_each(this->_db, callback, arg);
 }
 
 inline void db::each(std::function<each_function> f) {
-	pmemkv_each(this->_db, &f, callKVEachFunction);
+	pmemkv_each(this->_db, callKVEachFunction, &f);
 }
 
 inline void db::each(std::function<each_string_function> f) {
-	pmemkv_each(this->_db, &f, callKVEachStringFunction);
+	pmemkv_each(this->_db, callKVEachStringFunction, &f);
 }
 
-inline void db::each_above(void *context, const std::string& key, each_callback* callback) {
-	pmemkv_each_above(this->_db, context, key.c_str(), key.size(), callback);
+inline void db::each_above(const std::string& key, each_callback* callback, void *arg) {
+	pmemkv_each_above(this->_db, key.c_str(), key.size(), callback, arg);
 }
 
 inline void db::each_above(const std::string& key, std::function<each_function> f) {
-	pmemkv_each_above(this->_db, &f, key.c_str(), key.size(), callKVEachFunction);
+	pmemkv_each_above(this->_db, key.c_str(), key.size(), callKVEachFunction, &f);
 }
 
 inline void db::each_above(const std::string& key, std::function<each_string_function> f) {
-	pmemkv_each_above(this->_db, &f, key.c_str(), key.size(), callKVEachStringFunction);
+	pmemkv_each_above(this->_db, key.c_str(), key.size(), callKVEachStringFunction, &f);
 }
 
-inline void db::each_below(void *context, const std::string& key, each_callback* callback) {
-	pmemkv_each_below(this->_db, context, key.c_str(), key.size(), callback);
+inline void db::each_below(const std::string& key, each_callback* callback, void *arg) {
+	pmemkv_each_below(this->_db, key.c_str(), key.size(), callback, arg);
 }
 
 inline void db::each_below(const std::string& key, std::function<each_function> f) {
-	pmemkv_each_below(this->_db, &f, key.c_str(), key.size(), callKVEachFunction);
+	pmemkv_each_below(this->_db, key.c_str(), key.size(), callKVEachFunction, &f);
 }
 
 inline void db::each_below(const std::string& key, std::function<each_string_function> f) {
-	pmemkv_each_below(this->_db, &f, key.c_str(), key.size(), callKVEachStringFunction);
+	pmemkv_each_below(this->_db, key.c_str(), key.size(), callKVEachStringFunction, &f);
 }
 
-inline void db::each_between(void *context, const std::string& key1, const std::string& key2, each_callback* callback) {
-	pmemkv_each_between(this->_db, context, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callback);
+inline void db::each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) {
+	pmemkv_each_between(this->_db, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callback, arg);
 }
 
 inline void db::each_between(const std::string& key1, const std::string& key2, std::function<each_function> f) {
-	pmemkv_each_between(this->_db, &f, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callKVEachFunction);
+	pmemkv_each_between(this->_db, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callKVEachFunction, &f);
 }
 
 inline void db::each_between(const std::string& key1, const std::string& key2, std::function<each_string_function> f) {
-	pmemkv_each_between(this->_db, &f, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callKVEachStringFunction);
+	pmemkv_each_between(this->_db, key1.c_str(), key1.size(), key2.c_str(), key2.size(), callKVEachStringFunction, &f);
 }
 
 inline status db::exists(const std::string& key) {
 	return (status) pmemkv_exists(this->_db, key.c_str(), key.size());
 }
 
-inline void db::get(void *context, const std::string& key, get_callback* callback) {
-	pmemkv_get(this->_db, context, key.c_str(), key.size(), callback);
+inline void db::get(const std::string& key, get_callback* callback, void *arg) {
+	pmemkv_get(this->_db, key.c_str(), key.size(), callback, arg);
 }
 
 inline void db::get(const std::string& key, std::function<get_function> f) {
-	pmemkv_get(this->_db, &f, key.c_str(), key.size(), callKVGetFunction);
+	pmemkv_get(this->_db, key.c_str(), key.size(), callKVGetFunction, &f);
 }
 
 inline void db::get(const std::string& key, std::function<get_string_function> f) {
-	pmemkv_get(this->_db, &f, key.c_str(), key.size(), callKVGetStringFunction);
+	pmemkv_get(this->_db, key.c_str(), key.size(), callKVGetStringFunction, &f);
 }
 
 inline status db::get(const std::string& key, std::string* value) {
 	std::pair<status, std::string*> ctx = {status::NOT_FOUND, value};
 
-	pmemkv_get(this->_db, &ctx, key.c_str(), key.size(), callGet);
+	pmemkv_get(this->_db, key.c_str(), key.size(), callGet, &ctx);
 
 	return ctx.first;
 }

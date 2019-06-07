@@ -363,12 +363,12 @@ TEST_F(VCMapTest, UsesAllTest) {
     ASSERT_TRUE(kv->count() == 2);
 
     std::string result;
-    kv->all(&result, [](void *context, const char *k, size_t kb) {
-        const auto c = ((std::string*) context);
+    kv->all([](const char *k, size_t kb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append("<");
         c->append(std::string(k, kb));
         c->append(">,");
-    });
+    }, &result);
     ASSERT_TRUE(result == "<2>,<记!>,");
 }
 
@@ -379,14 +379,14 @@ TEST_F(VCMapTest, UsesEachTest) {
     ASSERT_TRUE(kv->count() == 2);
 
     std::string result;
-    kv->each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-            const auto c = ((std::string*) context);
+    kv->each([](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+            const auto c = ((std::string*) arg);
             c->append("<");
             c->append(std::string(k, kb));
             c->append(">,<");
             c->append(std::string(v, vb));
             c->append(">|");
-    });
+    }, &result);
     ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");
 }
 
