@@ -112,15 +112,15 @@ bool CachingEngine::readConfig(pmemkv_config *config)
 	return true;
 }
 
-void caching::all(void *context, all_callback* callback) {
+void caching::all(all_callback* callback, void *arg) {
     LOG("All");
     int result = 0;
-    each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-        auto c = ((int*) context);
+    each(&result, [](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+        auto c = ((int*) arg);
         (*c)++;
     });
     if (result > 0 && basePtr) {
-        basePtr->all(context, callback);
+        basePtr->all(callback, arg);
     }
     // todo refactor as single callback (Each --> All)
 }
@@ -128,32 +128,32 @@ void caching::all(void *context, all_callback* callback) {
 std::size_t caching::count() {
     LOG("Count");
     int result = 0;
-    each(&result, [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-        auto c = ((int*) context);
+    each(&result, [](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+        auto c = ((int*) arg);
         (*c)++;
     });
     return result;
 }
 
 struct EachCacheCallbackContext {
-    void *context;
+    void *arg;
     each_callback* cBack;
     std::list<std::string>* expiredKeys;
 };
 
-void caching::each(void *context, each_callback* callback) {
+void caching::each(each_callback* callback, void *arg) {
     LOG("Each");
     std::list<std::string> removingKeys;
-    EachCacheCallbackContext cxt = {context, callback, &removingKeys};
+    EachCacheCallbackContext cxt = {arg, callback, &removingKeys};
 
-    auto cb = [](void *context, const char *k, size_t kb, const char *v, size_t vb) {
-        const auto c = ((EachCacheCallbackContext*) context);
+    auto cb = [](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+        const auto c = ((EachCacheCallbackContext*) arg);
         std::string localValue = v;
         std::string timeStamp = localValue.substr(0, 14);
         std::string value = localValue.substr(14);
         // TTL from config is ZERO or if the key is valid
         if (!ttl || valueFieldConversion(timeStamp)) {
-            (*c->cBack)(c->context, k, kb, value.c_str(), value.length());
+            (*c->cBack)(c->k, kb, value.c_str(), value.length(), arg);
         } else {
             c->expiredKeys->push_back(k);
         }
@@ -176,15 +176,15 @@ status caching::exists(const std::string& key) {
     // todo fold into single return statement
 }
 
-void caching::get(void *context, const std::string& key, get_callback* callback) {
+void caching::get(const std::string& key, get_callback* callback, void *arg) {
     LOG("Get key=" << key);
     std::string value;
-    if (getKey(key, value, false)) (*callback)(context, value.c_str(), value.size());
+    if (getKey(key, value, false)) (*callback)(value.c_str(), value.size(), arg);
 }
 
 bool caching::getKey(const std::string& key, std::string& valueField, bool api_flag) {
-    auto cb = [](void *context, const char *v, size_t vb) {
-        const auto c = ((std::string*) context);
+    auto cb = [](const char *v, size_t vb, void *arg) {
+        const auto c = ((std::string*) arg);
         c->append(v, vb);
     };
     std::string value;
