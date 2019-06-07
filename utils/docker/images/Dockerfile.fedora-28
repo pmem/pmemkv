@@ -57,6 +57,7 @@ RUN dnf update -y \
 	ndctl-devel \
 	numactl-devel \
 	passwd \
+	perl-Text-Diff \
 	rapidjson-devel \
 	rpm-build \
 	sudo \
