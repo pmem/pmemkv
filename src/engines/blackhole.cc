@@ -47,19 +47,19 @@ blackhole::~blackhole() {
     LOG("Stopped ok");
 }
 
-void blackhole::all(void *context, all_callback* callback) {
+void blackhole::all(all_callback* callback, void *arg) {
     LOG("All");
 }
 
-void blackhole::all_above(void *context, const std::string& key, all_callback* callback) {
+void blackhole::all_above(const std::string& key, all_callback* callback, void *arg) {
     LOG("AllAbove for key=" << key);
 }
 
-void blackhole::all_below(void *context, const std::string& key, all_callback* callback) {
+void blackhole::all_below(const std::string& key, all_callback* callback, void *arg) {
     LOG("AllBelow for key=" << key);
 }
 
-void blackhole::all_between(void *context, const std::string& key1, const std::string& key2, all_callback* callback) {
+void blackhole::all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) {
     LOG("AllBetween for key1=" << key1 << ", key2=" << key2);
 }
 
@@ -83,19 +83,19 @@ std::size_t blackhole::count_between(const std::string& key1, const std::string&
     return 0;
 }
 
-void blackhole::each(void *context, each_callback* callback) {
+void blackhole::each(each_callback* callback, void *arg) {
     LOG("Each");
 }
 
-void blackhole::each_above(void *context, const std::string& key, each_callback* callback) {
+void blackhole::each_above(const std::string& key, each_callback* callback, void *arg) {
     LOG("EachAbove for key=" << key);
 }
 
-void blackhole::each_below(void *context, const std::string& key, each_callback* callback) {
+void blackhole::each_below(const std::string& key, each_callback* callback, void *arg) {
     LOG("EachBelow for key=" << key);
 }
 
-void blackhole::each_between(void *context, const std::string& key1, const std::string& key2, each_callback* callback) {
+void blackhole::each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) {
     LOG("EachBetween for key1=" << key1 << ", key2=" << key2);
 }
 
@@ -104,7 +104,7 @@ status blackhole::exists(const std::string& key) {
     return status::NOT_FOUND;
 }
 
-void blackhole::get(void *context, const std::string& key, get_callback* callback) {
+void blackhole::get(const std::string& key, get_callback* callback, void *arg) {
     LOG("Get key=" << key);
 }
 

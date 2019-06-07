@@ -53,13 +53,13 @@ class engine_base {
 
     virtual void *engine_context() = 0;
 
-    virtual void all(void *context, all_callback* callback) = 0;
+    virtual void all(all_callback* callback, void *arg) = 0;
 
-    virtual void all_above(void *context, const std::string& key, all_callback* callback) = 0;
+    virtual void all_above(const std::string& key, all_callback* callback, void *arg) = 0;
 
-    virtual void all_below(void *context, const std::string& key, all_callback* callback) = 0;
+    virtual void all_below(const std::string& key, all_callback* callback, void *arg) = 0;
 
-    virtual void all_between(void *context, const std::string& key1, const std::string& key2, all_callback* callback) = 0;
+    virtual void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) = 0;
 
     virtual std::size_t count() = 0;
 
@@ -69,17 +69,17 @@ class engine_base {
 
     virtual std::size_t count_between(const std::string& key1, const std::string& key2) = 0;
 
-    virtual void each(void *context, each_callback* callback) = 0;
+    virtual void each(each_callback* callback, void *arg) = 0;
 
-    virtual void each_above(void *context, const std::string& key, each_callback* callback) = 0;
+    virtual void each_above(const std::string& key, each_callback* callback, void *arg) = 0;
 
-    virtual void each_below(void *context, const std::string& key, each_callback* callback) = 0;
+    virtual void each_below(const std::string& key, each_callback* callback, void *arg) = 0;
 
-    virtual void each_between(void *context, const std::string& key1, const std::string& key2, each_callback* callback) = 0;
+    virtual void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) = 0;
 
     virtual status exists(const std::string& key) = 0;
 
-    virtual void get(void *context, const std::string& key, get_callback* callback) = 0;
+    virtual void get(const std::string& key, get_callback* callback, void *arg) = 0;
 
     virtual status put(const std::string& key, const std::string& value) = 0;
 

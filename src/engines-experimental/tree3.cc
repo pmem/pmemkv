@@ -66,14 +66,14 @@ tree3::~tree3() {
 // KEY/VALUE METHODS
 // ===============================================================================================
 
-void tree3::all(void *context, all_callback* callback) {
+void tree3::all(all_callback* callback, void *arg) {
     LOG("All");
     auto leaf = pmpool.root()->head;
     while (leaf) {
         for (int slot = LEAF_KEYS; slot--;) {
             auto kvslot = leaf->slots[slot].get_ro();
             if (kvslot.empty() || kvslot.hash() == 0) continue;
-            (*callback)(context, kvslot.key(), kvslot.get_ks());
+            (*callback)(kvslot.key(), kvslot.get_ks(), arg);
         }
         leaf = leaf->next;  // advance to next linked leaf
     }
@@ -93,14 +93,14 @@ std::size_t tree3::count() {
     return result;
 }
 
-void tree3::each(void *context, each_callback* callback) {
+void tree3::each(each_callback* callback, void *arg) {
     LOG("Each");
     auto leaf = pmpool.root()->head;
     while (leaf) {
         for (int slot = LEAF_KEYS; slot--;) {
             auto kvslot = leaf->slots[slot].get_ro();
             if (kvslot.empty() || kvslot.hash() == 0) continue;
-            (*callback)(context,  kvslot.key(), kvslot.get_ks(), kvslot.val(), kvslot.get_vs());
+            (*callback)( kvslot.key(), kvslot.get_ks(), kvslot.val(), kvslot.get_vs(), arg);
         }
         leaf = leaf->next;  // advance to next linked leaf
     }
@@ -122,7 +122,7 @@ status tree3::exists(const std::string& key) {
     return status::NOT_FOUND;
 }
 
-void tree3::get(void *context, const std::string& key, get_callback* callback) {
+void tree3::get(const std::string& key, get_callback* callback, void *arg) {
     LOG("Get using callback for key=" << key);
     auto leafnode = LeafSearch(key);
     if (leafnode) {
@@ -133,7 +133,7 @@ void tree3::get(void *context, const std::string& key, get_callback* callback) {
                 if (leafnode->keys[slot].compare(key) == 0) {
                     auto kv = leafnode->leaf->slots[slot].get_ro();
                     LOG("   found value, slot=" << slot << ", size=" << std::to_string(kv.valsize()));
-                    (*callback)(context, kv.val(), kv.valsize());
+                    (*callback)(kv.val(), kv.valsize(), arg);
                     return;
                 }
             }

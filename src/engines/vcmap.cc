@@ -51,10 +51,10 @@ vcmap::~vcmap() {
     LOG("Stopped ok");
 }
 
-void vcmap::all(void *context, all_callback* callback) {
+void vcmap::all(all_callback* callback, void *arg) {
     LOG("All");
     for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, iterator.first.c_str(), iterator.first.size());
+        (*callback)(iterator.first.c_str(), iterator.first.size(), arg);
     }
 }
 
@@ -63,11 +63,11 @@ std::size_t vcmap::count() {
     return pmem_kv_container.size();
 }
 
-void vcmap::each(void *context, each_callback* callback) {
+void vcmap::each(each_callback* callback, void *arg) {
     LOG("Each");
     for (auto& iterator : pmem_kv_container) {
-        (*callback)(context, iterator.first.c_str(), iterator.first.size(),
-                iterator.second.c_str(), iterator.second.size());
+        (*callback)(iterator.first.c_str(), iterator.first.size(),
+                iterator.second.c_str(), iterator.second.size(), arg);
     }
 }
 
@@ -78,7 +78,7 @@ status vcmap::exists(const std::string& key) {
     return (result_found ? status::OK : status::NOT_FOUND);
 }
 
-void vcmap::get(void *context, const std::string& key, get_callback* callback) {
+void vcmap::get(const std::string& key, get_callback* callback, void *arg) {
     LOG("Get key=" << key);
     map_t::const_accessor result;
     const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
@@ -86,7 +86,7 @@ void vcmap::get(void *context, const std::string& key, get_callback* callback) {
         LOG("  key not found");
         return;
     }
-    (*callback)(context, result->second.c_str(), result->second.size());
+    (*callback)(result->second.c_str(), result->second.size(), arg);
 }
 
 status vcmap::put(const std::string& key, const std::string& value) {

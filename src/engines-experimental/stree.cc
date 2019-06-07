@@ -66,10 +66,10 @@ stree::~stree() {
     LOG("Stopped ok");
 }
 
-void stree::all(void *context, all_callback* callback) {
+void stree::all(all_callback* callback, void *arg) {
     LOG("All");
     for (auto& iterator : *my_btree) {
-        (*callback)(context, iterator.first.c_str(), iterator.first.size());
+        (*callback)(iterator.first.c_str(), iterator.first.size(), arg);
     }
 }
 
@@ -79,11 +79,11 @@ std::size_t stree::count() {
     return result;
 }
 
-void stree::each(void *context, each_callback* callback) {
+void stree::each(each_callback* callback, void *arg) {
     LOG("Each");
     for (auto& iterator : *my_btree) {
-        (*callback)(context, iterator.first.c_str(), iterator.first.size(),
-                    iterator.second.c_str(), iterator.second.size());
+        (*callback)(iterator.first.c_str(), iterator.first.size(),
+                    iterator.second.c_str(), iterator.second.size(), arg);
     }
 }
 
@@ -97,14 +97,14 @@ status stree::exists(const std::string& key) {
     return status::OK;
 }
 
-void stree::get(void *context, const std::string& key, get_callback* callback) {
+void stree::get(const std::string& key, get_callback* callback, void *arg) {
     LOG("Get using callback for key=" << key);
     btree_type::iterator it = my_btree->find(pstring<20>(key));
     if (it == my_btree->end()) {
         LOG("  key not found");
         return;
     }
-    (*callback)(context, it->second.c_str(), it->second.size());
+    (*callback)(it->second.c_str(), it->second.size(), arg);
 }
 
 status stree::put(const std::string& key, const std::string& value) {
