@@ -32,66 +32,55 @@
 
 #pragma once
 
-#include "../libpmemkv.h"
+#include "../engine.h"
 #include "stree/persistent_b_tree.h"
 #include "stree/pstring.h"
 
 using pmem::obj::pool;
 using pmem::obj::persistent_ptr;
 
-namespace pmemkv {
-namespace stree {
+namespace pmem {
+namespace kv {
 
-const std::string ENGINE = "stree";
 const size_t DEGREE = 64;
 const size_t MAX_KEY_SIZE = 20;
 const size_t MAX_VALUE_SIZE = 200;
 
-class STree : public KVEngine {
+class stree : public engine_base {
   public:
-    STree(void* context, const std::string& path, size_t size);
-    ~STree();
+    stree(void *context, const std::string& path, size_t size);
+    ~stree();
 
-    std::string Engine() final { return ENGINE; }
-    void* EngineContext() { return engine_context; }
-    void All(void* context, KVAllCallback* callback) final;
-    void AllAbove(void* context, const std::string& key, KVAllCallback* callback) final {};
-    void AllBelow(void* context, const std::string& key, KVAllCallback* callback) final {};
-    void AllBetween(void* context, const std::string& key1, const std::string& key2, KVAllCallback* callback) final {};
-    int64_t Count() final;
-    int64_t CountAbove(const std::string& key) final { return 0; };
-    int64_t CountBelow(const std::string& key) final { return 0; };
-    int64_t CountBetween(const std::string& key1, const std::string& key2) final { return 0; };
-    void Each(void* context, KVEachCallback* callback) final;
-    void EachAbove(void* context, const std::string& key, KVEachCallback* callback) final {};
-    void EachBelow(void* context, const std::string& key, KVEachCallback* callback) final {};
-    void EachBetween(void* context, const std::string& key1, const std::string& key2, KVEachCallback* callback) final {};
-    KVStatus Exists(const std::string& key) final;
-    void Get(void* context, const std::string& key, KVGetCallback* callback) final;
-    KVStatus Put(const std::string& key, const std::string& value) final;
-    KVStatus Remove(const std::string& key) final;
-
-    using KVEngine::All;
-    using KVEngine::AllAbove;
-    using KVEngine::AllBelow;
-    using KVEngine::AllBetween;
-    using KVEngine::Each;
-    using KVEngine::EachAbove;
-    using KVEngine::EachBelow;
-    using KVEngine::EachBetween;
-    using KVEngine::Get;
+    std::string name() final { return "stree"; }
+    void *engine_context() { return context; }
+    void all(all_callback* callback, void *arg) final;
+    void all_above(const std::string& key, all_callback* callback, void *arg) final {};
+    void all_below(const std::string& key, all_callback* callback, void *arg) final {};
+    void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) final {};
+    std::size_t count() final;
+    std::size_t count_above(const std::string& key) final { return 0; };
+    std::size_t count_below(const std::string& key) final { return 0; };
+    std::size_t count_between(const std::string& key1, const std::string& key2) final { return 0; };
+    void each(each_callback* callback, void *arg) final;
+    void each_above(const std::string& key, each_callback* callback, void *arg) final {};
+    void each_below(const std::string& key, each_callback* callback, void *arg) final {};
+    void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) final {};
+    status exists(const std::string& key) final;
+    void get(const std::string& key, get_callback* callback, void *arg) final;
+    status put(const std::string& key, const std::string& value) final;
+    status remove(const std::string& key) final;
   private:
     typedef persistent::b_tree<pstring<MAX_KEY_SIZE>, pstring<MAX_VALUE_SIZE>, DEGREE> btree_type;
     struct RootData {
         persistent_ptr<btree_type> btree_ptr;
     };
-    STree(const STree&);
-    void operator=(const STree&);
+    stree(const stree&);
+    void operator=(const stree&);
     void Recover();
-    void* engine_context;
+    void *context;
     pool<RootData> pmpool;
     btree_type* my_btree;
 };
 
-} // namespace stree
-} // namespace pmemkv
+} /* namespace kv */
+} /* namespace pmem */

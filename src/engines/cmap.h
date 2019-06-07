@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "../libpmemkv.h"
+#include "../engine.h"
 #include "../polymorphic_string.h"
 
 #include <libpmemobj++/pool.hpp>
@@ -42,11 +42,11 @@
 
 namespace std {
 template<>
-struct hash<pmemkv::polymorphic_string> {
+struct hash<pmem::kv::polymorphic_string> {
     /* hash multiplier used by fibonacci hashing */
     static const size_t hash_multiplier = 11400714819323198485ULL;
 
-    size_t operator()(const pmemkv::polymorphic_string &str) {
+    size_t operator()(const pmem::kv::polymorphic_string &str) {
         size_t h = 0;
         for (size_t i = 0; i < str.size(); ++i) {
             h = static_cast<size_t>(str[i]) ^ (h * hash_multiplier);
@@ -56,49 +56,37 @@ struct hash<pmemkv::polymorphic_string> {
 };
 }
 
-namespace pmemkv {
-namespace cmap {
+namespace pmem {
+namespace kv {
 
-const std::string ENGINE = "cmap";
-
-class CMap : public KVEngine {
+class cmap : public engine_base {
   public:
-    CMap(void* context, const std::string& path, size_t size);
-    ~CMap();
+    cmap(void *context, const std::string& path, size_t size);
+    ~cmap();
 
-    CMap(const CMap&) = delete;
-    CMap& operator=(const CMap&) = delete;
+    cmap(const cmap&) = delete;
+    cmap& operator=(const cmap&) = delete;
 
-    std::string Engine() final { return ENGINE; }
-    void* EngineContext() { return engine_context; }
-    void All(void* context, KVAllCallback* callback) final;
-    void AllAbove(void* context, const std::string& key, KVAllCallback* callback) final {}
-    void AllBelow(void* context, const std::string& key, KVAllCallback* callback) final {}
-    void AllBetween(void* context, const std::string& key1, const std::string& key2, KVAllCallback* callback) final {}
-    int64_t Count() final;
-    int64_t CountAbove(const std::string& key) final { return 0; }
-    int64_t CountBelow(const std::string& key) final { return 0; }
-    int64_t CountBetween(const std::string& key1, const std::string& key2) final { return 0; }
-    void Each(void* context, KVEachCallback* callback) final;
-    void EachAbove(void* context, const std::string& key, KVEachCallback* callback) final {}
-    void EachBelow(void* context, const std::string& key, KVEachCallback* callback) final {}
-    void EachBetween(void* context, const std::string& key1, const std::string& key2, KVEachCallback* callback) final {}
-    KVStatus Exists(const std::string& key) final;
-    void Get(void* context, const std::string& key, KVGetCallback* callback) final;
-    KVStatus Put(const std::string& key, const std::string& value) final;
-    KVStatus Remove(const std::string& key) final;
-
-    using KVEngine::All;
-    using KVEngine::AllAbove;
-    using KVEngine::AllBelow;
-    using KVEngine::AllBetween;
-    using KVEngine::Each;
-    using KVEngine::EachAbove;
-    using KVEngine::EachBelow;
-    using KVEngine::EachBetween;
-    using KVEngine::Get;
+    std::string name() final { return "cmap"; }
+    void *engine_context() { return context; }
+    void all(all_callback* callback, void *arg) final;
+    void all_above(const std::string& key, all_callback* callback, void *arg) final {}
+    void all_below(const std::string& key, all_callback* callback, void *arg) final {}
+    void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) final {}
+    std::size_t count() final;
+    std::size_t count_above(const std::string& key) final { return 0; }
+    std::size_t count_below(const std::string& key) final { return 0; }
+    std::size_t count_between(const std::string& key1, const std::string& key2) final { return 0; }
+    void each(each_callback* callback, void *arg) final;
+    void each_above(const std::string& key, each_callback* callback, void *arg) final {}
+    void each_below(const std::string& key, each_callback* callback, void *arg) final {}
+    void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) final {}
+    status exists(const std::string& key) final;
+    void get(const std::string& key, get_callback* callback, void *arg) final;
+    status put(const std::string& key, const std::string& value) final;
+    status remove(const std::string& key) final;
   private:
-    using string_t = pmemkv::polymorphic_string;
+    using string_t = pmem::kv::polymorphic_string;
     using map_t = pmem::obj::experimental::concurrent_hash_map<string_t, string_t>;
 
     struct RootData {
@@ -107,10 +95,10 @@ class CMap : public KVEngine {
     using pool_t = pmem::obj::pool<RootData>;
 
     void Recover();
-    void* engine_context;
+    void *context;
     pool_t pmpool;
     map_t* container;
 };
 
-} // namespace cmap
-} // namespace pmemkv
+} /* namespace kv */
+} /* namespace pmem */

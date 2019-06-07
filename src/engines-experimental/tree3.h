@@ -41,7 +41,7 @@
 #include <libpmemobj++/transaction.hpp>
 #include <libpmemobj++/pool.hpp>
 
-#include "../libpmemkv.h"
+#include "../engine.h"
 
 using std::move;
 using std::unique_ptr;
@@ -53,10 +53,8 @@ using pmem::obj::transaction;
 using pmem::obj::delete_persistent;
 using pmem::obj::pool;
 
-namespace pmemkv {
-namespace tree3 {
-
-const std::string ENGINE = "tree3";                        // engine identifier
+namespace pmem {
+namespace kv {
 
 #define INNER_KEYS 4                                       // maximum keys for inner nodes
 #define INNER_KEYS_MIDPOINT (INNER_KEYS / 2)               // halfway point within the node
@@ -68,12 +66,12 @@ class KVSlot {
   public:
     uint8_t hash() const { return get_ph(); }
     static uint8_t hash_direct(char *p) { return *((uint8_t *)(p + sizeof(uint32_t) + sizeof(uint32_t))); }
-    const char* key() const { return ((char *)(kv.get()) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)); }
-    static const char* key_direct(char *p) { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)); }
+    const char *key() const { return ((char *)(kv.get()) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)); }
+    static const char *key_direct(char *p) { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)); }
     const uint32_t keysize() const { return get_ks(); }
     static const uint32_t keysize_direct(char *p) { return *((uint32_t *)(p)); }
-    const char* val() const { return ((char *)(kv.get()) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + get_ks() + 1); }
-    static const char* val_direct(char *p) { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + *((uint32_t *)(p)) + 1); }
+    const char *val() const { return ((char *)(kv.get()) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + get_ks() + 1); }
+    static const char *val_direct(char *p) { return (p + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + *((uint32_t *)(p)) + 1); }
     const uint32_t valsize() const { return get_vs(); }
     static const uint32_t valsize_direct(char *p) { return *((uint32_t *)(p + sizeof(uint32_t))); }
     void clear();
@@ -130,39 +128,29 @@ struct KVRecoveredLeaf {                                   // temporary wrapper 
     std::string max_key;                                   // highest sorting key present
 };
 
-class Tree : public KVEngine {                             // hybrid B+ tree engine
+class tree3 : public engine_base {                           // hybrid B+ tree engine
   public:
-    Tree(void* context, const std::string& path, size_t size);
-    ~Tree();
+    tree3(void *context, const std::string& path, size_t size);
+    ~tree3();
 
-    std::string Engine() final { return ENGINE; }
-    void* EngineContext() { return engine_context; }
-    void All(void* context, KVAllCallback* callback) final;
-    void AllAbove(void* context, const std::string& key, KVAllCallback* callback) final {};
-    void AllBelow(void* context, const std::string& key, KVAllCallback* callback) final {};
-    void AllBetween(void* context, const std::string& key1, const std::string& key2, KVAllCallback* callback) final {};
-    int64_t Count() final;
-    int64_t CountAbove(const std::string& key) final { return 0; };
-    int64_t CountBelow(const std::string& key) final { return 0; };
-    int64_t CountBetween(const std::string& key1, const std::string& key2) final { return 0; };
-    void Each(void* context, KVEachCallback* callback) final;
-    void EachAbove(void* context, const std::string& key, KVEachCallback* callback) final {};
-    void EachBelow(void* context, const std::string& key, KVEachCallback* callback) final {};
-    void EachBetween(void* context, const std::string& key1, const std::string& key2, KVEachCallback* callback) final {};
-    KVStatus Exists(const std::string& key) final;
-    void Get(void* context, const std::string& key, KVGetCallback* callback) final;
-    KVStatus Put(const std::string& key, const std::string& value) final;
-    KVStatus Remove(const std::string& key) final;
-
-    using KVEngine::All;
-    using KVEngine::AllAbove;
-    using KVEngine::AllBelow;
-    using KVEngine::AllBetween;
-    using KVEngine::Each;
-    using KVEngine::EachAbove;
-    using KVEngine::EachBelow;
-    using KVEngine::EachBetween;
-    using KVEngine::Get;
+    std::string name() final { return "tree3"; }
+    void *engine_context() { return context; }
+    void all(all_callback* callback, void *arg) final;
+    void all_above(const std::string& key, all_callback* callback, void *arg) final {};
+    void all_below(const std::string& key, all_callback* callback, void *arg) final {};
+    void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) final {};
+    std::size_t count() final;
+    std::size_t count_above(const std::string& key) final { return 0; };
+    std::size_t count_below(const std::string& key) final { return 0; };
+    std::size_t count_between(const std::string& key1, const std::string& key2) final { return 0; };
+    void each(each_callback* callback, void *arg) final;
+    void each_above(const std::string& key, each_callback* callback, void *arg) final {};
+    void each_below(const std::string& key, each_callback* callback, void *arg) final {};
+    void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) final {};
+    status exists(const std::string& key) final;
+    void get(const std::string& key, get_callback* callback, void *arg) final;
+    status put(const std::string& key, const std::string& value) final;
+    status remove(const std::string& key) final;
   protected:
     KVLeafNode* LeafSearch(const std::string& key);
     void LeafFillEmptySlot(KVLeafNode* leafnode, uint8_t hash, const std::string& key, const std::string& value);
@@ -170,16 +158,16 @@ class Tree : public KVEngine {                             // hybrid B+ tree eng
     void LeafFillSpecificSlot(KVLeafNode* leafnode, uint8_t hash, const std::string& key, const std::string& value, int slot);
     void LeafSplitFull(KVLeafNode* leafnode, uint8_t hash, const std::string& key, const std::string& value);
     void InnerUpdateAfterSplit(KVNode* node, unique_ptr<KVNode> newnode, std::string* split_key);
-    uint8_t PearsonHash(const char* data, size_t size);
+    uint8_t PearsonHash(const char *data, size_t size);
     void Recover();
   private:
-    Tree(const Tree&);                                     // prevent copying
-    void operator=(const Tree&);                           // prevent assigning
-    void* engine_context;                                  // context when started
+    tree3(const tree3&);                                     // prevent copying
+    void operator=(const tree3&);                           // prevent assigning
+    void *context;                                  // context when started
     vector<persistent_ptr<KVLeaf>> leaves_prealloc;        // persisted but unused leaves
     pool<KVRoot> pmpool;                                   // pool for persistent root
     unique_ptr<KVNode> tree_top;                           // pointer to uppermost inner node
 };
 
-} // namespace tree3
-} // namespace pmemkv
+} /* namespace kv */
+} /* namespace pmem */

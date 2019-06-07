@@ -105,15 +105,14 @@ Next we'll walk you through the steps of creating a new engine.
 
 * Create `src/engines/mytree.h` header file
 * For new engines, use `blackhole.h` as a template
-* Use `pmemkv::mytree` namespace to define internal types
-* Define `ENGINE` constant in namespace to export engine name
-* Use camel-case for implementation class name (`class MyTree`)
+* Define engine class in `pmem::kv` namespace
+* Use snake_case for implementation class name (`class my_tree`)
 
 ### Creating Engine Implementation
 
 * Create `src/engines/mytree.cc` implementation file
 * For new engines, use `blackhole.cc` as a template
-* Use `pmemkv::mytree` namespace defined by the header
+* Use `pmem::kv` namespace defined by the header
 
 ### Providing Unit Test
 
@@ -127,7 +126,7 @@ Next we'll walk you through the steps of creating a new engine.
     * Add a build option for a new engine with a name like `ENGINE_MYTREE`
     and use it to ifdef all includes, dependencies and linking you may add
     * Add definition of the new option, like `-DENGINE_MYTREE`, so it can
-    be used to ifdef engine-specific code (e.g. in pmemkv header), like:
+    be used to ifdef engine-specific code (e.g. in libpmemkv.cc), like:
     ```
     #ifdef ENGINE_MYTREE
     ...
@@ -143,8 +142,7 @@ Next we'll walk you through the steps of creating a new engine.
 
 * In `src/pmemkv.cc`:
     * Add `#include "engines/mytree.h"`
-    * Update `KVEngine::Start` to return new `MyTree` instances
-    * Update `KVEngine::Stop` to delete `MyTree` instances
+    * Update `pmemkv_open` to return new `my_tree` instances
 * Build & verify engine now works with high-level bindings
 
 ### Documentation

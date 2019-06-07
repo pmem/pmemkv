@@ -32,6 +32,9 @@
 
 #include <rapidjson/document.h>
 #include <sys/stat.h>
+
+#include "libpmemkv.h"
+#include "engine.h"
 #include "engines/blackhole.h"
 
 #ifdef ENGINE_VSMAP
@@ -195,35 +198,16 @@ pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 	return 0;
 }
 
-} /* extern "C" */
-
-using std::runtime_error;
-
-namespace pmemkv {
-
-KVEngine::~KVEngine() { }
-
-// STATIC METHOD IMPLEMENTATIONS
-
-KVEngine* KVEngine::Start(const std::string& engine, pmemkv_config *config) {
-    return Start(nullptr, engine, config);
-}
-
-KVEngine* KVEngine::Start(void* context, const std::string& engine, pmemkv_config *config) {
-    auto cb = [](void* cxt, const char* engine, pmemkv_config *config, const char* msg) {
-        throw runtime_error(msg);
-    };
-    return Start(context, engine.c_str(), config, cb);
-}
-
-KVEngine* KVEngine::Start(void* context, const char* engine, pmemkv_config *config, KVStartFailureCallback* onfail) {
+pmemkv_db *pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config, pmemkv_start_failure_callback* onfail) {
     try {
-        if (engine == blackhole::ENGINE) {
-            return new blackhole::Blackhole(context);
+        std::string engine = engine_c_str;
+
+        if (engine == "blackhole") {
+            return reinterpret_cast<pmemkv_db*>(new pmem::kv::blackhole(context));
         }
 #ifdef ENGINE_CACHING
-        if (engine == caching::ENGINE) {
-            return new caching::CachingEngine(context, config);
+        if (engine == "caching") {
+            return reinterpret_cast<pmemkv_db*>(new pmem::kv::caching(context, config));
         }
 #endif
         // handle traditional engines expecting path & size params
@@ -237,318 +221,141 @@ KVEngine* KVEngine::Start(void* context, const char* engine, pmemkv_config *conf
         size_t size = 0;
         pmemkv_config_get(config, "size", &size, sizeof(size_t), NULL);
 #ifdef ENGINE_TREE3
-        if (engine == tree3::ENGINE) {
-            return new tree3::Tree(context, path.get(), size);
+        if (engine == "tree3") {
+            return reinterpret_cast<pmemkv_db*>(new pmem::kv::tree3(context, path.get(), size));
         }
 #endif
 
 #ifdef ENGINE_STREE
-        if (engine == stree::ENGINE) {
-            return new stree::STree(context, path.get(), size);
+        if (engine == "stree") {
+            return reinterpret_cast<pmemkv_db*>(new pmem::kv::stree(context, path.get(), size));
         }
 #endif
 
 #ifdef ENGINE_CMAP
-        if (engine == cmap::ENGINE) {
-            return new cmap::CMap(context, path.get(), size);
+        if (engine == "cmap") {
+            return reinterpret_cast<pmemkv_db*>(new pmem::kv::cmap(context, path.get(), size));
         }
 #endif
 
 #if defined(ENGINE_VSMAP) || defined(ENGINE_VCMAP)
         struct stat info;
         if ((stat(path.get(), &info) < 0) || !S_ISDIR(info.st_mode)) {
-            throw runtime_error("Config path is not an existing directory");
+            throw std::runtime_error("Config path is not an existing directory");
         }
 #endif
 
 #ifdef ENGINE_VSMAP
-        if (engine == vsmap::ENGINE) {
-            return new vsmap::VSMap(context, path.get(), size);
+        if (engine == "vsmap") {
+            return reinterpret_cast<pmemkv_db*>(new pmem::kv::vsmap(context, path.get(), size));
         }
 #endif
 
 #ifdef ENGINE_VCMAP
-        if (engine == vcmap::ENGINE) {
-            return new vcmap::VCMap(context, path.get(), size);
+        if (engine == "vcmap") {
+            return reinterpret_cast<pmemkv_db*>(new pmem::kv::vcmap(context, path.get(), size));
         }
 #endif
-        throw runtime_error("Unknown engine name");
+        throw std::runtime_error("Unknown engine name");
     } catch (std::exception& e) {
-        (*onfail)(context, engine, config, e.what());
+        onfail(context, engine_c_str, config, e.what());
         return nullptr;
     }
 }
 
-void KVEngine::Stop(KVEngine* kv) {
-    auto engine = kv->Engine();
-    if (engine == blackhole::ENGINE)
-        delete (blackhole::Blackhole*) kv;
-#ifdef ENGINE_TREE3
-    if (engine == tree3::ENGINE)
-        delete (tree3::Tree*) kv;
-#endif
-
-#ifdef ENGINE_STREE
-    if (engine == stree::ENGINE)
-        delete (stree::STree*) kv;
-#endif
-
-#ifdef ENGINE_CACHING
-    if (engine == caching::ENGINE)
-        delete (caching::CachingEngine*) kv;
-#endif
-
-#ifdef ENGINE_VSMAP
-    if (engine == vsmap::ENGINE)
-        delete (vsmap::VSMap*) kv;
-#endif
-
-#ifdef ENGINE_VCMAP
-    if (engine == vcmap::ENGINE)
-        delete (vcmap::VCMap*) kv;
-#endif
-
-#ifdef ENGINE_CMAP
-    if (engine == cmap::ENGINE)
-        delete (cmap::CMap*) kv;
-#endif
+void pmemkv_close(pmemkv_db *db) {
+    // XXX: move dangerous work to close() method
+    delete reinterpret_cast<pmem::kv::engine_base*>(db);
 }
 
-// API METHOD IMPLEMENTATIONS
-
-auto cb_all_function = [](void* context, int32_t kb, const char* k) {
-    const auto c = ((std::function<KVAllFunction>*) context);
-    c->operator()(kb, k);
-};
-
-auto cb_all_string_function = [](void* context, int32_t kb, const char* k) {
-    const auto c = ((std::function<KVAllStringFunction>*) context);
-    c->operator()(std::string(k, kb));
-};
-
-auto cb_each_function = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
-    const auto c = ((std::function<KVEachFunction>*) context);
-    c->operator()(kb, k, vb, v);
-};
-
-auto cb_each_string_function = [](void* context, int32_t kb, const char* k, int32_t vb, const char* v) {
-    const auto c = ((std::function<KVEachStringFunction>*) context);
-    c->operator()(std::string(k, kb), std::string(v, vb));
-};
-
-void KVEngine::All(const std::function<KVAllFunction> f) {
-    auto localf = f;
-    All(&localf, cb_all_function);
+void pmemkv_all(pmemkv_db *db, pmemkv_all_callback* c, void *arg) {
+    reinterpret_cast<pmem::kv::engine_base*>(db)->all(c, arg);
 }
 
-void KVEngine::All(const std::function<KVAllStringFunction> f) {
-    auto localf = f;
-    All(&localf, cb_all_string_function);
+void pmemkv_all_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_all_callback* c, void *arg) {
+    reinterpret_cast<pmem::kv::engine_base*>(db)->all_above(std::string(k, (size_t) kb), c, arg);
 }
 
-void KVEngine::AllAbove(const std::string& key, const std::function<KVAllFunction> f) {
-    auto localf = f;
-    AllAbove(&localf, key, cb_all_function);
+void pmemkv_all_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_all_callback* c, void *arg) {
+    reinterpret_cast<pmem::kv::engine_base*>(db)->all_below(std::string(k, (size_t) kb), c, arg);
 }
 
-void KVEngine::AllAbove(const std::string& key, const std::function<KVAllStringFunction> f) {
-    auto localf = f;
-    AllAbove(&localf, key, cb_all_string_function);
+void pmemkv_all_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2, size_t kb2, pmemkv_all_callback* c, void *arg) {
+    reinterpret_cast<pmem::kv::engine_base*>(db)->all_between(std::string(k1, (size_t) kb1), std::string(k2, (size_t) kb2), c, arg);
 }
 
-void KVEngine::AllBelow(const std::string& key, const std::function<KVAllFunction> f) {
-    auto localf = f;
-    AllBelow(&localf, key, cb_all_function);
+size_t pmemkv_count(pmemkv_db *db) {
+    return reinterpret_cast<pmem::kv::engine_base*>(db)->count();
 }
 
-void KVEngine::AllBelow(const std::string& key, const std::function<KVAllStringFunction> f) {
-    auto localf = f;
-    AllBelow(&localf, key, cb_all_string_function);
+size_t pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb) {
+    return reinterpret_cast<pmem::kv::engine_base*>(db)->count_above(std::string(k, (size_t) kb));
 }
 
-void KVEngine::AllBetween(const std::string& key1, const std::string& key2, const std::function<KVAllFunction> f) {
-    auto localf = f;
-    AllBetween(&localf, key1, key2, cb_all_function);
+size_t pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb) {
+    return reinterpret_cast<pmem::kv::engine_base*>(db)->count_below(std::string(k, (size_t) kb));
 }
 
-void KVEngine::AllBetween(const std::string& key1, const std::string& key2, const std::function<KVAllStringFunction> f) {
-    auto localf = f;
-    AllBetween(&localf, key1, key2, cb_all_string_function);
+size_t pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2, size_t kb2) {
+    return reinterpret_cast<pmem::kv::engine_base*>(db)->count_between(std::string(k1, (size_t) kb1), std::string(k2, (size_t) kb2));
 }
 
-void KVEngine::Each(const std::function<KVEachFunction> f) {
-    auto localf = f;
-    Each(&localf, cb_each_function);
+void pmemkv_each(pmemkv_db *db, pmemkv_each_callback* c, void *arg) {
+    reinterpret_cast<pmem::kv::engine_base*>(db)->each(c, arg);
 }
 
-void KVEngine::Each(const std::function<KVEachStringFunction> f) {
-    auto localf = f;
-    Each(&localf, cb_each_string_function);
+void pmemkv_each_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_each_callback* c, void *arg) {
+    reinterpret_cast<pmem::kv::engine_base*>(db)->each_above(std::string(k, (size_t) kb), c, arg);
 }
 
-void KVEngine::EachAbove(const std::string& key, const std::function<KVEachFunction> f) {
-    auto localf = f;
-    EachAbove(&localf, key, cb_each_function);
+void pmemkv_each_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_each_callback* c, void *arg) {
+    reinterpret_cast<pmem::kv::engine_base*>(db)->each_below(std::string(k, (size_t) kb), c, arg);
 }
 
-void KVEngine::EachAbove(const std::string& key, const std::function<KVEachStringFunction> f) {
-    auto localf = f;
-    EachAbove(&localf, key, cb_each_string_function);
+void pmemkv_each_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2, size_t kb2, pmemkv_each_callback* c, void *arg) {
+    reinterpret_cast<pmem::kv::engine_base*>(db)->each_between(std::string(k1, (size_t) kb1), std::string(k2, (size_t) kb2), c, arg);
 }
 
-void KVEngine::EachBelow(const std::string& key, const std::function<KVEachFunction> f) {
-    auto localf = f;
-    EachBelow(&localf, key, cb_each_function);
+pmemkv_status pmemkv_exists(pmemkv_db *db, const char *k, size_t kb) {
+    return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base*>(db)->exists(std::string(k, (size_t) kb));
 }
 
-void KVEngine::EachBelow(const std::string& key, const std::function<KVEachStringFunction> f) {
-    auto localf = f;
-    EachBelow(&localf, key, cb_each_string_function);
-}
-
-void KVEngine::EachBetween(const std::string& key1, const std::string& key2, const std::function<KVEachFunction> f) {
-    auto localf = f;
-    EachBetween(&localf, key1, key2, cb_each_function);
-}
-
-void KVEngine::EachBetween(const std::string& key1, const std::string& key2, const std::function<KVEachStringFunction> f) {
-    auto localf = f;
-    EachBetween(&localf, key1, key2, cb_each_string_function);
-}
-
-struct GetCallbackContext {
-    KVStatus result;
-    std::string* value;
-};
-
-KVStatus KVEngine::Get(const std::string& key, std::string* value) {
-    GetCallbackContext cxt = {NOT_FOUND, value};
-    auto cb = [](void* context, int32_t vb, const char* v) {
-        const auto c = ((GetCallbackContext*) context);
-        c->result = OK;
-        c->value->append(v, vb);
-    };
-    Get(&cxt, key, cb);
-    return cxt.result;
-}
-
-void KVEngine::Get(const std::string& key, std::function<KVGetFunction> f) {
-    std::function<KVGetFunction> localf = f;
-    auto cb = [](void* context, int vb, const char* v) {
-        const auto c = ((std::function<KVGetFunction>*) context);
-        c->operator()(vb, v);
-    };
-    Get(&localf, key, cb);
-}
-
-void KVEngine::Get(const std::string& key, std::function<KVGetStringFunction> f) {
-    std::function<KVGetStringFunction> localf = f;
-    auto cb = [](void* context, int vb, const char* v) {
-        const auto c = ((std::function<KVGetStringFunction>*) context);
-        c->operator()(std::string(v, vb));
-    };
-    Get(&localf, key, cb);
-}
-
-// EXTERN C IMPLEMENTATION
-
-extern "C" KVEngine* kvengine_start(void* context, const char* engine, pmemkv_config *config,
-                                    KVStartFailureCallback* callback) {
-    return KVEngine::Start(context, engine, config, callback);
-}
-
-extern "C" void kvengine_stop(KVEngine* kv) {
-    return KVEngine::Stop(kv);
-}
-
-extern "C" void kvengine_all(KVEngine* kv, void* context, KVAllCallback* c) {
-    kv->All(context, c);
-}
-
-extern "C" void kvengine_all_above(KVEngine* kv, void* context, int32_t kb, const char* k, KVAllCallback* c) {
-    kv->AllAbove(context, std::string(k, (size_t) kb), c);
-}
-
-extern "C" void kvengine_all_below(KVEngine* kv, void* context, int32_t kb, const char* k, KVAllCallback* c) {
-    kv->AllBelow(context, std::string(k, (size_t) kb), c);
-}
-
-extern "C" void kvengine_all_between(KVEngine* kv, void* context, int32_t kb1, const char* k1,
-                                     int32_t kb2, const char* k2, KVAllCallback* c) {
-    kv->AllBetween(context, std::string(k1, (size_t) kb1), std::string(k2, (size_t) kb2), c);
-}
-
-extern "C" int64_t kvengine_count(KVEngine* kv) {
-    return kv->Count();
-}
-
-extern "C" int64_t kvengine_count_above(KVEngine* kv, int32_t kb, const char* k) {
-    return kv->CountAbove(std::string(k, (size_t) kb));
-}
-
-extern "C" int64_t kvengine_count_below(KVEngine* kv, int32_t kb, const char* k) {
-    return kv->CountBelow(std::string(k, (size_t) kb));
-}
-
-extern "C" int64_t kvengine_count_between(KVEngine* kv, int32_t kb1, const char* k1, int32_t kb2, const char* k2) {
-    return kv->CountBetween(std::string(k1, (size_t) kb1), std::string(k2, (size_t) kb2));
-}
-
-extern "C" void kvengine_each(KVEngine* kv, void* context, KVEachCallback* c) {
-    kv->Each(context, c);
-}
-
-extern "C" void kvengine_each_above(KVEngine* kv, void* context, int32_t kb, const char* k, KVEachCallback* c) {
-    kv->EachAbove(context, std::string(k, (size_t) kb), c);
-}
-
-extern "C" void kvengine_each_below(KVEngine* kv, void* context, int32_t kb, const char* k, KVEachCallback* c) {
-    kv->EachBelow(context, std::string(k, (size_t) kb), c);
-}
-
-extern "C" void kvengine_each_between(KVEngine* kv, void* context, int32_t kb1, const char* k1,
-                                      int32_t kb2, const char* k2, KVEachCallback* c) {
-    kv->EachBetween(context, std::string(k1, (size_t) kb1), std::string(k2, (size_t) kb2), c);
-}
-
-extern "C" int8_t kvengine_exists(KVEngine* kv, int32_t kb, const char* k) {
-    return kv->Exists(std::string(k, (size_t) kb));
-}
-
-extern "C" void kvengine_get(KVEngine* kv, void* context, const int32_t kb, const char* k, KVGetCallback* c) {
-    kv->Get(context, std::string(k, (size_t) kb), c);
+void pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_callback* c, void *arg) {
+    reinterpret_cast<pmem::kv::engine_base*>(db)->get(std::string(k, (size_t) kb), c, arg);
 }
 
 struct GetCopyCallbackContext {
-    KVStatus result;
-    int32_t maxvaluebytes;
+    pmemkv_status result;
+    size_t maxvaluebytes;
     char* value;
 };
 
-extern "C" int8_t kvengine_get_copy(KVEngine* kv, int32_t kb, const char* k, int32_t maxvaluebytes, char* value) {
-    GetCopyCallbackContext cxt = {NOT_FOUND, maxvaluebytes, value};
-    auto cb = [](void* context, int32_t vb, const char* v) {
-        const auto c = ((GetCopyCallbackContext*) context);
+pmemkv_status pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char* value, size_t maxvaluebytes) {
+    GetCopyCallbackContext cxt = {PMEMKV_STATUS_NOT_FOUND, maxvaluebytes, value};
+    auto cb = [](const char *v, size_t vb, void *arg) {
+        const auto c = ((GetCopyCallbackContext*) arg);
         if (vb < c->maxvaluebytes) {
-            c->result = OK;
+            c->result = PMEMKV_STATUS_OK;
             memcpy(c->value, v, vb);
         } else {
-            c->result = FAILED;
+            c->result = PMEMKV_STATUS_FAILED;
         }
     };
     memset(value, 0, maxvaluebytes);
-    kv->Get(&cxt, std::string(k, (size_t) kb), cb);
+    reinterpret_cast<pmem::kv::engine_base*>(db)->get(std::string(k, (size_t) kb), cb, &cxt);
     return cxt.result;
 }
 
-extern "C" int8_t kvengine_put(KVEngine* kv, const int32_t kb, const char* k, const int32_t vb, const char* v) {
-    return kv->Put(std::string(k, (size_t) kb), std::string(v, (size_t) vb));
+pmemkv_status pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb) {
+    return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base*>(db)->put(std::string(k, (size_t) kb), std::string(v, (size_t) vb));
 }
 
-extern "C" int8_t kvengine_remove(KVEngine* kv, const int32_t kb, const char* k) {
-    return kv->Remove(std::string(k, (size_t) kb));
+pmemkv_status pmemkv_remove(pmemkv_db *db, const char *k, size_t kb) {
+    return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base*>(db)->remove(std::string(k, (size_t) kb));
 }
 
-// todo missing test cases for KVEngine static methods & extern C API
+void *pmemkv_engine_context(pmemkv_db *db) {
+    return reinterpret_cast<pmem::kv::engine_base*>(db)->engine_context();
+}
 
-} // namespace pmemkv
+} /* extern "C" */

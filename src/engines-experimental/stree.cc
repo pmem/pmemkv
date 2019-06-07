@@ -45,10 +45,10 @@ using pmem::obj::make_persistent_atomic;
 using pmem::obj::transaction;
 using pmem::detail::conditional_add_to_tx;
 
-namespace pmemkv {
-namespace stree {
+namespace pmem {
+namespace kv {
 
-STree::STree(void* context, const std::string& path, const size_t size) : engine_context(context) {
+stree::stree(void *context, const std::string& path, const size_t size) : context(context) {
     if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
         LOG("Creating filesystem pool, path=" << path << ", size=" << std::to_string(size));
         pmpool = pool<RootData>::create(path.c_str(), LAYOUT, size, S_IRWXU);
@@ -60,54 +60,54 @@ STree::STree(void* context, const std::string& path, const size_t size) : engine
     LOG("Started ok");
 }
 
-STree::~STree() {
+stree::~stree() {
     LOG("Stopping");
     pmpool.close();
     LOG("Stopped ok");
 }
 
-void STree::All(void* context, KVAllCallback* callback) {
+void stree::all(all_callback* callback, void *arg) {
     LOG("All");
     for (auto& iterator : *my_btree) {
-        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str());
+        (*callback)(iterator.first.c_str(), iterator.first.size(), arg);
     }
 }
 
-int64_t STree::Count() {
-    int64_t result = 0;
+std::size_t stree::count() {
+    std::size_t result = 0;
     for (auto& iterator : *my_btree) result++;
     return result;
 }
 
-void STree::Each(void* context, KVEachCallback* callback) {
+void stree::each(each_callback* callback, void *arg) {
     LOG("Each");
     for (auto& iterator : *my_btree) {
-        (*callback)(context, (int32_t) iterator.first.size(), iterator.first.c_str(),
-                    (int32_t) iterator.second.size(), iterator.second.c_str());
+        (*callback)(iterator.first.c_str(), iterator.first.size(),
+                    iterator.second.c_str(), iterator.second.size(), arg);
     }
 }
 
-KVStatus STree::Exists(const std::string& key) {
+status stree::exists(const std::string& key) {
     LOG("Exists for key=" << key);
     btree_type::iterator it = my_btree->find(pstring<20>(key));
     if (it == my_btree->end()) {
         LOG("  key not found");
-        return NOT_FOUND;
+        return status::NOT_FOUND;
     }
-    return OK;
+    return status::OK;
 }
 
-void STree::Get(void* context, const std::string& key, KVGetCallback* callback) {
+void stree::get(const std::string& key, get_callback* callback, void *arg) {
     LOG("Get using callback for key=" << key);
     btree_type::iterator it = my_btree->find(pstring<20>(key));
     if (it == my_btree->end()) {
         LOG("  key not found");
         return;
     }
-    (*callback)(context, (int32_t) it->second.size(), it->second.c_str());
+    (*callback)(it->second.c_str(), it->second.size(), arg);
 }
 
-KVStatus STree::Put(const std::string& key, const std::string& value) {
+status stree::put(const std::string& key, const std::string& value) {
     LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
     try {
         auto result = my_btree->insert(std::make_pair(pstring<MAX_KEY_SIZE>(key), pstring<MAX_VALUE_SIZE>(value)));
@@ -118,37 +118,37 @@ KVStatus STree::Put(const std::string& key, const std::string& value) {
             entry.second = value;
             transaction::commit();
         }
-        return OK;
+        return status::OK;
     } catch (std::bad_alloc e) {
         LOG("Put failed due to exception, " << e.what());
-        return FAILED;
+        return status::FAILED;
     } catch (pmem::transaction_alloc_error e) {
         LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
-        return FAILED;
+        return status::FAILED;
     } catch (pmem::transaction_error e) {
         LOG("Put failed due to pmem::transaction_error, " << e.what());
-        return FAILED;
+        return status::FAILED;
     }
 }
 
-KVStatus STree::Remove(const std::string& key) {
+status stree::remove(const std::string& key) {
     LOG("Remove key=" << key);
     try {
         auto result = my_btree->erase(key);
-        return (result == 1) ? OK : NOT_FOUND;
+        return (result == 1) ? status::OK : status::NOT_FOUND;
     } catch (std::bad_alloc e) {
         LOG("Put failed due to exception, " << e.what());
-        return FAILED;
+        return status::FAILED;
     } catch (pmem::transaction_alloc_error e) {
         LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
-        return FAILED;
+        return status::FAILED;
     } catch (pmem::transaction_error e) {
         LOG("Put failed due to pmem::transaction_error, " << e.what());
-        return FAILED;
+        return status::FAILED;
     }
 }
 
-void STree::Recover() {
+void stree::Recover() {
     auto root_data = pmpool.root();
     if (root_data->btree_ptr) {
         my_btree = root_data->btree_ptr.get();
@@ -159,5 +159,5 @@ void STree::Recover() {
     }
 }
 
-} // namespace stree
-} // namespace pmemkv
+} // namespace kv
+} // namespace pmem

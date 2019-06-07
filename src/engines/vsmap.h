@@ -32,50 +32,38 @@
 
 #pragma once
 
-#include "../libpmemkv.h"
+#include "../engine.h"
 #include "pmem_allocator.h"
 #include <map>
 #include <string>
 #include <scoped_allocator>
 
-namespace pmemkv {
-namespace vsmap {
+namespace pmem {
+namespace kv {
 
-const std::string ENGINE = "vsmap";
-
-class VSMap : public KVEngine {
+class vsmap : public engine_base {
   public:
-    VSMap(void* context, const std::string& path, size_t size);
-    ~VSMap();
+    vsmap(void *context, const std::string& path, size_t size);
+    ~vsmap();
 
-    std::string Engine() final { return ENGINE; }
-    void* EngineContext() { return engine_context; }
-    void All(void* context, KVAllCallback* callback) final;
-    void AllAbove(void* context, const std::string& key, KVAllCallback* callback) final;
-    void AllBelow(void* context, const std::string& key, KVAllCallback* callback) final;
-    void AllBetween(void* context, const std::string& key1, const std::string& key2, KVAllCallback* callback) final;
-    int64_t Count() final;
-    int64_t CountAbove(const std::string& key) final;
-    int64_t CountBelow(const std::string& key) final;
-    int64_t CountBetween(const std::string& key1, const std::string& key2) final;
-    void Each(void* context, KVEachCallback* callback) final;
-    void EachAbove(void* context, const std::string& key, KVEachCallback* callback) final;
-    void EachBelow(void* context, const std::string& key, KVEachCallback* callback) final;
-    void EachBetween(void* context, const std::string& key1, const std::string& key2, KVEachCallback* callback) final;
-    KVStatus Exists(const std::string& key) final;
-    void Get(void* context, const std::string& key, KVGetCallback* callback) final;
-    KVStatus Put(const std::string& key, const std::string& value) final;
-    KVStatus Remove(const std::string& key) final;
-
-    using KVEngine::All;
-    using KVEngine::AllAbove;
-    using KVEngine::AllBelow;
-    using KVEngine::AllBetween;
-    using KVEngine::Each;
-    using KVEngine::EachAbove;
-    using KVEngine::EachBelow;
-    using KVEngine::EachBetween;
-    using KVEngine::Get;
+    std::string name() final { return "vsmap"; }
+    void *engine_context() { return context; }
+    void all(all_callback* callback, void *arg) final;
+    void all_above(const std::string& key, all_callback* callback, void *arg) final;
+    void all_below(const std::string& key, all_callback* callback, void *arg) final;
+    void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) final;
+    std::size_t count() final;
+    std::size_t count_above(const std::string& key) final;
+    std::size_t count_below(const std::string& key) final;
+    std::size_t count_between(const std::string& key1, const std::string& key2) final;
+    void each(each_callback* callback, void *arg) final;
+    void each_above(const std::string& key, each_callback* callback, void *arg) final;
+    void each_below(const std::string& key, each_callback* callback, void *arg) final;
+    void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) final;
+    status exists(const std::string& key) final;
+    void get(const std::string& key, get_callback* callback, void *arg) final;
+    status put(const std::string& key, const std::string& value) final;
+    status remove(const std::string& key) final;
   private:
     using storage_type = std::basic_string<char, std::char_traits<char>, pmem::allocator<char> >;
 
@@ -84,10 +72,10 @@ class VSMap : public KVEngine {
     using map_allocator_type = pmem::allocator<std::pair<key_type, mapped_type> >;
     using map_type = std::map<key_type, mapped_type, std::less<key_type>, std::scoped_allocator_adaptor<map_allocator_type>>;
 
-    void* engine_context;
+    void *context;
     map_allocator_type kv_allocator;
     map_type pmem_kv_container;
 };
 
-} // namespace vsmap
-} // namespace pmemkv
+} /* namespace kv */
+} /* namespace pmem */

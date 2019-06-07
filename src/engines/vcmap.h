@@ -32,60 +32,48 @@
 
 #pragma once
 
-#include "../libpmemkv.h"
+#include "../engine.h"
 #include "pmem_allocator.h"
 #include <string>
 #include <scoped_allocator>
 #include <tbb/concurrent_hash_map.h>
 
-namespace pmemkv {
-namespace vcmap {
+namespace pmem {
+namespace kv {
 
-const std::string ENGINE = "vcmap";
-
-class VCMap : public KVEngine {
+class vcmap : public engine_base {
   public:
-    VCMap(void* context, const std::string& path, size_t size);
-    ~VCMap();
+    vcmap(void *context, const std::string& path, size_t size);
+    ~vcmap();
 
-    std::string Engine() final { return ENGINE; }
-    void* EngineContext() { return engine_context; }
-    void All(void* context, KVAllCallback* callback) final;
-    void AllAbove(void* context, const std::string& key, KVAllCallback* callback) final {};
-    void AllBelow(void* context, const std::string& key, KVAllCallback* callback) final {};
-    void AllBetween(void* context, const std::string& key1, const std::string& key2, KVAllCallback* callback) final {};
-    int64_t Count() final;
-    int64_t CountAbove(const std::string& key) final { return 0; };
-    int64_t CountBelow(const std::string& key) final { return 0; };
-    int64_t CountBetween(const std::string& key1, const std::string& key2) final { return 0; };
-    void Each(void* context, KVEachCallback* callback) final;
-    void EachAbove(void* context, const std::string& key, KVEachCallback* callback) final {};
-    void EachBelow(void* context, const std::string& key, KVEachCallback* callback) final {};
-    void EachBetween(void* context, const std::string& key1, const std::string& key2, KVEachCallback* callback) final {};
-    KVStatus Exists(const std::string& key) final;
-    void Get(void* context, const std::string& key, KVGetCallback* callback) final;
-    KVStatus Put(const std::string& key, const std::string& value) final;
-    KVStatus Remove(const std::string& key) final;
-
-    using KVEngine::All;
-    using KVEngine::AllAbove;
-    using KVEngine::AllBelow;
-    using KVEngine::AllBetween;
-    using KVEngine::Each;
-    using KVEngine::EachAbove;
-    using KVEngine::EachBelow;
-    using KVEngine::EachBetween;
-    using KVEngine::Get;
+    std::string name() final { return "vcmap"; }
+    void *engine_context() { return context; }
+    void all(all_callback* callback, void *arg) final;
+    void all_above(const std::string& key, all_callback* callback, void *arg) final {};
+    void all_below(const std::string& key, all_callback* callback, void *arg) final {};
+    void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) final {};
+    std::size_t count() final;
+    std::size_t count_above(const std::string& key) final { return 0; };
+    std::size_t count_below(const std::string& key) final { return 0; };
+    std::size_t count_between(const std::string& key1, const std::string& key2) final { return 0; };
+    void each(each_callback* callback, void *arg) final;
+    void each_above(const std::string& key, each_callback* callback, void *arg) final {}
+    void each_below(const std::string& key, each_callback* callback, void *arg) final {}
+    void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) final {}
+    status exists(const std::string& key) final;
+    void get(const std::string& key, get_callback* callback, void *arg) final;
+    status put(const std::string& key, const std::string& value) final;
+    status remove(const std::string& key) final;
   private:
     typedef pmem::allocator<char> ch_allocator_t;
     typedef std::basic_string<char, std::char_traits<char>, ch_allocator_t> pmem_string;
     typedef pmem::allocator<std::pair<pmem_string, pmem_string> > kv_allocator_t;
     typedef tbb::concurrent_hash_map <pmem_string, pmem_string, tbb::tbb_hash_compare<pmem_string>, std::scoped_allocator_adaptor<kv_allocator_t>> map_t;
-    void* engine_context;
+    void *context;
     kv_allocator_t kv_allocator;
     ch_allocator_t ch_allocator;
     map_t pmem_kv_container;
 };
 
-} // namespace vcmap
-} // namespace pmemkv
+} /* namespace kv */
+} /* namespace pmem */
