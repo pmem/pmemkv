@@ -59,6 +59,16 @@ vcmap::~vcmap()
 	LOG("Stopped ok");
 }
 
+std::string vcmap::name()
+{
+	return "vcmap";
+}
+
+void *vcmap::engine_context()
+{
+	return context;
+}
+
 void vcmap::all(all_callback *callback, void *arg)
 {
 	LOG("All");

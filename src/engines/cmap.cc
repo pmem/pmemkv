@@ -66,6 +66,16 @@ cmap::~cmap()
 	LOG("Stopped ok");
 }
 
+std::string cmap::name()
+{
+	return "cmap";
+}
+
+void *cmap::engine_context()
+{
+	return context;
+}
+
 void cmap::all(all_callback *callback, void *arg)
 {
 	LOG("All");
