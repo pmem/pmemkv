@@ -56,6 +56,16 @@ vsmap::~vsmap()
 	LOG("Stopped ok");
 }
 
+std::string vsmap::name()
+{
+	return "vsmap";
+}
+
+void *vsmap::engine_context()
+{
+	return context;
+}
+
 void vsmap::all(all_callback *callback, void *arg)
 {
 	LOG("All");
