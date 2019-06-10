@@ -30,25 +30,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "../../src/libpmemkv.hpp"
+#include "gtest/gtest.h"
 
 using namespace pmem::kv;
 
 class BlackholeTest : public testing::Test {
-  public:
-    db kv;
+public:
+	db kv;
 
-    BlackholeTest(): kv("blackhole", nullptr) {}
+	BlackholeTest() : kv("blackhole", nullptr)
+	{
+	}
 };
 
-TEST_F(BlackholeTest, SimpleTest) {
-    std::string value;
-    ASSERT_TRUE(kv.count() == 0);
-    ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
-    ASSERT_TRUE(kv.put("key1", "value1") == status::OK);
-    ASSERT_TRUE(kv.count() == 0);
-    ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
-    ASSERT_TRUE(kv.remove("key1") == status::OK);
-    ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
+TEST_F(BlackholeTest, SimpleTest)
+{
+	std::string value;
+	ASSERT_TRUE(kv.count() == 0);
+	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv.put("key1", "value1") == status::OK);
+	ASSERT_TRUE(kv.count() == 0);
+	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv.remove("key1") == status::OK);
+	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
 }
