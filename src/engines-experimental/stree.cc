@@ -73,6 +73,16 @@ stree::~stree()
 	LOG("Stopped ok");
 }
 
+std::string stree::name()
+{
+	return "stree";
+}
+
+void *stree::engine_context()
+{
+	return context;
+}
+
 void stree::all(all_callback *callback, void *arg)
 {
 	LOG("All");

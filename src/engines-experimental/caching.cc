@@ -68,6 +68,16 @@ caching::~caching()
 	LOG("Stopped ok");
 }
 
+std::string caching::name()
+{
+	return "caching";
+}
+
+void *caching::engine_context()
+{
+	return context;
+}
+
 bool CachingEngine::getString(pmemkv_config *config, const char *key, std::string &str)
 {
 	size_t length;
