@@ -33,57 +33,70 @@
 #ifndef LIBPMEMKV_ENGINE_H
 #define LIBPMEMKV_ENGINE_H
 
-#include <string>
 #include <functional>
+#include <string>
 
 #include "libpmemkv.hpp"
 
-namespace pmem {
-namespace kv {
+namespace pmem
+{
+namespace kv
+{
 
 const std::string LAYOUT = "pmemkv";
 
 class engine_base {
-  public:
-    engine_base() {}
+public:
+	engine_base()
+	{
+	}
 
-    virtual ~engine_base() {}
+	virtual ~engine_base()
+	{
+	}
 
-    virtual std::string name() = 0;
+	virtual std::string name() = 0;
 
-    virtual void *engine_context() = 0;
+	virtual void *engine_context() = 0;
 
-    virtual void all(all_callback* callback, void *arg) = 0;
+	virtual void all(all_callback *callback, void *arg) = 0;
 
-    virtual void all_above(const std::string& key, all_callback* callback, void *arg) = 0;
+	virtual void all_above(const std::string &key, all_callback *callback,
+			       void *arg) = 0;
 
-    virtual void all_below(const std::string& key, all_callback* callback, void *arg) = 0;
+	virtual void all_below(const std::string &key, all_callback *callback,
+			       void *arg) = 0;
 
-    virtual void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) = 0;
+	virtual void all_between(const std::string &key1, const std::string &key2,
+				 all_callback *callback, void *arg) = 0;
 
-    virtual std::size_t count() = 0;
+	virtual std::size_t count() = 0;
 
-    virtual std::size_t count_above(const std::string& key) = 0;
+	virtual std::size_t count_above(const std::string &key) = 0;
 
-    virtual std::size_t count_below(const std::string& key) = 0;
+	virtual std::size_t count_below(const std::string &key) = 0;
 
-    virtual std::size_t count_between(const std::string& key1, const std::string& key2) = 0;
+	virtual std::size_t count_between(const std::string &key1,
+					  const std::string &key2) = 0;
 
-    virtual void each(each_callback* callback, void *arg) = 0;
+	virtual void each(each_callback *callback, void *arg) = 0;
 
-    virtual void each_above(const std::string& key, each_callback* callback, void *arg) = 0;
+	virtual void each_above(const std::string &key, each_callback *callback,
+				void *arg) = 0;
 
-    virtual void each_below(const std::string& key, each_callback* callback, void *arg) = 0;
+	virtual void each_below(const std::string &key, each_callback *callback,
+				void *arg) = 0;
 
-    virtual void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) = 0;
+	virtual void each_between(const std::string &key1, const std::string &key2,
+				  each_callback *callback, void *arg) = 0;
 
-    virtual status exists(const std::string& key) = 0;
+	virtual status exists(const std::string &key) = 0;
 
-    virtual void get(const std::string& key, get_callback* callback, void *arg) = 0;
+	virtual void get(const std::string &key, get_callback *callback, void *arg) = 0;
 
-    virtual status put(const std::string& key, const std::string& value) = 0;
+	virtual status put(const std::string &key, const std::string &value) = 0;
 
-    virtual status remove(const std::string& key) = 0;
+	virtual status remove(const std::string &key) = 0;
 };
 
 } /* namespace kv */

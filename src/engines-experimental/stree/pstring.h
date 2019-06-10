@@ -33,85 +33,105 @@
 #ifndef PERSISTENT_PSTRING_H
 #define PERSISTENT_PSTRING_H
 
-#include <string.h>
 #include <stdexcept>
+#include <string.h>
 
-template<size_t CAPACITY>
+template <size_t CAPACITY>
 class pstring {
-    static const size_t BUFFER_SIZE = CAPACITY + 1;
+	static const size_t BUFFER_SIZE = CAPACITY + 1;
+
 public:
-    pstring(const std::string& s = "\0") {
-        init(s.c_str(), s.size());
-    }
+	pstring(const std::string &s = "\0")
+	{
+		init(s.c_str(), s.size());
+	}
 
-    pstring(const pstring& other) {
-        init(other.c_str(), other.size());
-    }
+	pstring(const pstring &other)
+	{
+		init(other.c_str(), other.size());
+	}
 
-    pstring& operator=(const pstring& other) {
-        init(other.c_str(), other.size());
-        return *this;
-    }
+	pstring &operator=(const pstring &other)
+	{
+		init(other.c_str(), other.size());
+		return *this;
+	}
 
-    pstring& operator=(const std::string& s) {
-        init(s.c_str(), s.size());
-        return *this;
-    }
+	pstring &operator=(const std::string &s)
+	{
+		init(s.c_str(), s.size());
+		return *this;
+	}
 
-    const char *c_str() const {
-        return str;
-    }
+	const char *c_str() const
+	{
+		return str;
+	}
 
-    size_t size() const {
-        return _size;
-    }
+	size_t size() const
+	{
+		return _size;
+	}
 
-    char* begin() {
-        return str;
-    }
+	char *begin()
+	{
+		return str;
+	}
 
-    char* end() {
-        return str + _size;
-    }
+	char *end()
+	{
+		return str + _size;
+	}
 
-    const char *begin() const {
-        return str;
-    }
+	const char *begin() const
+	{
+		return str;
+	}
 
-    const char *end() const {
-        return str + _size;
-    }
+	const char *end() const
+	{
+		return str + _size;
+	}
 
 private:
-    void init(const char *src, size_t size) {
-        if(size > CAPACITY) throw std::length_error("size exceed pstring capacity");
-        memcpy(str, src, size);
-        str[size] = '\0';
-        _size = size;
-    }
+	void init(const char *src, size_t size)
+	{
+		if (size > CAPACITY)
+			throw std::length_error("size exceed pstring capacity");
+		memcpy(str, src, size);
+		str[size] = '\0';
+		_size = size;
+	}
 
-    char str[BUFFER_SIZE];
-    size_t _size;
+	char str[BUFFER_SIZE];
+	size_t _size;
 };
 
-template<size_t size>
-inline bool operator<(const pstring<size>& lhs, const pstring<size>& rhs) {
-    return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+template <size_t size>
+inline bool operator<(const pstring<size> &lhs, const pstring<size> &rhs)
+{
+	return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
+					    rhs.end());
 }
 
-template<size_t size>
-inline bool operator>(const pstring<size>& lhs, const pstring<size>& rhs) {
-    return std::lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(), lhs.end());
+template <size_t size>
+inline bool operator>(const pstring<size> &lhs, const pstring<size> &rhs)
+{
+	return std::lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(),
+					    lhs.end());
 }
 
-template<size_t size>
-inline bool operator==(const pstring<size>& lhs, const pstring<size>& rhs) {
-    return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin());
+template <size_t size>
+inline bool operator==(const pstring<size> &lhs, const pstring<size> &rhs)
+{
+	return lhs.size() == rhs.size() &&
+		std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
-template<size_t size>
-std::ostream& operator<<(std::ostream& os, const pstring<size>& obj) {
-    return os << obj.c_str();           
+template <size_t size>
+std::ostream &operator<<(std::ostream &os, const pstring<size> &obj)
+{
+	return os << obj.c_str();
 }
 
 #endif // PERSISTENT_PSTRING_H
