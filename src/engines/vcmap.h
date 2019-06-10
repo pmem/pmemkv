@@ -48,19 +48,15 @@ public:
 	vcmap(void *context, const std::string &path, size_t size);
 	~vcmap();
 
-	std::string name() final
-	{
-		return "vcmap";
-	}
-	void *engine_context()
-	{
-		return context;
-	}
+	std::string name() final;
+	void *engine_context();
+
 	void all(all_callback *callback, void *arg) final;
 	void all_above(const std::string &key, all_callback *callback, void *arg) final{};
 	void all_below(const std::string &key, all_callback *callback, void *arg) final{};
 	void all_between(const std::string &key1, const std::string &key2,
 			 all_callback *callback, void *arg) final{};
+
 	std::size_t count() final;
 	std::size_t count_above(const std::string &key) final
 	{
@@ -74,6 +70,7 @@ public:
 	{
 		return 0;
 	};
+
 	void each(each_callback *callback, void *arg) final;
 	void each_above(const std::string &key, each_callback *callback, void *arg) final
 	{
@@ -85,9 +82,13 @@ public:
 			  each_callback *callback, void *arg) final
 	{
 	}
+
 	status exists(const std::string &key) final;
+
 	void get(const std::string &key, get_callback *callback, void *arg) final;
+
 	status put(const std::string &key, const std::string &value) final;
+
 	status remove(const std::string &key) final;
 
 private:

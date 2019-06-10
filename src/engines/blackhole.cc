@@ -53,6 +53,16 @@ blackhole::~blackhole()
 	LOG("Stopped ok");
 }
 
+std::string blackhole::name()
+{
+	return "blackhole";
+}
+
+void *blackhole::engine_context()
+{
+	return context;
+}
+
 void blackhole::all(all_callback *callback, void *arg)
 {
 	LOG("All");
