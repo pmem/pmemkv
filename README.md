@@ -32,7 +32,7 @@ Installation
 
 `pmemkv` does not currently provide install packages, but our
 <a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">installation</a> guide
-provides detailed instructions, including use of experimental engines and pool sets. 
+provides detailed instructions, including use of experimental engines and pool sets.
 
 <ul>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources">Building From Sources</a></li>
@@ -154,7 +154,7 @@ int main() {
 
 These bindings are maintained in separate GitHub repos, but are still kept
 in sync with the main `pmemkv` distribution.
- 
+
 * Java - https://github.com/pmem/pmemkv-java
 * Node.js - https://github.com/pmem/pmemkv-nodejs
 * Ruby - https://github.com/pmem/pmemkv-ruby
