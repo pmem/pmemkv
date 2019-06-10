@@ -35,69 +35,103 @@
 #include "../engine.h"
 #include "../polymorphic_string.h"
 
-#include <libpmemobj++/pool.hpp>
 #include <libpmemobj++/persistent_ptr.hpp>
+#include <libpmemobj++/pool.hpp>
 #define LIBPMEMOBJ_CPP_USE_TBB_RW_MUTEX 1
 #include <libpmemobj++/experimental/concurrent_hash_map.hpp>
 
-namespace std {
-template<>
+namespace std
+{
+template <>
 struct hash<pmem::kv::polymorphic_string> {
-    /* hash multiplier used by fibonacci hashing */
-    static const size_t hash_multiplier = 11400714819323198485ULL;
+	/* hash multiplier used by fibonacci hashing */
+	static const size_t hash_multiplier = 11400714819323198485ULL;
 
-    size_t operator()(const pmem::kv::polymorphic_string &str) {
-        size_t h = 0;
-        for (size_t i = 0; i < str.size(); ++i) {
-            h = static_cast<size_t>(str[i]) ^ (h * hash_multiplier);
-        }
-        return h;
-    }
+	size_t operator()(const pmem::kv::polymorphic_string &str)
+	{
+		size_t h = 0;
+		for (size_t i = 0; i < str.size(); ++i) {
+			h = static_cast<size_t>(str[i]) ^ (h * hash_multiplier);
+		}
+		return h;
+	}
 };
 }
 
-namespace pmem {
-namespace kv {
+namespace pmem
+{
+namespace kv
+{
 
 class cmap : public engine_base {
-  public:
-    cmap(void *context, const std::string& path, size_t size);
-    ~cmap();
+public:
+	cmap(void *context, const std::string &path, size_t size);
+	~cmap();
 
-    cmap(const cmap&) = delete;
-    cmap& operator=(const cmap&) = delete;
+	cmap(const cmap &) = delete;
+	cmap &operator=(const cmap &) = delete;
 
-    std::string name() final { return "cmap"; }
-    void *engine_context() { return context; }
-    void all(all_callback* callback, void *arg) final;
-    void all_above(const std::string& key, all_callback* callback, void *arg) final {}
-    void all_below(const std::string& key, all_callback* callback, void *arg) final {}
-    void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) final {}
-    std::size_t count() final;
-    std::size_t count_above(const std::string& key) final { return 0; }
-    std::size_t count_below(const std::string& key) final { return 0; }
-    std::size_t count_between(const std::string& key1, const std::string& key2) final { return 0; }
-    void each(each_callback* callback, void *arg) final;
-    void each_above(const std::string& key, each_callback* callback, void *arg) final {}
-    void each_below(const std::string& key, each_callback* callback, void *arg) final {}
-    void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) final {}
-    status exists(const std::string& key) final;
-    void get(const std::string& key, get_callback* callback, void *arg) final;
-    status put(const std::string& key, const std::string& value) final;
-    status remove(const std::string& key) final;
-  private:
-    using string_t = pmem::kv::polymorphic_string;
-    using map_t = pmem::obj::experimental::concurrent_hash_map<string_t, string_t>;
+	std::string name() final
+	{
+		return "cmap";
+	}
+	void *engine_context()
+	{
+		return context;
+	}
+	void all(all_callback *callback, void *arg) final;
+	void all_above(const std::string &key, all_callback *callback, void *arg) final
+	{
+	}
+	void all_below(const std::string &key, all_callback *callback, void *arg) final
+	{
+	}
+	void all_between(const std::string &key1, const std::string &key2,
+			 all_callback *callback, void *arg) final
+	{
+	}
+	std::size_t count() final;
+	std::size_t count_above(const std::string &key) final
+	{
+		return 0;
+	}
+	std::size_t count_below(const std::string &key) final
+	{
+		return 0;
+	}
+	std::size_t count_between(const std::string &key1, const std::string &key2) final
+	{
+		return 0;
+	}
+	void each(each_callback *callback, void *arg) final;
+	void each_above(const std::string &key, each_callback *callback, void *arg) final
+	{
+	}
+	void each_below(const std::string &key, each_callback *callback, void *arg) final
+	{
+	}
+	void each_between(const std::string &key1, const std::string &key2,
+			  each_callback *callback, void *arg) final
+	{
+	}
+	status exists(const std::string &key) final;
+	void get(const std::string &key, get_callback *callback, void *arg) final;
+	status put(const std::string &key, const std::string &value) final;
+	status remove(const std::string &key) final;
 
-    struct RootData {
-        pmem::obj::persistent_ptr<map_t> map_ptr;
-    };
-    using pool_t = pmem::obj::pool<RootData>;
+private:
+	using string_t = pmem::kv::polymorphic_string;
+	using map_t = pmem::obj::experimental::concurrent_hash_map<string_t, string_t>;
 
-    void Recover();
-    void *context;
-    pool_t pmpool;
-    map_t* container;
+	struct RootData {
+		pmem::obj::persistent_ptr<map_t> map_ptr;
+	};
+	using pool_t = pmem::obj::pool<RootData>;
+
+	void Recover();
+	void *context;
+	pool_t pmpool;
+	map_t *container;
 };
 
 } /* namespace kv */
