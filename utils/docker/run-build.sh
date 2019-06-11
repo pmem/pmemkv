@@ -38,6 +38,14 @@
 set -e
 echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
 
+# fail in case of any CMake Errors in ctest
+function check_ctest() {
+	if [ $(ctest -N 2>&1 | grep -e "CMake Error" > /dev/null) ]; then
+		ctest -N
+		exit 1
+	fi
+}
+
 function cleanup() {
 	find . -name ".coverage" -exec rm {} \;
 	find . -name "coverage.xml" -exec rm {} \;
@@ -72,6 +80,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DCOVERAGE=$COVERAGE \
 	-DDEVELOPER_MODE=1
 make -j2
+check_ctest
 ctest --output-on-failure
 echo $USERPASS | sudo -S make install
 
@@ -118,6 +127,7 @@ do
 		-DENGINE_CMAP=OFF \
 		-D$engine_flag=ON
 	make -j2
+	check_ctest
 	# list all tests in this build
 	ctest -N
 done
@@ -135,5 +145,6 @@ cmake .. -DTBB_DIR=/opt/tbb/cmake \
 	-DENGINE_STREE=ON \
 	-DENGINE_TREE3=ON
 make -j2
+check_ctest
 # list all tests in this build
 ctest -N
