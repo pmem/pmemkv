@@ -291,3 +291,7 @@ add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
+
+if(NOT "${CPACK_GENERATOR}" STREQUAL "")
+	include(${CMAKE_SOURCE_DIR}/cmake/packages.cmake)
+endif()
