@@ -147,8 +147,8 @@ Installing on Ubuntu
 Install required packages:
 
 ```sh
-sudo apt install autoconf automake build-essential cmake doxygen \
-	libdaxctl-dev libndctl-dev libnuma-dev libtbb-dev libtool rapidjson-dev
+sudo apt install autoconf automake build-essential cmake doxygen libdaxctl-dev \
+	libndctl-dev libnuma-dev libtbb-dev libtool rapidjson-dev
 ```
 
 Configure for proxy if necessary:
