@@ -163,6 +163,7 @@ Next we'll walk you through the steps of creating a new engine.
 
 * In `ENGINES.md`, add `mytree` section
 * In `README.md`, link `mytree` in the table of supported engines
+* Update manpages in `/doc/pmemkv` directory (to check and generate manpages you need `pandoc` installed)
 
 <a name="experimental"></a>
 
