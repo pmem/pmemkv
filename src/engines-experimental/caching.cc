@@ -78,7 +78,7 @@ void *caching::engine_context()
 	return context;
 }
 
-bool CachingEngine::getString(pmemkv_config *config, const char *key, std::string &str)
+bool caching::getString(pmemkv_config *config, const char *key, std::string &str)
 {
 	size_t length;
 
@@ -94,7 +94,7 @@ bool CachingEngine::getString(pmemkv_config *config, const char *key, std::strin
 	return true;
 }
 
-bool CachingEngine::readConfig(pmemkv_config *config)
+bool caching::readConfig(pmemkv_config *config)
 {
 	if (!getString(config, "subengine", subEngine))
 		return false;
