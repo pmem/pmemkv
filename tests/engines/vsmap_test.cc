@@ -55,11 +55,16 @@ public:
 		if (cfg == nullptr)
 			throw std::runtime_error("creating config failed");
 
-		ret += pmemkv_config_put(cfg, "path", PATH.c_str(), PATH.size() + 1);
-		ret += pmemkv_config_put(cfg, "size", &size, sizeof(size));
+		auto cfg_s =
+			pmemkv_config_put(cfg, "path", PATH.c_str(), PATH.size() + 1);
 
-		if (ret != 0)
-			throw std::runtime_error("putting value to config failed");
+		if (cfg_s != PMEMKV_STATUS_OK)
+			throw std::runtime_error("putting 'path' to config failed");
+
+		cfg_s = pmemkv_config_put(cfg, "size", &size, sizeof(size));
+
+		if (cfg_s != PMEMKV_STATUS_OK)
+			throw std::runtime_error("putting 'path' to config failed");
 
 		kv = new db;
 		auto s = kv->open("vsmap", cfg);
