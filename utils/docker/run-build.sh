@@ -71,6 +71,10 @@ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE
 make -j2
+
+# fail in case of CMake Errors in ctest
+ctest -N 2>&1 | grep -e "CMake Error at" > /dev/null && ctest -N && exit 1
+
 ctest --output-on-failure
 echo $USERPASS | sudo -S make install
 
