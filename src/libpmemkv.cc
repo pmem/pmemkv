@@ -86,22 +86,23 @@ void pmemkv_config_delete(pmemkv_config *config)
 	delete config;
 }
 
-int pmemkv_config_put(pmemkv_config *config, const char *key, const void *value,
-		      size_t value_size)
+pmemkv_config_status pmemkv_config_put(pmemkv_config *config, const char *key,
+				       const void *value, size_t value_size)
 {
 	try {
 		std::string mkey(key);
 		std::vector<char> v((char *)value, (char *)value + value_size);
 		config->umap.insert({mkey, v});
 	} catch (...) {
-		return -1;
+		return PMEMKV_CONFIG_STATUS_FAILED;
 	}
 
-	return 0;
+	return PMEMKV_CONFIG_STATUS_OK;
 }
 
-ssize_t pmemkv_config_get(pmemkv_config *config, const char *key, void *buffer,
-			  size_t buffer_len, size_t *value_size)
+pmemkv_config_status pmemkv_config_get(pmemkv_config *config, const char *key,
+				       void *buffer, size_t buffer_len,
+				       size_t *value_size)
 {
 	size_t len = 0;
 
@@ -110,7 +111,7 @@ ssize_t pmemkv_config_get(pmemkv_config *config, const char *key, void *buffer,
 		auto found = config->umap.find(mkey);
 
 		if (found == config->umap.end())
-			return -1;
+			return PMEMKV_CONFIG_STATUS_NOT_FOUND;
 
 		auto mvalue = found->second;
 
@@ -122,13 +123,14 @@ ssize_t pmemkv_config_get(pmemkv_config *config, const char *key, void *buffer,
 		if (value_size)
 			*value_size = mvalue.size();
 	} catch (...) {
-		return -1;
+		return PMEMKV_CONFIG_STATUS_FAILED;
 	}
 
-	return len;
+	return PMEMKV_CONFIG_STATUS_OK;
 }
 
-int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
+pmemkv_config_status pmemkv_config_from_json(pmemkv_config *config,
+					     const char *jsonconfig)
 {
 	rapidjson::Document doc;
 	rapidjson::Value::ConstMemberIterator itr;
@@ -145,7 +147,7 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 
 	try {
 		if (doc.Parse(jsonconfig).HasParseError())
-			throw std::runtime_error("Input string is not a valid JSON");
+			return PMEMKV_CONFIG_STATUS_PARSING_ERROR;
 
 		if (doc.HasMember("path") && !doc["path"].IsString())
 			throw std::runtime_error("'path' in JSON is not a valid string");
@@ -178,17 +180,17 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 					"Unsupported data type in JSON string");
 			}
 
-			if (pmemkv_config_put(config, itr->name.GetString(), value,
-					      value_size))
-				throw std::runtime_error(
-					"Inserting a new entry to the config failed");
+			auto status = pmemkv_config_put(config, itr->name.GetString(),
+							value, value_size);
+			if (status != PMEMKV_CONFIG_STATUS_OK)
+				return status;
 		}
 	} catch (const std::exception &exc) {
 		std::cerr << exc.what() << "\n";
-		return -1;
+		return PMEMKV_CONFIG_STATUS_FAILED;
 	}
 
-	return 0;
+	return PMEMKV_CONFIG_STATUS_OK;
 }
 
 pmemkv_status pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
@@ -216,16 +218,20 @@ pmemkv_status pmemkv_open(void *context, const char *engine_c_str, pmemkv_config
 #endif
 		// handle traditional engines expecting path & size params
 		size_t length;
-		if (pmemkv_config_get(config, "path", NULL, 0, &length))
+		if (pmemkv_config_get(config, "path", NULL, 0, &length) !=
+		    PMEMKV_CONFIG_STATUS_OK)
 			throw std::runtime_error(
 				"JSON does not contain a valid path string");
 		auto path = std::unique_ptr<char[]>(new char[length]);
-		if (pmemkv_config_get(config, "path", path.get(), length, NULL) != length)
+		if (pmemkv_config_get(config, "path", path.get(), length, NULL) !=
+		    PMEMKV_CONFIG_STATUS_OK)
 			throw std::runtime_error(
 				"Cannot get a 'path' string from the config");
 
 		size_t size = 0;
-		pmemkv_config_get(config, "size", &size, sizeof(size_t), NULL);
+		if (pmemkv_config_get(config, "size", &size, sizeof(size_t), NULL) !=
+		    PMEMKV_CONFIG_STATUS_OK)
+			throw std::runtime_error("Cannot get 'size' from the config");
 #ifdef ENGINE_TREE3
 		if (engine == "tree3") {
 			*db = reinterpret_cast<pmemkv_db *>(
