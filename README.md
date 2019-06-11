@@ -123,7 +123,7 @@ int main() {
     LOG("Putting new key");
     char* key1 = "key1";
     char* value1 = "value1";
-    pmemkv_status s = pmemkv_put(kv, key1, strlen(key1), value1, strlen(value1));
+    int s = pmemkv_put(kv, key1, strlen(key1), value1, strlen(value1));
     assert(s == PMEMKV_STATUS_OK && pmemkv_count(kv) == 1);
 
     LOG("Reading key back");
