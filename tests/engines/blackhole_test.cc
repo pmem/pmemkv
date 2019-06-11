@@ -39,18 +39,28 @@ class BlackholeTest : public testing::Test {
 public:
 	db kv;
 
-	BlackholeTest() : kv("blackhole", nullptr)
+	BlackholeTest()
 	{
+		auto s = kv.open("blackhole", nullptr);
+		if (s != status::OK)
+			throw std::runtime_error("Open failed");
 	}
 };
 
 TEST_F(BlackholeTest, SimpleTest)
 {
 	std::string value;
-	ASSERT_TRUE(kv.count() == 0);
+	std::size_t cnt = 1;
+
+	ASSERT_TRUE(kv.count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv.put("key1", "value1") == status::OK);
-	ASSERT_TRUE(kv.count() == 0);
+
+	cnt = 1;
+
+	ASSERT_TRUE(kv.count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv.remove("key1") == status::OK);
 	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);

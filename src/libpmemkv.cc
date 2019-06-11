@@ -191,20 +191,27 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 	return 0;
 }
 
-pmemkv_db *pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
-		       pmemkv_start_failure_callback *onfail)
+pmemkv_status pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
+			  pmemkv_db **db)
 {
+	if (db == nullptr)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	try {
 		std::string engine = engine_c_str;
 
 		if (engine == "blackhole") {
-			return reinterpret_cast<pmemkv_db *>(
+			*db = reinterpret_cast<pmemkv_db *>(
 				new pmem::kv::blackhole(context));
+
+			return PMEMKV_STATUS_OK;
 		}
 #ifdef ENGINE_CACHING
 		if (engine == "caching") {
-			return reinterpret_cast<pmemkv_db *>(
+			*db = reinterpret_cast<pmemkv_db *>(
 				new pmem::kv::caching(context, config));
+
+			return PMEMKV_STATUS_OK;
 		}
 #endif
 		// handle traditional engines expecting path & size params
@@ -221,22 +228,28 @@ pmemkv_db *pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *c
 		pmemkv_config_get(config, "size", &size, sizeof(size_t), NULL);
 #ifdef ENGINE_TREE3
 		if (engine == "tree3") {
-			return reinterpret_cast<pmemkv_db *>(
+			*db = reinterpret_cast<pmemkv_db *>(
 				new pmem::kv::tree3(context, path.get(), size));
+
+			return PMEMKV_STATUS_OK;
 		}
 #endif
 
 #ifdef ENGINE_STREE
 		if (engine == "stree") {
-			return reinterpret_cast<pmemkv_db *>(
+			*db = reinterpret_cast<pmemkv_db *>(
 				new pmem::kv::stree(context, path.get(), size));
+
+			return PMEMKV_STATUS_OK;
 		}
 #endif
 
 #ifdef ENGINE_CMAP
 		if (engine == "cmap") {
-			return reinterpret_cast<pmemkv_db *>(
+			*db = reinterpret_cast<pmemkv_db *>(
 				new pmem::kv::cmap(context, path.get(), size));
+
+			return PMEMKV_STATUS_OK;
 		}
 #endif
 
@@ -250,104 +263,114 @@ pmemkv_db *pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *c
 
 #ifdef ENGINE_VSMAP
 		if (engine == "vsmap") {
-			return reinterpret_cast<pmemkv_db *>(
+			*db = reinterpret_cast<pmemkv_db *>(
 				new pmem::kv::vsmap(context, path.get(), size));
+
+			return PMEMKV_STATUS_OK;
 		}
 #endif
 
 #ifdef ENGINE_VCMAP
 		if (engine == "vcmap") {
-			return reinterpret_cast<pmemkv_db *>(
+			*db = reinterpret_cast<pmemkv_db *>(
 				new pmem::kv::vcmap(context, path.get(), size));
+
+			return PMEMKV_STATUS_OK;
 		}
 #endif
 		throw std::runtime_error("Unknown engine name");
 	} catch (std::exception &e) {
-		onfail(context, engine_c_str, config, e.what());
-		return nullptr;
+		std::cerr << e.what() << "\n";
+		*db = nullptr;
+
+		return PMEMKV_STATUS_FAILED;
 	}
 }
 
 void pmemkv_close(pmemkv_db *db)
 {
-	// XXX: move dangerous work to close() method
 	delete reinterpret_cast<pmem::kv::engine_base *>(db);
 }
 
-void pmemkv_all(pmemkv_db *db, pmemkv_all_callback *c, void *arg)
+pmemkv_status pmemkv_all(pmemkv_db *db, pmemkv_all_callback *c, void *arg)
 {
-	reinterpret_cast<pmem::kv::engine_base *>(db)->all(c, arg);
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)->all(c, arg);
 }
 
-void pmemkv_all_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_all_callback *c,
-		      void *arg)
+pmemkv_status pmemkv_all_above(pmemkv_db *db, const char *k, size_t kb,
+			       pmemkv_all_callback *c, void *arg)
 {
-	reinterpret_cast<pmem::kv::engine_base *>(db)->all_above(
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)->all_above(
 		std::string(k, (size_t)kb), c, arg);
 }
 
-void pmemkv_all_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_all_callback *c,
-		      void *arg)
+pmemkv_status pmemkv_all_below(pmemkv_db *db, const char *k, size_t kb,
+			       pmemkv_all_callback *c, void *arg)
 {
-	reinterpret_cast<pmem::kv::engine_base *>(db)->all_below(
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)->all_below(
 		std::string(k, (size_t)kb), c, arg);
 }
 
-void pmemkv_all_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-			size_t kb2, pmemkv_all_callback *c, void *arg)
+pmemkv_status pmemkv_all_between(pmemkv_db *db, const char *k1, size_t kb1,
+				 const char *k2, size_t kb2, pmemkv_all_callback *c,
+				 void *arg)
 {
-	reinterpret_cast<pmem::kv::engine_base *>(db)->all_between(
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)->all_between(
 		std::string(k1, (size_t)kb1), std::string(k2, (size_t)kb2), c, arg);
 }
 
-size_t pmemkv_count(pmemkv_db *db)
+pmemkv_status pmemkv_count(pmemkv_db *db, size_t *count)
 {
-	return reinterpret_cast<pmem::kv::engine_base *>(db)->count();
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)->count(
+		*count);
 }
 
-size_t pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb)
+pmemkv_status pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb, size_t *count)
 {
-	return reinterpret_cast<pmem::kv::engine_base *>(db)->count_above(
-		std::string(k, (size_t)kb));
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)->count_above(
+		std::string(k, kb), *count);
 }
 
-size_t pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb)
+pmemkv_status pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb, size_t *count)
 {
-	return reinterpret_cast<pmem::kv::engine_base *>(db)->count_below(
-		std::string(k, (size_t)kb));
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)->count_below(
+		std::string(k, kb), *count);
 }
 
-size_t pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-			    size_t kb2)
+pmemkv_status pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1,
+				   const char *k2, size_t kb2, size_t *count)
 {
-	return reinterpret_cast<pmem::kv::engine_base *>(db)->count_between(
-		std::string(k1, (size_t)kb1), std::string(k2, (size_t)kb2));
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)
+		->count_between(std::string(k1, kb1), std::string(k2, kb2), *count);
 }
 
-void pmemkv_each(pmemkv_db *db, pmemkv_each_callback *c, void *arg)
+pmemkv_status pmemkv_each(pmemkv_db *db, pmemkv_each_callback *c, void *arg)
 {
-	reinterpret_cast<pmem::kv::engine_base *>(db)->each(c, arg);
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)->each(c,
+										   arg);
 }
 
-void pmemkv_each_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_each_callback *c,
-		       void *arg)
+pmemkv_status pmemkv_each_above(pmemkv_db *db, const char *k, size_t kb,
+				pmemkv_each_callback *c, void *arg)
 {
-	reinterpret_cast<pmem::kv::engine_base *>(db)->each_above(
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)->each_above(
 		std::string(k, (size_t)kb), c, arg);
 }
 
-void pmemkv_each_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_each_callback *c,
-		       void *arg)
+pmemkv_status pmemkv_each_below(pmemkv_db *db, const char *k, size_t kb,
+				pmemkv_each_callback *c, void *arg)
 {
-	reinterpret_cast<pmem::kv::engine_base *>(db)->each_below(
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)->each_below(
 		std::string(k, (size_t)kb), c, arg);
 }
 
-void pmemkv_each_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-			 size_t kb2, pmemkv_each_callback *c, void *arg)
+pmemkv_status pmemkv_each_between(pmemkv_db *db, const char *k1, size_t kb1,
+				  const char *k2, size_t kb2, pmemkv_each_callback *c,
+				  void *arg)
 {
-	reinterpret_cast<pmem::kv::engine_base *>(db)->each_between(
-		std::string(k1, (size_t)kb1), std::string(k2, (size_t)kb2), c, arg);
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)
+		->each_between(std::string(k1, (size_t)kb1), std::string(k2, (size_t)kb2),
+			       c, arg);
 }
 
 pmemkv_status pmemkv_exists(pmemkv_db *db, const char *k, size_t kb)
@@ -356,11 +379,11 @@ pmemkv_status pmemkv_exists(pmemkv_db *db, const char *k, size_t kb)
 		std::string(k, (size_t)kb));
 }
 
-void pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_callback *c,
-		void *arg)
+pmemkv_status pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_callback *c,
+			 void *arg)
 {
-	reinterpret_cast<pmem::kv::engine_base *>(db)->get(std::string(k, (size_t)kb), c,
-							   arg);
+	return (pmemkv_status) reinterpret_cast<pmem::kv::engine_base *>(db)->get(
+		std::string(k, (size_t)kb), c, arg);
 }
 
 struct GetCopyCallbackContext {
