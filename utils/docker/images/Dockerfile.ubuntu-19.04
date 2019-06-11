@@ -107,5 +107,5 @@ USER $USER
 # Set required environment variables
 ENV OS ubuntu
 ENV OS_VER 19.04
-ENV PACKAGE_MANAGER dpkg
+ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
