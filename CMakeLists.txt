@@ -148,26 +148,28 @@ include(CheckCXXSourceCompiles)
 include(GNUInstallDirs)
 
 include(rapidjson)
-set(PKG_REQUIRES "RapidJSON")
+set(DEPENDENCY_LIST RapidJSON)
 
 if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3 OR ENGINE_CACHING)
 	include(libpmemobj++)
-	set(PKG_REQUIRES "${PKG_REQUIRES} libpmemobj++ >= ${LIBPMEMOBJ_CPP_REQUIRED_VERSION}")
+	list(APPEND DEPENDENCY_LIST "libpmemobj++ >= ${LIBPMEMOBJ_CPP_REQUIRED_VERSION}")
 endif()
 if(ENGINE_VSMAP OR ENGINE_VCMAP)
 	include(memkind)
-	set(PKG_REQUIRES "${PKG_REQUIRES} memkind")
+	list(APPEND DEPENDENCY_LIST memkind)
 endif()
 if(ENGINE_VCMAP OR ENGINE_CMAP)
 	include(tbb)
-	set(PKG_REQUIRES "${PKG_REQUIRES} tbb")
+	list(APPEND DEPENDENCY_LIST tbb)
 endif()
 if(ENGINE_CACHING)
 	include(memcached-experimental)
 	include(redis-experimental)
 	# XXX consider adding
-	# set(PKG_REQUIRES "${PKG_REQUIRES} libmemcached")
+	#list(APPEND DEPENDENCY_LIST libmemcached)
 endif()
+
+string(REPLACE ";" " " PKG_REQUIRES "${DEPENDENCY_LIST}")
 
 add_executable(check_license EXCLUDE_FROM_ALL utils/check_license/check-license.c)
 
@@ -304,3 +306,7 @@ add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
+
+if(NOT "${CPACK_GENERATOR}" STREQUAL "")
+	include(${CMAKE_SOURCE_DIR}/cmake/packages.cmake)
+endif()
