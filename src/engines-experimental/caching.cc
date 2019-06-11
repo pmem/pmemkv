@@ -146,7 +146,7 @@ status caching::all(all_callback *callback, void *arg)
 		return basePtr->all(callback, arg);
 	// todo refactor as single callback (Each --> All)
 
-	return status::OK;
+	return s;
 }
 
 status caching::count(std::size_t &cnt)
