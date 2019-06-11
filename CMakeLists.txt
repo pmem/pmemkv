@@ -267,6 +267,13 @@ install(FILES ${CMAKE_BINARY_DIR}/libpmemkv.pc
 
 set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER "src/libpmemkv.h;src/libpmemkv.hpp")
 
+find_program(PANDOC NAMES pandoc)
+if(NOT PANDOC)
+	message(WARNING "pandoc not found - documentation will not be generated")
+else()
+	add_subdirectory(doc)
+endif()
+
 install(TARGETS pmemkv
 		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
