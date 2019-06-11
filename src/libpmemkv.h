@@ -41,9 +41,11 @@ extern "C" {
 #endif
 
 typedef enum {
-	PMEMKV_STATUS_FAILED = -1,
-	PMEMKV_STATUS_NOT_FOUND = 0,
-	PMEMKV_STATUS_OK = 1,
+	PMEMKV_STATUS_OK,
+	PMEMKV_STATUS_FAILED,
+	PMEMKV_STATUS_NOT_FOUND,
+	PMEMKV_STATUS_NOT_SUPPORTED,
+	PMEMKV_STATUS_INVALID_ARGUMENT,
 } pmemkv_status;
 
 typedef struct pmemkv_db pmemkv_db;
@@ -53,8 +55,6 @@ typedef void pmemkv_all_callback(const char *key, size_t keybytes, void *arg);
 typedef void pmemkv_each_callback(const char *key, size_t keybytes, const char *value,
 				  size_t valuebytes, void *arg);
 typedef void pmemkv_get_callback(const char *value, size_t valuebytes, void *arg);
-typedef void pmemkv_start_failure_callback(void *context, const char *engine,
-					   pmemkv_config *config, const char *msg);
 
 pmemkv_config *pmemkv_config_new(void);
 void pmemkv_config_delete(pmemkv_config *config);
@@ -64,39 +64,43 @@ ssize_t pmemkv_config_get(pmemkv_config *config, const char *key, void *buffer,
 			  size_t buffer_len, size_t *value_size);
 int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);
 
-pmemkv_db *pmemkv_open(void *context, const char *engine, pmemkv_config *config,
-		       pmemkv_start_failure_callback *callback);
+pmemkv_status pmemkv_open(void *context, const char *engine, pmemkv_config *config,
+			  pmemkv_db **db);
 void pmemkv_close(pmemkv_db *kv);
 
-void pmemkv_all(pmemkv_db *db, pmemkv_all_callback *c, void *arg);
-void pmemkv_all_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_all_callback *c,
-		      void *arg);
-void pmemkv_all_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_all_callback *c,
-		      void *arg);
-void pmemkv_all_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-			size_t kb2, pmemkv_all_callback *c, void *arg);
+pmemkv_status pmemkv_all(pmemkv_db *db, pmemkv_all_callback *c, void *arg);
+pmemkv_status pmemkv_all_above(pmemkv_db *db, const char *k, size_t kb,
+			       pmemkv_all_callback *c, void *arg);
+pmemkv_status pmemkv_all_below(pmemkv_db *db, const char *k, size_t kb,
+			       pmemkv_all_callback *c, void *arg);
+pmemkv_status pmemkv_all_between(pmemkv_db *db, const char *k1, size_t kb1,
+				 const char *k2, size_t kb2, pmemkv_all_callback *c,
+				 void *arg);
 
-size_t pmemkv_count(pmemkv_db *db);
-size_t pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb);
-size_t pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb);
-size_t pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-			    size_t kb2);
+pmemkv_status pmemkv_count(pmemkv_db *db, size_t *cnt);
+pmemkv_status pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);
+pmemkv_status pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);
+pmemkv_status pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1,
+				   const char *k2, size_t kb2, size_t *cnt);
 
-void pmemkv_each(pmemkv_db *db, pmemkv_each_callback *c, void *arg);
-void pmemkv_each_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_each_callback *c,
-		       void *arg);
-void pmemkv_each_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_each_callback *c,
-		       void *arg);
-void pmemkv_each_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-			 size_t kb2, pmemkv_each_callback *c, void *arg);
+pmemkv_status pmemkv_each(pmemkv_db *db, pmemkv_each_callback *c, void *arg);
+pmemkv_status pmemkv_each_above(pmemkv_db *db, const char *k, size_t kb,
+				pmemkv_each_callback *c, void *arg);
+pmemkv_status pmemkv_each_below(pmemkv_db *db, const char *k, size_t kb,
+				pmemkv_each_callback *c, void *arg);
+pmemkv_status pmemkv_each_between(pmemkv_db *db, const char *k1, size_t kb1,
+				  const char *k2, size_t kb2, pmemkv_each_callback *c,
+				  void *arg);
 
 pmemkv_status pmemkv_exists(pmemkv_db *db, const char *k, size_t kb);
-void pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_callback *c,
-		void *arg);
+
+pmemkv_status pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_callback *c,
+			 void *arg);
 pmemkv_status pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *value,
 			      size_t maxvaluebytes);
 pmemkv_status pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v,
 			 size_t vb);
+
 pmemkv_status pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
 
 void *pmemkv_engine_context(pmemkv_db *db);
