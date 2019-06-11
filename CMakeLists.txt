@@ -267,6 +267,12 @@ install(FILES ${CMAKE_BINARY_DIR}/libpmemkv.pc
 
 set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER "src/libpmemkv.h;src/libpmemkv.hpp")
 
+add_custom_target(md2man
+	COMMAND ${CMAKE_SOURCE_DIR}/utils/md2man/md2man.sh
+	${CMAKE_SOURCE_DIR}/doc/pmemkv/pmemkv.7.md
+	${CMAKE_SOURCE_DIR}/utils/md2man/default.man
+	${CMAKE_SOURCE_DIR}/doc/generated/pmemkv.7)
+
 install(TARGETS pmemkv
 		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
