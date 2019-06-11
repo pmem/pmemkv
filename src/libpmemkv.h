@@ -47,6 +47,13 @@ typedef enum {
 	PMEMKV_STATUS_NOT_SUPPORTED,
 } pmemkv_status;
 
+typedef enum {
+	PMEMKV_CONFIG_STATUS_OK,
+	PMEMKV_CONFIG_STATUS_FAILED,
+	PMEMKV_CONFIG_STATUS_PARSING_ERROR,
+	PMEMKV_CONFIG_STATUS_NOT_FOUND,
+} pmemkv_config_status;
+
 typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;
 
@@ -57,11 +64,13 @@ typedef void pmemkv_get_callback(const char *value, size_t valuebytes, void *arg
 
 pmemkv_config *pmemkv_config_new(void);
 void pmemkv_config_delete(pmemkv_config *config);
-int pmemkv_config_put(pmemkv_config *config, const char *key, const void *value,
-		      size_t value_size);
-ssize_t pmemkv_config_get(pmemkv_config *config, const char *key, void *buffer,
-			  size_t buffer_len, size_t *value_size);
-int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);
+pmemkv_config_status pmemkv_config_put(pmemkv_config *config, const char *key,
+				       const void *value, size_t value_size);
+pmemkv_config_status pmemkv_config_get(pmemkv_config *config, const char *key,
+				       void *buffer, size_t buffer_len,
+				       size_t *value_size);
+pmemkv_config_status pmemkv_config_from_json(pmemkv_config *config,
+					     const char *jsonconfig);
 
 pmemkv_status pmemkv_open(void *context, const char *engine, pmemkv_config *config,
 			  pmemkv_db **db);
