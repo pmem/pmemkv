@@ -48,6 +48,11 @@ public:
 		construct();
 	}
 
+	polymorphic_string(const char *data, std::size_t size)
+	{
+		construct(data, size);
+	}
+
 	polymorphic_string(const std::string &s)
 	{
 		construct(s);

@@ -108,10 +108,10 @@ void stree::each(each_callback *callback, void *arg)
 	}
 }
 
-status stree::exists(const std::string &key)
+status stree::exists(string_view key)
 {
-	LOG("Exists for key=" << key);
-	btree_type::iterator it = my_btree->find(pstring<20>(key));
+	LOG("Exists for key=" << key.to_string());
+	btree_type::iterator it = my_btree->find(pstring<20>(key.data(), key.size()));
 	if (it == my_btree->end()) {
 		LOG("  key not found");
 		return status::NOT_FOUND;
@@ -119,10 +119,10 @@ status stree::exists(const std::string &key)
 	return status::OK;
 }
 
-void stree::get(const std::string &key, get_callback *callback, void *arg)
+void stree::get(string_view key, get_callback *callback, void *arg)
 {
-	LOG("Get using callback for key=" << key);
-	btree_type::iterator it = my_btree->find(pstring<20>(key));
+	LOG("Get using callback for key=" << key.to_string());
+	btree_type::iterator it = my_btree->find(pstring<20>(key.data(), key.size()));
 	if (it == my_btree->end()) {
 		LOG("  key not found");
 		return;
@@ -130,17 +130,19 @@ void stree::get(const std::string &key, get_callback *callback, void *arg)
 	(*callback)(it->second.c_str(), it->second.size(), arg);
 }
 
-status stree::put(const std::string &key, const std::string &value)
+status stree::put(string_view key, string_view value)
 {
-	LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
+	LOG("Put key=" << key.to_string()
+		       << ", value.size=" << std::to_string(value.size()));
 	try {
 		auto result = my_btree->insert(std::make_pair(
-			pstring<MAX_KEY_SIZE>(key), pstring<MAX_VALUE_SIZE>(value)));
+			pstring<MAX_KEY_SIZE>(key.data(), key.size()),
+			pstring<MAX_VALUE_SIZE>(value.data(), value.size())));
 		if (!result.second) { // key already exists, so update
 			typename btree_type::value_type &entry = *result.first;
 			transaction::manual tx(pmpool);
 			conditional_add_to_tx(&(entry.second));
-			entry.second = value;
+			entry.second = value.to_string();
 			transaction::commit();
 		}
 		return status::OK;
@@ -156,11 +158,11 @@ status stree::put(const std::string &key, const std::string &value)
 	}
 }
 
-status stree::remove(const std::string &key)
+status stree::remove(string_view key)
 {
-	LOG("Remove key=" << key);
+	LOG("Remove key=" << key.to_string());
 	try {
-		auto result = my_btree->erase(key);
+		auto result = my_btree->erase(key.to_string());
 		return (result == 1) ? status::OK : status::NOT_FOUND;
 	} catch (std::bad_alloc e) {
 		LOG("Put failed due to exception, " << e.what());
