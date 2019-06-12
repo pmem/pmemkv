@@ -31,8 +31,8 @@
 set(GTEST_VERSION 1.7.0)
 set(GTEST_SHA256HASH b58cb7547a28b2c718d1e38aee18a3659c9e3ff52440297e965f5edffe34b6d0)
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
-    set(GTEST_URL ${CMAKE_SOURCE_DIR}/googletest-${GTEST_VERSION}.zip)
+if (EXISTS ${GTEST_DIR}/googletest-${GTEST_VERSION}.zip)
+    set(GTEST_URL ${GTEST_DIR}/googletest-${GTEST_VERSION}.zip)
 else ()
     set(GTEST_URL https://github.com/google/googletest/archive/release-${GTEST_VERSION}.zip)
 endif ()
