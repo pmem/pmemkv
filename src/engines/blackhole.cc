@@ -68,20 +68,20 @@ void blackhole::all(all_callback *callback, void *arg)
 	LOG("All");
 }
 
-void blackhole::all_above(const std::string &key, all_callback *callback, void *arg)
+void blackhole::all_above(string_view key, all_callback *callback, void *arg)
 {
-	LOG("AllAbove for key=" << key);
+	LOG("AllAbove for key=" << key.to_string());
 }
 
-void blackhole::all_below(const std::string &key, all_callback *callback, void *arg)
+void blackhole::all_below(string_view key, all_callback *callback, void *arg)
 {
-	LOG("AllBelow for key=" << key);
+	LOG("AllBelow for key=" << key.to_string());
 }
 
-void blackhole::all_between(const std::string &key1, const std::string &key2,
-			    all_callback *callback, void *arg)
+void blackhole::all_between(string_view key1, string_view key2, all_callback *callback,
+			    void *arg)
 {
-	LOG("AllBetween for key1=" << key1 << ", key2=" << key2);
+	LOG("AllBetween for key1=" << key1.to_string() << ", key2=" << key2.to_string());
 }
 
 std::size_t blackhole::count()
@@ -90,21 +90,22 @@ std::size_t blackhole::count()
 	return 0;
 }
 
-std::size_t blackhole::count_above(const std::string &key)
+std::size_t blackhole::count_above(string_view key)
 {
-	LOG("CountAbove for key=" << key);
+	LOG("CountAbove for key=" << key.to_string());
 	return 0;
 }
 
-std::size_t blackhole::count_below(const std::string &key)
+std::size_t blackhole::count_below(string_view key)
 {
-	LOG("CountBelow for key=" << key);
+	LOG("CountBelow for key=" << key.to_string());
 	return 0;
 }
 
-std::size_t blackhole::count_between(const std::string &key1, const std::string &key2)
+std::size_t blackhole::count_between(string_view key1, string_view key2)
 {
-	LOG("CountBetween for key1=" << key1 << ", key2=" << key2);
+	LOG("CountBetween for key1=" << key1.to_string()
+				     << ", key2=" << key2.to_string());
 	return 0;
 }
 
@@ -113,42 +114,43 @@ void blackhole::each(each_callback *callback, void *arg)
 	LOG("Each");
 }
 
-void blackhole::each_above(const std::string &key, each_callback *callback, void *arg)
+void blackhole::each_above(string_view key, each_callback *callback, void *arg)
 {
-	LOG("EachAbove for key=" << key);
+	LOG("EachAbove for key=" << key.to_string());
 }
 
-void blackhole::each_below(const std::string &key, each_callback *callback, void *arg)
+void blackhole::each_below(string_view key, each_callback *callback, void *arg)
 {
-	LOG("EachBelow for key=" << key);
+	LOG("EachBelow for key=" << key.to_string());
 }
 
-void blackhole::each_between(const std::string &key1, const std::string &key2,
-			     each_callback *callback, void *arg)
+void blackhole::each_between(string_view key1, string_view key2, each_callback *callback,
+			     void *arg)
 {
-	LOG("EachBetween for key1=" << key1 << ", key2=" << key2);
+	LOG("EachBetween for key1=" << key1.to_string() << ", key2=" << key2.to_string());
 }
 
-status blackhole::exists(const std::string &key)
+status blackhole::exists(string_view key)
 {
-	LOG("Exists for key=" << key);
+	LOG("Exists for key=" << key.to_string());
 	return status::NOT_FOUND;
 }
 
-void blackhole::get(const std::string &key, get_callback *callback, void *arg)
+void blackhole::get(string_view key, get_callback *callback, void *arg)
 {
-	LOG("Get key=" << key);
+	LOG("Get key=" << key.to_string());
 }
 
-status blackhole::put(const std::string &key, const std::string &value)
+status blackhole::put(string_view key, string_view value)
 {
-	LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
+	LOG("Put key=" << key.to_string()
+		       << ", value.size=" << std::to_string(value.size()));
 	return status::OK;
 }
 
-status blackhole::remove(const std::string &key)
+status blackhole::remove(string_view key)
 {
-	LOG("Remove key=" << key);
+	LOG("Remove key=" << key.to_string());
 	return status::OK;
 }
 

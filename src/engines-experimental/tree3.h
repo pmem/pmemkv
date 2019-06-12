@@ -211,40 +211,38 @@ public:
 	void *engine_context();
 
 	void all(all_callback *callback, void *arg) final;
-	void all_above(const std::string &key, all_callback *callback, void *arg) final{};
-	void all_below(const std::string &key, all_callback *callback, void *arg) final{};
-	void all_between(const std::string &key1, const std::string &key2,
-			 all_callback *callback, void *arg) final{};
+	void all_above(string_view key, all_callback *callback, void *arg) final{};
+	void all_below(string_view key, all_callback *callback, void *arg) final{};
+	void all_between(string_view key1, string_view key2, all_callback *callback,
+			 void *arg) final{};
 
 	std::size_t count() final;
-	std::size_t count_above(const std::string &key) final
+	std::size_t count_above(string_view key) final
 	{
 		return 0;
 	};
-	std::size_t count_below(const std::string &key) final
+	std::size_t count_below(string_view key) final
 	{
 		return 0;
 	};
-	std::size_t count_between(const std::string &key1, const std::string &key2) final
+	std::size_t count_between(string_view key1, string_view key2) final
 	{
 		return 0;
 	};
 
 	void each(each_callback *callback, void *arg) final;
-	void each_above(const std::string &key, each_callback *callback,
-			void *arg) final{};
-	void each_below(const std::string &key, each_callback *callback,
-			void *arg) final{};
-	void each_between(const std::string &key1, const std::string &key2,
-			  each_callback *callback, void *arg) final{};
+	void each_above(string_view key, each_callback *callback, void *arg) final{};
+	void each_below(string_view key, each_callback *callback, void *arg) final{};
+	void each_between(string_view key1, string_view key2, each_callback *callback,
+			  void *arg) final{};
 
-	status exists(const std::string &key) final;
+	status exists(string_view key) final;
 
-	void get(const std::string &key, get_callback *callback, void *arg) final;
+	void get(string_view key, get_callback *callback, void *arg) final;
 
-	status put(const std::string &key, const std::string &value) final;
+	status put(string_view key, string_view value) final;
 
-	status remove(const std::string &key) final;
+	status remove(string_view key) final;
 
 protected:
 	KVLeafNode *LeafSearch(const std::string &key);

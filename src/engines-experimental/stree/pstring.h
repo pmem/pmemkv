@@ -46,6 +46,11 @@ public:
 		init(s.c_str(), s.size());
 	}
 
+	pstring(const char *data, size_t size)
+	{
+		init(data, size);
+	}
+
 	pstring(const pstring &other)
 	{
 		init(other.c_str(), other.size());
