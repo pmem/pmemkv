@@ -30,14 +30,15 @@ provides different options for language bindings and storage engines.
 Installation
 ------------
 
-`pmemkv` does not currently provide install packages, but our
-<a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">installation</a> guide
-provides detailed instructions, including use of experimental engines and pool sets.
+Our <a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">installation</a> guide
+provides detailed instructions how to build and install `pmemkv` from sources,
+build rpm and deb packages and explains use of experimental engines and pool sets.
 
 <ul>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources">Building From Sources</a></li>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora">Installing on Fedora</a></li>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#ubuntu">Installing on Ubuntu</a></li>
+<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#build_package">Building packages</a></li>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental">Using Experimental Engines</a></li>
 </ul>
 
