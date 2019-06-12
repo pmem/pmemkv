@@ -34,54 +34,77 @@
 
 #include "../engine.h"
 
-namespace pmem {
-namespace kv {
+namespace pmem
+{
+namespace kv
+{
 
 class db;
 
-static int ttl;  // todo move into private field
+static int ttl; // todo move into private field
 
 class caching : public engine_base {
-  public:
-    caching(void* context, pmemkv_config *config);
-    ~caching();
+public:
+	caching(void *context, pmemkv_config *config);
+	~caching();
 
-    std::string name() final { return "caching"; }
-    void *engine_context() { return context; }
-    void all(all_callback* callback, void *arg) final;
-    void all_above(const std::string& key, all_callback* callback, void *arg) final {};
-    void all_below(const std::string& key, all_callback* callback, void *arg) final {};
-    void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) final {};
-    std::size_t count() final;
-    std::size_t count_above(const std::string& key) final { return 0; };
-    std::size_t count_below(const std::string& key) final { return 0; };
-    std::size_t count_between(const std::string& key1, const std::string& key2) final { return 0; };
-    void each(each_callback* callback, void *arg) final;
-    void each_above(const std::string& key, each_callback* callback, void *arg) final {};
-    void each_below(const std::string& key, each_callback* callback, void *arg) final {};
-    void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) final {};
-    status exists(const std::string& key) final;
-    void get(const std::string& key, get_callback* callback, void *arg) final;
-    status put(const std::string& key, const std::string& value) final;
-    status remove(const std::string& key) final;
-  private:
-    bool getString(pmemkv_config *config, const char *key, std::string &str);
-    bool readConfig(pmemkv_config *config);
-    bool getFromRemoteRedis(const std::string& key, std::string& value);
-    bool getFromRemoteMemcached(const std::string& key, std::string& value);
-    bool getKey(const std::string& key, std::string& valueField, bool api_flag);
+	std::string name() final;
+	void *engine_context();
 
-    void *context;
-    int attempts;
-    db* basePtr;
-    std::string host;
-    unsigned long int port;
-    std::string remoteType;
-    std::string remoteUser;
-    std::string remotePasswd;
-    std::string remoteUrl;
-    std::string subEngine;
-    std::string subEngineConfig;
+	void all(all_callback *callback, void *arg) final;
+	void all_above(const std::string &key, all_callback *callback, void *arg) final{};
+	void all_below(const std::string &key, all_callback *callback, void *arg) final{};
+	void all_between(const std::string &key1, const std::string &key2,
+			 all_callback *callback, void *arg) final{};
+
+	std::size_t count() final;
+	std::size_t count_above(const std::string &key) final
+	{
+		return 0;
+	};
+	std::size_t count_below(const std::string &key) final
+	{
+		return 0;
+	};
+	std::size_t count_between(const std::string &key1, const std::string &key2) final
+	{
+		return 0;
+	};
+
+	void each(each_callback *callback, void *arg) final;
+	void each_above(const std::string &key, each_callback *callback,
+			void *arg) final{};
+	void each_below(const std::string &key, each_callback *callback,
+			void *arg) final{};
+	void each_between(const std::string &key1, const std::string &key2,
+			  each_callback *callback, void *arg) final{};
+
+	status exists(const std::string &key) final;
+
+	void get(const std::string &key, get_callback *callback, void *arg) final;
+
+	status put(const std::string &key, const std::string &value) final;
+
+	status remove(const std::string &key) final;
+
+private:
+	bool getString(pmemkv_config *config, const char *key, std::string &str);
+	bool readConfig(pmemkv_config *config);
+	bool getFromRemoteRedis(const std::string &key, std::string &value);
+	bool getFromRemoteMemcached(const std::string &key, std::string &value);
+	bool getKey(const std::string &key, std::string &valueField, bool api_flag);
+
+	void *context;
+	int attempts;
+	db *basePtr;
+	std::string host;
+	unsigned long int port;
+	std::string remoteType;
+	std::string remoteUser;
+	std::string remotePasswd;
+	std::string remoteUrl;
+	std::string subEngine;
+	std::string subEngineConfig;
 };
 
 time_t convertTimeToEpoch(const char *theTime, const char *format = "%Y%m%d%H%M%S");

@@ -36,98 +36,127 @@
 #include <iostream>
 
 #define DO_LOG 0
-#define LOG(msg) if (DO_LOG) std::cout << "[vcmap] " << msg << "\n"
+#define LOG(msg)                                                                         \
+	if (DO_LOG)                                                                      \
+	std::cout << "[vcmap] " << msg << "\n"
 
-namespace pmem {
-namespace kv {
+namespace pmem
+{
+namespace kv
+{
 
-vcmap::vcmap(void *context, const std::string& path, size_t size) : context(context),
-             kv_allocator(path, size), ch_allocator(kv_allocator),
-             pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator)) {
-    LOG("Started ok");
+vcmap::vcmap(void *context, const std::string &path, size_t size)
+    : context(context),
+      kv_allocator(path, size),
+      ch_allocator(kv_allocator),
+      pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator))
+{
+	LOG("Started ok");
 }
 
-vcmap::~vcmap() {
-    LOG("Stopped ok");
+vcmap::~vcmap()
+{
+	LOG("Stopped ok");
 }
 
-void vcmap::all(all_callback* callback, void *arg) {
-    LOG("All");
-    for (auto& iterator : pmem_kv_container) {
-        (*callback)(iterator.first.c_str(), iterator.first.size(), arg);
-    }
+std::string vcmap::name()
+{
+	return "vcmap";
 }
 
-std::size_t vcmap::count() {
-    LOG("Count");
-    return pmem_kv_container.size();
+void *vcmap::engine_context()
+{
+	return context;
 }
 
-void vcmap::each(each_callback* callback, void *arg) {
-    LOG("Each");
-    for (auto& iterator : pmem_kv_container) {
-        (*callback)(iterator.first.c_str(), iterator.first.size(),
-                iterator.second.c_str(), iterator.second.size(), arg);
-    }
+void vcmap::all(all_callback *callback, void *arg)
+{
+	LOG("All");
+	for (auto &iterator : pmem_kv_container) {
+		(*callback)(iterator.first.c_str(), iterator.first.size(), arg);
+	}
 }
 
-status vcmap::exists(const std::string& key) {
-    LOG("Exists for key=" << key);
-    map_t::const_accessor result;
-    const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
-    return (result_found ? status::OK : status::NOT_FOUND);
+std::size_t vcmap::count()
+{
+	LOG("Count");
+	return pmem_kv_container.size();
 }
 
-void vcmap::get(const std::string& key, get_callback* callback, void *arg) {
-    LOG("Get key=" << key);
-    map_t::const_accessor result;
-    const bool result_found = pmem_kv_container.find(result, pmem_string(key.c_str(), key.size(), ch_allocator));
-    if (!result_found) {
-        LOG("  key not found");
-        return;
-    }
-    (*callback)(result->second.c_str(), result->second.size(), arg);
+void vcmap::each(each_callback *callback, void *arg)
+{
+	LOG("Each");
+	for (auto &iterator : pmem_kv_container) {
+		(*callback)(iterator.first.c_str(), iterator.first.size(),
+			    iterator.second.c_str(), iterator.second.size(), arg);
+	}
 }
 
-status vcmap::put(const std::string& key, const std::string& value) {
-    LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
-    try {
-        map_t::value_type kv_pair{pmem_string(key.c_str(), key.size(), ch_allocator),
-                                  pmem_string(value.c_str(), value.size(), ch_allocator)};
-        bool result = pmem_kv_container.insert(kv_pair);
-        if (!result) {
-            map_t::accessor result_found;
-            pmem_kv_container.find(result_found, kv_pair.first);
-            result_found->second = kv_pair.second;
-        }
-        return status::OK;
-    } catch (std::bad_alloc e) {
-        LOG("Put failed due to exception, " << e.what());
-        return status::FAILED;
-    } catch (pmem::transaction_alloc_error e) {
-        LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
-        return status::FAILED;
-    } catch (pmem::transaction_error e) {
-        LOG("Put failed due to pmem::transaction_error, " << e.what());
-        return status::FAILED;
-    }
+status vcmap::exists(const std::string &key)
+{
+	LOG("Exists for key=" << key);
+	map_t::const_accessor result;
+	const bool result_found = pmem_kv_container.find(
+		result, pmem_string(key.c_str(), key.size(), ch_allocator));
+	return (result_found ? status::OK : status::NOT_FOUND);
 }
 
-status vcmap::remove(const std::string& key) {
-    LOG("Remove key=" << key);
-    try {
-        size_t erased = pmem_kv_container.erase(pmem_string(key.c_str(), key.size(), ch_allocator));
-        return (erased == 1) ? status::OK : status::NOT_FOUND;
-    } catch (std::bad_alloc e) {
-        LOG("Put failed due to exception, " << e.what());
-        return status::FAILED;
-    } catch (pmem::transaction_alloc_error e) {
-        LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
-        return status::FAILED;
-    } catch (pmem::transaction_error e) {
-        LOG("Put failed due to pmem::transaction_error, " << e.what());
-        return status::FAILED;
-    }
+void vcmap::get(const std::string &key, get_callback *callback, void *arg)
+{
+	LOG("Get key=" << key);
+	map_t::const_accessor result;
+	const bool result_found = pmem_kv_container.find(
+		result, pmem_string(key.c_str(), key.size(), ch_allocator));
+	if (!result_found) {
+		LOG("  key not found");
+		return;
+	}
+	(*callback)(result->second.c_str(), result->second.size(), arg);
+}
+
+status vcmap::put(const std::string &key, const std::string &value)
+{
+	LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
+	try {
+		map_t::value_type kv_pair{
+			pmem_string(key.c_str(), key.size(), ch_allocator),
+			pmem_string(value.c_str(), value.size(), ch_allocator)};
+		bool result = pmem_kv_container.insert(kv_pair);
+		if (!result) {
+			map_t::accessor result_found;
+			pmem_kv_container.find(result_found, kv_pair.first);
+			result_found->second = kv_pair.second;
+		}
+		return status::OK;
+	} catch (std::bad_alloc e) {
+		LOG("Put failed due to exception, " << e.what());
+		return status::FAILED;
+	} catch (pmem::transaction_alloc_error e) {
+		LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+		return status::FAILED;
+	} catch (pmem::transaction_error e) {
+		LOG("Put failed due to pmem::transaction_error, " << e.what());
+		return status::FAILED;
+	}
+}
+
+status vcmap::remove(const std::string &key)
+{
+	LOG("Remove key=" << key);
+	try {
+		size_t erased = pmem_kv_container.erase(
+			pmem_string(key.c_str(), key.size(), ch_allocator));
+		return (erased == 1) ? status::OK : status::NOT_FOUND;
+	} catch (std::bad_alloc e) {
+		LOG("Put failed due to exception, " << e.what());
+		return status::FAILED;
+	} catch (pmem::transaction_alloc_error e) {
+		LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+		return status::FAILED;
+	} catch (pmem::transaction_error e) {
+		LOG("Put failed due to pmem::transaction_error, " << e.what());
+		return status::FAILED;
+	}
 }
 
 } // namespace kv

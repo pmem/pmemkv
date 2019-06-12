@@ -152,7 +152,7 @@ This value cannot be smaller than 8388608 (8MB).
 Internally, `tree3` uses a hybrid fingerprinted B+ tree implementation. Rather than keeping
 inner and leaf nodes of the tree in persistent memory, `tree3` uses a hybrid structure where
 inner nodes are kept in DRAM and leaf nodes only are kept in persistent memory. Though `tree3`
-has to recover all inner nodes when the engine is started, searches are performed in 
+has to recover all inner nodes when the engine is started, searches are performed in
 DRAM except for a final read from persistent memory.
 
 ![pmemkv-intro](https://cloud.githubusercontent.com/assets/913363/25543024/289f06d8-2c12-11e7-86e4-a1f0df891659.png)
@@ -223,7 +223,7 @@ all inner nodes when the engine is started)
 **FPTree**
 
 This research paper describes a hybrid DRAM/NVM tree design (similar
-to the `tree3` storage engine) but this paper doesn't provide any code, and 
+to the `tree3` storage engine) but this paper doesn't provide any code, and
 omits certain important implementation details.
 
 Beyond providing a clean-room implementation, the design of `tree3`
@@ -259,7 +259,7 @@ performance and reduced write amplification, since splitting can be
 performed by swapping pointers to slots without copying any key or
 value data stored in the slots. `KVSlot` internally stores key and
 value to a single persistent buffer, which minimizes the number of
-persistent allocations and improves storage efficiency with larger 
+persistent allocations and improves storage efficiency with larger
 keys and values.
 
 **cpp_map**

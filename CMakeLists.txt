@@ -62,6 +62,8 @@ option(ENGINE_CACHING "enable experimental caching engine" OFF)
 option(ENGINE_STREE "enable experimental stree engine" OFF)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 
+option(DEVELOPER_MODE "enable developer's checks" OFF)
+
 if(ENGINE_VSMAP)
 	add_definitions(-DENGINE_VSMAP)
 endif()
@@ -133,6 +135,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.6)
 
 find_package(PkgConfig QUIET)
+include(FindPerl)
 include(ExternalProject)
 include(FindThreads)
 include(CheckCXXSourceCompiles)
@@ -158,6 +161,60 @@ if(ENGINE_CACHING)
 	include(redis-experimental)
 	# XXX consider adding
 	# set(PKG_REQUIRES "${PKG_REQUIRES} libmemcached")
+endif()
+
+add_executable(check_license EXCLUDE_FROM_ALL utils/check_license/check-license.c)
+
+add_custom_target(checkers ALL)
+add_custom_target(cppstyle)
+add_custom_target(cppformat)
+add_custom_target(check-whitespace)
+add_custom_target(check-license
+	COMMAND ${CMAKE_SOURCE_DIR}/utils/check_license/check-headers.sh
+		${CMAKE_SOURCE_DIR}
+		${CMAKE_BINARY_DIR}/check_license
+		${CMAKE_SOURCE_DIR}/LICENSE
+		-a)
+add_dependencies(check-license check_license)
+
+add_custom_target(check-whitespace-main
+		COMMAND ${PERL_EXECUTABLE}
+			${CMAKE_SOURCE_DIR}/utils/check_whitespace
+			${CMAKE_SOURCE_DIR}/utils/check_license/*.sh
+			${CMAKE_SOURCE_DIR}/*.md)
+
+add_dependencies(check-whitespace check-whitespace-main)
+
+if(DEVELOPER_MODE)
+	find_program(CLANG_FORMAT NAMES clang-format clang-format-6.0)
+	set(CLANG_FORMAT_REQUIRED "6.0")
+	if(CLANG_FORMAT)
+		get_program_version(${CLANG_FORMAT} CLANG_FORMAT_VERSION)
+		if(NOT (CLANG_FORMAT_VERSION VERSION_EQUAL CLANG_FORMAT_REQUIRED))
+			message(WARNING "required clang-format version is ${CLANG_FORMAT_REQUIRED} (version ${CLANG_FORMAT_VERSION} is installed)")
+			unset(CLANG_FORMAT)
+		endif()
+	else()
+		message(WARNING "clang-format not found - C++ sources will not be checked (needed version: ${CLANG_FORMAT_REQUIRED})")
+	endif()
+
+	if(NOT PERL_FOUND)
+		message(FATAL_ERROR "Perl not found")
+	endif()
+	if (PERL_VERSION_STRING VERSION_LESS 5.16)
+		message(FATAL_ERROR "Minimum required version of Perl is 5.16)")
+	endif()
+
+	execute_process(COMMAND ${PERL_EXECUTABLE} -MText::Diff -e ""
+			ERROR_QUIET
+			RESULT_VARIABLE PERL_TEXT_DIFF_STATUS)
+	if (PERL_TEXT_DIFF_STATUS)
+		message(FATAL_ERROR "Text::Diff Perl module not found (install libtext-diff-perl or perl-Text-Diff)")
+	endif()
+
+	add_dependencies(checkers cppstyle)
+	add_dependencies(checkers check-whitespace)
+	add_dependencies(checkers check-license)
 endif()
 
 if(PKG_CONFIG_FOUND)
@@ -218,3 +275,19 @@ configure_file(
 
 add_custom_target(uninstall
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
+add_cppstyle(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
+
+add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)

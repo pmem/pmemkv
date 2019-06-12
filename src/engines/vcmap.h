@@ -34,45 +34,76 @@
 
 #include "../engine.h"
 #include "pmem_allocator.h"
-#include <string>
 #include <scoped_allocator>
+#include <string>
 #include <tbb/concurrent_hash_map.h>
 
-namespace pmem {
-namespace kv {
+namespace pmem
+{
+namespace kv
+{
 
 class vcmap : public engine_base {
-  public:
-    vcmap(void *context, const std::string& path, size_t size);
-    ~vcmap();
+public:
+	vcmap(void *context, const std::string &path, size_t size);
+	~vcmap();
 
-    std::string name() final { return "vcmap"; }
-    void *engine_context() { return context; }
-    void all(all_callback* callback, void *arg) final;
-    void all_above(const std::string& key, all_callback* callback, void *arg) final {};
-    void all_below(const std::string& key, all_callback* callback, void *arg) final {};
-    void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) final {};
-    std::size_t count() final;
-    std::size_t count_above(const std::string& key) final { return 0; };
-    std::size_t count_below(const std::string& key) final { return 0; };
-    std::size_t count_between(const std::string& key1, const std::string& key2) final { return 0; };
-    void each(each_callback* callback, void *arg) final;
-    void each_above(const std::string& key, each_callback* callback, void *arg) final {}
-    void each_below(const std::string& key, each_callback* callback, void *arg) final {}
-    void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) final {}
-    status exists(const std::string& key) final;
-    void get(const std::string& key, get_callback* callback, void *arg) final;
-    status put(const std::string& key, const std::string& value) final;
-    status remove(const std::string& key) final;
-  private:
-    typedef pmem::allocator<char> ch_allocator_t;
-    typedef std::basic_string<char, std::char_traits<char>, ch_allocator_t> pmem_string;
-    typedef pmem::allocator<std::pair<pmem_string, pmem_string> > kv_allocator_t;
-    typedef tbb::concurrent_hash_map <pmem_string, pmem_string, tbb::tbb_hash_compare<pmem_string>, std::scoped_allocator_adaptor<kv_allocator_t>> map_t;
-    void *context;
-    kv_allocator_t kv_allocator;
-    ch_allocator_t ch_allocator;
-    map_t pmem_kv_container;
+	std::string name() final;
+	void *engine_context();
+
+	void all(all_callback *callback, void *arg) final;
+	void all_above(const std::string &key, all_callback *callback, void *arg) final{};
+	void all_below(const std::string &key, all_callback *callback, void *arg) final{};
+	void all_between(const std::string &key1, const std::string &key2,
+			 all_callback *callback, void *arg) final{};
+
+	std::size_t count() final;
+	std::size_t count_above(const std::string &key) final
+	{
+		return 0;
+	};
+	std::size_t count_below(const std::string &key) final
+	{
+		return 0;
+	};
+	std::size_t count_between(const std::string &key1, const std::string &key2) final
+	{
+		return 0;
+	};
+
+	void each(each_callback *callback, void *arg) final;
+	void each_above(const std::string &key, each_callback *callback, void *arg) final
+	{
+	}
+	void each_below(const std::string &key, each_callback *callback, void *arg) final
+	{
+	}
+	void each_between(const std::string &key1, const std::string &key2,
+			  each_callback *callback, void *arg) final
+	{
+	}
+
+	status exists(const std::string &key) final;
+
+	void get(const std::string &key, get_callback *callback, void *arg) final;
+
+	status put(const std::string &key, const std::string &value) final;
+
+	status remove(const std::string &key) final;
+
+private:
+	typedef pmem::allocator<char> ch_allocator_t;
+	typedef std::basic_string<char, std::char_traits<char>, ch_allocator_t>
+		pmem_string;
+	typedef pmem::allocator<std::pair<pmem_string, pmem_string>> kv_allocator_t;
+	typedef tbb::concurrent_hash_map<pmem_string, pmem_string,
+					 tbb::tbb_hash_compare<pmem_string>,
+					 std::scoped_allocator_adaptor<kv_allocator_t>>
+		map_t;
+	void *context;
+	kv_allocator_t kv_allocator;
+	ch_allocator_t ch_allocator;
+	map_t pmem_kv_container;
 };
 
 } /* namespace kv */

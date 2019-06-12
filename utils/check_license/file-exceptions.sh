@@ -1,5 +1,6 @@
+#!/bin/sh -e
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2016-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,17 +29,8 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
 
-# parse tests source files to get the list of all tests
-function(get_tests dir test_files output)
-	set(all_tests "")
-	foreach(file IN ITEMS ${test_files})
-		file(STRINGS ${dir}/${file} tests REGEX "^TEST_F")
-		string(REPLACE "TEST_F(" "" tests "${tests}")
-		string(REPLACE ", " "." tests "${tests}")
-		string(REPLACE ")" " " tests "${tests}")
-		string(CONCAT all_tests ${all_tests} ${tests})
-	endforeach(file)
-	string(REPLACE " " ";" list_all_tests "${all_tests}")
-	set(${output} "${list_all_tests}" PARENT_SCOPE)
-endfunction()
+# file-exceptions.sh - filter out files not checked for copyright and license
+
+grep -v -E -e 'src/valgrind'

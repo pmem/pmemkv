@@ -36,50 +36,74 @@
 #include "stree/persistent_b_tree.h"
 #include "stree/pstring.h"
 
-using pmem::obj::pool;
 using pmem::obj::persistent_ptr;
+using pmem::obj::pool;
 
-namespace pmem {
-namespace kv {
+namespace pmem
+{
+namespace kv
+{
 
 const size_t DEGREE = 64;
 const size_t MAX_KEY_SIZE = 20;
 const size_t MAX_VALUE_SIZE = 200;
 
 class stree : public engine_base {
-  public:
-    stree(void *context, const std::string& path, size_t size);
-    ~stree();
+public:
+	stree(void *context, const std::string &path, size_t size);
+	~stree();
 
-    std::string name() final { return "stree"; }
-    void *engine_context() { return context; }
-    void all(all_callback* callback, void *arg) final;
-    void all_above(const std::string& key, all_callback* callback, void *arg) final {};
-    void all_below(const std::string& key, all_callback* callback, void *arg) final {};
-    void all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) final {};
-    std::size_t count() final;
-    std::size_t count_above(const std::string& key) final { return 0; };
-    std::size_t count_below(const std::string& key) final { return 0; };
-    std::size_t count_between(const std::string& key1, const std::string& key2) final { return 0; };
-    void each(each_callback* callback, void *arg) final;
-    void each_above(const std::string& key, each_callback* callback, void *arg) final {};
-    void each_below(const std::string& key, each_callback* callback, void *arg) final {};
-    void each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) final {};
-    status exists(const std::string& key) final;
-    void get(const std::string& key, get_callback* callback, void *arg) final;
-    status put(const std::string& key, const std::string& value) final;
-    status remove(const std::string& key) final;
-  private:
-    typedef persistent::b_tree<pstring<MAX_KEY_SIZE>, pstring<MAX_VALUE_SIZE>, DEGREE> btree_type;
-    struct RootData {
-        persistent_ptr<btree_type> btree_ptr;
-    };
-    stree(const stree&);
-    void operator=(const stree&);
-    void Recover();
-    void *context;
-    pool<RootData> pmpool;
-    btree_type* my_btree;
+	std::string name() final;
+	void *engine_context();
+
+	void all(all_callback *callback, void *arg) final;
+	void all_above(const std::string &key, all_callback *callback, void *arg) final{};
+	void all_below(const std::string &key, all_callback *callback, void *arg) final{};
+	void all_between(const std::string &key1, const std::string &key2,
+			 all_callback *callback, void *arg) final{};
+
+	std::size_t count() final;
+	std::size_t count_above(const std::string &key) final
+	{
+		return 0;
+	};
+	std::size_t count_below(const std::string &key) final
+	{
+		return 0;
+	};
+	std::size_t count_between(const std::string &key1, const std::string &key2) final
+	{
+		return 0;
+	};
+
+	void each(each_callback *callback, void *arg) final;
+	void each_above(const std::string &key, each_callback *callback,
+			void *arg) final{};
+	void each_below(const std::string &key, each_callback *callback,
+			void *arg) final{};
+	void each_between(const std::string &key1, const std::string &key2,
+			  each_callback *callback, void *arg) final{};
+
+	status exists(const std::string &key) final;
+
+	void get(const std::string &key, get_callback *callback, void *arg) final;
+
+	status put(const std::string &key, const std::string &value) final;
+
+	status remove(const std::string &key) final;
+
+private:
+	typedef persistent::b_tree<pstring<MAX_KEY_SIZE>, pstring<MAX_VALUE_SIZE>, DEGREE>
+		btree_type;
+	struct RootData {
+		persistent_ptr<btree_type> btree_ptr;
+	};
+	stree(const stree &);
+	void operator=(const stree &);
+	void Recover();
+	void *context;
+	pool<RootData> pmpool;
+	btree_type *my_btree;
 };
 
 } /* namespace kv */

@@ -30,92 +30,126 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
 #include "blackhole.h"
+#include <iostream>
 
 #define DO_LOG 0
-#define LOG(msg) if (DO_LOG) std::cout << "[blackhole] " << msg << "\n"
+#define LOG(msg)                                                                         \
+	if (DO_LOG)                                                                      \
+	std::cout << "[blackhole] " << msg << "\n"
 
-namespace pmem {
-namespace kv {
+namespace pmem
+{
+namespace kv
+{
 
-blackhole::blackhole(void *context): context(context) {
-    LOG("Started ok");
+blackhole::blackhole(void *context) : context(context)
+{
+	LOG("Started ok");
 }
 
-blackhole::~blackhole() {
-    LOG("Stopped ok");
+blackhole::~blackhole()
+{
+	LOG("Stopped ok");
 }
 
-void blackhole::all(all_callback* callback, void *arg) {
-    LOG("All");
+std::string blackhole::name()
+{
+	return "blackhole";
 }
 
-void blackhole::all_above(const std::string& key, all_callback* callback, void *arg) {
-    LOG("AllAbove for key=" << key);
+void *blackhole::engine_context()
+{
+	return context;
 }
 
-void blackhole::all_below(const std::string& key, all_callback* callback, void *arg) {
-    LOG("AllBelow for key=" << key);
+void blackhole::all(all_callback *callback, void *arg)
+{
+	LOG("All");
 }
 
-void blackhole::all_between(const std::string& key1, const std::string& key2, all_callback* callback, void *arg) {
-    LOG("AllBetween for key1=" << key1 << ", key2=" << key2);
+void blackhole::all_above(const std::string &key, all_callback *callback, void *arg)
+{
+	LOG("AllAbove for key=" << key);
 }
 
-std::size_t blackhole::count() {
-    LOG("Count");
-    return 0;
+void blackhole::all_below(const std::string &key, all_callback *callback, void *arg)
+{
+	LOG("AllBelow for key=" << key);
 }
 
-std::size_t blackhole::count_above(const std::string& key) {
-    LOG("CountAbove for key=" << key);
-    return 0;
+void blackhole::all_between(const std::string &key1, const std::string &key2,
+			    all_callback *callback, void *arg)
+{
+	LOG("AllBetween for key1=" << key1 << ", key2=" << key2);
 }
 
-std::size_t blackhole::count_below(const std::string& key) {
-    LOG("CountBelow for key=" << key);
-    return 0;
+std::size_t blackhole::count()
+{
+	LOG("Count");
+	return 0;
 }
 
-std::size_t blackhole::count_between(const std::string& key1, const std::string& key2) {
-    LOG("CountBetween for key1=" << key1 << ", key2=" << key2);
-    return 0;
+std::size_t blackhole::count_above(const std::string &key)
+{
+	LOG("CountAbove for key=" << key);
+	return 0;
 }
 
-void blackhole::each(each_callback* callback, void *arg) {
-    LOG("Each");
+std::size_t blackhole::count_below(const std::string &key)
+{
+	LOG("CountBelow for key=" << key);
+	return 0;
 }
 
-void blackhole::each_above(const std::string& key, each_callback* callback, void *arg) {
-    LOG("EachAbove for key=" << key);
+std::size_t blackhole::count_between(const std::string &key1, const std::string &key2)
+{
+	LOG("CountBetween for key1=" << key1 << ", key2=" << key2);
+	return 0;
 }
 
-void blackhole::each_below(const std::string& key, each_callback* callback, void *arg) {
-    LOG("EachBelow for key=" << key);
+void blackhole::each(each_callback *callback, void *arg)
+{
+	LOG("Each");
 }
 
-void blackhole::each_between(const std::string& key1, const std::string& key2, each_callback* callback, void *arg) {
-    LOG("EachBetween for key1=" << key1 << ", key2=" << key2);
+void blackhole::each_above(const std::string &key, each_callback *callback, void *arg)
+{
+	LOG("EachAbove for key=" << key);
 }
 
-status blackhole::exists(const std::string& key) {
-    LOG("Exists for key=" << key);
-    return status::NOT_FOUND;
+void blackhole::each_below(const std::string &key, each_callback *callback, void *arg)
+{
+	LOG("EachBelow for key=" << key);
 }
 
-void blackhole::get(const std::string& key, get_callback* callback, void *arg) {
-    LOG("Get key=" << key);
+void blackhole::each_between(const std::string &key1, const std::string &key2,
+			     each_callback *callback, void *arg)
+{
+	LOG("EachBetween for key1=" << key1 << ", key2=" << key2);
 }
 
-status blackhole::put(const std::string& key, const std::string& value) {
-    LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
-    return status::OK;
+status blackhole::exists(const std::string &key)
+{
+	LOG("Exists for key=" << key);
+	return status::NOT_FOUND;
 }
 
-status blackhole::remove(const std::string& key) {
-    LOG("Remove key=" << key);
-    return status::OK;
+void blackhole::get(const std::string &key, get_callback *callback, void *arg)
+{
+	LOG("Get key=" << key);
+}
+
+status blackhole::put(const std::string &key, const std::string &value)
+{
+	LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
+	return status::OK;
+}
+
+status blackhole::remove(const std::string &key)
+{
+	LOG("Remove key=" << key);
+	return status::OK;
 }
 
 } // namespace kv

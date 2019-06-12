@@ -93,3 +93,77 @@ function(find_pmemcheck)
 		message(WARNING "Valgrind pmemcheck NOT found.")
 	endif()
 endfunction()
+
+# Generates cppstyle-$name and cppformat-$name targets and attaches them
+# as dependencies of global "cppformat" target.
+# cppstyle-$name target verifies C++ style of files in current source dir.
+# cppformat-$name target reformats files in current source dir.
+# If more arguments are used, then they are used as files to be checked
+# instead.
+# ${name} must be unique.
+function(add_cppstyle name)
+	if(NOT CLANG_FORMAT)
+		return()
+	endif()
+
+	if(${ARGC} EQUAL 1)
+		add_custom_target(cppstyle-${name}
+			COMMAND ${PERL_EXECUTABLE}
+				${CMAKE_SOURCE_DIR}/utils/cppstyle
+				${CLANG_FORMAT}
+				check
+				${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+				${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
+			)
+		add_custom_target(cppformat-${name}
+			COMMAND ${PERL_EXECUTABLE}
+				${CMAKE_SOURCE_DIR}/utils/cppstyle
+				${CLANG_FORMAT}
+				format
+				${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+				${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
+			)
+	else()
+		add_custom_target(cppstyle-${name}
+			COMMAND ${PERL_EXECUTABLE}
+				${CMAKE_SOURCE_DIR}/utils/cppstyle
+				${CLANG_FORMAT}
+				check
+				${ARGN}
+			)
+		add_custom_target(cppformat-${name}
+			COMMAND ${PERL_EXECUTABLE}
+				${CMAKE_SOURCE_DIR}/utils/cppstyle
+				${CLANG_FORMAT}
+				format
+				${ARGN}
+			)
+	endif()
+
+	add_dependencies(cppstyle cppstyle-${name})
+	add_dependencies(cppformat cppformat-${name})
+endfunction()
+
+# Generates check-whitespace-$name target and attaches it as a dependency
+# of global "check-whitespace" target.
+# ${name} must be unique.
+function(add_check_whitespace name)
+	if(NOT DEVELOPER_MODE)
+		return()
+	endif()
+
+	add_custom_target(check-whitespace-${name}
+		COMMAND ${PERL_EXECUTABLE}
+			${CMAKE_SOURCE_DIR}/utils/check_whitespace ${ARGN})
+
+	add_dependencies(check-whitespace check-whitespace-${name})
+endfunction()
+
+# Sets ${ret} to version of program specified by ${name} in major.minor.patch format
+function(get_program_version name ret)
+	execute_process(COMMAND ${name} --version
+		OUTPUT_VARIABLE cmd_ret
+		ERROR_QUIET)
+	STRING(REGEX MATCH "([0-9]+.)([0-9]+.)([0-9]+)" VERSION ${cmd_ret})
+	SET(${ret} ${VERSION} PARENT_SCOPE)
+endfunction()
