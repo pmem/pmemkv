@@ -90,10 +90,7 @@ TEST_F(VCMapTest, SimpleTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	value = "";
-	kv->get("key1", [&](const char *v, int vb) { value.append(v, vb); });
-	ASSERT_TRUE(value == "value1");
-	value = "";
-	kv->get("key1", [&](const std::string &v) { value.append(v); });
+	kv->get("key1", [&](string_view v) { value.append(v.data(), v.size()); });
 	ASSERT_TRUE(value == "value1");
 }
 

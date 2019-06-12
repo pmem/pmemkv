@@ -169,10 +169,7 @@ TEST_F(TreeTest, SimpleTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	value = "";
-	kv->get("key1", [&](const char *v, int vb) { value.append(v, vb); });
-	ASSERT_TRUE(value == "value1");
-	value = "";
-	kv->get("key1", [&](const std::string &v) { value.append(v); });
+	kv->get("key1", [&](string_view v) { value.append(v.data(), v.size()); });
 	ASSERT_TRUE(value == "value1");
 }
 
@@ -473,9 +470,9 @@ TEST_F(TreeTest, UsesAllTest)
 	ASSERT_TRUE(kv->count() == 2);
 
 	std::string result;
-	kv->all([&result](const char *k, int kb) {
+	kv->all([&result](string_view k) {
 		result.append("<");
-		result.append(std::string(k, kb));
+		result.append(k.data(), k.size());
 		result.append(">,");
 	});
 	ASSERT_TRUE(result == "<2>,<记!>,");
@@ -489,11 +486,11 @@ TEST_F(TreeTest, UsesEachTest)
 	ASSERT_TRUE(kv->count() == 2);
 
 	std::string result;
-	kv->each([&result](const char *k, int kb, const char *v, int vb) {
+	kv->each([&result](string_view k, string_view v) {
 		result.append("<");
-		result.append(std::string(k, kb));
+		result.append(k.data(), k.size());
 		result.append(">,<");
-		result.append(std::string(v, vb));
+		result.append(v.data(), v.size());
 		result.append(">|");
 	});
 	ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");
