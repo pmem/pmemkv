@@ -100,21 +100,23 @@ status vcmap::each(each_callback *callback, void *arg)
 	return status::OK;
 }
 
-status vcmap::exists(const std::string &key)
+status vcmap::exists(string_view key)
 {
-	LOG("Exists for key=" << key);
+	LOG("Exists for key=" << std::string(key.data(), key.size()));
 	map_t::const_accessor result;
+	// XXX - do not create temporary string
 	const bool result_found = pmem_kv_container.find(
-		result, pmem_string(key.c_str(), key.size(), ch_allocator));
+		result, pmem_string(key.data(), key.size(), ch_allocator));
 	return (result_found ? status::OK : status::NOT_FOUND);
 }
 
-status vcmap::get(const std::string &key, get_callback *callback, void *arg)
+status vcmap::get(string_view key, get_callback *callback, void *arg)
 {
-	LOG("Get key=" << key);
+	LOG("Get key=" << std::string(key.data(), key.size()));
 	map_t::const_accessor result;
+	// XXX - do not create temporary string
 	const bool result_found = pmem_kv_container.find(
-		result, pmem_string(key.c_str(), key.size(), ch_allocator));
+		result, pmem_string(key.data(), key.size(), ch_allocator));
 	if (!result_found) {
 		LOG("  key not found");
 		return status::NOT_FOUND;
@@ -124,13 +126,15 @@ status vcmap::get(const std::string &key, get_callback *callback, void *arg)
 	return status::OK;
 }
 
-status vcmap::put(const std::string &key, const std::string &value)
+status vcmap::put(string_view key, string_view value)
 {
-	LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
+	LOG("Put key=" << std::string(key.data(), key.size())
+		       << ", value.size=" << std::to_string(value.size()));
 	try {
 		map_t::value_type kv_pair{
-			pmem_string(key.c_str(), key.size(), ch_allocator),
-			pmem_string(value.c_str(), value.size(), ch_allocator)};
+			// XXX - do not create temporary string
+			pmem_string(key.data(), key.size(), ch_allocator),
+			pmem_string(value.data(), value.size(), ch_allocator)};
 		bool result = pmem_kv_container.insert(kv_pair);
 		if (!result) {
 			map_t::accessor result_found;
@@ -150,12 +154,13 @@ status vcmap::put(const std::string &key, const std::string &value)
 	}
 }
 
-status vcmap::remove(const std::string &key)
+status vcmap::remove(string_view key)
 {
-	LOG("Remove key=" << key);
+	LOG("Remove key=" << std::string(key.data(), key.size()));
 	try {
+		// XXX - do not create temporary string
 		size_t erased = pmem_kv_container.erase(
-			pmem_string(key.c_str(), key.size(), ch_allocator));
+			pmem_string(key.data(), key.size(), ch_allocator));
 		return (erased == 1) ? status::OK : status::NOT_FOUND;
 	} catch (std::bad_alloc e) {
 		LOG("Put failed due to exception, " << e.what());

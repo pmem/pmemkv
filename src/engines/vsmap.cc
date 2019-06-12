@@ -77,11 +77,12 @@ status vsmap::all(all_callback *callback, void *arg)
 	return status::OK;
 }
 
-status vsmap::all_above(const std::string &key, all_callback *callback, void *arg)
+status vsmap::all_above(string_view key, all_callback *callback, void *arg)
 {
-	LOG("AllAbove for key=" << key);
+	LOG("AllAbove for key=" << std::string(key.data(), key.size()));
+	// XXX - do not create temporary string
 	auto it = pmem_kv_container.upper_bound(
-		key_type(key.c_str(), key.size(), kv_allocator));
+		key_type(key.data(), key.size(), kv_allocator));
 	auto end = pmem_kv_container.end();
 	for (; it != end; it++)
 		(*callback)(it->first.c_str(), it->first.size(), arg);
@@ -89,27 +90,29 @@ status vsmap::all_above(const std::string &key, all_callback *callback, void *ar
 	return status::OK;
 }
 
-status vsmap::all_below(const std::string &key, all_callback *callback, void *arg)
+status vsmap::all_below(string_view key, all_callback *callback, void *arg)
 {
-	LOG("AllBelow for key=" << key);
+	LOG("AllBelow for key=" << std::string(key.data(), key.size()));
 	auto it = pmem_kv_container.begin();
+	// XXX - do not create temporary string
 	auto end = pmem_kv_container.lower_bound(
-		key_type(key.c_str(), key.size(), kv_allocator));
+		key_type(key.data(), key.size(), kv_allocator));
 	for (; it != end; it++)
 		(*callback)(it->first.c_str(), it->first.size(), arg);
 
 	return status::OK;
 }
 
-status vsmap::all_between(const std::string &key1, const std::string &key2,
-			  all_callback *callback, void *arg)
+status vsmap::all_between(string_view key1, string_view key2, all_callback *callback,
+			  void *arg)
 {
-	LOG("AllBetween for key1=" << key1 << ", key2=" << key2);
-	if (key1 < key2) {
+	LOG("AllBetween for key1=" << key1.data() << ", key2=" << key2.data());
+	if (key1.compare(key2) < 0) {
+		// XXX - do not create temporary string
 		auto it = pmem_kv_container.upper_bound(
-			key_type(key1.c_str(), key1.size(), kv_allocator));
+			key_type(key1.data(), key1.size(), kv_allocator));
 		auto end = pmem_kv_container.lower_bound(
-			key_type(key2.c_str(), key2.size(), kv_allocator));
+			key_type(key2.data(), key2.size(), kv_allocator));
 		for (; it != end; it++)
 			(*callback)(it->first.c_str(), it->first.size(), arg);
 	}
@@ -124,12 +127,13 @@ status vsmap::count(std::size_t &cnt)
 	return status::OK;
 }
 
-status vsmap::count_above(const std::string &key, std::size_t &cnt)
+status vsmap::count_above(string_view key, std::size_t &cnt)
 {
-	LOG("CountAbove for key=" << key);
+	LOG("CountAbove for key=" << std::string(key.data(), key.size()));
 	std::size_t result = 0;
+	// XXX - do not create temporary string
 	auto it = pmem_kv_container.upper_bound(
-		key_type(key.c_str(), key.size(), kv_allocator));
+		key_type(key.data(), key.size(), kv_allocator));
 	auto end = pmem_kv_container.end();
 	for (; it != end; it++)
 		result++;
@@ -139,13 +143,14 @@ status vsmap::count_above(const std::string &key, std::size_t &cnt)
 	return status::OK;
 }
 
-status vsmap::count_below(const std::string &key, std::size_t &cnt)
+status vsmap::count_below(string_view key, std::size_t &cnt)
 {
-	LOG("CountBelow for key=" << key);
+	LOG("CountBelow for key=" << std::string(key.data(), key.size()));
 	std::size_t result = 0;
 	auto it = pmem_kv_container.begin();
+	// XXX - do not create temporary string
 	auto end = pmem_kv_container.lower_bound(
-		key_type(key.c_str(), key.size(), kv_allocator));
+		key_type(key.data(), key.size(), kv_allocator));
 	for (; it != end; it++)
 		result++;
 
@@ -154,16 +159,16 @@ status vsmap::count_below(const std::string &key, std::size_t &cnt)
 	return status::OK;
 }
 
-status vsmap::count_between(const std::string &key1, const std::string &key2,
-			    std::size_t &cnt)
+status vsmap::count_between(string_view key1, string_view key2, std::size_t &cnt)
 {
-	LOG("CountBetween for key1=" << key1 << ", key2=" << key2);
+	LOG("CountBetween for key1=" << key1.data() << ", key2=" << key2.data());
 	std::size_t result = 0;
-	if (key1 < key2) {
+	if (key1.compare(key2) < 0) {
+		// XXX - do not create temporary string
 		auto it = pmem_kv_container.upper_bound(
-			key_type(key1.c_str(), key1.size(), kv_allocator));
+			key_type(key1.data(), key1.size(), kv_allocator));
 		auto end = pmem_kv_container.lower_bound(
-			key_type(key2.c_str(), key2.size(), kv_allocator));
+			key_type(key2.data(), key2.size(), kv_allocator));
 		for (; it != end; it++)
 			result++;
 	}
@@ -183,11 +188,12 @@ status vsmap::each(each_callback *callback, void *arg)
 	return status::OK;
 }
 
-status vsmap::each_above(const std::string &key, each_callback *callback, void *arg)
+status vsmap::each_above(string_view key, each_callback *callback, void *arg)
 {
-	LOG("EachAbove for key=" << key);
+	LOG("EachAbove for key=" << std::string(key.data(), key.size()));
+	// XXX - do not create temporary string
 	auto it = pmem_kv_container.upper_bound(
-		key_type(key.c_str(), key.size(), kv_allocator));
+		key_type(key.data(), key.size(), kv_allocator));
 	auto end = pmem_kv_container.end();
 	for (; it != end; it++)
 		(*callback)(it->first.c_str(), it->first.size(), it->second.c_str(),
@@ -196,12 +202,13 @@ status vsmap::each_above(const std::string &key, each_callback *callback, void *
 	return status::OK;
 }
 
-status vsmap::each_below(const std::string &key, each_callback *callback, void *arg)
+status vsmap::each_below(string_view key, each_callback *callback, void *arg)
 {
-	LOG("EachBelow for key=" << key);
+	LOG("EachBelow for key=" << std::string(key.data(), key.size()));
 	auto it = pmem_kv_container.begin();
+	// XXX - do not create temporary string
 	auto end = pmem_kv_container.lower_bound(
-		key_type(key.c_str(), key.size(), kv_allocator));
+		key_type(key.data(), key.size(), kv_allocator));
 	for (; it != end; it++)
 		(*callback)(it->first.c_str(), it->first.size(), it->second.c_str(),
 			    it->second.size(), arg);
@@ -209,15 +216,16 @@ status vsmap::each_below(const std::string &key, each_callback *callback, void *
 	return status::OK;
 }
 
-status vsmap::each_between(const std::string &key1, const std::string &key2,
-			   each_callback *callback, void *arg)
+status vsmap::each_between(string_view key1, string_view key2, each_callback *callback,
+			   void *arg)
 {
-	LOG("EachBetween for key1=" << key1 << ", key2=" << key2);
-	if (key1 < key2) {
+	LOG("EachBetween for key1=" << key1.data() << ", key2=" << key2.data());
+	if (key1.compare(key2) < 0) {
+		// XXX - do not create temporary string
 		auto it = pmem_kv_container.upper_bound(
-			key_type(key1.c_str(), key1.size(), kv_allocator));
+			key_type(key1.data(), key1.size(), kv_allocator));
 		auto end = pmem_kv_container.lower_bound(
-			key_type(key2.c_str(), key2.size(), kv_allocator));
+			key_type(key2.data(), key2.size(), kv_allocator));
 		for (; it != end; it++)
 			(*callback)(it->first.c_str(), it->first.size(),
 				    it->second.c_str(), it->second.size(), arg);
@@ -226,20 +234,21 @@ status vsmap::each_between(const std::string &key1, const std::string &key2,
 	return status::OK;
 }
 
-status vsmap::exists(const std::string &key)
+status vsmap::exists(string_view key)
 {
-	LOG("Exists for key=" << key);
-	bool r =
-		pmem_kv_container.find(key_type(key.c_str(), key.size(), kv_allocator)) !=
+	LOG("Exists for key=" << std::string(key.data(), key.size()));
+	// XXX - do not create temporary string
+	bool r = pmem_kv_container.find(key_type(key.data(), key.size(), kv_allocator)) !=
 		pmem_kv_container.end();
 	return (r ? status::OK : status::NOT_FOUND);
 }
 
-status vsmap::get(const std::string &key, get_callback *callback, void *arg)
+status vsmap::get(string_view key, get_callback *callback, void *arg)
 {
-	LOG("Get key=" << key);
+	LOG("Get key=" << std::string(key.data(), key.size()));
+	// XXX - do not create temporary string
 	const auto pos =
-		pmem_kv_container.find(key_type(key.c_str(), key.size(), kv_allocator));
+		pmem_kv_container.find(key_type(key.data(), key.size(), kv_allocator));
 	if (pos == pmem_kv_container.end()) {
 		LOG("  key not found");
 		return status::NOT_FOUND;
@@ -249,12 +258,14 @@ status vsmap::get(const std::string &key, get_callback *callback, void *arg)
 	return status::OK;
 }
 
-status vsmap::put(const std::string &key, const std::string &value)
+status vsmap::put(string_view key, string_view value)
 {
-	LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
+	LOG("Put key=" << std::string(key.data(), key.size())
+		       << ", value.size=" << std::to_string(value.size()));
 	try {
-		pmem_kv_container[key_type(key.c_str(), key.size(), kv_allocator)] =
-			mapped_type(value.c_str(), value.size(), kv_allocator);
+		// XXX - do not create temporary string
+		pmem_kv_container[key_type(key.data(), key.size(), kv_allocator)] =
+			mapped_type(value.data(), value.size(), kv_allocator);
 		return status::OK;
 	} catch (std::bad_alloc e) {
 		LOG("Put failed due to exception, " << e.what());
@@ -268,12 +279,13 @@ status vsmap::put(const std::string &key, const std::string &value)
 	}
 }
 
-status vsmap::remove(const std::string &key)
+status vsmap::remove(string_view key)
 {
-	LOG("Remove key=" << key);
+	LOG("Remove key=" << std::string(key.data(), key.size()));
 	try {
+		// XXX - do not create temporary string
 		size_t erased = pmem_kv_container.erase(
-			key_type(key.c_str(), key.size(), kv_allocator));
+			key_type(key.data(), key.size(), kv_allocator));
 		return (erased == 1) ? status::OK : status::NOT_FOUND;
 	} catch (std::bad_alloc e) {
 		LOG("Put failed due to exception, " << e.what());
