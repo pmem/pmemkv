@@ -48,6 +48,9 @@ if(NOT CMAKE_BUILD_TYPE)
 		CACHE STRING "Choose a type of build (Debug, Release or RelWithDebInfo)" FORCE)
 endif()
 
+set(GTEST_DIR "/opt/googletest"
+	CACHE STRING "directory containing google-test archive file")
+
 option(COVERAGE "run coverage test" OFF)
 if(COVERAGE)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage")
