@@ -63,6 +63,9 @@ function upload_codecov() {
 
 cd $WORKDIR
 
+# copy Googletest to the current directory
+cp /opt/googletest/googletest-*.zip .
+
 # make & install
 mkdir build
 cd build

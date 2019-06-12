@@ -70,6 +70,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	whois \
  && rm -rf /var/lib/apt/lists/*
 
+# Install Googletest
+COPY install-googletest.sh install-googletest.sh
+RUN ./install-googletest.sh
+
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
 RUN ./install-valgrind.sh

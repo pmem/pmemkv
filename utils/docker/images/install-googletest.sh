@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 #
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,80 +31,31 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of fedora-based
-#              environment prepared for running pmemkv build and tests.
+# install-googletest.sh -- install Googletest
 #
 
-# Pull base image
-FROM fedora:28
-MAINTAINER lukasz.stolarczuk@intel.com
+GTEST_VERSION=1.7.0
+URL=https://github.com/google/googletest/archive/release-${GTEST_VERSION}.zip
+GTEST_SHA256HASH=b58cb7547a28b2c718d1e38aee18a3659c9e3ff52440297e965f5edffe34b6d0
+GTEST=googletest-${GTEST_VERSION}.zip
+HASH_FILE=SHA256SUM
+DEST_DIR=/opt/googletest
+PWD=$(pwd)
 
-# Install basic tools
-RUN dnf update -y \
- && dnf install -y \
-	autoconf \
-	automake \
-	clang \
-	cmake \
-	daxctl-devel \
-	doxygen \
-	gcc \
-	gcc-c++ \
-	gdb \
-	git \
-	libtool \
-	make \
-	man \
-	ndctl-devel \
-	numactl-devel \
-	passwd \
-	perl-Text-Diff \
-	rapidjson-devel \
-	rpm-build \
-	sudo \
-	unzip \
-	wget \
-	which \
-&& dnf clean all
+set -e
 
-# Install glibc-debuginfo
-RUN dnf debuginfo-install -y glibc
+rm -rf ${DEST_DIR}
+mkdir -p ${DEST_DIR}
+cd ${DEST_DIR}
 
-# Install Googletest
-COPY install-googletest.sh install-googletest.sh
-RUN ./install-googletest.sh
+# create a hash file
+echo "${GTEST_SHA256HASH} ${GTEST}" > ${HASH_FILE}
 
-# Install valgrind
-COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
+# Download and save Googletest packages
+wget --no-check-certificate ${URL}
+mv release-${GTEST_VERSION}.zip ${GTEST}
 
-# Install pmdk
-COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh rpm
+sha256sum -c ${HASH_FILE}
+rm ${HASH_FILE}
 
-# Install pmdk c++ bindings
-COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh RPM
-
-# Install memkind
-COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh
-
-# Install Intel TBB
-COPY install-tbb.sh install-tbb.sh
-RUN ./install-tbb.sh
-
-# Add user
-ENV USER user
-ENV USERPASS pass
-RUN useradd -m $USER
-RUN echo $USERPASS | passwd $USER --stdin
-RUN gpasswd wheel -a $USER
-USER $USER
-
-# Set required environment variables
-ENV OS fedora
-ENV OS_VER 28
-ENV PACKAGE_MANAGER rpm
-ENV NOTTY 1
-
+cd ${PWD}
