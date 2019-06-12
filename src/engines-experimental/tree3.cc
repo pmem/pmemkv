@@ -139,15 +139,17 @@ status tree3::each(each_callback *callback, void *arg)
 	return status::OK;
 }
 
-status tree3::exists(const std::string &key)
+status tree3::exists(string_view key)
 {
-	LOG("Exists for key=" << key);
-	auto leafnode = LeafSearch(key);
+	LOG("Exists for key=" << key.data());
+	// XXX - do not create temporary string
+	auto leafnode = LeafSearch(std::string(key.data(), key.size()));
 	if (leafnode) {
-		const uint8_t hash = PearsonHash(key.c_str(), key.size());
+		const uint8_t hash = PearsonHash(key.data(), key.size());
 		for (int slot = LEAF_KEYS; slot--;) {
 			if (leafnode->hashes[slot] == hash) {
-				if (leafnode->keys[slot].compare(key) == 0)
+				if (leafnode->keys[slot].compare(
+					    std::string(key.data(), key.size())) == 0)
 					return status::OK;
 			}
 		}
@@ -156,16 +158,18 @@ status tree3::exists(const std::string &key)
 	return status::NOT_FOUND;
 }
 
-status tree3::get(const std::string &key, get_callback *callback, void *arg)
+status tree3::get(string_view key, get_callback *callback, void *arg)
 {
-	LOG("Get using callback for key=" << key);
-	auto leafnode = LeafSearch(key);
+	LOG("Get using callback for key=" << key.data());
+	// XXX - do not create temporary string
+	auto leafnode = LeafSearch(std::string(key.data(), key.size()));
 	if (leafnode) {
-		const uint8_t hash = PearsonHash(key.c_str(), key.size());
+		const uint8_t hash = PearsonHash(key.data(), key.size());
 		for (int slot = LEAF_KEYS; slot--;) {
 			if (leafnode->hashes[slot] == hash) {
 				LOG("   found hash match, slot=" << slot);
-				if (leafnode->keys[slot].compare(key) == 0) {
+				if (leafnode->keys[slot].compare(
+					    std::string(key.data(), key.size())) == 0) {
 					auto kv = leafnode->leaf->slots[slot].get_ro();
 					LOG("   found value, slot="
 					    << slot
@@ -180,12 +184,13 @@ status tree3::get(const std::string &key, get_callback *callback, void *arg)
 	return status::NOT_FOUND;
 }
 
-status tree3::put(const std::string &key, const std::string &value)
+status tree3::put(string_view key, string_view value)
 {
-	LOG("Put key=" << key.c_str() << ", value.size=" << std::to_string(value.size()));
+	LOG("Put key=" << key.data() << ", value.size=" << std::to_string(value.size()));
 	try {
-		const auto hash = PearsonHash(key.c_str(), key.size());
-		auto leafnode = LeafSearch(key);
+		const auto hash = PearsonHash(key.data(), key.size());
+		// XXX - do not create temporary string
+		auto leafnode = LeafSearch(std::string(key.data(), key.size()));
 		if (!leafnode) {
 			LOG("   adding head leaf");
 			unique_ptr<KVLeafNode> new_node(new KVLeafNode());
@@ -202,13 +207,20 @@ status tree3::put(const std::string &key, const std::string &value)
 					new_leaf->next = old_head;
 					new_node->leaf = new_leaf;
 				}
-				LeafFillSpecificSlot(new_node.get(), hash, key, value, 0);
+				LeafFillSpecificSlot(
+					new_node.get(), hash,
+					std::string(key.data(), key.size()),
+					std::string(value.data(), value.size()), 0);
 			});
 			tree_top = move(new_node);
-		} else if (LeafFillSlotForKey(leafnode, hash, key, value)) {
+		} else if (LeafFillSlotForKey(leafnode, hash,
+					      std::string(key.data(), key.size()),
+					      std::string(value.data(), value.size()))) {
 			// nothing else to do
 		} else {
-			LeafSplitFull(leafnode, hash, key, value);
+			// XXX - do not create temporary string
+			LeafSplitFull(leafnode, hash, std::string(key.data(), key.size()),
+				      std::string(value.data(), value.size()));
 		}
 		return status::OK;
 	} catch (std::bad_alloc e) {
@@ -223,19 +235,21 @@ status tree3::put(const std::string &key, const std::string &value)
 	}
 }
 
-status tree3::remove(const std::string &key)
+status tree3::remove(string_view key)
 {
-	LOG("Remove key=" << key.c_str());
-	auto leafnode = LeafSearch(key);
+	LOG("Remove key=" << key.data());
+	// XXX - do not create temporary string
+	auto leafnode = LeafSearch(std::string(key.data(), key.size()));
 	if (!leafnode) {
 		LOG("   head not present");
 		return status::NOT_FOUND;
 	}
 	try {
-		const auto hash = PearsonHash(key.c_str(), key.size());
+		const auto hash = PearsonHash(key.data(), key.size());
 		for (int slot = LEAF_KEYS; slot--;) {
 			if (leafnode->hashes[slot] == hash) {
-				if (leafnode->keys[slot].compare(key) == 0) {
+				if (leafnode->keys[slot].compare(
+					    std::string(key.data(), key.size())) == 0) {
 					LOG("   freeing slot=" << slot);
 					leafnode->hashes[slot] = 0;
 					leafnode->keys[slot].clear();

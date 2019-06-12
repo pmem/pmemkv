@@ -205,20 +205,20 @@ status caching::each(each_callback *callback, void *arg)
 	}
 }
 
-status caching::exists(const std::string &key)
+status caching::exists(string_view key)
 {
-	LOG("Exists for key=" << key);
+	LOG("Exists for key=" << key.data());
 	status s = status::NOT_FOUND;
 	std::string value;
-	if (getKey(key, value, true))
+	if (getKey(std::string(key.data(), key.size()), value, true))
 		s = status::OK;
 	return s;
 	// todo fold into single return statement
 }
 
-status caching::get(const std::string &key, get_callback *callback, void *arg)
+status caching::get(string_view key, get_callback *callback, void *arg)
 {
-	LOG("Get key=" << key);
+	LOG("Get key=" << key.data());
 	std::string value;
 	if (getKey(key, value, false)) {
 		(*callback)(value.c_str(), value.size(), arg);
@@ -318,19 +318,20 @@ bool caching::getFromRemoteRedis(const std::string &key, std::string &value)
 	return retValue;
 }
 
-status caching::put(const std::string &key, const std::string &value)
+status caching::put(string_view key, string_view value)
 {
-	LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
+	LOG("Put key=" << key.data() << ", value.size=" << std::to_string(value.size()));
 	const time_t curSysTime = time(0);
 	const std::string curTime = getTimeStamp(curSysTime);
-	const std::string ValueWithCurTime = curTime + value;
-	return basePtr->put(key, ValueWithCurTime);
+	const std::string ValueWithCurTime =
+		curTime + std::string(value.data(), value.size());
+	return basePtr->put(std::string(key.data(), key.size()), ValueWithCurTime);
 }
 
-status caching::remove(const std::string &key)
+status caching::remove(string_view key)
 {
-	LOG("Remove key=" << key);
-	return basePtr->remove(key);
+	LOG("Remove key=" << key.data());
+	return basePtr->remove(std::string(key.data(), key.size()));
 }
 
 time_t convertTimeToEpoch(const char *theTime, const char *format)

@@ -80,13 +80,13 @@ public:
 
 	status each(each_callback *callback, void *arg) final;
 
-	status exists(const std::string &key) final;
+	status exists(string_view key) final;
 
-	status get(const std::string &key, get_callback *callback, void *arg) final;
+	status get(string_view key, get_callback *callback, void *arg) final;
 
-	status put(const std::string &key, const std::string &value) final;
+	status put(string_view key, string_view value) final;
 
-	status remove(const std::string &key) final;
+	status remove(string_view key) final;
 
 private:
 	using string_t = pmem::kv::polymorphic_string;
