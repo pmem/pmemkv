@@ -102,10 +102,7 @@ TEST_F(VSMapTest, SimpleTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	value = "";
-	kv->get("key1", [&](const char *v, int vb) { value.append(v, vb); });
-	ASSERT_TRUE(value == "value1");
-	value = "";
-	kv->get("key1", [&](const std::string &v) { value.append(v); });
+	kv->get("key1", [&](string_view v) { value.append(v.data(), v.size()); });
 	ASSERT_TRUE(value == "value1");
 }
 
@@ -489,12 +486,14 @@ TEST_F(VSMapTest, UsesAllTest)
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->all([&](const std::string &k) { x.append("<").append(k).append(">,"); });
+	kv->all([&](string_view k) {
+		x.append("<").append(k.data(), k.size()).append(">,");
+	});
 	ASSERT_TRUE(x == "<1>,<2>,<记!>,");
 
 	x = "";
-	kv->all([&](const char *k, size_t kb) {
-		x.append("<").append(std::string(k, kb)).append(">,");
+	kv->all([&](string_view k) {
+		x.append("<").append(std::string(k.data(), k.size())).append(">,");
 	});
 	ASSERT_TRUE(x == "<1>,<2>,<记!>,");
 
@@ -518,20 +517,23 @@ TEST_F(VSMapTest, UsesAllAboveTest)
 	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->all_above("B", [&](const std::string &k) { x.append(k).append(","); });
+	kv->all_above("B",
+		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
 	ASSERT_TRUE(x == "BB,BC,");
 
 	x = "";
-	kv->all_above("", [&](const std::string &k) { x.append(k).append(","); });
+	kv->all_above("",
+		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
 	ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,");
 
 	x = "";
-	kv->all_above("ZZZ", [&](const std::string &k) { x.append(k).append(","); });
+	kv->all_above("ZZZ",
+		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->all_above("B", [&](const char *k, size_t kb) {
-		x.append(std::string(k, kb)).append(",");
+	kv->all_above("B", [&](string_view k) {
+		x.append(std::string(k.data(), k.size())).append(",");
 	});
 	ASSERT_TRUE(x == "BB,BC,");
 
@@ -556,20 +558,23 @@ TEST_F(VSMapTest, UsesAllBelowTest)
 	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->all_below("B", [&](const std::string &k) { x.append(k).append(","); });
+	kv->all_below("B",
+		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
 	ASSERT_TRUE(x == "A,AB,AC,");
 
 	x = "";
-	kv->all_below("", [&](const std::string &k) { x.append(k).append(","); });
+	kv->all_below("",
+		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->all_below("ZZZZ", [&](const std::string &k) { x.append(k).append(","); });
+	kv->all_below("ZZZZ",
+		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
 	ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,");
 
 	x = "";
-	kv->all_below("B", [&](const char *k, size_t kb) {
-		x.append(std::string(k, kb)).append(",");
+	kv->all_below("B", [&](string_view k) {
+		x.append(std::string(k.data(), k.size())).append(",");
 	});
 	ASSERT_TRUE(x == "A,AB,AC,");
 
@@ -594,51 +599,54 @@ TEST_F(VSMapTest, UsesAllBetweenTest)
 	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->all_between("A", "B", [&](const std::string &k) { x.append(k).append(","); });
+	kv->all_between("A", "B",
+			[&](string_view k) { x.append(k.data(), k.size()).append(","); });
 	ASSERT_TRUE(x == "AB,AC,");
 
 	x = "";
 	kv->all_between("", "ZZZ",
-			[&](const std::string &k) { x.append(k).append(","); });
+			[&](string_view k) { x.append(k.data(), k.size()).append(","); });
 	ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,");
 
 	x = "";
-	kv->all_between("", "A", [&](const std::string &k) { x.append(k).append(","); });
+	kv->all_between("", "A",
+			[&](string_view k) { x.append(k.data(), k.size()).append(","); });
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->all_between("", "B", [&](const std::string &k) { x.append(k).append(","); });
+	kv->all_between("", "B",
+			[&](string_view k) { x.append(k.data(), k.size()).append(","); });
 	ASSERT_TRUE(x == "A,AB,AC,");
 
 	x = "";
 	kv->all_between("B", "ZZZ",
-			[&](const std::string &k) { x.append(k).append(","); });
+			[&](string_view k) { x.append(k.data(), k.size()).append(","); });
 	ASSERT_TRUE(x == "BB,BC,");
 
 	x = "";
-	kv->all_between("", "", [&](const std::string &k) {
-		x.append("<").append(k).append(">,");
+	kv->all_between("", "", [&](string_view k) {
+		x.append("<").append(k.data(), k.size()).append(">,");
 	});
-	kv->all_between("A", "A", [&](const std::string &k) {
-		x.append("<").append(k).append(">,");
+	kv->all_between("A", "A", [&](string_view k) {
+		x.append("<").append(k.data(), k.size()).append(">,");
 	});
-	kv->all_between("AC", "A", [&](const std::string &k) {
-		x.append("<").append(k).append(">,");
+	kv->all_between("AC", "A", [&](string_view k) {
+		x.append("<").append(k.data(), k.size()).append(">,");
 	});
-	kv->all_between("B", "A", [&](const std::string &k) {
-		x.append("<").append(k).append(">,");
+	kv->all_between("B", "A", [&](string_view k) {
+		x.append("<").append(k.data(), k.size()).append(">,");
 	});
-	kv->all_between("BD", "A", [&](const std::string &k) {
-		x.append("<").append(k).append(">,");
+	kv->all_between("BD", "A", [&](string_view k) {
+		x.append("<").append(k.data(), k.size()).append(">,");
 	});
-	kv->all_between("ZZZ", "B", [&](const std::string &k) {
-		x.append("<").append(k).append(">,");
+	kv->all_between("ZZZ", "B", [&](string_view k) {
+		x.append("<").append(k.data(), k.size()).append(">,");
 	});
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->all_between("A", "B", [&](const char *k, size_t kb) {
-		x.append(std::string(k, kb)).append(",");
+	kv->all_between("A", "B", [&](string_view k) {
+		x.append(std::string(k.data(), k.size())).append(",");
 	});
 	ASSERT_TRUE(x == "AB,AC,");
 
@@ -722,17 +730,21 @@ TEST_F(VSMapTest, UsesEachTest)
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->each([&](const std::string &k, const std::string &v) {
-		x.append("<").append(k).append(">,<").append(v).append(">|");
+	kv->each([&](string_view k, string_view v) {
+		x.append("<")
+			.append(k.data(), k.size())
+			.append(">,<")
+			.append(v.data(), v.size())
+			.append(">|");
 	});
 	ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
 
 	x = "";
-	kv->each([&](const char *k, size_t kb, const char *v, size_t vb) {
+	kv->each([&](string_view k, string_view v) {
 		x.append("<")
-			.append(std::string(k, kb))
+			.append(std::string(k.data(), k.size()))
 			.append(">,<")
-			.append(std::string(v, vb))
+			.append(std::string(v.data(), v.size()))
 			.append(">|");
 	});
 	ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
@@ -761,28 +773,37 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->each_above("B", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_above("B", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
 	ASSERT_TRUE(x == "BB,5|BC,6|");
 
 	x = "";
-	kv->each_above("", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_above("", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
 
 	x = "";
-	kv->each_above("ZZZ", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_above("ZZZ", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->each_above("B", [&](const char *k, size_t kb, const char *v, size_t vb) {
-		x.append(std::string(k, kb))
+	kv->each_above("B", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
 			.append(",")
-			.append(std::string(v, vb))
+			.append(v.data(), v.size())
 			.append("|");
 	});
 	ASSERT_TRUE(x == "BB,5|BC,6|");
@@ -811,28 +832,37 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->each_below("AC", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_below("AC", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|");
 
 	x = "";
-	kv->each_below("", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_below("", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->each_below("ZZZZ", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_below("ZZZZ", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
 
 	x = "";
-	kv->each_below("AC", [&](const char *k, size_t kb, const char *v, size_t vb) {
-		x.append(std::string(k, kb))
+	kv->each_below("AC", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
 			.append(",")
-			.append(std::string(v, vb))
+			.append(v.data(), v.size())
 			.append("|");
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|");
@@ -861,58 +891,87 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->each_between("A", "B", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_between("A", "B", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
 	ASSERT_TRUE(x == "AB,2|AC,3|");
 
 	x = "";
-	kv->each_between("", "ZZZ", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_between("", "ZZZ", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
 
 	x = "";
-	kv->each_between("", "A", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_between("", "A", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->each_between("", "B", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_between("", "B", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|");
 
 	x = "";
-	kv->each_between("", "", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_between("", "", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
-	kv->each_between("A", "A", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_between("A", "A", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
-	kv->each_between("AC", "A", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_between("AC", "A", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
-	kv->each_between("B", "A", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_between("B", "A", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
-	kv->each_between("BD", "A", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_between("BD", "A", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
-	kv->each_between("ZZZ", "A", [&](const std::string &k, const std::string &v) {
-		x.append(k).append(",").append(v).append("|");
+	kv->each_between("ZZZ", "A", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
 	});
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->each_between("A", "B",
-			 [&](const char *k, size_t kb, const char *v, size_t vb) {
-				 x.append(std::string(k, kb))
-					 .append(",")
-					 .append(std::string(v, vb))
-					 .append("|");
-			 });
+	kv->each_between("A", "B", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
+	});
 	ASSERT_TRUE(x == "AB,2|AC,3|");
 
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
