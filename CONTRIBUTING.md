@@ -21,10 +21,24 @@ Details such as OS and PMDK version are always appreciated.
 Code Style
 ----------
 
-* Start with [Google C++ Style](https://google.github.io/styleguide/cppguide.html)
-* Indent 4 spaces, 8 spaces for continuation
-* Max 120 chars per line
-* Space after '*' and '&' (rather than before)
+* See `.clang-format` file in the repository for details
+* Indent with tabs (width: 8)
+* Max 90 chars per line
+* Space before '*' and '&' (rather than after)
+
+If you want to check and format your source code properly you can use CMake's `DEVELOPER_MODE`
+option. When enabled additional checks are switched on (cppstyle, whitespaces and headers).
+
+```
+cmake .. -DDEVELOPER_MODE=ON
+```
+
+If you just want to format your code you can make adequate target:
+```
+make cppformat
+```
+
+**NOTE**: We're using specific clang-format - version exactly **6.0** is required.
 
 <a name="pull_requests"></a>
 
