@@ -29,6 +29,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+
 function(set_version VERSION)
 	set(VERSION_FILE ${CMAKE_SOURCE_DIR}/VERSION)
 	if(EXISTS ${VERSION_FILE})
@@ -167,3 +170,63 @@ function(get_program_version name ret)
 	STRING(REGEX MATCH "([0-9]+.)([0-9]+.)([0-9]+)" VERSION ${cmd_ret})
 	SET(${ret} ${VERSION} PARENT_SCOPE)
 endfunction()
+
+# prepends prefix to list of strings
+function(prepend var prefix)
+	set(listVar "")
+	foreach(f ${ARGN})
+		list(APPEND listVar "${prefix}/${f}")
+	endforeach(f)
+	set(${var} "${listVar}" PARENT_SCOPE)
+endfunction()
+
+# Checks whether flag is supported by current C++ compiler and appends
+# it to the relevant cmake variable.
+# 1st argument is a flag
+# 2nd (optional) argument is a build type (debug, release)
+macro(add_cxx_flag flag)
+	string(REPLACE - _ flag2 ${flag})
+	string(REPLACE " " _ flag2 ${flag2})
+	string(REPLACE = "_" flag2 ${flag2})
+	set(check_name "CXX_HAS_${flag2}")
+
+	check_cxx_compiler_flag(${flag} ${check_name})
+
+	if (${${check_name}})
+		if (${ARGC} EQUAL 1)
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
+		else()
+			set(CMAKE_CXX_FLAGS_${ARGV1} "${CMAKE_CXX_FLAGS_${ARGV1}} ${flag}")
+		endif()
+	endif()
+endmacro()
+
+# Checks whether flag is supported by current C compiler and appends
+# it to the relevant cmake variable.
+# 1st argument is a flag
+# 2nd (optional) argument is a build type (debug, release)
+macro(add_c_flag flag)
+	string(REPLACE - _ flag2 ${flag})
+	string(REPLACE " " _ flag2 ${flag2})
+	string(REPLACE = "_" flag2 ${flag2})
+	set(check_name "C_HAS_${flag2}")
+
+	check_c_compiler_flag(${flag} ${check_name})
+
+	if (${${check_name}})
+		if (${ARGC} EQUAL 1)
+			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flag}")
+		else()
+			set(CMAKE_C_FLAGS_${ARGV1} "${CMAKE_C_FLAGS_${ARGV1}} ${flag}")
+		endif()
+	endif()
+endmacro()
+
+# Checks whether flag is supported by both C and C++ compiler and appends
+# it to the relevant cmake variables.
+# 1st argument is a flag
+# 2nd (optional) argument is a build type (debug, release)
+macro(add_common_flag flag)
+	add_c_flag(${flag} ${ARGV1})
+	add_cxx_flag(${flag} ${ARGV1})
+endmacro()
