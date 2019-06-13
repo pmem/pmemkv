@@ -35,6 +35,8 @@
 #                starts pmemkv build with tests.
 #
 
+PREFIX=/usr/local
+
 set -e
 echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
 
@@ -60,7 +62,9 @@ function upload_codecov() {
 }
 
 cd $WORKDIR
-PREFIX=/usr/local
+
+# copy Googletest to the current directory
+cp /opt/googletest/googletest-*.zip .
 
 # make & install
 mkdir build

@@ -34,14 +34,16 @@
 # run-bindings.sh - runs bindings
 #
 
-set -e
-
-cd $WORKDIR
 PREFIX=/usr/local
+
+set -e
 
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
 
+cd $WORKDIR
+# copy Googletest to the current directory
+cp /opt/googletest/googletest-*.zip .
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -49,21 +51,23 @@ cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX
 make -j2
 echo $USERPASS | sudo -S make install
-cd ~
 
+cd ~
 echo $USERPASS | sudo -S gem install bundler -v '< 2.0'
 git clone https://github.com/pmem/pmemkv-ruby.git
 cd pmemkv-ruby
 echo $USERPASS | sudo -S bundle install
 LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ bundle exec rspec
-cd ~
 
+cd ~
 git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
+# copy Googletest to the current directory
+cp /opt/googletest/googletest-*.zip .
 make
 echo $USERPASS | sudo -S make install
-cd ..
 
+cd ~
 git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
 LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ mvn install
