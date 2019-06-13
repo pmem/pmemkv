@@ -114,7 +114,7 @@ do
 	# testing each engine separately; disabling default engines
 	echo
 	echo "##############################################################"
-	echo "### Veryfing building of the '$engine_flag' engine"
+	echo "### Verifying building of the '$engine_flag' engine"
 	echo "##############################################################"
 	cmake .. -DTBB_DIR=/opt/tbb/cmake \
 		-DENGINE_VSMAP=OFF \
@@ -128,7 +128,7 @@ done
 
 echo
 echo "##############################################################"
-echo "### Veryfing building of all engines"
+echo "### Verifying building of all engines"
 echo "##############################################################"
 cd $WORKDIR/build
 rm -rf *
