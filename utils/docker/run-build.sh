@@ -35,6 +35,8 @@
 #                starts pmemkv build with tests.
 #
 
+PREFIX=/usr/local
+
 set -e
 echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
 
@@ -60,7 +62,6 @@ function upload_codecov() {
 }
 
 cd $WORKDIR
-PREFIX=/usr/local
 
 # make & install
 mkdir build
