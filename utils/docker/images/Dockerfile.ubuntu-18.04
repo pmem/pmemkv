@@ -60,6 +60,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	libtool \
 	libunwind8-dev \
 	maven \
+	nodejs-dev \
+	npm \
 	numactl \
 	openjdk-8-jdk \
 	pkg-config \
