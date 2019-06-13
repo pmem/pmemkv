@@ -42,11 +42,15 @@ if(TRACE_TESTS)
 	set(GLOBAL_TEST_ARGS ${GLOBAL_TEST_ARGS} --trace-expand)
 endif()
 
-add_cppstyle(tests-engines ${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc)
-add_cppstyle(tests-engines-experimental ${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc)
+add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/*.h
+		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc)
 
-add_check_whitespace(tests-engines ${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc)
-add_check_whitespace(tests-engines-experimental ${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc)
+add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/*.h
+		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc)
 
 set(vg_tracers memcheck helgrind drd pmemcheck)
 
