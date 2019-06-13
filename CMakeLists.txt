@@ -48,6 +48,8 @@ if(NOT CMAKE_BUILD_TYPE)
 		CACHE STRING "Choose a type of build (Debug, Release or RelWithDebInfo)" FORCE)
 endif()
 
+option(BUILD_EXAMPLES "build examples" ON)
+
 option(COVERAGE "run coverage test" OFF)
 if(COVERAGE)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage")
@@ -254,6 +256,8 @@ target_include_directories(pmemkv PRIVATE src/valgrind)
 # Enable libpmemobj-cpp valgrind annotations
 target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_ENABLED=1)
 
+include_directories(src)
+
 enable_testing()
 add_subdirectory(tests)
 
@@ -291,6 +295,10 @@ add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
+
+if(BUILD_EXAMPLES)
+	add_subdirectory(examples)
+endif()
 
 if(NOT "${CPACK_GENERATOR}" STREQUAL "")
 	include(${CMAKE_SOURCE_DIR}/cmake/packages.cmake)

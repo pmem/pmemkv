@@ -61,11 +61,23 @@ Language Bindings
 
 #define LOG(msg) std::cout << msg << "\n"
 
+const std::string PATH = "/dev/shm/";
+
 using namespace pmem::kv;
 
 int main() {
+    LOG("Creating config file");
+    pmemkv_config *cfg = pmemkv_config_new();
+    assert(cfg != nullptr);
+
+    int ret = pmemkv_config_put(cfg, "path", PATH.c_str(), PATH.size() + 1);
+    assert(ret == 0);
+
     LOG("Starting engine");
-    db *kv = new db("vsmap", "{\"path\":\"/dev/shm/\"}");
+    db *kv = new db("vsmap", cfg);
+    assert(kv != nullptr);
+
+    pmemkv_config_delete(cfg);
 
     LOG("Putting new key");
     status s = kv->put("key1", "value1");
@@ -91,6 +103,7 @@ int main() {
 
     LOG("Stopping engine");
     delete kv;
+
     return 0;
 }
 ```
@@ -107,47 +120,57 @@ int main() {
 #define LOG(msg) printf("%s\n", msg)
 #define MAX_VAL_LEN 64
 
-void start_failure_callback(void *context, const char *engine, const char *config, const char *msg) {
-    printf("ERROR: %s\n", msg);
-    exit(-1);
+const char *PATH = "/dev/shm";
+
+void start_failure_callback(void *context, const char *engine, pmemkv_config *config, const char *msg) {
+  printf("ERROR: %s\n", msg);
+  exit(-1);
 }
 
 void all_callback(const char *k, size_t kb, void *arg) {
-    printf("   visited: %s\n", k);
+  printf("   visited: %s\n", k);
 }
 
 int main() {
-    LOG("Starting engine");
+  LOG("Creating config file");
+  pmemkv_config *cfg = pmemkv_config_new();
+  assert(cfg != NULL);
 
-    pmemkv_db *kv = pmemkv_open(NULL, "vsmap", "{\"path\":\"/dev/shm/\"}", &start_failure_callback);
+  int ret = pmemkv_config_put(cfg, "path", PATH, strlen(PATH) + 1);
+  assert(ret == 0);
 
-    LOG("Putting new key");
-    char* key1 = "key1";
-    char* value1 = "value1";
-    pmemkv_status s = pmemkv_put(kv, key1, strlen(key1), value1, strlen(value1));
-    assert(s == PMEMKV_STATUS_OK && pmemkv_count(kv) == 1);
+  LOG("Starting engine");
+  pmemkv_db *kv = pmemkv_open(NULL, "vsmap", cfg, &start_failure_callback);
+  pmemkv_config_delete(cfg);
 
-    LOG("Reading key back");
-    char val[MAX_VAL_LEN];
-    s = pmemkv_get_copy(kv, key1, strlen(key1), val, MAX_VAL_LEN);
-    assert(s == PMEMKV_STATUS_OK && !strcmp(val, "value1"));
+  LOG("Putting new key");
+  char* key1 = "key1";
+  char* value1 = "value1";
+  pmemkv_status s = pmemkv_put(kv, key1, strlen(key1), value1, strlen(value1));
+  assert(s == PMEMKV_STATUS_OK && pmemkv_count(kv) == 1);
 
-    LOG("Iterating existing keys");
-    char* key2 = "key2";
-    char* value2 = "value2";
-    char* key3 = "key3";
-    char* value3 = "value3";
-    pmemkv_put(kv, key2, strlen(key2), value2, strlen(value2));
-    pmemkv_put(kv, key3, strlen(key3), value3, strlen(value3));
-    pmemkv_all(kv, NULL, &all_callback);
+  LOG("Reading key back");
+  char val[MAX_VAL_LEN];
+  s = pmemkv_get_copy(kv, key1, strlen(key1), val, MAX_VAL_LEN);
+  assert(s == PMEMKV_STATUS_OK && !strcmp(val, "value1"));
 
-    LOG("Removing existing key");
-    s = pmemkv_remove(kv, key1, strlen(key1));
-    assert(s == PMEMKV_STATUS_OK && pmemkv_exists(kv, key1, strlen(key1)) == PMEMKV_STATUS_NOT_FOUND);
+  LOG("Iterating existing keys");
+  char* key2 = "key2";
+  char* value2 = "value2";
+  char* key3 = "key3";
+  char* value3 = "value3";
+  pmemkv_put(kv, key2, strlen(key2), value2, strlen(value2));
+  pmemkv_put(kv, key3, strlen(key3), value3, strlen(value3));
+  pmemkv_all(kv, &all_callback, NULL);
 
-    LOG("Stopping engine");
-    pmemkv_close(kv);
-    return 0;
+  LOG("Removing existing key");
+  s = pmemkv_remove(kv, key1, strlen(key1));
+  assert(s == PMEMKV_STATUS_OK && pmemkv_exists(kv, key1, strlen(key1)) == PMEMKV_STATUS_NOT_FOUND);
+
+  LOG("Stopping engine");
+  pmemkv_close(kv);
+
+  return 0;
 }
 ```
 
