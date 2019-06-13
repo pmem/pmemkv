@@ -138,12 +138,12 @@ Next we'll walk you through the steps of creating a new engine.
     * Add `engines/mytree_test.cc` to `TEST_FILES`
 * CMake build and `make test` should complete without any errors now
 
-### Updating KVEngine
+### Updating Common Source
 
-* In `src/pmemkv.cc`:
-    * Add `#include "engines/mytree.h"`
+* In `src/libpmemkv.cc`:
+    * Add `#include "engines/mytree.h"` (within `#ifdef ENGINE_MYTREE` clause)
     * Update `pmemkv_open` to return new `my_tree` instances
-* Build & verify engine now works with high-level bindings
+* Build & verify engine now works with high-level bindings (see [README](https://github.com/pmem/pmemkv#bindings) for information on current bindings)
 
 ### Documentation
 
