@@ -24,7 +24,6 @@ ColumnLimit: 90
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ContinuationIndentWidth: 8
 FixNamespaceComments: false
-IndentCaseLabels: false
 IndentCaseLabels: true
 IndentWidth: 8
 PointerAlignment: Right
