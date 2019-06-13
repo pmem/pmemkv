@@ -64,15 +64,15 @@ git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
 # copy Googletest to the current directory
 cp /opt/googletest/googletest-*.zip .
-make
-echo $USERPASS | sudo -S make install
+make test
+echo $USERPASS | sudo -S make install prefix=$PREFIX
 
 cd ~
 git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
 LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ mvn install
-cd ~
 
+cd ~
 git clone https://github.com/pmem/pmemkv-nodejs.git
 cd pmemkv-nodejs
 npm install --save
