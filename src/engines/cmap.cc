@@ -36,8 +36,10 @@
 
 #define DO_LOG 0
 #define LOG(msg)                                                                         \
-	if (DO_LOG)                                                                      \
-	std::cout << "[cmap] " << msg << "\n"
+	do {                                                                             \
+		if (DO_LOG)                                                              \
+			std::cout << "[cmap] " << msg << "\n";                           \
+	} while (0)
 
 namespace pmem
 {

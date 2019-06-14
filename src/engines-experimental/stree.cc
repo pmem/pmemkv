@@ -40,8 +40,10 @@
 
 #define DO_LOG 0
 #define LOG(msg)                                                                         \
-	if (DO_LOG)                                                                      \
-	std::cout << "[stree] " << msg << "\n"
+	do {                                                                             \
+		if (DO_LOG)                                                              \
+			std::cout << "[stree] " << msg << "\n";                          \
+	} while (0)
 
 using pmem::detail::conditional_add_to_tx;
 using pmem::obj::make_persistent_atomic;
