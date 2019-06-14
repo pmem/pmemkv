@@ -92,16 +92,12 @@ void *caching::engine_context()
 
 bool caching::getString(pmemkv_config *config, const char *key, std::string &str)
 {
-	size_t length;
+	const char *value;
 
-	if (pmemkv_config_get(config, key, NULL, 0, &length) == -1)
+	if (pmemkv_config_get_string(config, key, &value) != PMEMKV_STATUS_OK)
 		return false;
 
-	auto c_str = std::unique_ptr<char[]>(new char[length]);
-	if (pmemkv_config_get(config, key, c_str.get(), length, NULL) != length)
-		return false;
-
-	str = std::string(c_str.get(), length);
+	str = std::string(value);
 
 	return true;
 }
@@ -126,18 +122,26 @@ bool caching::readConfig(pmemkv_config *config)
 	if (!getString(config, "host", host))
 		return false;
 
-	if (pmemkv_config_get(config, "ttl", &ttl, sizeof(int), NULL) != sizeof(int))
+	auto ret = pmemkv_config_get_int64(config, "ttl", &ttl);
+	if (ret == PMEMKV_STATUS_NOT_FOUND)
 		ttl = 0;
-
-	if (pmemkv_config_get(config, "port", &port, sizeof(int), NULL) != sizeof(int))
+	else if (ret != PMEMKV_STATUS_OK)
 		return false;
 
-	if (pmemkv_config_get(config, "attempts", &attempts, sizeof(int), NULL) !=
-	    sizeof(int))
+	ret = pmemkv_config_get_int64(config, "port", &port);
+	if (ret != PMEMKV_STATUS_OK)
 		return false;
 
-	if (pmemkv_config_get(config, "subengine_config", &subEngineConfig,
-			      sizeof(pmemkv_config *), NULL) != sizeof(pmemkv_config *))
+	ret = pmemkv_config_get_int64(config, "attempts", &attempts);
+	if (ret != PMEMKV_STATUS_OK)
+		return false;
+
+	size_t obj_size;
+	pmemkv_config **obj_ptr;
+	ret = pmemkv_config_get_object(config, "subengine_config",
+				       (const void **)&obj_ptr, &obj_size);
+	subEngineConfig = *obj_ptr;
+	if (ret != PMEMKV_STATUS_OK || obj_size != sizeof(pmemkv_config *))
 		return false;
 
 	return true;
