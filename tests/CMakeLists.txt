@@ -63,13 +63,9 @@ set(vg_tracers memcheck helgrind drd pmemcheck)
 function(test cmake_file test_name test_filter tracer)
 	if (${tracer} IN_LIST vg_tracers)
 		if (NOT VALGRIND_FOUND)
-			message(WARNING
-				"Valgrind not found, test skipped: ${test_name}")
 			return()
 		endif()
 		if (COVERAGE)
-			message(STATUS
-				"This is the Coverage build, skipping Valgrind test: ${test_name}")
 			return()
 		endif()
 	endif()
@@ -90,6 +86,10 @@ function(test cmake_file test_name test_filter tracer)
 		ENVIRONMENT "LC_ALL=C;PATH=$ENV{PATH};PMEM_IS_PMEM_FORCE=1"
 		TIMEOUT 300)
 endfunction()
+
+if (COVERAGE AND VALGRIND_FOUND)
+	message(STATUS "This is the Coverage build, skipping Valgrind tests")
+endif()
 
 set(TEST_FILES
 	pmemkv_test.cc
