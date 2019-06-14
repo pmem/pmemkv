@@ -46,6 +46,7 @@ extern "C" {
 #define PMEMKV_STATUS_NOT_SUPPORTED 3
 #define PMEMKV_STATUS_INVALID_ARGUMENT 4
 #define PMEMKV_STATUS_CONFIG_PARSING_ERROR 5
+#define PMEMKV_STATUS_CONFIG_TYPE_ERROR 6
 
 typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;
@@ -56,10 +57,21 @@ typedef void pmemkv_get_v_callback(const char *value, size_t valuebytes, void *a
 
 pmemkv_config *pmemkv_config_new(void);
 void pmemkv_config_delete(pmemkv_config *config);
-int pmemkv_config_put(pmemkv_config *config, const char *key, const void *value,
-		      size_t value_size);
-int pmemkv_config_get(pmemkv_config *config, const char *key, const void **data,
-		      size_t *value_size);
+int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *value,
+			   size_t value_size);
+int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value,
+			     void (*deleter)(void *));
+int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value);
+int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value);
+int pmemkv_config_put_double(pmemkv_config *config, const char *key, double value);
+int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value);
+int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **value,
+			   size_t *value_size);
+int pmemkv_config_get_object(pmemkv_config *config, const char *key, const void **value);
+int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value);
+int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value);
+int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *value);
+int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);
 int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);
 
 int pmemkv_open(void *context, const char *engine, pmemkv_config *config, pmemkv_db **db);
