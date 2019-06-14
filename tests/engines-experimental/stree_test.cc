@@ -73,13 +73,12 @@ protected:
 		if (cfg == nullptr)
 			throw std::runtime_error("creating config failed");
 
-		auto cfg_s =
-			pmemkv_config_put(cfg, "path", PATH.c_str(), PATH.size() + 1);
+		auto cfg_s = pmemkv_config_put_string(cfg, "path", PATH.c_str());
 
 		if (cfg_s != PMEMKV_STATUS_OK)
 			throw std::runtime_error("putting 'path' to config failed");
 
-		cfg_s = pmemkv_config_put(cfg, "size", &size, sizeof(size));
+		cfg_s = pmemkv_config_put_int64(cfg, "size", size);
 
 		if (cfg_s != PMEMKV_STATUS_OK)
 			throw std::runtime_error("putting 'size' to config failed");

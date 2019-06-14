@@ -45,12 +45,14 @@ endif()
 add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/*.h
 		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc)
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc)
 
 add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/*.h
 		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc)
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc)
 
 set(vg_tracers memcheck helgrind drd pmemcheck)
 
@@ -99,6 +101,8 @@ set(TEST_FILES
 	pmemkv_test.cc
 	mock_tx_alloc.cc
 	engines/blackhole_test.cc
+	config/config.cc
+	config/json_to_config.cc
 )
 # add each engine's tests source files separately
 if(ENGINE_VSMAP)
