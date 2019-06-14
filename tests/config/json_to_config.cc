@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2019, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,64 +30,54 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "../../src/libpmemkv.hpp"
+#include "gtest/gtest.h"
 
-#include "../engine.h"
+using namespace pmem::kv;
 
-namespace pmem
-{
-namespace kv
-{
-
-class db;
-
-static int64_t ttl; // todo move into private field
-
-class caching : public engine_base {
+class JsonToConfigTest : public testing::Test {
 public:
-	caching(void *context, pmemkv_config *config);
-	~caching();
+	pmemkv_config *config;
 
-	std::string name() final;
-	void *engine_context();
+	JsonToConfigTest()
+	{
+		config = pmemkv_config_new();
+	}
 
-	status all(all_callback *callback, void *arg) final;
-
-	status count(std::size_t &cnt) final;
-
-	status each(each_callback *callback, void *arg) final;
-
-	status exists(string_view key) final;
-
-	status get(string_view key, get_callback *callback, void *arg) final;
-
-	status put(string_view key, string_view value) final;
-
-	status remove(string_view key) final;
-
-private:
-	bool getString(pmemkv_config *config, const char *key, std::string &str);
-	bool readConfig(pmemkv_config *config);
-	bool getFromRemoteRedis(const std::string &key, std::string &value);
-	bool getFromRemoteMemcached(const std::string &key, std::string &value);
-	bool getKey(const std::string &key, std::string &valueField, bool api_flag);
-
-	void *context;
-	int64_t attempts;
-	db *basePtr;
-	std::string host;
-	int64_t port;
-	std::string remoteType;
-	std::string remoteUser;
-	std::string remotePasswd;
-	std::string remoteUrl;
-	std::string subEngine;
-	pmemkv_config *subEngineConfig;
+	~JsonToConfigTest()
+	{
+		pmemkv_config_delete(config);
+	}
 };
 
-time_t convertTimeToEpoch(const char *theTime, const char *format = "%Y%m%d%H%M%S");
-std::string getTimeStamp(time_t epochTime, const char *format = "%Y%m%d%H%M%S");
-bool valueFieldConversion(std::string dateValue);
+TEST_F(JsonToConfigTest, SimpleTest)
+{
+	auto ret = pmemkv_config_from_json(
+		config,
+		"{\"string\": \"abc\", \"int\": 123, \"bool\": true, \"double\": 12.43}");
+	// XXX: extend by adding "false", subconfig, negative value
+	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
 
-} /* namespace kv */
-} /* namespace pmem */
+	const char *value_string;
+	ret = pmemkv_config_get_string(config, "string", &value_string);
+	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
+	ASSERT_TRUE(std::string(value_string) == "abc");
+
+	int64_t value_int;
+	ret = pmemkv_config_get_int64(config, "int", &value_int);
+	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
+	ASSERT_EQ(value_int, 123);
+
+	int64_t value_bool;
+	ret = pmemkv_config_get_int64(config, "bool", &value_bool);
+	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
+	ASSERT_EQ(value_bool, 1);
+
+	double value_double;
+	ret = pmemkv_config_get_double(config, "double", &value_double);
+	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
+	ASSERT_EQ(value_double, 12.43);
+
+	ret = pmemkv_config_get_int64(config, "string", &value_int);
+	ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
+}
