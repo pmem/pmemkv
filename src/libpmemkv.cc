@@ -132,8 +132,8 @@ int pmemkv_config_put(pmemkv_config *config, const char *key, const void *value,
 				       pmemkv_config::config_type::UNSPECIFIED);
 }
 
-int pmemkv_config_get(pmemkv_config *config, const char *key, void *buffer,
-		      size_t buffer_len, size_t *value_size)
+int pmemkv_config_get(pmemkv_config *config, const char *key, const void **data,
+		      size_t *value_size)
 {
 	size_t len = 0;
 
@@ -146,10 +146,8 @@ int pmemkv_config_get(pmemkv_config *config, const char *key, void *buffer,
 
 		auto mvalue = found->second.value;
 
-		if (buffer) {
-			len = (buffer_len < mvalue.size()) ? buffer_len : mvalue.size();
-			memcpy(buffer, mvalue.data(), len);
-		}
+		if (data)
+			*data = mvalue.data();
 
 		if (value_size)
 			*value_size = mvalue.size();
@@ -274,25 +272,27 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 		}
 #endif
 		// handle traditional engines expecting path & size params
-		size_t length;
-		if (pmemkv_config_get(config, "path", NULL, 0, &length) !=
-		    PMEMKV_STATUS_OK)
+		size_t path_length;
+		const char *path;
+
+		auto status = pmemkv_config_get(config, "path", (const void **)&path,
+						&path_length);
+		if (status != PMEMKV_STATUS_OK)
 			throw std::runtime_error(
 				"JSON does not contain a valid path string");
-		auto path = std::unique_ptr<char[]>(new char[length]);
-		if (pmemkv_config_get(config, "path", path.get(), length, NULL) !=
-		    PMEMKV_STATUS_OK)
-			throw std::runtime_error(
-				"Cannot get a 'path' string from the config");
 
-		size_t size = 0;
-		if (pmemkv_config_get(config, "size", &size, sizeof(size_t), NULL) !=
-		    PMEMKV_STATUS_OK)
+		size_t size_length = 0;
+		const size_t *size;
+
+		status = pmemkv_config_get(config, "size", (const void **)&size,
+					   &size_length);
+		if (status != PMEMKV_STATUS_OK)
 			throw std::runtime_error("Cannot get 'size' from the config");
+
 #ifdef ENGINE_TREE3
 		if (engine == "tree3") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::tree3(context, path.get(), size));
+				new pmem::kv::tree3(context, path, *size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -301,7 +301,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_STREE
 		if (engine == "stree") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::stree(context, path.get(), size));
+				new pmem::kv::stree(context, path, *size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -310,7 +310,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_CMAP
 		if (engine == "cmap") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::cmap(context, path.get(), size));
+				new pmem::kv::cmap(context, path, *size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -318,7 +318,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 
 #if defined(ENGINE_VSMAP) || defined(ENGINE_VCMAP)
 		struct stat info;
-		if ((stat(path.get(), &info) < 0) || !S_ISDIR(info.st_mode)) {
+		if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
 			throw std::runtime_error(
 				"Config path is not an existing directory");
 		}
@@ -327,7 +327,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_VSMAP
 		if (engine == "vsmap") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::vsmap(context, path.get(), size));
+				new pmem::kv::vsmap(context, path, *size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -336,7 +336,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_VCMAP
 		if (engine == "vcmap") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::vcmap(context, path.get(), size));
+				new pmem::kv::vcmap(context, path, *size));
 
 			return PMEMKV_STATUS_OK;
 		}
