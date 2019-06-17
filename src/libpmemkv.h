@@ -92,8 +92,8 @@ int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb);
 
 int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_callback *c,
 	       void *arg);
-int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *value,
-		    size_t maxvaluebytes);
+int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
+		    size_t buffer_size, size_t *value_size);
 int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb);
 
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
