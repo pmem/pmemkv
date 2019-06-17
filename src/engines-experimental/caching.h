@@ -82,7 +82,7 @@ private:
 	std::string remotePasswd;
 	std::string remoteUrl;
 	std::string subEngine;
-	std::string subEngineConfig;
+	pmemkv_config *subEngineConfig;
 };
 
 time_t convertTimeToEpoch(const char *theTime, const char *format = "%Y%m%d%H%M%S");
