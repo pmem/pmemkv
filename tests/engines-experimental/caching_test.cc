@@ -42,9 +42,9 @@ using namespace pmem::kv;
 const std::string ENGINE = "tree3";
 const std::string PATH = "/dev/shm/pmemkv";
 
-// const string ENGINE = "vcmap";
-// const string ENGINE = "vsmap";
-// const string PATH = "/dev/shm";
+// const std::string ENGINE = "vcmap";
+// const std::string ENGINE = "vsmap";
+// const std::string PATH = "/dev/shm";
 
 class CachingTest : public testing::Test {
 public:
@@ -52,6 +52,24 @@ public:
 	{
 		std::remove(PATH.c_str());
 	}
+
+	int start(const std::string &engine, const std::string &json)
+	{
+		pmemkv_config *cfg = pmemkv_config_new();
+		if (cfg == nullptr)
+			throw std::runtime_error("Cannot create config");
+
+		auto ret = pmemkv_config_from_json(cfg, json.c_str());
+		if (ret != 0)
+			throw std::runtime_error("Cannot parse json");
+
+		kv = new db(engine, cfg);
+
+		pmemkv_config_delete(cfg);
+
+		return kv != nullptr;
+	}
+
 	~CachingTest()
 	{
 		if (kv)
@@ -62,24 +80,20 @@ public:
 
 TEST_F(CachingTest, PutKeyValue)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 }
 
 TEST_F(CachingTest, PutUpdateValue)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	std::string value;
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
@@ -92,12 +106,10 @@ TEST_F(CachingTest, PutUpdateValue)
 
 TEST_F(CachingTest, PutKeywithinTTL)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	std::string value;
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	sleep(1);
@@ -109,12 +121,10 @@ TEST_F(CachingTest, PutKeywithinTTL)
 
 TEST_F(CachingTest, PutKeyExpiredTTL)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	sleep(2);
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
@@ -122,12 +132,10 @@ TEST_F(CachingTest, PutKeyExpiredTTL)
 
 TEST_F(CachingTest, EmptyKeyTest)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->put("", "empty") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put(" ", "single-space") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("\t\t", "two-tab") == status::OK) << pmemobj_errormsg();
@@ -145,12 +153,10 @@ TEST_F(CachingTest, EmptyKeyTest)
 
 TEST_F(CachingTest, EmptyValueTest)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->put("empty", "") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("single-space", " ") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("two-tab", "\t\t") == status::OK) << pmemobj_errormsg();
@@ -162,12 +168,10 @@ TEST_F(CachingTest, EmptyValueTest)
 
 TEST_F(CachingTest, SimpleMemcached)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":11211,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Memcached\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":11211,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Memcached\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 
 	memcached_server_st *servers = NULL;
@@ -192,12 +196,10 @@ TEST_F(CachingTest, SimpleMemcached)
 
 TEST_F(CachingTest, SimpleRedis)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 
 	int conn_timeout = 30, rw_timeout = 10;
@@ -212,12 +214,10 @@ TEST_F(CachingTest, SimpleRedis)
 
 TEST_F(CachingTest, UnknownLocalMemcachedKey)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":11211,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Memcached\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":11211,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Memcached\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 
 	memcached_server_st *servers = NULL;
@@ -245,12 +245,10 @@ TEST_F(CachingTest, UnknownLocalMemcachedKey)
 
 TEST_F(CachingTest, UnknownLocalRedisKey)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 
 	int conn_timeout = 30, rw_timeout = 10;
@@ -266,12 +264,10 @@ TEST_F(CachingTest, UnknownLocalRedisKey)
 
 TEST_F(CachingTest, SimpleEachTest)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
@@ -312,12 +308,10 @@ TEST_F(CachingTest, SimpleEachTest)
 
 TEST_F(CachingTest, EachTTLValidExpired)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
@@ -344,12 +338,10 @@ TEST_F(CachingTest, EachTTLValidExpired)
 
 TEST_F(CachingTest, EachEmptyCache)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 	std::string result;
 	kv->each(
@@ -368,12 +360,10 @@ TEST_F(CachingTest, EachEmptyCache)
 
 TEST_F(CachingTest, EachZeroTTL)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
@@ -416,12 +406,10 @@ TEST_F(CachingTest, EachZeroTTL)
 
 TEST_F(CachingTest, SimpleCount)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->count() == 1);
@@ -433,12 +421,10 @@ TEST_F(CachingTest, SimpleCount)
 
 TEST_F(CachingTest, SimpleZeroTTLCount)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
@@ -453,12 +439,10 @@ TEST_F(CachingTest, SimpleZeroTTLCount)
 
 TEST_F(CachingTest, SimpleAll)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->count() == 2);
@@ -490,12 +474,10 @@ TEST_F(CachingTest, SimpleAll)
 
 TEST_F(CachingTest, SimpleZeroTTLAll)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->count() == 2);
@@ -525,12 +507,10 @@ TEST_F(CachingTest, SimpleZeroTTLAll)
 
 TEST_F(CachingTest, SimpleRemovekey)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 	ASSERT_TRUE(kv->remove("key1") == status::OK);
@@ -543,12 +523,10 @@ TEST_F(CachingTest, SimpleRemovekey)
 
 TEST_F(CachingTest, SimpleExistsKey)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
@@ -565,12 +543,10 @@ TEST_F(CachingTest, SimpleExistsKey)
 
 TEST_F(CachingTest, Redis_Integration)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->count() == 1);
@@ -706,12 +682,10 @@ TEST_F(CachingTest, Redis_Integration)
 
 TEST_F(CachingTest, Memcached_Integration)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":11211,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Memcached\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":11211,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Memcached\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	ASSERT_TRUE(kv->count() == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->count() == 1);
@@ -867,7 +841,7 @@ TEST_F(CachingTest, Memcached_Integration)
 }
 
 // TEST_F(CachingTest, NegativeTTL) {
-//    ASSERT_TRUE(!(kv = new db("caching",
+//    ASSERT_TRUE(!(start("caching",
 //    "{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":-10,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\",
 //    \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" + ENGINE +
 //    "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
@@ -875,12 +849,10 @@ TEST_F(CachingTest, Memcached_Integration)
 
 TEST_F(CachingTest, LargeTTL)
 {
-	ASSERT_TRUE(
-		kv = new db(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":999999999,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+	ASSERT_TRUE(start(
+		"caching",
+		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":999999999,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
+			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
 	std::string value;
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	sleep(1);
