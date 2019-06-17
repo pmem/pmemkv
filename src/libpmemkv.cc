@@ -511,28 +511,42 @@ int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_callback *c, 
 
 struct GetCopyCallbackContext {
 	int result;
-	size_t maxvaluebytes;
-	char *value;
+
+	size_t buffer_size;
+	char *buffer;
+
+	size_t *value_size;
 };
 
-int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *value,
-		    size_t maxvaluebytes)
+static void get_copy_callback(const char *v, size_t vb, void *arg)
 {
+	const auto c = ((GetCopyCallbackContext *)arg);
+
+	if (c->value_size != nullptr)
+		*(c->value_size) = vb;
+
+	if (vb < c->buffer_size) {
+		c->result = PMEMKV_STATUS_OK;
+
+		if (c->buffer != nullptr)
+			memcpy(c->buffer, v, vb);
+	} else {
+		c->result = PMEMKV_STATUS_FAILED;
+	}
+}
+
+int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
+		    size_t buffer_size, size_t *value_size)
+{
+	GetCopyCallbackContext cxt = {PMEMKV_STATUS_NOT_FOUND, buffer_size, buffer,
+				      value_size};
+
+	if (buffer != nullptr)
+		memset(buffer, 0, buffer_size);
+
 	try {
-		GetCopyCallbackContext cxt = {PMEMKV_STATUS_NOT_FOUND, maxvaluebytes,
-					      value};
-		auto cb = [](const char *v, size_t vb, void *arg) {
-			const auto c = ((GetCopyCallbackContext *)arg);
-			if (vb < c->maxvaluebytes) {
-				c->result = PMEMKV_STATUS_OK;
-				memcpy(c->value, v, vb);
-			} else {
-				c->result = PMEMKV_STATUS_FAILED;
-			}
-		};
-		memset(value, 0, maxvaluebytes);
 		reinterpret_cast<pmem::kv::engine_base *>(db)->get(
-			std::string(k, (size_t)kb), cb, &cxt);
+			std::string(k, (size_t)kb), &get_copy_callback, &cxt);
 		return cxt.result;
 	} catch (const std::exception &exc) {
 		ERR(exc.what());
