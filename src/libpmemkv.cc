@@ -31,6 +31,9 @@
  */
 
 #include <rapidjson/document.h>
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/writer.h>
 #include <sys/stat.h>
 
 #include "engine.h"
@@ -74,7 +77,14 @@
 	} while (0)
 
 struct pmemkv_config {
-	std::unordered_map<std::string, std::vector<char>> umap;
+	enum class config_type { UNSPECIFIED, SUBCONFIG };
+
+	struct entry {
+		std::vector<char> value;
+		config_type type;
+	};
+
+	std::unordered_map<std::string, entry> umap;
 };
 
 extern "C" {
@@ -90,21 +100,38 @@ pmemkv_config *pmemkv_config_new(void)
 
 void pmemkv_config_delete(pmemkv_config *config)
 {
+	for (auto &item : config->umap) {
+		if (item.second.type == pmemkv_config::config_type::SUBCONFIG) {
+			pmemkv_config *cfg;
+			memcpy(&cfg, item.second.value.data(), item.second.value.size());
+
+			pmemkv_config_delete(cfg);
+		}
+	}
+
 	delete config;
 }
 
-int pmemkv_config_put(pmemkv_config *config, const char *key, const void *value,
-		      size_t value_size)
+static int pmemkv_config_put_typed(pmemkv_config *config, const char *key,
+				   const void *value, size_t value_size,
+				   pmemkv_config::config_type type)
 {
 	try {
 		std::string mkey(key);
 		std::vector<char> v((char *)value, (char *)value + value_size);
-		config->umap.insert({mkey, v});
+		config->umap.insert({mkey, {v, type}});
 	} catch (...) {
 		return PMEMKV_STATUS_FAILED;
 	}
 
 	return PMEMKV_STATUS_OK;
+}
+
+int pmemkv_config_put(pmemkv_config *config, const char *key, const void *value,
+		      size_t value_size)
+{
+	return pmemkv_config_put_typed(config, key, value, value_size,
+				       pmemkv_config::config_type::UNSPECIFIED);
 }
 
 int pmemkv_config_get(pmemkv_config *config, const char *key, void *buffer,
@@ -119,7 +146,7 @@ int pmemkv_config_get(pmemkv_config *config, const char *key, void *buffer,
 		if (found == config->umap.end())
 			return PMEMKV_STATUS_NOT_FOUND;
 
-		auto mvalue = found->second;
+		auto mvalue = found->second.value;
 
 		if (buffer) {
 			len = (buffer_len < mvalue.size()) ? buffer_len : mvalue.size();
@@ -146,7 +173,10 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 		uint64_t uint64;
 		int64_t sint64;
 		double db;
+		pmemkv_config *sub_cfg;
 	} data;
+
+	pmemkv_config::config_type type;
 
 	assert(config && jsonconfig);
 
@@ -160,6 +190,8 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 			throw std::runtime_error("'size' in JSON is not a valid number");
 
 		for (itr = doc.MemberBegin(); itr != doc.MemberEnd(); ++itr) {
+			type = pmemkv_config::config_type::UNSPECIFIED;
+
 			const void *value = &data;
 			size_t value_size;
 			if (itr->value.IsString()) {
@@ -180,15 +212,34 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 			} else if (itr->value.IsDouble()) {
 				data.db = itr->value.GetDouble();
 				value_size = 8;
+			} else if (itr->value.IsObject()) {
+				rapidjson::StringBuffer sb;
+				rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+				itr->value.Accept(writer);
+
+				data.sub_cfg = pmemkv_config_new();
+				value_size = sizeof(pmemkv_config *);
+
+				if (data.sub_cfg == nullptr)
+					throw std::runtime_error(
+						"Cannot allocate sub config");
+
+				auto ret = pmemkv_config_from_json(data.sub_cfg,
+								   sb.GetString());
+				if (ret != 0)
+					throw std::runtime_error(
+						"Cannot parse subconfig");
+
+				type = pmemkv_config::config_type::SUBCONFIG;
 			} else {
 				throw std::runtime_error(
 					"Unsupported data type in JSON string");
 			}
 
-			auto status = pmemkv_config_put(config, itr->name.GetString(),
-							value, value_size);
-			if (status != PMEMKV_STATUS_OK)
-				return status;
+			if (pmemkv_config_put_typed(config, itr->name.GetString(), value,
+						    value_size, type))
+				throw std::runtime_error(
+					"Inserting a new entry to the config failed");
 		}
 	} catch (const std::exception &exc) {
 		std::cerr << exc.what() << "\n";

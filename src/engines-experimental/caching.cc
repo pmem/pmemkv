@@ -58,13 +58,16 @@ namespace kv
 caching::caching(void *context, pmemkv_config *config) : context(context)
 {
 	if (!readConfig(config))
-		throw "caching Exception"; // todo propagate start exceptions properly
+		throw std::runtime_error(
+			"caching Exception"); // todo propagate start exceptions properly
 
 	if (!(basePtr = new db))
-		throw "caching Exception"; // todo propagate start exceptions properly
+		throw std::runtime_error(
+			"caching Exception"); // todo propagate start exceptions properly
 
-	if (basePtr->open(subEngine, config) != status::OK)
-		throw "caching Exception"; // todo propagate start exceptions properly
+	if (basePtr->open(subEngine, subEngineConfig) != status::OK)
+		throw std::runtime_error(
+			"caching Exception"); // todo propagate start exceptions properly
 
 	LOG("Started ok");
 }
@@ -126,12 +129,15 @@ bool caching::readConfig(pmemkv_config *config)
 	if (pmemkv_config_get(config, "ttl", &ttl, sizeof(int), NULL) != sizeof(int))
 		ttl = 0;
 
-	if (pmemkv_config_get(config, "port", &port, sizeof(unsigned long int), NULL) !=
-	    sizeof(unsigned long int))
+	if (pmemkv_config_get(config, "port", &port, sizeof(int), NULL) != sizeof(int))
 		return false;
 
 	if (pmemkv_config_get(config, "attempts", &attempts, sizeof(int), NULL) !=
 	    sizeof(int))
+		return false;
+
+	if (pmemkv_config_get(config, "subengine_config", &subEngineConfig,
+			      sizeof(pmemkv_config *), NULL) != sizeof(pmemkv_config *))
 		return false;
 
 	return true;
