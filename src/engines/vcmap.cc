@@ -37,8 +37,10 @@
 
 #define DO_LOG 0
 #define LOG(msg)                                                                         \
-	if (DO_LOG)                                                                      \
-	std::cout << "[vcmap] " << msg << "\n"
+	do {                                                                             \
+		if (DO_LOG)                                                              \
+			std::cout << "[vcmap] " << msg << "\n";                          \
+	} while (0)
 
 namespace pmem
 {
@@ -69,27 +71,33 @@ void *vcmap::engine_context()
 	return context;
 }
 
-void vcmap::all(all_callback *callback, void *arg)
+status vcmap::all(all_callback *callback, void *arg)
 {
 	LOG("All");
 	for (auto &iterator : pmem_kv_container) {
 		(*callback)(iterator.first.c_str(), iterator.first.size(), arg);
 	}
+
+	return status::OK;
 }
 
-std::size_t vcmap::count()
+status vcmap::count(std::size_t &cnt)
 {
 	LOG("Count");
-	return pmem_kv_container.size();
+	cnt = pmem_kv_container.size();
+
+	return status::OK;
 }
 
-void vcmap::each(each_callback *callback, void *arg)
+status vcmap::each(each_callback *callback, void *arg)
 {
 	LOG("Each");
 	for (auto &iterator : pmem_kv_container) {
 		(*callback)(iterator.first.c_str(), iterator.first.size(),
 			    iterator.second.c_str(), iterator.second.size(), arg);
 	}
+
+	return status::OK;
 }
 
 status vcmap::exists(const std::string &key)
@@ -101,7 +109,7 @@ status vcmap::exists(const std::string &key)
 	return (result_found ? status::OK : status::NOT_FOUND);
 }
 
-void vcmap::get(const std::string &key, get_callback *callback, void *arg)
+status vcmap::get(const std::string &key, get_callback *callback, void *arg)
 {
 	LOG("Get key=" << key);
 	map_t::const_accessor result;
@@ -109,9 +117,11 @@ void vcmap::get(const std::string &key, get_callback *callback, void *arg)
 		result, pmem_string(key.c_str(), key.size(), ch_allocator));
 	if (!result_found) {
 		LOG("  key not found");
-		return;
+		return status::NOT_FOUND;
 	}
+
 	(*callback)(result->second.c_str(), result->second.size(), arg);
+	return status::OK;
 }
 
 status vcmap::put(const std::string &key, const std::string &value)

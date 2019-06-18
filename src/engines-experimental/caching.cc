@@ -44,8 +44,10 @@
 
 #define DO_LOG 0
 #define LOG(msg)                                                                         \
-	if (DO_LOG)                                                                      \
-	std::cout << "[caching] " << msg << "\n"
+	do {                                                                             \
+		if (DO_LOG)                                                              \
+			std::cout << "[caching] " << msg << "\n";                        \
+	} while (0)
 #define ZERO 0
 
 namespace pmem
@@ -55,8 +57,15 @@ namespace kv
 
 caching::caching(void *context, pmemkv_config *config) : context(context)
 {
-	if (!readConfig(config) || !(basePtr = new db(subEngine, config)))
+	if (!readConfig(config))
 		throw "caching Exception"; // todo propagate start exceptions properly
+
+	if (!(basePtr = new db))
+		throw "caching Exception"; // todo propagate start exceptions properly
+
+	if (basePtr->open(subEngine, config) != status::OK)
+		throw "caching Exception"; // todo propagate start exceptions properly
+
 	LOG("Started ok");
 }
 
@@ -128,33 +137,34 @@ bool caching::readConfig(pmemkv_config *config)
 	return true;
 }
 
-void caching::all(all_callback *callback, void *arg)
+status caching::all(all_callback *callback, void *arg)
 {
 	LOG("All");
-	int result = 0;
-	each(
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			auto c = ((int *)arg);
-			(*c)++;
-		},
-		&result);
-	if (result > 0 && basePtr) {
-		basePtr->all(callback, arg);
-	}
+
+	std::size_t cnt;
+	auto s = count(cnt);
+
+	if (s == status::OK && cnt > 0 && basePtr)
+		return basePtr->all(callback, arg);
 	// todo refactor as single callback (Each --> All)
+
+	return s;
 }
 
-std::size_t caching::count()
+status caching::count(std::size_t &cnt)
 {
 	LOG("Count");
-	int result = 0;
+	std::size_t result = 0;
 	each(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			auto c = ((int *)arg);
+			auto c = ((std::size_t *)arg);
 			(*c)++;
 		},
 		&result);
-	return result;
+
+	cnt = result;
+
+	return status::OK;
 }
 
 struct EachCacheCallbackContext {
@@ -163,7 +173,7 @@ struct EachCacheCallbackContext {
 	std::list<std::string> *expiredKeys;
 };
 
-void caching::each(each_callback *callback, void *arg)
+status caching::each(each_callback *callback, void *arg)
 {
 	LOG("Each");
 	std::list<std::string> removingKeys;
@@ -183,9 +193,15 @@ void caching::each(each_callback *callback, void *arg)
 	};
 
 	if (basePtr) { // todo bail earlier if null
-		basePtr->each(cb, &cxt);
-		for (const auto &itr : removingKeys)
-			basePtr->remove(itr);
+		auto s = basePtr->each(cb, &cxt);
+		if (s != status::OK)
+			return s;
+
+		for (const auto &itr : removingKeys) {
+			auto s = basePtr->remove(itr);
+			if (s != status::OK)
+				return status::FAILED;
+		}
 	}
 }
 
@@ -200,12 +216,15 @@ status caching::exists(const std::string &key)
 	// todo fold into single return statement
 }
 
-void caching::get(const std::string &key, get_callback *callback, void *arg)
+status caching::get(const std::string &key, get_callback *callback, void *arg)
 {
 	LOG("Get key=" << key);
 	std::string value;
-	if (getKey(key, value, false))
+	if (getKey(key, value, false)) {
 		(*callback)(value.c_str(), value.size(), arg);
+		return status::OK;
+	} else
+		return status::NOT_FOUND;
 }
 
 bool caching::getKey(const std::string &key, std::string &valueField, bool api_flag)

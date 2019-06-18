@@ -73,13 +73,21 @@ protected:
 		if (cfg == nullptr)
 			throw std::runtime_error("creating config failed");
 
-		ret += pmemkv_config_put(cfg, "path", PATH.c_str(), PATH.size() + 1);
-		ret += pmemkv_config_put(cfg, "size", &size, sizeof(size));
+		auto cfg_s =
+			pmemkv_config_put(cfg, "path", PATH.c_str(), PATH.size() + 1);
 
-		if (ret != 0)
-			throw std::runtime_error("putting value to config failed");
+		if (cfg_s != PMEMKV_STATUS_OK)
+			throw std::runtime_error("putting 'path' to config failed");
 
-		kv = new db("stree", cfg);
+		cfg_s = pmemkv_config_put(cfg, "size", &size, sizeof(size));
+
+		if (cfg_s != PMEMKV_STATUS_OK)
+			throw std::runtime_error("putting 'size' to config failed");
+
+		kv = new db;
+		auto s = kv->open("stree", cfg);
+		if (s != status::OK)
+			throw std::runtime_error("open failed");
 
 		pmemkv_config_delete(cfg);
 	}
@@ -90,28 +98,38 @@ typedef STreeBaseTest<LARGE_SIZE> STreeLargeTest;
 
 TEST_F(STreeTest, SimpleTest)
 {
-	ASSERT_TRUE(kv->count() == 0);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("key1"));
 	std::string value;
 	ASSERT_TRUE(kv->get("key1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 }
 
 TEST_F(STreeTest, BinaryKeyTest)
 {
-	ASSERT_TRUE(kv->count() == 0);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("a"));
 	ASSERT_TRUE(kv->put("a", "should_not_change") == status::OK)
 		<< pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(status::OK == kv->exists("a"));
 	std::string key1 = std::string("a\0b", 3);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists(key1));
 	ASSERT_TRUE(kv->put(key1, "stuff") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(status::OK == kv->exists("a"));
 	ASSERT_TRUE(status::OK == kv->exists(key1));
 	std::string value;
@@ -121,7 +139,9 @@ TEST_F(STreeTest, BinaryKeyTest)
 	ASSERT_TRUE(kv->get("a", &value2) == status::OK);
 	ASSERT_EQ(value2, "should_not_change");
 	ASSERT_TRUE(kv->remove(key1) == status::OK);
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(status::OK == kv->exists("a"));
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists(key1));
 	std::string value3;
@@ -140,13 +160,21 @@ TEST_F(STreeTest, BinaryValueTest)
 
 TEST_F(STreeTest, EmptyKeyTest)
 {
-	ASSERT_TRUE(kv->count() == 0);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("", "empty") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->put(" ", "single-space") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(kv->put("\t\t", "two-tab") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 3);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 3);
 	std::string value1;
 	std::string value2;
 	std::string value3;
@@ -160,13 +188,21 @@ TEST_F(STreeTest, EmptyKeyTest)
 
 TEST_F(STreeTest, EmptyValueTest)
 {
-	ASSERT_TRUE(kv->count() == 0);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("empty", "") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->put("single-space", " ") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(kv->put("two-tab", "\t\t") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 3);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 3);
 	std::string value1;
 	std::string value2;
 	std::string value3;
@@ -196,7 +232,9 @@ TEST_F(STreeTest, GetMultipleTest)
 	ASSERT_TRUE(kv->put("hij", "C3") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("jkl", "D4") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("mno", "E5") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 5);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 5);
 	ASSERT_TRUE(status::OK == kv->exists("abc"));
 	std::string value1;
 	ASSERT_TRUE(kv->get("abc", &value1) == status::OK && value1 == "A1");
@@ -221,7 +259,9 @@ TEST_F(STreeTest, GetMultiple2Test)
 	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->remove("key2") == status::OK);
 	ASSERT_TRUE(kv->put("key3", "VALUE3") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 	std::string value1;
 	ASSERT_TRUE(kv->get("key1", &value1) == status::OK && value1 == "value1");
 	std::string value2;
@@ -240,30 +280,40 @@ TEST_F(STreeTest, GetNonexistentTest)
 
 TEST_F(STreeTest, PutTest)
 {
-	ASSERT_TRUE(kv->count() == 0);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	std::string value;
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 
 	std::string new_value;
 	ASSERT_TRUE(kv->put("key1", "VALUE1") == status::OK)
 		<< pmemobj_errormsg(); // same size
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("key1", &new_value) == status::OK && new_value == "VALUE1");
 
 	std::string new_value2;
 	ASSERT_TRUE(kv->put("key1", "new_value") == status::OK)
 		<< pmemobj_errormsg(); // longer size
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("key1", &new_value2) == status::OK &&
 		    new_value2 == "new_value");
 
 	std::string new_value3;
 	ASSERT_TRUE(kv->put("key1", "?") == status::OK)
 		<< pmemobj_errormsg(); // shorter size
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("key1", &new_value3) == status::OK && new_value3 == "?");
 }
 
@@ -271,28 +321,38 @@ TEST_F(STreeTest, PutKeysOfDifferentSizesTest)
 {
 	std::string value;
 	ASSERT_TRUE(kv->put("123456789ABCDE", "A") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("123456789ABCDE", &value) == status::OK && value == "A");
 
 	std::string value2;
 	ASSERT_TRUE(kv->put("123456789ABCDEF", "B") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(kv->get("123456789ABCDEF", &value2) == status::OK && value2 == "B");
 
 	std::string value3;
 	ASSERT_TRUE(kv->put("12345678ABCDEFG", "C") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 3);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 3);
 	ASSERT_TRUE(kv->get("12345678ABCDEFG", &value3) == status::OK && value3 == "C");
 
 	std::string value4;
 	ASSERT_TRUE(kv->put("123456789", "D") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 4);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 4);
 	ASSERT_TRUE(kv->get("123456789", &value4) == status::OK && value4 == "D");
 
 	std::string value5;
 	ASSERT_TRUE(kv->put("123456789ABCDEFGHI", "E") == status::OK)
 		<< pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 5);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 5);
 	ASSERT_TRUE(kv->get("123456789ABCDEFGHI", &value5) == status::OK &&
 		    value5 == "E");
 }
@@ -301,39 +361,55 @@ TEST_F(STreeTest, PutValuesOfDifferentSizesTest)
 {
 	std::string value;
 	ASSERT_TRUE(kv->put("A", "123456789ABCDE") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("A", &value) == status::OK && value == "123456789ABCDE");
 
 	std::string value2;
 	ASSERT_TRUE(kv->put("B", "123456789ABCDEF") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(kv->get("B", &value2) == status::OK && value2 == "123456789ABCDEF");
 
 	std::string value3;
 	ASSERT_TRUE(kv->put("C", "12345678ABCDEFG") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 3);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 3);
 	ASSERT_TRUE(kv->get("C", &value3) == status::OK && value3 == "12345678ABCDEFG");
 
 	std::string value4;
 	ASSERT_TRUE(kv->put("D", "123456789") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 4);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 4);
 	ASSERT_TRUE(kv->get("D", &value4) == status::OK && value4 == "123456789");
 
 	std::string value5;
 	ASSERT_TRUE(kv->put("E", "123456789ABCDEFGHI") == status::OK)
 		<< pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 5);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 5);
 	ASSERT_TRUE(kv->get("E", &value5) == status::OK &&
 		    value5 == "123456789ABCDEFGHI");
 }
 
 TEST_F(STreeTest, RemoveAllTest)
 {
-	ASSERT_TRUE(kv->count() == 0);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("tmpkey", "tmpvalue1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->remove("tmpkey") == status::OK);
-	ASSERT_TRUE(kv->count() == 0);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey"));
 	std::string value;
 	ASSERT_TRUE(kv->get("tmpkey", &value) == status::NOT_FOUND);
@@ -341,35 +417,55 @@ TEST_F(STreeTest, RemoveAllTest)
 
 TEST_F(STreeTest, RemoveAndInsertTest)
 {
-	ASSERT_TRUE(kv->count() == 0);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("tmpkey", "tmpvalue1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->remove("tmpkey") == status::OK);
-	ASSERT_TRUE(kv->count() == 0);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey"));
 	std::string value;
 	ASSERT_TRUE(kv->get("tmpkey", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv->put("tmpkey1", "tmpvalue1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(status::OK == kv->exists("tmpkey1"));
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::OK && value == "tmpvalue1");
 	ASSERT_TRUE(kv->remove("tmpkey1") == status::OK);
-	ASSERT_TRUE(kv->count() == 0);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey1"));
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
 }
 
 TEST_F(STreeTest, RemoveExistingTest)
 {
-	ASSERT_TRUE(kv->count() == 0);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("tmpkey1", "tmpvalue1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->put("tmpkey2", "tmpvalue2") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(kv->remove("tmpkey1") == status::OK);
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->remove("tmpkey1") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey1"));
 	std::string value;
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
@@ -392,9 +488,13 @@ TEST_F(STreeTest, RemoveNonexistentTest)
 TEST_F(STreeTest, UsesAllTest)
 {
 	ASSERT_TRUE(kv->put("2", "1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 
 	std::string result;
 	kv->all(
@@ -411,9 +511,13 @@ TEST_F(STreeTest, UsesAllTest)
 TEST_F(STreeTest, UsesEachTest)
 {
 	ASSERT_TRUE(kv->put("1", "2") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->put("RR", "记!") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 
 	std::string result;
 	kv->each(
@@ -576,7 +680,9 @@ TEST_F(STreeTest, SingleInnerNodeAscendingTest)
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
 	}
-	ASSERT_TRUE(kv->count() == SINGLE_INNER_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == SINGLE_INNER_LIMIT);
 }
 
 TEST_F(STreeTest, SingleInnerNodeAscendingTest2)
@@ -592,7 +698,9 @@ TEST_F(STreeTest, SingleInnerNodeAscendingTest2)
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
 	}
-	ASSERT_TRUE(kv->count() == SINGLE_INNER_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == SINGLE_INNER_LIMIT);
 }
 
 TEST_F(STreeTest, SingleInnerNodeDescendingTest)
@@ -608,7 +716,9 @@ TEST_F(STreeTest, SingleInnerNodeDescendingTest)
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
 	}
-	ASSERT_TRUE(kv->count() == SINGLE_INNER_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == SINGLE_INNER_LIMIT);
 }
 
 TEST_F(STreeTest, SingleInnerNodeDescendingTest2)
@@ -624,7 +734,9 @@ TEST_F(STreeTest, SingleInnerNodeDescendingTest2)
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
 	}
-	ASSERT_TRUE(kv->count() == SINGLE_INNER_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == SINGLE_INNER_LIMIT);
 }
 
 // =============================================================================================
@@ -643,7 +755,9 @@ TEST_F(STreeTest, SingleInnerNodeAscendingAfterRecoveryTest)
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
 	}
-	ASSERT_TRUE(kv->count() == SINGLE_INNER_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == SINGLE_INNER_LIMIT);
 }
 
 TEST_F(STreeTest, SingleInnerNodeAscendingAfterRecoveryTest2)
@@ -658,7 +772,9 @@ TEST_F(STreeTest, SingleInnerNodeAscendingAfterRecoveryTest2)
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
 	}
-	ASSERT_TRUE(kv->count() == SINGLE_INNER_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == SINGLE_INNER_LIMIT);
 }
 
 TEST_F(STreeTest, SingleInnerNodeDescendingAfterRecoveryTest)
@@ -673,7 +789,9 @@ TEST_F(STreeTest, SingleInnerNodeDescendingAfterRecoveryTest)
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
 	}
-	ASSERT_TRUE(kv->count() == SINGLE_INNER_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == SINGLE_INNER_LIMIT);
 }
 
 TEST_F(STreeTest, SingleInnerNodeDescendingAfterRecoveryTest2)
@@ -688,7 +806,9 @@ TEST_F(STreeTest, SingleInnerNodeDescendingAfterRecoveryTest2)
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
 	}
-	ASSERT_TRUE(kv->count() == SINGLE_INNER_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == SINGLE_INNER_LIMIT);
 }
 
 // =============================================================================================
@@ -711,7 +831,9 @@ TEST_F(STreeLargeTest, LargeAscendingTest)
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == (istr + "!"));
 	}
-	ASSERT_TRUE(kv->count() == LARGE_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == LARGE_LIMIT);
 }
 
 TEST_F(STreeLargeTest, LargeDescendingTest)
@@ -730,7 +852,9 @@ TEST_F(STreeLargeTest, LargeDescendingTest)
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK &&
 			    value == ("ABC" + istr));
 	}
-	ASSERT_TRUE(kv->count() == LARGE_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == LARGE_LIMIT);
 }
 
 // =============================================================================================
@@ -750,7 +874,9 @@ TEST_F(STreeLargeTest, LargeAscendingAfterRecoveryTest)
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == (istr + "!"));
 	}
-	ASSERT_TRUE(kv->count() == LARGE_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == LARGE_LIMIT);
 }
 
 TEST_F(STreeLargeTest, LargeDescendingAfterRecoveryTest)
@@ -767,5 +893,7 @@ TEST_F(STreeLargeTest, LargeDescendingAfterRecoveryTest)
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK &&
 			    value == ("ABC" + istr));
 	}
-	ASSERT_TRUE(kv->count() == LARGE_LIMIT);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == LARGE_LIMIT);
 }

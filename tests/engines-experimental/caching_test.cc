@@ -62,12 +62,13 @@ public:
 
 TEST_F(CachingTest, PutKeyValue)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+				"\"}}") == status::OK);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 }
@@ -75,11 +76,11 @@ TEST_F(CachingTest, PutKeyValue)
 TEST_F(CachingTest, PutUpdateValue)
 {
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+				"\"}}") == status::OK);
 	std::string value;
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
@@ -92,29 +93,33 @@ TEST_F(CachingTest, PutUpdateValue)
 
 TEST_F(CachingTest, PutKeywithinTTL)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+				"\"}}") == status::OK);
 	std::string value;
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	sleep(1);
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	sleep(1);
-	ASSERT_TRUE(kv->count() == 1);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 }
 
 TEST_F(CachingTest, PutKeyExpiredTTL)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+				"\"}}") == status::OK);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	sleep(2);
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
@@ -122,12 +127,13 @@ TEST_F(CachingTest, PutKeyExpiredTTL)
 
 TEST_F(CachingTest, EmptyKeyTest)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+				"\"}}") == status::OK);
 	ASSERT_TRUE(kv->put("", "empty") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put(" ", "single-space") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("\t\t", "two-tab") == status::OK) << pmemobj_errormsg();
@@ -145,12 +151,13 @@ TEST_F(CachingTest, EmptyKeyTest)
 
 TEST_F(CachingTest, EmptyValueTest)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+				"\"}}") == status::OK);
 	ASSERT_TRUE(kv->put("empty", "") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("single-space", " ") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("two-tab", "\t\t") == status::OK) << pmemobj_errormsg();
@@ -162,13 +169,16 @@ TEST_F(CachingTest, EmptyValueTest)
 
 TEST_F(CachingTest, SimpleMemcached)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":11211,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Memcached\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	memcached_server_st *servers = NULL;
 	memcached_st *memc;
@@ -192,13 +202,16 @@ TEST_F(CachingTest, SimpleMemcached)
 
 TEST_F(CachingTest, SimpleRedis)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	int conn_timeout = 30, rw_timeout = 10;
 	acl::string addr("127.0.0.1:6379"), passwd;
@@ -212,13 +225,16 @@ TEST_F(CachingTest, SimpleRedis)
 
 TEST_F(CachingTest, UnknownLocalMemcachedKey)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":11211,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Memcached\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	memcached_server_st *servers = NULL;
 	memcached_st *memc;
@@ -246,12 +262,14 @@ TEST_F(CachingTest, UnknownLocalMemcachedKey)
 TEST_F(CachingTest, UnknownLocalRedisKey)
 {
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	int conn_timeout = 30, rw_timeout = 10;
 	acl::string addr("127.0.0.1:6379"), passwd;
@@ -266,19 +284,24 @@ TEST_F(CachingTest, UnknownLocalRedisKey)
 
 TEST_F(CachingTest, SimpleEachTest)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 4);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 4);
 
 	std::string result;
 	kv->each(
@@ -312,13 +335,16 @@ TEST_F(CachingTest, SimpleEachTest)
 
 TEST_F(CachingTest, EachTTLValidExpired)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
@@ -339,18 +365,23 @@ TEST_F(CachingTest, EachTTLValidExpired)
 		},
 		&result);
 	ASSERT_TRUE(result == "<key5>,<value5>|");
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 }
 
 TEST_F(CachingTest, EachEmptyCache)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	std::string result;
 	kv->each(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
@@ -363,18 +394,23 @@ TEST_F(CachingTest, EachEmptyCache)
 		},
 		&result);
 	ASSERT_TRUE(result == "");
-	ASSERT_TRUE(kv->count() == 0);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 }
 
 TEST_F(CachingTest, EachZeroTTL)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
@@ -382,7 +418,9 @@ TEST_F(CachingTest, EachZeroTTL)
 	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
 	sleep(1);
-	ASSERT_TRUE(kv->count() == 4);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 4);
 
 	std::string result;
 	kv->each(
@@ -416,52 +454,69 @@ TEST_F(CachingTest, EachZeroTTL)
 
 TEST_F(CachingTest, SimpleCount)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	sleep(2);
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 }
 
 TEST_F(CachingTest, SimpleZeroTTLCount)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 3);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 3);
 	sleep(1);
 	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key5", "value5") == status::OK) << pmemobj_errormsg();
 	sleep(1);
-	ASSERT_TRUE(kv->count() == 5);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 5);
 }
 
 TEST_F(CachingTest, SimpleAll)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+				"\"}}") == status::OK);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 	sleep(2);
 	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
@@ -485,20 +540,25 @@ TEST_F(CachingTest, SimpleAll)
 	else
 		ASSERT_TRUE(result == "<key3>,<key4>,");
 
-	ASSERT_TRUE(kv->count() == 2);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 }
 
 TEST_F(CachingTest, SimpleZeroTTLAll)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+				"\"}}") == status::OK);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 2);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 2);
 	sleep(1);
 	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
@@ -525,12 +585,13 @@ TEST_F(CachingTest, SimpleZeroTTLAll)
 
 TEST_F(CachingTest, SimpleRemovekey)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+				"\"}}") == status::OK);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 	ASSERT_TRUE(kv->remove("key1") == status::OK);
@@ -543,13 +604,16 @@ TEST_F(CachingTest, SimpleRemovekey)
 
 TEST_F(CachingTest, SimpleExistsKey)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	sleep(1);
@@ -557,7 +621,9 @@ TEST_F(CachingTest, SimpleExistsKey)
 	sleep(1);
 	// key1 not expired even after 1+1 sec sleep as Exists above updated on local
 	// cache
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 	sleep(2);
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
@@ -565,15 +631,20 @@ TEST_F(CachingTest, SimpleExistsKey)
 
 TEST_F(CachingTest, Redis_Integration)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 
 	std::string value;
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
@@ -592,7 +663,9 @@ TEST_F(CachingTest, Redis_Integration)
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
 	ASSERT_TRUE(kv->exists("key2") == status::NOT_FOUND);
 	ASSERT_TRUE(kv->exists("key3") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->count() == 0);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	// Remote redis connection
 	int conn_timeout = 30, rw_timeout = 10;
@@ -647,7 +720,9 @@ TEST_F(CachingTest, Redis_Integration)
 		},
 		&result);
 	ASSERT_TRUE(result == "");
-	ASSERT_TRUE(kv->count() == 0);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	value = "";
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
@@ -686,7 +761,9 @@ TEST_F(CachingTest, Redis_Integration)
 		},
 		&result);
 	ASSERT_TRUE(result == "");
-	ASSERT_TRUE(kv->count() == 0);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	cmd.del("key1");
 	cmd.del("key2");
@@ -706,15 +783,20 @@ TEST_F(CachingTest, Redis_Integration)
 
 TEST_F(CachingTest, Memcached_Integration)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":11211,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Memcached\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
-	ASSERT_TRUE(kv->count() == 0);
+				"\"}}") == status::OK);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->count() == 1);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 
 	std::string value;
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
@@ -733,7 +815,9 @@ TEST_F(CachingTest, Memcached_Integration)
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
 	ASSERT_TRUE(kv->exists("key2") == status::NOT_FOUND);
 	ASSERT_TRUE(kv->exists("key3") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->count() == 0);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	// Remote memcached connection
 	memcached_server_st *servers = NULL;
@@ -805,7 +889,9 @@ TEST_F(CachingTest, Memcached_Integration)
 		},
 		&result);
 	ASSERT_TRUE(result == "");
-	ASSERT_TRUE(kv->count() == 0);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	value = "";
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
@@ -844,7 +930,9 @@ TEST_F(CachingTest, Memcached_Integration)
 		},
 		&result);
 	ASSERT_TRUE(result == "");
-	ASSERT_TRUE(kv->count() == 0);
+	cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 0);
 
 	memcached_delete(memc, "key1", key_length, (time_t)0);
 	memcached_delete(memc, "key2", key_length, (time_t)0);
@@ -867,25 +955,28 @@ TEST_F(CachingTest, Memcached_Integration)
 }
 
 // TEST_F(CachingTest, NegativeTTL) {
-//    ASSERT_TRUE(!(kv = new db("caching",
+//    ASSERT_TRUE(!(kv->open("caching",
 //    "{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":-10,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\",
 //    \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" + ENGINE +
-//    "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}"));
+//    "\",\"subengine_config\":{\"path\":\"" + PATH + "\"}}") == status::OK);
 //}
 
 TEST_F(CachingTest, LargeTTL)
 {
+	ASSERT_TRUE(kv = new db);
 	ASSERT_TRUE(
-		kv = new db(
+		kv->open(
 			"caching",
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":999999999,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}"));
+				"\"}}") == status::OK);
 	std::string value;
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	sleep(1);
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	sleep(1);
-	ASSERT_TRUE(kv->count() == 1);
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 }

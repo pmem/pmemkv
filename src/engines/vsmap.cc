@@ -37,8 +37,10 @@
 
 #define DO_LOG 0
 #define LOG(msg)                                                                         \
-	if (DO_LOG)                                                                      \
-	std::cout << "[vsmap] " << msg << "\n"
+	do {                                                                             \
+		if (DO_LOG)                                                              \
+			std::cout << "[vsmap] " << msg << "\n";                          \
+	} while (0)
 
 namespace pmem
 {
@@ -66,14 +68,16 @@ void *vsmap::engine_context()
 	return context;
 }
 
-void vsmap::all(all_callback *callback, void *arg)
+status vsmap::all(all_callback *callback, void *arg)
 {
 	LOG("All");
 	for (auto &it : pmem_kv_container)
 		(*callback)(it.first.c_str(), it.first.size(), arg);
+
+	return status::OK;
 }
 
-void vsmap::all_above(const std::string &key, all_callback *callback, void *arg)
+status vsmap::all_above(const std::string &key, all_callback *callback, void *arg)
 {
 	LOG("AllAbove for key=" << key);
 	auto it = pmem_kv_container.upper_bound(
@@ -81,9 +85,11 @@ void vsmap::all_above(const std::string &key, all_callback *callback, void *arg)
 	auto end = pmem_kv_container.end();
 	for (; it != end; it++)
 		(*callback)(it->first.c_str(), it->first.size(), arg);
+
+	return status::OK;
 }
 
-void vsmap::all_below(const std::string &key, all_callback *callback, void *arg)
+status vsmap::all_below(const std::string &key, all_callback *callback, void *arg)
 {
 	LOG("AllBelow for key=" << key);
 	auto it = pmem_kv_container.begin();
@@ -91,10 +97,12 @@ void vsmap::all_below(const std::string &key, all_callback *callback, void *arg)
 		key_type(key.c_str(), key.size(), kv_allocator));
 	for (; it != end; it++)
 		(*callback)(it->first.c_str(), it->first.size(), arg);
+
+	return status::OK;
 }
 
-void vsmap::all_between(const std::string &key1, const std::string &key2,
-			all_callback *callback, void *arg)
+status vsmap::all_between(const std::string &key1, const std::string &key2,
+			  all_callback *callback, void *arg)
 {
 	LOG("AllBetween for key1=" << key1 << ", key2=" << key2);
 	if (key1 < key2) {
@@ -105,14 +113,18 @@ void vsmap::all_between(const std::string &key1, const std::string &key2,
 		for (; it != end; it++)
 			(*callback)(it->first.c_str(), it->first.size(), arg);
 	}
+
+	return status::OK;
 }
 
-std::size_t vsmap::count()
+status vsmap::count(std::size_t &cnt)
 {
-	return pmem_kv_container.size();
+	cnt = pmem_kv_container.size();
+
+	return status::OK;
 }
 
-std::size_t vsmap::count_above(const std::string &key)
+status vsmap::count_above(const std::string &key, std::size_t &cnt)
 {
 	LOG("CountAbove for key=" << key);
 	std::size_t result = 0;
@@ -121,10 +133,13 @@ std::size_t vsmap::count_above(const std::string &key)
 	auto end = pmem_kv_container.end();
 	for (; it != end; it++)
 		result++;
-	return result;
+
+	cnt = result;
+
+	return status::OK;
 }
 
-std::size_t vsmap::count_below(const std::string &key)
+status vsmap::count_below(const std::string &key, std::size_t &cnt)
 {
 	LOG("CountBelow for key=" << key);
 	std::size_t result = 0;
@@ -133,10 +148,14 @@ std::size_t vsmap::count_below(const std::string &key)
 		key_type(key.c_str(), key.size(), kv_allocator));
 	for (; it != end; it++)
 		result++;
-	return result;
+
+	cnt = result;
+
+	return status::OK;
 }
 
-std::size_t vsmap::count_between(const std::string &key1, const std::string &key2)
+status vsmap::count_between(const std::string &key1, const std::string &key2,
+			    std::size_t &cnt)
 {
 	LOG("CountBetween for key1=" << key1 << ", key2=" << key2);
 	std::size_t result = 0;
@@ -148,18 +167,23 @@ std::size_t vsmap::count_between(const std::string &key1, const std::string &key
 		for (; it != end; it++)
 			result++;
 	}
-	return result;
+
+	cnt = result;
+
+	return status::OK;
 }
 
-void vsmap::each(each_callback *callback, void *arg)
+status vsmap::each(each_callback *callback, void *arg)
 {
 	LOG("Each");
 	for (auto &it : pmem_kv_container)
 		(*callback)(it.first.c_str(), it.first.size(), it.second.c_str(),
 			    it.second.size(), arg);
+
+	return status::OK;
 }
 
-void vsmap::each_above(const std::string &key, each_callback *callback, void *arg)
+status vsmap::each_above(const std::string &key, each_callback *callback, void *arg)
 {
 	LOG("EachAbove for key=" << key);
 	auto it = pmem_kv_container.upper_bound(
@@ -168,9 +192,11 @@ void vsmap::each_above(const std::string &key, each_callback *callback, void *ar
 	for (; it != end; it++)
 		(*callback)(it->first.c_str(), it->first.size(), it->second.c_str(),
 			    it->second.size(), arg);
+
+	return status::OK;
 }
 
-void vsmap::each_below(const std::string &key, each_callback *callback, void *arg)
+status vsmap::each_below(const std::string &key, each_callback *callback, void *arg)
 {
 	LOG("EachBelow for key=" << key);
 	auto it = pmem_kv_container.begin();
@@ -179,10 +205,12 @@ void vsmap::each_below(const std::string &key, each_callback *callback, void *ar
 	for (; it != end; it++)
 		(*callback)(it->first.c_str(), it->first.size(), it->second.c_str(),
 			    it->second.size(), arg);
+
+	return status::OK;
 }
 
-void vsmap::each_between(const std::string &key1, const std::string &key2,
-			 each_callback *callback, void *arg)
+status vsmap::each_between(const std::string &key1, const std::string &key2,
+			   each_callback *callback, void *arg)
 {
 	LOG("EachBetween for key1=" << key1 << ", key2=" << key2);
 	if (key1 < key2) {
@@ -194,6 +222,8 @@ void vsmap::each_between(const std::string &key1, const std::string &key2,
 			(*callback)(it->first.c_str(), it->first.size(),
 				    it->second.c_str(), it->second.size(), arg);
 	}
+
+	return status::OK;
 }
 
 status vsmap::exists(const std::string &key)
@@ -205,16 +235,18 @@ status vsmap::exists(const std::string &key)
 	return (r ? status::OK : status::NOT_FOUND);
 }
 
-void vsmap::get(const std::string &key, get_callback *callback, void *arg)
+status vsmap::get(const std::string &key, get_callback *callback, void *arg)
 {
 	LOG("Get key=" << key);
 	const auto pos =
 		pmem_kv_container.find(key_type(key.c_str(), key.size(), kv_allocator));
 	if (pos == pmem_kv_container.end()) {
 		LOG("  key not found");
-		return;
+		return status::NOT_FOUND;
 	}
+
 	(*callback)(pos->second.c_str(), pos->second.size(), arg);
+	return status::OK;
 }
 
 status vsmap::put(const std::string &key, const std::string &value)

@@ -40,8 +40,10 @@
 
 #define DO_LOG 0
 #define LOG(msg)                                                                         \
-	if (DO_LOG)                                                                      \
-	std::cout << "[tree3] " << msg << "\n"
+	do {                                                                             \
+		if (DO_LOG)                                                              \
+			std::cout << "[tree3] " << msg << "\n";                          \
+	} while (0)
 
 namespace pmem
 {
@@ -83,7 +85,7 @@ void *tree3::engine_context()
 // KEY/VALUE METHODS
 // ===============================================================================================
 
-void tree3::all(all_callback *callback, void *arg)
+status tree3::all(all_callback *callback, void *arg)
 {
 	LOG("All");
 	auto leaf = pmpool.root()->head;
@@ -96,9 +98,11 @@ void tree3::all(all_callback *callback, void *arg)
 		}
 		leaf = leaf->next; // advance to next linked leaf
 	}
+
+	return status::OK;
 }
 
-std::size_t tree3::count()
+status tree3::count(std::size_t &cnt)
 {
 	std::size_t result = 0;
 	auto leaf = pmpool.root()->head;
@@ -111,10 +115,13 @@ std::size_t tree3::count()
 		}
 		leaf = leaf->next; // advance to next linked leaf
 	}
-	return result;
+
+	cnt = result;
+
+	return status::OK;
 }
 
-void tree3::each(each_callback *callback, void *arg)
+status tree3::each(each_callback *callback, void *arg)
 {
 	LOG("Each");
 	auto leaf = pmpool.root()->head;
@@ -128,6 +135,8 @@ void tree3::each(each_callback *callback, void *arg)
 		}
 		leaf = leaf->next; // advance to next linked leaf
 	}
+
+	return status::OK;
 }
 
 status tree3::exists(const std::string &key)
@@ -147,7 +156,7 @@ status tree3::exists(const std::string &key)
 	return status::NOT_FOUND;
 }
 
-void tree3::get(const std::string &key, get_callback *callback, void *arg)
+status tree3::get(const std::string &key, get_callback *callback, void *arg)
 {
 	LOG("Get using callback for key=" << key);
 	auto leafnode = LeafSearch(key);
@@ -162,12 +171,13 @@ void tree3::get(const std::string &key, get_callback *callback, void *arg)
 					    << slot
 					    << ", size=" << std::to_string(kv.valsize()));
 					(*callback)(kv.val(), kv.valsize(), arg);
-					return;
+					return status::OK;
 				}
 			}
 		}
 	}
 	LOG("   could not find key");
+	return status::NOT_FOUND;
 }
 
 status tree3::put(const std::string &key, const std::string &value)

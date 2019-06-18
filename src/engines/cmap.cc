@@ -36,8 +36,10 @@
 
 #define DO_LOG 0
 #define LOG(msg)                                                                         \
-	if (DO_LOG)                                                                      \
-	std::cout << "[cmap] " << msg << "\n"
+	do {                                                                             \
+		if (DO_LOG)                                                              \
+			std::cout << "[cmap] " << msg << "\n";                           \
+	} while (0)
 
 namespace pmem
 {
@@ -76,27 +78,33 @@ void *cmap::engine_context()
 	return context;
 }
 
-void cmap::all(all_callback *callback, void *arg)
+status cmap::all(all_callback *callback, void *arg)
 {
 	LOG("All");
 	for (auto it = container->begin(); it != container->end(); ++it) {
 		(*callback)(it->first.c_str(), it->first.size(), arg);
 	}
+
+	return status::OK;
 }
 
-std::size_t cmap::count()
+status cmap::count(std::size_t &cnt)
 {
 	LOG("Count");
-	return container->size();
+	cnt = container->size();
+
+	return status::OK;
 }
 
-void cmap::each(each_callback *callback, void *arg)
+status cmap::each(each_callback *callback, void *arg)
 {
 	LOG("Each");
 	for (auto it = container->begin(); it != container->end(); ++it) {
 		(*callback)(it->first.c_str(), it->first.size(), it->second.c_str(),
 			    it->second.size(), arg);
 	}
+
+	return status::OK;
 }
 
 status cmap::exists(const std::string &key)
@@ -105,16 +113,18 @@ status cmap::exists(const std::string &key)
 	return container->count(key) == 1 ? status::OK : status::NOT_FOUND;
 }
 
-void cmap::get(const std::string &key, get_callback *callback, void *arg)
+status cmap::get(const std::string &key, get_callback *callback, void *arg)
 {
 	LOG("Get key=" << key);
 	map_t::const_accessor result;
 	bool found = container->find(result, key);
 	if (!found) {
 		LOG("  key not found");
-		return;
+		return status::NOT_FOUND;
 	}
+
 	(*callback)(result->second.c_str(), result->second.size(), arg);
+	return status::OK;
 }
 
 status cmap::put(const std::string &key, const std::string &value)
