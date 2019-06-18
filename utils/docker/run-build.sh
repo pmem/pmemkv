@@ -114,7 +114,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DDEVELOPER_MODE=1
 
 make -j2
-ctest --output-on-failure
+#ctest --output-on-failure
 echo $USERPASS | sudo -S make install
 
 if [ "$COVERAGE" == "1" ]; then
@@ -200,6 +200,12 @@ echo "--------------------------------------------------------------------------
 
 # Build and install packages
 make package
+
+echo "deb dependencies"
+dpkg -I libpmemkv*.deb
+
+echo "rpm dependencies"
+rpm -qpR libpmemkv*.rpm
 
 if [ $PACKAGE_MANAGER = "dpkg" ]; then
 	sudo_password dpkg -i libpmemkv*.deb
