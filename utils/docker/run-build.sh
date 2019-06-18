@@ -69,7 +69,7 @@ cp /opt/googletest/googletest-*.zip .
 # make & install
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release \
+cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DTEST_DIR=/dev/shm \
 	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
@@ -92,6 +92,25 @@ else
 	echo "Installation not successful"
 	exit 1
 fi
+
+cd ..
+rm -rf build
+
+# make & test
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release \
+	-DTEST_DIR=/dev/shm \
+	-DTBB_DIR=/opt/tbb/cmake \
+	-DCMAKE_INSTALL_PREFIX=$PREFIX \
+	-DCOVERAGE=$COVERAGE \
+	-DDEVELOPER_MODE=1 \
+	-DCXX_STANDARD=17
+make -j2
+ctest --output-on-failure
+
+cd ..
+rm -rf build
 
 # verify if each engine is building properly
 engines_flags=(
