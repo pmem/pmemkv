@@ -45,25 +45,9 @@ namespace pmem
 namespace kv
 {
 
-class string_view;
-
-typedef void all_function(string_view key);
-typedef void each_function(string_view key, string_view value);
-typedef void get_function(string_view value);
-
-using all_callback = pmemkv_all_callback;
-using each_callback = pmemkv_each_callback;
-using get_callback = pmemkv_get_callback;
-
-enum class status {
-	OK = PMEMKV_STATUS_OK,
-	FAILED = PMEMKV_STATUS_FAILED,
-	NOT_FOUND = PMEMKV_STATUS_NOT_FOUND,
-	NOT_SUPPORTED = PMEMKV_STATUS_NOT_SUPPORTED,
-	INVALID_ARGUMENT = PMEMKV_STATUS_INVALID_ARGUMENT,
-	CONFIG_PARSING_ERROR = PMEMKV_STATUS_CONFIG_PARSING_ERROR,
-};
-
+#if __cpp_lib_string_view
+using string_view = std::string_view;
+#else
 class string_view {
 public:
 	string_view();
@@ -90,6 +74,24 @@ public:
 private:
 	const char *_data;
 	std::size_t _size;
+};
+#endif
+
+typedef void all_function(string_view key);
+typedef void each_function(string_view key, string_view value);
+typedef void get_function(string_view value);
+
+using all_callback = pmemkv_all_callback;
+using each_callback = pmemkv_each_callback;
+using get_callback = pmemkv_get_callback;
+
+enum class status {
+	OK = PMEMKV_STATUS_OK,
+	FAILED = PMEMKV_STATUS_FAILED,
+	NOT_FOUND = PMEMKV_STATUS_NOT_FOUND,
+	NOT_SUPPORTED = PMEMKV_STATUS_NOT_SUPPORTED,
+	INVALID_ARGUMENT = PMEMKV_STATUS_INVALID_ARGUMENT,
+	CONFIG_PARSING_ERROR = PMEMKV_STATUS_CONFIG_PARSING_ERROR,
 };
 
 class db {
@@ -150,6 +152,7 @@ private:
 	pmemkv_db *_db;
 };
 
+#if !__cpp_lib_string_view
 inline string_view::string_view() : _data(""), _size(0)
 {
 }
@@ -189,6 +192,7 @@ inline int string_view::compare(const string_view &other)
 		return 1;
 	return 0;
 }
+#endif
 
 /*
  * All functions which will be called by C code must be declared as extern "C"
