@@ -69,7 +69,7 @@ cp /opt/googletest/googletest-*.zip .
 # make & install
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release \
+cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DTEST_DIR=/dev/shm \
 	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
@@ -93,6 +93,26 @@ else
 	exit 1
 fi
 
+cd ..
+rm -rf build
+
+# make & test
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release \
+	-DTEST_DIR=/dev/shm \
+	-DTBB_DIR=/opt/tbb/cmake \
+	-DCMAKE_INSTALL_PREFIX=$PREFIX \
+	-DCOVERAGE=$COVERAGE \
+	-DDEVELOPER_MODE=1 \
+	-DCXX_STANDARD=20
+make -j2
+# Run basic tests
+ctest -R "SimpleTest"
+
+cd ..
+rm -rf build
+
 # verify if each engine is building properly
 engines_flags=(
 	ENGINE_VSMAP
@@ -109,8 +129,8 @@ engines_flags=(
 
 for engine_flag in "${engines_flags[@]}"
 do
+	mkdir $WORKDIR/build
 	cd $WORKDIR/build
-	rm -rf *
 	# testing each engine separately; disabling default engines
 	echo
 	echo "##############################################################"
@@ -124,14 +144,17 @@ do
 	make -j2
 	# list all tests in this build
 	ctest -N
+
+	cd -
+	rm -rf $WORKDIR/build
 done
 
 echo
 echo "##############################################################"
 echo "### Verifying building of all engines"
 echo "##############################################################"
+mkdir $WORKDIR/build
 cd $WORKDIR/build
-rm -rf *
 cmake .. -DTBB_DIR=/opt/tbb/cmake \
 	-DENGINE_VSMAP=ON \
 	-DENGINE_VCMAP=ON \
@@ -141,3 +164,5 @@ cmake .. -DTBB_DIR=/opt/tbb/cmake \
 make -j2
 # list all tests in this build
 ctest -N
+
+rm -rf $WORKDIR/build
