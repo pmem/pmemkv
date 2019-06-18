@@ -31,7 +31,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# run-bindings.sh - runs bindings
+# run-bindings.sh - checks bindings' building and installation
 #
 
 PREFIX=/usr/local
@@ -41,6 +41,7 @@ set -e
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
 
+# build and install pmemkv
 cd $WORKDIR
 # copy Googletest to the current directory
 cp /opt/googletest/googletest-*.zip .
@@ -52,6 +53,10 @@ cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 make -j2
 echo $USERPASS | sudo -S make install
 
+echo
+echo "################################################################"
+echo "### Verifying building and installing of the pmemkv-ruby binding"
+echo "################################################################"
 cd ~
 echo $USERPASS | sudo -S gem install bundler -v '< 2.0'
 git clone https://github.com/pmem/pmemkv-ruby.git
@@ -59,20 +64,28 @@ cd pmemkv-ruby
 echo $USERPASS | sudo -S bundle install
 LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ bundle exec rspec
 
+echo
+echo "#########################################################################"
+echo "### Verifying building and installing of the pmemkv-jni and java bindings"
+echo "#########################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
 # copy Googletest to the current directory
 cp /opt/googletest/googletest-*.zip .
-make
-echo $USERPASS | sudo -S make install
+make test
+echo $USERPASS | sudo -S make install prefix=$PREFIX
 
 cd ~
 git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
 LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ mvn install
-cd ~
 
+echo
+echo "##################################################################"
+echo "### Verifying building and installing of the pmemkv-nodejs binding"
+echo "##################################################################"
+cd ~
 git clone https://github.com/pmem/pmemkv-nodejs.git
 cd pmemkv-nodejs
 npm install --save
