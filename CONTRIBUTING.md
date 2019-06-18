@@ -21,10 +21,24 @@ Details such as OS and PMDK version are always appreciated.
 Code Style
 ----------
 
-* Start with [Google C++ Style](https://google.github.io/styleguide/cppguide.html)
-* Indent 4 spaces, 8 spaces for continuation
-* Max 120 chars per line
-* Space after '*' and '&' (rather than before)
+* See `.clang-format` file in the repository for details
+* Indent with tabs (width: 8)
+* Max 90 chars per line
+* Space before '*' and '&' (rather than after)
+
+If you want to check and format your source code properly you can use CMake's `DEVELOPER_MODE`
+option. When enabled additional checks are switched on (cppstyle, whitespaces and headers).
+
+```
+cmake .. -DDEVELOPER_MODE=ON
+```
+
+If you just want to format your code you can make adequate target:
+```
+make cppformat
+```
+
+**NOTE**: We're using specific clang-format - version exactly **6.0** is required.
 
 <a name="pull_requests"></a>
 
@@ -138,12 +152,12 @@ Next we'll walk you through the steps of creating a new engine.
     * Add `engines/mytree_test.cc` to `TEST_FILES`
 * CMake build and `make test` should complete without any errors now
 
-### Updating KVEngine
+### Updating Common Source
 
-* In `src/pmemkv.cc`:
-    * Add `#include "engines/mytree.h"`
+* In `src/libpmemkv.cc`:
+    * Add `#include "engines/mytree.h"` (within `#ifdef ENGINE_MYTREE` clause)
     * Update `pmemkv_open` to return new `my_tree` instances
-* Build & verify engine now works with high-level bindings
+* Build & verify engine now works with high-level bindings (see [README](https://github.com/pmem/pmemkv#bindings) for information on current bindings)
 
 ### Documentation
 
