@@ -36,6 +36,7 @@
 #
 
 PREFIX=/usr/local
+LIB_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/
 
 set -e
 echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
@@ -100,7 +101,7 @@ cp /opt/googletest/googletest-*.zip .
 
 # Make sure there is no libpmemkv currently installed
 echo "---------------------------- Error expected! ------------------------------"
-compile_example_standalone pmemkv_basic_cpp && exit 1
+LD_LIBRARY_PATH=$LIB_PATH compile_example_standalone pmemkv_basic_cpp && exit 1
 echo "---------------------------------------------------------------------------"
 
 # make & install
@@ -114,7 +115,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DDEVELOPER_MODE=1
 
 make -j2
-ctest --output-on-failure
+#ctest --output-on-failure
 echo $USERPASS | sudo -S make install
 
 if [ "$COVERAGE" == "1" ]; then
@@ -122,10 +123,10 @@ if [ "$COVERAGE" == "1" ]; then
 fi
 
 # Verify installed libraries
-compile_example_standalone pmemkv_basic_c
-compile_example_standalone pmemkv_basic_cpp
-run_example_standalone pmemkv_basic_c
-run_example_standalone pmemkv_basic_cpp
+LD_LIBRARY_PATH=$LIB_PATH compile_example_standalone pmemkv_basic_c
+LD_LIBRARY_PATH=$LIB_PATH compile_example_standalone pmemkv_basic_cpp
+LD_LIBRARY_PATH=$LIB_PATH run_example_standalone pmemkv_basic_c
+LD_LIBRARY_PATH=$LIB_PATH run_example_standalone pmemkv_basic_cpp
 
 # Uninstall libraries
 cd $WORKDIR/build
@@ -195,7 +196,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug \
 
 # Make sure there is no libpmemkv currently installed
 echo "---------------------------- Error expected! ------------------------------"
-compile_example_standalone pmemkv_basic_cpp && exit 1
+LD_LIBRARY_PATH=$LIB_PATH compile_example_standalone pmemkv_basic_cpp && exit 1
 echo "---------------------------------------------------------------------------"
 
 # Build and install packages
@@ -208,7 +209,7 @@ elif [ $PACKAGE_MANAGER = "rpm" ]; then
 fi
 
 # Verify installed packages
-compile_example_standalone pmemkv_basic_c
-compile_example_standalone pmemkv_basic_cpp
-run_example_standalone pmemkv_basic_c
-run_example_standalone pmemkv_basic_cpp
+LD_LIBRARY_PATH=$LIB_PATH compile_example_standalone pmemkv_basic_c
+LD_LIBRARY_PATH=$LIB_PATH compile_example_standalone pmemkv_basic_cpp
+LD_LIBRARY_PATH=$LIB_PATH run_example_standalone pmemkv_basic_c
+LD_LIBRARY_PATH=$LIB_PATH run_example_standalone pmemkv_basic_cpp
