@@ -71,6 +71,12 @@ public:
 	db();
 	~db();
 
+	db(const db &other) = delete;
+	db(db &&other) = default;
+
+	db &operator=(const db &other) = delete;
+	db &operator=(db &&other) = default;
+
 	status open(void *context, const std::string &engine_name, pmemkv_config *config);
 	status open(const std::string &engine_name, pmemkv_config *config);
 
