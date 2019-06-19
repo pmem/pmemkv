@@ -58,14 +58,17 @@ public:
 		if (cfg == nullptr)
 			throw std::runtime_error("Cannot create config");
 
+		// TODO: update with C++ config API (get rid of json?)
 		auto ret = pmemkv_config_from_json(cfg, json.c_str());
 		if (ret != 0)
 			throw std::runtime_error("Cannot parse json");
 
 		kv = new db;
 
-		if (kv->open(engine, cfg) != status::OK)
+		if (kv->open(engine, config(cfg)) != status::OK)
 			throw std::runtime_error(db::errormsg());
+
+		pmemkv_config_delete(cfg);
 
 		return kv != nullptr;
 	}
