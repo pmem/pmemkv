@@ -58,10 +58,12 @@ echo "################################################################"
 echo "### Verifying building and installing of the pmemkv-ruby binding"
 echo "################################################################"
 cd ~
-echo $USERPASS | sudo -S gem install bundler -v '< 2.0'
 git clone https://github.com/pmem/pmemkv-ruby.git
 cd pmemkv-ruby
-echo $USERPASS | sudo -S bundle install
+mkdir vendor/
+mkdir vendor/cache/
+echo $USERPASS | sudo -S mv -v /opt/bindings/ruby/* vendor/cache/
+bundle install --local
 LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ bundle exec rspec
 
 echo
