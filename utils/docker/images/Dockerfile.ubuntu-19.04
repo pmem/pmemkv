@@ -93,6 +93,10 @@ RUN ./install-libpmemobj-cpp.sh DEB
 COPY install-memkind.sh install-memkind.sh
 RUN ./install-memkind.sh
 
+# Bindings
+COPY install-bindings-dependencies.sh install-bindings-dependencies.sh
+RUN ./install-bindings-dependencies.sh
+
 # Add user
 ENV USER user
 ENV USERPASS pass
