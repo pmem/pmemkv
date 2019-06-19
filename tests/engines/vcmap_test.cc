@@ -46,21 +46,16 @@ public:
 
 	VCMapBaseTest()
 	{
-		size_t size = POOL_SIZE;
+		config cfg;
 
-		pmemkv_config *cfg = pmemkv_config_new();
+		auto cfg_s = cfg.put_string("path", PATH);
 
-		if (cfg == nullptr)
-			throw std::runtime_error("creating config failed");
-
-		auto cfg_s = pmemkv_config_put_string(cfg, "path", PATH.c_str());
-
-		if (cfg_s != PMEMKV_STATUS_OK)
+		if (cfg_s != status::OK)
 			throw std::runtime_error("putting 'path' to config failed");
 
-		cfg_s = pmemkv_config_put_uint64(cfg, "size", size);
+		cfg_s = cfg.put_int64("size", POOL_SIZE);
 
-		if (cfg_s != PMEMKV_STATUS_OK)
+		if (cfg_s != status::OK)
 			throw std::runtime_error("putting 'size' to config failed");
 
 		kv = new db;

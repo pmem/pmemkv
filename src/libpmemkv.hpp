@@ -95,6 +95,62 @@ enum class status {
 	OUT_OF_MEMORY = PMEMKV_STATUS_OUT_OF_MEMORY
 };
 
+class config {
+public:
+	config() noexcept;
+
+	/**
+	 * Creates config from pointer to pmemkv_config.
+	 * Ownership is transfered to config class.
+	 */
+	explicit config(pmemkv_config *cfg) noexcept;
+
+	~config();
+
+	config(const config &other) = delete;
+	config(config &&other) noexcept;
+
+	config &operator=(const config &other) = delete;
+	config &operator=(config &&other) noexcept;
+
+	/**
+	 * Puts binary data pointed by value, of type T, number of times.
+	 *
+	 * @param[in] key The string representing config item.
+	 * @param[in] value The pointer to data.
+	 * @param[in] number The count of elements stored under reference.
+	 */
+	template <typename T>
+	status put_data(const std::string &key, const T *value,
+			const std::size_t number = 1) noexcept;
+	template <typename T>
+	status put_object(
+		const std::string &key, T *value,
+		void (*deleter)(void *) = [](T *value) { delete value; }) noexcept;
+	status put_uint64(const std::string &key, std::uint64_t value) noexcept;
+	status put_int64(const std::string &key, std::int64_t value) noexcept;
+	status put_double(const std::string &key, double value) noexcept;
+	status put_string(const std::string &key, const std::string &value) noexcept;
+
+	template <typename T>
+	status get_data(const std::string &key, T *&value, std::size_t &number) const
+		noexcept;
+	template <typename T>
+	status get_object(const std::string &key, T *&value) const noexcept;
+
+	status get_uint64(const std::string &key, std::uint64_t &value) const noexcept;
+	status get_int64(const std::string &key, std::int64_t &value) const noexcept;
+	status get_double(const std::string &key, double &value) const noexcept;
+	status get_string(const std::string &key, std::string &value) const noexcept;
+
+	pmemkv_config *c_config() const noexcept;
+
+private:
+	int init() noexcept;
+
+	pmemkv_config *_config;
+};
+
 class db {
 public:
 	db() noexcept;
@@ -106,7 +162,8 @@ public:
 	db &operator=(const db &other) = delete;
 	db &operator=(db &&other) noexcept;
 
-	status open(const std::string &engine_name, pmemkv_config *config) noexcept;
+	status open(const std::string &engine_name) noexcept;
+	status open(const std::string &engine_name, const config &cfg) noexcept;
 
 	void close() noexcept;
 
@@ -144,6 +201,193 @@ public:
 private:
 	pmemkv_db *_db;
 };
+
+inline config::config() noexcept
+{
+	this->_config = nullptr;
+}
+
+inline config::config(config &&other) noexcept
+{
+	this->_config = other._config;
+}
+
+inline config &config::operator=(config &&other) noexcept
+{
+	if (this->_config)
+		pmemkv_config_delete(this->_config);
+
+	this->_config = other._config;
+	other._config = nullptr;
+
+	return *this;
+}
+
+inline config::config(pmemkv_config *cfg) noexcept
+{
+	this->_config = cfg;
+}
+
+inline config::~config()
+{
+	if (this->_config)
+		pmemkv_config_delete(this->_config);
+}
+
+inline int config::init() noexcept
+{
+	if (this->_config == nullptr) {
+		this->_config = pmemkv_config_new();
+
+		if (this->_config == nullptr)
+			return 1;
+	}
+
+	return 0;
+}
+
+template <typename T>
+inline status config::put_data(const std::string &key, const T *value,
+			       const std::size_t number) noexcept
+{
+	if (init() != 0)
+		return status::FAILED;
+
+	return static_cast<status>(pmemkv_config_put_data(this->_config, key.data(),
+							  value, number * sizeof(T)));
+}
+
+template <typename T>
+inline status config::put_object(const std::string &key, T *value,
+				 void (*deleter)(void *)) noexcept
+{
+	if (init() != 0)
+		return status::FAILED;
+
+	return static_cast<status>(
+		pmemkv_config_put_object(this->_config, key.data(), value, deleter));
+}
+
+inline status config::put_uint64(const std::string &key, std::uint64_t value) noexcept
+{
+	if (init() != 0)
+		return status::FAILED;
+
+	return static_cast<status>(
+		pmemkv_config_put_uint64(this->_config, key.data(), value));
+}
+
+inline status config::put_int64(const std::string &key, std::int64_t value) noexcept
+{
+	if (init() != 0)
+		return status::FAILED;
+
+	return static_cast<status>(
+		pmemkv_config_put_int64(this->_config, key.data(), value));
+}
+
+inline status config::put_double(const std::string &key, double value) noexcept
+{
+	if (init() != 0)
+		return status::FAILED;
+
+	return static_cast<status>(
+		pmemkv_config_put_double(this->_config, key.data(), value));
+}
+
+inline status config::put_string(const std::string &key,
+				 const std::string &value) noexcept
+{
+	if (init() != 0)
+		return status::FAILED;
+
+	return static_cast<status>(
+		pmemkv_config_put_string(this->_config, key.data(), value.data()));
+}
+
+template <typename T>
+inline status config::get_data(const std::string &key, T *&value,
+			       std::size_t &number) const noexcept
+{
+	if (this->_config == nullptr)
+		return status::NOT_FOUND;
+
+	std::size_t size;
+	auto s = static_cast<status>(
+		pmemkv_config_get_data(this->_config, key.data(), &value, &size));
+
+	if (s != status::OK)
+		return s;
+
+	number = size / sizeof(T);
+
+	return status::OK;
+}
+
+template <typename T>
+inline status config::get_object(const std::string &key, T *&value) const noexcept
+{
+	if (this->_config == nullptr)
+		return status::NOT_FOUND;
+
+	auto s = static_cast<status>(
+		pmemkv_config_get_object(this->_config, key.data(), &value));
+
+	return s;
+}
+
+inline status config::get_uint64(const std::string &key, std::uint64_t &value) const
+	noexcept
+{
+	if (this->_config == nullptr)
+		return status::NOT_FOUND;
+
+	return static_cast<status>(
+		pmemkv_config_get_uint64(this->_config, key.data(), &value));
+}
+
+inline status config::get_int64(const std::string &key, std::int64_t &value) const
+	noexcept
+{
+	if (this->_config == nullptr)
+		return status::NOT_FOUND;
+
+	return static_cast<status>(
+		pmemkv_config_get_int64(this->_config, key.data(), &value));
+}
+
+inline status config::get_double(const std::string &key, double &value) const noexcept
+{
+	if (this->_config == nullptr)
+		return status::NOT_FOUND;
+
+	return static_cast<status>(
+		pmemkv_config_get_double(this->_config, key.data(), &value));
+}
+
+inline status config::get_string(const std::string &key, std::string &value) const
+	noexcept
+{
+	if (this->_config == nullptr)
+		return status::NOT_FOUND;
+
+	const char *data;
+
+	auto s = static_cast<status>(
+		pmemkv_config_get_string(this->_config, key.data(), &data));
+
+	if (s != status::OK)
+		return s;
+
+	value = data;
+
+	return status::OK;
+}
+
+inline pmemkv_config *config::c_config() const noexcept
+{
+	return this->_config;
+}
 
 #if !__cpp_lib_string_view
 inline string_view::string_view() noexcept : _data(""), _size(0)
@@ -234,10 +478,16 @@ inline db &db::operator=(db &&other) noexcept
 	return *this;
 }
 
-inline status db::open(const std::string &engine_name, pmemkv_config *config) noexcept
+inline status db::open(const std::string &engine_name) noexcept
 {
 	return static_cast<status>(
-		pmemkv_open(engine_name.c_str(), config, &(this->_db)));
+		pmemkv_open(engine_name.c_str(), nullptr, &(this->_db)));
+}
+
+inline status db::open(const std::string &engine_name, const config &cfg) noexcept
+{
+	return static_cast<status>(
+		pmemkv_open(engine_name.c_str(), cfg.c_config(), &(this->_db)));
 }
 
 inline void db::close() noexcept
