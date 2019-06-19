@@ -96,6 +96,10 @@ RUN ./install-memkind.sh
 COPY install-tbb.sh install-tbb.sh
 RUN ./install-tbb.sh
 
+# Bindings
+COPY install-bindings-dependencies.sh install-bindings-dependencies.sh
+RUN ./install-bindings-dependencies.sh
+
 # Add user
 ENV USER user
 ENV USERPASS pass
