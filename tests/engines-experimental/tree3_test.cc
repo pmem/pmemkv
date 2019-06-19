@@ -41,27 +41,24 @@ const std::string PATH = "/dev/shm/pmemkv";
 const std::string PATH_CACHED = "/tmp/pmemkv";
 const size_t SIZE = ((size_t)(1024 * 1024 * 1104));
 
-pmemkv_config *getConfig(const std::string &path, size_t size, bool create = true)
+config getConfig(const std::string &path, size_t size, bool create = true)
 {
-	pmemkv_config *cfg = pmemkv_config_new();
+	config cfg;
 
-	if (cfg == nullptr)
-		throw std::runtime_error("creating config failed");
+	auto cfg_s = cfg.put_string("path", path);
 
-	auto cfg_s = pmemkv_config_put_string(cfg, "path", path.c_str());
-
-	if (cfg_s != PMEMKV_STATUS_OK)
+	if (cfg_s != status::OK)
 		throw std::runtime_error("putting 'path' to config failed");
 
 	if (create) {
-		cfg_s = pmemkv_config_put_uint64(cfg, "force_create", 1);
-		if (cfg_s != PMEMKV_STATUS_OK)
+		cfg_s = cfg.put_uint64("force_create", 1);
+		if (cfg_s != status::OK)
 			throw std::runtime_error(
 				"putting 'force_create' to config failed");
 
-		cfg_s = pmemkv_config_put_uint64(cfg, "size", size);
+		cfg_s = cfg.put_uint64("size", size);
 
-		if (cfg_s != PMEMKV_STATUS_OK)
+		if (cfg_s != status::OK)
 			throw std::runtime_error("putting 'size' to config failed");
 	}
 

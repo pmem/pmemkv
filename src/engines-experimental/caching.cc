@@ -128,7 +128,7 @@ caching::caching(std::unique_ptr<internal::config> cfg)
 		throw std::runtime_error(
 			"caching Exception"); // todo propagate start exceptions properly
 
-	if (basePtr->open(subEngine, subEngineConfig) != status::OK)
+	if (basePtr->open(subEngine, pmem::kv::config(subEngineConfig)) != status::OK)
 		throw std::runtime_error(
 			"caching Exception"); // todo propagate start exceptions properly
 

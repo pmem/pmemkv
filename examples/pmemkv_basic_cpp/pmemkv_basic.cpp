@@ -54,20 +54,19 @@ int main(int argc, char *argv[])
 
 	/* See libpmemkv_config(3) for more detailed example of config creation */
 	LOG("Creating config");
-	pmemkv_config *cfg = pmemkv_config_new();
-	assert(cfg != nullptr);
+	config cfg;
 
-	int ret = pmemkv_config_put_string(cfg, "path", argv[1]);
-	assert(ret == PMEMKV_STATUS_OK);
-	ret = pmemkv_config_put_uint64(cfg, "size", SIZE);
-	assert(ret == PMEMKV_STATUS_OK);
-	ret = pmemkv_config_put_uint64(cfg, "force_create", 1);
-	assert(ret == PMEMKV_STATUS_OK);
+	status s = cfg.put_string("path", argv[1]);
+	assert(s == status::OK);
+	s = cfg.put_uint64("size", SIZE);
+	assert(s == status::OK);
+	s = cfg.put_uint64("force_create", 1);
+	assert(s == status::OK);
 
 	LOG("Opening pmemkv database with 'cmap' engine");
 	db *kv = new db();
 	assert(kv != nullptr);
-	status s = kv->open("cmap", cfg);
+	s = kv->open("cmap", std::move(cfg));
 	assert(s == status::OK);
 
 	LOG("Putting new key");
