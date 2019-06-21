@@ -107,17 +107,21 @@ status cmap::each(each_callback *callback, void *arg)
 	return status::OK;
 }
 
-status cmap::exists(const std::string &key)
+status cmap::exists(string_view key)
 {
-	LOG("Exists for key=" << key);
-	return container->count(key) == 1 ? status::OK : status::NOT_FOUND;
+	LOG("Exists for key=" << std::string(key.data(), key.size()));
+	// XXX - do not create temporary string
+	return container->count(string_t(key.data(), key.size())) == 1
+		? status::OK
+		: status::NOT_FOUND;
 }
 
-status cmap::get(const std::string &key, get_callback *callback, void *arg)
+status cmap::get(string_view key, get_callback *callback, void *arg)
 {
-	LOG("Get key=" << key);
+	LOG("Get key=" << std::string(key.data(), key.size()));
 	map_t::const_accessor result;
-	bool found = container->find(result, key);
+	// XXX - do not create temporary string
+	bool found = container->find(result, string_t(key.data(), key.size()));
 	if (!found) {
 		LOG("  key not found");
 		return status::NOT_FOUND;
@@ -127,15 +131,20 @@ status cmap::get(const std::string &key, get_callback *callback, void *arg)
 	return status::OK;
 }
 
-status cmap::put(const std::string &key, const std::string &value)
+status cmap::put(string_view key, string_view value)
 {
-	LOG("Put key=" << key << ", value.size=" << std::to_string(value.size()));
+	LOG("Put key=" << std::string(key.data(), key.size())
+		       << ", value.size=" << std::to_string(value.size()));
 	try {
 		map_t::accessor acc;
-		bool result = container->insert(acc, map_t::value_type(key, value));
+		// XXX - do not create temporary string
+		bool result = container->insert(
+			acc,
+			map_t::value_type(string_t(key.data(), key.size()),
+					  string_t(value.data(), value.size())));
 		if (!result) {
 			pmem::obj::transaction::manual tx(pmpool);
-			acc->second = value;
+			acc->second = string_t(value.data(), value.size());
 			pmem::obj::transaction::commit();
 		}
 	} catch (std::bad_alloc e) {
@@ -149,11 +158,12 @@ status cmap::put(const std::string &key, const std::string &value)
 	return status::OK;
 }
 
-status cmap::remove(const std::string &key)
+status cmap::remove(string_view key)
 {
-	LOG("Remove key=" << key);
+	LOG("Remove key=" << std::string(key.data(), key.size()));
 	try {
-		bool erased = container->erase(key);
+		// XXX - do not create temporary string
+		bool erased = container->erase(string_t(key.data(), key.size()));
 		return erased ? status::OK : status::NOT_FOUND;
 	} catch (std::runtime_error e) {
 		LOG("Remove failed due to exception, " << e.what());

@@ -63,19 +63,17 @@ public:
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status all_above(const std::string &key, all_callback *callback,
-				 void *arg)
+	virtual status all_above(string_view key, all_callback *callback, void *arg)
 	{
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status all_below(const std::string &key, all_callback *callback,
-				 void *arg)
+	virtual status all_below(string_view key, all_callback *callback, void *arg)
 	{
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status all_between(const std::string &key1, const std::string &key2,
+	virtual status all_between(string_view key1, string_view key2,
 				   all_callback *callback, void *arg)
 	{
 		return status::NOT_SUPPORTED;
@@ -86,17 +84,16 @@ public:
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status count_above(const std::string &key, std::size_t &cnt)
+	virtual status count_above(string_view key, std::size_t &cnt)
 	{
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status count_below(const std::string &key, std::size_t &cnt)
+	virtual status count_below(string_view key, std::size_t &cnt)
 	{
 		return status::NOT_SUPPORTED;
 	}
-	virtual status count_between(const std::string &key1, const std::string &key2,
-				     std::size_t &cnt)
+	virtual status count_between(string_view key1, string_view key2, std::size_t &cnt)
 	{
 		return status::NOT_SUPPORTED;
 	}
@@ -106,34 +103,32 @@ public:
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status each_above(const std::string &key, each_callback *callback,
-				  void *arg)
+	virtual status each_above(string_view key, each_callback *callback, void *arg)
 	{
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status each_below(const std::string &key, each_callback *callback,
-				  void *arg)
+	virtual status each_below(string_view key, each_callback *callback, void *arg)
 	{
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status each_between(const std::string &key1, const std::string &key2,
+	virtual status each_between(string_view key1, string_view key2,
 				    each_callback *callback, void *arg)
 	{
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status exists(const std::string &key)
+	virtual status exists(string_view key)
 	{
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status get(const std::string &key, get_callback *callback, void *arg) = 0;
+	virtual status get(string_view key, get_callback *callback, void *arg) = 0;
 
-	virtual status put(const std::string &key, const std::string &value) = 0;
+	virtual status put(string_view key, string_view value) = 0;
 
-	virtual status remove(const std::string &key) = 0;
+	virtual status remove(string_view key) = 0;
 };
 
 } /* namespace kv */
