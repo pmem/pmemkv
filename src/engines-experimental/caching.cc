@@ -227,7 +227,7 @@ status caching::get(string_view key, get_callback *callback, void *arg)
 {
 	LOG("Get key=" << std::string(key.data(), key.size()));
 	std::string value;
-	if (getKey(key, value, false)) {
+	if (getKey(std::string(key.data(), key.size()), value, false)) {
 		(*callback)(value.c_str(), value.size(), arg);
 		return status::OK;
 	} else
