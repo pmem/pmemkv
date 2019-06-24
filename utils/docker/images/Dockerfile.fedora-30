@@ -30,47 +30,44 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
+# Dockerfile - a 'recipe' for Docker to build an image of fedora-based
 #              environment prepared for running pmemkv build and tests.
 #
 
 # Pull base image
-FROM ubuntu:18.04
+FROM fedora:30
 MAINTAINER lukasz.stolarczuk@intel.com
 
-# Update the Apt cache and install basic tools
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+# Install basic tools
+RUN dnf update -y \
+ && dnf install -y \
 	autoconf \
 	automake \
-	build-essential \
 	clang \
-	clang-format \
 	cmake \
-	curl \
-	debhelper \
-	devscripts \
-	fakeroot \
+	daxctl-devel \
+	doxygen \
+	gcc \
+	gcc-c++ \
+	gdb \
 	git \
-	libc6-dbg \
-	libdaxctl-dev \
-	libndctl-dev \
-	libnuma-dev \
-	libtext-diff-perl \
 	libtool \
-	libunwind8-dev \
-	maven \
-	nodejs-dev \
-	npm \
-	numactl \
-	openjdk-8-jdk \
-	pkg-config \
-	rapidjson-dev \
-	ruby-dev \
+	make \
+	man \
+	ndctl-devel \
+	numactl-devel \
+	passwd \
+	perl-Text-Diff \
+	rapidjson-devel \
+	rpm-build \
 	sudo \
+	unzip \
 	wget \
-	whois \
- && rm -rf /var/lib/apt/lists/*
+	which \
+&& dnf clean all
+
+# Install glibc-debuginfo
+RUN dnf debuginfo-install -y glibc
 
 # Install Googletest
 COPY install-googletest.sh install-googletest.sh
@@ -82,11 +79,11 @@ RUN ./install-valgrind.sh
 
 # Install pmdk
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh dpkg
+RUN ./install-pmdk.sh rpm
 
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh DEB
+RUN ./install-libpmemobj-cpp.sh RPM
 
 # Install memkind
 COPY install-memkind.sh install-memkind.sh
@@ -99,11 +96,14 @@ RUN ./install-tbb.sh
 # Add user
 ENV USER user
 ENV USERPASS pass
-RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
+RUN useradd -m $USER
+RUN echo $USERPASS | passwd $USER --stdin
+RUN gpasswd wheel -a $USER
 USER $USER
 
 # Set required environment variables
-ENV OS ubuntu
-ENV OS_VER 18.04
-ENV PACKAGE_MANAGER dpkg
+ENV OS fedora
+ENV OS_VER 30
+ENV PACKAGE_MANAGER rpm
 ENV NOTTY 1
+
