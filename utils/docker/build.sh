@@ -47,7 +47,7 @@ set -e
 
 if [[ -z "$OS" || -z "$OS_VER" ]]; then
 	echo "ERROR: The variables OS and OS_VER have to be set " \
-		"(eg. OS=fedora, OS_VER=28)."
+		"(eg. OS=fedora, OS_VER=30)."
 	exit 1
 fi
 
