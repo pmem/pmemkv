@@ -539,12 +539,13 @@ TEST_F(VSMapTest, UsesAllAboveTest)
 
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
 	x = "";
-	kv->all_above("B",
-		      [](const char *k, size_t kb, void *arg) {
-			      const auto c = ((std::string *)arg);
-			      c->append(std::string(k, kb)).append(",");
-		      },
-		      &x);
+	kv->all_above(
+		"B",
+		[](const char *k, size_t kb, void *arg) {
+			const auto c = ((std::string *)arg);
+			c->append(std::string(k, kb)).append(",");
+		},
+		&x);
 	ASSERT_TRUE(x == "BB,BC,记!,");
 }
 
@@ -580,12 +581,13 @@ TEST_F(VSMapTest, UsesAllBelowTest)
 
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
 	x = "";
-	kv->all_below("\xFF",
-		      [](const char *k, size_t kb, void *arg) {
-			      const auto c = ((std::string *)arg);
-			      c->append(std::string(k, kb)).append(",");
-		      },
-		      &x);
+	kv->all_below(
+		"\xFF",
+		[](const char *k, size_t kb, void *arg) {
+			const auto c = ((std::string *)arg);
+			c->append(std::string(k, kb)).append(",");
+		},
+		&x);
 	ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,记!,");
 }
 
@@ -652,12 +654,13 @@ TEST_F(VSMapTest, UsesAllBetweenTest)
 
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
 	x = "";
-	kv->all_between("B", "\xFF",
-			[](const char *k, size_t kb, void *arg) {
-				const auto c = ((std::string *)arg);
-				c->append(std::string(k, kb)).append(",");
-			},
-			&x);
+	kv->all_between(
+		"B", "\xFF",
+		[](const char *k, size_t kb, void *arg) {
+			const auto c = ((std::string *)arg);
+			c->append(std::string(k, kb)).append(",");
+		},
+		&x);
 	ASSERT_TRUE(x == "BB,BC,记!,");
 }
 
@@ -810,15 +813,16 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
 	x = "";
-	kv->each_above("B",
-		       [](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			       const auto c = ((std::string *)arg);
-			       c->append(std::string(k, kb))
-				       .append(",")
-				       .append(std::string(v, vb))
-				       .append("|");
-		       },
-		       &x);
+	kv->each_above(
+		"B",
+		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+			const auto c = ((std::string *)arg);
+			c->append(std::string(k, kb))
+				.append(",")
+				.append(std::string(v, vb))
+				.append("|");
+		},
+		&x);
 	ASSERT_TRUE(x == "BB,5|BC,6|记!,RR|");
 }
 
@@ -869,15 +873,16 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
 	x = "";
-	kv->each_below("\xFF",
-		       [](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			       const auto c = ((std::string *)arg);
-			       c->append(std::string(k, kb))
-				       .append(",")
-				       .append(std::string(v, vb))
-				       .append("|");
-		       },
-		       &x);
+	kv->each_below(
+		"\xFF",
+		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+			const auto c = ((std::string *)arg);
+			c->append(std::string(k, kb))
+				.append(",")
+				.append(std::string(v, vb))
+				.append("|");
+		},
+		&x);
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|");
 }
 
