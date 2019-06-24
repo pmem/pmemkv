@@ -44,8 +44,8 @@ set -e
 function usage {
 	echo "Usage:"
 	echo "    build-image.sh <DOCKERHUB_REPO> <OS-VER>"
-	echo "where <OS-VER>, for example, can be 'fedora-28', provided " \
-		"a Dockerfile named 'Dockerfile.fedora-28' exists in the " \
+	echo "where <OS-VER>, for example, can be 'fedora-30', provided " \
+		"a Dockerfile named 'Dockerfile.fedora-30' exists in the " \
 		"current directory."
 }
 
