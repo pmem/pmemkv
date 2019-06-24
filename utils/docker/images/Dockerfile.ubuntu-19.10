@@ -68,6 +68,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	rapidjson-dev \
 	ruby-dev \
 	sudo \
+	libtbb-dev \
 	wget \
 	whois \
  && rm -rf /var/lib/apt/lists/*
@@ -91,10 +92,6 @@ RUN ./install-libpmemobj-cpp.sh DEB
 # Install memkind
 COPY install-memkind.sh install-memkind.sh
 RUN ./install-memkind.sh
-
-# Install Intel TBB
-COPY install-tbb.sh install-tbb.sh
-RUN ./install-tbb.sh
 
 # Add user
 ENV USER user

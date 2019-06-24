@@ -48,7 +48,6 @@ cp /opt/googletest/googletest-*.zip .
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX
 make -j2
 echo $USERPASS | sudo -S make install
@@ -62,7 +61,7 @@ echo $USERPASS | sudo -S gem install bundler -v '< 2.0'
 git clone https://github.com/pmem/pmemkv-ruby.git
 cd pmemkv-ruby
 echo $USERPASS | sudo -S bundle install
-LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ bundle exec rspec
+bundle exec rspec
 
 echo
 echo "#########################################################################"
@@ -79,7 +78,7 @@ echo $USERPASS | sudo -S make install prefix=$PREFIX
 cd ~
 git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
-LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ mvn install
+mvn install
 
 echo
 echo "##################################################################"
@@ -89,4 +88,4 @@ cd ~
 git clone https://github.com/pmem/pmemkv-nodejs.git
 cd pmemkv-nodejs
 npm install --save
-LD_LIBRARY_PATH=$PREFIX/lib/:/opt/tbb/lib/intel64/gcc4.7/ npm test
+npm test

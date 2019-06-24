@@ -71,7 +71,6 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DTEST_DIR=/dev/shm \
-	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE \
 	-DDEVELOPER_MODE=1
@@ -102,7 +101,6 @@ cd build
 
 CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DTEST_DIR=/dev/shm \
-	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE \
 	-DDEVELOPER_MODE=1 \
@@ -121,7 +119,6 @@ cd build
 
 CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DTEST_DIR=/dev/shm \
-	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE \
 	-DDEVELOPER_MODE=1 \
@@ -157,8 +154,7 @@ do
 	echo "##############################################################"
 	echo "### Verifying building of the '$engine_flag' engine"
 	echo "##############################################################"
-	cmake .. -DTBB_DIR=/opt/tbb/cmake \
-		-DENGINE_VSMAP=OFF \
+	cmake .. -DENGINE_VSMAP=OFF \
 		-DENGINE_VCMAP=OFF \
 		-DENGINE_CMAP=OFF \
 		-D$engine_flag=ON
@@ -176,8 +172,7 @@ echo "### Verifying building of all engines"
 echo "##############################################################"
 mkdir $WORKDIR/build
 cd $WORKDIR/build
-cmake .. -DTBB_DIR=/opt/tbb/cmake \
-	-DENGINE_VSMAP=ON \
+cmake .. -DENGINE_VSMAP=ON \
 	-DENGINE_VCMAP=ON \
 	-DENGINE_CMAP=ON \
 	-DENGINE_STREE=ON \
