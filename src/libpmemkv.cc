@@ -296,6 +296,9 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 		*db = nullptr;
 
 		return PMEMKV_STATUS_FAILED;
+	} catch (...) {
+		ERR("Unspecified failure");
+		return PMEMKV_STATUS_FAILED;
 	}
 }
 
@@ -305,6 +308,8 @@ void pmemkv_close(pmemkv_db *db)
 		delete reinterpret_cast<pmem::kv::engine_base *>(db);
 	} catch (const std::exception &exc) {
 		ERR(exc.what());
+	} catch (...) {
+		ERR("Unspecified failure");
 	}
 }
 
