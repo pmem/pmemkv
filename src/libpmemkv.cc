@@ -66,11 +66,9 @@
 #include <unordered_map>
 #include <vector>
 
-#define DO_LOG 0
 #define ERR(msg)                                                                         \
 	do {                                                                             \
-		if (DO_LOG)                                                              \
-			std::cerr << "[" << __func__ << "()] " << msg << "\n";           \
+		std::cerr << "[" << __func__ << "()] " << msg << "\n";                   \
 	} while (0)
 
 struct pmemkv_config {
@@ -191,7 +189,7 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 				return status;
 		}
 	} catch (const std::exception &exc) {
-		std::cerr << exc.what() << "\n";
+		ERR(exc.what());
 		return PMEMKV_STATUS_CONFIG_PARSING_ERROR;
 	} catch (...) {
 		ERR("Unspecified failure");
@@ -294,7 +292,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #endif
 		throw std::runtime_error("Unknown engine name");
 	} catch (std::exception &e) {
-		std::cerr << e.what() << "\n";
+		ERR(e.what());
 		*db = nullptr;
 
 		return PMEMKV_STATUS_FAILED;
