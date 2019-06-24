@@ -61,6 +61,7 @@ RUN dnf update -y \
 	rapidjson-devel \
 	rpm-build \
 	sudo \
+	tbb-devel \
 	unzip \
 	wget \
 	which \
@@ -88,10 +89,6 @@ RUN ./install-libpmemobj-cpp.sh RPM
 # Install memkind
 COPY install-memkind.sh install-memkind.sh
 RUN ./install-memkind.sh
-
-# Install Intel TBB
-COPY install-tbb.sh install-tbb.sh
-RUN ./install-tbb.sh
 
 # Add user
 ENV USER user
