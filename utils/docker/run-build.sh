@@ -96,47 +96,43 @@ fi
 cd ..
 rm -rf build
 
-# no C++20 support in g++ on Ubuntu-18.04
-if [[ "$OS" == "fedora" ]]; then
-	mkdir build
-	cd build
+# check C++20 support in g++
+mkdir build
+cd build
 
-	CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
-		-DTEST_DIR=/dev/shm \
-		-DTBB_DIR=/opt/tbb/cmake \
-		-DCMAKE_INSTALL_PREFIX=$PREFIX \
-		-DCOVERAGE=$COVERAGE \
-		-DDEVELOPER_MODE=1 \
-		-DCXX_STANDARD=20
+CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
+	-DTEST_DIR=/dev/shm \
+	-DTBB_DIR=/opt/tbb/cmake \
+	-DCMAKE_INSTALL_PREFIX=$PREFIX \
+	-DCOVERAGE=$COVERAGE \
+	-DDEVELOPER_MODE=1 \
+	-DCXX_STANDARD=20
 
-	make -j2
-	# Run basic tests
-	ctest -R "SimpleTest"
+make -j2
+# Run basic tests
+ctest -R "SimpleTest"
 
-	cd ..
-	rm -rf build
-fi
+cd ..
+rm -rf build
 
-# no C++20 support in clang++ on Ubuntu-18.04
-if [[ "$OS" == "fedora" ]]; then
-	mkdir build
-	cd build
+# check C++20 support in clang++
+mkdir build
+cd build
 
-	CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
-		-DTEST_DIR=/dev/shm \
-		-DTBB_DIR=/opt/tbb/cmake \
-		-DCMAKE_INSTALL_PREFIX=$PREFIX \
-		-DCOVERAGE=$COVERAGE \
-		-DDEVELOPER_MODE=1 \
-		-DCXX_STANDARD=20
+CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
+	-DTEST_DIR=/dev/shm \
+	-DTBB_DIR=/opt/tbb/cmake \
+	-DCMAKE_INSTALL_PREFIX=$PREFIX \
+	-DCOVERAGE=$COVERAGE \
+	-DDEVELOPER_MODE=1 \
+	-DCXX_STANDARD=20
 
-	make -j2
-	# Run basic tests
-	ctest -R "SimpleTest"
+make -j2
+# Run basic tests
+ctest -R "SimpleTest"
 
-	cd ..
-	rm -rf build
-fi
+cd ..
+rm -rf build
 
 # verify if each engine is building properly
 engines_flags=(
