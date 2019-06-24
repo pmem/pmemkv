@@ -55,6 +55,8 @@ section=`sed -n 's/^title:.*\([0-9]\))$/\1/p' $filename`
 version=`sed -n 's/^date:\ *\(.*\)$/\1/p' $filename`
 
 dt=$(date +"%F")
+out_dir=`echo $outfile | sed 's/\(.*\)\/.*/\1/'`
+mkdir -p $out_dir
 cat $filename | sed -n -e '/# NAME #/,$p' |\
 	pandoc -s -t man -o $outfile.tmp --template=$template \
 	-V title=$title -V section=$section \
