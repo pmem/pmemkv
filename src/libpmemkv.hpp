@@ -50,16 +50,16 @@ using string_view = std::string_view;
 #else
 class string_view {
 public:
-	string_view();
+	string_view() noexcept;
 	string_view(const char *data, size_t size);
 	string_view(const std::string &s);
 	string_view(const char *data);
 
-	string_view(const string_view &rhs) = default;
-	string_view &operator=(const string_view &rhs) = default;
+	string_view(const string_view &rhs) noexcept = default;
+	string_view &operator=(const string_view &rhs) noexcept = default;
 
-	const char *data() const;
-	std::size_t size() const;
+	const char *data() const noexcept;
+	std::size_t size() const noexcept;
 
 	/**
 	 * Compares this string_view with other. Works in the same way as
@@ -69,7 +69,7 @@ public:
 	 *         positive value if this is lexicographically greater than other,
 	 *         negative value if this is lexicographically less than other.
 	 */
-	int compare(const string_view &other);
+	int compare(const string_view &other) noexcept;
 
 private:
 	const char *_data;
@@ -96,70 +96,72 @@ enum class status {
 
 class db {
 public:
-	db();
+	db() noexcept;
 	~db();
 
 	db(const db &other) = delete;
-	db(db &&other);
+	db(db &&other) noexcept;
 
 	db &operator=(const db &other) = delete;
-	db &operator=(db &&other);
+	db &operator=(db &&other) noexcept;
 
-	status open(void *context, const std::string &engine_name, pmemkv_config *config);
-	status open(const std::string &engine_name, pmemkv_config *config);
+	status open(void *context, const std::string &engine_name,
+		    pmemkv_config *config) noexcept;
+	status open(const std::string &engine_name, pmemkv_config *config) noexcept;
 
-	void close();
+	void close() noexcept;
 
 	void *engine_context();
 
-	status all(all_callback *callback, void *arg);
-	status all(std::function<all_function> f);
+	status all(all_callback *callback, void *arg) noexcept;
+	status all(std::function<all_function> f) noexcept;
 
-	status all_above(string_view key, all_callback *callback, void *arg);
-	status all_above(string_view key, std::function<all_function> f);
+	status all_above(string_view key, all_callback *callback, void *arg) noexcept;
+	status all_above(string_view key, std::function<all_function> f) noexcept;
 
-	status all_below(string_view key, all_callback *callback, void *arg);
-	status all_below(string_view key, std::function<all_function> f);
+	status all_below(string_view key, all_callback *callback, void *arg) noexcept;
+	status all_below(string_view key, std::function<all_function> f) noexcept;
 
 	status all_between(string_view key1, string_view key2, all_callback *callback,
-			   void *arg);
+			   void *arg) noexcept;
 	status all_between(string_view key1, string_view key2,
-			   std::function<all_function> f);
+			   std::function<all_function> f) noexcept;
 
-	status count(std::size_t &cnt);
-	status count_above(string_view key, std::size_t &cnt);
-	status count_below(string_view key, std::size_t &cnt);
-	status count_between(string_view key1, string_view key2, std::size_t &cnt);
+	status count(std::size_t &cnt) noexcept;
+	status count_above(string_view key, std::size_t &cnt) noexcept;
+	status count_below(string_view key, std::size_t &cnt) noexcept;
+	status count_between(string_view key1, string_view key2,
+			     std::size_t &cnt) noexcept;
 
-	status each(each_callback *callback, void *arg);
-	status each(std::function<each_function> f);
+	status each(each_callback *callback, void *arg) noexcept;
+	status each(std::function<each_function> f) noexcept;
 
-	status each_above(string_view key, each_callback *callback, void *arg);
-	status each_above(string_view key, std::function<each_function> f);
+	status each_above(string_view key, each_callback *callback, void *arg) noexcept;
+	status each_above(string_view key, std::function<each_function> f) noexcept;
 
-	status each_below(string_view key, each_callback *callback, void *arg);
-	status each_below(string_view key, std::function<each_function> f);
+	status each_below(string_view key, each_callback *callback, void *arg) noexcept;
+	status each_below(string_view key, std::function<each_function> f) noexcept;
 
 	status each_between(string_view key1, string_view key2, each_callback *callback,
-			    void *arg);
+			    void *arg) noexcept;
 	status each_between(string_view key1, string_view key2,
-			    std::function<each_function> f);
+			    std::function<each_function> f) noexcept;
 
-	status exists(string_view key);
+	status exists(string_view key) noexcept;
 
-	status get(string_view key, get_callback *callback, void *arg);
-	status get(string_view key, std::function<get_function> f);
-	status get(string_view key, std::string *value);
+	status get(string_view key, get_callback *callback, void *arg) noexcept;
+	status get(string_view key, std::function<get_function> f) noexcept;
+	status get(string_view key, std::string *value) noexcept;
 
-	status put(string_view key, string_view value);
-	status remove(string_view key);
+	status put(string_view key, string_view value) noexcept;
+	status remove(string_view key) noexcept;
 
 private:
 	pmemkv_db *_db;
 };
 
 #if !__cpp_lib_string_view
-inline string_view::string_view() : _data(""), _size(0)
+inline string_view::string_view() noexcept : _data(""), _size(0)
 {
 }
 
@@ -176,17 +178,17 @@ inline string_view::string_view(const char *data)
 {
 }
 
-inline const char *string_view::data() const
+inline const char *string_view::data() const noexcept
 {
 	return _data;
 }
 
-inline std::size_t string_view::size() const
+inline std::size_t string_view::size() const noexcept
 {
 	return _size;
 }
 
-inline int string_view::compare(const string_view &other)
+inline int string_view::compare(const string_view &other) noexcept
 {
 	int ret = std::char_traits<char>::compare(data(), other.data(),
 						  std::min(size(), other.size()));
@@ -245,28 +247,28 @@ inline void *db::engine_context()
 	return pmemkv_engine_context(this->_db);
 }
 
-inline status db::all(all_callback *callback, void *arg)
+inline status db::all(all_callback *callback, void *arg) noexcept
 {
 	return static_cast<status>(pmemkv_all(this->_db, callback, arg));
 }
 
-inline status db::all(std::function<all_function> f)
+inline status db::all(std::function<all_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_all(this->_db, callKVAllFunction, &f));
 }
 
-inline db::db()
+inline db::db() noexcept
 {
 	this->_db = nullptr;
 }
 
-inline db::db(db &&other)
+inline db::db(db &&other) noexcept
 {
 	this->_db = other._db;
 	other._db = nullptr;
 }
 
-inline db &db::operator=(db &&other)
+inline db &db::operator=(db &&other) noexcept
 {
 	close();
 
@@ -276,19 +278,19 @@ inline db &db::operator=(db &&other)
 }
 
 inline status db::open(void *context, const std::string &engine_name,
-		       pmemkv_config *config)
+		       pmemkv_config *config) noexcept
 {
 	return static_cast<status>(
 		pmemkv_open(context, engine_name.c_str(), config, &(this->_db)));
 }
 
-inline status db::open(const std::string &engine_name, pmemkv_config *config)
+inline status db::open(const std::string &engine_name, pmemkv_config *config) noexcept
 {
 	return static_cast<status>(
 		pmemkv_open(nullptr, engine_name.c_str(), config, &(this->_db)));
 }
 
-inline void db::close()
+inline void db::close() noexcept
 {
 	if (this->_db != nullptr)
 		pmemkv_close(this->_db);
@@ -301,32 +303,32 @@ inline db::~db()
 	close();
 }
 
-inline status db::all_above(string_view key, all_callback *callback, void *arg)
+inline status db::all_above(string_view key, all_callback *callback, void *arg) noexcept
 {
 	return static_cast<status>(
 		pmemkv_all_above(this->_db, key.data(), key.size(), callback, arg));
 }
 
-inline status db::all_above(string_view key, std::function<all_function> f)
+inline status db::all_above(string_view key, std::function<all_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_all_above(this->_db, key.data(), key.size(),
 						    callKVAllFunction, &f));
 }
 
-inline status db::all_below(string_view key, all_callback *callback, void *arg)
+inline status db::all_below(string_view key, all_callback *callback, void *arg) noexcept
 {
 	return static_cast<status>(
 		pmemkv_all_below(this->_db, key.data(), key.size(), callback, arg));
 }
 
-inline status db::all_below(string_view key, std::function<all_function> f)
+inline status db::all_below(string_view key, std::function<all_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_all_below(this->_db, key.data(), key.size(),
 						    callKVAllFunction, &f));
 }
 
 inline status db::all_between(string_view key1, string_view key2, all_callback *callback,
-			      void *arg)
+			      void *arg) noexcept
 {
 	return static_cast<status>(pmemkv_all_between(this->_db, key1.data(), key1.size(),
 						      key2.data(), key2.size(), callback,
@@ -334,72 +336,73 @@ inline status db::all_between(string_view key1, string_view key2, all_callback *
 }
 
 inline status db::all_between(string_view key1, string_view key2,
-			      std::function<all_function> f)
+			      std::function<all_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_all_between(this->_db, key1.data(), key1.size(),
 						      key2.data(), key2.size(),
 						      callKVAllFunction, &f));
 }
 
-inline status db::count(std::size_t &cnt)
+inline status db::count(std::size_t &cnt) noexcept
 {
 	return static_cast<status>(pmemkv_count(this->_db, &cnt));
 }
 
-inline status db::count_above(string_view key, std::size_t &cnt)
+inline status db::count_above(string_view key, std::size_t &cnt) noexcept
 {
 	return static_cast<status>(
 		pmemkv_count_above(this->_db, key.data(), key.size(), &cnt));
 }
 
-inline status db::count_below(string_view key, std::size_t &cnt)
+inline status db::count_below(string_view key, std::size_t &cnt) noexcept
 {
 	return static_cast<status>(
 		pmemkv_count_below(this->_db, key.data(), key.size(), &cnt));
 }
 
-inline status db::count_between(string_view key1, string_view key2, std::size_t &cnt)
+inline status db::count_between(string_view key1, string_view key2,
+				std::size_t &cnt) noexcept
 {
 	return static_cast<status>(pmemkv_count_between(
 		this->_db, key1.data(), key1.size(), key2.data(), key2.size(), &cnt));
 }
 
-inline status db::each(each_callback *callback, void *arg)
+inline status db::each(each_callback *callback, void *arg) noexcept
 {
 	return static_cast<status>(pmemkv_each(this->_db, callback, arg));
 }
 
-inline status db::each(std::function<each_function> f)
+inline status db::each(std::function<each_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_each(this->_db, callKVEachFunction, &f));
 }
 
-inline status db::each_above(string_view key, each_callback *callback, void *arg)
+inline status db::each_above(string_view key, each_callback *callback, void *arg) noexcept
 {
 	return static_cast<status>(
 		pmemkv_each_above(this->_db, key.data(), key.size(), callback, arg));
 }
 
-inline status db::each_above(string_view key, std::function<each_function> f)
+inline status db::each_above(string_view key, std::function<each_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_each_above(this->_db, key.data(), key.size(),
 						     callKVEachFunction, &f));
 }
 
-inline status db::each_below(string_view key, each_callback *callback, void *arg)
+inline status db::each_below(string_view key, each_callback *callback, void *arg) noexcept
 {
 	return static_cast<status>(
 		pmemkv_each_below(this->_db, key.data(), key.size(), callback, arg));
 }
 
-inline status db::each_below(string_view key, std::function<each_function> f)
+inline status db::each_below(string_view key, std::function<each_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_each_below(this->_db, key.data(), key.size(),
 						     callKVEachFunction, &f));
 }
 
 inline status db::each_between(string_view key1, string_view key2,
-			       each_callback *callback, void *arg)
+			       each_callback *callback, void *arg) noexcept
 {
 	return static_cast<status>(pmemkv_each_between(this->_db, key1.data(),
 						       key1.size(), key2.data(),
@@ -407,31 +410,31 @@ inline status db::each_between(string_view key1, string_view key2,
 }
 
 inline status db::each_between(string_view key1, string_view key2,
-			       std::function<each_function> f)
+			       std::function<each_function> f) noexcept
 {
 	return static_cast<status>(
 		pmemkv_each_between(this->_db, key1.data(), key1.size(), key2.data(),
 				    key2.size(), callKVEachFunction, &f));
 }
 
-inline status db::exists(string_view key)
+inline status db::exists(string_view key) noexcept
 {
 	return static_cast<status>(pmemkv_exists(this->_db, key.data(), key.size()));
 }
 
-inline status db::get(string_view key, get_callback *callback, void *arg)
+inline status db::get(string_view key, get_callback *callback, void *arg) noexcept
 {
 	return static_cast<status>(
 		pmemkv_get(this->_db, key.data(), key.size(), callback, arg));
 }
 
-inline status db::get(string_view key, std::function<get_function> f)
+inline status db::get(string_view key, std::function<get_function> f) noexcept
 {
 	return static_cast<status>(
 		pmemkv_get(this->_db, key.data(), key.size(), callKVGetFunction, &f));
 }
 
-inline status db::get(string_view key, std::string *value)
+inline status db::get(string_view key, std::string *value) noexcept
 {
 	std::pair<status, std::string *> ctx = {status::NOT_FOUND, value};
 
@@ -440,13 +443,13 @@ inline status db::get(string_view key, std::string *value)
 	return ctx.first;
 }
 
-inline status db::put(string_view key, string_view value)
+inline status db::put(string_view key, string_view value) noexcept
 {
 	return static_cast<status>(pmemkv_put(this->_db, key.data(), key.size(),
 					      value.data(), value.size()));
 }
 
-inline status db::remove(string_view key)
+inline status db::remove(string_view key) noexcept
 {
 	return static_cast<status>(pmemkv_remove(this->_db, key.data(), key.size()));
 }
