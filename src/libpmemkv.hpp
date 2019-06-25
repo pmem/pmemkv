@@ -99,6 +99,12 @@ public:
 	db();
 	~db();
 
+	db(const db &other) = delete;
+	db(db &&other);
+
+	db &operator=(const db &other) = delete;
+	db &operator=(db &&other);
+
 	status open(void *context, const std::string &engine_name, pmemkv_config *config);
 	status open(const std::string &engine_name, pmemkv_config *config);
 
@@ -254,6 +260,21 @@ inline db::db()
 	this->_db = nullptr;
 }
 
+inline db::db(db &&other)
+{
+	this->_db = other._db;
+	other._db = nullptr;
+}
+
+inline db &db::operator=(db &&other)
+{
+	close();
+
+	std::swap(this->_db, other._db);
+
+	return *this;
+}
+
 inline status db::open(void *context, const std::string &engine_name,
 		       pmemkv_config *config)
 {
@@ -277,8 +298,7 @@ inline void db::close()
 
 inline db::~db()
 {
-	if (this->_db != nullptr)
-		pmemkv_close(this->_db);
+	close();
 }
 
 inline status db::all_above(string_view key, all_callback *callback, void *arg)
