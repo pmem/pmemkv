@@ -313,65 +313,6 @@ void pmemkv_close(pmemkv_db *db)
 	}
 }
 
-int pmemkv_all(pmemkv_db *db, pmemkv_all_callback *c, void *arg)
-{
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->all(c, arg);
-	} catch (const std::exception &exc) {
-		ERR(exc.what());
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR("Unspecified failure");
-		return PMEMKV_STATUS_FAILED;
-	}
-}
-
-int pmemkv_all_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_all_callback *c,
-		     void *arg)
-{
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->all_above(
-			std::string(k, (size_t)kb), c, arg);
-	} catch (const std::exception &exc) {
-		ERR(exc.what());
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR("Unspecified failure");
-		return PMEMKV_STATUS_FAILED;
-	}
-}
-
-int pmemkv_all_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_all_callback *c,
-		     void *arg)
-{
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->all_below(
-			std::string(k, (size_t)kb), c, arg);
-	} catch (const std::exception &exc) {
-		ERR(exc.what());
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR("Unspecified failure");
-		return PMEMKV_STATUS_FAILED;
-	}
-}
-
-int pmemkv_all_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-		       size_t kb2, pmemkv_all_callback *c, void *arg)
-{
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->all_between(
-			std::string(k1, (size_t)kb1), std::string(k2, (size_t)kb2), c,
-			arg);
-	} catch (const std::exception &exc) {
-		ERR(exc.what());
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR("Unspecified failure");
-		return PMEMKV_STATUS_FAILED;
-	}
-}
-
 int pmemkv_count(pmemkv_db *db, size_t *cnt)
 {
 	try {

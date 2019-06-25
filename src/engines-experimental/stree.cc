@@ -85,16 +85,6 @@ void *stree::engine_context()
 	return context;
 }
 
-status stree::all(all_callback *callback, void *arg)
-{
-	LOG("All");
-	for (auto &iterator : *my_btree) {
-		(*callback)(iterator.first.c_str(), iterator.first.size(), arg);
-	}
-
-	return status::OK;
-}
-
 status stree::count(std::size_t &cnt)
 {
 	std::size_t result = 0;

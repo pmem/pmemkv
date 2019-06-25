@@ -493,29 +493,6 @@ TEST_F(CMapTest, RemoveNonexistentTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 }
 
-TEST_F(CMapTest, UsesAllTest)
-{
-	ASSERT_TRUE(kv->put("2", "1") == status::OK) << pmemobj_errormsg();
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
-	ASSERT_TRUE(cnt == 1);
-	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
-	ASSERT_TRUE(cnt == 2);
-
-	std::string result;
-	kv->all(
-		[](const char *k, size_t kb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,");
-		},
-		&result);
-	ASSERT_TRUE(result == "<2>,<记!>,");
-}
-
 TEST_F(CMapTest, UsesEachTest)
 {
 	ASSERT_TRUE(kv->put("1", "2") == status::OK) << pmemobj_errormsg();

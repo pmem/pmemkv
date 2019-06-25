@@ -77,11 +77,9 @@ private:
 };
 #endif
 
-typedef void all_function(string_view key);
 typedef void each_function(string_view key, string_view value);
 typedef void get_function(string_view value);
 
-using all_callback = pmemkv_all_callback;
 using each_callback = pmemkv_each_callback;
 using get_callback = pmemkv_get_callback;
 
@@ -111,20 +109,6 @@ public:
 	void close();
 
 	void *engine_context();
-
-	status all(all_callback *callback, void *arg);
-	status all(std::function<all_function> f);
-
-	status all_above(string_view key, all_callback *callback, void *arg);
-	status all_above(string_view key, std::function<all_function> f);
-
-	status all_below(string_view key, all_callback *callback, void *arg);
-	status all_below(string_view key, std::function<all_function> f);
-
-	status all_between(string_view key1, string_view key2, all_callback *callback,
-			   void *arg);
-	status all_between(string_view key1, string_view key2,
-			   std::function<all_function> f);
 
 	status count(std::size_t &cnt);
 	status count_above(string_view key, std::size_t &cnt);
@@ -206,12 +190,6 @@ inline int string_view::compare(const string_view &other)
  * C and C++ functions use different calling conventions.
  */
 extern "C" {
-static inline void callKVAllFunction(const char *key, size_t keybytes, void *arg)
-{
-	(*reinterpret_cast<std::function<all_function> *>(arg))(
-		string_view(key, keybytes));
-}
-
 static inline void callKVEachFunction(const char *key, size_t keybytes, const char *value,
 				      size_t valuebytes, void *arg)
 {
@@ -221,7 +199,7 @@ static inline void callKVEachFunction(const char *key, size_t keybytes, const ch
 
 static inline void callKVGetFunction(const char *value, size_t valuebytes, void *arg)
 {
-	(*reinterpret_cast<std::function<all_function> *>(arg))(
+	(*reinterpret_cast<std::function<get_function> *>(arg))(
 		string_view(value, valuebytes));
 }
 
@@ -243,16 +221,6 @@ static inline void callOnStartCallback(void *context, const char *engine,
 inline void *db::engine_context()
 {
 	return pmemkv_engine_context(this->_db);
-}
-
-inline status db::all(all_callback *callback, void *arg)
-{
-	return static_cast<status>(pmemkv_all(this->_db, callback, arg));
-}
-
-inline status db::all(std::function<all_function> f)
-{
-	return static_cast<status>(pmemkv_all(this->_db, callKVAllFunction, &f));
 }
 
 inline db::db()
@@ -299,46 +267,6 @@ inline void db::close()
 inline db::~db()
 {
 	close();
-}
-
-inline status db::all_above(string_view key, all_callback *callback, void *arg)
-{
-	return static_cast<status>(
-		pmemkv_all_above(this->_db, key.data(), key.size(), callback, arg));
-}
-
-inline status db::all_above(string_view key, std::function<all_function> f)
-{
-	return static_cast<status>(pmemkv_all_above(this->_db, key.data(), key.size(),
-						    callKVAllFunction, &f));
-}
-
-inline status db::all_below(string_view key, all_callback *callback, void *arg)
-{
-	return static_cast<status>(
-		pmemkv_all_below(this->_db, key.data(), key.size(), callback, arg));
-}
-
-inline status db::all_below(string_view key, std::function<all_function> f)
-{
-	return static_cast<status>(pmemkv_all_below(this->_db, key.data(), key.size(),
-						    callKVAllFunction, &f));
-}
-
-inline status db::all_between(string_view key1, string_view key2, all_callback *callback,
-			      void *arg)
-{
-	return static_cast<status>(pmemkv_all_between(this->_db, key1.data(), key1.size(),
-						      key2.data(), key2.size(), callback,
-						      arg));
-}
-
-inline status db::all_between(string_view key1, string_view key2,
-			      std::function<all_function> f)
-{
-	return static_cast<status>(pmemkv_all_between(this->_db, key1.data(), key1.size(),
-						      key2.data(), key2.size(),
-						      callKVAllFunction, &f));
 }
 
 inline status db::count(std::size_t &cnt)

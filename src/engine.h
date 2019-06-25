@@ -58,27 +58,6 @@ public:
 	virtual std::string name() = 0;
 	virtual void *engine_context() = 0;
 
-	virtual status all(all_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
-	virtual status all_above(string_view key, all_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
-	virtual status all_below(string_view key, all_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
-	virtual status all_between(string_view key1, string_view key2,
-				   all_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
 	virtual status count(std::size_t &cnt)
 	{
 		return status::NOT_SUPPORTED;

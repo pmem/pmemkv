@@ -575,26 +575,6 @@ TEST_F(TreeTest, RemoveNonexistentTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 }
 
-TEST_F(TreeTest, UsesAllTest)
-{
-	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
-	ASSERT_TRUE(cnt == 1);
-	ASSERT_TRUE(kv->put("2", "1") == status::OK) << pmemobj_errormsg();
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
-	ASSERT_TRUE(cnt == 2);
-
-	std::string result;
-	kv->all([&result](string_view k) {
-		result.append("<");
-		result.append(k.data(), k.size());
-		result.append(">,");
-	});
-	ASSERT_TRUE(result == "<2>,<记!>,");
-}
-
 TEST_F(TreeTest, UsesEachTest)
 {
 	ASSERT_TRUE(kv->put("RR", "记!") == status::OK) << pmemobj_errormsg();

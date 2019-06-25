@@ -47,12 +47,6 @@ public:
 	std::string name() final;
 	void *engine_context();
 
-	status all(all_callback *callback, void *arg) final;
-	status all_above(string_view key, all_callback *callback, void *arg) final;
-	status all_below(string_view key, all_callback *callback, void *arg) final;
-	status all_between(string_view key1, string_view key2, all_callback *callback,
-			   void *arg) final;
-
 	status count(std::size_t &cnt) final;
 	status count_above(string_view key, std::size_t &cnt) final;
 	status count_below(string_view key, std::size_t &cnt) final;

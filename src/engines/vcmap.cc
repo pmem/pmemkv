@@ -71,16 +71,6 @@ void *vcmap::engine_context()
 	return context;
 }
 
-status vcmap::all(all_callback *callback, void *arg)
-{
-	LOG("All");
-	for (auto &iterator : pmem_kv_container) {
-		(*callback)(iterator.first.c_str(), iterator.first.size(), arg);
-	}
-
-	return status::OK;
-}
-
 status vcmap::count(std::size_t &cnt)
 {
 	LOG("Count");

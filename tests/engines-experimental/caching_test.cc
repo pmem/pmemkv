@@ -503,86 +503,6 @@ TEST_F(CachingTest, SimpleZeroTTLCount)
 	ASSERT_TRUE(cnt == 5);
 }
 
-TEST_F(CachingTest, SimpleAll)
-{
-	ASSERT_TRUE(kv = new db);
-	ASSERT_TRUE(
-		kv->open(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}") == status::OK);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
-	ASSERT_TRUE(cnt == 2);
-	sleep(2);
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
-
-	std::string result;
-	kv->all(
-		[](const char *k, size_t kb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,");
-		},
-		&result);
-
-	if (ENGINE == "tree3")
-		ASSERT_TRUE(result == "<key4>,<key3>,");
-	else if (ENGINE == "vcmap")
-		ASSERT_TRUE(result == "<key4>,<key3>,");
-	else if (ENGINE == "vsmap")
-		ASSERT_TRUE(result == "<key3>,<key4>,");
-	else
-		ASSERT_TRUE(result == "<key3>,<key4>,");
-
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
-	ASSERT_TRUE(cnt == 2);
-}
-
-TEST_F(CachingTest, SimpleZeroTTLAll)
-{
-	ASSERT_TRUE(kv = new db);
-	ASSERT_TRUE(
-		kv->open(
-			"caching",
-			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
-				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
-				"\"}}") == status::OK);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
-	ASSERT_TRUE(cnt == 2);
-	sleep(1);
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
-
-	std::string result;
-	kv->all(
-		[](const char *k, size_t kb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,");
-		},
-		&result);
-
-	if (ENGINE == "tree3")
-		ASSERT_TRUE(result == "<key4>,<key3>,<key2>,<key1>,");
-	else if (ENGINE == "vcmap")
-		ASSERT_TRUE(result == "<key1>,<key4>,<key3>,<key2>,");
-	else if (ENGINE == "vsmap")
-		ASSERT_TRUE(result == "<key1>,<key2>,<key3>,<key4>,");
-	else
-		ASSERT_TRUE(result == "<key1>,<key2>,<key3>,<key4>,");
-}
-
 TEST_F(CachingTest, SimpleRemovekey)
 {
 	ASSERT_TRUE(kv = new db);
@@ -731,6 +651,7 @@ TEST_F(CachingTest, Redis_Integration)
 	value = "";
 	ASSERT_TRUE(kv->get("key3", &value) == status::NOT_FOUND);
 
+#if 0
 	result = "";
 	kv->all(
 		[](const char *k, size_t kb, void *arg) {
@@ -761,6 +682,7 @@ TEST_F(CachingTest, Redis_Integration)
 		},
 		&result);
 	ASSERT_TRUE(result == "");
+#endif
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
@@ -900,6 +822,7 @@ TEST_F(CachingTest, Memcached_Integration)
 	value = "";
 	ASSERT_TRUE(kv->get("key3", &value) == status::NOT_FOUND);
 
+#if 0
 	result = "";
 	kv->all(
 		[](const char *k, size_t kb, void *arg) {
@@ -930,6 +853,7 @@ TEST_F(CachingTest, Memcached_Integration)
 		},
 		&result);
 	ASSERT_TRUE(result == "");
+#endif
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);

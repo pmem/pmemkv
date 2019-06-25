@@ -65,35 +65,6 @@ void *blackhole::engine_context()
 	return context;
 }
 
-status blackhole::all(all_callback *callback, void *arg)
-{
-	LOG("All");
-
-	return status::OK;
-}
-
-status blackhole::all_above(string_view key, all_callback *callback, void *arg)
-{
-	LOG("AllAbove for key=" << std::string(key.data(), key.size()));
-
-	return status::OK;
-}
-
-status blackhole::all_below(string_view key, all_callback *callback, void *arg)
-{
-	LOG("AllBelow for key=" << std::string(key.data(), key.size()));
-
-	return status::OK;
-}
-
-status blackhole::all_between(string_view key1, string_view key2, all_callback *callback,
-			      void *arg)
-{
-	LOG("AllBetween for key1=" << key1.data() << ", key2=" << key2.data());
-
-	return status::OK;
-}
-
 status blackhole::count(std::size_t &cnt)
 {
 	LOG("Count");

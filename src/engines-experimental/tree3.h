@@ -210,8 +210,6 @@ public:
 	std::string name() final;
 	void *engine_context();
 
-	status all(all_callback *callback, void *arg) final;
-
 	status count(std::size_t &cnt) final;
 
 	status each(each_callback *callback, void *arg) final;

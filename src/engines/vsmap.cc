@@ -68,58 +68,6 @@ void *vsmap::engine_context()
 	return context;
 }
 
-status vsmap::all(all_callback *callback, void *arg)
-{
-	LOG("All");
-	for (auto &it : pmem_kv_container)
-		(*callback)(it.first.c_str(), it.first.size(), arg);
-
-	return status::OK;
-}
-
-status vsmap::all_above(string_view key, all_callback *callback, void *arg)
-{
-	LOG("AllAbove for key=" << std::string(key.data(), key.size()));
-	// XXX - do not create temporary string
-	auto it = pmem_kv_container.upper_bound(
-		key_type(key.data(), key.size(), kv_allocator));
-	auto end = pmem_kv_container.end();
-	for (; it != end; it++)
-		(*callback)(it->first.c_str(), it->first.size(), arg);
-
-	return status::OK;
-}
-
-status vsmap::all_below(string_view key, all_callback *callback, void *arg)
-{
-	LOG("AllBelow for key=" << std::string(key.data(), key.size()));
-	auto it = pmem_kv_container.begin();
-	// XXX - do not create temporary string
-	auto end = pmem_kv_container.lower_bound(
-		key_type(key.data(), key.size(), kv_allocator));
-	for (; it != end; it++)
-		(*callback)(it->first.c_str(), it->first.size(), arg);
-
-	return status::OK;
-}
-
-status vsmap::all_between(string_view key1, string_view key2, all_callback *callback,
-			  void *arg)
-{
-	LOG("AllBetween for key1=" << key1.data() << ", key2=" << key2.data());
-	if (key1.compare(key2) < 0) {
-		// XXX - do not create temporary string
-		auto it = pmem_kv_container.upper_bound(
-			key_type(key1.data(), key1.size(), kv_allocator));
-		auto end = pmem_kv_container.lower_bound(
-			key_type(key2.data(), key2.size(), kv_allocator));
-		for (; it != end; it++)
-			(*callback)(it->first.c_str(), it->first.size(), arg);
-	}
-
-	return status::OK;
-}
-
 status vsmap::count(std::size_t &cnt)
 {
 	cnt = pmem_kv_container.size();

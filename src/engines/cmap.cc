@@ -78,16 +78,6 @@ void *cmap::engine_context()
 	return context;
 }
 
-status cmap::all(all_callback *callback, void *arg)
-{
-	LOG("All");
-	for (auto it = container->begin(); it != container->end(); ++it) {
-		(*callback)(it->first.c_str(), it->first.size(), arg);
-	}
-
-	return status::OK;
-}
-
 status cmap::count(std::size_t &cnt)
 {
 	LOG("Count");

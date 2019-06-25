@@ -85,23 +85,6 @@ void *tree3::engine_context()
 // KEY/VALUE METHODS
 // ===============================================================================================
 
-status tree3::all(all_callback *callback, void *arg)
-{
-	LOG("All");
-	auto leaf = pmpool.root()->head;
-	while (leaf) {
-		for (int slot = LEAF_KEYS; slot--;) {
-			auto kvslot = leaf->slots[slot].get_ro();
-			if (kvslot.empty() || kvslot.hash() == 0)
-				continue;
-			(*callback)(kvslot.key(), kvslot.get_ks(), arg);
-		}
-		leaf = leaf->next; // advance to next linked leaf
-	}
-
-	return status::OK;
-}
-
 status tree3::count(std::size_t &cnt)
 {
 	std::size_t result = 0;

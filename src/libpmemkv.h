@@ -50,7 +50,6 @@ extern "C" {
 typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;
 
-typedef void pmemkv_all_callback(const char *key, size_t keybytes, void *arg);
 typedef void pmemkv_each_callback(const char *key, size_t keybytes, const char *value,
 				  size_t valuebytes, void *arg);
 typedef void pmemkv_get_callback(const char *value, size_t valuebytes, void *arg);
@@ -65,14 +64,6 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);
 
 int pmemkv_open(void *context, const char *engine, pmemkv_config *config, pmemkv_db **db);
 void pmemkv_close(pmemkv_db *kv);
-
-int pmemkv_all(pmemkv_db *db, pmemkv_all_callback *c, void *arg);
-int pmemkv_all_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_all_callback *c,
-		     void *arg);
-int pmemkv_all_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_all_callback *c,
-		     void *arg);
-int pmemkv_all_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-		       size_t kb2, pmemkv_all_callback *c, void *arg);
 
 int pmemkv_count(pmemkv_db *db, size_t *cnt);
 int pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);

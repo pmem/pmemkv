@@ -137,20 +137,6 @@ bool caching::readConfig(pmemkv_config *config)
 	return true;
 }
 
-status caching::all(all_callback *callback, void *arg)
-{
-	LOG("All");
-
-	std::size_t cnt;
-	auto s = count(cnt);
-
-	if (s == status::OK && cnt > 0 && basePtr)
-		return basePtr->all(callback, arg);
-	// todo refactor as single callback (Each --> All)
-
-	return s;
-}
-
 status caching::count(std::size_t &cnt)
 {
 	LOG("Count");
