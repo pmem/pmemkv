@@ -190,8 +190,8 @@ add_custom_target(check-whitespace-main
 add_dependencies(check-whitespace check-whitespace-main)
 
 if(DEVELOPER_MODE)
-	find_program(CLANG_FORMAT NAMES clang-format clang-format-6.0)
-	set(CLANG_FORMAT_REQUIRED "6.0")
+	find_program(CLANG_FORMAT NAMES clang-format clang-format-8.0)
+	set(CLANG_FORMAT_REQUIRED "8.0")
 	if(CLANG_FORMAT)
 		get_program_version(${CLANG_FORMAT} CLANG_FORMAT_VERSION)
 		if(NOT (CLANG_FORMAT_VERSION VERSION_EQUAL CLANG_FORMAT_REQUIRED))

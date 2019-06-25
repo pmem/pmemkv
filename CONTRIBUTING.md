@@ -38,7 +38,7 @@ If you just want to format your code you can make adequate target:
 make cppformat
 ```
 
-**NOTE**: We're using specific clang-format - version exactly **6.0** is required.
+**NOTE**: We're using specific clang-format - version exactly **8.0** is required.
 
 <a name="pull_requests"></a>
 
