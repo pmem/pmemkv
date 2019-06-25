@@ -85,7 +85,7 @@ void *stree::engine_context()
 	return context;
 }
 
-status stree::count(std::size_t &cnt)
+status stree::count_all(std::size_t &cnt)
 {
 	std::size_t result = 0;
 	for (auto &iterator : *my_btree)
@@ -96,7 +96,7 @@ status stree::count(std::size_t &cnt)
 	return status::OK;
 }
 
-status stree::each(each_callback *callback, void *arg)
+status stree::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("Each");
 	for (auto &iterator : *my_btree) {
@@ -118,7 +118,7 @@ status stree::exists(string_view key)
 	return status::OK;
 }
 
-status stree::get(string_view key, get_callback *callback, void *arg)
+status stree::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("Get using callback for key=" << std::string(key.data(), key.size()));
 	btree_type::iterator it = my_btree->find(pstring<20>(key.data(), key.size()));

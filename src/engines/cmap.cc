@@ -78,7 +78,7 @@ void *cmap::engine_context()
 	return context;
 }
 
-status cmap::count(std::size_t &cnt)
+status cmap::count_all(std::size_t &cnt)
 {
 	LOG("Count");
 	cnt = container->size();
@@ -86,7 +86,7 @@ status cmap::count(std::size_t &cnt)
 	return status::OK;
 }
 
-status cmap::each(each_callback *callback, void *arg)
+status cmap::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("Each");
 	for (auto it = container->begin(); it != container->end(); ++it) {
@@ -106,7 +106,7 @@ status cmap::exists(string_view key)
 		: status::NOT_FOUND;
 }
 
-status cmap::get(string_view key, get_callback *callback, void *arg)
+status cmap::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("Get key=" << std::string(key.data(), key.size()));
 	map_t::const_accessor result;

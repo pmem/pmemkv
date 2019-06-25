@@ -51,20 +51,20 @@ public:
 	std::string name() final;
 	void *engine_context();
 
-	status count(std::size_t &cnt) final;
+	status count_all(std::size_t &cnt) final;
 	status count_above(string_view key, std::size_t &cnt) final;
 	status count_below(string_view key, std::size_t &cnt) final;
 	status count_between(string_view key1, string_view key2, std::size_t &cnt) final;
 
-	status each(each_callback *callback, void *arg) final;
-	status each_above(string_view key, each_callback *callback, void *arg) final;
-	status each_below(string_view key, each_callback *callback, void *arg) final;
-	status each_between(string_view key1, string_view key2, each_callback *callback,
+	status get_all(get_kv_callback *callback, void *arg) final;
+	status get_above(string_view key, get_kv_callback *callback, void *arg) final;
+	status get_below(string_view key, get_kv_callback *callback, void *arg) final;
+	status get_between(string_view key1, string_view key2, get_kv_callback *callback,
 			    void *arg) final;
 
 	status exists(string_view key) final;
 
-	status get(string_view key, get_callback *callback, void *arg) final;
+	status get(string_view key, get_v_callback *callback, void *arg) final;
 
 	status put(string_view key, string_view value) final;
 

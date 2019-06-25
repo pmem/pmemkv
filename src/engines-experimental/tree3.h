@@ -210,13 +210,13 @@ public:
 	std::string name() final;
 	void *engine_context();
 
-	status count(std::size_t &cnt) final;
+	status count_all(std::size_t &cnt) final;
 
-	status each(each_callback *callback, void *arg) final;
+	status get_all(get_kv_callback *callback, void *arg) final;
 
 	status exists(string_view key) final;
 
-	status get(string_view key, get_callback *callback, void *arg) final;
+	status get(string_view key, get_v_callback *callback, void *arg) final;
 
 	status put(string_view key, string_view value) final;
 

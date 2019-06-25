@@ -65,7 +65,7 @@ void *blackhole::engine_context()
 	return context;
 }
 
-status blackhole::count(std::size_t &cnt)
+status blackhole::count_all(std::size_t &cnt)
 {
 	LOG("Count");
 
@@ -101,29 +101,29 @@ status blackhole::count_between(string_view key1, string_view key2, std::size_t 
 	return status::OK;
 }
 
-status blackhole::each(each_callback *callback, void *arg)
+status blackhole::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("Each");
 
 	return status::OK;
 }
 
-status blackhole::each_above(string_view key, each_callback *callback, void *arg)
+status blackhole::get_above(string_view key, get_kv_callback *callback, void *arg)
 {
 	LOG("EachAbove for key=" << std::string(key.data(), key.size()));
 
 	return status::OK;
 }
 
-status blackhole::each_below(string_view key, each_callback *callback, void *arg)
+status blackhole::get_below(string_view key, get_kv_callback *callback, void *arg)
 {
 	LOG("EachBelow for key=" << std::string(key.data(), key.size()));
 
 	return status::OK;
 }
 
-status blackhole::each_between(string_view key1, string_view key2,
-			       each_callback *callback, void *arg)
+status blackhole::get_between(string_view key1, string_view key2,
+			       get_kv_callback *callback, void *arg)
 {
 	LOG("EachBetween for key1=" << key1.data() << ", key2=" << key2.data());
 
@@ -137,7 +137,7 @@ status blackhole::exists(string_view key)
 	return status::NOT_FOUND;
 }
 
-status blackhole::get(string_view key, get_callback *callback, void *arg)
+status blackhole::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("Get key=" << std::string(key.data(), key.size()));
 

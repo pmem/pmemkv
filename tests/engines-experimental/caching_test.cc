@@ -106,7 +106,7 @@ TEST_F(CachingTest, PutKeywithinTTL)
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	sleep(1);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 }
@@ -177,7 +177,7 @@ TEST_F(CachingTest, SimpleMemcached)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	memcached_server_st *servers = NULL;
@@ -210,7 +210,7 @@ TEST_F(CachingTest, SimpleRedis)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	int conn_timeout = 30, rw_timeout = 10;
@@ -233,7 +233,7 @@ TEST_F(CachingTest, UnknownLocalMemcachedKey)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	memcached_server_st *servers = NULL;
@@ -268,7 +268,7 @@ TEST_F(CachingTest, UnknownLocalRedisKey)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	int conn_timeout = 30, rw_timeout = 10;
@@ -292,7 +292,7 @@ TEST_F(CachingTest, SimpleEachTest)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
@@ -300,11 +300,11 @@ TEST_F(CachingTest, SimpleEachTest)
 	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 4);
 
 	std::string result;
-	kv->each(
+	kv->get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
 			c->append("<");
@@ -343,7 +343,7 @@ TEST_F(CachingTest, EachTTLValidExpired)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
@@ -354,7 +354,7 @@ TEST_F(CachingTest, EachTTLValidExpired)
 	ASSERT_TRUE(kv->put("key5", "value5") == status::OK) << pmemobj_errormsg();
 
 	std::string result;
-	kv->each(
+	kv->get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
 			c->append("<");
@@ -366,7 +366,7 @@ TEST_F(CachingTest, EachTTLValidExpired)
 		&result);
 	ASSERT_TRUE(result == "<key5>,<value5>|");
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 }
 
@@ -380,10 +380,10 @@ TEST_F(CachingTest, EachEmptyCache)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	std::string result;
-	kv->each(
+	kv->get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
 			c->append("<");
@@ -395,7 +395,7 @@ TEST_F(CachingTest, EachEmptyCache)
 		&result);
 	ASSERT_TRUE(result == "");
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 }
 
@@ -409,7 +409,7 @@ TEST_F(CachingTest, EachZeroTTL)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
@@ -419,11 +419,11 @@ TEST_F(CachingTest, EachZeroTTL)
 	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
 	sleep(1);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 4);
 
 	std::string result;
-	kv->each(
+	kv->get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
 			c->append("<");
@@ -462,17 +462,17 @@ TEST_F(CachingTest, SimpleCount)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	sleep(2);
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 2);
 }
 
@@ -486,20 +486,20 @@ TEST_F(CachingTest, SimpleZeroTTLCount)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 3);
 	sleep(1);
 	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("key5", "value5") == status::OK) << pmemobj_errormsg();
 	sleep(1);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 5);
 }
 
@@ -532,7 +532,7 @@ TEST_F(CachingTest, SimpleExistsKey)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
@@ -542,7 +542,7 @@ TEST_F(CachingTest, SimpleExistsKey)
 	// key1 not expired even after 1+1 sec sleep as Exists above updated on local
 	// cache
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 	sleep(2);
@@ -559,11 +559,11 @@ TEST_F(CachingTest, Redis_Integration)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 
 	std::string value;
@@ -584,7 +584,7 @@ TEST_F(CachingTest, Redis_Integration)
 	ASSERT_TRUE(kv->exists("key2") == status::NOT_FOUND);
 	ASSERT_TRUE(kv->exists("key3") == status::NOT_FOUND);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	// Remote redis connection
@@ -607,7 +607,7 @@ TEST_F(CachingTest, Redis_Integration)
 	ASSERT_TRUE(kv->exists("key3") == status::OK);
 
 	std::string result;
-	kv->each(
+	kv->get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
 			c->append("<");
@@ -629,7 +629,7 @@ TEST_F(CachingTest, Redis_Integration)
 
 	sleep(2);
 	result = "";
-	kv->each(
+	kv->get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
 			c->append("<");
@@ -641,7 +641,7 @@ TEST_F(CachingTest, Redis_Integration)
 		&result);
 	ASSERT_TRUE(result == "");
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	value = "";
@@ -684,7 +684,7 @@ TEST_F(CachingTest, Redis_Integration)
 	ASSERT_TRUE(result == "");
 #endif
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	cmd.del("key1");
@@ -713,11 +713,11 @@ TEST_F(CachingTest, Memcached_Integration)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 
 	std::string value;
@@ -738,7 +738,7 @@ TEST_F(CachingTest, Memcached_Integration)
 	ASSERT_TRUE(kv->exists("key2") == status::NOT_FOUND);
 	ASSERT_TRUE(kv->exists("key3") == status::NOT_FOUND);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	// Remote memcached connection
@@ -778,7 +778,7 @@ TEST_F(CachingTest, Memcached_Integration)
 	ASSERT_TRUE(kv->exists("key3") == status::OK);
 
 	std::string result;
-	kv->each(
+	kv->get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
 			c->append("<");
@@ -800,7 +800,7 @@ TEST_F(CachingTest, Memcached_Integration)
 
 	sleep(2);
 	result = "";
-	kv->each(
+	kv->get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
 			c->append("<");
@@ -812,7 +812,7 @@ TEST_F(CachingTest, Memcached_Integration)
 		&result);
 	ASSERT_TRUE(result == "");
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	value = "";
@@ -855,7 +855,7 @@ TEST_F(CachingTest, Memcached_Integration)
 	ASSERT_TRUE(result == "");
 #endif
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	memcached_delete(memc, "key1", key_length, (time_t)0);
@@ -900,7 +900,7 @@ TEST_F(CachingTest, LargeTTL)
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	sleep(1);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 }

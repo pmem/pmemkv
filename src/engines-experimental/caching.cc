@@ -137,11 +137,11 @@ bool caching::readConfig(pmemkv_config *config)
 	return true;
 }
 
-status caching::count(std::size_t &cnt)
+status caching::count_all(std::size_t &cnt)
 {
 	LOG("Count");
 	std::size_t result = 0;
-	each(
+	get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			auto c = ((std::size_t *)arg);
 			(*c)++;
@@ -155,11 +155,11 @@ status caching::count(std::size_t &cnt)
 
 struct EachCacheCallbackContext {
 	void *arg;
-	each_callback *cBack;
+	get_kv_callback *cBack;
 	std::list<std::string> *expiredKeys;
 };
 
-status caching::each(each_callback *callback, void *arg)
+status caching::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("Each");
 	std::list<std::string> removingKeys;
@@ -179,7 +179,7 @@ status caching::each(each_callback *callback, void *arg)
 	};
 
 	if (basePtr) { // todo bail earlier if null
-		auto s = basePtr->each(cb, &cxt);
+		auto s = basePtr->get_all(cb, &cxt);
 		if (s != status::OK)
 			return s;
 
@@ -202,7 +202,7 @@ status caching::exists(string_view key)
 	// todo fold into single return statement
 }
 
-status caching::get(string_view key, get_callback *callback, void *arg)
+status caching::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("Get key=" << std::string(key.data(), key.size()));
 	std::string value;

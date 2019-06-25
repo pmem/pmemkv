@@ -313,10 +313,10 @@ void pmemkv_close(pmemkv_db *db)
 	}
 }
 
-int pmemkv_count(pmemkv_db *db, size_t *cnt)
+int pmemkv_count_all(pmemkv_db *db, size_t *cnt)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->count(*cnt);
+		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->count_all(*cnt);
 	} catch (const std::exception &exc) {
 		ERR(exc.what());
 		return PMEMKV_STATUS_FAILED;
@@ -369,10 +369,10 @@ int pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *
 	}
 }
 
-int pmemkv_each(pmemkv_db *db, pmemkv_each_callback *c, void *arg)
+int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->each(c, arg);
+		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_all(c, arg);
 	} catch (const std::exception &exc) {
 		ERR(exc.what());
 		return PMEMKV_STATUS_FAILED;
@@ -382,11 +382,11 @@ int pmemkv_each(pmemkv_db *db, pmemkv_each_callback *c, void *arg)
 	}
 }
 
-int pmemkv_each_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_each_callback *c,
+int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
 		      void *arg)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->each_above(
+		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_above(
 			std::string(k, (size_t)kb), c, arg);
 	} catch (const std::exception &exc) {
 		ERR(exc.what());
@@ -394,11 +394,11 @@ int pmemkv_each_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_each_callb
 	}
 }
 
-int pmemkv_each_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_each_callback *c,
+int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
 		      void *arg)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->each_below(
+		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_below(
 			std::string(k, (size_t)kb), c, arg);
 	} catch (const std::exception &exc) {
 		ERR(exc.what());
@@ -409,11 +409,11 @@ int pmemkv_each_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_each_callb
 	}
 }
 
-int pmemkv_each_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-			size_t kb2, pmemkv_each_callback *c, void *arg)
+int pmemkv_get_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
+			size_t kb2, pmemkv_get_kv_callback *c, void *arg)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->each_between(
+		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_between(
 			std::string(k1, (size_t)kb1), std::string(k2, (size_t)kb2), c,
 			arg);
 	} catch (const std::exception &exc) {
@@ -439,7 +439,7 @@ int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb)
 	}
 }
 
-int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_callback *c, void *arg)
+int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c, void *arg)
 {
 	try {
 		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get(
