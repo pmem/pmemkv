@@ -55,6 +55,7 @@ RUN dnf update -y \
 	man \
 	ndctl-devel \
 	numactl-devel \
+	pandoc \
 	passwd \
 	perl-Text-Diff \
 	rapidjson-devel \
