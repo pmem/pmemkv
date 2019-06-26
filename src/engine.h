@@ -58,28 +58,7 @@ public:
 	virtual std::string name() = 0;
 	virtual void *engine_context() = 0;
 
-	virtual status all(all_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
-	virtual status all_above(string_view key, all_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
-	virtual status all_below(string_view key, all_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
-	virtual status all_between(string_view key1, string_view key2,
-				   all_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
-	virtual status count(std::size_t &cnt)
+	virtual status count_all(std::size_t &cnt)
 	{
 		return status::NOT_SUPPORTED;
 	}
@@ -98,23 +77,23 @@ public:
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status each(each_callback *callback, void *arg)
+	virtual status get_all(get_kv_callback *callback, void *arg)
 	{
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status each_above(string_view key, each_callback *callback, void *arg)
+	virtual status get_above(string_view key, get_kv_callback *callback, void *arg)
 	{
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status each_below(string_view key, each_callback *callback, void *arg)
+	virtual status get_below(string_view key, get_kv_callback *callback, void *arg)
 	{
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status each_between(string_view key1, string_view key2,
-				    each_callback *callback, void *arg)
+	virtual status get_between(string_view key1, string_view key2,
+				    get_kv_callback *callback, void *arg)
 	{
 		return status::NOT_SUPPORTED;
 	}
@@ -124,7 +103,7 @@ public:
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status get(string_view key, get_callback *callback, void *arg) = 0;
+	virtual status get(string_view key, get_v_callback *callback, void *arg) = 0;
 
 	virtual status put(string_view key, string_view value) = 0;
 

@@ -71,17 +71,7 @@ void *vcmap::engine_context()
 	return context;
 }
 
-status vcmap::all(all_callback *callback, void *arg)
-{
-	LOG("All");
-	for (auto &iterator : pmem_kv_container) {
-		(*callback)(iterator.first.c_str(), iterator.first.size(), arg);
-	}
-
-	return status::OK;
-}
-
-status vcmap::count(std::size_t &cnt)
+status vcmap::count_all(std::size_t &cnt)
 {
 	LOG("Count");
 	cnt = pmem_kv_container.size();
@@ -89,7 +79,7 @@ status vcmap::count(std::size_t &cnt)
 	return status::OK;
 }
 
-status vcmap::each(each_callback *callback, void *arg)
+status vcmap::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("Each");
 	for (auto &iterator : pmem_kv_container) {
@@ -110,7 +100,7 @@ status vcmap::exists(string_view key)
 	return (result_found ? status::OK : status::NOT_FOUND);
 }
 
-status vcmap::get(string_view key, get_callback *callback, void *arg)
+status vcmap::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("Get key=" << std::string(key.data(), key.size()));
 	map_t::const_accessor result;

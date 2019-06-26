@@ -90,14 +90,14 @@ using VSMapLargeTest = VSMapBaseTest<LARGE_SIZE>;
 TEST_F(VSMapTest, SimpleTest)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("key1"));
 	std::string value;
 	ASSERT_TRUE(kv->get("key1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
@@ -109,20 +109,20 @@ TEST_F(VSMapTest, SimpleTest)
 TEST_F(VSMapTest, BinaryKeyTest)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("a"));
 	ASSERT_TRUE(kv->put("a", "should_not_change") == status::OK)
 		<< pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(status::OK == kv->exists("a"));
 	std::string key1 = std::string("a\0b", 3);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists(key1));
 	ASSERT_TRUE(kv->put(key1, "stuff") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(status::OK == kv->exists("a"));
 	ASSERT_TRUE(status::OK == kv->exists(key1));
@@ -134,7 +134,7 @@ TEST_F(VSMapTest, BinaryKeyTest)
 	ASSERT_EQ(value2, "should_not_change");
 	ASSERT_TRUE(kv->remove(key1) == status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(status::OK == kv->exists("a"));
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists(key1));
@@ -155,19 +155,19 @@ TEST_F(VSMapTest, BinaryValueTest)
 TEST_F(VSMapTest, EmptyKeyTest)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("", "empty") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->put(" ", "single-space") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(kv->put("\t\t", "two-tab") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 3);
 	std::string value1;
 	std::string value2;
@@ -183,19 +183,19 @@ TEST_F(VSMapTest, EmptyKeyTest)
 TEST_F(VSMapTest, EmptyValueTest)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("empty", "") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->put("single-space", " ") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(kv->put("two-tab", "\t\t") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 3);
 	std::string value1;
 	std::string value2;
@@ -227,7 +227,7 @@ TEST_F(VSMapTest, GetMultipleTest)
 	ASSERT_TRUE(kv->put("jkl", "D4") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("mno", "E5") == status::OK) << pmemobj_errormsg();
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 5);
 	ASSERT_TRUE(status::OK == kv->exists("abc"));
 	std::string value1;
@@ -254,7 +254,7 @@ TEST_F(VSMapTest, GetMultiple2Test)
 	ASSERT_TRUE(kv->remove("key2") == status::OK);
 	ASSERT_TRUE(kv->put("key3", "VALUE3") == status::OK) << pmemobj_errormsg();
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 2);
 	std::string value1;
 	ASSERT_TRUE(kv->get("key1", &value1) == status::OK && value1 == "value1");
@@ -275,13 +275,13 @@ TEST_F(VSMapTest, GetNonexistentTest)
 TEST_F(VSMapTest, PutTest)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	std::string value;
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 
@@ -289,7 +289,7 @@ TEST_F(VSMapTest, PutTest)
 	ASSERT_TRUE(kv->put("key1", "VALUE1") == status::OK)
 		<< pmemobj_errormsg(); // same size
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("key1", &new_value) == status::OK && new_value == "VALUE1");
 
@@ -297,7 +297,7 @@ TEST_F(VSMapTest, PutTest)
 	ASSERT_TRUE(kv->put("key1", "new_value") == status::OK)
 		<< pmemobj_errormsg(); // longer size
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("key1", &new_value2) == status::OK &&
 		    new_value2 == "new_value");
@@ -306,7 +306,7 @@ TEST_F(VSMapTest, PutTest)
 	ASSERT_TRUE(kv->put("key1", "?") == status::OK)
 		<< pmemobj_errormsg(); // shorter size
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("key1", &new_value3) == status::OK && new_value3 == "?");
 }
@@ -316,28 +316,28 @@ TEST_F(VSMapTest, PutKeysOfDifferentSizesTest)
 	std::string value;
 	ASSERT_TRUE(kv->put("123456789ABCDE", "A") == status::OK) << pmemobj_errormsg();
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("123456789ABCDE", &value) == status::OK && value == "A");
 
 	std::string value2;
 	ASSERT_TRUE(kv->put("123456789ABCDEF", "B") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(kv->get("123456789ABCDEF", &value2) == status::OK && value2 == "B");
 
 	std::string value3;
 	ASSERT_TRUE(kv->put("12345678ABCDEFG", "C") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 3);
 	ASSERT_TRUE(kv->get("12345678ABCDEFG", &value3) == status::OK && value3 == "C");
 
 	std::string value4;
 	ASSERT_TRUE(kv->put("123456789", "D") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 4);
 	ASSERT_TRUE(kv->get("123456789", &value4) == status::OK && value4 == "D");
 
@@ -345,7 +345,7 @@ TEST_F(VSMapTest, PutKeysOfDifferentSizesTest)
 	ASSERT_TRUE(kv->put("123456789ABCDEFGHI", "E") == status::OK)
 		<< pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 5);
 	ASSERT_TRUE(kv->get("123456789ABCDEFGHI", &value5) == status::OK &&
 		    value5 == "E");
@@ -356,28 +356,28 @@ TEST_F(VSMapTest, PutValuesOfDifferentSizesTest)
 	std::string value;
 	ASSERT_TRUE(kv->put("A", "123456789ABCDE") == status::OK) << pmemobj_errormsg();
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("A", &value) == status::OK && value == "123456789ABCDE");
 
 	std::string value2;
 	ASSERT_TRUE(kv->put("B", "123456789ABCDEF") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(kv->get("B", &value2) == status::OK && value2 == "123456789ABCDEF");
 
 	std::string value3;
 	ASSERT_TRUE(kv->put("C", "12345678ABCDEFG") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 3);
 	ASSERT_TRUE(kv->get("C", &value3) == status::OK && value3 == "12345678ABCDEFG");
 
 	std::string value4;
 	ASSERT_TRUE(kv->put("D", "123456789") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 4);
 	ASSERT_TRUE(kv->get("D", &value4) == status::OK && value4 == "123456789");
 
@@ -385,7 +385,7 @@ TEST_F(VSMapTest, PutValuesOfDifferentSizesTest)
 	ASSERT_TRUE(kv->put("E", "123456789ABCDEFGHI") == status::OK)
 		<< pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 5);
 	ASSERT_TRUE(kv->get("E", &value5) == status::OK &&
 		    value5 == "123456789ABCDEFGHI");
@@ -394,15 +394,15 @@ TEST_F(VSMapTest, PutValuesOfDifferentSizesTest)
 TEST_F(VSMapTest, RemoveAllTest)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("tmpkey", "tmpvalue1") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->remove("tmpkey") == status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey"));
 	std::string value;
@@ -412,28 +412,28 @@ TEST_F(VSMapTest, RemoveAllTest)
 TEST_F(VSMapTest, RemoveAndInsertTest)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("tmpkey", "tmpvalue1") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->remove("tmpkey") == status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey"));
 	std::string value;
 	ASSERT_TRUE(kv->get("tmpkey", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv->put("tmpkey1", "tmpvalue1") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(status::OK == kv->exists("tmpkey1"));
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::OK && value == "tmpvalue1");
 	ASSERT_TRUE(kv->remove("tmpkey1") == status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey1"));
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
@@ -442,23 +442,23 @@ TEST_F(VSMapTest, RemoveAndInsertTest)
 TEST_F(VSMapTest, RemoveExistingTest)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->put("tmpkey1", "tmpvalue1") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->put("tmpkey2", "tmpvalue2") == status::OK) << pmemobj_errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 2);
 	ASSERT_TRUE(kv->remove("tmpkey1") == status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->remove("tmpkey1") == status::NOT_FOUND);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey1"));
 	std::string value;
@@ -479,191 +479,6 @@ TEST_F(VSMapTest, RemoveNonexistentTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 }
 
-TEST_F(VSMapTest, UsesAllTest)
-{
-	ASSERT_TRUE(kv->put("1", "one") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("2", "two") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
-
-	std::string x;
-	kv->all([&](string_view k) {
-		x.append("<").append(k.data(), k.size()).append(">,");
-	});
-	ASSERT_TRUE(x == "<1>,<2>,<记!>,");
-
-	x = "";
-	kv->all([&](string_view k) {
-		x.append("<").append(std::string(k.data(), k.size())).append(">,");
-	});
-	ASSERT_TRUE(x == "<1>,<2>,<记!>,");
-
-	x = "";
-	kv->all(
-		[](const char *k, size_t kb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<").append(std::string(k, kb)).append(">,");
-		},
-		&x);
-	ASSERT_TRUE(x == "<1>,<2>,<记!>,");
-}
-
-TEST_F(VSMapTest, UsesAllAboveTest)
-{
-	ASSERT_TRUE(kv->put("A", "1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("AB", "2") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("AC", "3") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("B", "4") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("BB", "5") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
-
-	std::string x;
-	kv->all_above("B",
-		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
-	ASSERT_TRUE(x == "BB,BC,");
-
-	x = "";
-	kv->all_above("",
-		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
-	ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,");
-
-	x = "";
-	kv->all_above("ZZZ",
-		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
-	ASSERT_TRUE(x.empty());
-
-	x = "";
-	kv->all_above("B", [&](string_view k) {
-		x.append(std::string(k.data(), k.size())).append(",");
-	});
-	ASSERT_TRUE(x == "BB,BC,");
-
-	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
-	x = "";
-	kv->all_above(
-		"B",
-		[](const char *k, size_t kb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append(std::string(k, kb)).append(",");
-		},
-		&x);
-	ASSERT_TRUE(x == "BB,BC,记!,");
-}
-
-TEST_F(VSMapTest, UsesAllBelowTest)
-{
-	ASSERT_TRUE(kv->put("A", "1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("AB", "2") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("AC", "3") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("B", "4") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("BB", "5") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
-
-	std::string x;
-	kv->all_below("B",
-		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
-	ASSERT_TRUE(x == "A,AB,AC,");
-
-	x = "";
-	kv->all_below("",
-		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
-	ASSERT_TRUE(x.empty());
-
-	x = "";
-	kv->all_below("ZZZZ",
-		      [&](string_view k) { x.append(k.data(), k.size()).append(","); });
-	ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,");
-
-	x = "";
-	kv->all_below("B", [&](string_view k) {
-		x.append(std::string(k.data(), k.size())).append(",");
-	});
-	ASSERT_TRUE(x == "A,AB,AC,");
-
-	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
-	x = "";
-	kv->all_below(
-		"\xFF",
-		[](const char *k, size_t kb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append(std::string(k, kb)).append(",");
-		},
-		&x);
-	ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,记!,");
-}
-
-TEST_F(VSMapTest, UsesAllBetweenTest)
-{
-	ASSERT_TRUE(kv->put("A", "1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("AB", "2") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("AC", "3") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("B", "4") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("BB", "5") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
-
-	std::string x;
-	kv->all_between("A", "B",
-			[&](string_view k) { x.append(k.data(), k.size()).append(","); });
-	ASSERT_TRUE(x == "AB,AC,");
-
-	x = "";
-	kv->all_between("", "ZZZ",
-			[&](string_view k) { x.append(k.data(), k.size()).append(","); });
-	ASSERT_TRUE(x == "A,AB,AC,B,BB,BC,");
-
-	x = "";
-	kv->all_between("", "A",
-			[&](string_view k) { x.append(k.data(), k.size()).append(","); });
-	ASSERT_TRUE(x.empty());
-
-	x = "";
-	kv->all_between("", "B",
-			[&](string_view k) { x.append(k.data(), k.size()).append(","); });
-	ASSERT_TRUE(x == "A,AB,AC,");
-
-	x = "";
-	kv->all_between("B", "ZZZ",
-			[&](string_view k) { x.append(k.data(), k.size()).append(","); });
-	ASSERT_TRUE(x == "BB,BC,");
-
-	x = "";
-	kv->all_between("", "", [&](string_view k) {
-		x.append("<").append(k.data(), k.size()).append(">,");
-	});
-	kv->all_between("A", "A", [&](string_view k) {
-		x.append("<").append(k.data(), k.size()).append(">,");
-	});
-	kv->all_between("AC", "A", [&](string_view k) {
-		x.append("<").append(k.data(), k.size()).append(">,");
-	});
-	kv->all_between("B", "A", [&](string_view k) {
-		x.append("<").append(k.data(), k.size()).append(">,");
-	});
-	kv->all_between("BD", "A", [&](string_view k) {
-		x.append("<").append(k.data(), k.size()).append(">,");
-	});
-	kv->all_between("ZZZ", "B", [&](string_view k) {
-		x.append("<").append(k.data(), k.size()).append(">,");
-	});
-	ASSERT_TRUE(x.empty());
-
-	x = "";
-	kv->all_between("A", "B", [&](string_view k) {
-		x.append(std::string(k.data(), k.size())).append(",");
-	});
-	ASSERT_TRUE(x == "AB,AC,");
-
-	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
-	x = "";
-	kv->all_between(
-		"B", "\xFF",
-		[](const char *k, size_t kb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append(std::string(k, kb)).append(",");
-		},
-		&x);
-	ASSERT_TRUE(x == "BB,BC,记!,");
-}
-
 TEST_F(VSMapTest, UsesCountTest)
 {
 	ASSERT_TRUE(kv->put("A", "1") == status::OK) << pmemobj_errormsg();
@@ -674,7 +489,7 @@ TEST_F(VSMapTest, UsesCountTest)
 	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("BD", "7") == status::OK) << pmemobj_errormsg();
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 7);
 
 	ASSERT_TRUE(kv->count_above("", cnt) == status::OK);
@@ -733,7 +548,7 @@ TEST_F(VSMapTest, UsesEachTest)
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->each([&](string_view k, string_view v) {
+	kv->get_all([&](string_view k, string_view v) {
 		x.append("<")
 			.append(k.data(), k.size())
 			.append(">,<")
@@ -743,7 +558,7 @@ TEST_F(VSMapTest, UsesEachTest)
 	ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
 
 	x = "";
-	kv->each([&](string_view k, string_view v) {
+	kv->get_all([&](string_view k, string_view v) {
 		x.append("<")
 			.append(std::string(k.data(), k.size()))
 			.append(">,<")
@@ -753,7 +568,7 @@ TEST_F(VSMapTest, UsesEachTest)
 	ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
 
 	x = "";
-	kv->each(
+	kv->get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
 			c->append("<")
@@ -776,7 +591,7 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->each_above("B", [&](string_view k, string_view v) {
+	kv->get_above("B", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -785,7 +600,7 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 	ASSERT_TRUE(x == "BB,5|BC,6|");
 
 	x = "";
-	kv->each_above("", [&](string_view k, string_view v) {
+	kv->get_above("", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -794,7 +609,7 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
 
 	x = "";
-	kv->each_above("ZZZ", [&](string_view k, string_view v) {
+	kv->get_above("ZZZ", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -803,7 +618,7 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->each_above("B", [&](string_view k, string_view v) {
+	kv->get_above("B", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -813,7 +628,7 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
 	x = "";
-	kv->each_above(
+	kv->get_above(
 		"B",
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
@@ -836,7 +651,7 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->each_below("AC", [&](string_view k, string_view v) {
+	kv->get_below("AC", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -845,7 +660,7 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 	ASSERT_TRUE(x == "A,1|AB,2|");
 
 	x = "";
-	kv->each_below("", [&](string_view k, string_view v) {
+	kv->get_below("", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -854,7 +669,7 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->each_below("ZZZZ", [&](string_view k, string_view v) {
+	kv->get_below("ZZZZ", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -863,7 +678,7 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
 
 	x = "";
-	kv->each_below("AC", [&](string_view k, string_view v) {
+	kv->get_below("AC", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -873,7 +688,7 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
 	x = "";
-	kv->each_below(
+	kv->get_below(
 		"\xFF",
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
@@ -896,7 +711,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << pmemobj_errormsg();
 
 	std::string x;
-	kv->each_between("A", "B", [&](string_view k, string_view v) {
+	kv->get_between("A", "B", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -905,7 +720,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 	ASSERT_TRUE(x == "AB,2|AC,3|");
 
 	x = "";
-	kv->each_between("", "ZZZ", [&](string_view k, string_view v) {
+	kv->get_between("", "ZZZ", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -914,7 +729,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
 
 	x = "";
-	kv->each_between("", "A", [&](string_view k, string_view v) {
+	kv->get_between("", "A", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -923,7 +738,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->each_between("", "B", [&](string_view k, string_view v) {
+	kv->get_between("", "B", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -932,37 +747,37 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|");
 
 	x = "";
-	kv->each_between("", "", [&](string_view k, string_view v) {
+	kv->get_between("", "", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
 	});
-	kv->each_between("A", "A", [&](string_view k, string_view v) {
+	kv->get_between("A", "A", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
 	});
-	kv->each_between("AC", "A", [&](string_view k, string_view v) {
+	kv->get_between("AC", "A", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
 	});
-	kv->each_between("B", "A", [&](string_view k, string_view v) {
+	kv->get_between("B", "A", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
 	});
-	kv->each_between("BD", "A", [&](string_view k, string_view v) {
+	kv->get_between("BD", "A", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
 	});
-	kv->each_between("ZZZ", "A", [&](string_view k, string_view v) {
+	kv->get_between("ZZZ", "A", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -971,7 +786,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 	ASSERT_TRUE(x.empty());
 
 	x = "";
-	kv->each_between("A", "B", [&](string_view k, string_view v) {
+	kv->get_between("A", "B", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
@@ -981,7 +796,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 
 	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << pmemobj_errormsg();
 	x = "";
-	kv->each_between(
+	kv->get_between(
 		"B", "\xFF",
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			const auto c = ((std::string *)arg);
@@ -1015,7 +830,7 @@ TEST_F(VSMapLargeTest, LargeAscendingTest)
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == (istr + "!"));
 	}
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == LARGE_LIMIT);
 }
 
@@ -1036,6 +851,6 @@ TEST_F(VSMapLargeTest, LargeDescendingTest)
 			    value == ("ABC" + istr));
 	}
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count(cnt) == status::OK);
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == LARGE_LIMIT);
 }

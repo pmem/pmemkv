@@ -85,24 +85,7 @@ void *tree3::engine_context()
 // KEY/VALUE METHODS
 // ===============================================================================================
 
-status tree3::all(all_callback *callback, void *arg)
-{
-	LOG("All");
-	auto leaf = pmpool.root()->head;
-	while (leaf) {
-		for (int slot = LEAF_KEYS; slot--;) {
-			auto kvslot = leaf->slots[slot].get_ro();
-			if (kvslot.empty() || kvslot.hash() == 0)
-				continue;
-			(*callback)(kvslot.key(), kvslot.get_ks(), arg);
-		}
-		leaf = leaf->next; // advance to next linked leaf
-	}
-
-	return status::OK;
-}
-
-status tree3::count(std::size_t &cnt)
+status tree3::count_all(std::size_t &cnt)
 {
 	std::size_t result = 0;
 	auto leaf = pmpool.root()->head;
@@ -121,7 +104,7 @@ status tree3::count(std::size_t &cnt)
 	return status::OK;
 }
 
-status tree3::each(each_callback *callback, void *arg)
+status tree3::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("Each");
 	auto leaf = pmpool.root()->head;
@@ -158,7 +141,7 @@ status tree3::exists(string_view key)
 	return status::NOT_FOUND;
 }
 
-status tree3::get(string_view key, get_callback *callback, void *arg)
+status tree3::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("Get using callback for key=" << std::string(key.data(), key.size()));
 	// XXX - do not create temporary string

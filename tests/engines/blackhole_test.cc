@@ -52,14 +52,14 @@ TEST_F(BlackholeTest, SimpleTest)
 	std::string value;
 	std::size_t cnt = 1;
 
-	ASSERT_TRUE(kv.count(cnt) == status::OK);
+	ASSERT_TRUE(kv.count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv.put("key1", "value1") == status::OK);
 
 	cnt = 1;
 
-	ASSERT_TRUE(kv.count(cnt) == status::OK);
+	ASSERT_TRUE(kv.count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv.remove("key1") == status::OK);
