@@ -136,14 +136,8 @@ include(get_tests.cmake)
 add_executable(pmemkv_test ${TEST_FILES})
 
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
-if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3 OR ENGINE_CACHING)
-	target_link_libraries(pmemkv_test ${LIBPMEMOBJ++_LIBRARIES})
-endif()
-if(ENGINE_VCMAP OR ENGINE_CMAP)
-	target_link_libraries(pmemkv_test ${TBB_LIBRARIES})
-endif()
 if(ENGINE_CACHING)
-	target_link_libraries(pmemkv_test memcached)
+       target_link_libraries(pmemkv_test memcached)
 endif()
 
 # parse tests source files to get the list of all tests
