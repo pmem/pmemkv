@@ -73,7 +73,7 @@ status vsmap::count_all(std::size_t &cnt)
 
 status vsmap::count_above(string_view key, std::size_t &cnt)
 {
-	LOG("CountAbove for key=" << std::string(key.data(), key.size()));
+	LOG("count_above for key=" << std::string(key.data(), key.size()));
 	std::size_t result = 0;
 	// XXX - do not create temporary string
 	auto it = pmem_kv_container.upper_bound(
@@ -89,7 +89,7 @@ status vsmap::count_above(string_view key, std::size_t &cnt)
 
 status vsmap::count_below(string_view key, std::size_t &cnt)
 {
-	LOG("CountBelow for key=" << std::string(key.data(), key.size()));
+	LOG("count_below for key=" << std::string(key.data(), key.size()));
 	std::size_t result = 0;
 	auto it = pmem_kv_container.begin();
 	// XXX - do not create temporary string
@@ -105,7 +105,7 @@ status vsmap::count_below(string_view key, std::size_t &cnt)
 
 status vsmap::count_between(string_view key1, string_view key2, std::size_t &cnt)
 {
-	LOG("CountBetween for key1=" << key1.data() << ", key2=" << key2.data());
+	LOG("count_between for key1=" << key1.data() << ", key2=" << key2.data());
 	std::size_t result = 0;
 	if (key1.compare(key2) < 0) {
 		// XXX - do not create temporary string
@@ -124,7 +124,7 @@ status vsmap::count_between(string_view key1, string_view key2, std::size_t &cnt
 
 status vsmap::get_all(get_kv_callback *callback, void *arg)
 {
-	LOG("Each");
+	LOG("get_all");
 	for (auto &it : pmem_kv_container) {
 		auto ret = callback(it.first.c_str(), it.first.size(), it.second.c_str(),
 				    it.second.size(), arg);
@@ -138,7 +138,7 @@ status vsmap::get_all(get_kv_callback *callback, void *arg)
 
 status vsmap::get_above(string_view key, get_kv_callback *callback, void *arg)
 {
-	LOG("EachAbove for key=" << std::string(key.data(), key.size()));
+	LOG("get_above for key=" << std::string(key.data(), key.size()));
 	// XXX - do not create temporary string
 	auto it = pmem_kv_container.upper_bound(
 		key_type(key.data(), key.size(), kv_allocator));
@@ -156,7 +156,7 @@ status vsmap::get_above(string_view key, get_kv_callback *callback, void *arg)
 
 status vsmap::get_below(string_view key, get_kv_callback *callback, void *arg)
 {
-	LOG("EachBelow for key=" << std::string(key.data(), key.size()));
+	LOG("get_below for key=" << std::string(key.data(), key.size()));
 	auto it = pmem_kv_container.begin();
 	// XXX - do not create temporary string
 	auto end = pmem_kv_container.lower_bound(
@@ -175,7 +175,7 @@ status vsmap::get_below(string_view key, get_kv_callback *callback, void *arg)
 status vsmap::get_between(string_view key1, string_view key2, get_kv_callback *callback,
 			  void *arg)
 {
-	LOG("EachBetween for key1=" << key1.data() << ", key2=" << key2.data());
+	LOG("get_between for key1=" << key1.data() << ", key2=" << key2.data());
 	if (key1.compare(key2) < 0) {
 		// XXX - do not create temporary string
 		auto it = pmem_kv_container.upper_bound(
@@ -196,7 +196,7 @@ status vsmap::get_between(string_view key1, string_view key2, get_kv_callback *c
 
 status vsmap::exists(string_view key)
 {
-	LOG("Exists for key=" << std::string(key.data(), key.size()));
+	LOG("exists for key=" << std::string(key.data(), key.size()));
 	// XXX - do not create temporary string
 	bool r = pmem_kv_container.find(key_type(key.data(), key.size(), kv_allocator)) !=
 		pmem_kv_container.end();
@@ -205,7 +205,7 @@ status vsmap::exists(string_view key)
 
 status vsmap::get(string_view key, get_v_callback *callback, void *arg)
 {
-	LOG("Get key=" << std::string(key.data(), key.size()));
+	LOG("get key=" << std::string(key.data(), key.size()));
 	// XXX - do not create temporary string
 	const auto pos =
 		pmem_kv_container.find(key_type(key.data(), key.size(), kv_allocator));
@@ -220,7 +220,7 @@ status vsmap::get(string_view key, get_v_callback *callback, void *arg)
 
 status vsmap::put(string_view key, string_view value)
 {
-	LOG("Put key=" << std::string(key.data(), key.size())
+	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 	try {
 		// XXX - do not create temporary string
@@ -241,7 +241,7 @@ status vsmap::put(string_view key, string_view value)
 
 status vsmap::remove(string_view key)
 {
-	LOG("Remove key=" << std::string(key.data(), key.size()));
+	LOG("remove key=" << std::string(key.data(), key.size()));
 	try {
 		// XXX - do not create temporary string
 		size_t erased = pmem_kv_container.erase(

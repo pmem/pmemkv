@@ -568,7 +568,7 @@ TEST_F(TreeTest, RemoveNonexistentTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 }
 
-TEST_F(TreeTest, UsesEachTest)
+TEST_F(TreeTest, UsesGetAllTest)
 {
 	ASSERT_TRUE(kv->put("RR", "记!") == status::OK) << db::errormsg();
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();

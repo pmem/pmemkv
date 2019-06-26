@@ -68,7 +68,7 @@ std::string vcmap::name()
 
 status vcmap::count_all(std::size_t &cnt)
 {
-	LOG("Count");
+	LOG("count_all");
 	cnt = pmem_kv_container.size();
 
 	return status::OK;
@@ -76,7 +76,7 @@ status vcmap::count_all(std::size_t &cnt)
 
 status vcmap::get_all(get_kv_callback *callback, void *arg)
 {
-	LOG("Each");
+	LOG("get_all");
 	for (auto &iterator : pmem_kv_container) {
 		auto ret = callback(iterator.first.c_str(), iterator.first.size(),
 				    iterator.second.c_str(), iterator.second.size(), arg);
@@ -90,7 +90,7 @@ status vcmap::get_all(get_kv_callback *callback, void *arg)
 
 status vcmap::exists(string_view key)
 {
-	LOG("Exists for key=" << std::string(key.data(), key.size()));
+	LOG("exists for key=" << std::string(key.data(), key.size()));
 	map_t::const_accessor result;
 	// XXX - do not create temporary string
 	const bool result_found = pmem_kv_container.find(
@@ -100,7 +100,7 @@ status vcmap::exists(string_view key)
 
 status vcmap::get(string_view key, get_v_callback *callback, void *arg)
 {
-	LOG("Get key=" << std::string(key.data(), key.size()));
+	LOG("get key=" << std::string(key.data(), key.size()));
 	map_t::const_accessor result;
 	// XXX - do not create temporary string
 	const bool result_found = pmem_kv_container.find(
@@ -116,7 +116,7 @@ status vcmap::get(string_view key, get_v_callback *callback, void *arg)
 
 status vcmap::put(string_view key, string_view value)
 {
-	LOG("Put key=" << std::string(key.data(), key.size())
+	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 	try {
 		map_t::value_type kv_pair{
@@ -144,7 +144,7 @@ status vcmap::put(string_view key, string_view value)
 
 status vcmap::remove(string_view key)
 {
-	LOG("Remove key=" << std::string(key.data(), key.size()));
+	LOG("remove key=" << std::string(key.data(), key.size()));
 	try {
 		// XXX - do not create temporary string
 		size_t erased = pmem_kv_container.erase(
