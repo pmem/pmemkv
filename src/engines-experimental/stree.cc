@@ -36,6 +36,7 @@
 #include <libpmemobj++/make_persistent_atomic.hpp>
 #include <libpmemobj++/transaction.hpp>
 
+#include "../out.h"
 #include "stree.h"
 
 #define DO_LOG 0
@@ -148,13 +149,13 @@ status stree::put(string_view key, string_view value)
 		}
 		return status::OK;
 	} catch (std::bad_alloc e) {
-		LOG("Put failed due to exception, " << e.what());
+		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_alloc_error e) {
-		LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_error e) {
-		LOG("Put failed due to pmem::transaction_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
 }
@@ -166,13 +167,13 @@ status stree::remove(string_view key)
 		auto result = my_btree->erase(std::string(key.data(), key.size()));
 		return (result == 1) ? status::OK : status::NOT_FOUND;
 	} catch (std::bad_alloc e) {
-		LOG("Put failed due to exception, " << e.what());
+		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_alloc_error e) {
-		LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_error e) {
-		LOG("Put failed due to pmem::transaction_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
 }
