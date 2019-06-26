@@ -31,6 +31,7 @@
  */
 
 #include "vcmap.h"
+#include "../out.h"
 #include <libpmemobj++/transaction.hpp>
 
 #include <iostream>
@@ -133,13 +134,13 @@ status vcmap::put(string_view key, string_view value)
 		}
 		return status::OK;
 	} catch (std::bad_alloc e) {
-		LOG("Put failed due to exception, " << e.what());
+		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_alloc_error e) {
-		LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_error e) {
-		LOG("Put failed due to pmem::transaction_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
 }
@@ -153,13 +154,13 @@ status vcmap::remove(string_view key)
 			pmem_string(key.data(), key.size(), ch_allocator));
 		return (erased == 1) ? status::OK : status::NOT_FOUND;
 	} catch (std::bad_alloc e) {
-		LOG("Put failed due to exception, " << e.what());
+		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_alloc_error e) {
-		LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_error e) {
-		LOG("Put failed due to pmem::transaction_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
 }
