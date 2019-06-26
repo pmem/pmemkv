@@ -31,6 +31,8 @@
  */
 
 #include "tree3.h"
+#include "../out.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cstring>
@@ -208,13 +210,13 @@ status tree3::put(string_view key, string_view value)
 		}
 		return status::OK;
 	} catch (std::bad_alloc e) {
-		LOG("Put failed due to exception, " << e.what());
+		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_alloc_error e) {
-		LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_error e) {
-		LOG("Put failed due to pmem::transaction_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
 }
@@ -247,13 +249,13 @@ status tree3::remove(string_view key)
 		}
 		return status::NOT_FOUND;
 	} catch (std::bad_alloc e) {
-		LOG("Put failed due to exception, " << e.what());
+		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_alloc_error e) {
-		LOG("Put failed due to pmem::transaction_alloc_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_error e) {
-		LOG("Put failed due to pmem::transaction_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
 }
