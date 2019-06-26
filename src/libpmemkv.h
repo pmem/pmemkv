@@ -89,6 +89,8 @@ int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb
 
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
 
+const char *pmemkv_errormsg(void);
+
 void *pmemkv_engine_context(pmemkv_db *db);
 
 #ifdef __cplusplus
