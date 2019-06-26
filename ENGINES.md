@@ -18,9 +18,11 @@ blackhole
 A volatile concurrent engine that accepts an unlimited amount of data, but never returns anything.
 It is always enabled (no CMake option is specified to enable/disable this engine).
 
-* `Put` and `Remove` always returns `status::OK`
-* `Get` always returns `status::NOT_FOUND`
-* `All` and `Each` never trigger callbacks
+* `put` and `remove` always returns `status::OK`
+* `get` always returns `status::OK`
+* `exists` always returns `status::NOT_FOUND`
+* `get_*` never trigger callbacks and always returns `status::OK`
+* `count` always returns 0
 
 ### Configuration
 
