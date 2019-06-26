@@ -93,7 +93,7 @@ public:
 	}
 
 	virtual status get_between(string_view key1, string_view key2,
-				    get_kv_callback *callback, void *arg)
+				   get_kv_callback *callback, void *arg)
 	{
 		return status::NOT_SUPPORTED;
 	}
