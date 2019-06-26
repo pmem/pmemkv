@@ -87,6 +87,7 @@ void *stree::engine_context()
 
 status stree::count_all(std::size_t &cnt)
 {
+	LOG("Count_all");
 	std::size_t result = 0;
 	for (auto &iterator : *my_btree)
 		result++;
@@ -98,7 +99,7 @@ status stree::count_all(std::size_t &cnt)
 
 status stree::get_all(get_kv_callback *callback, void *arg)
 {
-	LOG("Each");
+	LOG("Get_all");
 	for (auto &iterator : *my_btree) {
 		(*callback)(iterator.first.c_str(), iterator.first.size(),
 			    iterator.second.c_str(), iterator.second.size(), arg);

@@ -67,7 +67,7 @@ void *blackhole::engine_context()
 
 status blackhole::count_all(std::size_t &cnt)
 {
-	LOG("Count");
+	LOG("Count_all");
 
 	cnt = 0;
 
@@ -76,7 +76,7 @@ status blackhole::count_all(std::size_t &cnt)
 
 status blackhole::count_above(string_view key, std::size_t &cnt)
 {
-	LOG("CountAbove for key=" << std::string(key.data(), key.size()));
+	LOG("Count_above for key=" << std::string(key.data(), key.size()));
 
 	cnt = 0;
 
@@ -85,7 +85,7 @@ status blackhole::count_above(string_view key, std::size_t &cnt)
 
 status blackhole::count_below(string_view key, std::size_t &cnt)
 {
-	LOG("CountBelow for key=" << std::string(key.data(), key.size()));
+	LOG("Count_below for key=" << std::string(key.data(), key.size()));
 
 	cnt = 0;
 
@@ -94,7 +94,7 @@ status blackhole::count_below(string_view key, std::size_t &cnt)
 
 status blackhole::count_between(string_view key1, string_view key2, std::size_t &cnt)
 {
-	LOG("CountBetween for key1=" << key1.data() << ", key2=" << key2.data());
+	LOG("Count_between for key1=" << key1.data() << ", key2=" << key2.data());
 
 	cnt = 0;
 
@@ -103,21 +103,21 @@ status blackhole::count_between(string_view key1, string_view key2, std::size_t 
 
 status blackhole::get_all(get_kv_callback *callback, void *arg)
 {
-	LOG("Each");
+	LOG("Get_all");
 
 	return status::OK;
 }
 
 status blackhole::get_above(string_view key, get_kv_callback *callback, void *arg)
 {
-	LOG("EachAbove for key=" << std::string(key.data(), key.size()));
+	LOG("Get_above for key=" << std::string(key.data(), key.size()));
 
 	return status::OK;
 }
 
 status blackhole::get_below(string_view key, get_kv_callback *callback, void *arg)
 {
-	LOG("EachBelow for key=" << std::string(key.data(), key.size()));
+	LOG("Get_below for key=" << std::string(key.data(), key.size()));
 
 	return status::OK;
 }
@@ -125,7 +125,7 @@ status blackhole::get_below(string_view key, get_kv_callback *callback, void *ar
 status blackhole::get_between(string_view key1, string_view key2,
 			      get_kv_callback *callback, void *arg)
 {
-	LOG("EachBetween for key1=" << key1.data() << ", key2=" << key2.data());
+	LOG("Get_between for key1=" << key1.data() << ", key2=" << key2.data());
 
 	return status::OK;
 }

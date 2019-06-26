@@ -146,7 +146,7 @@ bool caching::readConfig(pmemkv_config *config)
 
 status caching::count_all(std::size_t &cnt)
 {
-	LOG("Count");
+	LOG("Count_all");
 	std::size_t result = 0;
 	get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
@@ -160,7 +160,7 @@ status caching::count_all(std::size_t &cnt)
 	return status::OK;
 }
 
-struct EachCacheCallbackContext {
+struct GetAllCacheCallbackContext {
 	void *arg;
 	get_kv_callback *cBack;
 	std::list<std::string> *expiredKeys;
@@ -168,12 +168,12 @@ struct EachCacheCallbackContext {
 
 status caching::get_all(get_kv_callback *callback, void *arg)
 {
-	LOG("Each");
+	LOG("Get_all");
 	std::list<std::string> removingKeys;
-	EachCacheCallbackContext cxt = {arg, callback, &removingKeys};
+	GetAllCacheCallbackContext cxt = {arg, callback, &removingKeys};
 
 	auto cb = [](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-		const auto c = ((EachCacheCallbackContext *)arg);
+		const auto c = ((GetAllCacheCallbackContext *)arg);
 		std::string localValue = v;
 		std::string timeStamp = localValue.substr(0, 14);
 		std::string value = localValue.substr(14);

@@ -106,7 +106,7 @@ status tree3::count_all(std::size_t &cnt)
 
 status tree3::get_all(get_kv_callback *callback, void *arg)
 {
-	LOG("Each");
+	LOG("Get_all");
 	auto leaf = pmpool.root()->head;
 	while (leaf) {
 		for (int slot = LEAF_KEYS; slot--;) {

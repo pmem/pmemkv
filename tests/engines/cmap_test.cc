@@ -492,7 +492,7 @@ TEST_F(CMapTest, RemoveNonexistentTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 }
 
-TEST_F(CMapTest, UsesEachTest)
+TEST_F(CMapTest, UsesGetAllTest)
 {
 	ASSERT_TRUE(kv->put("1", "2") == status::OK) << pmemobj_errormsg();
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();

@@ -80,7 +80,7 @@ void *cmap::engine_context()
 
 status cmap::count_all(std::size_t &cnt)
 {
-	LOG("Count");
+	LOG("Count_all");
 	cnt = container->size();
 
 	return status::OK;
@@ -88,7 +88,7 @@ status cmap::count_all(std::size_t &cnt)
 
 status cmap::get_all(get_kv_callback *callback, void *arg)
 {
-	LOG("Each");
+	LOG("Get_all");
 	for (auto it = container->begin(); it != container->end(); ++it) {
 		(*callback)(it->first.c_str(), it->first.size(), it->second.c_str(),
 			    it->second.size(), arg);

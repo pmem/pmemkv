@@ -540,7 +540,7 @@ TEST_F(VSMapTest, UsesCountTest)
 	ASSERT_TRUE(cnt == 0);
 }
 
-TEST_F(VSMapTest, UsesEachTest)
+TEST_F(VSMapTest, UsesGetAllTest)
 {
 	ASSERT_TRUE(kv->put("1", "one") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("2", "two") == status::OK) << pmemobj_errormsg();
@@ -580,7 +580,7 @@ TEST_F(VSMapTest, UsesEachTest)
 	ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
 }
 
-TEST_F(VSMapTest, UsesEachAboveTest)
+TEST_F(VSMapTest, UsesGetAllAboveTest)
 {
 	ASSERT_TRUE(kv->put("A", "1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("AB", "2") == status::OK) << pmemobj_errormsg();
@@ -640,7 +640,7 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 	ASSERT_TRUE(x == "BB,5|BC,6|记!,RR|");
 }
 
-TEST_F(VSMapTest, UsesEachBelowTest)
+TEST_F(VSMapTest, UsesGetAllBelowTest)
 {
 	ASSERT_TRUE(kv->put("A", "1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("AB", "2") == status::OK) << pmemobj_errormsg();
@@ -700,7 +700,7 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|");
 }
 
-TEST_F(VSMapTest, UsesEachBetweenTest)
+TEST_F(VSMapTest, UsesGetAllBetweenTest)
 {
 	ASSERT_TRUE(kv->put("A", "1") == status::OK) << pmemobj_errormsg();
 	ASSERT_TRUE(kv->put("AB", "2") == status::OK) << pmemobj_errormsg();
