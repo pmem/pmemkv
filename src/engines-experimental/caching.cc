@@ -58,13 +58,16 @@ namespace kv
 caching::caching(void *context, pmemkv_config *config) : context(context)
 {
 	if (!readConfig(config))
-		throw "caching Exception"; // todo propagate start exceptions properly
+		throw std::runtime_error(
+			"caching Exception"); // todo propagate start exceptions properly
 
 	if (!(basePtr = new db))
-		throw "caching Exception"; // todo propagate start exceptions properly
+		throw std::runtime_error(
+			"caching Exception"); // todo propagate start exceptions properly
 
-	if (basePtr->open(subEngine, config) != status::OK)
-		throw "caching Exception"; // todo propagate start exceptions properly
+	if (basePtr->open(subEngine, subEngineConfig) != status::OK)
+		throw std::runtime_error(
+			"caching Exception"); // todo propagate start exceptions properly
 
 	LOG("Started ok");
 }
@@ -89,16 +92,12 @@ void *caching::engine_context()
 
 bool caching::getString(pmemkv_config *config, const char *key, std::string &str)
 {
-	size_t length;
+	const char *value;
 
-	if (pmemkv_config_get(config, key, NULL, 0, &length) == -1)
+	if (pmemkv_config_get_string(config, key, &value) != PMEMKV_STATUS_OK)
 		return false;
 
-	auto c_str = std::unique_ptr<char[]>(new char[length]);
-	if (pmemkv_config_get(config, key, c_str.get(), length, NULL) != length)
-		return false;
-
-	str = std::string(c_str.get(), length);
+	str = std::string(value);
 
 	return true;
 }
@@ -123,15 +122,23 @@ bool caching::readConfig(pmemkv_config *config)
 	if (!getString(config, "host", host))
 		return false;
 
-	if (pmemkv_config_get(config, "ttl", &ttl, sizeof(int), NULL) != sizeof(int))
+	auto ret = pmemkv_config_get_int64(config, "ttl", &ttl);
+	if (ret == PMEMKV_STATUS_NOT_FOUND)
 		ttl = 0;
-
-	if (pmemkv_config_get(config, "port", &port, sizeof(unsigned long int), NULL) !=
-	    sizeof(unsigned long int))
+	else if (ret != PMEMKV_STATUS_OK)
 		return false;
 
-	if (pmemkv_config_get(config, "attempts", &attempts, sizeof(int), NULL) !=
-	    sizeof(int))
+	ret = pmemkv_config_get_int64(config, "port", &port);
+	if (ret != PMEMKV_STATUS_OK)
+		return false;
+
+	ret = pmemkv_config_get_int64(config, "attempts", &attempts);
+	if (ret != PMEMKV_STATUS_OK)
+		return false;
+
+	ret = pmemkv_config_get_object(config, "subengine_config",
+				       (const void **)&subEngineConfig);
+	if (ret != PMEMKV_STATUS_OK)
 		return false;
 
 	return true;
@@ -189,6 +196,8 @@ status caching::get_all(get_kv_callback *callback, void *arg)
 				return status::FAILED;
 		}
 	}
+
+	return status::OK;
 }
 
 status caching::exists(string_view key)
@@ -206,7 +215,7 @@ status caching::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("Get key=" << std::string(key.data(), key.size()));
 	std::string value;
-	if (getKey(key, value, false)) {
+	if (getKey(std::string(key.data(), key.size()), value, false)) {
 		(*callback)(value.c_str(), value.size(), arg);
 		return status::OK;
 	} else

@@ -31,6 +31,9 @@
  */
 
 #include <rapidjson/document.h>
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/writer.h>
 #include <sys/stat.h>
 
 #include "engine.h"
@@ -73,7 +76,15 @@
 	} while (0)
 
 struct pmemkv_config {
-	std::unordered_map<std::string, std::vector<char>> umap;
+	enum class config_type { STRING, INT64, UINT64, DOUBLE, DATA, OBJECT };
+
+	struct entry {
+		std::vector<char> value;
+		void (*deleter)(void *);
+		config_type type;
+	};
+
+	std::unordered_map<std::string, entry> umap;
 };
 
 extern "C" {
@@ -89,16 +100,27 @@ pmemkv_config *pmemkv_config_new(void)
 
 void pmemkv_config_delete(pmemkv_config *config)
 {
+	for (auto &item : config->umap) {
+		if (item.second.type == pmemkv_config::config_type::OBJECT) {
+			void *object;
+			memcpy(&object, item.second.value.data(),
+			       item.second.value.size());
+
+			if (item.second.deleter != nullptr)
+				item.second.deleter(object);
+		}
+	}
+
 	delete config;
 }
 
-int pmemkv_config_put(pmemkv_config *config, const char *key, const void *value,
-		      size_t value_size)
+static int pmemkv_config_put(pmemkv_config *config, const char *key, const void *value,
+			     size_t value_size, pmemkv_config::config_type type)
 {
 	try {
 		std::string mkey(key);
 		std::vector<char> v((char *)value, (char *)value + value_size);
-		config->umap.insert({mkey, v});
+		config->umap.insert({mkey, {v, nullptr, type}});
 	} catch (...) {
 		return PMEMKV_STATUS_FAILED;
 	}
@@ -106,27 +128,25 @@ int pmemkv_config_put(pmemkv_config *config, const char *key, const void *value,
 	return PMEMKV_STATUS_OK;
 }
 
-int pmemkv_config_get(pmemkv_config *config, const char *key, void *buffer,
-		      size_t buffer_len, size_t *value_size)
+static int pmemkv_config_get(pmemkv_config *config, const char *key, const void **value,
+			     size_t *value_size, pmemkv_config::config_type *type)
 {
-	size_t len = 0;
-
 	try {
-		std::string mkey(key);
-		auto found = config->umap.find(mkey);
+		auto found = config->umap.find(key);
 
 		if (found == config->umap.end())
 			return PMEMKV_STATUS_NOT_FOUND;
 
-		auto mvalue = found->second;
+		auto &mvalue = found->second.value;
 
-		if (buffer) {
-			len = (buffer_len < mvalue.size()) ? buffer_len : mvalue.size();
-			memcpy(buffer, mvalue.data(), len);
-		}
+		if (value)
+			*value = mvalue.data();
 
 		if (value_size)
 			*value_size = mvalue.size();
+
+		if (type)
+			*type = found->second.type;
 	} catch (...) {
 		return PMEMKV_STATUS_FAILED;
 	}
@@ -134,23 +154,15 @@ int pmemkv_config_get(pmemkv_config *config, const char *key, void *buffer,
 	return PMEMKV_STATUS_OK;
 }
 
-int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
+int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 {
 	rapidjson::Document doc;
 	rapidjson::Value::ConstMemberIterator itr;
 
-	union data {
-		unsigned uint;
-		int sint;
-		uint64_t uint64;
-		int64_t sint64;
-		double db;
-	} data;
-
-	assert(config && jsonconfig);
+	assert(config && json);
 
 	try {
-		if (doc.Parse(jsonconfig).HasParseError())
+		if (doc.Parse(json).HasParseError())
 			return PMEMKV_STATUS_CONFIG_PARSING_ERROR;
 
 		if (doc.HasMember("path") && !doc["path"].IsString())
@@ -159,35 +171,73 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 			throw std::runtime_error("'size' in JSON is not a valid number");
 
 		for (itr = doc.MemberBegin(); itr != doc.MemberEnd(); ++itr) {
-			const void *value = &data;
-			size_t value_size;
 			if (itr->value.IsString()) {
-				value = itr->value.GetString();
-				value_size = itr->value.GetStringLength() + 1;
-			} else if (itr->value.IsUint()) {
-				data.uint = itr->value.GetUint();
-				value_size = 4;
-			} else if (itr->value.IsInt()) {
-				data.sint = itr->value.GetInt();
-				value_size = 4;
-			} else if (itr->value.IsUint64()) {
-				data.uint64 = itr->value.GetUint64();
-				value_size = 8;
-			} else if (itr->value.IsInt64()) {
-				data.sint64 = itr->value.GetInt64();
-				value_size = 8;
-			} else if (itr->value.IsDouble()) {
-				data.db = itr->value.GetDouble();
-				value_size = 8;
-			} else {
-				throw std::runtime_error(
-					"Unsupported data type in JSON string");
-			}
+				auto value = itr->value.GetString();
 
-			auto status = pmemkv_config_put(config, itr->name.GetString(),
-							value, value_size);
-			if (status != PMEMKV_STATUS_OK)
-				return status;
+				auto status = pmemkv_config_put_string(
+					config, itr->name.GetString(), value);
+				if (status != PMEMKV_STATUS_OK)
+					throw std::runtime_error(
+						"Inserting string to the config failed");
+			} else if (itr->value.IsInt64()) {
+				auto value = itr->value.GetInt64();
+
+				auto status = pmemkv_config_put_int64(
+					config, itr->name.GetString(), value);
+				if (status != PMEMKV_STATUS_OK)
+					throw std::runtime_error(
+						"Inserting int to the config failed");
+			} else if (itr->value.IsDouble()) {
+				auto value = itr->value.GetDouble();
+
+				auto status = pmemkv_config_put_double(
+					config, itr->name.GetString(), value);
+				if (status != PMEMKV_STATUS_OK)
+					throw std::runtime_error(
+						"Inserting double to the config failed");
+			} else if (itr->value.IsTrue() || itr->value.IsFalse()) {
+				auto value = itr->value.GetBool();
+
+				auto status = pmemkv_config_put_int64(
+					config, itr->name.GetString(), value);
+				if (status != PMEMKV_STATUS_OK)
+					throw std::runtime_error(
+						"Inserting bool to the config failed");
+			} else if (itr->value.IsObject()) {
+				rapidjson::StringBuffer sb;
+				rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+				itr->value.Accept(writer);
+
+				auto sub_cfg = pmemkv_config_new();
+
+				if (sub_cfg == nullptr) {
+					ERR("Cannot allocate subconfig");
+					return PMEMKV_STATUS_FAILED;
+				}
+
+				auto status =
+					pmemkv_config_from_json(sub_cfg, sb.GetString());
+				if (status != PMEMKV_STATUS_OK) {
+					pmemkv_config_delete(sub_cfg);
+					throw std::runtime_error(
+						"Cannot parse subconfig");
+				}
+
+				status = pmemkv_config_put_object(
+					config, itr->name.GetString(), sub_cfg,
+					(void (*)(void *)) & pmemkv_config_delete);
+				if (status != PMEMKV_STATUS_OK)
+					throw std::runtime_error(
+						"Inserting a new entry to the config failed");
+			} else {
+				static std::string kTypeNames[] = {
+					"Null",  "False",  "True",  "Object",
+					"Array", "String", "Number"};
+
+				throw std::runtime_error(
+					"Unsupported data type in JSON string: " +
+					kTypeNames[itr->value.GetType()]);
+			}
 		}
 	} catch (const std::exception &exc) {
 		ERR(exc.what());
@@ -196,6 +246,162 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig)
 		ERR("Unspecified failure");
 		return PMEMKV_STATUS_CONFIG_PARSING_ERROR;
 	}
+
+	return PMEMKV_STATUS_OK;
+}
+
+int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *value,
+			   size_t value_size)
+{
+	return pmemkv_config_put(config, key, value, value_size,
+				 pmemkv_config::config_type::DATA);
+}
+
+int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value,
+			     void (*deleter)(void *))
+{
+	try {
+		std::string mkey(key);
+		std::vector<char> v((char *)&value, (char *)&value + sizeof(value));
+		config->umap.insert(
+			{mkey, {v, deleter, pmemkv_config::config_type::OBJECT}});
+	} catch (...) {
+		return PMEMKV_STATUS_FAILED;
+	}
+
+	return PMEMKV_STATUS_OK;
+}
+
+int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value)
+{
+	return pmemkv_config_put(config, key, &value, sizeof(value),
+				 pmemkv_config::config_type::INT64);
+}
+
+int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value)
+{
+	return pmemkv_config_put(config, key, &value, sizeof(value),
+				 pmemkv_config::config_type::UINT64);
+	;
+}
+
+int pmemkv_config_put_double(pmemkv_config *config, const char *key, double value)
+{
+	return pmemkv_config_put(config, key, &value, sizeof(value),
+				 pmemkv_config::config_type::DOUBLE);
+	;
+}
+
+int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value)
+{
+	return pmemkv_config_put(config, key, value,
+				 std::char_traits<char>::length(value) + 1,
+				 pmemkv_config::config_type::STRING);
+}
+
+int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **value,
+			   size_t *value_size)
+{
+	return pmemkv_config_get(config, key, value, value_size, nullptr);
+}
+
+int pmemkv_config_get_object(pmemkv_config *config, const char *key, const void **value)
+{
+	size_t size;
+	void *ptr_ptr;
+
+	auto status =
+		pmemkv_config_get(config, key, (const void **)&ptr_ptr, &size, nullptr);
+	if (status == PMEMKV_STATUS_OK && size != sizeof(value))
+		return PMEMKV_STATUS_CONFIG_TYPE_ERROR;
+
+	memcpy(value, ptr_ptr, sizeof(value));
+
+	return status;
+}
+
+int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value)
+{
+	const void *data;
+	size_t value_size;
+	pmemkv_config::config_type type;
+
+	auto status = pmemkv_config_get(config, key, &data, &value_size, &type);
+	if (status != PMEMKV_STATUS_OK)
+		return status;
+
+	if (type == pmemkv_config::config_type::INT64) {
+		*value = *(static_cast<const int64_t *>(data));
+		return PMEMKV_STATUS_OK;
+	} else if (type == pmemkv_config::config_type::UINT64) {
+		/* conversion from uint64 allowed */
+		auto uval = *(static_cast<const uint64_t *>(data));
+		if (uval < std::numeric_limits<int64_t>::max()) {
+			*value = *(static_cast<const int64_t *>(data));
+			return PMEMKV_STATUS_OK;
+		}
+	}
+
+	return PMEMKV_STATUS_CONFIG_TYPE_ERROR;
+}
+
+int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value)
+{
+	const void *data;
+	size_t value_size;
+	pmemkv_config::config_type type;
+
+	auto status = pmemkv_config_get(config, key, &data, &value_size, &type);
+	if (status != PMEMKV_STATUS_OK)
+		return status;
+
+	if (type == pmemkv_config::config_type::UINT64) {
+		*value = *(static_cast<const uint64_t *>(data));
+		return PMEMKV_STATUS_OK;
+	} else if (type == pmemkv_config::config_type::INT64) {
+		/* conversion from int64 allowed */
+		auto sval = *(static_cast<const int64_t *>(data));
+		if (sval >= 0) {
+			*value = *(static_cast<const uint64_t *>(data));
+			return PMEMKV_STATUS_OK;
+		}
+	}
+
+	return PMEMKV_STATUS_CONFIG_TYPE_ERROR;
+}
+
+int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *value)
+{
+	const void *data;
+	size_t value_size;
+	pmemkv_config::config_type type;
+
+	auto status = pmemkv_config_get(config, key, &data, &value_size, &type);
+	if (status != PMEMKV_STATUS_OK)
+		return status;
+
+	if (type != pmemkv_config::config_type::DOUBLE)
+		return PMEMKV_STATUS_CONFIG_TYPE_ERROR;
+
+	*value = *((const double *)data);
+
+	return PMEMKV_STATUS_OK;
+}
+
+int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value)
+{
+	const void *data;
+	size_t value_size;
+	pmemkv_config::config_type type;
+
+	auto status = pmemkv_config_get(config, key, &data, &value_size, &type);
+	if (status != PMEMKV_STATUS_OK)
+		return status;
+
+	if (type != pmemkv_config::config_type::STRING)
+		return PMEMKV_STATUS_CONFIG_TYPE_ERROR;
+
+	*value = (const char *)data;
 
 	return PMEMKV_STATUS_OK;
 }
@@ -224,25 +430,23 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 		}
 #endif
 		// handle traditional engines expecting path & size params
-		size_t length;
-		if (pmemkv_config_get(config, "path", NULL, 0, &length) !=
-		    PMEMKV_STATUS_OK)
+		const char *path;
+
+		auto status = pmemkv_config_get_string(config, "path", &path);
+		if (status != PMEMKV_STATUS_OK)
 			throw std::runtime_error(
 				"JSON does not contain a valid path string");
-		auto path = std::unique_ptr<char[]>(new char[length]);
-		if (pmemkv_config_get(config, "path", path.get(), length, NULL) !=
-		    PMEMKV_STATUS_OK)
-			throw std::runtime_error(
-				"Cannot get a 'path' string from the config");
 
-		size_t size = 0;
-		if (pmemkv_config_get(config, "size", &size, sizeof(size_t), NULL) !=
-		    PMEMKV_STATUS_OK)
+		size_t size;
+
+		status = pmemkv_config_get_uint64(config, "size", &size);
+		if (status != PMEMKV_STATUS_OK)
 			throw std::runtime_error("Cannot get 'size' from the config");
+
 #ifdef ENGINE_TREE3
 		if (engine == "tree3") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::tree3(context, path.get(), size));
+				new pmem::kv::tree3(context, path, size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -251,7 +455,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_STREE
 		if (engine == "stree") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::stree(context, path.get(), size));
+				new pmem::kv::stree(context, path, size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -260,7 +464,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_CMAP
 		if (engine == "cmap") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::cmap(context, path.get(), size));
+				new pmem::kv::cmap(context, path, size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -268,7 +472,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 
 #if defined(ENGINE_VSMAP) || defined(ENGINE_VCMAP)
 		struct stat info;
-		if ((stat(path.get(), &info) < 0) || !S_ISDIR(info.st_mode)) {
+		if ((stat(path, &info) < 0) || !S_ISDIR(info.st_mode)) {
 			throw std::runtime_error(
 				"Config path is not an existing directory");
 		}
@@ -277,7 +481,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_VSMAP
 		if (engine == "vsmap") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::vsmap(context, path.get(), size));
+				new pmem::kv::vsmap(context, path, size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -286,7 +490,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_VCMAP
 		if (engine == "vcmap") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::vcmap(context, path.get(), size));
+				new pmem::kv::vcmap(context, path, size));
 
 			return PMEMKV_STATUS_OK;
 		}
