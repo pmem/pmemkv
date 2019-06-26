@@ -41,7 +41,7 @@ cd memkind
 # 1.9.0
 git checkout v1.9.0
 
-./build.sh
+./build.sh --prefix=/usr
 sudo make install
 
 cd ..
