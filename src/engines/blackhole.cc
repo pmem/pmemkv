@@ -123,7 +123,7 @@ status blackhole::get_below(string_view key, get_kv_callback *callback, void *ar
 }
 
 status blackhole::get_between(string_view key1, string_view key2,
-			       get_kv_callback *callback, void *arg)
+			      get_kv_callback *callback, void *arg)
 {
 	LOG("EachBetween for key1=" << key1.data() << ", key2=" << key2.data());
 

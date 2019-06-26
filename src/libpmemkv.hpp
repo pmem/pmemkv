@@ -114,7 +114,8 @@ public:
 	status count_all(std::size_t &cnt) noexcept;
 	status count_above(string_view key, std::size_t &cnt) noexcept;
 	status count_below(string_view key, std::size_t &cnt) noexcept;
-	status count_between(string_view key1, string_view key2, std::size_t &cnt)noexcept;
+	status count_between(string_view key1, string_view key2,
+			     std::size_t &cnt) noexcept;
 
 	status get_all(get_kv_callback *callback, void *arg) noexcept;
 	status get_all(std::function<get_kv_function> f) noexcept;
@@ -126,9 +127,9 @@ public:
 	status get_below(string_view key, std::function<get_kv_function> f) noexcept;
 
 	status get_between(string_view key1, string_view key2, get_kv_callback *callback,
-			    void *arg) noexcept;
+			   void *arg) noexcept;
 	status get_between(string_view key1, string_view key2,
-			    std::function<get_kv_function> f) noexcept;
+			   std::function<get_kv_function> f) noexcept;
 
 	status exists(string_view key) noexcept;
 
@@ -191,8 +192,8 @@ inline int string_view::compare(const string_view &other) noexcept
  * C and C++ functions use different calling conventions.
  */
 extern "C" {
-static inline void call_get_kv_function(const char *key, size_t keybytes, const char *value,
-				      size_t valuebytes, void *arg)
+static inline void call_get_kv_function(const char *key, size_t keybytes,
+					const char *value, size_t valuebytes, void *arg)
 {
 	(*reinterpret_cast<std::function<get_kv_function> *>(arg))(
 		string_view(key, keybytes), string_view(value, valuebytes));
@@ -297,7 +298,8 @@ inline status db::get_all(std::function<get_kv_function> f) noexcept
 	return static_cast<status>(pmemkv_get_all(this->_db, call_get_kv_function, &f));
 }
 
-inline status db::get_above(string_view key, get_kv_callback *callback, void *arg) noexcept
+inline status db::get_above(string_view key, get_kv_callback *callback,
+			    void *arg) noexcept
 {
 	return static_cast<status>(
 		pmemkv_get_above(this->_db, key.data(), key.size(), callback, arg));
@@ -306,10 +308,11 @@ inline status db::get_above(string_view key, get_kv_callback *callback, void *ar
 inline status db::get_above(string_view key, std::function<get_kv_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_get_above(this->_db, key.data(), key.size(),
-						     call_get_kv_function, &f));
+						    call_get_kv_function, &f));
 }
 
-inline status db::get_below(string_view key, get_kv_callback *callback, void *arg) noexcept
+inline status db::get_below(string_view key, get_kv_callback *callback,
+			    void *arg) noexcept
 {
 	return static_cast<status>(
 		pmemkv_get_below(this->_db, key.data(), key.size(), callback, arg));
@@ -318,23 +321,23 @@ inline status db::get_below(string_view key, get_kv_callback *callback, void *ar
 inline status db::get_below(string_view key, std::function<get_kv_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_get_below(this->_db, key.data(), key.size(),
-						     call_get_kv_function, &f));
+						    call_get_kv_function, &f));
 }
 
 inline status db::get_between(string_view key1, string_view key2,
-			       get_kv_callback *callback, void *arg) noexcept
+			      get_kv_callback *callback, void *arg) noexcept
 {
-	return static_cast<status>(pmemkv_get_between(this->_db, key1.data(),
-						       key1.size(), key2.data(),
-						       key2.size(), callback, arg));
+	return static_cast<status>(pmemkv_get_between(this->_db, key1.data(), key1.size(),
+						      key2.data(), key2.size(), callback,
+						      arg));
 }
 
 inline status db::get_between(string_view key1, string_view key2,
-			       std::function<get_kv_function> f) noexcept
+			      std::function<get_kv_function> f) noexcept
 {
-	return static_cast<status>(
-		pmemkv_get_between(this->_db, key1.data(), key1.size(), key2.data(),
-				    key2.size(), call_get_kv_function, &f));
+	return static_cast<status>(pmemkv_get_between(this->_db, key1.data(), key1.size(),
+						      key2.data(), key2.size(),
+						      call_get_kv_function, &f));
 }
 
 inline status db::exists(string_view key) noexcept

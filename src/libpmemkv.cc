@@ -317,7 +317,8 @@ void pmemkv_close(pmemkv_db *db)
 int pmemkv_count_all(pmemkv_db *db, size_t *cnt)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->count_all(*cnt);
+		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->count_all(
+			*cnt);
 	} catch (const std::exception &exc) {
 		ERR(exc.what());
 		return PMEMKV_STATUS_FAILED;
@@ -374,7 +375,8 @@ int pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *
 int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_all(c, arg);
+		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_all(c,
+										   arg);
 	} catch (const std::exception &exc) {
 		ERR(exc.what());
 		return PMEMKV_STATUS_FAILED;
@@ -385,7 +387,7 @@ int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg)
 }
 
 int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
-		      void *arg)
+		     void *arg)
 {
 	try {
 		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_above(
@@ -397,7 +399,7 @@ int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_call
 }
 
 int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
-		      void *arg)
+		     void *arg)
 {
 	try {
 		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_below(
@@ -412,7 +414,7 @@ int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_call
 }
 
 int pmemkv_get_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-			size_t kb2, pmemkv_get_kv_callback *c, void *arg)
+		       size_t kb2, pmemkv_get_kv_callback *c, void *arg)
 {
 	try {
 		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_between(
@@ -441,7 +443,8 @@ int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb)
 	}
 }
 
-int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c, void *arg)
+int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c,
+	       void *arg)
 {
 	try {
 		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get(

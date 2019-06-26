@@ -51,7 +51,7 @@ typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;
 
 typedef void pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
-				  size_t valuebytes, void *arg);
+				    size_t valuebytes, void *arg);
 typedef void pmemkv_get_v_callback(const char *value, size_t valuebytes, void *arg);
 
 pmemkv_config *pmemkv_config_new(void);
@@ -73,11 +73,11 @@ int pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *
 
 int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg);
 int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
-		      void *arg);
+		     void *arg);
 int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
-		      void *arg);
+		     void *arg);
 int pmemkv_get_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-			size_t kb2, pmemkv_get_kv_callback *c, void *arg);
+		       size_t kb2, pmemkv_get_kv_callback *c, void *arg);
 
 int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb);
 
