@@ -91,7 +91,7 @@ Installing on Fedora
 Install required packages:
 
 ```sh
-su -c 'dnf install autoconf automake cmake daxctl-devel doxygen gcc gcc-c++ \
+su -c 'dnf install autoconf automake cmake daxctl-devel gcc gcc-c++ \
 	libtool ndctl-devel numactl-devel rapidjson-devel tbb-devel'
 ```
 
@@ -147,7 +147,7 @@ Installing on Ubuntu
 Install required packages:
 
 ```sh
-sudo apt install autoconf automake build-essential cmake doxygen libdaxctl-dev \
+sudo apt install autoconf automake build-essential cmake libdaxctl-dev \
 	libndctl-dev libnuma-dev libtbb-dev libtool rapidjson-dev
 ```
 
