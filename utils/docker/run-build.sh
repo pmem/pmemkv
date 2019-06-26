@@ -71,7 +71,6 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DTEST_DIR=/dev/shm \
-	-DTBB_DIR=/opt/tbb/cmake \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE \
 	-DDEVELOPER_MODE=1
@@ -96,47 +95,48 @@ fi
 cd ..
 rm -rf build
 
-# no C++20 support in g++ on Ubuntu-18.04
-if [[ "$OS" == "fedora" ]]; then
-	mkdir build
-	cd build
+echo
+echo "##############################################################"
+echo "### Checking C++20 support in g++"
+echo "##############################################################"
+mkdir build
+cd build
 
-	CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
-		-DTEST_DIR=/dev/shm \
-		-DTBB_DIR=/opt/tbb/cmake \
-		-DCMAKE_INSTALL_PREFIX=$PREFIX \
-		-DCOVERAGE=$COVERAGE \
-		-DDEVELOPER_MODE=1 \
-		-DCXX_STANDARD=20
+CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
+	-DTEST_DIR=/dev/shm \
+	-DCMAKE_INSTALL_PREFIX=$PREFIX \
+	-DCOVERAGE=$COVERAGE \
+	-DDEVELOPER_MODE=1 \
+	-DCXX_STANDARD=20
 
-	make -j2
-	# Run basic tests
-	ctest -R "SimpleTest"
+make -j2
+# Run basic tests
+ctest -R "SimpleTest"
 
-	cd ..
-	rm -rf build
-fi
+cd ..
+rm -rf build
 
-# no C++20 support in clang++ on Ubuntu-18.04
-if [[ "$OS" == "fedora" ]]; then
-	mkdir build
-	cd build
 
-	CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
-		-DTEST_DIR=/dev/shm \
-		-DTBB_DIR=/opt/tbb/cmake \
-		-DCMAKE_INSTALL_PREFIX=$PREFIX \
-		-DCOVERAGE=$COVERAGE \
-		-DDEVELOPER_MODE=1 \
-		-DCXX_STANDARD=20
+echo
+echo "##############################################################"
+echo "### Checking C++20 support in clang++"
+echo "##############################################################"
+mkdir build
+cd build
 
-	make -j2
-	# Run basic tests
-	ctest -R "SimpleTest"
+CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
+	-DTEST_DIR=/dev/shm \
+	-DCMAKE_INSTALL_PREFIX=$PREFIX \
+	-DCOVERAGE=$COVERAGE \
+	-DDEVELOPER_MODE=1 \
+	-DCXX_STANDARD=20
 
-	cd ..
-	rm -rf build
-fi
+make -j2
+# Run basic tests
+ctest -R "SimpleTest"
+
+cd ..
+rm -rf build
 
 # verify if each engine is building properly
 engines_flags=(
@@ -161,8 +161,7 @@ do
 	echo "##############################################################"
 	echo "### Verifying building of the '$engine_flag' engine"
 	echo "##############################################################"
-	cmake .. -DTBB_DIR=/opt/tbb/cmake \
-		-DENGINE_VSMAP=OFF \
+	cmake .. -DENGINE_VSMAP=OFF \
 		-DENGINE_VCMAP=OFF \
 		-DENGINE_CMAP=OFF \
 		-D$engine_flag=ON
@@ -180,8 +179,7 @@ echo "### Verifying building of all engines"
 echo "##############################################################"
 mkdir $WORKDIR/build
 cd $WORKDIR/build
-cmake .. -DTBB_DIR=/opt/tbb/cmake \
-	-DENGINE_VSMAP=ON \
+cmake .. -DENGINE_VSMAP=ON \
 	-DENGINE_VCMAP=ON \
 	-DENGINE_CMAP=ON \
 	-DENGINE_STREE=ON \

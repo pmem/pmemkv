@@ -44,8 +44,8 @@ set -e
 function usage {
 	echo "Usage:"
 	echo "    push-image.sh <OS-VER>"
-	echo "where <OS-VER>, for example, can be 'fedora-28', provided " \
-		"a Docker image tagged with ${DOCKERHUB_REPO}:fedora-28 exists " \
+	echo "where <OS-VER>, for example, can be 'fedora-30', provided " \
+		"a Docker image tagged with ${DOCKERHUB_REPO}:fedora-30 exists " \
 		"locally."
 }
 

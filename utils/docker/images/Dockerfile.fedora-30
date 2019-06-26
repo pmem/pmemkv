@@ -35,7 +35,7 @@
 #
 
 # Pull base image
-FROM fedora:28
+FROM fedora:30
 MAINTAINER lukasz.stolarczuk@intel.com
 
 # Install basic tools
@@ -61,6 +61,7 @@ RUN dnf update -y \
 	rapidjson-devel \
 	rpm-build \
 	sudo \
+	tbb-devel \
 	unzip \
 	wget \
 	which \
@@ -89,10 +90,6 @@ RUN ./install-libpmemobj-cpp.sh RPM
 COPY install-memkind.sh install-memkind.sh
 RUN ./install-memkind.sh
 
-# Install Intel TBB
-COPY install-tbb.sh install-tbb.sh
-RUN ./install-tbb.sh
-
 # Add user
 ENV USER user
 ENV USERPASS pass
@@ -103,7 +100,7 @@ USER $USER
 
 # Set required environment variables
 ENV OS fedora
-ENV OS_VER 28
+ENV OS_VER 30
 ENV PACKAGE_MANAGER rpm
 ENV NOTTY 1
 

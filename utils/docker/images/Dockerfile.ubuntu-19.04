@@ -35,7 +35,7 @@
 #
 
 # Pull base image
-FROM ubuntu:18.04
+FROM ubuntu:19.04
 MAINTAINER lukasz.stolarczuk@intel.com
 
 # Update the Apt cache and install basic tools
@@ -55,12 +55,13 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	libc6-dbg \
 	libdaxctl-dev \
 	libndctl-dev \
+	libnode-dev \
 	libnuma-dev \
+	libtbb-dev \
 	libtext-diff-perl \
 	libtool \
 	libunwind8-dev \
 	maven \
-	nodejs-dev \
 	npm \
 	numactl \
 	openjdk-8-jdk \
@@ -92,10 +93,6 @@ RUN ./install-libpmemobj-cpp.sh DEB
 COPY install-memkind.sh install-memkind.sh
 RUN ./install-memkind.sh
 
-# Install Intel TBB
-COPY install-tbb.sh install-tbb.sh
-RUN ./install-tbb.sh
-
 # Add user
 ENV USER user
 ENV USERPASS pass
@@ -104,6 +101,6 @@ USER $USER
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER 18.04
+ENV OS_VER 19.04
 ENV PACKAGE_MANAGER dpkg
 ENV NOTTY 1
