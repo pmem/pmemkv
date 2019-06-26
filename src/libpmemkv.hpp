@@ -141,6 +141,8 @@ public:
 	status put(string_view key, string_view value) noexcept;
 	status remove(string_view key) noexcept;
 
+	static std::string errormsg();
+
 private:
 	pmemkv_db *_db;
 };
@@ -376,6 +378,11 @@ inline status db::put(string_view key, string_view value) noexcept
 inline status db::remove(string_view key) noexcept
 {
 	return static_cast<status>(pmemkv_remove(this->_db, key.data(), key.size()));
+}
+
+inline std::string db::errormsg()
+{
+	return std::string(pmemkv_errormsg());
 }
 
 } /* namespace kv */

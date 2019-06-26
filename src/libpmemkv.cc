@@ -40,6 +40,7 @@
 #include "engines/blackhole.h"
 #include "libpmemkv.h"
 #include "libpmemkv.hpp"
+#include "out.h"
 
 #ifdef ENGINE_VSMAP
 #include "engines/vsmap.h"
@@ -69,11 +70,6 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
-
-#define ERR(msg)                                                                         \
-	do {                                                                             \
-		std::cerr << "[" << __func__ << "()] " << msg << "\n";                   \
-	} while (0)
 
 struct pmemkv_config {
 	enum class config_type { STRING, INT64, UINT64, DOUBLE, DATA, OBJECT };
@@ -750,6 +746,11 @@ void *pmemkv_engine_context(pmemkv_db *db)
 		ERR("Unspecified failure");
 		return nullptr;
 	}
+}
+
+const char *pmemkv_errormsg(void)
+{
+	return out_get_errormsg();
 }
 
 } /* extern "C" */
