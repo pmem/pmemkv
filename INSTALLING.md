@@ -30,6 +30,10 @@ Building from Sources
 * [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings for PMDK (required by all engines except blackhole)
 * [TBB](https://github.com/01org/tbb) - Thread Building Blocks (requiered by cmap & vcmap engines)
 * [memkind](https://github.com/memkind/memkind) - Volatile memory manager (required by vsmap & vcmap engines)
+* Used only for development & testing:
+	* [pandoc](https://pandoc.org/) - markup converter to generate manpages
+	* [perl](https://www.perl.org/) - for whitespace checker script
+	* [clang format 8.0](https://clang.llvm.org/docs/ClangFormat.html) - to format and check coding style
 
 **Building and running tests**
 
