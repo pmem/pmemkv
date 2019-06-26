@@ -191,31 +191,24 @@ inline int string_view::compare(const string_view &other) noexcept
  * C and C++ functions use different calling conventions.
  */
 extern "C" {
-static inline void callKVGetKVFunction(const char *key, size_t keybytes, const char *value,
+static inline void call_get_kv_function(const char *key, size_t keybytes, const char *value,
 				      size_t valuebytes, void *arg)
 {
 	(*reinterpret_cast<std::function<get_kv_function> *>(arg))(
 		string_view(key, keybytes), string_view(value, valuebytes));
 }
 
-static inline void callKVGetVFunction(const char *value, size_t valuebytes, void *arg)
+static inline void call_get_v_function(const char *value, size_t valuebytes, void *arg)
 {
 	(*reinterpret_cast<std::function<get_v_function> *>(arg))(
 		string_view(value, valuebytes));
 }
 
-static inline void callGet(const char *v, size_t vb, void *arg)
+static inline void call_get_copy(const char *v, size_t vb, void *arg)
 {
 	auto c = reinterpret_cast<std::pair<status, std::string *> *>(arg);
 	c->first = status::OK;
 	c->second->append(v, vb);
-}
-
-static inline void callOnStartCallback(void *context, const char *engine,
-				       pmemkv_config *config, const char *msg)
-{
-	auto *string = reinterpret_cast<std::string *>(context);
-	*string = msg;
 }
 }
 
@@ -301,7 +294,7 @@ inline status db::get_all(get_kv_callback *callback, void *arg) noexcept
 
 inline status db::get_all(std::function<get_kv_function> f) noexcept
 {
-	return static_cast<status>(pmemkv_get_all(this->_db, callKVGetKVFunction, &f));
+	return static_cast<status>(pmemkv_get_all(this->_db, call_get_kv_function, &f));
 }
 
 inline status db::get_above(string_view key, get_kv_callback *callback, void *arg) noexcept
@@ -313,7 +306,7 @@ inline status db::get_above(string_view key, get_kv_callback *callback, void *ar
 inline status db::get_above(string_view key, std::function<get_kv_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_get_above(this->_db, key.data(), key.size(),
-						     callKVGetKVFunction, &f));
+						     call_get_kv_function, &f));
 }
 
 inline status db::get_below(string_view key, get_kv_callback *callback, void *arg) noexcept
@@ -325,7 +318,7 @@ inline status db::get_below(string_view key, get_kv_callback *callback, void *ar
 inline status db::get_below(string_view key, std::function<get_kv_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_get_below(this->_db, key.data(), key.size(),
-						     callKVGetKVFunction, &f));
+						     call_get_kv_function, &f));
 }
 
 inline status db::get_between(string_view key1, string_view key2,
@@ -341,7 +334,7 @@ inline status db::get_between(string_view key1, string_view key2,
 {
 	return static_cast<status>(
 		pmemkv_get_between(this->_db, key1.data(), key1.size(), key2.data(),
-				    key2.size(), callKVGetKVFunction, &f));
+				    key2.size(), call_get_kv_function, &f));
 }
 
 inline status db::exists(string_view key) noexcept
@@ -358,14 +351,14 @@ inline status db::get(string_view key, get_v_callback *callback, void *arg) noex
 inline status db::get(string_view key, std::function<get_v_function> f) noexcept
 {
 	return static_cast<status>(
-		pmemkv_get(this->_db, key.data(), key.size(), callKVGetVFunction, &f));
+		pmemkv_get(this->_db, key.data(), key.size(), call_get_v_function, &f));
 }
 
 inline status db::get(string_view key, std::string *value) noexcept
 {
 	std::pair<status, std::string *> ctx = {status::NOT_FOUND, value};
 
-	pmemkv_get(this->_db, key.data(), key.size(), callGet, &ctx);
+	pmemkv_get(this->_db, key.data(), key.size(), call_get_copy, &ctx);
 
 	return ctx.first;
 }
