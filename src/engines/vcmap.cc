@@ -78,8 +78,11 @@ status vcmap::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("Each");
 	for (auto &iterator : pmem_kv_container) {
-		(*callback)(iterator.first.c_str(), iterator.first.size(),
-			    iterator.second.c_str(), iterator.second.size(), arg);
+		auto ret = callback(iterator.first.c_str(), iterator.first.size(),
+				    iterator.second.c_str(), iterator.second.size(), arg);
+
+		if (ret != 0)
+			return status::STOPPED_BY_CB;
 	}
 
 	return status::OK;
@@ -107,7 +110,7 @@ status vcmap::get(string_view key, get_v_callback *callback, void *arg)
 		return status::NOT_FOUND;
 	}
 
-	(*callback)(result->second.c_str(), result->second.size(), arg);
+	callback(result->second.c_str(), result->second.size(), arg);
 	return status::OK;
 }
 

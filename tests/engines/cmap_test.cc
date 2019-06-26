@@ -507,6 +507,8 @@ TEST_F(CMapTest, UsesEachTest)
 			c->append(">,<");
 			c->append(std::string(v, vb));
 			c->append(">|");
+
+			return 0;
 		},
 		&result);
 	ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");

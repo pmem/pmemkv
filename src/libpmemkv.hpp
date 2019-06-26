@@ -77,7 +77,7 @@ private:
 };
 #endif
 
-typedef void get_kv_function(string_view key, string_view value);
+typedef int get_kv_function(string_view key, string_view value);
 typedef void get_v_function(string_view value);
 
 using get_kv_callback = pmemkv_get_kv_callback;
@@ -91,6 +91,7 @@ enum class status {
 	INVALID_ARGUMENT = PMEMKV_STATUS_INVALID_ARGUMENT,
 	CONFIG_PARSING_ERROR = PMEMKV_STATUS_CONFIG_PARSING_ERROR,
 	CONFIG_TYPE_ERROR = PMEMKV_STATUS_CONFIG_TYPE_ERROR,
+	STOPPED_BY_CB = PMEMKV_STATUS_STOPPED_BY_CB
 };
 
 class db {
@@ -191,10 +192,10 @@ inline int string_view::compare(const string_view &other) noexcept
  * C and C++ functions use different calling conventions.
  */
 extern "C" {
-static inline void call_get_kv_function(const char *key, size_t keybytes,
-					const char *value, size_t valuebytes, void *arg)
+static inline int call_get_kv_function(const char *key, size_t keybytes,
+				       const char *value, size_t valuebytes, void *arg)
 {
-	(*reinterpret_cast<std::function<get_kv_function> *>(arg))(
+	return (*reinterpret_cast<std::function<get_kv_function> *>(arg))(
 		string_view(key, keybytes), string_view(value, valuebytes));
 }
 

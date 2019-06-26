@@ -586,6 +586,7 @@ TEST_F(TreeTest, UsesEachTest)
 		result.append(">,<");
 		result.append(v.data(), v.size());
 		result.append(">|");
+		return 0;
 	});
 	ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");
 }

@@ -679,7 +679,6 @@ static void get_copy_callback(const char *v, size_t vb, void *arg)
 
 	if (vb < c->buffer_size) {
 		c->result = PMEMKV_STATUS_OK;
-
 		if (c->buffer != nullptr)
 			memcpy(c->buffer, v, vb);
 	} else {
