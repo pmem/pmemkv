@@ -141,7 +141,7 @@ bool caching::readConfig(pmemkv_config *config)
 
 status caching::count_all(std::size_t &cnt)
 {
-	LOG("Count");
+	LOG("count_all");
 	std::size_t result = 0;
 	get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
@@ -157,7 +157,7 @@ status caching::count_all(std::size_t &cnt)
 	return status::OK;
 }
 
-struct EachCacheCallbackContext {
+struct GetAllCacheCallbackContext {
 	void *arg;
 	get_kv_callback *cBack;
 	std::list<std::string> *expiredKeys;
@@ -165,12 +165,12 @@ struct EachCacheCallbackContext {
 
 status caching::get_all(get_kv_callback *callback, void *arg)
 {
-	LOG("Each");
+	LOG("get_all");
 	std::list<std::string> removingKeys;
-	EachCacheCallbackContext cxt = {arg, callback, &removingKeys};
+	GetAllCacheCallbackContext cxt = {arg, callback, &removingKeys};
 
 	auto cb = [](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-		const auto c = ((EachCacheCallbackContext *)arg);
+		const auto c = ((GetAllCacheCallbackContext *)arg);
 		std::string localValue = v;
 		std::string timeStamp = localValue.substr(0, 14);
 		std::string value = localValue.substr(14);
@@ -203,7 +203,7 @@ status caching::get_all(get_kv_callback *callback, void *arg)
 
 status caching::exists(string_view key)
 {
-	LOG("Exists for key=" << std::string(key.data(), key.size()));
+	LOG("exists for key=" << std::string(key.data(), key.size()));
 	status s = status::NOT_FOUND;
 	std::string value;
 	if (getKey(std::string(key.data(), key.size()), value, true))
@@ -214,7 +214,7 @@ status caching::exists(string_view key)
 
 status caching::get(string_view key, get_v_callback *callback, void *arg)
 {
-	LOG("Get key=" << std::string(key.data(), key.size()));
+	LOG("get key=" << std::string(key.data(), key.size()));
 	std::string value;
 	if (getKey(std::string(key.data(), key.size()), value, false)) {
 		callback(value.c_str(), value.size(), arg);
@@ -316,7 +316,7 @@ bool caching::getFromRemoteRedis(const std::string &key, std::string &value)
 
 status caching::put(string_view key, string_view value)
 {
-	LOG("Put key=" << std::string(key.data(), key.size())
+	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 	const time_t curSysTime = time(0);
 	const std::string curTime = getTimeStamp(curSysTime);
@@ -327,7 +327,7 @@ status caching::put(string_view key, string_view value)
 
 status caching::remove(string_view key)
 {
-	LOG("Remove key=" << std::string(key.data(), key.size()));
+	LOG("remove key=" << std::string(key.data(), key.size()));
 	return basePtr->remove(std::string(key.data(), key.size()));
 }
 

@@ -103,7 +103,7 @@ status tree3::count_all(std::size_t &cnt)
 
 status tree3::get_all(get_kv_callback *callback, void *arg)
 {
-	LOG("Each");
+	LOG("get_all");
 	auto leaf = pmpool.root()->head;
 	while (leaf) {
 		for (int slot = LEAF_KEYS; slot--;) {
@@ -123,7 +123,7 @@ status tree3::get_all(get_kv_callback *callback, void *arg)
 
 status tree3::exists(string_view key)
 {
-	LOG("Exists for key=" << std::string(key.data(), key.size()));
+	LOG("exists for key=" << std::string(key.data(), key.size()));
 	// XXX - do not create temporary string
 	auto leafnode = LeafSearch(std::string(key.data(), key.size()));
 	if (leafnode) {
@@ -142,7 +142,7 @@ status tree3::exists(string_view key)
 
 status tree3::get(string_view key, get_v_callback *callback, void *arg)
 {
-	LOG("Get using callback for key=" << std::string(key.data(), key.size()));
+	LOG("get using callback for key=" << std::string(key.data(), key.size()));
 	// XXX - do not create temporary string
 	auto leafnode = LeafSearch(std::string(key.data(), key.size()));
 	if (leafnode) {
@@ -168,7 +168,7 @@ status tree3::get(string_view key, get_v_callback *callback, void *arg)
 
 status tree3::put(string_view key, string_view value)
 {
-	LOG("Put key=" << std::string(key.data(), key.size())
+	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 	try {
 		const auto hash = PearsonHash(key.data(), key.size());
@@ -220,7 +220,7 @@ status tree3::put(string_view key, string_view value)
 
 status tree3::remove(string_view key)
 {
-	LOG("Remove key=" << std::string(key.data(), key.size()));
+	LOG("remove key=" << std::string(key.data(), key.size()));
 	// XXX - do not create temporary string
 	auto leafnode = LeafSearch(std::string(key.data(), key.size()));
 	if (!leafnode) {
