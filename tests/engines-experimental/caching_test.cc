@@ -34,8 +34,7 @@
 #include "lib_acl.hpp"
 #include "gtest/gtest.h"
 #include <libmemcached/memcached.h>
-#include <libpmemobj.h>
-#include <libpmemobj/base.h>
+
 using namespace pmem::kv;
 
 // const string ENGINE = "stree";
@@ -69,7 +68,7 @@ TEST_F(CachingTest, PutKeyValue)
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 }
 
@@ -82,10 +81,10 @@ TEST_F(CachingTest, PutUpdateValue)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::string value;
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
-	ASSERT_TRUE(kv->put("key1", "value11") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value11") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 	value = "";
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value11");
@@ -101,7 +100,7 @@ TEST_F(CachingTest, PutKeywithinTTL)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::string value;
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	sleep(1);
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	sleep(1);
@@ -120,7 +119,7 @@ TEST_F(CachingTest, PutKeyExpiredTTL)
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	sleep(2);
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
 }
@@ -134,10 +133,10 @@ TEST_F(CachingTest, EmptyKeyTest)
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
-	ASSERT_TRUE(kv->put("", "empty") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put(" ", "single-space") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("\t\t", "two-tab") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("&*", " ") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("", "empty") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put(" ", "single-space") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("\t\t", "two-tab") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("&*", " ") == status::OK) << db::errormsg();
 	std::string value1, value2, value3, value4;
 	ASSERT_TRUE(status::OK == kv->exists(""));
 	ASSERT_TRUE(kv->get("", &value1) == status::OK && value1 == "empty");
@@ -158,9 +157,9 @@ TEST_F(CachingTest, EmptyValueTest)
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
-	ASSERT_TRUE(kv->put("empty", "") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("single-space", " ") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("two-tab", "\t\t") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("empty", "") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("single-space", " ") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("two-tab", "\t\t") == status::OK) << db::errormsg();
 	std::string value1, value2, value3;
 	ASSERT_TRUE(kv->get("empty", &value1) == status::OK && value1 == "");
 	ASSERT_TRUE(kv->get("single-space", &value2) == status::OK && value2 == " ");
@@ -295,10 +294,10 @@ TEST_F(CachingTest, SimpleEachTest)
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << db::errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 4);
@@ -346,12 +345,12 @@ TEST_F(CachingTest, EachTTLValidExpired)
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << db::errormsg();
 	sleep(2);
-	ASSERT_TRUE(kv->put("key5", "value5") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key5", "value5") == status::OK) << db::errormsg();
 
 	std::string result;
 	kv->get_all(
@@ -412,11 +411,11 @@ TEST_F(CachingTest, EachZeroTTL)
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << db::errormsg();
 	sleep(1);
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << db::errormsg();
 	sleep(1);
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -464,13 +463,13 @@ TEST_F(CachingTest, SimpleCount)
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	sleep(2);
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << db::errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 2);
@@ -488,15 +487,15 @@ TEST_F(CachingTest, SimpleZeroTTLCount)
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << db::errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 3);
 	sleep(1);
-	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << pmemobj_errormsg();
-	ASSERT_TRUE(kv->put("key5", "value5") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << db::errormsg();
+	ASSERT_TRUE(kv->put("key5", "value5") == status::OK) << db::errormsg();
 	sleep(1);
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -512,12 +511,12 @@ TEST_F(CachingTest, SimpleRemovekey)
 			"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 	ASSERT_TRUE(kv->remove("key1") == status::OK);
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
 	ASSERT_TRUE(kv->remove("key1") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << db::errormsg();
 	sleep(2);
 	ASSERT_TRUE(kv->remove("key2") == status::OK);
 }
@@ -535,7 +534,7 @@ TEST_F(CachingTest, SimpleExistsKey)
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	sleep(1);
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 	sleep(1);
@@ -561,7 +560,7 @@ TEST_F(CachingTest, Redis_Integration)
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
@@ -571,7 +570,7 @@ TEST_F(CachingTest, Redis_Integration)
 	ASSERT_TRUE(kv->remove("key1") == status::OK);
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
 
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	sleep(1);
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 	sleep(1);
@@ -595,7 +594,7 @@ TEST_F(CachingTest, Redis_Integration)
 
 	cmd.set("key1", "value1");
 	cmd.set("key2", "value2");
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << db::errormsg();
 	value = "";
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
@@ -715,7 +714,7 @@ TEST_F(CachingTest, Memcached_Integration)
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 0);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
@@ -725,7 +724,7 @@ TEST_F(CachingTest, Memcached_Integration)
 	ASSERT_TRUE(kv->remove("key1") == status::OK);
 	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
 
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	sleep(1);
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 	sleep(1);
@@ -766,7 +765,7 @@ TEST_F(CachingTest, Memcached_Integration)
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
 	memcached_set(memc, "key2", key_length, "value2", value_length, (time_t)0,
 		      (uint32_t)0);
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << db::errormsg();
 	value = "";
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
@@ -895,7 +894,7 @@ TEST_F(CachingTest, LargeTTL)
 				ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 				"\"}}") == status::OK);
 	std::string value;
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << pmemobj_errormsg();
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	sleep(1);
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	sleep(1);
