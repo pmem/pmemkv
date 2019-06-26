@@ -312,6 +312,8 @@ TEST_F(CachingTest, SimpleEachTest)
 			c->append(">,<");
 			c->append(std::string(v, vb));
 			c->append(">|");
+
+			return 0;
 		},
 		&result);
 
@@ -360,6 +362,8 @@ TEST_F(CachingTest, EachTTLValidExpired)
 			c->append(">,<");
 			c->append(std::string(v, vb));
 			c->append(">|");
+
+			return 0;
 		},
 		&result);
 	ASSERT_TRUE(result == "<key5>,<value5>|");
@@ -387,6 +391,8 @@ TEST_F(CachingTest, EachEmptyCache)
 			c->append(">,<");
 			c->append(std::string(v, vb));
 			c->append(">|");
+
+			return 0;
 		},
 		&result);
 	ASSERT_TRUE(result == "");
@@ -425,6 +431,8 @@ TEST_F(CachingTest, EachZeroTTL)
 			c->append(">,<");
 			c->append(std::string(v, vb));
 			c->append(">|");
+
+			return 0;
 		},
 		&result);
 
@@ -599,6 +607,8 @@ TEST_F(CachingTest, Redis_Integration)
 			c->append(">,<");
 			c->append(std::string(v, vb));
 			c->append(">|");
+
+			return 0;
 		},
 		&result);
 
@@ -621,6 +631,8 @@ TEST_F(CachingTest, Redis_Integration)
 			c->append(">,<");
 			c->append(std::string(v, vb));
 			c->append(">|");
+
+			return 0;
 		},
 		&result);
 	ASSERT_TRUE(result == "");
@@ -768,6 +780,8 @@ TEST_F(CachingTest, Memcached_Integration)
 			c->append(">,<");
 			c->append(std::string(v, vb));
 			c->append(">|");
+
+			return 0;
 		},
 		&result);
 
@@ -790,6 +804,8 @@ TEST_F(CachingTest, Memcached_Integration)
 			c->append(">,<");
 			c->append(std::string(v, vb));
 			c->append(">|");
+
+			return 0;
 		},
 		&result);
 	ASSERT_TRUE(result == "");

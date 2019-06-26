@@ -152,6 +152,8 @@ status caching::count_all(std::size_t &cnt)
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			auto c = ((std::size_t *)arg);
 			(*c)++;
+
+			return 0;
 		},
 		&result);
 
@@ -179,10 +181,14 @@ status caching::get_all(get_kv_callback *callback, void *arg)
 		std::string value = localValue.substr(14);
 		// TTL from config is ZERO or if the key is valid
 		if (!ttl || valueFieldConversion(timeStamp)) {
-			(*c->cBack)(k, kb, value.c_str(), value.length(), c->arg);
+			auto ret = c->cBack(k, kb, value.c_str(), value.length(), c->arg);
+			if (ret != 0)
+				return status::FAILED;
 		} else {
 			c->expiredKeys->push_back(k);
 		}
+
+		return 0;
 	};
 
 	if (basePtr) { // todo bail earlier if null
@@ -216,8 +222,11 @@ status caching::get(string_view key, get_v_callback *callback, void *arg)
 	LOG("Get key=" << std::string(key.data(), key.size()));
 	std::string value;
 	if (getKey(std::string(key.data(), key.size()), value, false)) {
-		(*callback)(value.c_str(), value.size(), arg);
-		return status::OK;
+		auto ret = callback(result->second.c_str(), result->second.size(), arg);
+		if (ret != 0)
+			return status::FAILED;
+		else
+			return status::OK;
 	} else
 		return status::NOT_FOUND;
 }
@@ -227,6 +236,8 @@ bool caching::getKey(const std::string &key, std::string &valueField, bool api_f
 	auto cb = [](const char *v, size_t vb, void *arg) {
 		const auto c = ((std::string *)arg);
 		c->append(v, vb);
+
+		return 0;
 	};
 	std::string value;
 	basePtr->get(key, cb, &value);

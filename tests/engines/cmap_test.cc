@@ -115,7 +115,10 @@ TEST_F(CMapTest, SimpleTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	value = "";
-	kv->get("key1", [&](string_view v) { value.append(v.data(), v.size()); });
+	kv->get("key1", [&](string_view v) {
+		value.append(v.data(), v.size());
+		return 0;
+	});
 	ASSERT_TRUE(value == "value1");
 }
 
@@ -512,6 +515,8 @@ TEST_F(CMapTest, UsesEachTest)
 			c->append(">,<");
 			c->append(std::string(v, vb));
 			c->append(">|");
+
+			return 0;
 		},
 		&result);
 	ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");

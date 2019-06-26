@@ -663,15 +663,13 @@ int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c
 }
 
 struct GetCopyCallbackContext {
-	int result;
-
 	size_t buffer_size;
 	char *buffer;
 
 	size_t *value_size;
 };
 
-static void get_copy_callback(const char *v, size_t vb, void *arg)
+static int get_copy_callback(const char *v, size_t vb, void *arg)
 {
 	const auto c = ((GetCopyCallbackContext *)arg);
 
@@ -679,26 +677,25 @@ static void get_copy_callback(const char *v, size_t vb, void *arg)
 		*(c->value_size) = vb;
 
 	if (vb < c->buffer_size) {
-		c->result = PMEMKV_STATUS_OK;
-
 		if (c->buffer != nullptr)
 			memcpy(c->buffer, v, vb);
 	} else {
-		c->result = PMEMKV_STATUS_FAILED;
+		return 1;
 	}
+
+	return 0;
 }
 
 int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
 		    size_t buffer_size, size_t *value_size)
 {
-	GetCopyCallbackContext ctx = {PMEMKV_STATUS_NOT_FOUND, buffer_size, buffer,
-				      value_size};
+	GetCopyCallbackContext ctx = {buffer_size, buffer, value_size};
 
 	if (buffer != nullptr)
 		memset(buffer, 0, buffer_size);
 
 	try {
-		reinterpret_cast<pmem::kv::engine_base *>(db)->get(
+		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get(
 			pmem::kv::string_view(k, kb), &get_copy_callback, &ctx);
 	} catch (const std::exception &exc) {
 		ERR(exc.what());
@@ -707,8 +704,6 @@ int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
 		ERR("Unspecified failure");
 		return PMEMKV_STATUS_FAILED;
 	}
-
-	return ctx.result;
 }
 
 int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb)

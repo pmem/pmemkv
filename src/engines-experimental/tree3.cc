@@ -113,8 +113,10 @@ status tree3::get_all(get_kv_callback *callback, void *arg)
 			auto kvslot = leaf->slots[slot].get_ro();
 			if (kvslot.empty() || kvslot.hash() == 0)
 				continue;
-			(*callback)(kvslot.key(), kvslot.get_ks(), kvslot.val(),
-				    kvslot.get_vs(), arg);
+			auto ret = callback(kvslot.key(), kvslot.get_ks(), kvslot.val(),
+					    kvslot.get_vs(), arg);
+			if (ret != 0)
+				return status::FAILED;
 		}
 		leaf = leaf->next; // advance to next linked leaf
 	}
@@ -157,8 +159,11 @@ status tree3::get(string_view key, get_v_callback *callback, void *arg)
 					LOG("   found value, slot="
 					    << slot
 					    << ", size=" << std::to_string(kv.valsize()));
-					(*callback)(kv.val(), kv.valsize(), arg);
-					return status::OK;
+					auto ret = callback(kv.val(), kv.valsize(), arg);
+					if (ret != 0)
+						return status::FAILED;
+					else
+						return status::OK;
 				}
 			}
 		}

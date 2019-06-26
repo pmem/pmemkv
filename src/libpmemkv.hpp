@@ -77,8 +77,8 @@ private:
 };
 #endif
 
-typedef void get_kv_function(string_view key, string_view value);
-typedef void get_v_function(string_view value);
+typedef int get_kv_function(string_view key, string_view value);
+typedef int get_v_function(string_view value);
 
 using get_kv_callback = pmemkv_get_kv_callback;
 using get_v_callback = pmemkv_get_v_callback;
@@ -193,24 +193,26 @@ inline int string_view::compare(const string_view &other) noexcept
  * C and C++ functions use different calling conventions.
  */
 extern "C" {
-static inline void call_get_kv_function(const char *key, size_t keybytes,
-					const char *value, size_t valuebytes, void *arg)
+static inline int call_get_kv_function(const char *key, size_t keybytes,
+				       const char *value, size_t valuebytes, void *arg)
 {
-	(*reinterpret_cast<std::function<get_kv_function> *>(arg))(
+	return (*reinterpret_cast<std::function<get_kv_function> *>(arg))(
 		string_view(key, keybytes), string_view(value, valuebytes));
 }
 
-static inline void call_get_v_function(const char *value, size_t valuebytes, void *arg)
+static inline int call_get_v_function(const char *value, size_t valuebytes, void *arg)
 {
-	(*reinterpret_cast<std::function<get_v_function> *>(arg))(
+	return (*reinterpret_cast<std::function<get_v_function> *>(arg))(
 		string_view(value, valuebytes));
 }
 
-static inline void call_get_copy(const char *v, size_t vb, void *arg)
+static inline int call_get_copy(const char *v, size_t vb, void *arg)
 {
 	auto c = reinterpret_cast<std::pair<status, std::string *> *>(arg);
 	c->first = status::OK;
 	c->second->append(v, vb);
+
+	return 0;
 }
 }
 

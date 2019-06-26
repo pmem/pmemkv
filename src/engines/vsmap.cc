@@ -129,9 +129,13 @@ status vsmap::count_between(string_view key1, string_view key2, std::size_t &cnt
 status vsmap::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("Each");
-	for (auto &it : pmem_kv_container)
-		(*callback)(it.first.c_str(), it.first.size(), it.second.c_str(),
-			    it.second.size(), arg);
+	for (auto &it : pmem_kv_container) {
+		auto ret = callback(it.first.c_str(), it.first.size(), it.second.c_str(),
+				    it.second.size(), arg);
+
+		if (ret != 0)
+			return status::FAILED;
+	}
 
 	return status::OK;
 }
@@ -143,9 +147,13 @@ status vsmap::get_above(string_view key, get_kv_callback *callback, void *arg)
 	auto it = pmem_kv_container.upper_bound(
 		key_type(key.data(), key.size(), kv_allocator));
 	auto end = pmem_kv_container.end();
-	for (; it != end; it++)
-		(*callback)(it->first.c_str(), it->first.size(), it->second.c_str(),
-			    it->second.size(), arg);
+	for (; it != end; it++) {
+		auto ret = callback(it->first.c_str(), it->first.size(),
+				    it->second.c_str(), it->second.size(), arg);
+
+		if (ret != 0)
+			return status::FAILED;
+	}
 
 	return status::OK;
 }
@@ -157,9 +165,13 @@ status vsmap::get_below(string_view key, get_kv_callback *callback, void *arg)
 	// XXX - do not create temporary string
 	auto end = pmem_kv_container.lower_bound(
 		key_type(key.data(), key.size(), kv_allocator));
-	for (; it != end; it++)
-		(*callback)(it->first.c_str(), it->first.size(), it->second.c_str(),
-			    it->second.size(), arg);
+	for (; it != end; it++) {
+		auto ret = callback(it->first.c_str(), it->first.size(),
+				    it->second.c_str(), it->second.size(), arg);
+
+		if (ret != 0)
+			return status::FAILED;
+	}
 
 	return status::OK;
 }
@@ -174,9 +186,13 @@ status vsmap::get_between(string_view key1, string_view key2, get_kv_callback *c
 			key_type(key1.data(), key1.size(), kv_allocator));
 		auto end = pmem_kv_container.lower_bound(
 			key_type(key2.data(), key2.size(), kv_allocator));
-		for (; it != end; it++)
-			(*callback)(it->first.c_str(), it->first.size(),
-				    it->second.c_str(), it->second.size(), arg);
+		for (; it != end; it++) {
+			auto ret = callback(it->first.c_str(), it->first.size(),
+					    it->second.c_str(), it->second.size(), arg);
+
+			if (ret != 0)
+				return status::FAILED;
+		}
 	}
 
 	return status::OK;
@@ -202,8 +218,11 @@ status vsmap::get(string_view key, get_v_callback *callback, void *arg)
 		return status::NOT_FOUND;
 	}
 
-	(*callback)(pos->second.c_str(), pos->second.size(), arg);
-	return status::OK;
+	auto ret = callback(pos->second.c_str(), pos->second.size(), arg);
+	if (ret != 0)
+		return status::FAILED;
+	else
+		return status::OK;
 }
 
 status vsmap::put(string_view key, string_view value)
