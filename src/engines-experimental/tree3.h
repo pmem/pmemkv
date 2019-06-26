@@ -204,11 +204,10 @@ struct KVRecoveredLeaf {		 // temporary wrapper used for recovery
 
 class tree3 : public engine_base { // hybrid B+ tree engine
 public:
-	tree3(void *context, const std::string &path, size_t size);
+	tree3(const std::string &path, size_t size);
 	~tree3();
 
 	std::string name() final;
-	void *engine_context();
 
 	status count_all(std::size_t &cnt) final;
 
@@ -241,7 +240,6 @@ protected:
 private:
 	tree3(const tree3 &);				// prevent copying
 	void operator=(const tree3 &);			// prevent assigning
-	void *context;					// context when started
 	vector<persistent_ptr<KVLeaf>> leaves_prealloc; // persisted but unused leaves
 	pool<KVRoot> pmpool;				// pool for persistent root
 	unique_ptr<KVNode> tree_top;			// pointer to uppermost inner node

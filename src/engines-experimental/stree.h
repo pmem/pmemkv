@@ -50,11 +50,10 @@ const size_t MAX_VALUE_SIZE = 200;
 
 class stree : public engine_base {
 public:
-	stree(void *context, const std::string &path, size_t size);
+	stree(const std::string &path, size_t size);
 	~stree();
 
 	std::string name() final;
-	void *engine_context();
 
 	status count_all(std::size_t &cnt) final;
 
@@ -77,7 +76,6 @@ private:
 	stree(const stree &);
 	void operator=(const stree &);
 	void Recover();
-	void *context;
 	pool<RootData> pmpool;
 	btree_type *my_btree;
 };

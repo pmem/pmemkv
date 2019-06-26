@@ -41,11 +41,10 @@ namespace kv
 
 class blackhole : public engine_base {
 public:
-	blackhole(void *context);
+	blackhole();
 	~blackhole();
 
 	std::string name() final;
-	void *engine_context();
 
 	status count_all(std::size_t &cnt) final;
 	status count_above(string_view key, std::size_t &cnt) final;
@@ -65,9 +64,6 @@ public:
 	status put(string_view key, string_view value) final;
 
 	status remove(string_view key) final;
-
-private:
-	void *context;
 };
 
 } /* namespace kv */
