@@ -65,14 +65,13 @@ namespace kv
 
 class cmap : public engine_base {
 public:
-	cmap(void *context, const std::string &path, size_t size);
+	cmap(const std::string &path, size_t size);
 	~cmap();
 
 	cmap(const cmap &) = delete;
 	cmap &operator=(const cmap &) = delete;
 
 	std::string name() final;
-	void *engine_context();
 
 	status count_all(std::size_t &cnt) final;
 
@@ -96,7 +95,6 @@ private:
 	using pool_t = pmem::obj::pool<RootData>;
 
 	void Recover();
-	void *context;
 	pool_t pmpool;
 	map_t *container;
 };

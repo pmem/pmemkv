@@ -74,7 +74,7 @@ int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *val
 int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);
 int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);
 
-int pmemkv_open(void *context, const char *engine, pmemkv_config *config, pmemkv_db **db);
+int pmemkv_open(const char *engine, pmemkv_config *config, pmemkv_db **db);
 void pmemkv_close(pmemkv_db *kv);
 
 int pmemkv_count_all(pmemkv_db *db, size_t *cnt);
@@ -102,8 +102,6 @@ int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
 
 const char *pmemkv_errormsg(void);
-
-void *pmemkv_engine_context(pmemkv_db *db);
 
 #ifdef __cplusplus
 } /* end extern "C" */

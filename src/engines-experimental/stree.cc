@@ -55,7 +55,7 @@ namespace pmem
 namespace kv
 {
 
-stree::stree(void *context, const std::string &path, const size_t size) : context(context)
+stree::stree(const std::string &path, const size_t size)
 {
 	if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
 		LOG("Creating filesystem pool, path=" << path << ", size="
@@ -79,11 +79,6 @@ stree::~stree()
 std::string stree::name()
 {
 	return "stree";
-}
-
-void *stree::engine_context()
-{
-	return context;
 }
 
 status stree::count_all(std::size_t &cnt)

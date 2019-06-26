@@ -48,8 +48,8 @@ namespace pmem
 namespace kv
 {
 
-vsmap::vsmap(void *context, const std::string &path, size_t size)
-    : context(context), kv_allocator(path, size), pmem_kv_container(kv_allocator)
+vsmap::vsmap(const std::string &path, size_t size)
+    : kv_allocator(path, size), pmem_kv_container(kv_allocator)
 {
 	LOG("Started ok");
 }
@@ -62,11 +62,6 @@ vsmap::~vsmap()
 std::string vsmap::name()
 {
 	return "vsmap";
-}
-
-void *vsmap::engine_context()
-{
-	return context;
 }
 
 status vsmap::count_all(std::size_t &cnt)
