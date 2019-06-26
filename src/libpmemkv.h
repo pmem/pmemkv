@@ -50,9 +50,9 @@ extern "C" {
 typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;
 
-typedef void pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
-				    size_t valuebytes, void *arg);
-typedef void pmemkv_get_v_callback(const char *value, size_t valuebytes, void *arg);
+typedef int pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
+				   size_t valuebytes, void *arg);
+typedef int pmemkv_get_v_callback(const char *value, size_t valuebytes, void *arg);
 
 pmemkv_config *pmemkv_config_new(void);
 void pmemkv_config_delete(pmemkv_config *config);

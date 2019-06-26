@@ -478,6 +478,8 @@ int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *value,
 			} else {
 				c->result = PMEMKV_STATUS_FAILED;
 			}
+
+			return 0;
 		};
 		memset(value, 0, maxvaluebytes);
 		reinterpret_cast<pmem::kv::engine_base *>(db)->get(

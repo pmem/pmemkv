@@ -145,6 +145,8 @@ status caching::count_all(std::size_t &cnt)
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
 			auto c = ((std::size_t *)arg);
 			(*c)++;
+
+			return 0;
 		},
 		&result);
 
@@ -176,6 +178,8 @@ status caching::get_all(get_kv_callback *callback, void *arg)
 		} else {
 			c->expiredKeys->push_back(k);
 		}
+
+		return 0;
 	};
 
 	if (basePtr) { // todo bail earlier if null
@@ -218,6 +222,8 @@ bool caching::getKey(const std::string &key, std::string &valueField, bool api_f
 	auto cb = [](const char *v, size_t vb, void *arg) {
 		const auto c = ((std::string *)arg);
 		c->append(v, vb);
+
+		return 0;
 	};
 	std::string value;
 	basePtr->get(key, cb, &value);
