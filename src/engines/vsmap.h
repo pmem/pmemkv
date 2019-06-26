@@ -45,11 +45,10 @@ namespace kv
 
 class vsmap : public engine_base {
 public:
-	vsmap(void *context, const std::string &path, size_t size);
+	vsmap(const std::string &path, size_t size);
 	~vsmap();
 
 	std::string name() final;
-	void *engine_context();
 
 	status count_all(std::size_t &cnt) final;
 	status count_above(string_view key, std::size_t &cnt) final;
@@ -80,7 +79,6 @@ private:
 	using map_type = std::map<key_type, mapped_type, std::less<key_type>,
 				  std::scoped_allocator_adaptor<map_allocator_type>>;
 
-	void *context;
 	map_allocator_type kv_allocator;
 	map_type pmem_kv_container;
 };

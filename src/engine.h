@@ -56,7 +56,6 @@ public:
 	}
 
 	virtual std::string name() = 0;
-	virtual void *engine_context() = 0;
 
 	virtual status count_all(std::size_t &cnt)
 	{

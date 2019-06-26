@@ -104,13 +104,9 @@ public:
 	db &operator=(const db &other) = delete;
 	db &operator=(db &&other) noexcept;
 
-	status open(void *context, const std::string &engine_name,
-		    pmemkv_config *config) noexcept;
 	status open(const std::string &engine_name, pmemkv_config *config) noexcept;
 
 	void close() noexcept;
-
-	void *engine_context();
 
 	status count_all(std::size_t &cnt) noexcept;
 	status count_above(string_view key, std::size_t &cnt) noexcept;
@@ -214,11 +210,6 @@ static inline void call_get_copy(const char *v, size_t vb, void *arg)
 }
 }
 
-inline void *db::engine_context()
-{
-	return pmemkv_engine_context(this->_db);
-}
-
 inline db::db() noexcept
 {
 	this->_db = nullptr;
@@ -239,17 +230,10 @@ inline db &db::operator=(db &&other) noexcept
 	return *this;
 }
 
-inline status db::open(void *context, const std::string &engine_name,
-		       pmemkv_config *config) noexcept
-{
-	return static_cast<status>(
-		pmemkv_open(context, engine_name.c_str(), config, &(this->_db)));
-}
-
 inline status db::open(const std::string &engine_name, pmemkv_config *config) noexcept
 {
 	return static_cast<status>(
-		pmemkv_open(nullptr, engine_name.c_str(), config, &(this->_db)));
+		pmemkv_open(engine_name.c_str(), config, &(this->_db)));
 }
 
 inline void db::close() noexcept

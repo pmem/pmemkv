@@ -47,9 +47,8 @@ namespace pmem
 namespace kv
 {
 
-vcmap::vcmap(void *context, const std::string &path, size_t size)
-    : context(context),
-      kv_allocator(path, size),
+vcmap::vcmap(const std::string &path, size_t size)
+    : kv_allocator(path, size),
       ch_allocator(kv_allocator),
       pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator))
 {
@@ -64,11 +63,6 @@ vcmap::~vcmap()
 std::string vcmap::name()
 {
 	return "vcmap";
-}
-
-void *vcmap::engine_context()
-{
-	return context;
 }
 
 status vcmap::count_all(std::size_t &cnt)

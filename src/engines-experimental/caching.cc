@@ -55,7 +55,7 @@ namespace pmem
 namespace kv
 {
 
-caching::caching(void *context, pmemkv_config *config) : context(context)
+caching::caching(pmemkv_config *config)
 {
 	if (!readConfig(config))
 		throw std::runtime_error(
@@ -83,11 +83,6 @@ caching::~caching()
 std::string caching::name()
 {
 	return "caching";
-}
-
-void *caching::engine_context()
-{
-	return context;
 }
 
 bool caching::getString(pmemkv_config *config, const char *key, std::string &str)

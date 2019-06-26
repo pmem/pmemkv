@@ -118,21 +118,6 @@ TEST_F(TreeEmptyTest, CreateInstanceTest)
 	delete kv;
 }
 
-struct Context {
-	int64_t count;
-};
-
-TEST_F(TreeEmptyTest, CreateInstanceWithContextTest)
-{
-	Context cxt = {42};
-	db *kv = new db;
-	auto s = kv->open(&cxt, "tree3", getConfig(PATH, PMEMOBJ_MIN_POOL).get());
-	if (s != status::OK)
-		throw std::runtime_error("Open failed");
-	ASSERT_TRUE(((Context *)(kv->engine_context()))->count == 42);
-	delete kv;
-}
-
 TEST_F(TreeEmptyTest, FailsToCreateInstanceWithInvalidPath)
 {
 	try {
