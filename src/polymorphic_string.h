@@ -36,6 +36,8 @@
 #include <libpmemobj++/p.hpp>
 #include <string>
 
+#include "libpmemkv.hpp"
+
 namespace pmem
 {
 namespace kv
@@ -61,6 +63,11 @@ public:
 	polymorphic_string(const pmem_string &s)
 	{
 		construct(s.c_str(), s.size());
+	}
+
+	polymorphic_string(string_view s)
+	{
+		construct(s.data(), s.size());
 	}
 
 	polymorphic_string(const polymorphic_string &s)
@@ -93,6 +100,17 @@ public:
 			this->operator=(s.pstr);
 		} else {
 			this->operator=(s.str);
+		}
+
+		return *this;
+	}
+
+	polymorphic_string &operator=(string_view s)
+	{
+		if (is_pmem.get_ro()) {
+			pstr.assign(s.data(), s.size());
+		} else {
+			str.assign(s.data(), s.size());
 		}
 
 		return *this;
@@ -137,16 +155,26 @@ public:
 		return size() == 0;
 	}
 
+	bool operator==(const polymorphic_string &rhs) const
+	{
+		return compare(0, size(), rhs.c_str(), rhs.size()) == 0;
+	}
+
+	bool operator==(string_view rhs) const
+	{
+		return compare(0, size(), rhs.data(), rhs.size()) == 0;
+	}
+
+	bool operator==(const std::string &rhs) const
+	{
+		return compare(0, size(), rhs.c_str(), rhs.size()) == 0;
+	}
+
 	template <typename... Args>
 	int compare(Args &&... args) const
 	{
 		return is_pmem.get_ro() ? pstr.compare(std::forward<Args>(args)...)
 					: str.compare(std::forward<Args>(args)...);
-	}
-
-	bool operator==(const polymorphic_string &other) const
-	{
-		return compare(0, size(), other.c_str(), other.size()) == 0;
 	}
 
 private:
@@ -172,16 +200,16 @@ private:
 		}
 	}
 }; // class polymorphic_string
-/*
-bool operator==(const polymorphic_string& lhs, const polymorphic_string& rhs) {
-    return lhs.compare(0, lhs.size(), rhs.c_str(), rhs.size()) == 0;
-}*/
 
-/*
-bool operator!=(const polymorphic_string& lhs, const polymorphic_string& rhs) {
-    return lhs.compare(0, lhs.size(), rhs.c_str(), rhs.size()) != 0;
+inline bool operator==(string_view lhs, const polymorphic_string &rhs)
+{
+	return rhs == lhs;
 }
-*/
+
+inline bool operator==(const std::string &lhs, const polymorphic_string &rhs)
+{
+	return rhs == lhs;
+}
 
 } /* namespace kv */
 } /* namespace pmem */
