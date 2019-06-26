@@ -195,7 +195,10 @@ TEST_F(TreeTest, SimpleTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	value = "";
-	kv->get("key1", [&](string_view v) { value.append(v.data(), v.size()); });
+	kv->get("key1", [&](string_view v) {
+		value.append(v.data(), v.size());
+		return 0;
+	});
 	ASSERT_TRUE(value == "value1");
 }
 
@@ -586,6 +589,7 @@ TEST_F(TreeTest, UsesEachTest)
 		result.append(">,<");
 		result.append(v.data(), v.size());
 		result.append(">|");
+		return 0;
 	});
 	ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");
 }

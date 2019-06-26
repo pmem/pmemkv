@@ -100,7 +100,10 @@ TEST_F(VSMapTest, SimpleTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
 	value = "";
-	kv->get("key1", [&](string_view v) { value.append(v.data(), v.size()); });
+	kv->get("key1", [&](string_view v) {
+		value.append(v.data(), v.size());
+		return 0;
+	});
 	ASSERT_TRUE(value == "value1");
 }
 
@@ -548,6 +551,7 @@ TEST_F(VSMapTest, UsesEachTest)
 			.append(">,<")
 			.append(v.data(), v.size())
 			.append(">|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
 
@@ -558,6 +562,7 @@ TEST_F(VSMapTest, UsesEachTest)
 			.append(">,<")
 			.append(std::string(v.data(), v.size()))
 			.append(">|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
 
@@ -570,6 +575,7 @@ TEST_F(VSMapTest, UsesEachTest)
 				.append(">,<")
 				.append(std::string(v, vb))
 				.append(">|");
+			return 0;
 		},
 		&x);
 	ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
@@ -590,6 +596,7 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "BB,5|BC,6|");
 
@@ -599,6 +606,7 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
 
@@ -608,6 +616,7 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x.empty());
 
@@ -617,6 +626,7 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "BB,5|BC,6|");
 
@@ -630,6 +640,7 @@ TEST_F(VSMapTest, UsesEachAboveTest)
 				.append(",")
 				.append(std::string(v, vb))
 				.append("|");
+			return 0;
 		},
 		&x);
 	ASSERT_TRUE(x == "BB,5|BC,6|记!,RR|");
@@ -650,6 +661,7 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|");
 
@@ -659,6 +671,7 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x.empty());
 
@@ -668,6 +681,7 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
 
@@ -677,6 +691,7 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|");
 
@@ -690,6 +705,7 @@ TEST_F(VSMapTest, UsesEachBelowTest)
 				.append(",")
 				.append(std::string(v, vb))
 				.append("|");
+			return 0;
 		},
 		&x);
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|");
@@ -710,6 +726,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "AB,2|AC,3|");
 
@@ -719,6 +736,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
 
@@ -728,6 +746,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x.empty());
 
@@ -737,6 +756,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|");
 
@@ -746,36 +766,42 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	kv->get_between("A", "A", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	kv->get_between("AC", "A", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	kv->get_between("B", "A", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	kv->get_between("BD", "A", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	kv->get_between("ZZZ", "A", [&](string_view k, string_view v) {
 		x.append(k.data(), k.size())
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x.empty());
 
@@ -785,6 +811,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 			.append(",")
 			.append(v.data(), v.size())
 			.append("|");
+		return 0;
 	});
 	ASSERT_TRUE(x == "AB,2|AC,3|");
 
@@ -798,6 +825,7 @@ TEST_F(VSMapTest, UsesEachBetweenTest)
 				.append(",")
 				.append(std::string(v, vb))
 				.append("|");
+			return 0;
 		},
 		&x);
 	ASSERT_TRUE(x == "BB,5|BC,6|记!,RR|");

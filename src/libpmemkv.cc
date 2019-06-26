@@ -678,13 +678,13 @@ static void get_copy_callback(const char *v, size_t vb, void *arg)
 		*(c->value_size) = vb;
 
 	if (vb < c->buffer_size) {
-		c->result = PMEMKV_STATUS_OK;
-
 		if (c->buffer != nullptr)
 			memcpy(c->buffer, v, vb);
 	} else {
 		c->result = PMEMKV_STATUS_FAILED;
 	}
+
+	c->result = PMEMKV_STATUS_OK;
 }
 
 int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
@@ -697,7 +697,7 @@ int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
 		memset(buffer, 0, buffer_size);
 
 	try {
-		reinterpret_cast<pmem::kv::engine_base *>(db)->get(
+		(int)reinterpret_cast<pmem::kv::engine_base *>(db)->get(
 			pmem::kv::string_view(k, kb), &get_copy_callback, &ctx);
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();

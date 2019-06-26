@@ -47,12 +47,13 @@ extern "C" {
 #define PMEMKV_STATUS_INVALID_ARGUMENT 4
 #define PMEMKV_STATUS_CONFIG_PARSING_ERROR 5
 #define PMEMKV_STATUS_CONFIG_TYPE_ERROR 6
+#define PMEMKV_STATUS_STOPPED_BY_CB 7
 
 typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;
 
-typedef void pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
-				    size_t valuebytes, void *arg);
+typedef int pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
+				   size_t valuebytes, void *arg);
 typedef void pmemkv_get_v_callback(const char *value, size_t valuebytes, void *arg);
 
 pmemkv_config *pmemkv_config_new(void);

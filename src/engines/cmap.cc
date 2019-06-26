@@ -86,8 +86,11 @@ status cmap::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("Each");
 	for (auto it = container->begin(); it != container->end(); ++it) {
-		(*callback)(it->first.c_str(), it->first.size(), it->second.c_str(),
-			    it->second.size(), arg);
+		auto ret = callback(it->first.c_str(), it->first.size(),
+				    it->second.c_str(), it->second.size(), arg);
+
+		if (ret != 0)
+			return status::STOPPED_BY_CB;
 	}
 
 	return status::OK;
@@ -113,7 +116,7 @@ status cmap::get(string_view key, get_v_callback *callback, void *arg)
 		return status::NOT_FOUND;
 	}
 
-	(*callback)(result->second.c_str(), result->second.size(), arg);
+	callback(result->second.c_str(), result->second.size(), arg);
 	return status::OK;
 }
 
