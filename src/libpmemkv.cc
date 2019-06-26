@@ -219,6 +219,11 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 			return PMEMKV_STATUS_OK;
 		}
 #endif
+		if (config == nullptr) {
+			ERR("Config pointer is null");
+			return PMEMKV_STATUS_INVALID_ARGUMENT;
+		}
+
 		// handle traditional engines expecting path & size params
 		size_t length;
 		if (pmemkv_config_get(config, "path", NULL, 0, &length) !=
