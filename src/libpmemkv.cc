@@ -262,7 +262,7 @@ int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value
 {
 	try {
 		std::string mkey(key);
-		std::vector<char> v((char *)&value, (char *)&value + sizeof(value));
+		std::vector<char> v((char *)&value, (char *)&value + sizeof(void *));
 		config->umap.insert(
 			{mkey, {v, deleter, pmemkv_config::config_type::OBJECT}});
 	} catch (...) {
@@ -312,10 +312,10 @@ int pmemkv_config_get_object(pmemkv_config *config, const char *key, const void 
 
 	auto status =
 		pmemkv_config_get(config, key, (const void **)&ptr_ptr, &size, nullptr);
-	if (status == PMEMKV_STATUS_OK && size != sizeof(value))
+	if (status == PMEMKV_STATUS_OK && size != sizeof(void *))
 		return PMEMKV_STATUS_CONFIG_TYPE_ERROR;
 
-	memcpy(value, ptr_ptr, sizeof(value));
+	memcpy(value, ptr_ptr, sizeof(void *));
 
 	return status;
 }
