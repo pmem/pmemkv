@@ -88,6 +88,8 @@ set(SOURCE_FILES
 	src/libpmemkv.h
 	src/engines/blackhole.cc
 	src/engines/blackhole.h
+	src/out.cc
+	src/out.h
 )
 # Add each engine source separately
 if(ENGINE_VSMAP)

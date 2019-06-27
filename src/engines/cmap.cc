@@ -31,6 +31,7 @@
  */
 
 #include "cmap.h"
+#include "../out.h"
 
 #include <unistd.h>
 
@@ -138,10 +139,10 @@ status cmap::put(string_view key, string_view value)
 			pmem::obj::transaction::commit();
 		}
 	} catch (std::bad_alloc e) {
-		LOG("Put failed due to exception, " << e.what());
+		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
 	} catch (pmem::transaction_error e) {
-		LOG("Put failed due to pmem::transaction_error, " << e.what());
+		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
 
@@ -156,7 +157,7 @@ status cmap::remove(string_view key)
 		bool erased = container->erase(string_t(key.data(), key.size()));
 		return erased ? status::OK : status::NOT_FOUND;
 	} catch (std::runtime_error e) {
-		LOG("Remove failed due to exception, " << e.what());
+		ERR() << "Remove failed due to exception, " << e.what();
 		return status::FAILED;
 	}
 }
