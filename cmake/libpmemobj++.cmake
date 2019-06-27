@@ -31,35 +31,8 @@
 if(PKG_CONFIG_FOUND)
 	pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++>=${LIBPMEMOBJ_CPP_REQUIRED_VERSION})
 else()
-	find_package(LIBPMEMOBJ++ REQUIRED libpmemobj++)
+	find_package(LIBPMEMOBJ++ ${LIBPMEMOBJ_CPP_REQUIRED_VERSION} REQUIRED libpmemobj++)
 	message(STATUS "libpmemobj++ found the old way (w/o pkg-config)")
-endif()
-
-set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
-set(SAVED_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-
-set(CMAKE_REQUIRED_INCLUDES ${LIBPMEMOBJ++_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_FLAGS "--std=c++11 -Wno-error -c")
-
-CHECK_CXX_SOURCE_COMPILES(
-	"#include <libpmemobj++/experimental/string.hpp>
-	int main() {}"
-	PMEM_STRING_PRESENT)
-
-if(NOT PMEM_STRING_PRESENT)
-	message(FATAL_ERROR "libpmemobj++/experimental/string.hpp not found (available in libpmemobj-cpp >= 1.6)")
-endif()
-
-CHECK_CXX_SOURCE_COMPILES(
-	"#include <libpmemobj++/experimental/concurrent_hash_map.hpp>
-	int main() {}"
-	PMEM_CONCURRENT_HASH_MAP_PRESENT)
-
-set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
-set(CMAKE_REQUIRED_FLAGS ${SAVED_CMAKE_REQUIRED_FLAGS})
-
-if(NOT PMEM_CONCURRENT_HASH_MAP_PRESENT)
-	message(FATAL_ERROR "libpmemobj++/experimental/concurrent_hash_map.hpp not found (available in libpmemobj-cpp > 1.6)")
 endif()
 
 include_directories(${LIBPMEMOBJ++_INCLUDE_DIRS})
