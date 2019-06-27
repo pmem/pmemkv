@@ -77,7 +77,10 @@ public:
 			std::string mkey(key);
 			std::vector<char> v((char *)&value,
 					    (char *)&value + sizeof(value));
-			umap.insert({mkey, {v, deleter, type::OBJECT}});
+			auto ret = umap.insert({mkey, {v, deleter, type::OBJECT}});
+
+			if (!ret.second)
+				return status::FAILED;
 		} catch (...) {
 			return status::FAILED;
 		}
@@ -227,7 +230,10 @@ private:
 		try {
 			std::string mkey(key);
 			std::vector<char> v((char *)value, (char *)value + value_size);
-			umap.insert({mkey, {v, nullptr, type}});
+			auto ret = umap.insert({mkey, {v, nullptr, type}});
+
+			if (!ret.second)
+				return status::FAILED;
 		} catch (...) {
 			return status::FAILED;
 		}
