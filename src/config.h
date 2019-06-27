@@ -76,7 +76,7 @@ public:
 		try {
 			std::string mkey(key);
 			std::vector<char> v((char *)&value,
-					    (char *)&value + sizeof(value));
+					    (char *)&value + sizeof(void *));
 			auto ret = umap.insert({mkey, {v, deleter, type::OBJECT}});
 
 			if (!ret.second)
@@ -120,10 +120,10 @@ public:
 		void *ptr_ptr;
 
 		auto status = get(key, (const void **)&ptr_ptr, &size, nullptr);
-		if (status == status::OK && size != sizeof(value))
+		if (status == status::OK && size != sizeof(void *))
 			return status::CONFIG_TYPE_ERROR;
 
-		memcpy(value, ptr_ptr, sizeof(value));
+		memcpy(value, ptr_ptr, sizeof(void *));
 
 		return status;
 	}
