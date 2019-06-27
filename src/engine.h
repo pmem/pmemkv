@@ -36,6 +36,7 @@
 #include <functional>
 #include <string>
 
+#include "config.h"
 #include "libpmemkv.hpp"
 
 namespace pmem
