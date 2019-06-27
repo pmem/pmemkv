@@ -41,6 +41,8 @@ const std::string PATH = "/dev/shm/pmemkv";
 const size_t SIZE = 1024ull * 1024ull * 512ull;
 const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
 
+static int count = 0;
+
 template <size_t POOL_SIZE>
 class CMapBaseTest : public testing::Test {
 public:
@@ -77,6 +79,11 @@ protected:
 
 		if (cfg_s != PMEMKV_STATUS_OK)
 			throw std::runtime_error("putting 'path' to config failed");
+
+		cfg_s = pmemkv_config_put_uint64(cfg, "force_create", 1);
+		if (cfg_s != PMEMKV_STATUS_OK)
+			throw std::runtime_error(
+				"putting 'force_create' to config failed");
 
 		cfg_s = pmemkv_config_put_uint64(cfg, "size", size);
 
