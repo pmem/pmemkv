@@ -52,7 +52,7 @@ namespace pmem
 namespace kv
 {
 
-tree3::tree3(void *context, const std::string &path, const size_t size) : context(context)
+tree3::tree3(const std::string &path, const size_t size)
 {
 	if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
 		LOG("Creating filesystem pool, path=" << path << ", size="
@@ -76,11 +76,6 @@ tree3::~tree3()
 std::string tree3::name()
 {
 	return "tree3";
-}
-
-void *tree3::engine_context()
-{
-	return context;
 }
 
 // ===============================================================================================

@@ -45,11 +45,10 @@ namespace kv
 
 class vcmap : public engine_base {
 public:
-	vcmap(void *context, const std::string &path, size_t size);
+	vcmap(const std::string &path, size_t size);
 	~vcmap();
 
 	std::string name() final;
-	void *engine_context();
 
 	status count_all(std::size_t &cnt) final;
 
@@ -72,7 +71,6 @@ private:
 					 tbb::tbb_hash_compare<pmem_string>,
 					 std::scoped_allocator_adaptor<kv_allocator_t>>
 		map_t;
-	void *context;
 	kv_allocator_t kv_allocator;
 	ch_allocator_t ch_allocator;
 	map_t pmem_kv_container;

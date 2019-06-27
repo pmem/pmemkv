@@ -47,7 +47,7 @@ namespace pmem
 namespace kv
 {
 
-cmap::cmap(void *context, const std::string &path, size_t size) : context(context)
+cmap::cmap(const std::string &path, size_t size)
 {
 	if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
 		LOG("Creating filesystem pool, path=" << path << ", size="
@@ -72,11 +72,6 @@ cmap::~cmap()
 std::string cmap::name()
 {
 	return "cmap";
-}
-
-void *cmap::engine_context()
-{
-	return context;
 }
 
 status cmap::count_all(std::size_t &cnt)

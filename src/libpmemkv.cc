@@ -402,8 +402,7 @@ int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char 
 	return PMEMKV_STATUS_OK;
 }
 
-int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
-		pmemkv_db **db)
+int pmemkv_open(const char *engine_c_str, pmemkv_config *config, pmemkv_db **db)
 {
 	if (db == nullptr)
 		return PMEMKV_STATUS_INVALID_ARGUMENT;
@@ -412,15 +411,14 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 		std::string engine = engine_c_str;
 
 		if (engine == "blackhole") {
-			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::blackhole(context));
+			*db = reinterpret_cast<pmemkv_db *>(new pmem::kv::blackhole());
 
 			return PMEMKV_STATUS_OK;
 		}
 #ifdef ENGINE_CACHING
 		if (engine == "caching") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::caching(context, config));
+				new pmem::kv::caching(config));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -447,7 +445,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_TREE3
 		if (engine == "tree3") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::tree3(context, path, size));
+				new pmem::kv::tree3(path, size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -456,7 +454,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_STREE
 		if (engine == "stree") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::stree(context, path, size));
+				new pmem::kv::stree(path, size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -465,7 +463,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_CMAP
 		if (engine == "cmap") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::cmap(context, path, size));
+				new pmem::kv::cmap(path, size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -482,7 +480,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_VSMAP
 		if (engine == "vsmap") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::vsmap(context, path, size));
+				new pmem::kv::vsmap(path, size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -491,7 +489,7 @@ int pmemkv_open(void *context, const char *engine_c_str, pmemkv_config *config,
 #ifdef ENGINE_VCMAP
 		if (engine == "vcmap") {
 			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::vcmap(context, path, size));
+				new pmem::kv::vcmap(path, size));
 
 			return PMEMKV_STATUS_OK;
 		}
@@ -737,19 +735,6 @@ int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb)
 	} catch (...) {
 		ERR() << "Unspecified failure";
 		return PMEMKV_STATUS_FAILED;
-	}
-}
-
-void *pmemkv_engine_context(pmemkv_db *db)
-{
-	try {
-		return reinterpret_cast<pmem::kv::engine_base *>(db)->engine_context();
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return nullptr;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return nullptr;
 	}
 }
 

@@ -45,7 +45,7 @@ namespace pmem
 namespace kv
 {
 
-blackhole::blackhole(void *context) : context(context)
+blackhole::blackhole()
 {
 	LOG("Started ok");
 }
@@ -58,11 +58,6 @@ blackhole::~blackhole()
 std::string blackhole::name()
 {
 	return "blackhole";
-}
-
-void *blackhole::engine_context()
-{
-	return context;
 }
 
 status blackhole::count_all(std::size_t &cnt)
