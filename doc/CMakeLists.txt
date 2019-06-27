@@ -44,12 +44,21 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/libpmemkv.3
 		${CMAKE_SOURCE_DIR}/doc/libpmemkv.3.md
 		${CMAKE_SOURCE_DIR}/utils/md2man/default.man
 		${CMAKE_BINARY_DIR}/man/libpmemkv.3)
+add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/libpmemkv_config.3
+	MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/doc/libpmemkv_config.3.md
+	COMMAND ${CMAKE_SOURCE_DIR}/utils/md2man/md2man.sh
+		${CMAKE_SOURCE_DIR}/doc/libpmemkv_config.3.md
+		${CMAKE_SOURCE_DIR}/utils/md2man/default.man
+		${CMAKE_BINARY_DIR}/man/libpmemkv_config.3)
 
 add_custom_target(docs ALL
 	DEPENDS ${CMAKE_BINARY_DIR}/man/libpmemkv.7
-	DEPENDS ${CMAKE_BINARY_DIR}/man/libpmemkv.3)
+	DEPENDS ${CMAKE_BINARY_DIR}/man/libpmemkv.3
+	DEPENDS ${CMAKE_BINARY_DIR}/man/libpmemkv_config.3)
 
 install(FILES ${CMAKE_BINARY_DIR}/man/libpmemkv.7
 	DESTINATION ${CMAKE_INSTALL_MANDIR}/man7)
 install(FILES ${CMAKE_BINARY_DIR}/man/libpmemkv.3
+	DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
+install(FILES ${CMAKE_BINARY_DIR}/man/libpmemkv_config.3
 	DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
