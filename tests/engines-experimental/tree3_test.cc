@@ -41,8 +41,7 @@ const std::string PATH = "/dev/shm/pmemkv";
 const std::string PATH_CACHED = "/tmp/pmemkv";
 const size_t SIZE = ((size_t)(1024 * 1024 * 1104));
 
-static std::unique_ptr<pmemkv_config, decltype(&pmemkv_config_delete)>
-getConfig(const std::string &path, size_t size)
+pmemkv_config *getConfig(const std::string &path, size_t size)
 {
 	int ret = 0;
 
@@ -61,8 +60,7 @@ getConfig(const std::string &path, size_t size)
 	if (cfg_s != PMEMKV_STATUS_OK)
 		throw std::runtime_error("putting 'size' to config failed");
 
-	return std::unique_ptr<pmemkv_config, decltype(&pmemkv_config_delete)>(
-		cfg, &pmemkv_config_delete);
+	return cfg;
 }
 
 class TreeEmptyTest : public testing::Test {
@@ -98,7 +96,7 @@ protected:
 	void Start()
 	{
 		kv = new db;
-		auto s = kv->open("tree3", getConfig(PATH, SIZE).get());
+		auto s = kv->open("tree3", getConfig(PATH, SIZE));
 		if (s != status::OK)
 			throw std::runtime_error(db::errormsg());
 	}
@@ -111,7 +109,7 @@ protected:
 TEST_F(TreeEmptyTest, CreateInstanceTest)
 {
 	db *kv = new db;
-	auto s = kv->open("tree3", getConfig(PATH, PMEMOBJ_MIN_POOL).get());
+	auto s = kv->open("tree3", getConfig(PATH, PMEMOBJ_MIN_POOL));
 	if (s != status::OK)
 		throw std::runtime_error(db::errormsg());
 	delete kv;
@@ -124,7 +122,7 @@ struct Context {
 TEST_F(TreeEmptyTest, CreateInstanceWithContextTest)
 {
 	db *kv = new db;
-	auto s = kv->open("tree3", getConfig(PATH, PMEMOBJ_MIN_POOL).get());
+	auto s = kv->open("tree3", getConfig(PATH, PMEMOBJ_MIN_POOL));
 	if (s != status::OK)
 		throw std::runtime_error("Open failed");
 	delete kv;
@@ -136,8 +134,7 @@ TEST_F(TreeEmptyTest, FailsToCreateInstanceWithInvalidPath)
 		auto kv = new db;
 		auto s = kv->open("tree3",
 				  getConfig("/tmp/123/234/345/456/567/678/nope.nope",
-					    PMEMOBJ_MIN_POOL)
-					  .get());
+					    PMEMOBJ_MIN_POOL));
 		if (s != status::OK)
 			throw std::runtime_error(db::errormsg());
 		FAIL();
@@ -150,9 +147,8 @@ TEST_F(TreeEmptyTest, FailsToCreateInstanceWithHugeSize)
 {
 	try {
 		auto kv = new db;
-		auto s = kv->open(
-			"tree3",
-			getConfig(PATH, 9223372036854775807).get()); // 9.22 exabytes
+		auto s = kv->open("tree3",
+				  getConfig(PATH, 9223372036854775807)); // 9.22 exabytes
 		if (s != status::OK)
 			throw std::runtime_error(db::errormsg());
 		FAIL();
@@ -165,9 +161,8 @@ TEST_F(TreeEmptyTest, FailsToCreateInstanceWithTinySize)
 {
 	try {
 		auto kv = new db;
-		auto s = kv->open(
-			"tree3",
-			getConfig(PATH, PMEMOBJ_MIN_POOL - 1).get()); // too small
+		auto s = kv->open("tree3",
+				  getConfig(PATH, PMEMOBJ_MIN_POOL - 1)); // too small
 		if (s != status::OK)
 			throw std::runtime_error(db::errormsg());
 		FAIL();
@@ -974,7 +969,7 @@ public:
 	{
 		delete kv;
 		kv = new db;
-		auto s = kv->open("tree3", getConfig(PATH, SIZE).get());
+		auto s = kv->open("tree3", getConfig(PATH, SIZE));
 		if (s != status::OK)
 			throw std::runtime_error(db::errormsg());
 	}
@@ -1015,7 +1010,7 @@ private:
 			std::cout << "!!! creating cached copy at " << PATH_CACHED
 				  << "\n";
 			db *kvt = new db;
-			auto s = kvt->open("tree3", getConfig(PATH, SIZE).get());
+			auto s = kvt->open("tree3", getConfig(PATH, SIZE));
 			if (s != status::OK)
 				throw std::runtime_error(db::errormsg());
 			for (int i = 1; i <= LARGE_LIMIT; i++) {
@@ -1028,7 +1023,7 @@ private:
 							.c_str()) == 0);
 		}
 		kv = new db;
-		auto s = kv->open("tree3", getConfig(PATH, SIZE).get());
+		auto s = kv->open("tree3", getConfig(PATH, SIZE));
 		if (s != status::OK)
 			throw std::runtime_error(db::errormsg());
 	}

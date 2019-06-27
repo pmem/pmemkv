@@ -50,7 +50,7 @@ const size_t MAX_VALUE_SIZE = 200;
 
 class stree : public engine_base {
 public:
-	stree(const std::string &path, size_t size);
+	stree(std::unique_ptr<internal::config> cfg);
 	~stree();
 
 	std::string name() final;

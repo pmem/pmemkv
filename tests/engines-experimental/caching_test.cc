@@ -67,8 +67,6 @@ public:
 		if (kv->open(engine, cfg) != status::OK)
 			throw std::runtime_error("Cannot open database");
 
-		pmemkv_config_delete(cfg);
-
 		return kv != nullptr;
 	}
 
