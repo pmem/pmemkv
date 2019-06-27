@@ -63,22 +63,20 @@ public:
 	status remove(string_view key) final;
 
 private:
-	bool getString(internal::config &cfg, const char *key, std::string &str);
-	bool readConfig(internal::config &cfg);
+	void getString(internal::config &cfg, const char *key, std::string &str);
 	bool getFromRemoteRedis(const std::string &key, std::string &value);
 	bool getFromRemoteMemcached(const std::string &key, std::string &value);
 	bool getKey(const std::string &key, std::string &valueField, bool api_flag);
 
-	int64_t attempts;
 	db *basePtr;
+
+	int64_t attempts;
 	std::string host;
 	int64_t port;
 	std::string remoteType;
 	std::string remoteUser;
 	std::string remotePasswd;
 	std::string remoteUrl;
-	std::string subEngine;
-	pmemkv_config *subEngineConfig;
 };
 
 time_t convertTimeToEpoch(const char *theTime, const char *format = "%Y%m%d%H%M%S");
