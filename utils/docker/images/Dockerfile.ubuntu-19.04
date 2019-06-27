@@ -65,6 +65,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	npm \
 	numactl \
 	openjdk-8-jdk \
+	pandoc \
 	pkg-config \
 	rapidjson-dev \
 	ruby-dev \

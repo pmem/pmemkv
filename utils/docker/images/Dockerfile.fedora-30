@@ -46,7 +46,6 @@ RUN dnf update -y \
 	clang \
 	cmake \
 	daxctl-devel \
-	doxygen \
 	gcc \
 	gcc-c++ \
 	gdb \
@@ -56,6 +55,7 @@ RUN dnf update -y \
 	man \
 	ndctl-devel \
 	numactl-devel \
+	pandoc \
 	passwd \
 	perl-Text-Diff \
 	rapidjson-devel \
