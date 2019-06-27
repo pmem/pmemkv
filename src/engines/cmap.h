@@ -40,28 +40,47 @@
 #define LIBPMEMOBJ_CPP_USE_TBB_RW_MUTEX 1
 #include <libpmemobj++/experimental/concurrent_hash_map.hpp>
 
-namespace std
+namespace pmem
 {
-template <>
-struct hash<pmem::kv::polymorphic_string> {
+namespace kv
+{
+
+class key_equal {
+public:
+	template <typename M, typename U>
+	bool operator()(const M &lhs, const U &rhs) const
+	{
+		return lhs == rhs;
+	}
+};
+
+class string_hasher {
 	/* hash multiplier used by fibonacci hashing */
 	static const size_t hash_multiplier = 11400714819323198485ULL;
 
-	size_t operator()(const pmem::kv::polymorphic_string &str)
+public:
+	using transparent_key_equal = key_equal;
+
+	size_t operator()(const pmem::kv::polymorphic_string &str) const
+	{
+		return hash(str.c_str(), str.size());
+	}
+
+	size_t operator()(string_view str) const
+	{
+		return hash(str.data(), str.size());
+	}
+
+private:
+	size_t hash(const char *str, size_t size) const
 	{
 		size_t h = 0;
-		for (size_t i = 0; i < str.size(); ++i) {
+		for (size_t i = 0; i < size; ++i) {
 			h = static_cast<size_t>(str[i]) ^ (h * hash_multiplier);
 		}
 		return h;
 	}
 };
-}
-
-namespace pmem
-{
-namespace kv
-{
 
 class cmap : public engine_base {
 public:
@@ -87,7 +106,8 @@ public:
 
 private:
 	using string_t = pmem::kv::polymorphic_string;
-	using map_t = pmem::obj::experimental::concurrent_hash_map<string_t, string_t>;
+	using map_t = pmem::obj::experimental::concurrent_hash_map<string_t, string_t,
+								   string_hasher>;
 
 	struct RootData {
 		pmem::obj::persistent_ptr<map_t> map_ptr;
