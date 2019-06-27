@@ -40,6 +40,7 @@
 #include <vector>
 
 #include "libpmemkv.hpp"
+#include "out.h"
 
 namespace pmem
 {
@@ -77,8 +78,14 @@ public:
 			std::string mkey(key);
 			std::vector<char> v((char *)&value,
 					    (char *)&value + sizeof(value));
-			umap.insert({mkey, {v, deleter, type::OBJECT}});
+			auto ret = umap.insert({mkey, {v, deleter, type::OBJECT}});
+
+			if (!ret.second) {
+				ERR() << "Element with key: " << key << " already exists";
+				return status::FAILED;
+			}
 		} catch (...) {
+			ERR() << "Unspecified failure";
 			return status::FAILED;
 		}
 
@@ -229,8 +236,14 @@ private:
 			std::string mkey(key);
 			std::vector<char> v((const char *)value,
 					    (const char *)value + value_size);
-			umap.insert({mkey, {v, nullptr, type}});
+			auto ret = umap.insert({mkey, {v, nullptr, type}});
+
+			if (!ret.second) {
+				ERR() << "Element with key: " << key << " already exists";
+				return status::FAILED;
+			}
 		} catch (...) {
+			ERR() << "Unspecified failure";
 			return status::FAILED;
 		}
 
@@ -256,6 +269,7 @@ private:
 			if (type)
 				*type = found->second.element_type;
 		} catch (...) {
+			ERR() << "Unspecified failure";
 			return status::FAILED;
 		}
 
