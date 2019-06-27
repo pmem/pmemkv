@@ -65,7 +65,7 @@ namespace kv
 
 class cmap : public engine_base {
 public:
-	cmap(const std::string &path, size_t size);
+	cmap(std::unique_ptr<internal::config> cfg);
 	~cmap();
 
 	cmap(const cmap &) = delete;

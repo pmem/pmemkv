@@ -47,15 +47,24 @@ namespace pmem
 namespace kv
 {
 
-cmap::cmap(const std::string &path, size_t size)
+cmap::cmap(std::unique_ptr<internal::config> cfg)
 {
-	if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
+	const char *path;
+	std::size_t size;
+
+	if (cfg->get_string("path", &path) != status::OK)
+		throw std::runtime_error("Config does not contain path");
+
+	if (cfg->get_uint64("size", &size) != status::OK)
+		throw std::runtime_error("Config does not contain size");
+
+	if ((access(path, F_OK) != 0) && (size > 0)) {
 		LOG("Creating filesystem pool, path=" << path << ", size="
 						      << std::to_string(size));
-		pmpool = pool_t::create(path.c_str(), LAYOUT, size, S_IRWXU);
+		pmpool = pool_t::create(path, LAYOUT, size, S_IRWXU);
 	} else {
 		LOG("Opening pool, path=" << path);
-		pmpool = pool_t::open(path.c_str(), LAYOUT);
+		pmpool = pool_t::open(path, LAYOUT);
 	}
 	LOG("Started ok");
 

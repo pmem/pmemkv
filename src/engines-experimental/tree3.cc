@@ -52,16 +52,26 @@ namespace pmem
 namespace kv
 {
 
-tree3::tree3(const std::string &path, const size_t size)
+tree3::tree3(std::unique_ptr<internal::config> cfg)
 {
-	if ((access(path.c_str(), F_OK) != 0) && (size > 0)) {
+	const char *path;
+	std::size_t size;
+
+	if (cfg->get_string("path", &path) != status::OK)
+		throw std::runtime_error("Config does not contain path");
+
+	if (cfg->get_uint64("size", &size) != status::OK)
+		throw std::runtime_error("Config does not contain size");
+
+	if ((access(path, F_OK) != 0) && (size > 0)) {
 		LOG("Creating filesystem pool, path=" << path << ", size="
 						      << std::to_string(size));
-		pmpool = pool<KVRoot>::create(path.c_str(), LAYOUT, size, S_IRWXU);
+		pmpool = pool<KVRoot>::create(path, LAYOUT, size, S_IRWXU);
 	} else {
 		LOG("Opening pool, path=" << path);
-		pmpool = pool<KVRoot>::open(path.c_str(), LAYOUT);
+		pmpool = pool<KVRoot>::open(path, LAYOUT);
 	}
+
 	Recover();
 	LOG("Started ok");
 }

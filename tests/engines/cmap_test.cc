@@ -87,8 +87,6 @@ protected:
 		auto s = kv->open("cmap", cfg);
 		if (s != status::OK)
 			throw std::runtime_error(db::errormsg());
-
-		pmemkv_config_delete(cfg);
 	}
 };
 

@@ -204,7 +204,7 @@ struct KVRecoveredLeaf {		 // temporary wrapper used for recovery
 
 class tree3 : public engine_base { // hybrid B+ tree engine
 public:
-	tree3(const std::string &path, size_t size);
+	tree3(std::unique_ptr<internal::config> cfg);
 	~tree3();
 
 	std::string name() final;

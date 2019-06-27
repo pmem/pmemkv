@@ -48,8 +48,26 @@ namespace pmem
 namespace kv
 {
 
-vcmap::vcmap(const std::string &path, size_t size)
-    : kv_allocator(path, size),
+static std::string get_path(internal::config &cfg)
+{
+	const char *path;
+	if (cfg.get_string("path", &path) != status::OK)
+		throw std::runtime_error("Config does not contain path");
+
+	return std::string(path);
+}
+
+static uint64_t get_size(internal::config &cfg)
+{
+	std::size_t size;
+	if (cfg.get_uint64("size", &size) != status::OK)
+		throw std::runtime_error("Config does not contain size");
+
+	return size;
+}
+
+vcmap::vcmap(std::unique_ptr<internal::config> cfg)
+    : kv_allocator(get_path(*cfg), get_size(*cfg)),
       ch_allocator(kv_allocator),
       pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator))
 {
