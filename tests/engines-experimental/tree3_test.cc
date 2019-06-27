@@ -55,6 +55,10 @@ pmemkv_config *getConfig(const std::string &path, size_t size)
 	if (cfg_s != PMEMKV_STATUS_OK)
 		throw std::runtime_error("putting 'path' to config failed");
 
+	cfg_s = pmemkv_config_put_uint64(cfg, "force_create", 1);
+	if (cfg_s != PMEMKV_STATUS_OK)
+		throw std::runtime_error("putting 'force_create' to config failed");
+
 	cfg_s = pmemkv_config_put_uint64(cfg, "size", size);
 
 	if (cfg_s != PMEMKV_STATUS_OK)
