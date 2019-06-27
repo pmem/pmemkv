@@ -57,9 +57,35 @@ namespace kv
 
 caching::caching(std::unique_ptr<internal::config> cfg)
 {
-	if (!readConfig(*cfg))
-		throw std::runtime_error(
-			"caching Exception"); // todo propagate start exceptions properly
+	auto &config = *cfg;
+
+	std::string subEngine;
+	getString(config, "subengine", subEngine);
+
+	getString(config, "remote_type", remoteType);
+	getString(config, "remote_user", remoteUser);
+	getString(config, "remote_pwd", remotePasswd);
+	getString(config, "remote_url", remoteUrl);
+	getString(config, "host", host);
+
+	if (!config.get_int64("ttl", &ttl))
+		ttl = 0;
+	else
+		throw internal::invalid_argument(
+			"Config does not contain element with key: \"ttl\"");
+
+	if (!config.get_int64("port", &port))
+		throw internal::invalid_argument(
+			"Config does not contain element with key: \"port\"");
+
+	if (!config.get_int64("attempts", &attempts))
+		throw internal::invalid_argument(
+			"Config does not contain element with key: \"attempts\"");
+
+	pmemkv_config *subEngineConfig;
+	if (!config.get_object("subengine_config", (void **)&subEngineConfig))
+		throw internal::invalid_argument(
+			"Config does not contain element with key: \"subengine_config\"");
 
 	if (!(basePtr = new db))
 		throw std::runtime_error(
@@ -85,57 +111,16 @@ std::string caching::name()
 	return "caching";
 }
 
-bool caching::getString(internal::config &config, const char *key, std::string &str)
+void caching::getString(internal::config &config, const char *key, std::string &str)
 {
 	const char *value;
 
-	if (config.get_string(key, &value) != status::OK)
-		return false;
+	if (!config.get_string(key, &value))
+		throw internal::invalid_argument(
+			"Config does not contain element with key: \"" +
+			std::string(key) + "\"");
 
 	str = std::string(value);
-
-	return true;
-}
-
-bool caching::readConfig(internal::config &config)
-{
-	if (!getString(config, "subengine", subEngine))
-		return false;
-
-	if (!getString(config, "remote_type", remoteType))
-		return false;
-
-	if (!getString(config, "remote_user", remoteUser))
-		return false;
-
-	if (!getString(config, "remote_pwd", remotePasswd))
-		return false;
-
-	if (!getString(config, "remote_url", remoteUrl))
-		return false;
-
-	if (!getString(config, "host", host))
-		return false;
-
-	auto ret = config.get_int64("ttl", &ttl);
-	if (ret == status::NOT_FOUND)
-		ttl = 0;
-	else if (ret != status::OK)
-		return false;
-
-	ret = config.get_int64("port", &port);
-	if (ret != status::OK)
-		return false;
-
-	ret = config.get_int64("attempts", &attempts);
-	if (ret != status::OK)
-		return false;
-
-	ret = config.get_object("subengine_config", (void **)&subEngineConfig);
-	if (ret != status::OK)
-		return false;
-
-	return true;
 }
 
 status caching::count_all(std::size_t &cnt)

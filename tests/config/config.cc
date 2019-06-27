@@ -126,6 +126,10 @@ TEST_F(ConfigTest, SimpleTest)
 	ASSERT_EQ(value_custom->a, 10);
 	ASSERT_EQ(value_custom->b, 'a');
 
+	int64_t none;
+	ASSERT_EQ(pmemkv_config_get_int64(config, "non-existent", &none),
+		  PMEMKV_STATUS_NOT_FOUND);
+
 	delete ptr;
 
 	pmemkv_config_delete(config);
