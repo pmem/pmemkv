@@ -78,7 +78,7 @@ extern "C" {
 pmemkv_config *pmemkv_config_new(void)
 {
 	try {
-		return reinterpret_cast<pmemkv_config *>(new pmem::kv::internal::config);
+		return config_from_internal(new pmem::kv::internal::config);
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return nullptr;
@@ -91,7 +91,7 @@ pmemkv_config *pmemkv_config_new(void)
 void pmemkv_config_delete(pmemkv_config *config)
 {
 	try {
-		delete reinterpret_cast<pmem::kv::internal::config *>(config);
+		delete config_to_internal(config);
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 	} catch (...) {
@@ -194,8 +194,9 @@ int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *v
 			   size_t value_size)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_data(key, value, value_size);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->put_data(
+			key, value, value_size);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;
@@ -209,8 +210,9 @@ int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value
 			     void (*deleter)(void *))
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_object(key, value, deleter);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->put_object(
+			key, value, deleter);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;
@@ -223,8 +225,9 @@ int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value
 int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_int64(key, value);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->put_int64(key,
+										  value);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;
@@ -237,8 +240,9 @@ int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t valu
 int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_uint64(key, value);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->put_uint64(key,
+										   value);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;
@@ -251,8 +255,9 @@ int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t va
 int pmemkv_config_put_double(pmemkv_config *config, const char *key, double value)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_double(key, value);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->put_double(key,
+										   value);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;
@@ -265,8 +270,9 @@ int pmemkv_config_put_double(pmemkv_config *config, const char *key, double valu
 int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_string(key, value);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->put_string(key,
+										   value);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;
@@ -280,8 +286,9 @@ int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **
 			   size_t *value_size)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_data(key, value, value_size);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->get_data(
+			key, value, value_size);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;
@@ -294,8 +301,9 @@ int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **
 int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **value)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_object(key, value);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->get_object(key,
+										   value);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;
@@ -308,8 +316,9 @@ int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **valu
 int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_int64(key, value);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->get_int64(key,
+										  value);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;
@@ -322,8 +331,9 @@ int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *val
 int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_uint64(key, value);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->get_uint64(key,
+										   value);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;
@@ -336,8 +346,9 @@ int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *v
 int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *value)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_double(key, value);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->get_double(key,
+										   value);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;
@@ -350,8 +361,9 @@ int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *val
 int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value)
 {
 	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_string(key, value);
+		reinterpret_cast<pmem::kv::internal::config *>(config)->get_string(key,
+										   value);
+		return PMEMKV_STATUS_OK;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return PMEMKV_STATUS_FAILED;

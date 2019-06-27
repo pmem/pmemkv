@@ -51,7 +51,7 @@ namespace kv
 static std::string get_path(internal::config &cfg)
 {
 	const char *path;
-	if (cfg.get_string("path", &path) != status::OK)
+	if (!cfg.get_string("path", &path))
 		throw std::runtime_error("Config does not contain path");
 
 	return std::string(path);
@@ -60,7 +60,7 @@ static std::string get_path(internal::config &cfg)
 static uint64_t get_size(internal::config &cfg)
 {
 	std::size_t size;
-	if (cfg.get_uint64("size", &size) != status::OK)
+	if (!cfg.get_uint64("size", &size))
 		throw std::runtime_error("Config does not contain size");
 
 	return size;
