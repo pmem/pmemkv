@@ -40,6 +40,7 @@
 #include "config.h"
 #include "engine.h"
 #include "engines/blackhole.h"
+#include "exceptions.h"
 #include "libpmemkv.h"
 #include "libpmemkv.hpp"
 #include "out.h"
@@ -71,7 +72,45 @@
 #include <iostream>
 #include <memory>
 #include <unordered_map>
+#include <utility>
 #include <vector>
+
+static inline pmemkv_config *config_from_internal(pmem::kv::internal::config *config)
+{
+	return reinterpret_cast<pmemkv_config *>(config);
+}
+
+static inline pmem::kv::internal::config *config_to_internal(pmemkv_config *config)
+{
+	return reinterpret_cast<pmem::kv::internal::config *>(config);
+}
+
+static inline pmemkv_db *db_from_internal(pmem::kv::engine_base *engine)
+{
+	return reinterpret_cast<pmemkv_db *>(engine);
+}
+
+static inline pmem::kv::engine_base *db_to_internal(pmemkv_db *db)
+{
+	return reinterpret_cast<pmem::kv::engine_base *>(db);
+}
+
+template <typename Function>
+static inline int catch_and_return_status(const char *func_name, Function &&f)
+{
+	try {
+		return static_cast<int>(f());
+	} catch (pmem::kv::internal::error &e) {
+		out_err_stream(func_name) << e.what();
+		return e.status_code;
+	} catch (std::runtime_error &e) {
+		out_err_stream(func_name) << e.what();
+		return PMEMKV_STATUS_FAILED;
+	} catch (...) {
+		out_err_stream(func_name) << "Unspecified error";
+		return PMEMKV_STATUS_FAILED;
+	}
+}
 
 extern "C" {
 
@@ -193,172 +232,106 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *value,
 			   size_t value_size)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_data(key, value, value_size);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		config_to_internal(config)->put_data(key, value, value_size);
+		return PMEMKV_STATUS_OK;
+	});
 }
 
 int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value,
 			     void (*deleter)(void *))
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_object(key, value, deleter);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		config_to_internal(config)->put_object(key, value, deleter);
+		return PMEMKV_STATUS_OK;
+	});
 }
 
 int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_int64(key, value);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		config_to_internal(config)->put_int64(key, value);
+		return PMEMKV_STATUS_OK;
+	});
 }
 
 int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_uint64(key, value);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		config_to_internal(config)->put_uint64(key, value);
+		return PMEMKV_STATUS_OK;
+	});
 }
 
 int pmemkv_config_put_double(pmemkv_config *config, const char *key, double value)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_double(key, value);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		config_to_internal(config)->put_double(key, value);
+		return PMEMKV_STATUS_OK;
+	});
 }
 
 int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->put_string(key, value);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		config_to_internal(config)->put_string(key, value);
+		return PMEMKV_STATUS_OK;
+	});
 }
 
 int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **value,
 			   size_t *value_size)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_data(key, value, value_size);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return config_to_internal(config)->get_data(key, value, value_size)
+			? PMEMKV_STATUS_OK
+			: PMEMKV_STATUS_NOT_FOUND;
+	});
 }
 
 int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **value)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_object(key, value);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return config_to_internal(config)->get_object(key, value)
+			? PMEMKV_STATUS_OK
+			: PMEMKV_STATUS_NOT_FOUND;
+	});
 }
 
 int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_int64(key, value);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return config_to_internal(config)->get_int64(key, value)
+			? PMEMKV_STATUS_OK
+			: PMEMKV_STATUS_NOT_FOUND;
+	});
 }
 
 int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_uint64(key, value);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return config_to_internal(config)->get_uint64(key, value)
+			? PMEMKV_STATUS_OK
+			: PMEMKV_STATUS_NOT_FOUND;
+	});
 }
 
 int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *value)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_double(key, value);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return config_to_internal(config)->get_double(key, value)
+			? PMEMKV_STATUS_OK
+			: PMEMKV_STATUS_NOT_FOUND;
+	});
 }
 
 int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
-			->get_string(key, value);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return config_to_internal(config)->get_string(key, value)
+			? PMEMKV_STATUS_OK
+			: PMEMKV_STATUS_NOT_FOUND;
+	});
 }
 
 int pmemkv_open(const char *engine_c_str, pmemkv_config *config, pmemkv_db **db)
@@ -446,7 +419,7 @@ int pmemkv_open(const char *engine_c_str, pmemkv_config *config, pmemkv_db **db)
 void pmemkv_close(pmemkv_db *db)
 {
 	try {
-		delete reinterpret_cast<pmem::kv::engine_base *>(db);
+		delete db_to_internal(db);
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 	} catch (...) {
@@ -456,146 +429,83 @@ void pmemkv_close(pmemkv_db *db)
 
 int pmemkv_count_all(pmemkv_db *db, size_t *cnt)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->count_all(
-			*cnt);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(
+		__func__, [&] { return db_to_internal(db)->count_all(*cnt); });
 }
 
 int pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb, size_t *cnt)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->count_above(
-			pmem::kv::string_view(k, kb), *cnt);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->count_above(pmem::kv::string_view(k, kb),
+						       *cnt);
+	});
 }
 
 int pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb, size_t *cnt)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->count_below(
-			pmem::kv::string_view(k, kb), *cnt);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->count_below(pmem::kv::string_view(k, kb),
+						       *cnt);
+	});
 }
 
 int pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
 			 size_t kb2, size_t *cnt)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->count_between(
-			pmem::kv::string_view(k1, kb1), pmem::kv::string_view(k2, kb2),
-			*cnt);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->count_between(pmem::kv::string_view(k1, kb1),
+							 pmem::kv::string_view(k2, kb2),
+							 *cnt);
+	});
 }
 
 int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_all(c,
-										   arg);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(
+		__func__, [&] { return db_to_internal(db)->get_all(c, arg); });
 }
 
 int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
 		     void *arg)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_above(
-			pmem::kv::string_view(k, kb), c, arg);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->get_above(pmem::kv::string_view(k, kb), c,
+						     arg);
+	});
 }
 
 int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
 		     void *arg)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_below(
-			pmem::kv::string_view(k, kb), c, arg);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->get_below(pmem::kv::string_view(k, kb), c,
+						     arg);
+	});
 }
 
 int pmemkv_get_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
 		       size_t kb2, pmemkv_get_kv_callback *c, void *arg)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get_between(
-			pmem::kv::string_view(k1, kb1), pmem::kv::string_view(k2, kb2), c,
-			arg);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->get_between(pmem::kv::string_view(k1, kb1),
+						       pmem::kv::string_view(k2, kb2), c,
+						       arg);
+	});
 }
 
 int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->exists(
-			pmem::kv::string_view(k, kb));
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->exists(pmem::kv::string_view(k, kb));
+	});
 }
 
 int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c,
 	       void *arg)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->get(
-			pmem::kv::string_view(k, kb), c, arg);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->get(pmem::kv::string_view(k, kb), c, arg);
+	});
 }
 
 struct GetCopyCallbackContext {
@@ -632,46 +542,30 @@ int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
 	if (buffer != nullptr)
 		memset(buffer, 0, buffer_size);
 
-	try {
-		reinterpret_cast<pmem::kv::engine_base *>(db)->get(
-			pmem::kv::string_view(k, kb), &get_copy_callback, &ctx);
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	auto ret = catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->get(pmem::kv::string_view(k, kb),
+					       &get_copy_callback, &ctx);
+	});
+
+	if (ret != PMEMKV_STATUS_OK)
+		return ret;
 
 	return ctx.result;
 }
 
 int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->put(
-			pmem::kv::string_view(k, kb), pmem::kv::string_view(v, vb));
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->put(pmem::kv::string_view(k, kb),
+					       pmem::kv::string_view(v, vb));
+	});
 }
 
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb)
 {
-	try {
-		return (int)reinterpret_cast<pmem::kv::engine_base *>(db)->remove(
-			pmem::kv::string_view(k, kb));
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->remove(pmem::kv::string_view(k, kb));
+	});
 }
 
 const char *pmemkv_errormsg(void)

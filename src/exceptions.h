@@ -79,8 +79,8 @@ struct config_type_error : error {
 	}
 };
 
-}
-}
-}
+} /* namespace internal */
+} /* namespace kv */
+} /* namespace pmem */
 
 #endif /* LIBPMEMKV_EXCEPTIONS_H */

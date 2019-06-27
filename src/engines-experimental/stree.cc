@@ -60,20 +60,20 @@ stree::stree(std::unique_ptr<internal::config> cfg)
 	const char *path;
 	std::size_t size;
 
-	if (cfg->get_string("path", &path) != status::OK)
-		throw std::runtime_error("Config does not contain path");
+	if (!cfg->get_string("path", &path))
+		throw internal::invalid_argument(
+			"Config does not contain item with key: \"path\"");
 
 	uint64_t force_create;
-	auto ret = cfg->get_uint64("force_create", &force_create);
-
-	if (ret == status::NOT_FOUND)
+	if (!cfg->get_uint64("force_create", &force_create)) {
+		LOG("Using default force_create = 0");
 		force_create = 0;
-	else if (ret != status::OK)
-		throw std::runtime_error("Cannot get force_create from config");
+	}
 
 	if (force_create) {
-		if (cfg->get_uint64("size", &size) != status::OK)
-			throw std::runtime_error("Config does not contain size");
+		if (!cfg->get_uint64("size", &size))
+			throw internal::invalid_argument(
+				"Config does not contain item with key: \"size\"");
 
 		LOG("Creating filesystem pool, path=" << path << ", size="
 						      << std::to_string(size));
