@@ -45,7 +45,7 @@ static int64_t ttl; // todo move into private field
 
 class caching : public engine_base {
 public:
-	caching(pmemkv_config *config);
+	caching(std::unique_ptr<internal::config> cfg);
 	~caching();
 
 	std::string name() final;
@@ -63,8 +63,8 @@ public:
 	status remove(string_view key) final;
 
 private:
-	bool getString(pmemkv_config *config, const char *key, std::string &str);
-	bool readConfig(pmemkv_config *config);
+	bool getString(internal::config &cfg, const char *key, std::string &str);
+	bool readConfig(internal::config &cfg);
 	bool getFromRemoteRedis(const std::string &key, std::string &value);
 	bool getFromRemoteMemcached(const std::string &key, std::string &value);
 	bool getKey(const std::string &key, std::string &valueField, bool api_flag);

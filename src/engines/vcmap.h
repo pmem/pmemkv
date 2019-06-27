@@ -45,7 +45,7 @@ namespace kv
 
 class vcmap : public engine_base {
 public:
-	vcmap(const std::string &path, size_t size);
+	vcmap(std::unique_ptr<internal::config> cfg);
 	~vcmap();
 
 	std::string name() final;
