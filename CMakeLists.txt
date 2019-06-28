@@ -240,6 +240,9 @@ else()
 endif()
 
 add_library(pmemkv SHARED ${SOURCE_FILES})
+set_target_properties(pmemkv PROPERTIES SOVERSION 0)
+target_link_libraries(pmemkv PRIVATE
+	-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv.map)
 
 target_link_libraries(pmemkv PRIVATE ${RapidJSON_LIBRARIES})
 if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3)
