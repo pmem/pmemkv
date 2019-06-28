@@ -141,6 +141,7 @@ set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.7)
+set(LIBPMEMOBJ_REQUIRED_VERSION 1.6)
 
 find_package(PkgConfig QUIET)
 include(FindPerl)
@@ -150,28 +151,42 @@ include(CheckCXXSourceCompiles)
 include(GNUInstallDirs)
 
 include(rapidjson)
-set(DEPENDENCY_LIST RapidJSON)
+set(PKG_CONFIG_REQUIRES RapidJSON)
+set(DEB_DEPENDS)
+set(RPM_DEPENDS)
 
 if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3 OR ENGINE_CACHING)
 	include(libpmemobj++)
-	list(APPEND DEPENDENCY_LIST "libpmemobj++ >= ${LIBPMEMOBJ_CPP_REQUIRED_VERSION}")
+	list(APPEND PKG_CONFIG_REQUIRES "libpmemobj++ >= ${LIBPMEMOBJ_CPP_REQUIRED_VERSION}")
+	list(APPEND RPM_DEPENDS "libpmemobj >= ${LIBPMEMOBJ_REQUIRED_VERSION}")
+	list(APPEND DEB_DEPENDS "libpmemobj1 (>= ${LIBPMEMOBJ_REQUIRED_VERSION}) | libpmemobj (>= ${LIBPMEMOBJ_REQUIRED_VERSION})")
 endif()
+
 if(ENGINE_VSMAP OR ENGINE_VCMAP)
 	include(memkind)
-	list(APPEND DEPENDENCY_LIST memkind)
+	list(APPEND PKG_CONFIG_REQUIRES memkind)
+	list(APPEND RPM_DEPENDS memkind)
+	list(APPEND DEB_DEPENDS libmemkind0)
 endif()
+
 if(ENGINE_VCMAP OR ENGINE_CMAP)
 	include(tbb)
-	list(APPEND DEPENDENCY_LIST tbb)
+	list(APPEND PKG_CONFIG_REQUIRES tbb)
+	list(APPEND RPM_DEPENDS tbb)
+	list(APPEND DEB_DEPENDS libtbb2)
 endif()
+
 if(ENGINE_CACHING)
 	include(memcached-experimental)
 	include(redis-experimental)
-	# XXX consider adding
-	#list(APPEND DEPENDENCY_LIST libmemcached)
+	list(APPEND PKG_CONFIG_REQUIRES libmemcached)
+	list(APPEND RPM_DEPENDS libmemcached)
+	list(APPEND DEB_DEPENDS libmemcached11)
 endif()
 
-string(REPLACE ";" " " PKG_REQUIRES "${DEPENDENCY_LIST}")
+string(REPLACE ";" " " PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES}")
+string(REPLACE ";" ", " RPM_PACKAGE_REQUIRES "${RPM_DEPENDS}")
+string(REPLACE ";" ", " DEB_PACKAGE_REQUIRES "${DEB_DEPENDS}")
 
 add_executable(check_license EXCLUDE_FROM_ALL utils/check_license/check-license.c)
 

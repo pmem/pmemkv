@@ -33,26 +33,6 @@
 # packages.cmake - CPack configuration for rpm and deb generation
 #
 
-# Converts list of ${dep_list} dependencies to the ${str} string of debian format
-function(parse_dep_list_to_deb_format dep_list str)
-	set(res_list "")
-	foreach(dep ${dep_list})
-		string(REPLACE " " ";" words_list ${dep})
-		list(LENGTH words_list LEN)
-		# reformat if version requirement was set
-		if (${LEN} EQUAL 3)
-			list(GET words_list 0 LIBRARY)
-			list(GET words_list 1 OPERATOR)
-			list(GET words_list 2 VERSION)
-			list(APPEND res_list "${LIBRARY} (${OPERATOR} ${VERSION})")
-			continue()
-		endif()
-		list(APPEND res_list ${words_list})
-	endforeach(dep)
-	string(REPLACE ";" ", " DEB_PACKAGE_REQUIRES "${res_list}")
-	set(${str} "${DEB_PACKAGE_REQUIRES}" PARENT_SCOPE)
-endfunction(parse_dep_list_to_deb_format)
-
 string(TOUPPER "${CPACK_GENERATOR}" CPACK_GENERATOR)
 
 if(NOT ("${CPACK_GENERATOR}" STREQUAL "DEB" OR
@@ -88,16 +68,12 @@ set(CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
 set(CPACK_RPM_PACKAGE_LICENSE "BSD")
 set(CPACK_RPM_PACKAGE_ARCHITECTURE x86_64)
 set(CPACK_RPM_PACKAGE_AUTOREQ "no")
-string(REPLACE ";" ", " RPM_PACKAGE_REQUIRES "${DEPENDENCY_LIST}")
-string(REPLACE "libpmemobj++" "libpmemobj++-devel" RPM_PACKAGE_REQUIRES ${RPM_PACKAGE_REQUIRES})
 set(CPACK_RPM_PACKAGE_REQUIRES ${RPM_PACKAGE_REQUIRES})
 #set(CPACK_RPM_CHANGELOG_FILE ${CMAKE_SOURCE_DIR}/ChangeLog)
 
 set(CPACK_DEBIAN_PACKAGE_NAME "libpmemkv-dev")
 set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION})
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE amd64)
-parse_dep_list_to_deb_format("${DEPENDENCY_LIST}" DEB_PACKAGE_REQUIRES)
-string(REPLACE "libpmemobj++" "libpmemobj++-dev" DEB_PACKAGE_REQUIRES ${DEB_PACKAGE_REQUIRES})
 set(CPACK_DEBIAN_PACKAGE_DEPENDS ${DEB_PACKAGE_REQUIRES})
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "lukasz.stolarczuk@intel.com")
 
