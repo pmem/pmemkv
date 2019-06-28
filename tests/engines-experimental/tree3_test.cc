@@ -41,7 +41,7 @@ const std::string PATH = "/dev/shm/pmemkv";
 const std::string PATH_CACHED = "/tmp/pmemkv";
 const size_t SIZE = ((size_t)(1024 * 1024 * 1104));
 
-pmemkv_config *getConfig(const std::string &path, size_t size)
+pmemkv_config *getConfig(const std::string &path, size_t size, bool create = true)
 {
 	int ret = 0;
 
@@ -50,19 +50,22 @@ pmemkv_config *getConfig(const std::string &path, size_t size)
 	if (cfg == nullptr)
 		throw std::runtime_error("creating config failed");
 
-	auto cfg_s = pmemkv_config_put_string(cfg, "path", PATH.c_str());
+	auto cfg_s = pmemkv_config_put_string(cfg, "path", path.c_str());
 
 	if (cfg_s != PMEMKV_STATUS_OK)
 		throw std::runtime_error("putting 'path' to config failed");
 
-	cfg_s = pmemkv_config_put_uint64(cfg, "force_create", 1);
-	if (cfg_s != PMEMKV_STATUS_OK)
-		throw std::runtime_error("putting 'force_create' to config failed");
+	if (create) {
+		cfg_s = pmemkv_config_put_uint64(cfg, "force_create", 1);
+		if (cfg_s != PMEMKV_STATUS_OK)
+			throw std::runtime_error(
+				"putting 'force_create' to config failed");
 
-	cfg_s = pmemkv_config_put_uint64(cfg, "size", size);
+		cfg_s = pmemkv_config_put_uint64(cfg, "size", size);
 
-	if (cfg_s != PMEMKV_STATUS_OK)
-		throw std::runtime_error("putting 'size' to config failed");
+		if (cfg_s != PMEMKV_STATUS_OK)
+			throw std::runtime_error("putting 'size' to config failed");
+	}
 
 	return cfg;
 }
@@ -83,7 +86,7 @@ public:
 	TreeTest()
 	{
 		std::remove(PATH.c_str());
-		Start();
+		Start(true);
 	}
 
 	~TreeTest()
@@ -93,14 +96,14 @@ public:
 	void Restart()
 	{
 		delete kv;
-		Start();
+		Start(false);
 	}
 
 protected:
-	void Start()
+	void Start(bool create)
 	{
 		kv = new db;
-		auto s = kv->open("tree3", getConfig(PATH, SIZE));
+		auto s = kv->open("tree3", getConfig(PATH, SIZE, create));
 		if (s != status::OK)
 			throw std::runtime_error(db::errormsg());
 	}
@@ -973,7 +976,7 @@ public:
 	{
 		delete kv;
 		kv = new db;
-		auto s = kv->open("tree3", getConfig(PATH, SIZE));
+		auto s = kv->open("tree3", getConfig(PATH, SIZE, true));
 		if (s != status::OK)
 			throw std::runtime_error(db::errormsg());
 	}
