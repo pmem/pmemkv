@@ -34,7 +34,7 @@
 # run-bindings.sh - checks bindings' building and installation
 #
 
-PREFIX=/usr/local
+PREFIX=/usr
 
 set -e
 
@@ -62,7 +62,7 @@ cd pmemkv-ruby
 mkdir -p vendor/cache/
 echo $USERPASS | sudo -S mv /opt/bindings/ruby/* vendor/cache/
 bundle install --local
-LD_LIBRARY_PATH=$PREFIX/lib/ bundle exec rspec
+bundle exec rspec
 
 echo
 echo "#########################################################################"
