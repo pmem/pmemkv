@@ -83,6 +83,7 @@ std::string stree::name()
 
 status stree::count_all(std::size_t &cnt)
 {
+	LOG("count_all");
 	std::size_t result = 0;
 	for (auto &iterator : *my_btree)
 		result++;
@@ -94,7 +95,7 @@ status stree::count_all(std::size_t &cnt)
 
 status stree::get_all(get_kv_callback *callback, void *arg)
 {
-	LOG("Each");
+	LOG("get_all");
 	for (auto &iterator : *my_btree) {
 		auto ret = callback(iterator.first.c_str(), iterator.first.size(),
 				    iterator.second.c_str(), iterator.second.size(), arg);
@@ -107,7 +108,7 @@ status stree::get_all(get_kv_callback *callback, void *arg)
 
 status stree::exists(string_view key)
 {
-	LOG("Exists for key=" << std::string(key.data(), key.size()));
+	LOG("exists for key=" << std::string(key.data(), key.size()));
 	btree_type::iterator it = my_btree->find(pstring<20>(key.data(), key.size()));
 	if (it == my_btree->end()) {
 		LOG("  key not found");
@@ -118,7 +119,7 @@ status stree::exists(string_view key)
 
 status stree::get(string_view key, get_v_callback *callback, void *arg)
 {
-	LOG("Get using callback for key=" << std::string(key.data(), key.size()));
+	LOG("get using callback for key=" << std::string(key.data(), key.size()));
 	btree_type::iterator it = my_btree->find(pstring<20>(key.data(), key.size()));
 	if (it == my_btree->end()) {
 		LOG("  key not found");
@@ -131,7 +132,7 @@ status stree::get(string_view key, get_v_callback *callback, void *arg)
 
 status stree::put(string_view key, string_view value)
 {
-	LOG("Put key=" << std::string(key.data(), key.size())
+	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 	try {
 		auto result = my_btree->insert(std::make_pair(
@@ -159,7 +160,7 @@ status stree::put(string_view key, string_view value)
 
 status stree::remove(string_view key)
 {
-	LOG("Remove key=" << std::string(key.data(), key.size()));
+	LOG("remove key=" << std::string(key.data(), key.size()));
 	try {
 		auto result = my_btree->erase(std::string(key.data(), key.size()));
 		return (result == 1) ? status::OK : status::NOT_FOUND;

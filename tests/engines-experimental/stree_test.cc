@@ -479,7 +479,7 @@ TEST_F(STreeTest, RemoveNonexistentTest)
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 }
 
-TEST_F(STreeTest, UsesEachTest)
+TEST_F(STreeTest, UsesGetAllTest)
 {
 	ASSERT_TRUE(kv->put("1", "2") == status::OK) << db::errormsg();
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();

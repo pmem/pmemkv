@@ -283,7 +283,7 @@ TEST_F(CachingTest, UnknownLocalRedisKey)
 	ASSERT_TRUE(kv->get("key1", &value) == status::NOT_FOUND);
 }
 
-TEST_F(CachingTest, SimpleEachTest)
+TEST_F(CachingTest, SimpleGetAllTest)
 {
 	ASSERT_TRUE(start(
 		"caching",
@@ -334,7 +334,7 @@ TEST_F(CachingTest, SimpleEachTest)
 			"<key1>,<value1>|<key2>,<value2>|<key3>,<value3>|<key4>,<value4>|");
 }
 
-TEST_F(CachingTest, EachTTLValidExpired)
+TEST_F(CachingTest, GetAllTTLValidExpired)
 {
 	ASSERT_TRUE(start(
 		"caching",
@@ -371,7 +371,7 @@ TEST_F(CachingTest, EachTTLValidExpired)
 	ASSERT_TRUE(cnt == 1);
 }
 
-TEST_F(CachingTest, EachEmptyCache)
+TEST_F(CachingTest, GetAllEmptyCache)
 {
 	ASSERT_TRUE(start(
 		"caching",
@@ -400,7 +400,7 @@ TEST_F(CachingTest, EachEmptyCache)
 	ASSERT_TRUE(cnt == 0);
 }
 
-TEST_F(CachingTest, EachZeroTTL)
+TEST_F(CachingTest, GetAllZeroTTL)
 {
 	ASSERT_TRUE(start(
 		"caching",
