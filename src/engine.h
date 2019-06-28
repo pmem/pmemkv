@@ -34,8 +34,10 @@
 #define LIBPMEMKV_ENGINE_H
 
 #include <functional>
+#include <memory>
 #include <string>
 
+#include "config.h"
 #include "libpmemkv.hpp"
 
 namespace pmem

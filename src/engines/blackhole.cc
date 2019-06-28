@@ -45,7 +45,7 @@ namespace pmem
 namespace kv
 {
 
-blackhole::blackhole()
+blackhole::blackhole(std::unique_ptr<internal::config> cfg)
 {
 	LOG("Started ok");
 }

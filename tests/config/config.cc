@@ -105,15 +105,14 @@ TEST_F(ConfigTest, SimpleTest)
 	ASSERT_EQ(value_double, 12.43);
 
 	custom_type *value_custom_ptr;
-	ret = pmemkv_config_get_object(config, "object_ptr",
-				       (const void **)&value_custom_ptr);
+	ret = pmemkv_config_get_object(config, "object_ptr", (void **)&value_custom_ptr);
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
 	ASSERT_EQ(value_custom_ptr->a, 10);
 	ASSERT_EQ(value_custom_ptr->b, 'a');
 
 	custom_type *value_custom_ptr_deleter;
 	ret = pmemkv_config_get_object(config, "object_ptr_with_deleter",
-				       (const void **)&value_custom_ptr_deleter);
+				       (void **)&value_custom_ptr_deleter);
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
 	ASSERT_EQ(value_custom_ptr_deleter->a, 11);
 	ASSERT_EQ(value_custom_ptr_deleter->b, 'b');

@@ -41,7 +41,7 @@ namespace kv
 
 class blackhole : public engine_base {
 public:
-	blackhole();
+	blackhole(std::unique_ptr<internal::config> cfg);
 	~blackhole();
 
 	std::string name() final;

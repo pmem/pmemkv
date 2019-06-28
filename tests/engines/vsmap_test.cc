@@ -68,8 +68,6 @@ public:
 		auto s = kv->open("vsmap", cfg);
 		if (s != status::OK)
 			throw std::runtime_error(db::errormsg());
-
-		pmemkv_config_delete(cfg);
 	}
 
 	~VSMapBaseTest()

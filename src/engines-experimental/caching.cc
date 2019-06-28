@@ -55,9 +55,9 @@ namespace pmem
 namespace kv
 {
 
-caching::caching(pmemkv_config *config)
+caching::caching(std::unique_ptr<internal::config> cfg)
 {
-	if (!readConfig(config))
+	if (!readConfig(*cfg))
 		throw std::runtime_error(
 			"caching Exception"); // todo propagate start exceptions properly
 
@@ -85,11 +85,11 @@ std::string caching::name()
 	return "caching";
 }
 
-bool caching::getString(pmemkv_config *config, const char *key, std::string &str)
+bool caching::getString(internal::config &config, const char *key, std::string &str)
 {
 	const char *value;
 
-	if (pmemkv_config_get_string(config, key, &value) != PMEMKV_STATUS_OK)
+	if (config.get_string(key, &value) != status::OK)
 		return false;
 
 	str = std::string(value);
@@ -97,7 +97,7 @@ bool caching::getString(pmemkv_config *config, const char *key, std::string &str
 	return true;
 }
 
-bool caching::readConfig(pmemkv_config *config)
+bool caching::readConfig(internal::config &config)
 {
 	if (!getString(config, "subengine", subEngine))
 		return false;
@@ -117,23 +117,22 @@ bool caching::readConfig(pmemkv_config *config)
 	if (!getString(config, "host", host))
 		return false;
 
-	auto ret = pmemkv_config_get_int64(config, "ttl", &ttl);
-	if (ret == PMEMKV_STATUS_NOT_FOUND)
+	auto ret = config.get_int64("ttl", &ttl);
+	if (ret == status::NOT_FOUND)
 		ttl = 0;
-	else if (ret != PMEMKV_STATUS_OK)
+	else if (ret != status::OK)
 		return false;
 
-	ret = pmemkv_config_get_int64(config, "port", &port);
-	if (ret != PMEMKV_STATUS_OK)
+	ret = config.get_int64("port", &port);
+	if (ret != status::OK)
 		return false;
 
-	ret = pmemkv_config_get_int64(config, "attempts", &attempts);
-	if (ret != PMEMKV_STATUS_OK)
+	ret = config.get_int64("attempts", &attempts);
+	if (ret != status::OK)
 		return false;
 
-	ret = pmemkv_config_get_object(config, "subengine_config",
-				       (const void **)&subEngineConfig);
-	if (ret != PMEMKV_STATUS_OK)
+	ret = config.get_object("subengine_config", (void **)&subEngineConfig);
+	if (ret != status::OK)
 		return false;
 
 	return true;
