@@ -36,6 +36,7 @@
  */
 
 #include <cassert>
+#include <cstdlib>
 #include <iostream>
 #include <libpmemkv.hpp>
 
@@ -43,24 +44,30 @@
 
 using namespace pmem::kv;
 
-const std::string PATH = "/dev/shm/";
 const uint64_t SIZE = 1024UL * 1024UL * 1024UL;
 
-int main()
+int main(int argc, char *argv[])
 {
+	if (argc < 2) {
+		std::cerr << "Usage: " << argv[0] << " file\n";
+		exit(1);
+	}
+
 	LOG("Creating config");
 	pmemkv_config *cfg = pmemkv_config_new();
 	assert(cfg != nullptr);
 
-	int ret = pmemkv_config_put_string(cfg, "path", PATH.c_str());
+	int ret = pmemkv_config_put_string(cfg, "path", argv[1]);
 	assert(ret == PMEMKV_STATUS_OK);
 	ret = pmemkv_config_put_uint64(cfg, "size", SIZE);
+	assert(ret == PMEMKV_STATUS_OK);
+	ret = pmemkv_config_put_uint64(cfg, "force_create", 1);
 	assert(ret == PMEMKV_STATUS_OK);
 
 	LOG("Starting engine");
 	db *kv = new db();
 	assert(kv != nullptr);
-	status s = kv->open("vsmap", cfg);
+	status s = kv->open("cmap", cfg);
 	assert(s == status::OK);
 
 	LOG("Putting new key");

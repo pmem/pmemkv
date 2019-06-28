@@ -87,7 +87,8 @@ function compile_example_standalone() {
 function run_example_standalone() {
 	cd $EXAMPLE_TEST_DIR
 
-	./$1
+	rm -f pool
+	./$1 pool
 	# exit on error
 	if [[ $? != 0 ]]; then
 		cd -
@@ -244,11 +245,14 @@ git config user.email "test@package.com"
 git config user.name "test package"
 git tag -a 0.7 -m "0.7" HEAD~1 || true
 
+# Disable VCMAP and VSMAP until we'll get packages for memkind.
 cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DTEST_DIR=/dev/shm \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DDEVELOPER_MODE=1 \
-	-DCPACK_GENERATOR=$PACKAGE_MANAGER
+	-DCPACK_GENERATOR=$PACKAGE_MANAGER \
+	-DENGINE_VCMAP=OFF \
+	-DENGINE_VSMAP=OFF
 
 # Make sure there is no libpmemkv currently installed
 echo "---------------------------- Error expected! ------------------------------"

@@ -38,12 +38,12 @@
 #include <assert.h>
 #include <libpmemkv.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define LOG(msg) puts(msg)
 #define MAX_VAL_LEN 64
 
-const char *PATH = "/dev/shm";
 const uint64_t SIZE = 1024UL * 1024UL * 1024UL;
 
 int get_kv_callback(const char *k, size_t kb, const char *value, size_t value_bytes,
@@ -54,20 +54,27 @@ int get_kv_callback(const char *k, size_t kb, const char *value, size_t value_by
 	return 0;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	if (argc < 2) {
+		fprintf(stderr, "Usage: %s file\n", argv[0]);
+		exit(1);
+	}
+
 	LOG("Creating config");
 	pmemkv_config *cfg = pmemkv_config_new();
 	assert(cfg != NULL);
 
-	int s = pmemkv_config_put_string(cfg, "path", PATH);
+	int s = pmemkv_config_put_string(cfg, "path", argv[1]);
 	assert(s == PMEMKV_STATUS_OK);
 	s = pmemkv_config_put_uint64(cfg, "size", SIZE);
+	assert(s == PMEMKV_STATUS_OK);
+	s = pmemkv_config_put_uint64(cfg, "force_create", 1);
 	assert(s == PMEMKV_STATUS_OK);
 
 	LOG("Starting engine");
 	pmemkv_db *db = NULL;
-	s = pmemkv_open("vsmap", cfg, &db);
+	s = pmemkv_open("cmap", cfg, &db);
 	assert(s == PMEMKV_STATUS_OK);
 	assert(db != NULL);
 
