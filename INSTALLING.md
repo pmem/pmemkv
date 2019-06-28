@@ -14,6 +14,7 @@ Contents
 <li><a href="#fedora">Installing on Fedora</a></li>
 <li><a href="#ubuntu">Installing on Ubuntu</a></li>
 <li><a href="#experimental">Using Experimental Engines</a></li>
+<li><a href="#build_package">Building packages</a></li>
 <li><a href="#pool_set">Using a Pool Set</a></li>
 </ul>
 
@@ -244,6 +245,20 @@ make
 cd ../lib_protocol
 make
 ```
+
+<a name="build_package"></a>
+
+Building packages
+-----------------
+```sh
+...
+cmake .. -DCPACK_GENERATOR="$GEN" -DCMAKE_INSTALL_PREFIX=/usr
+make package
+```
+
+$GEN is a type of package generator and can be RPM or DEB
+
+CMAKE_INSTALL_PREFIX must be set to a destination where packages will be installed
 
 <a name="pool_set"></a>
 

@@ -35,10 +35,16 @@
 #                starts pmemkv build with tests.
 #
 
-PREFIX=/usr/local
-
 set -e
+
 echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
+EXAMPLE_TEST_DIR="/tmp/build_example"
+PREFIX=/usr
+
+# XXX use this function
+function sudo_password() {
+	echo $USERPASS | sudo -Sk $*
+}
 
 function cleanup() {
 	find . -name ".coverage" -exec rm {} \;
@@ -61,10 +67,46 @@ function upload_codecov() {
 	cleanup
 }
 
+function compile_example_standalone() {
+	rm -rf $EXAMPLE_TEST_DIR
+	mkdir $EXAMPLE_TEST_DIR
+	cd $EXAMPLE_TEST_DIR
+
+	cmake $WORKDIR/examples/$1
+
+	# exit on error
+	if [[ $? != 0 ]]; then
+		cd -
+		return 1
+	fi
+
+	make
+	cd -
+}
+
+function run_example_standalone() {
+	cd $EXAMPLE_TEST_DIR
+
+	rm -f pool
+	./$1 pool
+	# exit on error
+	if [[ $? != 0 ]]; then
+		cd -
+		return 1
+	fi
+
+	cd -
+}
+
 cd $WORKDIR
 
 # copy Googletest to the current directory
 cp /opt/googletest/googletest-*.zip .
+
+# Make sure there is no libpmemkv currently installed
+echo "---------------------------- Error expected! ------------------------------"
+compile_example_standalone pmemkv_basic_cpp && exit 1
+echo "---------------------------------------------------------------------------"
 
 # make & install
 mkdir build
@@ -74,6 +116,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE \
 	-DDEVELOPER_MODE=1
+
 make -j2
 ctest --output-on-failure
 echo $USERPASS | sudo -S make install
@@ -82,15 +125,15 @@ if [ "$COVERAGE" == "1" ]; then
 	upload_codecov tests
 fi
 
-# verify installed package
-HEADERFILE=$PREFIX/include/libpmemkv.h
+# Verify installed libraries
+compile_example_standalone pmemkv_basic_c
+run_example_standalone pmemkv_basic_c
+compile_example_standalone pmemkv_basic_cpp
+run_example_standalone pmemkv_basic_cpp
 
-if [[ -f $HEADERFILE ]]; then
-	echo "Correctly installed"
-else
-	echo "Installation not successful"
-	exit 1
-fi
+# Uninstall libraries
+cd $WORKDIR/build
+echo $USERPASS | sudo -S make uninstall
 
 cd ..
 rm -rf build
@@ -115,7 +158,6 @@ ctest -R "SimpleTest"
 
 cd ..
 rm -rf build
-
 
 echo
 echo "##############################################################"
@@ -188,4 +230,45 @@ make -j2
 # list all tests in this build
 ctest -N
 
-rm -rf $WORKDIR/build
+cd ..
+rm -rf build
+
+echo
+echo "##############################################################"
+echo "### Verifying building of packages"
+echo "##############################################################"
+mkdir $WORKDIR/build
+cd $WORKDIR/build
+
+# Create fake tag, so that package has proper 'version' field
+git config user.email "test@package.com"
+git config user.name "test package"
+git tag -a 0.7 -m "0.7" HEAD~1 || true
+
+# Disable VCMAP and VSMAP until we'll get packages for memkind.
+cmake .. -DCMAKE_BUILD_TYPE=Debug \
+	-DTEST_DIR=/dev/shm \
+	-DCMAKE_INSTALL_PREFIX=$PREFIX \
+	-DDEVELOPER_MODE=1 \
+	-DCPACK_GENERATOR=$PACKAGE_MANAGER \
+	-DENGINE_VCMAP=OFF \
+	-DENGINE_VSMAP=OFF
+
+# Make sure there is no libpmemkv currently installed
+echo "---------------------------- Error expected! ------------------------------"
+compile_example_standalone pmemkv_basic_cpp && exit 1
+echo "---------------------------------------------------------------------------"
+
+make package
+
+if [ $PACKAGE_MANAGER = "deb" ]; then
+	sudo_password dpkg -i libpmemkv*.deb
+elif [ $PACKAGE_MANAGER = "rpm" ]; then
+	sudo_password rpm -i libpmemkv*.rpm
+fi
+
+# Verify installed packages
+compile_example_standalone pmemkv_basic_c
+run_example_standalone pmemkv_basic_c
+compile_example_standalone pmemkv_basic_cpp
+run_example_standalone pmemkv_basic_cpp

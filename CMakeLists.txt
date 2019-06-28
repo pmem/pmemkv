@@ -48,6 +48,8 @@ if(NOT CMAKE_BUILD_TYPE)
 		CACHE STRING "Choose a type of build (Debug, Release or RelWithDebInfo)" FORCE)
 endif()
 
+option(BUILD_EXAMPLES "build examples" ON)
+
 option(COVERAGE "run coverage test" OFF)
 if(COVERAGE)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage")
@@ -139,6 +141,7 @@ set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.7)
+set(LIBPMEMOBJ_REQUIRED_VERSION 1.6)
 
 find_package(PkgConfig QUIET)
 include(FindPerl)
@@ -148,26 +151,42 @@ include(CheckCXXSourceCompiles)
 include(GNUInstallDirs)
 
 include(rapidjson)
-set(PKG_REQUIRES "RapidJSON")
+set(PKG_CONFIG_REQUIRES RapidJSON)
+set(DEB_DEPENDS)
+set(RPM_DEPENDS)
 
 if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3)
 	include(libpmemobj++)
-	set(PKG_REQUIRES "${PKG_REQUIRES} libpmemobj++ >= ${LIBPMEMOBJ_CPP_REQUIRED_VERSION}")
+	list(APPEND PKG_CONFIG_REQUIRES "libpmemobj++ >= ${LIBPMEMOBJ_CPP_REQUIRED_VERSION}")
+	list(APPEND RPM_DEPENDS "libpmemobj >= ${LIBPMEMOBJ_REQUIRED_VERSION}")
+	list(APPEND DEB_DEPENDS "libpmemobj1 (>= ${LIBPMEMOBJ_REQUIRED_VERSION}) | libpmemobj (>= ${LIBPMEMOBJ_REQUIRED_VERSION})")
 endif()
+
 if(ENGINE_VSMAP OR ENGINE_VCMAP)
 	include(memkind)
-	set(PKG_REQUIRES "${PKG_REQUIRES} memkind")
+	list(APPEND PKG_CONFIG_REQUIRES memkind)
+	list(APPEND RPM_DEPENDS memkind)
+	list(APPEND DEB_DEPENDS libmemkind0)
 endif()
+
 if(ENGINE_VCMAP OR ENGINE_CMAP)
 	include(tbb)
-	set(PKG_REQUIRES "${PKG_REQUIRES} tbb")
+	list(APPEND PKG_CONFIG_REQUIRES tbb)
+	list(APPEND RPM_DEPENDS tbb)
+	list(APPEND DEB_DEPENDS libtbb2)
 endif()
+
 if(ENGINE_CACHING)
 	include(memcached-experimental)
 	include(redis-experimental)
-	# XXX consider adding
-	# set(PKG_REQUIRES "${PKG_REQUIRES} libmemcached")
+	list(APPEND PKG_CONFIG_REQUIRES libmemcached)
+	list(APPEND RPM_DEPENDS libmemcached)
+	list(APPEND DEB_DEPENDS libmemcached11)
 endif()
+
+string(REPLACE ";" " " PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES}")
+string(REPLACE ";" ", " RPM_PACKAGE_REQUIRES "${RPM_DEPENDS}")
+string(REPLACE ";" ", " DEB_PACKAGE_REQUIRES "${DEB_DEPENDS}")
 
 add_executable(check_license EXCLUDE_FROM_ALL utils/check_license/check-license.c)
 
@@ -307,3 +326,11 @@ add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
+
+if(BUILD_EXAMPLES)
+	add_subdirectory(examples)
+endif()
+
+if(NOT "${CPACK_GENERATOR}" STREQUAL "")
+	include(${CMAKE_SOURCE_DIR}/cmake/packages.cmake)
+endif()

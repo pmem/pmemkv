@@ -102,6 +102,18 @@ if (COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
 endif()
 
+function(build_example_pmemkv_basic_cpp)
+	add_executable(ex_pmemkv_basic_cpp ../examples/pmemkv_basic_cpp/pmemkv_basic.cpp)
+	target_include_directories(ex_pmemkv_basic_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+	target_link_libraries(ex_pmemkv_basic_cpp pmemkv)
+endfunction()
+
+function(build_example_pmemkv_basic_c)
+	add_executable(ex_pmemkv_basic_c ../examples/pmemkv_basic_c/pmemkv_basic.c)
+	target_include_directories(ex_pmemkv_basic_c PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+	target_link_libraries(ex_pmemkv_basic_c pmemkv)
+endfunction()
+
 set(TEST_FILES
 	pmemkv_test.cc
 	mock_tx_alloc.cc
@@ -185,3 +197,9 @@ foreach(test IN ITEMS ${list_all_tests})
 		test("run-one-test" "${test}-drd" ${test} drd)
 	endif()
 endforeach(test)
+
+build_example_pmemkv_basic_c()
+build_example_pmemkv_basic_cpp()
+
+test("run-binary" ex_pmemkv_basic_c ex_pmemkv_basic_c none)
+test("run-binary" ex_pmemkv_basic_cpp ex_pmemkv_basic_cpp none)
