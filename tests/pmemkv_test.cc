@@ -32,8 +32,13 @@
 
 #include "gtest/gtest.h"
 
+const char *test_file = nullptr;
+
 int main(int argc, char *argv[])
 {
+	if (argc >= 3)
+		test_file = argv[2];
+
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }

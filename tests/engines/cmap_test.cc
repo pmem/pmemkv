@@ -37,9 +37,10 @@
 
 using namespace pmem::kv;
 
-const std::string PATH = "/dev/shm/pmemkv";
+std::string PATH = "/dev/shm/pmemkv";
 const size_t SIZE = 1024ull * 1024ull * 512ull;
 const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
+extern const char *test_file;
 
 template <size_t POOL_SIZE>
 class CMapBaseTest : public testing::Test {
@@ -48,6 +49,8 @@ public:
 
 	CMapBaseTest()
 	{
+		if (test_file)
+			PATH = test_file;
 		std::remove(PATH.c_str());
 		Start(true);
 	}
