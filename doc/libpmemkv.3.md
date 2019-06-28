@@ -39,6 +39,7 @@ date: pmemkv version 0.8
 [NAME](#name)<br />
 [SYNOPSIS](#synopsis)<br />
 [DESCRIPTION](#description)<br />
+[EXAMPLE](#example)<br />
 [SEE ALSO](#see-also)<br />
 
 
@@ -48,14 +49,118 @@ date: pmemkv version 0.8
 
 # SYNOPSIS #
 
-...
+```c
+#include <libpmemkv.h>
 
-For general pmemkv description, engines descriptions and example see **libpmemkv**(7).
+int pmemkv_open(const char *engine, pmemkv_config *config, pmemkv_db **db);
+void pmemkv_close(pmemkv_db *kv);
+
+int pmemkv_count_all(pmemkv_db *db, size_t *cnt);
+int pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);
+int pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);
+int pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
+			 size_t kb2, size_t *cnt);
+
+int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg);
+int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
+		     void *arg);
+int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
+		     void *arg);
+int pmemkv_get_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
+		       size_t kb2, pmemkv_get_kv_callback *c, void *arg);
+
+int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb);
+
+int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c,
+	       void *arg);
+int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
+		    size_t buffer_size, size_t *value_size);
+int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb);
+
+int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
+
+const char *pmemkv_errormsg(void);
+```
+
+For pmemkv configuration API description see **libpmemkv_config**(3).
+For general pmemkv information, engines descriptions and bindings details see **libpmemkv**(7).
 
 # DESCRIPTION #
 
-...
+```c
+int pmemkv_open(const char *engine, pmemkv_config *config, pmemkv_db **db);
+```
+:
+```c
+void pmemkv_close(pmemkv_db *kv);
+```
+:
+```c
+int pmemkv_count_all(pmemkv_db *db, size_t *cnt);
+```
+:
+```c
+int pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);
+```
+:
+```c
+int pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);
+```
+:
+```c
+int pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
+			size_t kb2, size_t *cnt);
+```
+:
+```c
+int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg);
+```
+:
+```c
+int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
+			void *arg);
+```
+:
+```c
+int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
+			void *arg);
+```
+:
+```c
+int pmemkv_get_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
+			size_t kb2, pmemkv_get_kv_callback *c, void *arg);
+```
+:
+```c
+int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb);
+```
+:
+```c
+int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c,
+			void *arg);
+```
+:
+```c
+int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
+			size_t buffer_size, size_t *value_size);
+```
+:
+```c
+int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb);
+```
+:
+```c
+int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
+```
+:
+```c
+const char *pmemkv_errormsg(void);
+```
+:
+
+# EXAMPLE #
+
 
 # SEE ALSO #
 
-**libpmemkv**(7) and **<http://pmem.io>**
+**libpmemkv**(7), **libpmemkv_config**(3) and **<http://pmem.io>**
