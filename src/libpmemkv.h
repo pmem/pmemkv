@@ -68,7 +68,7 @@ int pmemkv_config_put_double(pmemkv_config *config, const char *key, double valu
 int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value);
 int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **value,
 			   size_t *value_size);
-int pmemkv_config_get_object(pmemkv_config *config, const char *key, const void **value);
+int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **value);
 int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value);
 int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value);
 int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *value);

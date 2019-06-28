@@ -118,7 +118,7 @@ public:
 		return get(key, value, value_size, nullptr);
 	}
 
-	status get_object(const char *key, const void **value)
+	status get_object(const char *key, void **value)
 	{
 		size_t size;
 		void *ptr_ptr;
