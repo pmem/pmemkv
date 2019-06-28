@@ -48,7 +48,7 @@ Language Bindings
 
 `pmemkv` is written in C/C++ and includes bindings for Java, Ruby, and Node.js applications.
 
-![pmemkv-bindings](https://user-images.githubusercontent.com/913363/52880816-4651ef00-3120-11e9-9ab4-7eb006b4c7f5.png)
+![pmemkv-bindings](https://user-images.githubusercontent.com/12031346/60339913-6769fc80-99aa-11e9-8d4d-bcdc8a1e4885.png)
 
 ### C++ Example
 
