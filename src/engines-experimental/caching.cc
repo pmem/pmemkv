@@ -131,7 +131,7 @@ bool caching::readConfig(internal::config &config)
 	if (ret != status::OK)
 		return false;
 
-	ret = config.get_object("subengine_config", (const void **)&subEngineConfig);
+	ret = config.get_object("subengine_config", (void **)&subEngineConfig);
 	if (ret != status::OK)
 		return false;
 

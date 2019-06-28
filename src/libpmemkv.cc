@@ -291,7 +291,7 @@ int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **
 	}
 }
 
-int pmemkv_config_get_object(pmemkv_config *config, const char *key, const void **value)
+int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **value)
 {
 	try {
 		return (int)reinterpret_cast<pmem::kv::internal::config *>(config)
