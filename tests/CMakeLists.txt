@@ -75,6 +75,11 @@ function(test cmake_file test_name test_filter tracer)
 			return()
 		endif()
 	endif()
+	if (${tracer} STREQUAL pmemcheck)
+		if (NOT VALGRIND_PMEMCHECK_FOUND)
+			return()
+		endif()
+	endif()
 
 	add_test(NAME ${test_name}
 		COMMAND ${CMAKE_COMMAND}
