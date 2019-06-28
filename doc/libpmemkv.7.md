@@ -79,25 +79,49 @@ Each engine can be manually turned on and off at build time, using CMake options
 
 ## cmap
 
-A persistent concurrent engine, backed by a hashmap that allows gets, puts, and removes concurrently from multiple threads.
+A persistent concurrent engine, backed by a hashmap that allows calling get, put, and remove concurrently from multiple threads.
+Data stored in this engine is persistent across reboots and guaranteed to be consistent in case of power failure.
+
 Internally this engine uses persistent concurrent hashmap and persistent string from libpmemobj-cpp library (for details see <https://github.com/pmem/libpmemobj-cpp>). Persistent string is used as a type of a key and a value.
 TBB and libpmemobj-cpp packages are required.
-Supports path, size, and force_create configuration parameters.
+
+This engine requires following config parameters (see **libpmemkv_config**(3) for detail how to set them):
+
+* **path** -- Path to the database file
+    + type: string
+* **force_create** -- If 0, pmemkv tries to open file specified by 'path', otherwise it tries to create it
+    + type: uint64_t
+    + default value: 0
+* **size** --  Only needed when force_create is not 0, specifies size of the database
+    + type: uint64_t
 
 ## vcmap
 
-A volatile concurrent engine, backed by memkind.
+A volatile concurrent engine, backed by memkind. Data written to this engine is lost after reboot.
+
 This engine is built on top of tbb::concurrent\_hash\_map data structure and uses PMEM C++ allocator to allocate memory. std::basic\_string is used as a type of a key and a value.
 Memkind, TBB and libpmemobj-cpp packages are required.
-Supports path and size configuration parameters.
+
+This engine requires following config parameters (see **libpmemkv_config**(3) for detail how to set them):
+
+* **path** -- Path to the database file
+    + type: string
+* **size** --  Specifies size of the database
+    + type: uint64_t
 
 ## vsmap
 
-A volatile single-threaded sorted engine, backed by memkind.
+A volatile single-threaded sorted engine, backed by memkind. Data written to this engine is lost after reboot.
+
 This engine is built on top of std::map and uses PMEM C++ allocator to allocate memory. std::basic\_string is used as a type of a key and a value.
 Memkind and libpmemobj-cpp packages are required.
-Supports path and size configuration parameters.
 
+This engine requires following config parameters (see **libpmemkv_config**(3) for detail how to set them):
+
+* **path** -- Path to the database file
+    + type: string
+* **size** --  Specifies size of the database
+    + type: uint64_t
 
 ## blackhole
 
