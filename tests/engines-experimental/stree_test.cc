@@ -48,7 +48,7 @@ public:
 	STreeBaseTest()
 	{
 		std::remove(PATH.c_str());
-		Start();
+		Start(true);
 	}
 
 	~STreeBaseTest()
@@ -58,11 +58,11 @@ public:
 	void Restart()
 	{
 		delete kv;
-		Start();
+		Start(false);
 	}
 
 protected:
-	void Start()
+	void Start(bool create)
 	{
 		size_t size = POOL_SIZE;
 		int ret = 0;
@@ -77,15 +77,18 @@ protected:
 		if (cfg_s != PMEMKV_STATUS_OK)
 			throw std::runtime_error("putting 'path' to config failed");
 
-		cfg_s = pmemkv_config_put_uint64(cfg, "force_create", 1);
-		if (cfg_s != PMEMKV_STATUS_OK)
-			throw std::runtime_error(
-				"putting 'force_create' to config failed");
+		if (create) {
+			cfg_s = pmemkv_config_put_uint64(cfg, "force_create", 1);
+			if (cfg_s != PMEMKV_STATUS_OK)
+				throw std::runtime_error(
+					"putting 'force_create' to config failed");
 
-		cfg_s = pmemkv_config_put_uint64(cfg, "size", size);
+			cfg_s = pmemkv_config_put_uint64(cfg, "size", size);
 
-		if (cfg_s != PMEMKV_STATUS_OK)
-			throw std::runtime_error("putting 'size' to config failed");
+			if (cfg_s != PMEMKV_STATUS_OK)
+				throw std::runtime_error(
+					"putting 'size' to config failed");
+		}
 
 		kv = new db;
 		auto s = kv->open("stree", cfg);
