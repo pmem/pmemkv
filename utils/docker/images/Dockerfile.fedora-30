@@ -30,7 +30,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of fedora-based
+# Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
 #              environment prepared for running pmemkv build and tests.
 #
 
