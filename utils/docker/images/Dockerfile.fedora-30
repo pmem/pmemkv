@@ -50,6 +50,7 @@ RUN dnf update -y \
 	gcc-c++ \
 	gdb \
 	git \
+	gtest-devel \
 	libtool \
 	make \
 	man \
