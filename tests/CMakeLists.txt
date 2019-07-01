@@ -147,7 +147,17 @@ if(ENGINE_TREE3)
 	list(APPEND TEST_FILES engines-experimental/tree3_test.cc)
 endif()
 
-include(gtest)
+find_library(GTEST NAMES gtest gtest.a)
+if(GTEST)
+	message(STATUS "Gtest found")
+	add_library(libgtest IMPORTED STATIC GLOBAL)
+	set_target_properties(libgtest PROPERTIES "IMPORTED_LOCATION" "${GTEST}"
+		"IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}")
+else()
+	message(WARNING "Gtest not installed, downloading from the 'Net")
+	include(gtest)
+endif()
+
 include(get_tests.cmake)
 
 add_executable(pmemkv_test ${TEST_FILES})
