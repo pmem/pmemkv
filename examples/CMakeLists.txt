@@ -29,19 +29,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_common_flag(-Wall)
-add_common_flag(-Wpointer-arith)
-add_common_flag(-Wsign-compare)
-add_common_flag(-Wunreachable-code-return)
-add_common_flag(-Wmissing-variable-declarations)
-add_common_flag(-fno-common)
-add_common_flag(-Wunused-macros)
-add_common_flag(-Wsign-conversion)
-
-add_common_flag(-ggdb DEBUG)
-add_common_flag(-DDEBUG DEBUG)
-
-add_common_flag("-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2" RELEASE)
+add_common_flag(-Wno-unused-but-set-variable)
 
 add_cppstyle(examples-pmemkv_basic_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c)
 add_check_whitespace(examples-pmemkv_basic_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c)

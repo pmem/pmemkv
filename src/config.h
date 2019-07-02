@@ -151,7 +151,7 @@ public:
 		} else if (type == type::UINT64) {
 			/* conversion from uint64 allowed */
 			auto uval = *(static_cast<const uint64_t *>(data));
-			if (uval < std::numeric_limits<int64_t>::max()) {
+			if (uval < (long unsigned int)std::numeric_limits<int64_t>::max()) {
 				*value = *(static_cast<const int64_t *>(data));
 				return status::OK;
 			}

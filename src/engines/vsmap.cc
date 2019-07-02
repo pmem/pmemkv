@@ -245,13 +245,13 @@ status vsmap::put(string_view key, string_view value)
 		pmem_kv_container[key_type(key.data(), key.size(), kv_allocator)] =
 			mapped_type(value.data(), value.size(), kv_allocator);
 		return status::OK;
-	} catch (std::bad_alloc e) {
+	} catch (std::bad_alloc &e) {
 		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
+	} catch (pmem::transaction_alloc_error &e) {
 		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_error e) {
+	} catch (pmem::transaction_error &e) {
 		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
@@ -265,13 +265,13 @@ status vsmap::remove(string_view key)
 		size_t erased = pmem_kv_container.erase(
 			key_type(key.data(), key.size(), kv_allocator));
 		return (erased == 1) ? status::OK : status::NOT_FOUND;
-	} catch (std::bad_alloc e) {
+	} catch (std::bad_alloc &e) {
 		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
+	} catch (pmem::transaction_alloc_error &e) {
 		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_error e) {
+	} catch (pmem::transaction_error &e) {
 		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
