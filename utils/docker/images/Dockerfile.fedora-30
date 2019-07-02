@@ -71,10 +71,6 @@ RUN dnf update -y \
 # Install glibc-debuginfo
 RUN dnf debuginfo-install -y glibc
 
-# Install Googletest
-COPY install-googletest.sh install-googletest.sh
-RUN ./install-googletest.sh
-
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
 RUN ./install-valgrind.sh
