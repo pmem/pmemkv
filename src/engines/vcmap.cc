@@ -150,13 +150,13 @@ status vcmap::put(string_view key, string_view value)
 			result_found->second = kv_pair.second;
 		}
 		return status::OK;
-	} catch (std::bad_alloc e) {
+	} catch (std::bad_alloc &e) {
 		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
+	} catch (pmem::transaction_alloc_error &e) {
 		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_error e) {
+	} catch (pmem::transaction_error &e) {
 		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
@@ -170,13 +170,13 @@ status vcmap::remove(string_view key)
 		size_t erased = pmem_kv_container.erase(
 			pmem_string(key.data(), key.size(), ch_allocator));
 		return (erased == 1) ? status::OK : status::NOT_FOUND;
-	} catch (std::bad_alloc e) {
+	} catch (std::bad_alloc &e) {
 		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
+	} catch (pmem::transaction_alloc_error &e) {
 		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_error e) {
+	} catch (pmem::transaction_error &e) {
 		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}

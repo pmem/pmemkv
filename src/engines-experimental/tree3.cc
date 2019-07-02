@@ -224,13 +224,13 @@ status tree3::put(string_view key, string_view value)
 				      std::string(value.data(), value.size()));
 		}
 		return status::OK;
-	} catch (std::bad_alloc e) {
+	} catch (std::bad_alloc &e) {
 		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
+	} catch (pmem::transaction_alloc_error &e) {
 		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_error e) {
+	} catch (pmem::transaction_error &e) {
 		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
@@ -263,13 +263,13 @@ status tree3::remove(string_view key)
 			}
 		}
 		return status::NOT_FOUND;
-	} catch (std::bad_alloc e) {
+	} catch (std::bad_alloc &e) {
 		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
+	} catch (pmem::transaction_alloc_error &e) {
 		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_error e) {
+	} catch (pmem::transaction_error &e) {
 		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
