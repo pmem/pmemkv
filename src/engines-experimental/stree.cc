@@ -102,11 +102,11 @@ std::string stree::name()
 status stree::count_all(std::size_t &cnt)
 {
 	LOG("count_all");
-	std::size_t result = 0;
-	for (auto &iterator : *my_btree)
-		result++;
 
-	cnt = result;
+	auto result = std::distance(my_btree->begin(), my_btree->end());
+	assert(result >= 0);
+
+	cnt = static_cast<std::size_t>(result);
 
 	return status::OK;
 }

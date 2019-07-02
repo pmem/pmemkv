@@ -44,7 +44,7 @@
 #define LOG(msg) puts(msg)
 #define MAX_VAL_LEN 64
 
-const uint64_t SIZE = 1024UL * 1024UL * 1024UL;
+static const uint64_t SIZE = 1024UL * 1024UL * 1024UL;
 
 int get_kv_callback(const char *k, size_t kb, const char *value, size_t value_bytes,
 		    void *arg)

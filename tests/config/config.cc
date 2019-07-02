@@ -164,7 +164,7 @@ TEST_F(ConfigTest, IntegralConversion)
 	size_t int_us;
 	ret = pmemkv_config_get_uint64(config, "int", &int_us);
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
-	ASSERT_EQ(int_us, 123);
+	ASSERT_EQ(int_us, 123U);
 
 	int64_t uint_s;
 	ret = pmemkv_config_get_int64(config, "uint", &uint_s);
@@ -174,7 +174,7 @@ TEST_F(ConfigTest, IntegralConversion)
 	size_t uint_us;
 	ret = pmemkv_config_get_uint64(config, "uint", &uint_us);
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
-	ASSERT_EQ(uint_us, 123);
+	ASSERT_EQ(uint_us, 123U);
 
 	int64_t neg_int_s;
 	ret = pmemkv_config_get_int64(config, "negative-int", &neg_int_s);

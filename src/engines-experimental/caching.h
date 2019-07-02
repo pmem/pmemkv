@@ -41,8 +41,6 @@ namespace kv
 
 class db;
 
-static int64_t ttl; // todo move into private field
-
 class caching : public engine_base {
 public:
 	caching(std::unique_ptr<internal::config> cfg);
@@ -77,11 +75,8 @@ private:
 	std::string remoteUser;
 	std::string remotePasswd;
 	std::string remoteUrl;
+	int64_t ttl;
 };
-
-time_t convertTimeToEpoch(const char *theTime, const char *format = "%Y%m%d%H%M%S");
-std::string getTimeStamp(time_t epochTime, const char *format = "%Y%m%d%H%M%S");
-bool valueFieldConversion(std::string dateValue);
 
 } /* namespace kv */
 } /* namespace pmem */

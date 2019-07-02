@@ -43,8 +43,6 @@ const size_t SIZE = ((size_t)(1024 * 1024 * 1104));
 
 pmemkv_config *getConfig(const std::string &path, size_t size, bool create = true)
 {
-	int ret = 0;
-
 	pmemkv_config *cfg = pmemkv_config_new();
 
 	if (cfg == nullptr)
