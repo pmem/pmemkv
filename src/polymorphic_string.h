@@ -157,17 +157,17 @@ public:
 
 	bool operator==(const polymorphic_string &rhs) const
 	{
-		return compare(0, size(), rhs.c_str(), rhs.size()) == 0;
+		return compare(0U, size(), rhs.c_str(), rhs.size()) == 0;
 	}
 
 	bool operator==(string_view rhs) const
 	{
-		return compare(0, size(), rhs.data(), rhs.size()) == 0;
+		return compare(0U, size(), rhs.data(), rhs.size()) == 0;
 	}
 
 	bool operator==(const std::string &rhs) const
 	{
-		return compare(0, size(), rhs.c_str(), rhs.size()) == 0;
+		return compare(0U, size(), rhs.c_str(), rhs.size()) == 0;
 	}
 
 	template <typename... Args>

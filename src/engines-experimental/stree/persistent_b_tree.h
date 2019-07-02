@@ -145,7 +145,7 @@ public:
 
 	node_iterator operator+=(difference_type off)
 	{
-		position += off;
+		position += static_cast<std::size_t>(off);
 		return *this;
 	}
 
@@ -161,7 +161,7 @@ public:
 		assert(node != nullptr);
 		assert(other.node != nullptr);
 		assert(node == other.node);
-		return position - other.position;
+		return static_cast<difference_type>(position - other.position);
 	}
 
 	bool operator==(const node_iterator &other) const
@@ -266,7 +266,10 @@ public:
 	      p_consistent_id(0)
 	{
 		copy(first, last);
-		assert(size() == std::distance(first, last));
+
+		assert(std::distance(first, last) >= 0);
+		assert(size() == static_cast<std::size_t>(std::distance(first, last)));
+
 		assert(std::is_sorted(begin(), end(),
 				      [](const_reference a, const_reference b) {
 					      return a.first < b.first;
@@ -284,7 +287,11 @@ public:
 	      p_consistent_id(0)
 	{
 		copy_insert(entry, first, last);
-		assert(size() == std::distance(first, last) + 1);
+
+		assert(std::distance(first, last) >= 0);
+		assert(size() ==
+		       static_cast<std::size_t>(std::distance(first, last)) + 1);
+
 		assert(std::binary_search(begin(), end(), entry,
 					  [](const_reference a, const_reference b) {
 						  return a.first < b.first;
@@ -550,8 +557,10 @@ private:
 #else
 		pop.persist(tmp, sizeof(leaf_entries_t));
 #endif
+		auto result = std::distance(out_begin, insert_pos);
+		assert(result >= 0);
 
-		return std::distance(out_begin, insert_pos);
+		return static_cast<std::size_t>(result);
 	}
 
 	void remove_idx(pool_base &pop, iterator it)
@@ -576,13 +585,19 @@ private:
 	 */
 	void copy_insert(const_reference entry, const_iterator first, const_iterator last)
 	{
-		assert(std::distance(first, last) < number_entrys_slots);
+		assert(std::distance(first, last) >= 0);
+		assert(static_cast<std::size_t>(std::distance(first, last)) <
+		       number_entrys_slots);
 
 		auto d_last = std::merge(first, last, &entry, &entry + 1, entries,
 					 [](const_reference a, const_reference b) {
 						 return a.first < b.first;
 					 });
-		consistent()->_size = std::distance(entries, d_last);
+
+		assert(std::distance(entries, d_last) >= 0);
+		consistent()->_size =
+			static_cast<std::size_t>(std::distance(entries, d_last));
+
 		std::iota(consistent()->idxs, consistent()->idxs + consistent()->_size,
 			  0);
 	}
@@ -592,10 +607,16 @@ private:
 	 */
 	void copy(const_iterator first, const_iterator last)
 	{
-		assert(std::distance(first, last) <= number_entrys_slots);
+		assert(std::distance(first, last) >= 0);
+		assert(static_cast<std::size_t>(std::distance(first, last)) <
+		       number_entrys_slots);
 
 		auto d_last = std::copy(first, last, entries);
-		consistent()->_size = std::distance(entries, d_last);
+
+		assert(std::distance(entries, d_last) >= 0);
+		consistent()->_size =
+			static_cast<std::size_t>(std::distance(entries, d_last));
+
 		std::iota(consistent()->idxs, consistent()->idxs + consistent()->_size,
 			  0);
 	}
@@ -669,6 +690,8 @@ private:
 	}
 
 public:
+	using difference_type = ptrdiff_t;
+
 	inner_node_t(size_t level, const value_type &key,
 		     const persistent_ptr<node_t> &child_0,
 		     const persistent_ptr<node_t> &child_1)
@@ -687,11 +710,16 @@ public:
 	    : node_t(level), consistent_id(0)
 	{
 		auto o_last = std::copy(first, last, consistent()->entries);
-		consistent()->_size = std::distance(consistent()->entries, o_last);
+
+		auto result = std::distance(consistent()->entries, o_last);
+		assert(result >= 0);
+		consistent()->_size = static_cast<std::size_t>(result);
+
 		auto in_cbegin = std::next(src->consistent()->children,
 					   std::distance(src->begin(), first));
-		auto in_cend = std::next(in_cbegin, consistent()->_size + 1);
-		auto o_clast = std::copy(in_cbegin, in_cend, consistent()->children);
+		auto in_cend = std::next(
+			in_cbegin, static_cast<difference_type>(consistent()->_size + 1));
+		std::copy(in_cbegin, in_cend, consistent()->children);
 		assert(std::is_sorted(begin(), end()));
 	}
 
@@ -709,7 +737,9 @@ public:
 
 		// Insert new key
 		auto in_entries_begin = consistent()->entries;
-		auto in_entries_end = std::next(in_entries_begin, consistent()->_size);
+		auto in_entries_end =
+			std::next(in_entries_begin,
+				  static_cast<difference_type>(consistent()->_size));
 		auto in_entries_splitted = std::next(
 			in_entries_begin, std::distance(this->begin(), partition_point));
 
@@ -720,7 +750,11 @@ public:
 		*insert_pos = entry;
 		auto out_entries_end =
 			std::copy(in_entries_splitted, in_entries_end, ++insert_pos);
-		working_copy()->_size = std::distance(out_entries_begin, out_entries_end);
+
+		auto result_entries = std::distance(out_entries_begin, out_entries_end);
+		assert(result_entries >= 0);
+		working_copy()->_size = static_cast<std::size_t>(result_entries);
+
 		pop.flush(working_copy()->entries,
 			  sizeof(working_copy()->entries[0]) * working_copy()->_size);
 		pop.flush(&(working_copy()->_size), sizeof(working_copy()->_size));
@@ -730,7 +764,8 @@ public:
 		auto in_children_splitted = std::next(
 			in_children_begin, std::distance(this->begin(), partition_point));
 		auto in_children_end =
-			std::next(in_children_begin, consistent()->_size + 1);
+			std::next(in_children_begin,
+				  static_cast<difference_type>(consistent()->_size + 1));
 		auto out_children_begin = working_copy()->children;
 		assert(*in_children_splitted == splitted_node);
 		auto out_insert_pos = std::copy(in_children_begin, in_children_splitted,
@@ -739,9 +774,14 @@ public:
 		*out_insert_pos++ = rnode;
 		auto out_children_end = std::copy(++in_children_splitted, in_children_end,
 						  out_insert_pos);
+
+		auto result_children =
+			std::distance(out_children_begin, out_children_end);
+		assert(result_children >= 0);
+
 		pop.flush(working_copy()->children,
 			  sizeof(working_copy()->children[0]) *
-				  std::distance(out_children_begin, out_children_end));
+				  static_cast<std::size_t>(result_children));
 
 		switch_consistent(pop);
 		assert(std::is_sorted(this->begin(), this->end()));
@@ -755,7 +795,10 @@ public:
 
 	const persistent_ptr<node_t> &get_left_child(const_iterator it) const
 	{
-		size_t child_pos = std::distance(this->begin(), it);
+		auto result = std::distance(this->begin(), it);
+		assert(result >= 0);
+
+		size_t child_pos = static_cast<std::size_t>(result);
 		return this->consistent()->children[child_pos];
 	}
 
@@ -1094,8 +1137,6 @@ private:
 			leaf_node_type *lnode = cast_leaf(left_child).get();
 			leaf_node_type *rnode = cast_leaf(right_child).get();
 
-			typename leaf_node_type::const_iterator middle =
-				split_leaf->begin() + split_leaf->size() / 2;
 			if (left_child && is_left_node(split_leaf, lnode)) {
 				if (right_child &&
 				    is_right_node(
@@ -1532,8 +1573,7 @@ void b_tree_base<TKey, TValue, degree>::create_new_root(pool_base &pop,
 	assert(r_child != nullptr);
 	assert(split_node == root);
 
-	persistent_ptr<inner_node_type> inner_root =
-		allocate_inner(pop, root, root->level() + 1, key, l_child, r_child);
+	allocate_inner(pop, root, root->level() + 1, key, l_child, r_child);
 }
 
 template <typename TKey, typename TValue, size_t degree>

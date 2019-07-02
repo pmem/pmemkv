@@ -161,6 +161,21 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.7)
 set(LIBPMEMOBJ_REQUIRED_VERSION 1.6)
 
+add_common_flag(-Wall)
+add_common_flag(-Werror)
+add_common_flag(-Wpointer-arith)
+add_common_flag(-Wsign-compare)
+add_common_flag(-Wunreachable-code-return)
+add_common_flag(-Wmissing-variable-declarations)
+add_common_flag(-fno-common)
+add_common_flag(-Wunused-macros)
+add_common_flag(-Wsign-conversion)
+
+add_common_flag(-ggdb DEBUG)
+add_common_flag(-DDEBUG DEBUG)
+
+add_common_flag("-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2" RELEASE)
+
 find_package(PkgConfig QUIET)
 include(FindPerl)
 include(ExternalProject)

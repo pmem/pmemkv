@@ -106,12 +106,22 @@ function(build_example_pmemkv_basic_cpp)
 	add_executable(ex_pmemkv_basic_cpp ../examples/pmemkv_basic_cpp/pmemkv_basic.cpp)
 	target_include_directories(ex_pmemkv_basic_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 	target_link_libraries(ex_pmemkv_basic_cpp pmemkv)
+
+	check_cxx_compiler_flag(-Wno-unused-but-set-variable wno_unused_but_set_variable_flag_cpp)
+	if (wno_unused_but_set_variable_flag_cpp)
+		target_compile_options(ex_pmemkv_basic_cpp PUBLIC -Wno-unused-but-set-variable)
+	endif()
 endfunction()
 
 function(build_example_pmemkv_basic_c)
 	add_executable(ex_pmemkv_basic_c ../examples/pmemkv_basic_c/pmemkv_basic.c)
 	target_include_directories(ex_pmemkv_basic_c PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 	target_link_libraries(ex_pmemkv_basic_c pmemkv)
+
+	check_c_compiler_flag(-Wno-unused-but-set-variable wno_unused_but_set_variable_flag_c)
+	if (wno_unused_but_set_variable_flag_c)
+		target_compile_options(ex_pmemkv_basic_c PUBLIC -Wno-unused-but-set-variable)
+	endif()
 endfunction()
 
 set(TEST_FILES

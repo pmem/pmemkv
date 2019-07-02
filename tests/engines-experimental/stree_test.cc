@@ -65,7 +65,6 @@ protected:
 	void Start(bool create)
 	{
 		size_t size = POOL_SIZE;
-		int ret = 0;
 
 		pmemkv_config *cfg = pmemkv_config_new();
 
@@ -647,13 +646,13 @@ const size_t SINGLE_INNER_LIMIT = LEAF_ENTRIES * (INNER_ENTRIES - 1);
 
 TEST_F(STreeTest, SingleInnerNodeAscendingTest)
 {
-	for (int i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
+	for (std::size_t i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
 		std::string istr = std::to_string(i);
 		ASSERT_TRUE(kv->put(istr, istr) == status::OK) << db::errormsg();
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
 	}
-	for (int i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
+	for (std::size_t i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
 		std::string istr = std::to_string(i);
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
@@ -665,13 +664,13 @@ TEST_F(STreeTest, SingleInnerNodeAscendingTest)
 
 TEST_F(STreeTest, SingleInnerNodeAscendingTest2)
 {
-	for (int i = 0; i < SINGLE_INNER_LIMIT; i++) {
+	for (size_t i = 0; i < SINGLE_INNER_LIMIT; i++) {
 		std::string istr = std::to_string(i);
 		ASSERT_TRUE(kv->put(istr, istr) == status::OK) << db::errormsg();
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
 	}
-	for (int i = 0; i < SINGLE_INNER_LIMIT; i++) {
+	for (size_t i = 0; i < SINGLE_INNER_LIMIT; i++) {
 		std::string istr = std::to_string(i);
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
@@ -723,12 +722,12 @@ TEST_F(STreeTest, SingleInnerNodeDescendingTest2)
 
 TEST_F(STreeTest, SingleInnerNodeAscendingAfterRecoveryTest)
 {
-	for (int i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
+	for (size_t i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
 		std::string istr = std::to_string(i);
 		ASSERT_TRUE(kv->put(istr, istr) == status::OK) << db::errormsg();
 	}
 	Restart();
-	for (int i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
+	for (size_t i = 10000; i < (10000 + SINGLE_INNER_LIMIT); i++) {
 		std::string istr = std::to_string(i);
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
@@ -740,12 +739,12 @@ TEST_F(STreeTest, SingleInnerNodeAscendingAfterRecoveryTest)
 
 TEST_F(STreeTest, SingleInnerNodeAscendingAfterRecoveryTest2)
 {
-	for (int i = 0; i < SINGLE_INNER_LIMIT; i++) {
+	for (size_t i = 0; i < SINGLE_INNER_LIMIT; i++) {
 		std::string istr = std::to_string(i);
 		ASSERT_TRUE(kv->put(istr, istr) == status::OK) << db::errormsg();
 	}
 	Restart();
-	for (int i = 0; i < SINGLE_INNER_LIMIT; i++) {
+	for (size_t i = 0; i < SINGLE_INNER_LIMIT; i++) {
 		std::string istr = std::to_string(i);
 		std::string value;
 		ASSERT_TRUE(kv->get(istr, &value) == status::OK && value == istr);
