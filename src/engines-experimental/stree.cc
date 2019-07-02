@@ -102,11 +102,11 @@ std::string stree::name()
 status stree::count_all(std::size_t &cnt)
 {
 	LOG("count_all");
-	std::size_t result = 0;
-	for (auto &iterator : *my_btree)
-		result++;
 
-	cnt = result;
+	auto result = std::distance(my_btree->begin(), my_btree->end());
+	assert(result >= 0);
+
+	cnt = static_cast<std::size_t>(result);
 
 	return status::OK;
 }
@@ -164,13 +164,13 @@ status stree::put(string_view key, string_view value)
 			transaction::commit();
 		}
 		return status::OK;
-	} catch (std::bad_alloc e) {
+	} catch (std::bad_alloc &e) {
 		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
+	} catch (pmem::transaction_alloc_error &e) {
 		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_error e) {
+	} catch (pmem::transaction_error &e) {
 		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
@@ -182,13 +182,13 @@ status stree::remove(string_view key)
 	try {
 		auto result = my_btree->erase(std::string(key.data(), key.size()));
 		return (result == 1) ? status::OK : status::NOT_FOUND;
-	} catch (std::bad_alloc e) {
+	} catch (std::bad_alloc &e) {
 		ERR() << "Put failed due to exception, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
+	} catch (pmem::transaction_alloc_error &e) {
 		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
 		return status::FAILED;
-	} catch (pmem::transaction_error e) {
+	} catch (pmem::transaction_error &e) {
 		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}

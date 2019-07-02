@@ -75,19 +75,9 @@
 #include <utility>
 #include <vector>
 
-static inline pmemkv_config *config_from_internal(pmem::kv::internal::config *config)
-{
-	return reinterpret_cast<pmemkv_config *>(config);
-}
-
 static inline pmem::kv::internal::config *config_to_internal(pmemkv_config *config)
 {
 	return reinterpret_cast<pmem::kv::internal::config *>(config);
-}
-
-static inline pmemkv_db *db_from_internal(pmem::kv::engine_base *engine)
-{
-	return reinterpret_cast<pmemkv_db *>(engine);
 }
 
 static inline pmem::kv::engine_base *db_to_internal(pmemkv_db *db)

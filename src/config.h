@@ -137,7 +137,8 @@ public:
 			*value = item->sint64;
 		else if (item->item_type == type::UINT64) {
 			/* Conversion from uint64 allowed */
-			if (item->uint64 <= std::numeric_limits<int64_t>::max())
+			if (item->uint64 <=
+			    static_cast<uint64_t>(std::numeric_limits<int64_t>::max()))
 				*value = static_cast<int64_t>(item->uint64);
 			else
 				throw config_type_error(

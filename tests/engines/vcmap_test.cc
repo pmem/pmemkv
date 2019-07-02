@@ -47,7 +47,6 @@ public:
 	VCMapBaseTest()
 	{
 		size_t size = POOL_SIZE;
-		int ret = 0;
 
 		pmemkv_config *cfg = pmemkv_config_new();
 
