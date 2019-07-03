@@ -59,6 +59,7 @@ echo "################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-ruby.git
 cd pmemkv-ruby
+git checkout 0.8
 mkdir -p vendor/cache/
 echo $USERPASS | sudo -S mv /opt/bindings/ruby/* vendor/cache/
 bundle install --local
@@ -71,6 +72,7 @@ echo "#########################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
+git checkout 0.8
 # copy Googletest to the current directory
 cp /opt/googletest/googletest-*.zip .
 make test
@@ -79,6 +81,7 @@ echo $USERPASS | sudo -S make install prefix=$PREFIX
 cd ~
 git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
+git checkout 0.8
 mvn install
 
 echo
@@ -88,5 +91,6 @@ echo "##################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-nodejs.git
 cd pmemkv-nodejs
+git checkout 0.8
 npm install --save
 npm test
