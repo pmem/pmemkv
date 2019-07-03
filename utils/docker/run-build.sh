@@ -100,9 +100,6 @@ function run_example_standalone() {
 
 cd $WORKDIR
 
-# copy Googletest to the current directory
-cp /opt/googletest/googletest-*.zip .
-
 # Make sure there is no libpmemkv currently installed
 echo "---------------------------- Error expected! ------------------------------"
 compile_example_standalone pmemkv_basic_cpp && exit 1
