@@ -129,17 +129,17 @@ Every engine has documented all supported config parameters (please see **libpme
 
 `int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value);`
 
-:	Gets value of element with key `key`. Value is copied to variable pointed by
+:	Gets value of a config item with key `key`. Value is copied to variable pointed by
 	`value`.
 
 `int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value);`
 
-:	Gets value of element with key `key`. Value is copied to variable pointed by
+:	Gets value of a config item with key `key`. Value is copied to variable pointed by
 	`value`.
 
 `int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *value);`
 
-:	Gets value of element with key `key`. Value is copied to variable pointed by
+:	Gets value of a config item with key `key`. Value is copied to variable pointed by
 	`value`.
 
 `int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);`
@@ -158,34 +158,33 @@ Every engine has documented all supported config parameters (please see **libpme
 
 `int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);`
 
-:	Parses JSON string and puts all elements found in JSON into `config`. Allowed types
+:	Parses JSON string and puts all items found in JSON into `config`. Allowed types
 	in JSON strings and their corresponding types in pmemkv_config are:
-	+ **number** -- int64 for integral types and double for floating point,
+	+ **number** -- int64 for integral types and double for floating points,
 	+ **string** -- const char *,
 	+ **object** -- (another JSON string) -> pointer to pmemkv_config (can be obtained using pmemkv_config_get_object)
 	+ **True**, **False** -- int64
 
-Elements stored in pmemkv_config, which were put using a specific function can be obtained
-only using corresponding pmemkv_config_get_ function (for example, elements put using pmemkv_config_put_double
+Config items stored in pmemkv_config, which were put using a specific function can be obtained
+only using corresponding pmemkv_config_get_ function (for example, config items put using pmemkv_config_put_double
 can only be obtained using pmemkv_config_get_double). Exception from this rule
 are functions for uint64 and int64. If value put by pmemkv_config_put_int64 is in uint64_t range
 it can be obtained using pmemkv_config_get_uint64 and vice versa.
 
 ## ERRORS ##
 
-Each function, except for *pmemkv_config_new()* and *pmemkv_config_delete()* returns status.
+Each function, except for *pmemkv_config_new()* and *pmemkv_config_delete()*, returns status.
 Possible return values are:
 
 + **PMEMKV_STATUS_OK** -- no error
 + **PMEMKV_STATUS_FAILED** -- unspecified error
-+ **PMEMKV_STATUS_NOT_FOUND** -- element not found
-+ **PMEMKV_STATUS_INVALID_ARGUMENT** -- argument to function has wrong value
++ **PMEMKV_STATUS_CONFIG_NOT_FOUND** -- config item not found
 + **PMEMKV_STATUS_CONFIG_PARSING_ERROR** -- parsing data to config failed
-+ **PMEMKV_STATUS_CONFIG_TYPE_ERROR** -- element has different type than expected
++ **PMEMKV_STATUS_CONFIG_TYPE_ERROR** -- config item has different type than expected
 
 # EXAMPLE #
 
-```
+```c
 #include <libpmemkv.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -238,13 +237,13 @@ int main(){
 	pmemkv_config *config_from_json = pmemkv_config_new();
 	assert(config_from_json != NULL);
 
-	/* Parse JSON and put all elements found into config_from_json */
+	/* Parse JSON and put all items found into config_from_json */
 	status = pmemkv_config_from_json(config_from_json,
 		"{\"path\":\"/dev/shm\",\
 		 \"size\":1073741824,\
 		 \"subconfig\":{\
-			 \"size\":1073741824\
-			 }\
+			\"size\":1073741824\
+			}\
 		}");
 	assert(status == PMEMKV_STATUS_OK);
 

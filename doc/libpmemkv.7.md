@@ -89,7 +89,7 @@ This engine requires the following config parameters (see **libpmemkv_config**(3
 
 * **path** -- Path to the database file
     + type: string
-* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creats it
+* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it
     + type: uint64_t
     + default value: 0
 * **size** --  Only needed when force_create is not 0, specifies size of the database
