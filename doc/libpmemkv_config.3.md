@@ -129,17 +129,17 @@ Every engine has documented all supported config parameters (please see **libpme
 
 `int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value);`
 
-:	Gets value of element with key `key`. Value is copied to variable pointed by
+:	Gets value of an element with key `key`. Value is copied to variable pointed by
 	`value`.
 
 `int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value);`
 
-:	Gets value of element with key `key`. Value is copied to variable pointed by
+:	Gets value of an element with key `key`. Value is copied to variable pointed by
 	`value`.
 
 `int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *value);`
 
-:	Gets value of element with key `key`. Value is copied to variable pointed by
+:	Gets value of an element with key `key`. Value is copied to variable pointed by
 	`value`.
 
 `int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);`
@@ -160,7 +160,7 @@ Every engine has documented all supported config parameters (please see **libpme
 
 :	Parses JSON string and puts all elements found in JSON into `config`. Allowed types
 	in JSON strings and their corresponding types in pmemkv_config are:
-	+ **number** -- int64 for integral types and double for floating point,
+	+ **number** -- int64 for integral types and double for floating points,
 	+ **string** -- const char *,
 	+ **object** -- (another JSON string) -> pointer to pmemkv_config (can be obtained using pmemkv_config_get_object)
 	+ **True**, **False** -- int64
@@ -173,19 +173,17 @@ it can be obtained using pmemkv_config_get_uint64 and vice versa.
 
 ## ERRORS ##
 
-Each function, except for *pmemkv_config_new()* and *pmemkv_config_delete()* returns status.
+Each function, except for *pmemkv_config_new()* and *pmemkv_config_delete()*, returns status.
 Possible return values are:
 
 + **PMEMKV_STATUS_OK** -- no error
 + **PMEMKV_STATUS_FAILED** -- unspecified error
-+ **PMEMKV_STATUS_NOT_FOUND** -- element not found
-+ **PMEMKV_STATUS_INVALID_ARGUMENT** -- argument to function has wrong value
 + **PMEMKV_STATUS_CONFIG_PARSING_ERROR** -- parsing data to config failed
 + **PMEMKV_STATUS_CONFIG_TYPE_ERROR** -- element has different type than expected
 
 # EXAMPLE #
 
-```
+```c
 #include <libpmemkv.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -243,8 +241,8 @@ int main(){
 		"{\"path\":\"/dev/shm\",\
 		 \"size\":1073741824,\
 		 \"subconfig\":{\
-			 \"size\":1073741824\
-			 }\
+			\"size\":1073741824\
+			}\
 		}");
 	assert(status == PMEMKV_STATUS_OK);
 

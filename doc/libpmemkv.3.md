@@ -53,7 +53,7 @@ date: pmemkv version 0.8
 #include <libpmemkv.h>
 
 typedef int pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
-				size_t valuebytes, void *arg);
+			size_t valuebytes, void *arg);
 typedef void pmemkv_get_v_callback(const char *value, size_t valuebytes, void *arg);
 
 int pmemkv_open(const char *engine, pmemkv_config *config, pmemkv_db **db);
@@ -63,22 +63,22 @@ int pmemkv_count_all(pmemkv_db *db, size_t *cnt);
 int pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);
 int pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);
 int pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-			 size_t kb2, size_t *cnt);
+			size_t kb2, size_t *cnt);
 
 int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg);
 int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
-		     void *arg);
+			void *arg);
 int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
-		     void *arg);
+			void *arg);
 int pmemkv_get_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
-		       size_t kb2, pmemkv_get_kv_callback *c, void *arg);
+			size_t kb2, pmemkv_get_kv_callback *c, void *arg);
 
 int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb);
 
 int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c,
 	       void *arg);
 int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
-		    size_t buffer_size, size_t *value_size);
+			size_t buffer_size, size_t *value_size);
 int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb);
 
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
@@ -109,66 +109,67 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 
 `int pmemkv_count_all(pmemkv_db *db, size_t *cnt);`
 
-:	Stores in `*cnt` the number of elements in `db`.
+:	Stores in `*cnt` the number of records in `db`.
 
 `int pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);`
 
-:	Stores in `*cnt` the number of elements in `db` whose keys are greater than
+:	Stores in `*cnt` the number of records in `db` whose keys are greater than
 	the key `k` of length `kb`.
 
 `int pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);`
 
-:	Stores in `*cnt` the number of elements in `db` whose keys are less than
+:	Stores in `*cnt` the number of records in `db` whose keys are less than
 	the key `k` of length `kb`.
 
 `int pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2, size_t kb2, size_t *cnt);`
 
-:	Stores in `*cnt` the number of elements in `db` whose keys are greater than key `k1` (of length `kb1`) and less than key `k2` (of length `kb2`).
+:	Stores in `*cnt` the number of records in `db` whose keys are greater than key `k1` (of length `kb1`)
+	and less than key `k2` (of length `kb2`).
 
 `int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg);`
 
-:	Executes function `c` for every element stored in `db`. Arguments
+:	Executes function `c` for every record stored in `db`. Arguments
 	passed to the function are: pointer to a key, size of the key, pointer to a value, size of
 	the value and `arg` specified by the user.
 	Function `c` can stop iteration by returning non-zero value. In that case *pmemkv_get_all()* returns
-	PMEMKV\_STATUS\_STOPPED\_BY\_CV. Returning 0 continues iteration.
+	PMEMKV\_STATUS\_STOPPED\_BY\_CB. Returning 0 continues iteration.
 
 `int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c, void *arg);`
 
-:	Executes function `c` for every element stored in `db` whose keys are greater than
+:	Executes function `c` for every record stored in `db` whose keys are greater than
 	key `k` (of length `kb`). Arguments passed to `c` are: pointer to a key, size of the key, pointer to a value, size of
 	the value and `arg` specified by the user.
 	Function `c` can stop iteration by returning non-zero value. In that case *pmemkv_get_above()* returns
-	PMEMKV\_STATUS\_STOPPED\_BY\_CV. Returning 0 continues iteration.
+	PMEMKV\_STATUS\_STOPPED\_BY\_CB. Returning 0 continues iteration.
 
 `int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c, oid *arg);`
 
-:	Executes function `c` for every element stored in `db` whose keys are less than
+:	Executes function `c` for every record stored in `db` whose keys are less than
 	key `k` (of length `kb`). Arguments passed to `c` are: pointer to a key, size of the key, pointer to a value, size of
 	the value and `arg` specified by the user.
 	Function `c` can stop iteration by returning non-zero value. In that case *pmemkv_get_below()* returns
-	PMEMKV\_STATUS\_STOPPED\_BY\_CV. Returning 0 continues iteration.
+	PMEMKV\_STATUS\_STOPPED\_BY\_CB. Returning 0 continues iteration.
 
 `int pmemkv_get_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2, size_t kb2, pmemkv_get_kv_callback *c, void *arg);`
 
-:	Executes function `c` for every element stored in `db` whose keys are greater than
+:	Executes function `c` for every record stored in `db` whose keys are greater than
 	key `k1` (of length `kb1`) and less than key `k2` (of length `kb2`).
 	Arguments passed to `c` are: pointer to a key, size of the key, pointer to a value, size of
 	the value and `arg` specified by the user.
 	Function `c` can stop iteration by returning non-zero value. In that case *pmemkv_get_between()* returns
-	PMEMKV\_STATUS\_STOPPED\_BY\_CV. Returning 0 continues iteration.
+	PMEMKV\_STATUS\_STOPPED\_BY\_CB. Returning 0 continues iteration.
 
 `int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb);`
 
-:	Checks existence of element with key `k` of length `kb`.
-	If element is present PMEMKV\_STATUS\_OK is returned, otherwise PMEMKV\_STATUS\_NOT\_FOUND is returned.
+:	Checks existence of record with key `k` of length `kb`.
+	If record is present PMEMKV\_STATUS\_OK is returned, otherwise PMEMKV\_STATUS\_NOT\_FOUND is returned.
 	Other possible return values are described in the *ERRORS* section.
 
 `int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c, void *arg);`
 
-:	Executes function `c` on element with key `k` of length `kb`.
-	If element is present and no error occured the function returns PMEMKV\_STATUS\_OK.
-	If element does not exist PMEMKV\_STATUS\_NOT\_FOUND is returned.
+:	Executes function `c` on record with key `k` (of length `kb`).
+	If record is present and no error occured the function returns PMEMKV\_STATUS\_OK.
+	If record does not exist PMEMKV\_STATUS\_NOT\_FOUND is returned.
 	Other possible return values are described in the *ERRORS* section.
 	Function `c` is called with the following parameters: pointer to a value, size of the value and `arg` specified by the user.
 	`Value` points to the location where data is actually stored (no copy occurs).
@@ -176,7 +177,7 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 
 `int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer, size_t buffer_size, size_t *value_size);`
 
-:	Copies value of element with key `k` of length `kb` to user provided buffer.
+:	Copies value of record with key `k` of length `kb` to user provided buffer.
 	`buffer` points to the value buffer, `buffer_size` specifies its size and `*value_size`
 	is filled in by this function. If the value doesn't fit in the provided buffer then this function returns PMEMKV\_STATUS\_FAILED.
 	Otherwise, in absence of any errors, PMEMKV\_STATUS\_OK is returned.
@@ -185,13 +186,13 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 
 `int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb);`
 
-:	Inserts a key-value pair into pmemkv database. `kb` is the length of key `k` and `vb` is the lenth of value `v`.
-	When this function returns caller is free to reuse both buffers.
+:	Inserts a key-value pair into pmemkv database. `kb` is the length of key `k` and `vb` is the length of value `v`.
+	When this function returns, caller is free to reuse both buffers.
 	This function is guaranteed to be implemented by all engines.
 
 `int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);`
 
-:	Removes element with key `k` of length `kb`.
+:	Removes record with key `k` of length `kb`.
 	This function is guaranteed to be implemented by all engines.
 
 `const char *pmemkv_errormsg(void);`
@@ -200,11 +201,11 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 
 ## ERRORS ##
 
-Each function, except for *pmemkv_close()* and *pmemkv_errormsg()* returns one of the following status codes:
+Each function, except for *pmemkv_close()* and *pmemkv_errormsg()*, returns one of the following status codes:
 
 + **PMEMKV_STATUS_OK** -- no error
 + **PMEMKV_STATUS_FAILED** -- unspecified error
-+ **PMEMKV_STATUS_NOT_FOUND** -- element not found
++ **PMEMKV_STATUS_NOT_FOUND** -- record not found
 + **PMEMKV_STATUS_NOT_SUPPORTED** -- function is not implemented by current engine
 + **PMEMKV_STATUS_INVALID_ARGUMENT** -- argument to function has wrong value
 + **PMEMKV_STATUS_CONFIG_PARSING_ERROR** -- parsing data to config failed
