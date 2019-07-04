@@ -49,65 +49,31 @@ const std::string LAYOUT = "pmemkv";
 
 class engine_base {
 public:
-	engine_base()
-	{
-	}
+	engine_base();
 
-	virtual ~engine_base()
-	{
-	}
+	virtual ~engine_base();
+
+	static std::unique_ptr<engine_base>
+	create_engine(const std::string &name, std::unique_ptr<internal::config> cfg);
 
 	virtual std::string name() = 0;
 
-	virtual status count_all(std::size_t &cnt)
-	{
-		return status::NOT_SUPPORTED;
-	}
+	virtual status count_all(std::size_t &cnt);
+	virtual status count_above(string_view key, std::size_t &cnt);
+	virtual status count_below(string_view key, std::size_t &cnt);
+	virtual status count_between(string_view key1, string_view key2,
+				     std::size_t &cnt);
 
-	virtual status count_above(string_view key, std::size_t &cnt)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
-	virtual status count_below(string_view key, std::size_t &cnt)
-	{
-		return status::NOT_SUPPORTED;
-	}
-	virtual status count_between(string_view key1, string_view key2, std::size_t &cnt)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
-	virtual status get_all(get_kv_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
-	virtual status get_above(string_view key, get_kv_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
-	virtual status get_below(string_view key, get_kv_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
-
+	virtual status get_all(get_kv_callback *callback, void *arg);
+	virtual status get_above(string_view key, get_kv_callback *callback, void *arg);
+	virtual status get_below(string_view key, get_kv_callback *callback, void *arg);
 	virtual status get_between(string_view key1, string_view key2,
-				   get_kv_callback *callback, void *arg)
-	{
-		return status::NOT_SUPPORTED;
-	}
+				   get_kv_callback *callback, void *arg);
 
-	virtual status exists(string_view key)
-	{
-		return status::NOT_SUPPORTED;
-	}
+	virtual status exists(string_view key);
 
 	virtual status get(string_view key, get_v_callback *callback, void *arg) = 0;
-
 	virtual status put(string_view key, string_view value) = 0;
-
 	virtual status remove(string_view key) = 0;
 };
 
