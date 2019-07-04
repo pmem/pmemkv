@@ -154,9 +154,9 @@ Next we'll walk you through the steps of creating a new engine.
 
 ### Updating Common Source
 
-* In `src/libpmemkv.cc`:
+* In `src/engine.cc`:
     * Add `#include "engines/mytree.h"` (within `#ifdef ENGINE_MYTREE` clause)
-    * Update `pmemkv_open` to return new `my_tree` instances
+    * Update `create_engine` to return new `my_tree` instances
 * Build & verify engine now works with high-level bindings (see [README](https://github.com/pmem/pmemkv#bindings) for information on current bindings)
 
 ### Documentation
