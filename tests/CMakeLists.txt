@@ -165,6 +165,7 @@ add_executable(pmemkv_test ${TEST_FILES})
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
 if(ENGINE_CACHING)
 	target_link_libraries(pmemkv_test memcached)
+	target_link_libraries(pmemkv_test acl_cpp protocol acl)
 endif()
 
 # parse tests source files to get the list of all tests
