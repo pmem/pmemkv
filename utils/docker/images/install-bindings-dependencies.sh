@@ -43,6 +43,7 @@ mkdir -p /opt/bindings/ruby/
 sudo gem install bundler -v '< 2.0'
 git clone https://github.com/pmem/pmemkv-ruby.git
 cd pmemkv-ruby
+git checkout 0.8
 # bundle package command copies all of the .gem files needed to run the application
 # into the vendor/cache directory
 sudo bundle package
