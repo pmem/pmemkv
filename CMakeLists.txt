@@ -57,32 +57,50 @@ endif()
 
 # Each engine can be enabled separately.
 # By default all experimental engines are turned off.
-option(ENGINE_VSMAP "enable vsmap engine" ON)
-option(ENGINE_VCMAP "enable vcmap engine" ON)
 option(ENGINE_CMAP "enable cmap engine" ON)
+option(ENGINE_VCMAP "enable vcmap engine" ON)
+option(ENGINE_VSMAP "enable vsmap engine" ON)
 option(ENGINE_CACHING "enable experimental caching engine" OFF)
 option(ENGINE_STREE "enable experimental stree engine" OFF)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 
 option(DEVELOPER_MODE "enable developer's checks" OFF)
 
-if(ENGINE_VSMAP)
-	add_definitions(-DENGINE_VSMAP)
+if(ENGINE_CMAP)
+	add_definitions(-DENGINE_CMAP)
+	message(STATUS "CMAP engine is ON")
+else()
+	message(STATUS "CMAP engine is OFF")
 endif()
 if(ENGINE_VCMAP)
 	add_definitions(-DENGINE_VCMAP)
+	message(STATUS "VCMAP engine is ON")
+else()
+	message(STATUS "VCMAP engine is OFF")
 endif()
-if(ENGINE_CMAP)
-	add_definitions(-DENGINE_CMAP)
+if(ENGINE_VSMAP)
+	add_definitions(-DENGINE_VSMAP)
+	message(STATUS "VSMAP engine is ON")
+else()
+	message(STATUS "VSMAP engine is OFF")
 endif()
 if(ENGINE_CACHING)
 	add_definitions(-DENGINE_CACHING)
+	message(STATUS "CACHING engine is ON")
+else()
+	message(STATUS "CACHING engine is OFF")
 endif()
 if(ENGINE_STREE)
 	add_definitions(-DENGINE_STREE)
+	message(STATUS "STREE engine is ON")
+else()
+	message(STATUS "STREE engine is OFF")
 endif()
 if(ENGINE_TREE3)
 	add_definitions(-DENGINE_TREE3)
+	message(STATUS "TREE3 engine is ON")
+else()
+	message(STATUS "TREE3 engine is OFF")
 endif()
 
 set(SOURCE_FILES
@@ -94,10 +112,10 @@ set(SOURCE_FILES
 	src/out.h
 )
 # Add each engine source separately
-if(ENGINE_VSMAP)
+if(ENGINE_CMAP)
 	list(APPEND SOURCE_FILES
-		src/engines/vsmap.h
-		src/engines/vsmap.cc
+		src/engines/cmap.h
+		src/engines/cmap.cc
 	)
 endif()
 if(ENGINE_VCMAP)
@@ -106,10 +124,10 @@ if(ENGINE_VCMAP)
 		src/engines/vcmap.cc
 	)
 endif()
-if(ENGINE_CMAP)
+if(ENGINE_VSMAP)
 	list(APPEND SOURCE_FILES
-		src/engines/cmap.h
-		src/engines/cmap.cc
+		src/engines/vsmap.h
+		src/engines/vsmap.cc
 	)
 endif()
 if(ENGINE_CACHING)
