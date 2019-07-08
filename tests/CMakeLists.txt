@@ -116,6 +116,7 @@ endfunction()
 
 set(TEST_FILES
 	pmemkv_test.cc
+	pmemkv_c_api_test.cc
 	mock_tx_alloc.cc
 	engines/blackhole_test.cc
 	config/config.cc
