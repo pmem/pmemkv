@@ -104,7 +104,12 @@ public:
 		return status::NOT_SUPPORTED;
 	}
 
-	virtual status get(string_view key, get_v_callback *callback, void *arg) = 0;
+    virtual status free()
+    {
+		return status::NOT_SUPPORTED;
+    }
+
+    virtual status get(string_view key, get_v_callback *callback, void *arg) = 0;
 
 	virtual status put(string_view key, string_view value) = 0;
 

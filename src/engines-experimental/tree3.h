@@ -221,10 +221,12 @@ public:
 
 	status remove(string_view key) final;
 
+	status free() final;
+
 protected:
 	KVLeafNode *LeafSearch(const std::string &key);
 	void LeafFillEmptySlot(KVLeafNode *leafnode, uint8_t hash, const std::string &key,
-			       const std::string &value);
+						   const std::string &value);
 	bool LeafFillSlotForKey(KVLeafNode *leafnode, uint8_t hash,
 				const std::string &key, const std::string &value);
 	void LeafFillSpecificSlot(KVLeafNode *leafnode, uint8_t hash,
@@ -236,12 +238,15 @@ protected:
 				   std::string *split_key);
 	uint8_t PearsonHash(const char *data, size_t size);
 	void Recover();
+	bool IsKVOnRoot();
 
 private:
 	tree3(const tree3 &);				// prevent copying
 	void operator=(const tree3 &);			// prevent assigning
 	vector<persistent_ptr<KVLeaf>> leaves_prealloc; // persisted but unused leaves
-	pool<KVRoot> pmpool;				// pool for persistent root
+	pmem::obj::pool_base pmpool;
+	persistent_ptr<KVRoot> kvroot;
+	bool auto_close_pool;
 	unique_ptr<KVNode> tree_top;			// pointer to uppermost inner node
 };
 

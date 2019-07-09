@@ -57,27 +57,73 @@ tree3::tree3(std::unique_ptr<internal::config> cfg)
 	const char *path;
 	std::size_t size;
 
-	if (cfg->get_string("path", &path) != status::OK)
-		throw std::runtime_error("Config does not contain path");
+	status get_path_status = cfg->get_string("path", &path);
+	status get_pool_status = cfg->get_object("pmemobjpool", reinterpret_cast<void**>(&pmpool));
 
-	uint64_t force_create;
-	auto ret = cfg->get_uint64("force_create", &force_create);
+	if (get_path_status != status::OK && get_pool_status != status::OK) {
+		throw std::runtime_error("Config does not contain path or pmemobjpool");
+	}
 
-	if (ret == status::NOT_FOUND)
-		force_create = 0;
-	else if (ret != status::OK)
-		throw std::runtime_error("Cannot get force_create from config");
+	if (get_path_status == status::OK && get_pool_status == status::OK) {
+		throw std::runtime_error("Config contains both path and pmemobjpool");
+	}
 
-	if (force_create) {
-		if (cfg->get_uint64("size", &size) != status::OK)
-			throw std::runtime_error("Config does not contain size");
+	if (get_path_status == status::OK) {
+		uint64_t force_create;
+		auto ret = cfg->get_uint64("force_create", &force_create);
 
-		LOG("Creating filesystem pool, path=" << path << ", size="
-						      << std::to_string(size));
-		pmpool = pool<KVRoot>::create(path, LAYOUT, size, S_IRWXU);
+		if (ret == status::NOT_FOUND) {
+			force_create = 0;
+		} else if (ret != status::OK) {
+			throw std::runtime_error("Cannot get force_create from config");
+		}
+
+		if (force_create) {
+			if (cfg->get_uint64("size", &size) != status::OK) {
+				throw std::runtime_error("Config does not contain size");
+			}
+
+			LOG("Creating filesystem pool, path=" << path << ", size="
+								  << std::to_string(size));
+			auto pool_with_root =
+				pool<KVRoot>::create(path, LAYOUT, size, S_IRWXU);
+			pmpool = pool_with_root;
+			kvroot = pool_with_root.root();
+		} else {
+			LOG("Opening pool, path=" << path);
+			auto pool_with_root = pool<KVRoot>::open(path, LAYOUT);
+			pmpool = pool_with_root;
+			kvroot = pool_with_root.root();
+		}
+	}
+
+	if (get_path_status == status::OK) {
+		PMEMoid *p_tree_root_oid;
+		auto ret = cfg->get_object("tree_root_oid",
+					   reinterpret_cast<void **>(&p_tree_root_oid));
+
+		if (ret == status::NOT_FOUND) {
+			throw std::runtime_error("Config does not tree root oid");
+		} else if(OID_IS_NULL(*p_tree_root_oid)) {
+			// Create a new one
+			transaction::run(pmpool,
+					 [&] { kvroot = make_persistent<KVRoot>(); });
+			p_tree_root_oid = kvroot.raw_ptr();
+		} else {
+			// Open an existing one
+			kvroot = *p_tree_root_oid;
+		}
+	}
+
+	uint64_t auto_close_pool_in_dtor;
+	status get_auto_close_pool_status = cfg->get_uint64("auto_close_pool", &auto_close_pool_in_dtor);
+	if (get_auto_close_pool_status == status::NOT_FOUND) {
+		// default to true
+		auto_close_pool = true;
+	} else if (get_auto_close_pool_status == status::OK) {
+		auto_close_pool = auto_close_pool_in_dtor;
 	} else {
-		LOG("Opening pool, path=" << path);
-		pmpool = pool<KVRoot>::open(path, LAYOUT);
+		throw std::runtime_error("Config get auto_close_pool error");
 	}
 
 	Recover();
@@ -87,7 +133,9 @@ tree3::tree3(std::unique_ptr<internal::config> cfg)
 tree3::~tree3()
 {
 	LOG("Stopping");
-	pmpool.close();
+	if (auto_close_pool) {
+		pmpool.close();
+	}
 	LOG("Stopped ok");
 }
 
@@ -103,7 +151,7 @@ std::string tree3::name()
 status tree3::count_all(std::size_t &cnt)
 {
 	std::size_t result = 0;
-	auto leaf = pmpool.root()->head;
+	auto leaf = kvroot->head;
 	while (leaf) {
 		for (int slot = LEAF_KEYS; slot--;) {
 			auto kvslot = leaf->slots[slot].get_ro();
@@ -122,7 +170,7 @@ status tree3::count_all(std::size_t &cnt)
 status tree3::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("get_all");
-	auto leaf = pmpool.root()->head;
+	auto leaf = kvroot->head;
 	while (leaf) {
 		for (int slot = LEAF_KEYS; slot--;) {
 			auto kvslot = leaf->slots[slot].get_ro();
@@ -201,7 +249,7 @@ status tree3::put(string_view key, string_view value)
 					new_node->leaf = leaves_prealloc.back();
 					leaves_prealloc.pop_back();
 				} else {
-					auto root = pmpool.root();
+					auto root = kvroot;
 					auto old_head = root->head;
 					auto new_leaf = make_persistent<KVLeaf>();
 					root->head = new_leaf;
@@ -250,7 +298,7 @@ status tree3::remove(string_view key)
 		for (int slot = LEAF_KEYS; slot--;) {
 			if (leafnode->hashes[slot] == hash) {
 				if (leafnode->keys[slot].compare(
-					    std::string(key.data(), key.size())) == 0) {
+						std::string(key.data(), key.size())) == 0) {
 					LOG("   freeing slot=" << slot);
 					leafnode->hashes[slot] = 0;
 					leafnode->keys[slot].clear();
@@ -273,6 +321,43 @@ status tree3::remove(string_view key)
 		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
 		return status::FAILED;
 	}
+}
+
+// Simple version of free
+status tree3::free()
+{
+	LOG("Free existing KV from pmem");
+
+	if (kvroot != NULL) {
+		auto kvleaf = kvroot->head;
+
+		while (kvleaf) {
+			transaction::run(pmpool, [&] {
+				// Clear all the slots in the KVLeaf
+				for (int slot = LEAF_KEYS; slot--;) {
+					kvleaf->slots[slot].get_rw().clear();
+				}
+
+				kvroot->head = kvleaf->next;
+
+				// Delete KVLeaf itself
+				delete_persistent<KVLeaf>(kvleaf);
+
+				if (kvroot->head != NULL) {
+					kvleaf = kvroot->head;
+				}
+			});
+		}
+
+		// Delete the KVRoot as well when it's not the pool root
+		if (IsKVOnRoot()) {
+			transaction::run(pmpool,
+					 [&] { delete_persistent<KVRoot>(kvroot); });
+		}
+	}
+
+	LOG("Free ok");
+	return status::OK;
 }
 
 // ===============================================================================================
@@ -379,7 +464,7 @@ void tree3::LeafSplitFull(KVLeafNode *leafnode, const uint8_t hash,
 			new_leafnode->leaf = new_leaf;
 			leaves_prealloc.pop_back();
 		} else {
-			auto root = pmpool.root();
+			auto root = kvroot;
 			auto old_head = root->head;
 			new_leaf = make_persistent<KVLeaf>();
 			root->head = new_leaf;
@@ -482,7 +567,7 @@ void tree3::Recover()
 
 	// traverse persistent leaves to build list of leaves to recover
 	std::list<KVRecoveredLeaf> leaves;
-	auto leaf = pmpool.root()->head;
+	auto leaf = kvroot->head;
 	while (leaf) {
 		unique_ptr<KVLeafNode> leafnode(new KVLeafNode());
 		leafnode->leaf = leaf;
@@ -538,7 +623,7 @@ void tree3::Recover()
 			auto nextnode = leaves.front().leafnode.get();
 			nextnode->parent = prevnode->parent;
 			InnerUpdateAfterSplit(prevnode, move(leaves.front().leafnode),
-					      &split_key);
+								  &split_key);
 			max_key = leaves.front().max_key;
 			leaves.pop_front();
 			prevnode = nextnode;
@@ -547,6 +632,12 @@ void tree3::Recover()
 
 	LOG("Recovered ok");
 }
+
+bool tree3::IsKVOnRoot() {
+	return pmemobj_root_size(pmpool.handle()) == sizeof(KVRoot)
+		&& OID_EQUALS(kvroot.raw(), pmemobj_root(pmpool.handle(), sizeof(KVRoot)));
+}
+
 
 // ===============================================================================================
 // PEARSON HASH METHODS
