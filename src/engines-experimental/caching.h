@@ -68,7 +68,7 @@ private:
 	bool getFromRemoteMemcached(const std::string &key, std::string &value);
 	bool getKey(const std::string &key, std::string &valueField, bool api_flag);
 
-	db *basePtr;
+	std::unique_ptr<engine_base> basePtr;
 
 	int64_t attempts;
 	std::string host;
