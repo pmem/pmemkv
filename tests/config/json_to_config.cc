@@ -55,6 +55,7 @@ TEST_F(JsonToConfigTest, SimpleTest)
 	auto ret = pmemkv_config_from_json(
 		config,
 		"{\"string\": \"abc\", \"int\": 123, \"bool\": true, \"double\": 12.43}");
+#ifdef ENABLE_CONFIG_FROM_JSON
 	// XXX: extend by adding "false", subconfig, negative value
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
 
@@ -80,4 +81,7 @@ TEST_F(JsonToConfigTest, SimpleTest)
 
 	ret = pmemkv_config_get_int64(config, "string", &value_int);
 	ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
+#else
+	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_SUPPORTED);
+#endif
 }
