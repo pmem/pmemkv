@@ -152,46 +152,26 @@ status stree::put(string_view key, string_view value)
 {
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
-	try {
-		auto result = my_btree->insert(std::make_pair(
-			pstring<MAX_KEY_SIZE>(key.data(), key.size()),
-			pstring<MAX_VALUE_SIZE>(value.data(), value.size())));
-		if (!result.second) { // key already exists, so update
-			typename btree_type::value_type &entry = *result.first;
-			transaction::manual tx(pmpool);
-			conditional_add_to_tx(&(entry.second));
-			entry.second = std::string(value.data(), value.size());
-			transaction::commit();
-		}
-		return status::OK;
-	} catch (std::bad_alloc e) {
-		ERR() << "Put failed due to exception, " << e.what();
-		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
-		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
-		return status::FAILED;
-	} catch (pmem::transaction_error e) {
-		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
-		return status::FAILED;
+
+	auto result = my_btree->insert(
+		std::make_pair(pstring<MAX_KEY_SIZE>(key.data(), key.size()),
+			       pstring<MAX_VALUE_SIZE>(value.data(), value.size())));
+	if (!result.second) { // key already exists, so update
+		typename btree_type::value_type &entry = *result.first;
+		transaction::manual tx(pmpool);
+		conditional_add_to_tx(&(entry.second));
+		entry.second = std::string(value.data(), value.size());
+		transaction::commit();
 	}
+	return status::OK;
 }
 
 status stree::remove(string_view key)
 {
 	LOG("remove key=" << std::string(key.data(), key.size()));
-	try {
-		auto result = my_btree->erase(std::string(key.data(), key.size()));
-		return (result == 1) ? status::OK : status::NOT_FOUND;
-	} catch (std::bad_alloc e) {
-		ERR() << "Put failed due to exception, " << e.what();
-		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
-		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
-		return status::FAILED;
-	} catch (pmem::transaction_error e) {
-		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
-		return status::FAILED;
-	}
+
+	auto result = my_btree->erase(std::string(key.data(), key.size()));
+	return (result == 1) ? status::OK : status::NOT_FOUND;
 }
 
 void stree::Recover()

@@ -188,52 +188,40 @@ status tree3::put(string_view key, string_view value)
 {
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
-	try {
-		const auto hash = PearsonHash(key.data(), key.size());
+
+	const auto hash = PearsonHash(key.data(), key.size());
+	// XXX - do not create temporary string
+	auto leafnode = LeafSearch(std::string(key.data(), key.size()));
+	if (!leafnode) {
+		LOG("   adding head leaf");
+		unique_ptr<KVLeafNode> new_node(new KVLeafNode());
+		new_node->is_leaf = true;
+		transaction::run(pmpool, [&] {
+			if (!leaves_prealloc.empty()) {
+				new_node->leaf = leaves_prealloc.back();
+				leaves_prealloc.pop_back();
+			} else {
+				auto root = pmpool.root();
+				auto old_head = root->head;
+				auto new_leaf = make_persistent<KVLeaf>();
+				root->head = new_leaf;
+				new_leaf->next = old_head;
+				new_node->leaf = new_leaf;
+			}
+			LeafFillSpecificSlot(new_node.get(), hash,
+					     std::string(key.data(), key.size()),
+					     std::string(value.data(), value.size()), 0);
+		});
+		tree_top = move(new_node);
+	} else if (LeafFillSlotForKey(leafnode, hash, std::string(key.data(), key.size()),
+				      std::string(value.data(), value.size()))) {
+		// nothing else to do
+	} else {
 		// XXX - do not create temporary string
-		auto leafnode = LeafSearch(std::string(key.data(), key.size()));
-		if (!leafnode) {
-			LOG("   adding head leaf");
-			unique_ptr<KVLeafNode> new_node(new KVLeafNode());
-			new_node->is_leaf = true;
-			transaction::run(pmpool, [&] {
-				if (!leaves_prealloc.empty()) {
-					new_node->leaf = leaves_prealloc.back();
-					leaves_prealloc.pop_back();
-				} else {
-					auto root = pmpool.root();
-					auto old_head = root->head;
-					auto new_leaf = make_persistent<KVLeaf>();
-					root->head = new_leaf;
-					new_leaf->next = old_head;
-					new_node->leaf = new_leaf;
-				}
-				LeafFillSpecificSlot(
-					new_node.get(), hash,
-					std::string(key.data(), key.size()),
-					std::string(value.data(), value.size()), 0);
-			});
-			tree_top = move(new_node);
-		} else if (LeafFillSlotForKey(leafnode, hash,
-					      std::string(key.data(), key.size()),
-					      std::string(value.data(), value.size()))) {
-			// nothing else to do
-		} else {
-			// XXX - do not create temporary string
-			LeafSplitFull(leafnode, hash, std::string(key.data(), key.size()),
-				      std::string(value.data(), value.size()));
-		}
-		return status::OK;
-	} catch (std::bad_alloc e) {
-		ERR() << "Put failed due to exception, " << e.what();
-		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
-		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
-		return status::FAILED;
-	} catch (pmem::transaction_error e) {
-		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
-		return status::FAILED;
+		LeafSplitFull(leafnode, hash, std::string(key.data(), key.size()),
+			      std::string(value.data(), value.size()));
 	}
+	return status::OK;
 }
 
 status tree3::remove(string_view key)
@@ -245,34 +233,24 @@ status tree3::remove(string_view key)
 		LOG("   head not present");
 		return status::NOT_FOUND;
 	}
-	try {
-		const auto hash = PearsonHash(key.data(), key.size());
-		for (int slot = LEAF_KEYS; slot--;) {
-			if (leafnode->hashes[slot] == hash) {
-				if (leafnode->keys[slot].compare(
-					    std::string(key.data(), key.size())) == 0) {
-					LOG("   freeing slot=" << slot);
-					leafnode->hashes[slot] = 0;
-					leafnode->keys[slot].clear();
-					auto leaf = leafnode->leaf;
-					transaction::run(pmpool, [&] {
-						leaf->slots[slot].get_rw().clear();
-					});
-					return status::OK; // no duplicate keys allowed
-				}
+
+	const auto hash = PearsonHash(key.data(), key.size());
+	for (int slot = LEAF_KEYS; slot--;) {
+		if (leafnode->hashes[slot] == hash) {
+			if (leafnode->keys[slot].compare(
+				    std::string(key.data(), key.size())) == 0) {
+				LOG("   freeing slot=" << slot);
+				leafnode->hashes[slot] = 0;
+				leafnode->keys[slot].clear();
+				auto leaf = leafnode->leaf;
+				transaction::run(pmpool, [&] {
+					leaf->slots[slot].get_rw().clear();
+				});
+				return status::OK; // no duplicate keys allowed
 			}
 		}
-		return status::NOT_FOUND;
-	} catch (std::bad_alloc e) {
-		ERR() << "Put failed due to exception, " << e.what();
-		return status::FAILED;
-	} catch (pmem::transaction_alloc_error e) {
-		ERR() << "Put failed due to pmem::transaction_alloc_error, " << e.what();
-		return status::FAILED;
-	} catch (pmem::transaction_error e) {
-		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
-		return status::FAILED;
 	}
+	return status::NOT_FOUND;
 }
 
 // ===============================================================================================
