@@ -103,6 +103,9 @@ static inline int catch_and_return_status(const char *func_name, Function &&f)
 	} catch (pmem::kv::internal::error &e) {
 		out_err_stream(func_name) << e.what();
 		return e.status_code;
+	} catch (std::bad_alloc &e) {
+		out_err_stream(func_name) << e.what();
+		return PMEMKV_STATUS_OUT_OF_MEMORY;
 	} catch (std::runtime_error &e) {
 		out_err_stream(func_name) << e.what();
 		return PMEMKV_STATUS_FAILED;

@@ -210,6 +210,7 @@ Each function, except for *pmemkv_close()* and *pmemkv_errormsg()* returns one o
 + **PMEMKV_STATUS_CONFIG_PARSING_ERROR** -- parsing data to config failed
 + **PMEMKV_STATUS_CONFIG_TYPE_ERROR** -- element has different type than expected
 + **PMEMKV_STATUS_STOPPED_BY_CB** -- iteration was stopped by user callback
++ **PMEMKV_STATUS_OUT_OF_MEMORY** -- operation failed because there is not enough memory (or space on the device)
 
 # EXAMPLE #
 
