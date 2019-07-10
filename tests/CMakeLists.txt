@@ -119,8 +119,12 @@ set(TEST_FILES
 	mock_tx_alloc.cc
 	engines/blackhole_test.cc
 	config/config.cc
-	config/json_to_config.cc
 )
+
+if(ENABLE_CONFIG_FROM_JSON)
+	list(APPEND TEST_FILES config/json_to_config.cc)
+endif()
+
 # add each engine's tests source files separately
 if(ENGINE_VSMAP)
 	list(APPEND TEST_FILES engines/vsmap_test.cc)
@@ -183,8 +187,11 @@ set(memcheck_tests
 	CMapTest
 	VCMapTest
 	VSMapTest
-	ConfigTest
-	JsonToConfigTest)
+	ConfigTest)
+
+if(ENABLE_CONFIG_FROM_JSON)
+	list(APPEND memcheck_tests JsonToConfigTest)
+endif()
 
 # set groups of tests to be run with Valgrind's helgrind and drd tools
 set(helgrind_drd_tests
