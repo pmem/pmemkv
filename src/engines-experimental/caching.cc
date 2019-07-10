@@ -84,6 +84,9 @@ caching::caching(std::unique_ptr<internal::config> cfg)
 		throw internal::invalid_argument(
 			"Config does not contain item with key: \"subengine_config\"");
 
+	/* Remove item to pass ownership of it to subengine */
+	config.remove("subengine_config");
+
 	if (!(basePtr = new db))
 		throw std::runtime_error(
 			"caching Exception"); // todo propagate start exceptions properly
