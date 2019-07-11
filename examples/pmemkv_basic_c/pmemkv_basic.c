@@ -32,7 +32,6 @@
 
 /*
  * pmemkv_basic.c -- example usage of pmemkv.
- * In case of any modification, change top-level README file as well.
  */
 
 #include <assert.h>
@@ -61,7 +60,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	LOG("Creating config");
+	LOG("Creating config, see libpmemkv_config(3) for more detailed example");
 	pmemkv_config *cfg = pmemkv_config_new();
 	assert(cfg != NULL);
 
@@ -72,7 +71,7 @@ int main(int argc, char *argv[])
 	s = pmemkv_config_put_uint64(cfg, "force_create", 1);
 	assert(s == PMEMKV_STATUS_OK);
 
-	LOG("Starting engine");
+	LOG("Opening pmemkv databse with 'cmap' engine");
 	pmemkv_db *db = NULL;
 	s = pmemkv_open("cmap", cfg, &db);
 	assert(s == PMEMKV_STATUS_OK);
@@ -109,7 +108,7 @@ int main(int argc, char *argv[])
 	assert(s == PMEMKV_STATUS_OK);
 	assert(pmemkv_exists(db, key1, strlen(key1)) == PMEMKV_STATUS_NOT_FOUND);
 
-	LOG("Stopping engine");
+	LOG("Closing database");
 	pmemkv_close(db);
 
 	return 0;
