@@ -1,4 +1,12 @@
 coverage:
   ignore:
+    - doc/
+    - examples/
     - utils/
+    - src/valgrind/
     - tests/
+
+comment:
+  layout: "diff, files"
+  behavior: default
+  require_changes: yes
