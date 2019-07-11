@@ -32,7 +32,6 @@
 
 /*
  * pmemkv_basic.cpp -- example usage of pmemkv.
- * In case of any modification, change top-level README file as well.
  */
 
 #include <cassert>
@@ -53,6 +52,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	/* See libpmemkv_config(3) for more detailed example of config creation */
 	LOG("Creating config");
 	pmemkv_config *cfg = pmemkv_config_new();
 	assert(cfg != nullptr);
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 	ret = pmemkv_config_put_uint64(cfg, "force_create", 1);
 	assert(ret == PMEMKV_STATUS_OK);
 
-	LOG("Starting engine");
+	LOG("Opening pmemkv database with 'cmap' engine");
 	db *kv = new db();
 	assert(kv != nullptr);
 	status s = kv->open("cmap", cfg);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 	s = kv->exists("key1");
 	assert(s == status::NOT_FOUND);
 
-	LOG("Stopping engine");
+	LOG("Closing database");
 	delete kv;
 
 	return 0;
