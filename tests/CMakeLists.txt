@@ -158,18 +158,25 @@ else()
 	include(gtest)
 endif()
 
-include(get_tests.cmake)
-
+include(GoogleTest)
 add_executable(pmemkv_test ${TEST_FILES})
+
+set(test_suffixes
+	memcheck
+	pmemcheck
+	helgrind
+	drd)
+
+gtest_discover_tests(pmemkv_test)
+foreach(suffix IN ITEMS ${test_suffixes})
+	gtest_discover_tests(pmemkv_test TEST_SUFFIX -${suffix})
+endforeach(suffix)
 
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
 if(ENGINE_CACHING)
 	target_link_libraries(pmemkv_test memcached)
 	target_link_libraries(pmemkv_test acl_cpp protocol acl)
 endif()
-
-# parse tests source files to get the list of all tests
-get_tests(${CMAKE_CURRENT_SOURCE_DIR} "${TEST_FILES}" list_all_tests)
 
 # save lists of source files and all tests in files to check them in the first test
 set(FILE_TEST_FILES ${CMAKE_CURRENT_BINARY_DIR}/test_files.txt)
