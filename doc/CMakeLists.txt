@@ -32,6 +32,15 @@
 add_check_whitespace(man
 	${CMAKE_CURRENT_SOURCE_DIR}/*.md)
 
+# prepare c example content to inject
+file(READ ${CMAKE_SOURCE_DIR}/examples/pmemkv_basic_c/pmemkv_basic.c example_content)
+string(REGEX REPLACE "[/]+[*]*.*[*]*[/]+" "" example_content "${example_content}")
+string(REGEX REPLACE "^[ \t\r\n]+|[ \t\r\n]+$" "" example_content "${example_content}")
+set(C_EXAMPLE "${example_content}")
+configure_file(${CMAKE_SOURCE_DIR}/doc/libpmemkv.3.md.in
+	${CMAKE_BINARY_DIR}/man/tmp/libpmemkv.3.md)
+
+# convert md files to manpage format
 add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/libpmemkv.7
 	MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/doc/libpmemkv.7.md
 	COMMAND ${CMAKE_SOURCE_DIR}/utils/md2man/md2man.sh
@@ -39,9 +48,9 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/libpmemkv.7
 		${CMAKE_SOURCE_DIR}/utils/md2man/default.man
 		${CMAKE_BINARY_DIR}/man/libpmemkv.7)
 add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/libpmemkv.3
-	MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/doc/libpmemkv.3.md
+	MAIN_DEPENDENCY ${CMAKE_BINARY_DIR}/man/tmp/libpmemkv.3.md
 	COMMAND ${CMAKE_SOURCE_DIR}/utils/md2man/md2man.sh
-		${CMAKE_SOURCE_DIR}/doc/libpmemkv.3.md
+		${CMAKE_BINARY_DIR}/man/tmp/libpmemkv.3.md
 		${CMAKE_SOURCE_DIR}/utils/md2man/default.man
 		${CMAKE_BINARY_DIR}/man/libpmemkv.3)
 add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/libpmemkv_config.3
@@ -56,6 +65,7 @@ add_custom_target(docs ALL
 	DEPENDS ${CMAKE_BINARY_DIR}/man/libpmemkv.3
 	DEPENDS ${CMAKE_BINARY_DIR}/man/libpmemkv_config.3)
 
+# install manpages
 install(FILES ${CMAKE_BINARY_DIR}/man/libpmemkv.7
 	DESTINATION ${CMAKE_INSTALL_MANDIR}/man7)
 install(FILES ${CMAKE_BINARY_DIR}/man/libpmemkv.3
