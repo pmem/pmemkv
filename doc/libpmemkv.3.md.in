@@ -214,77 +214,7 @@ Each function, except for *pmemkv_close()* and *pmemkv_errormsg()* returns one o
 # EXAMPLE #
 
 ```c
-#include <assert.h>
-#include <libpmemkv.h>
-#include <stdio.h>
-#include <string.h>
-
-#define MAX_VAL_LEN 64
-
-const char *PATH = "/dev/shm";
-const uint64_t SIZE = 1024UL * 1024UL * 1024UL;
-
-int get_kv_callback(const char *k, size_t kb, const char *value, size_t value_bytes,
-		     void *arg)
-{
-	printf("   visited: %s\n", k);
-
-	return 0;
-}
-
-int main()
-{
-	/* Creating config see libpmemkv_config(3).md for more detailed example */
-	pmemkv_config *cfg = pmemkv_config_new();
-	assert(cfg != NULL);
-
-	int s = pmemkv_config_put_string(cfg, "path", PATH);
-	assert(s == PMEMKV_STATUS_OK);
-	s = pmemkv_config_put_uint64(cfg, "size", SIZE);
-	assert(s == PMEMKV_STATUS_OK);
-
-	/* Opening pmemkv databse with 'vsmap' engine */
-	pmemkv_db *db = NULL;
-	s = pmemkv_open("vsmap", cfg, &db);
-	assert(s == PMEMKV_STATUS_OK);
-	assert(db != NULL);
-
-	/* Putting new key */
-	const char *key1 = "key1";
-	const char *value1 = "value1";
-	s = pmemkv_put(db, key1, strlen(key1), value1, strlen(value1));
-	assert(s == PMEMKV_STATUS_OK);
-
-	size_t cnt;
-	s = pmemkv_count_all(db, &cnt);
-	assert(s == PMEMKV_STATUS_OK);
-	assert(cnt == 1);
-
-	/* Reading key back */
-	char val[MAX_VAL_LEN];
-	s = pmemkv_get_copy(db, key1, strlen(key1), val, MAX_VAL_LEN, NULL);
-	assert(s == PMEMKV_STATUS_OK);
-	assert(!strcmp(val, "value1"));
-
-	/* Iterating existing keys */
-	const char *key2 = "key2";
-	const char *value2 = "value2";
-	const char *key3 = "key3";
-	const char *value3 = "value3";
-	pmemkv_put(db, key2, strlen(key2), value2, strlen(value2));
-	pmemkv_put(db, key3, strlen(key3), value3, strlen(value3));
-	pmemkv_get_all(db, &get_kv_callback, NULL);
-
-	/* Removing existing key */
-	s = pmemkv_remove(db, key1, strlen(key1));
-	assert(s == PMEMKV_STATUS_OK);
-	assert(pmemkv_exists(db, key1, strlen(key1)) == PMEMKV_STATUS_NOT_FOUND);
-
-	/* Closing database */
-	pmemkv_close(db);
-
-	return 0;
-}
+@C_EXAMPLE@
 ```
 
 # SEE ALSO #
