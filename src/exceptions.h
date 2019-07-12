@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2019, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,58 +30,57 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef LIBPMEMKV_EXCEPTIONS_H
+#define LIBPMEMKV_EXCEPTIONS_H
 
-#include "../engine.h"
+#include <stdexcept>
+
+#include "libpmemkv.h"
 
 namespace pmem
 {
 namespace kv
 {
+namespace internal
+{
 
-class db;
-
-static int64_t ttl; // todo move into private field
-
-class caching : public engine_base {
-public:
-	caching(std::unique_ptr<internal::config> cfg);
-	~caching();
-
-	std::string name() final;
-
-	status count_all(std::size_t &cnt) final;
-
-	status get_all(get_kv_callback *callback, void *arg) final;
-
-	status exists(string_view key) final;
-
-	status get(string_view key, get_v_callback *callback, void *arg) final;
-
-	status put(string_view key, string_view value) final;
-
-	status remove(string_view key) final;
-
-private:
-	void getString(internal::config &cfg, const char *key, std::string &str);
-	bool getFromRemoteRedis(const std::string &key, std::string &value);
-	bool getFromRemoteMemcached(const std::string &key, std::string &value);
-	bool getKey(const std::string &key, std::string &valueField, bool api_flag);
-
-	db *basePtr;
-
-	int64_t attempts;
-	std::string host;
-	int64_t port;
-	std::string remoteType;
-	std::string remoteUser;
-	std::string remotePasswd;
-	std::string remoteUrl;
+struct error : std::runtime_error {
+	error(const std::string &msg, int status_code = PMEMKV_STATUS_FAILED)
+	    : std::runtime_error(msg), status_code(status_code)
+	{
+	}
+	int status_code;
 };
 
-time_t convertTimeToEpoch(const char *theTime, const char *format = "%Y%m%d%H%M%S");
-std::string getTimeStamp(time_t epochTime, const char *format = "%Y%m%d%H%M%S");
-bool valueFieldConversion(std::string dateValue);
+struct not_supported : error {
+	not_supported(const std::string &msg) : error(msg, PMEMKV_STATUS_NOT_SUPPORTED)
+	{
+	}
+};
 
+struct invalid_argument : error {
+	invalid_argument(const std::string &msg)
+	    : error(msg, PMEMKV_STATUS_INVALID_ARGUMENT)
+	{
+	}
+};
+
+struct config_parsing_error : error {
+	config_parsing_error(const std::string &msg)
+	    : error(msg, PMEMKV_STATUS_CONFIG_PARSING_ERROR)
+	{
+	}
+};
+
+struct config_type_error : error {
+	config_type_error(const std::string &msg)
+	    : error(msg, PMEMKV_STATUS_CONFIG_TYPE_ERROR)
+	{
+	}
+};
+
+} /* namespace internal */
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif /* LIBPMEMKV_EXCEPTIONS_H */
