@@ -88,12 +88,13 @@ TBB and libpmemobj-cpp packages are required.
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
 * **path** -- Path to the database file
-    + type: string
-* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creats it
-    + type: uint64_t
-    + default value: 0
-* **size** --  Only needed when force_create is not 0, specifies size of the database
-    + type: uint64_t
+	+ type: string
+* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it
+	+ type: uint64_t
+	+ default value: 0
+* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+	+ type: uint64_t
+	+ min value: 8388608 (8MB)
 
 ## vcmap
 
@@ -105,9 +106,10 @@ Memkind, TBB and libpmemobj-cpp packages are required.
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
 * **path** -- Path to the database file
-    + type: string
-* **size** --  Specifies size of the database
-    + type: uint64_t
+	+ type: string
+* **size** --  Specifies size of the database [in bytes]
+	+ type: uint64_t
+	+ min value: 8388608 (8MB)
 
 ## vsmap
 
@@ -119,9 +121,10 @@ Memkind and libpmemobj-cpp packages are required.
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
 * **path** -- Path to the database file
-    + type: string
-* **size** --  Specifies size of the database
-    + type: uint64_t
+	+ type: string
+* **size** --  Specifies size of the database [in bytes]
+	+ type: uint64_t
+	+ min value: 8388608 (8MB)
 
 ## blackhole
 
