@@ -3,19 +3,20 @@
 <ul>
 <li><a href="#blackhole">blackhole</a></li>
 <li><a href="#cmap">cmap</a></li>
-<li><a href="#vsmap">vsmap</a></li>
 <li><a href="#vcmap">vcmap</a></li>
+<li><a href="#vsmap">vsmap</a></li>
 <li><a href="#tree3">tree3</a></li>
 <li><a href="#stree">stree</a></li>
 <li><a href="#caching">caching</a></li>
 </ul>
+
 
 <a name="blackhole"></a>
 
 blackhole
 ---------
 
-A volatile concurrent engine that accepts an unlimited amount of data, but never returns anything.
+A volatile engine that accepts an unlimited amount of data, but never returns anything.
 It is always enabled (no CMake option is specified to enable/disable this engine).
 
 * `put` and `remove` always returns `status::OK`
@@ -26,11 +27,11 @@ It is always enabled (no CMake option is specified to enable/disable this engine
 
 ### Configuration
 
-No required configuration parameters.  JSON configuration is never parsed.
+No required configuration parameters.
 
 ### Internals
 
-Internally, `blackhole` does not use a persistent pool or any durable structures. The intended
+Internally, `blackhole` does not use a persistent pool or any durable structure. The intended
 use of this engine is to profile and tune high-level bindings, and similar cases when persistence
 should be intentionally skipped.
 
@@ -38,45 +39,74 @@ should be intentionally skipped.
 
 No additional packages are required.
 
+
 <a name="cmap"></a>
 
 cmap
 -----
 
-A persistent concurrent engine, backed by a hashmap.
+A persistent concurrent engine, backed by a hashmap that allows calling get, put, and remove
+concurrently from multiple threads. Data stored using this engine is persistent and guaranteed
+to be consistent in case of any kind of interruption (crash / power loss / etc).
 It is enabled by default. It can be disabled in CMake using the `ENGINE_CMAP` option.
 
 ### Configuration
 
-Configuration must specify a `path` to a PMDK persistent pool, which can be a file (on a DAX filesystem),
-a DAX device, or a PMDK poolset file.
+Configuration must specify a `path` to a PMDK persistent pool, which can be a file (on a DAX filesystem)
+or a DAX device.
 
-```
-{ "path" : "my-pool" }
-```
-
-Configuration may optionally specify a `size` in bytes.
-If omitted the default value of 1073741824 bytes (1GB) is applied.
-This value cannot be smaller than 8388608 (8MB).
-
-```
-{ "path" : "my-pool", "size" : 1073741824 }
-```
+* **path** -- Path to the database file
+	+ type: string
+* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it
+	+ type: uint64_t
+	+ default value: 0
+* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+	+ type: uint64_t
+	+ min value: 8388608 (8MB)
 
 ### Internals
 
-Internally the engine uses persistent concurrent hash map and persistent string from [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) library. Persistent string is used as a type of a key and a value.
+Internally the engine uses persistent concurrent hashmap and persistent string from [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) library. Persistent string is used as a type of a key and a value.
 
 ### Prerequisites
 
 TBB and libpmemobj-cpp packages are required.
+
+
+<a name="vcmap"></a>
+
+vcmap
+-----
+
+A volatile concurrent engine, backed by memkind. Data written using this engine is lost after database is closed.
+It is enabled by default. It can be disabled in CMake using the `ENGINE_VCMAP` option.
+
+### Configuration
+
+Configuration must specify a `path` to a PMDK persistent pool, which can be a file (on a DAX filesystem)
+or a DAX device.
+
+* **path** -- Path to the database file
+	+ type: string
+* **size** --  Specifies size of the database [in bytes]
+	+ type: uint64_t
+	+ min value: 8388608 (8MB)
+
+### Internals
+
+The engine is built on top of [tbb::concurrent_hash_map](https://www.threadingbuildingblocks.org/docs/help/reference/containers_overview/concurrent_hash_map_cls.html) data structure and uses [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) to allocate memory. The [std::basic_string](https://en.cppreference.com/w/cpp/string/basic_string) with [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) is used as a type of a key and a value.
+
+### Prerequisites
+
+Memkind, TBB and libpmemobj-cpp packages are required.
+
 
 <a name="vsmap"></a>
 
 vsmap
 -----
 
-A volatile single-threaded sorted engine, backed by memkind.
+A volatile single-threaded sorted engine, backed by memkind. Data written using this engine is lost after database is closed.
 It is enabled by default. It can be disabled in CMake using the `ENGINE_VSMAP` option.
 
 ### Configuration
@@ -84,45 +114,20 @@ It is enabled by default. It can be disabled in CMake using the `ENGINE_VSMAP` o
 Configuration must specify a `path` to a local directory where temporary files will be created.
 For best performance this directory should reside on a DAX-enabled filesystem.
 
-```
-{ "path" : "my-directory" }
-```
-
-Configuration may optionally specify a `size` in bytes.
-If omitted the default value of 1073741824 bytes (1GB) is applied.
-This value cannot be smaller than 8388608 (8MB).
-
-```
-{ "path" : "my-directory", "size" : 1073741824 }
-```
+* **path** -- Path to the database file
+	+ type: string
+* **size** --  Specifies size of the database [in bytes]
+	+ type: uint64_t
+	+ min value: 8388608 (8MB)
 
 ### Internals
 
-The engine is built on top of [std::map](https://en.cppreference.com/w/cpp/container/map). The map uses [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) to allocate memory. The [std::basic_string](https://en.cppreference.com/w/cpp/string/basic_string) with [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) is used as a type of a key and a value.
+The engine is built on top of [std::map](https://en.cppreference.com/w/cpp/container/map) and uses [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) to allocate memory. [std::basic_string](https://en.cppreference.com/w/cpp/string/basic_string) with [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) is used as a type of a key and a value.
 
 ### Prerequisites
 
 Memkind and libpmemobj-cpp packages are required.
 
-<a name="vcmap"></a>
-
-vcmap
------
-
-A volatile concurrent engine, backed by memkind.
-It is enabled by default. It can be disabled in CMake using the `ENGINE_VCMAP` option.
-
-### Configuration
-
-(same as the `vsmap` engine)
-
-### Internals
-
-The engine is built on top of [tbb::concurrent_hash_map](https://www.threadingbuildingblocks.org/docs/help/reference/containers_overview/concurrent_hash_map_cls.html) data structure. The hash map uses [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) to allocate memory. The [std::basic_string](https://en.cppreference.com/w/cpp/string/basic_string) with [PMEM C++ allocator](https://github.com/memkind/memkind/blob/master/include/pmem_allocator.h) is used as a type of a key and a value.
-
-### Prerequisites
-
-Memkind, TBB and libpmemobj-cpp packages are required.
 
 <a name="tree3"></a>
 
@@ -137,17 +142,14 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_TREE3` o
 Configuration must specify a `path` to a PMDK persistent pool, which can be a file (on a DAX filesystem),
 a DAX device, or a PMDK poolset file.
 
-```
-{ "path" : "my-pool" }
-```
-
-Configuration may optionally specify a `size` in bytes.
-If omitted the default value of 1073741824 bytes (1GB) is applied.
-This value cannot be smaller than 8388608 (8MB).
-
-```
-{ "path" : "my-pool", "size" : 1073741824 }
-```
+* **path** -- Path to the database file
+	+ type: string
+* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it
+	+ type: uint64_t
+	+ default value: 0
+* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+	+ type: uint64_t
+	+ min value: 8388608 (8MB)
 
 ### Internals
 
@@ -168,17 +170,24 @@ a given key. Leaf modifications are accelerated using
 
 Libpmemobj-cpp package is required.
 
+
 <a name="stree"></a>
 
 stree
 ---------
 
-(TBD)
+A persistent, single-threaded and sorted engine, backed by a B+ tree.
 It is disabled by default. It can be enabled in CMake using the `ENGINE_STREE` option.
 
 ### Configuration
 
-(TBD)
+* **path** -- Path to the database file
+	+ type: string
+* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it
+	+ type: uint64_t
+	+ default value: 0
+* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+	+ type: uint64_t
 
 ### Internals
 
@@ -188,17 +197,38 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_STREE` o
 
 Libpmemobj-cpp package is required.
 
+
 <a name="caching"></a>
 
 caching
 ---------
 
-(TBD)
+This engine is using a sub engine from the list above to cache requests to external Redis or Memcached server.
 It is disabled by default. It can be enabled in CMake using the `ENGINE_CACHING` option.
 
 ### Configuration
 
-(TBD)
+Caching engine itself requires server connection settings. Part of the config required for the sub engine should be relevant to chosen engine.
+
+* **host** -- Server's IP
+	+ type: string
+* **port** -- Server's port
+	+ type: int64_t
+* **attempts** -- Number of connection attempts
+	+ type: int64_t
+* **ttl** -- Time to live [in seconds]
+	+ type: int64_t
+	+ default value: 0
+* **remote_type** -- Server's type (Redis or Memcached)
+	+ type: string
+* **remote_user** -- Connection's user
+	+ type: string
+* **remote_pwd** -- User's password
+	+ type: string
+* **remote_url** -- Remote (server's) URL
+	+ type: string
+* **subengine** -- Config object for sub engine with its required settings
+	+ type: object
 
 ### Internals
 
@@ -206,7 +236,9 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_CACHING`
 
 ### Prerequisites
 
-Memcached, libacl (<a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental">see here for installation guide</a>) and libpmemobj-cpp packages required.
+Memcached and libacl (<a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental">see here for installation guide</a>)
+packages are required.
+
 
 ### Related Work
 ---------
