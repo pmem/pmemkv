@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2019, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,59 +30,58 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef LIBPMEMKV_PMEMOBJ_ENGINE_H
+#define LIBPMEMKV_PMEMOBJ_ENGINE_H
 
-#include "../pmemobj_engine.h"
-#include "stree/persistent_b_tree.h"
-#include "stree/pstring.h"
+#include <iostream>
+#include <unistd.h>
 
-using pmem::obj::persistent_ptr;
-using pmem::obj::pool;
+#include "engine.h"
+#include <libpmemobj++/pool.hpp>
 
 namespace pmem
 {
 namespace kv
 {
-namespace internal
-{
-namespace stree
-{
 
-const size_t DEGREE = 64;
-const size_t MAX_KEY_SIZE = 20;
-const size_t MAX_VALUE_SIZE = 200;
-
-typedef persistent::b_tree<pstring<MAX_KEY_SIZE>, pstring<MAX_VALUE_SIZE>, DEGREE>
-	btree_type;
-
-} /* namespace stree */
-} /* namespace internal */
-
-class stree : public pmemobj_engine_base<internal::stree::btree_type> {
+template <typename EngineData>
+class pmemobj_engine_base : public engine_base {
 public:
-	stree(std::unique_ptr<internal::config> cfg);
-	~stree();
+	pmemobj_engine_base(std::unique_ptr<internal::config> &cfg)
+	{
+		const char *path;
+		std::size_t size;
 
-	std::string name() final;
+		if (!cfg->get_string("path", &path))
+			throw internal::invalid_argument(
+				"Config does not contain item with key: \"path\"");
 
-	status count_all(std::size_t &cnt) final;
+		uint64_t force_create;
+		if (!cfg->get_uint64("force_create", &force_create)) {
+			force_create = 0;
+		}
 
-	status get_all(get_kv_callback *callback, void *arg) final;
+		if (force_create) {
+			if (!cfg->get_uint64("size", &size))
+				throw internal::invalid_argument(
+					"Config does not contain item with key: \"size\"");
 
-	status exists(string_view key) final;
+			pmpool = pmem::obj::pool<Root>::create(path, LAYOUT, size,
+							       S_IRWXU);
+		} else {
+			pmpool = pmem::obj::pool<Root>::open(path, LAYOUT);
+		}
+	}
 
-	status get(string_view key, get_v_callback *callback, void *arg) final;
+protected:
+	struct Root {
+		pmem::obj::persistent_ptr<EngineData> ptr;
+	};
 
-	status put(string_view key, string_view value) final;
-
-	status remove(string_view key) final;
-
-private:
-	stree(const stree &);
-	void operator=(const stree &);
-	void Recover();
-	internal::stree::btree_type *my_btree;
+	pmem::obj::pool<Root> pmpool;
 };
 
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif /* LIBPMEMKV_PMEMOBJ_ENGINE_H */
