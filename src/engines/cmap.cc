@@ -138,22 +138,15 @@ status cmap::put(string_view key, string_view value)
 {
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
-	try {
-		map_t::accessor acc;
-		// XXX - do not create temporary string
-		bool result = container->insert(
-			acc, map_t::value_type(string_t(key), string_t(value)));
-		if (!result) {
-			pmem::obj::transaction::manual tx(pmpool);
-			acc->second = value;
-			pmem::obj::transaction::commit();
-		}
-	} catch (std::bad_alloc e) {
-		ERR() << "Put failed due to exception, " << e.what();
-		return status::FAILED;
-	} catch (pmem::transaction_error e) {
-		ERR() << "Put failed due to pmem::transaction_error, " << e.what();
-		return status::FAILED;
+
+	map_t::accessor acc;
+	// XXX - do not create temporary string
+	bool result =
+		container->insert(acc, map_t::value_type(string_t(key), string_t(value)));
+	if (!result) {
+		pmem::obj::transaction::manual tx(pmpool);
+		acc->second = value;
+		pmem::obj::transaction::commit();
 	}
 
 	return status::OK;
@@ -162,13 +155,9 @@ status cmap::put(string_view key, string_view value)
 status cmap::remove(string_view key)
 {
 	LOG("remove key=" << std::string(key.data(), key.size()));
-	try {
-		bool erased = container->erase(key);
-		return erased ? status::OK : status::NOT_FOUND;
-	} catch (std::runtime_error e) {
-		ERR() << "Remove failed due to exception, " << e.what();
-		return status::FAILED;
-	}
+
+	bool erased = container->erase(key);
+	return erased ? status::OK : status::NOT_FOUND;
 }
 
 void cmap::Recover()
