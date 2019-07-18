@@ -640,8 +640,8 @@ TEST_F(STreeTest, RemoveNonexistentAfterRecoveryTest)
 // TEST TREE WITH SINGLE INNER NODE
 // =============================================================================================
 
-const size_t INNER_ENTRIES = DEGREE - 1;
-const size_t LEAF_ENTRIES = DEGREE - 1;
+const size_t INNER_ENTRIES = internal::stree::DEGREE - 1;
+const size_t LEAF_ENTRIES = internal::stree::DEGREE - 1;
 const size_t SINGLE_INNER_LIMIT = LEAF_ENTRIES * (INNER_ENTRIES - 1);
 
 TEST_F(STreeTest, SingleInnerNodeAscendingTest)

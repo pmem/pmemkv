@@ -47,36 +47,9 @@ namespace pmem
 namespace kv
 {
 
-cmap::cmap(std::unique_ptr<internal::config> cfg)
+cmap::cmap(std::unique_ptr<internal::config> cfg) : pmemobj_engine_base(cfg)
 {
-	const char *path;
-	std::size_t size;
-
-	if (!cfg->get_string("path", &path))
-		throw internal::invalid_argument(
-			"Config does not contain item with key: \"path\"");
-
-	uint64_t force_create;
-	if (!cfg->get_uint64("force_create", &force_create)) {
-		LOG("Using default force_create = 0");
-		force_create = 0;
-	}
-
-	if (force_create) {
-		if (!cfg->get_uint64("size", &size))
-			throw internal::invalid_argument(
-				"Config does not contain item with key: \"size\"");
-
-		LOG("Creating filesystem pool, path=" << path << ", size="
-						      << std::to_string(size));
-		pmpool = pool_t::create(path, LAYOUT, size, S_IRWXU);
-	} else {
-		LOG("Opening pool, path=" << path);
-		pmpool = pool_t::open(path, LAYOUT);
-	}
-
 	LOG("Started ok");
-
 	Recover();
 }
 
@@ -123,7 +96,7 @@ status cmap::exists(string_view key)
 status cmap::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("get key=" << std::string(key.data(), key.size()));
-	map_t::const_accessor result;
+	internal::cmap::map_t::const_accessor result;
 	bool found = container->find(result, key);
 	if (!found) {
 		LOG("  key not found");
@@ -139,10 +112,12 @@ status cmap::put(string_view key, string_view value)
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 
-	map_t::accessor acc;
+	internal::cmap::map_t::accessor acc;
 	// XXX - do not create temporary string
-	bool result =
-		container->insert(acc, map_t::value_type(string_t(key), string_t(value)));
+	bool result = container->insert(
+		acc,
+		internal::cmap::map_t::value_type(internal::cmap::string_t(key),
+						  internal::cmap::string_t(value)));
 	if (!result) {
 		pmem::obj::transaction::manual tx(pmpool);
 		acc->second = value;
@@ -163,14 +138,14 @@ status cmap::remove(string_view key)
 void cmap::Recover()
 {
 	auto root_data = pmpool.root();
-	if (root_data->map_ptr) {
-		container = root_data->map_ptr.get();
+	if (root_data->ptr) {
+		container = root_data->ptr.get();
 		container->initialize();
 	} else {
 		pmem::obj::transaction::manual tx(pmpool);
-		root_data->map_ptr = pmem::obj::make_persistent<map_t>();
+		root_data->ptr = pmem::obj::make_persistent<internal::cmap::map_t>();
 		pmem::obj::transaction::commit();
-		container = root_data->map_ptr.get();
+		container = root_data->ptr.get();
 		container->initialize(true);
 	}
 }
