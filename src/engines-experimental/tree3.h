@@ -32,16 +32,15 @@
 
 #pragma once
 
+#include "../pmemobj_engine.h"
+
 #include <libpmemobj++/make_persistent.hpp>
 #include <libpmemobj++/make_persistent_array.hpp>
 #include <libpmemobj++/p.hpp>
 #include <libpmemobj++/persistent_ptr.hpp>
-#include <libpmemobj++/pool.hpp>
 #include <libpmemobj++/transaction.hpp>
 #include <memory>
 #include <vector>
-
-#include "../engine.h"
 
 using pmem::obj::delete_persistent;
 using pmem::obj::make_persistent;
@@ -56,6 +55,10 @@ using std::vector;
 namespace pmem
 {
 namespace kv
+{
+namespace internal
+{
+namespace tree3
 {
 
 #define INNER_KEYS 4				// maximum keys for inner nodes
@@ -172,10 +175,6 @@ struct KVLeaf {
 	persistent_ptr<KVLeaf> next; // next leaf in unsorted list
 };
 
-struct KVRoot {			     // persistent root object
-	persistent_ptr<KVLeaf> head; // head of linked list of leaves
-};
-
 struct KVInnerNode;
 
 struct KVNode {		      // volatile nodes of the tree
@@ -202,7 +201,11 @@ struct KVRecoveredLeaf {		 // temporary wrapper used for recovery
 	std::string max_key;		 // highest sorting key present
 };
 
-class tree3 : public engine_base { // hybrid B+ tree engine
+} /* namespace tree3 */
+} /* namespace internal */
+
+class tree3
+    : public pmemobj_engine_base<internal::tree3::KVLeaf> { // hybrid B+ tree engine
 public:
 	tree3(std::unique_ptr<internal::config> cfg);
 	~tree3();
@@ -222,27 +225,28 @@ public:
 	status remove(string_view key) final;
 
 protected:
-	KVLeafNode *LeafSearch(const std::string &key);
-	void LeafFillEmptySlot(KVLeafNode *leafnode, uint8_t hash, const std::string &key,
-			       const std::string &value);
-	bool LeafFillSlotForKey(KVLeafNode *leafnode, uint8_t hash,
+	internal::tree3::KVLeafNode *LeafSearch(const std::string &key);
+	void LeafFillEmptySlot(internal::tree3::KVLeafNode *leafnode, uint8_t hash,
+			       const std::string &key, const std::string &value);
+	bool LeafFillSlotForKey(internal::tree3::KVLeafNode *leafnode, uint8_t hash,
 				const std::string &key, const std::string &value);
-	void LeafFillSpecificSlot(KVLeafNode *leafnode, uint8_t hash,
+	void LeafFillSpecificSlot(internal::tree3::KVLeafNode *leafnode, uint8_t hash,
 				  const std::string &key, const std::string &value,
 				  int slot);
-	void LeafSplitFull(KVLeafNode *leafnode, uint8_t hash, const std::string &key,
-			   const std::string &value);
-	void InnerUpdateAfterSplit(KVNode *node, unique_ptr<KVNode> newnode,
+	void LeafSplitFull(internal::tree3::KVLeafNode *leafnode, uint8_t hash,
+			   const std::string &key, const std::string &value);
+	void InnerUpdateAfterSplit(internal::tree3::KVNode *node,
+				   unique_ptr<internal::tree3::KVNode> newnode,
 				   std::string *split_key);
 	uint8_t PearsonHash(const char *data, size_t size);
 	void Recover();
 
 private:
-	tree3(const tree3 &);				// prevent copying
-	void operator=(const tree3 &);			// prevent assigning
-	vector<persistent_ptr<KVLeaf>> leaves_prealloc; // persisted but unused leaves
-	pool<KVRoot> pmpool;				// pool for persistent root
-	unique_ptr<KVNode> tree_top;			// pointer to uppermost inner node
+	tree3(const tree3 &);	  // prevent copying
+	void operator=(const tree3 &); // prevent assigning
+	vector<persistent_ptr<internal::tree3::KVLeaf>>
+		leaves_prealloc;		      // persisted but unused leaves
+	unique_ptr<internal::tree3::KVNode> tree_top; // pointer to uppermost inner node
 };
 
 } /* namespace kv */

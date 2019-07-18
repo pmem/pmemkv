@@ -32,17 +32,20 @@
 
 #pragma once
 
-#include "../engine.h"
+#include "../pmemobj_engine.h"
 #include "../polymorphic_string.h"
 
 #include <libpmemobj++/persistent_ptr.hpp>
-#include <libpmemobj++/pool.hpp>
 #define LIBPMEMOBJ_CPP_USE_TBB_RW_MUTEX 1
 #include <libpmemobj++/experimental/concurrent_hash_map.hpp>
 
 namespace pmem
 {
 namespace kv
+{
+namespace internal
+{
+namespace cmap
 {
 
 class key_equal {
@@ -82,7 +85,14 @@ private:
 	}
 };
 
-class cmap : public engine_base {
+using string_t = pmem::kv::polymorphic_string;
+using map_t =
+	pmem::obj::experimental::concurrent_hash_map<string_t, string_t, string_hasher>;
+
+} /* namespace cmap */
+} /* namespace internal */
+
+class cmap : public pmemobj_engine_base<internal::cmap::map_t> {
 public:
 	cmap(std::unique_ptr<internal::config> cfg);
 	~cmap();
@@ -105,18 +115,8 @@ public:
 	status remove(string_view key) final;
 
 private:
-	using string_t = pmem::kv::polymorphic_string;
-	using map_t = pmem::obj::experimental::concurrent_hash_map<string_t, string_t,
-								   string_hasher>;
-
-	struct RootData {
-		pmem::obj::persistent_ptr<map_t> map_ptr;
-	};
-	using pool_t = pmem::obj::pool<RootData>;
-
 	void Recover();
-	pool_t pmpool;
-	map_t *container;
+	internal::cmap::map_t *container;
 };
 
 } /* namespace kv */
