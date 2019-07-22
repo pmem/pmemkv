@@ -1,2 +1,9 @@
-This directory contains examples for pmemkv, the library providing
-key-value datastore optimized for persistent memory.
+This directory contains C and C++ examples for pmemkv, the library
+providing key-value datastore optimized for persistent memory.
+For more information see libpmemkv(3).
+
+pmemkv_basic_c/pmemkv_basic.c -- contains basic example workflow
+		of C application
+
+pmemkv_basic_cpp/pmemkv_basic.cpp -- contains basic example workflow
+		of C++ application
