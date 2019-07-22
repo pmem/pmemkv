@@ -173,6 +173,8 @@ include(get_tests.cmake)
 add_executable(pmemkv_test ${TEST_FILES})
 
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
+# caching tests require lib_acl and memcached included, so we need to link
+# them to test binary itself
 if(ENGINE_CACHING)
 	target_link_libraries(pmemkv_test memcached)
 	target_link_libraries(pmemkv_test acl_cpp protocol acl)
