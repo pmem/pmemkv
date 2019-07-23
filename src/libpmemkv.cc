@@ -85,11 +85,6 @@ static inline pmem::kv::internal::config *config_to_internal(pmemkv_config *conf
 	return reinterpret_cast<pmem::kv::internal::config *>(config);
 }
 
-static inline pmemkv_db *db_from_internal(pmem::kv::engine_base *engine)
-{
-	return reinterpret_cast<pmemkv_db *>(engine);
-}
-
 static inline pmem::kv::engine_base *db_to_internal(pmemkv_db *db)
 {
 	return reinterpret_cast<pmem::kv::engine_base *>(db);
@@ -120,7 +115,7 @@ extern "C" {
 pmemkv_config *pmemkv_config_new(void)
 {
 	try {
-		return reinterpret_cast<pmemkv_config *>(new pmem::kv::internal::config);
+		return config_from_internal(new pmem::kv::internal::config);
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 		return nullptr;
@@ -133,7 +128,7 @@ pmemkv_config *pmemkv_config_new(void)
 void pmemkv_config_delete(pmemkv_config *config)
 {
 	try {
-		delete reinterpret_cast<pmem::kv::internal::config *>(config);
+		delete config_to_internal(config);
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 	} catch (...) {
