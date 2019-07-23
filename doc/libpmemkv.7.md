@@ -87,14 +87,24 @@ TBB and libpmemobj-cpp packages are required.
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
-* **path** -- Path to the database file
+* **path** -- Path to the database file.
 	+ type: string
-* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it
+* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it.
 	+ type: uint64_t
 	+ default value: 0
-* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes].
 	+ type: uint64_t
 	+ min value: 8388608 (8MB)
+* **oid** -- Pointer to oid (for details see **libpmemobj**(7)) which points to engine data. If oid is null, engine will allocate new data, otherwise it will use existing data.
+	+ type: object
+
+The following table shows three possible combinations of parameters (where '-' means 'cannot be set'):
+
+| **#** | **path** | **force_create** | **size** | **oid** |
+| ----- | -------- | ---------------- | -------- | ------- |
+| **1** | set | 0 | - | - |
+| **2** | set | 1 | set | - |
+| **3** | - | - | - | set |
 
 ## vcmap
 
@@ -137,6 +147,7 @@ No supported configuration parameters.
 ### Experimental engines
 
 There are also more engines in various states of development, for details see <https://github.com/pmem/pmemkv>.
+Two of them (tree3 and stree) requires the config parameters like cmap.
 
 # BINDINGS #
 
