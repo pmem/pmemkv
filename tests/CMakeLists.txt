@@ -209,8 +209,15 @@ foreach(test IN ITEMS ${list_all_tests})
 	endif()
 endforeach(test)
 
+
 build_example_pmemkv_basic_c()
 build_example_pmemkv_basic_cpp()
 
-test("run-binary" ex_pmemkv_basic_c ex_pmemkv_basic_c none)
-test("run-binary" ex_pmemkv_basic_cpp ex_pmemkv_basic_cpp none)
+if(ENGINE_CMAP)
+	test("run-binary" ex_pmemkv_basic_c ex_pmemkv_basic_c none)
+	test("run-binary" ex_pmemkv_basic_cpp ex_pmemkv_basic_cpp none)
+else()
+	message(WARNING
+		"Examples use cmap engine, which is disabled, hence their execution "
+		"is also disabled. If you want to run them use -DENGINE_CMAP=ON option.")
+endif()
