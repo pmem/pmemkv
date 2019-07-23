@@ -28,7 +28,23 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# FIXME hardcoded path is a VERY bad idea
-set(MEMCACHED_INCLUDE $ENV{HOME}/work/libmemcached)
+if(PKG_CONFIG_FOUND)
+	pkg_check_modules(MEMCACHED libmemcached)
+endif()
 
-include_directories(${MEMCACHED_INCLUDE})
+if(NOT MEMCACHED_FOUND)
+	# find_package without unsetting this var is not working correctly
+	unset(MEMCACHED_FOUND CACHE)
+	find_package(MEMCACHED COMPONENTS libmemcached)
+
+	if(MEMCACHED_FOUND)
+		set(MEMCACHED_INCLUDE_DIRS ${MEMCACHED_INCLUDE_DIR})
+		message(STATUS "memcached package found without pkg-config")
+	endif()
+endif()
+
+if(NOT MEMCACHED_FOUND)
+	message(FATAL_ERROR "memcached library not found")
+endif()
+
+include_directories(${MEMCACHED_INCLUDE_DIRS})

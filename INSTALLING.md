@@ -218,16 +218,10 @@ you need to follow these instructions:
 First build and install `pmemkv` as described above. Then, install client libraries for Memcached:
 
 ```sh
-cd ~
-mkdir work
-cd work
-wget https://launchpad.net/libmemcached/1.0/0.21/+download/libmemcached-0.21.tar.gz
-tar -xvf libmemcached-0.21.tar.gz
-mv libmemcached-0.21 libmemcached
-cd libmemcached
-./configure
-make
-su -c 'make install'
+# on Fedora:
+sudo dnf install libmemcached-devel
+# or on Ubuntu:
+sudo apt install libmemcached-dev
 ```
 
 Install client libraries for Redis:
