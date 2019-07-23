@@ -152,14 +152,16 @@ status stree::remove(string_view key)
 
 void stree::Recover()
 {
-	auto root_data = pmpool.root();
-	if (root_data->ptr) {
-		my_btree = root_data->ptr.get();
+	if (!OID_IS_NULL(*root_oid)) {
+		my_btree = (internal::stree::btree_type *)pmemobj_direct(*root_oid);
 		my_btree->garbage_collection();
 	} else {
-		make_persistent_atomic<internal::stree::btree_type>(pmpool,
-								    root_data->ptr);
-		my_btree = root_data->ptr.get();
+		pmem::obj::transaction::manual tx(pmpool);
+		pmem::obj::transaction::snapshot(root_oid);
+		*root_oid =
+			pmem::obj::make_persistent<internal::stree::btree_type>().raw();
+		pmem::obj::transaction::commit();
+		my_btree = (internal::stree::btree_type *)pmemobj_direct(*root_oid);
 	}
 }
 

@@ -137,15 +137,15 @@ status cmap::remove(string_view key)
 
 void cmap::Recover()
 {
-	auto root_data = pmpool.root();
-	if (root_data->ptr) {
-		container = root_data->ptr.get();
+	if (!OID_IS_NULL(*root_oid)) {
+		container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(*root_oid);
 		container->initialize();
 	} else {
 		pmem::obj::transaction::manual tx(pmpool);
-		root_data->ptr = pmem::obj::make_persistent<internal::cmap::map_t>();
+		pmem::obj::transaction::snapshot(root_oid);
+		*root_oid = pmem::obj::make_persistent<internal::cmap::map_t>().raw();
 		pmem::obj::transaction::commit();
-		container = root_data->ptr.get();
+		container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(*root_oid);
 		container->initialize(true);
 	}
 }
