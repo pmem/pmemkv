@@ -33,8 +33,8 @@ include(${SRC_DIR}/helpers.cmake)
 
 setup()
 
-execute_process(COMMAND ${CMAKE_COMMAND} -E remove pool${TEST_NAME})
+execute_process(COMMAND ${CMAKE_COMMAND} -E remove pool_${TEST_NAME})
 
-execute(0 ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME} pool${TEST_NAME})
+execute(0 ${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME} pool_${TEST_NAME})
 
 cleanup()
