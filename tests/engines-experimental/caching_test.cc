@@ -190,8 +190,8 @@ TEST_F(CachingTest, SimpleMemcached)
 	const char *key = "key1";
 	const char *value1 = "value1";
 
-	memcached_server_st *memcached_servers_parse(char *server_strings);
 	memc = memcached_create(NULL);
+	// XXX: need to check if server doesn't exist already
 	servers = memcached_server_list_append(servers, (char *)"127.0.0.1", 11211, &rc);
 	rc = memcached_server_push(memc, servers);
 	if (rc == MEMCACHED_SUCCESS)
@@ -244,7 +244,6 @@ TEST_F(CachingTest, UnknownLocalMemcachedKey)
 	uint32_t flags;
 	size_t return_value_length;
 
-	memcached_server_st *memcached_servers_parse(char *server_strings);
 	memc = memcached_create(NULL);
 	servers = memcached_server_list_append(servers, (char *)"127.0.0.1", 11211, &rc);
 	rc = memcached_server_push(memc, servers);
@@ -742,7 +741,6 @@ TEST_F(CachingTest, Memcached_Integration)
 	const int key_length = 4;
 	const int value_length = 6;
 
-	memcached_server_st *memcached_servers_parse(char *server_strings);
 	memc = memcached_create(NULL);
 	servers = memcached_server_list_append(servers, (char *)"127.0.0.1", 11211, &rc);
 	rc = memcached_server_push(memc, servers);
