@@ -60,8 +60,6 @@ tree3::tree3(std::unique_ptr<internal::config> cfg) : pmemobj_engine_base(cfg)
 
 tree3::~tree3()
 {
-	LOG("Stopping");
-	pmpool.close();
 	LOG("Stopped ok");
 }
 
@@ -77,7 +75,7 @@ std::string tree3::name()
 status tree3::count_all(std::size_t &cnt)
 {
 	std::size_t result = 0;
-	auto leaf = pmpool.root()->ptr;
+	auto leaf = (pmem::kv::internal::tree3::KVLeaf *)pmemobj_direct(*root_oid);
 	while (leaf) {
 		for (int slot = LEAF_KEYS; slot--;) {
 			auto kvslot = leaf->slots[slot].get_ro();
@@ -85,7 +83,7 @@ status tree3::count_all(std::size_t &cnt)
 				continue;
 			result++;
 		}
-		leaf = leaf->next; // advance to next linked leaf
+		leaf = leaf->next.get(); // advance to next linked leaf
 	}
 
 	cnt = result;
@@ -96,7 +94,7 @@ status tree3::count_all(std::size_t &cnt)
 status tree3::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("get_all");
-	auto leaf = pmpool.root()->ptr;
+	auto leaf = (pmem::kv::internal::tree3::KVLeaf *)pmemobj_direct(*root_oid);
 	while (leaf) {
 		for (int slot = LEAF_KEYS; slot--;) {
 			auto kvslot = leaf->slots[slot].get_ro();
@@ -107,7 +105,7 @@ status tree3::get_all(get_kv_callback *callback, void *arg)
 			if (ret != 0)
 				return status::STOPPED_BY_CB;
 		}
-		leaf = leaf->next; // advance to next linked leaf
+		leaf = leaf->next.get(); // advance to next linked leaf
 	}
 
 	return status::OK;
@@ -176,11 +174,12 @@ status tree3::put(string_view key, string_view value)
 				new_node->leaf = leaves_prealloc.back();
 				leaves_prealloc.pop_back();
 			} else {
-				auto root = pmpool.root();
-				auto old_head = root->ptr;
+				auto old_head = persistent_ptr<internal::tree3::KVLeaf>(
+					*root_oid);
 				auto new_leaf =
 					make_persistent<internal::tree3::KVLeaf>();
-				root->ptr = new_leaf;
+				transaction::snapshot(root_oid);
+				*root_oid = new_leaf.raw();
 				new_leaf->next = old_head;
 				new_node->leaf = new_leaf;
 			}
@@ -334,10 +333,11 @@ void tree3::LeafSplitFull(internal::tree3::KVLeafNode *leafnode, const uint8_t h
 			new_leafnode->leaf = new_leaf;
 			leaves_prealloc.pop_back();
 		} else {
-			auto root = pmpool.root();
-			auto old_head = root->ptr;
+			auto old_head =
+				persistent_ptr<internal::tree3::KVLeaf>(*root_oid);
 			new_leaf = make_persistent<internal::tree3::KVLeaf>();
-			root->ptr = new_leaf;
+			transaction::snapshot(root_oid);
+			*root_oid = new_leaf.raw();
 			new_leaf->next = old_head;
 			new_leafnode->leaf = new_leaf;
 		}
@@ -440,18 +440,20 @@ void tree3::Recover()
 
 	// traverse persistent leaves to build list of leaves to recover
 	std::list<internal::tree3::KVRecoveredLeaf> leaves;
-	auto leaf = pmpool.root()->ptr;
-	while (leaf) {
+
+	auto root_leaf = persistent_ptr<internal::tree3::KVLeaf>(*root_oid);
+
+	while (root_leaf) {
 		unique_ptr<internal::tree3::KVLeafNode> leafnode(
 			new internal::tree3::KVLeafNode());
-		leafnode->leaf = leaf;
+		leafnode->leaf = root_leaf;
 		leafnode->is_leaf = true;
 
 		// find highest sorting key in leaf, while recovering all hashes
 		bool empty_leaf = true;
 		std::string max_key;
 		for (int slot = LEAF_KEYS; slot--;) {
-			auto kvslot = leaf->slots[slot].get_ro();
+			auto kvslot = root_leaf->slots[slot].get_ro();
 			if (kvslot.empty())
 				continue;
 			leafnode->hashes[slot] = kvslot.hash();
@@ -470,12 +472,12 @@ void tree3::Recover()
 
 		// use highest sorting key to decide how to recover the leaf
 		if (empty_leaf) {
-			leaves_prealloc.push_back(leaf);
+			leaves_prealloc.push_back(root_leaf);
 		} else {
 			leaves.push_back({move(leafnode), max_key});
 		}
 
-		leaf = leaf->next; // advance to next linked leaf
+		root_leaf = root_leaf->next.get(); // advance to next linked leaf
 	}
 
 	// sort recovered leaves in ascending key order

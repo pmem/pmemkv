@@ -50,36 +50,64 @@ class pmemobj_engine_base : public engine_base {
 public:
 	pmemobj_engine_base(std::unique_ptr<internal::config> &cfg)
 	{
-		const char *path;
+		const char *path = nullptr;
 		std::size_t size;
+		PMEMoid *oid;
 
-		if (!cfg->get_string("path", &path))
+		auto is_path = cfg->get_string("path", &path);
+		auto is_oid = cfg->get_object("oid", (void **)&oid);
+
+		if (is_path && is_oid) {
 			throw internal::invalid_argument(
-				"Config does not contain item with key: \"path\"");
+				"Config contains both: \"path\" and \"oid\"");
+		} else if (!is_path && !is_oid) {
+			throw internal::invalid_argument(
+				"Config does not contain item with key: \"path\" or \"oid\"");
+		} else if (is_path) {
+			uint64_t force_create;
+			cfg_by_path = true;
 
-		uint64_t force_create;
-		if (!cfg->get_uint64("force_create", &force_create)) {
-			force_create = 0;
+			if (!cfg->get_uint64("force_create", &force_create)) {
+				force_create = 0;
+			}
+
+			if (force_create) {
+				if (!cfg->get_uint64("size", &size))
+					throw internal::invalid_argument(
+						"Config does not contain item with key: \"size\"");
+
+				auto pop = pmem::obj::pool<Root>::create(path, LAYOUT,
+									 size, S_IRWXU);
+				root_oid = pop.root()->ptr.raw_ptr();
+				pmpool = pop;
+			} else {
+				auto pop = pmem::obj::pool<Root>::open(path, LAYOUT);
+
+				root_oid = pop.root()->ptr.raw_ptr();
+				pmpool = pop;
+			}
+		} else if (is_oid) {
+			pmpool = pmem::obj::pool_base(pmemobj_pool_by_ptr(oid));
+			root_oid = oid;
 		}
+	}
 
-		if (force_create) {
-			if (!cfg->get_uint64("size", &size))
-				throw internal::invalid_argument(
-					"Config does not contain item with key: \"size\"");
-
-			pmpool = pmem::obj::pool<Root>::create(path, LAYOUT, size,
-							       S_IRWXU);
-		} else {
-			pmpool = pmem::obj::pool<Root>::open(path, LAYOUT);
-		}
+	~pmemobj_engine_base()
+	{
+		if (cfg_by_path)
+			pmpool.close();
 	}
 
 protected:
 	struct Root {
-		pmem::obj::persistent_ptr<EngineData> ptr; /* used when path is specified */
+		pmem::obj::persistent_ptr<EngineData>
+			ptr; /* used when path is specified */
 	};
 
-	pmem::obj::pool<Root> pmpool;
+	pmem::obj::pool_base pmpool;
+	PMEMoid *root_oid;
+
+	bool cfg_by_path = false;
 };
 
 } /* namespace kv */
