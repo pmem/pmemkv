@@ -237,10 +237,8 @@ echo "##############################################################"
 mkdir $WORKDIR/build
 cd $WORKDIR/build
 
-# Create fake tag, so that package has proper 'version' field
-git config user.email "test@package.com"
-git config user.name "test package"
-git tag -a 0.7 -m "0.7" HEAD~1 || true
+# Fetch git history for `git describe` to work, so that package has proper 'version' field
+git fetch --unshallow --tags
 
 # Disable VCMAP and VSMAP until we'll get packages for memkind.
 cmake .. -DCMAKE_BUILD_TYPE=Debug \
