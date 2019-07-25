@@ -98,6 +98,52 @@ function run_example_standalone() {
 	cd -
 }
 
+run_ctest_with_memcheck()
+{
+	tool_name=${1}
+	declare -A tools=( ["helgrind"]="--tool=helgrind"
+	["drd"]="--tool=drd"
+	["pmemcheck"]="--tool=pmemcheck"
+	["memcheck"]="--leak-check=full")
+
+	declare -A sup_files=( ["helgrind"]="${WORKDIR}/tests/helgrind.supp"
+	["drd"]="${WORKDIR}/tests/drd.supp"
+	["pmemcheck"]=""
+	["memcheck"]="${WORKDIR}/tests/memcheck.supp")
+
+	tool=${tools[${tool_name}]}
+	supp_file=${supp_files[${tool_name}]}
+	regex=${2}
+	[ -z "${tool}" ] && echo "${FUNCNAME[0]}: Argument not found: ${1}" && exit 1
+
+	echo "Running test: ${regex} with ${tool}"
+	test_log=$(mktemp)
+	ctest --output-on-failure --overwrite MemoryCheckCommandOptions="${tool}" --overwrite MemoryCheckSuppressionFile="${supp_file}" -T memcheck -R ${regex} | tee ${test_log}
+	! grep "Defects" ${test_log} > /dev/null
+}
+
+function run_tests()
+{
+	regex=${1}
+	echo "Running tests without memchek"
+	ctest --output-on-failure -R ${1}
+
+	[ "${COVERAGE}" == "1" ] && return
+
+	echo "Running tests with memcheck"
+	memcheck_tests="(BlackholeTest|CMapTest|VCMapTest|VSMapTest|ConfigTest|JsonToConfigTest)"
+	helgrind_drd_tests="(CMapTest|VCMapTest)"
+
+	run_ctest_with_memcheck "memcheck" "${regex:-$memcheck_tests}"
+	run_ctest_with_memcheck "pmemcheck" "${regex:-$memcheck_tests}"
+	run_ctest_with_memcheck "drd" ${regex:-$helgrind_drd_tests}
+	run_ctest_with_memcheck "helgrind" ${regex:-$helgrind_drd_tests}
+}
+
+function list_tests()
+{
+	ctest -N
+}
 cd $WORKDIR
 
 # Make sure there is no libpmemkv currently installed
@@ -115,7 +161,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DDEVELOPER_MODE=1
 
 make -j2
-ctest --output-on-failure
+run_tests
 echo $USERPASS | sudo -S make install
 
 if [ "$COVERAGE" == "1" ]; then
@@ -151,7 +197,7 @@ CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 
 make -j2
 # Run basic tests
-ctest -R "SimpleTest"
+run_tests "SimpleTest"
 
 cd ..
 rm -rf build
@@ -172,7 +218,7 @@ CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 
 make -j2
 # Run basic tests
-ctest -R "SimpleTest"
+run_tests "SimpleTest"
 
 cd ..
 rm -rf build
@@ -206,7 +252,7 @@ do
 		-D$engine_flag=ON
 	make -j2
 	# list all tests in this build
-	ctest -N
+	list_tests
 
 	cd -
 	rm -rf $WORKDIR/build
@@ -225,8 +271,7 @@ cmake .. -DENGINE_VSMAP=ON \
 	-DENGINE_TREE3=ON
 make -j2
 # list all tests in this build
-ctest -N
-
+list_tests
 cd ..
 rm -rf build
 
