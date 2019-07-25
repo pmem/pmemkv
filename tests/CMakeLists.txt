@@ -164,8 +164,7 @@ if(GTEST)
 	set_target_properties(libgtest PROPERTIES "IMPORTED_LOCATION" "${GTEST}"
 		"IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}")
 else()
-	message(WARNING "Gtest not installed, downloading from the Internet")
-	include(gtest)
+	message(FATAL_ERROR "Gtest not installed in system")
 endif()
 
 include(Dart)
