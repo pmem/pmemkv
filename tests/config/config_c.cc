@@ -33,18 +33,16 @@
 #include "../../src/libpmemkv.hpp"
 #include "gtest/gtest.h"
 
-using namespace pmem::kv;
-
-class ConfigTest : public testing::Test {
+class ConfigCTest : public testing::Test {
 public:
 	pmemkv_config *config;
 
-	ConfigTest()
+	ConfigCTest()
 	{
 		config = pmemkv_config_new();
 	}
 
-	~ConfigTest()
+	~ConfigCTest()
 	{
 		if (config)
 			pmemkv_config_delete(config);
@@ -56,13 +54,13 @@ struct custom_type {
 	char b;
 };
 
-void deleter(custom_type *ct_ptr)
+static void deleter(custom_type *ct_ptr)
 {
 	ct_ptr->a = -1;
 	ct_ptr->b = '0';
 }
 
-TEST_F(ConfigTest, SimpleTest)
+TEST_F(ConfigCTest, SimpleTest)
 {
 	auto ret = pmemkv_config_put_string(config, "string", "abc");
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
@@ -141,7 +139,7 @@ TEST_F(ConfigTest, SimpleTest)
 	delete ptr_deleter;
 }
 
-TEST_F(ConfigTest, IntegralConversion)
+TEST_F(ConfigCTest, IntegralConversion)
 {
 	auto ret = pmemkv_config_put_int64(config, "int", 123);
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
