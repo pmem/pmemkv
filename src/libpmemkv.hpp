@@ -83,16 +83,27 @@ typedef void get_v_function(string_view value);
 using get_kv_callback = pmemkv_get_kv_callback;
 using get_v_callback = pmemkv_get_v_callback;
 
+/**
+ * Functions' return status, providing information on errors or success.
+ */
 enum class status {
-	OK = PMEMKV_STATUS_OK,
-	FAILED = PMEMKV_STATUS_FAILED,
-	NOT_FOUND = PMEMKV_STATUS_NOT_FOUND,
-	NOT_SUPPORTED = PMEMKV_STATUS_NOT_SUPPORTED,
-	INVALID_ARGUMENT = PMEMKV_STATUS_INVALID_ARGUMENT,
-	CONFIG_PARSING_ERROR = PMEMKV_STATUS_CONFIG_PARSING_ERROR,
-	CONFIG_TYPE_ERROR = PMEMKV_STATUS_CONFIG_TYPE_ERROR,
-	STOPPED_BY_CB = PMEMKV_STATUS_STOPPED_BY_CB,
-	OUT_OF_MEMORY = PMEMKV_STATUS_OUT_OF_MEMORY
+	OK = PMEMKV_STATUS_OK,		     /**< no error */
+	FAILED = PMEMKV_STATUS_FAILED,       /**< unspecified error */
+	NOT_FOUND = PMEMKV_STATUS_NOT_FOUND, /**< record (or config item) not found */
+	NOT_SUPPORTED = PMEMKV_STATUS_NOT_SUPPORTED, /**< function is not implemented by
+							current engine */
+	INVALID_ARGUMENT = PMEMKV_STATUS_INVALID_ARGUMENT, /**< argument to function has
+							      wrong value */
+	CONFIG_PARSING_ERROR =
+		PMEMKV_STATUS_CONFIG_PARSING_ERROR, /**< parsing data to config failed */
+	CONFIG_TYPE_ERROR =
+		PMEMKV_STATUS_CONFIG_TYPE_ERROR, /**< config item has different type than
+						    expected */
+	STOPPED_BY_CB = PMEMKV_STATUS_STOPPED_BY_CB, /**< iteration was stopped by user's
+							callback */
+	OUT_OF_MEMORY =
+		PMEMKV_STATUS_OUT_OF_MEMORY /**< operation failed because there is not
+					       enough memory (or space on the device) */
 };
 
 class config {
