@@ -102,26 +102,41 @@ if (COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
 endif()
 
+function(unused_but_set_variable_cpp TARGET)
+	check_cxx_compiler_flag(-Wno-unused-but-set-variable wno_unused_but_set_variable_flag_cpp)
+	if (wno_unused_but_set_variable_flag_cpp)
+		target_compile_options(${TARGET} PUBLIC -Wno-unused-but-set-variable)
+	endif()
+endfunction()
+
+function(unused_but_set_variable_c TARGET)
+	check_c_compiler_flag(-Wno-unused-but-set-variable wno_unused_but_set_variable_flag_c)
+	if (wno_unused_but_set_variable_flag_c)
+		target_compile_options(${TARGET} PUBLIC -Wno-unused-but-set-variable)
+	endif()
+endfunction()
+
+function(build_example_pmemkv_pmemobj_cpp)
+	if(ENGINE_CMAP)
+		add_executable(ex_pmemkv_pmemobj_cpp ../examples/pmemkv_pmemobj_cpp/pmemkv_pmemobj_basic.cpp)
+		target_include_directories(ex_pmemkv_pmemobj_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+		target_link_libraries(ex_pmemkv_pmemobj_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
+		unused_but_set_variable_cpp(ex_pmemkv_pmemobj_cpp)
+	endif()
+endfunction()
+
 function(build_example_pmemkv_basic_cpp)
 	add_executable(ex_pmemkv_basic_cpp ../examples/pmemkv_basic_cpp/pmemkv_basic.cpp)
 	target_include_directories(ex_pmemkv_basic_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 	target_link_libraries(ex_pmemkv_basic_cpp pmemkv)
-
-	check_cxx_compiler_flag(-Wno-unused-but-set-variable wno_unused_but_set_variable_flag_cpp)
-	if (wno_unused_but_set_variable_flag_cpp)
-		target_compile_options(ex_pmemkv_basic_cpp PUBLIC -Wno-unused-but-set-variable)
-	endif()
+	unused_but_set_variable_cpp(ex_pmemkv_basic_cpp)
 endfunction()
 
 function(build_example_pmemkv_basic_c)
 	add_executable(ex_pmemkv_basic_c ../examples/pmemkv_basic_c/pmemkv_basic.c)
 	target_include_directories(ex_pmemkv_basic_c PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 	target_link_libraries(ex_pmemkv_basic_c pmemkv)
-
-	check_c_compiler_flag(-Wno-unused-but-set-variable wno_unused_but_set_variable_flag_c)
-	if (wno_unused_but_set_variable_flag_c)
-		target_compile_options(ex_pmemkv_basic_c PUBLIC -Wno-unused-but-set-variable)
-	endif()
+	unused_but_set_variable_c(ex_pmemkv_basic_c)
 endfunction()
 
 set(TEST_FILES
@@ -236,10 +251,12 @@ endforeach(test)
 
 build_example_pmemkv_basic_c()
 build_example_pmemkv_basic_cpp()
+build_example_pmemkv_pmemobj_cpp()
 
 if(ENGINE_CMAP)
 	test("run-binary" ex_pmemkv_basic_c ex_pmemkv_basic_c none)
 	test("run-binary" ex_pmemkv_basic_cpp ex_pmemkv_basic_cpp none)
+	test("run-binary" ex_pmemkv_pmemobj_cpp ex_pmemkv_pmemobj_cpp none)
 else()
 	message(WARNING
 		"Examples use cmap engine, which is disabled, hence their execution "
