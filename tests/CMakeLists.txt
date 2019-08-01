@@ -141,6 +141,7 @@ if(ENGINE_VCMAP)
 endif()
 if(ENGINE_CMAP)
 	list(APPEND TEST_FILES engines/cmap_test.cc)
+	list(APPEND TEST_FILES engines/cmap_pmemobj_test.cc)
 endif()
 if(ENGINE_CACHING)
 	if(ENGINE_TREE3)
@@ -153,9 +154,11 @@ if(ENGINE_CACHING)
 endif()
 if(ENGINE_STREE)
 	list(APPEND TEST_FILES engines-experimental/stree_test.cc)
+	list(APPEND TEST_FILES engines-experimental/stree_pmemobj_test.cc)
 endif()
 if(ENGINE_TREE3)
 	list(APPEND TEST_FILES engines-experimental/tree3_test.cc)
+	list(APPEND TEST_FILES engines-experimental/tree3_pmemobj_test.cc)
 endif()
 
 find_library(GTEST NAMES gtest gtest.a)
@@ -174,9 +177,19 @@ include(get_tests.cmake)
 add_executable(pmemkv_test ${TEST_FILES})
 
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
+
+if(ENGINE_CMAP)
+	target_link_libraries(pmemkv_test ${LIBPMEMOBJ++_LIBRARIES})
+endif()
 if(ENGINE_CACHING)
 	target_link_libraries(pmemkv_test memcached)
 	target_link_libraries(pmemkv_test acl_cpp protocol acl)
+endif()
+if(ENGINE_STREE)
+	target_link_libraries(pmemkv_test ${LIBPMEMOBJ++_LIBRARIES})
+endif()
+if(ENGINE_TREE3)
+	target_link_libraries(pmemkv_test ${LIBPMEMOBJ++_LIBRARIES})
 endif()
 
 # parse tests source files to get the list of all tests
@@ -192,6 +205,7 @@ file(WRITE ${FILE_ALL_TESTS} "${list_all_tests}")
 set(memcheck_tests
 	BlackholeTest
 	CMapTest
+	CMapPmemobjTest
 	VCMapTest
 	VSMapTest
 	ConfigCTest
@@ -201,6 +215,7 @@ set(memcheck_tests
 # set groups of tests to be run with Valgrind's helgrind and drd tools
 set(helgrind_drd_tests
 	CMapTest
+	CMapPmemobjTest
 	VCMapTest)
 
 # add a test checking generated tests
