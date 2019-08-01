@@ -29,32 +29,16 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_common_flag(-Wno-unused-but-set-variable)
+cmake_minimum_required(VERSION 3.5)
+project(pmemkv_pmemobj_basic CXX)
 
-add_cppstyle(examples-pmemkv_basic_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c)
-add_check_whitespace(examples-pmemkv_basic_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c)
-
-add_cppstyle(examples-pmemkv_basic_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_cpp/*.cpp)
-add_check_whitespace(examples-pmemkv_basic_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_cpp/*.cpp)
-
-add_cppstyle(examples-pmemkv_pmemobj_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.cpp)
-add_check_whitespace(examples-pmemkv_pmemobj_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.cpp)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
-
-function(add_example name)
-	set(srcs ${ARGN})
-	prepend(srcs ${CMAKE_CURRENT_SOURCE_DIR} ${srcs})
-	add_executable(example-${name} ${srcs})
-endfunction()
-
-if(ENGINE_CMAP)
-	add_example(pmemkv_pmemobj_basic_cpp pmemkv_pmemobj_cpp/pmemkv_pmemobj_basic.cpp)
-	target_link_libraries(example-pmemkv_pmemobj_basic_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+	pkg_check_modules(LIBPMEMKV REQUIRED libpmemkv)
+	pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++>=1.6)
+else()
+	message(FATAL_ERROR "pkg-config not found")
 endif()
 
-add_example(pmemkv_basic_cpp pmemkv_basic_cpp/pmemkv_basic.cpp)
-target_link_libraries(example-pmemkv_basic_cpp pmemkv)
-
-add_example(pmemkv_basic_c pmemkv_basic_c/pmemkv_basic.c)
-target_link_libraries(example-pmemkv_basic_c pmemkv)
+add_executable(pmemkv_pmemobj_basic_cpp pmemkv_pmemobj_basic.cpp)
+target_link_libraries(pmemkv_pmemobj_basic_cpp ${LIBPMEMKV_LIBRARIES} ${LIBPMEMOBJ++_LIBRARIES})
