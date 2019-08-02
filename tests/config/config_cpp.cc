@@ -254,4 +254,18 @@ TEST_F(ConfigCppTest, NotFoundTest)
 	ASSERT_EQ(cfg->get_object("object", my_object), status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_data("data", my_object, my_object_count), status::NOT_FOUND);
 	ASSERT_EQ(my_object_count, 0);
+
+	/* initialize config with any put */
+	cfg->put_int64("init", 0);
+
+	/* all gets should return NotFound when looking for non-existing key */
+	ASSERT_EQ(cfg->get_string("non-existent-string", my_string), status::NOT_FOUND);
+	ASSERT_EQ(cfg->get_int64("non-existent-int", my_int), status::NOT_FOUND);
+	ASSERT_EQ(cfg->get_uint64("non-existent-uint", my_uint), status::NOT_FOUND);
+	ASSERT_EQ(cfg->get_double("non-existent-double", my_double), status::NOT_FOUND);
+	ASSERT_EQ(cfg->get_object("non-existent-object_ptr", my_object),
+		  status::NOT_FOUND);
+	ASSERT_EQ(cfg->get_data("non-existent-data", my_object, my_object_count),
+		  status::NOT_FOUND);
+	ASSERT_EQ(my_object_count, 0);
 }
