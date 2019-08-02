@@ -101,6 +101,99 @@ using CMapTest = CMapBaseTest<SIZE>;
 using CMapLargeTest = CMapBaseTest<LARGE_SIZE>;
 
 // =============================================================================================
+// TEST SUPPORTED STATUS FOR ALL METHODS
+// =============================================================================================
+// XXX - once test framework for generic tests is implemented - use this to test all
+// engines
+TEST_F(CMapTest, SupportedMethods)
+{
+	std::size_t cnt;
+	ASSERT_TRUE(kv->count_above("key", cnt) == status::NOT_SUPPORTED);
+	ASSERT_TRUE(kv->count_below("key", cnt) == status::NOT_SUPPORTED);
+	ASSERT_TRUE(kv->count_between("key1", "key2", cnt) == status::NOT_SUPPORTED);
+
+	int called = 0;
+	ASSERT_TRUE(kv->get_all([&](string_view key, string_view value) {
+		called = 1;
+		return 0;
+	}) != status::NOT_SUPPORTED);
+	ASSERT_TRUE(called == 0);
+
+	ASSERT_TRUE(kv->get_all(
+			    [](const char *k, size_t kb, const char *v, size_t vb,
+			       void *arg) {
+				    *((int *)arg) = 1;
+				    return 0;
+			    },
+			    &called) != status::NOT_SUPPORTED);
+	ASSERT_TRUE(called == 0);
+
+	ASSERT_TRUE(kv->get_above("key", [&](string_view key, string_view value) {
+		called = 1;
+		return 0;
+	}) == status::NOT_SUPPORTED);
+	ASSERT_TRUE(called == 0);
+
+	ASSERT_TRUE(kv->get_above(
+			    "key",
+			    [](const char *k, size_t kb, const char *v, size_t vb,
+			       void *arg) {
+				    *((int *)arg) = 1;
+				    return 0;
+			    },
+			    &called) == status::NOT_SUPPORTED);
+	ASSERT_TRUE(called == 0);
+
+	ASSERT_TRUE(kv->get_below("key", [&](string_view key, string_view value) {
+		called = 1;
+		return 0;
+	}) == status::NOT_SUPPORTED);
+	ASSERT_TRUE(called == 0);
+
+	ASSERT_TRUE(kv->get_below(
+			    "key",
+			    [](const char *k, size_t kb, const char *v, size_t vb,
+			       void *arg) {
+				    *((int *)arg) = 1;
+				    return 0;
+			    },
+			    &called) == status::NOT_SUPPORTED);
+	ASSERT_TRUE(called == 0);
+
+	ASSERT_TRUE(
+		kv->get_between("key1", "key2", [&](string_view key, string_view value) {
+			called = 1;
+			return 0;
+		}) == status::NOT_SUPPORTED);
+	ASSERT_TRUE(called == 0);
+
+	ASSERT_TRUE(kv->get_between(
+			    "key1", "key2",
+			    [](const char *k, size_t kb, const char *v, size_t vb,
+			       void *arg) {
+				    *((int *)arg) = 1;
+				    return 0;
+			    },
+			    &called) == status::NOT_SUPPORTED);
+	ASSERT_TRUE(called == 0);
+
+	ASSERT_TRUE(kv->exists("key") != status::NOT_SUPPORTED);
+
+	ASSERT_TRUE(kv->get("key", [&](string_view v) {}) != status::NOT_SUPPORTED);
+
+	ASSERT_TRUE(kv->get(
+			    "key", [](const char *v, size_t vb, void *arg) {}, nullptr) !=
+		    status::NOT_SUPPORTED);
+
+	std::string value = "";
+	ASSERT_TRUE(kv->get("key", &value) != status::NOT_SUPPORTED);
+
+	ASSERT_TRUE(kv->put("key", "value") != status::NOT_SUPPORTED);
+
+	ASSERT_TRUE(kv->remove("key") != status::NOT_SUPPORTED);
+}
+
+// =============================================================================================
 // TEST SMALL COLLECTIONS
 // =============================================================================================
 
