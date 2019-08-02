@@ -65,6 +65,7 @@ option(ENGINE_STREE "enable experimental stree engine" OFF)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 
 option(DEVELOPER_MODE "enable developer's checks" OFF)
+option(CONFIG_FROM_JSON "enable support to load config from json file" ON)
 
 if(ENGINE_CMAP)
 	add_definitions(-DENGINE_CMAP)
@@ -101,6 +102,9 @@ if(ENGINE_TREE3)
 	message(STATUS "TREE3 engine is ON")
 else()
 	message(STATUS "TREE3 engine is OFF")
+endif()
+if(CONFIG_FROM_JSON)
+	add_definitions(-DCONFIG_FROM_JSON)
 endif()
 
 set(SOURCE_FILES
@@ -183,8 +187,11 @@ include(FindThreads)
 include(CheckCXXSourceCompiles)
 include(GNUInstallDirs)
 
-include(rapidjson)
-set(PKG_CONFIG_REQUIRES RapidJSON)
+if(CONFIG_FROM_JSON)
+	include(rapidjson)
+	set(PKG_CONFIG_REQUIRES RapidJSON)
+endif()
+
 set(DEB_DEPENDS)
 set(RPM_DEPENDS)
 
@@ -295,7 +302,10 @@ add_library(pmemkv SHARED ${SOURCE_FILES})
 target_link_libraries(pmemkv PRIVATE
 	-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv.map)
 
-target_link_libraries(pmemkv PRIVATE ${RapidJSON_LIBRARIES})
+if(CONFIG_FROM_JSON)
+	target_link_libraries(pmemkv PRIVATE ${RapidJSON_LIBRARIES})
+endif()
+
 if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3)
 	target_link_libraries(pmemkv PRIVATE ${LIBPMEMOBJ++_LIBRARIES})
 endif()

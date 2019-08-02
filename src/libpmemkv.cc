@@ -31,10 +31,14 @@
  */
 
 #include <memory>
+
+#ifdef CONFIG_FROM_JSON
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/writer.h>
+#endif
+
 #include <sys/stat.h>
 
 #include "config.h"
@@ -138,6 +142,7 @@ void pmemkv_config_delete(pmemkv_config *config)
 
 int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 {
+#ifdef CONFIG_FROM_JSON
 	rapidjson::Document doc;
 	rapidjson::Value::ConstMemberIterator itr;
 
@@ -225,6 +230,10 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 	}
 
 	return PMEMKV_STATUS_OK;
+#else
+	ERR() << "pmemkv_config_from_json requires compile option CONFIG_FROM_JSON=ON";
+	return PMEMKV_STATUS_NOT_SUPPORTED;
+#endif
 }
 
 int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *value,
