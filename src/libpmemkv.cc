@@ -43,35 +43,10 @@
 
 #include "config.h"
 #include "engine.h"
-#include "engines/blackhole.h"
 #include "exceptions.h"
 #include "libpmemkv.h"
 #include "libpmemkv.hpp"
 #include "out.h"
-
-#ifdef ENGINE_VSMAP
-#include "engines/vsmap.h"
-#endif
-
-#ifdef ENGINE_VCMAP
-#include "engines/vcmap.h"
-#endif
-
-#ifdef ENGINE_CMAP
-#include "engines/cmap.h"
-#endif
-
-#ifdef ENGINE_CACHING
-#include "engines-experimental/caching.h"
-#endif
-
-#ifdef ENGINE_STREE
-#include "engines-experimental/stree.h"
-#endif
-
-#ifdef ENGINE_TREE3
-#include "engines-experimental/tree3.h"
-#endif
 
 #include <iostream>
 #include <memory>
@@ -92,6 +67,11 @@ static inline pmem::kv::internal::config *config_to_internal(pmemkv_config *conf
 static inline pmem::kv::engine_base *db_to_internal(pmemkv_db *db)
 {
 	return reinterpret_cast<pmem::kv::engine_base *>(db);
+}
+
+static inline pmemkv_db *db_from_internal(pmem::kv::engine_base *db)
+{
+	return reinterpret_cast<pmemkv_db *>(db);
 }
 
 template <typename Function>
@@ -346,81 +326,17 @@ int pmemkv_open(const char *engine_c_str, pmemkv_config *config, pmemkv_db **db)
 	if (db == nullptr)
 		return PMEMKV_STATUS_INVALID_ARGUMENT;
 
-	try {
-		std::string engine = engine_c_str;
+	return catch_and_return_status(__func__, [&] {
+		std::unique_ptr<pmem::kv::internal::config> cfg(
+			config_to_internal(config));
 
-		auto cfg = std::unique_ptr<pmem::kv::internal::config>(
-			reinterpret_cast<pmem::kv::internal::config *>(config));
+		auto engine = pmem::kv::engine_base::create_engine(engine_c_str,
+								   std::move(cfg));
 
-		if (engine == "blackhole") {
-			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::blackhole(std::move(cfg)));
+		*db = db_from_internal(engine.release());
 
-			return PMEMKV_STATUS_OK;
-		}
-#ifdef ENGINE_CACHING
-		if (engine == "caching") {
-			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::caching(std::move(cfg)));
-
-			return PMEMKV_STATUS_OK;
-		}
-#endif
-
-#ifdef ENGINE_TREE3
-		if (engine == "tree3") {
-			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::tree3(std::move(cfg)));
-
-			return PMEMKV_STATUS_OK;
-		}
-#endif
-
-#ifdef ENGINE_STREE
-		if (engine == "stree") {
-			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::stree(std::move(cfg)));
-
-			return PMEMKV_STATUS_OK;
-		}
-#endif
-
-#ifdef ENGINE_CMAP
-		if (engine == "cmap") {
-			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::cmap(std::move(cfg)));
-
-			return PMEMKV_STATUS_OK;
-		}
-#endif
-
-#ifdef ENGINE_VSMAP
-		if (engine == "vsmap") {
-			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::vsmap(std::move(cfg)));
-
-			return PMEMKV_STATUS_OK;
-		}
-#endif
-
-#ifdef ENGINE_VCMAP
-		if (engine == "vcmap") {
-			*db = reinterpret_cast<pmemkv_db *>(
-				new pmem::kv::vcmap(std::move(cfg)));
-
-			return PMEMKV_STATUS_OK;
-		}
-#endif
-		throw std::runtime_error("Unknown engine name");
-	} catch (std::exception &e) {
-		ERR() << e.what();
-		*db = nullptr;
-
-		return PMEMKV_STATUS_FAILED;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_FAILED;
-	}
+		return PMEMKV_STATUS_OK;
+	});
 }
 
 void pmemkv_close(pmemkv_db *db)

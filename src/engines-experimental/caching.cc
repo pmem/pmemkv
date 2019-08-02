@@ -39,9 +39,6 @@
 #include <memory>
 #include <unistd.h>
 
-// XXX: needed to create subEngine, remove once configure structure is created
-#include "../libpmemkv.hpp"
-
 #define DO_LOG 0
 #define LOG(msg)                                                                         \
 	do {                                                                             \
@@ -116,7 +113,7 @@ caching::caching(std::unique_ptr<internal::config> cfg)
 		throw internal::invalid_argument(
 			"Config does not contain item with key: \"attempts\"");
 
-	pmemkv_config *subEngineConfig;
+	internal::config *subEngineConfig;
 	if (!config.get_object("subengine_config", (void **)&subEngineConfig))
 		throw internal::invalid_argument(
 			"Config does not contain item with key: \"subengine_config\"");
@@ -124,22 +121,14 @@ caching::caching(std::unique_ptr<internal::config> cfg)
 	/* Remove item to pass ownership of it to subengine */
 	config.remove("subengine_config");
 
-	if (!(basePtr = new db))
-		throw std::runtime_error(
-			"caching Exception"); // todo propagate start exceptions properly
-
-	if (basePtr->open(subEngine, subEngineConfig) != status::OK)
-		throw std::runtime_error(
-			"caching Exception"); // todo propagate start exceptions properly
+	basePtr = engine_base::create_engine(
+		subEngine, std::unique_ptr<internal::config>(subEngineConfig));
 
 	LOG("Started ok");
 }
 
 caching::~caching()
 {
-	LOG("Stopping");
-	if (basePtr)
-		delete basePtr;
 	LOG("Stopped ok");
 }
 

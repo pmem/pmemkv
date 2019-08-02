@@ -110,6 +110,7 @@ endif()
 set(SOURCE_FILES
 	src/libpmemkv.cc
 	src/libpmemkv.h
+	src/engine.cc
 	src/engines/blackhole.cc
 	src/engines/blackhole.h
 	src/out.cc
