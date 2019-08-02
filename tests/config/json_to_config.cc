@@ -33,8 +33,6 @@
 #include "../../src/libpmemkv.hpp"
 #include "gtest/gtest.h"
 
-using namespace pmem::kv;
-
 class JsonToConfigTest : public testing::Test {
 public:
 	pmemkv_config *config;

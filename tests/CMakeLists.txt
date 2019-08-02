@@ -128,7 +128,8 @@ set(TEST_FILES
 	pmemkv_test.cc
 	mock_tx_alloc.cc
 	engines/blackhole_test.cc
-	config/config.cc
+	config/config_c.cc
+	config/config_cpp.cc
 	config/json_to_config.cc
 )
 # add each engine's tests source files separately
@@ -193,7 +194,8 @@ set(memcheck_tests
 	CMapTest
 	VCMapTest
 	VSMapTest
-	ConfigTest
+	ConfigCTest
+	ConfigCppTest
 	JsonToConfigTest)
 
 # set groups of tests to be run with Valgrind's helgrind and drd tools
