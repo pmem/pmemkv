@@ -173,7 +173,23 @@ include(Dart)
 include(GoogleTest)
 add_executable(pmemkv_test ${TEST_FILES})
 
+add_executable(memcheck valgrind_wrapper.cc)
+add_dependencies(memcheck pmemkv_test)
+
+add_executable(pmemcheck valgrind_wrapper.cc)
+add_dependencies(pmemcheck pmemkv_test)
+
+add_executable(drd valgrind_wrapper.cc)
+add_dependencies(drd pmemkv_test)
+
+add_executable(helgrind valgrind_wrapper.cc)
+add_dependencies(helgrind pmemkv_test)
+
 gtest_discover_tests(pmemkv_test NO_PRETTY_VALUES)
+gtest_discover_tests(memcheck NO_PRETTY_VALUES TEST_SUFFIX _MEMCHECK)
+gtest_discover_tests(pmemcheck NO_PRETTY_VALUES TEST_SUFFIX _PMEMCHECK)
+gtest_discover_tests(drd NO_PRETTY_VALUES TEST_SUFFIX _DRD)
+gtest_discover_tests(helgrind NO_PRETTY_VALUES TEST_SUFFIX _HELGRIND)
 
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
 if(ENGINE_CACHING)

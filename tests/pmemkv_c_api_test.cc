@@ -68,7 +68,11 @@ struct GetTestName {
 	std::string operator()(const testing::TestParamInfo<ParamType> &info) const
 	{
 		auto test = static_cast<ParamType>(info.param);
-		return test.name;
+		auto name = test.name;
+		if (!info.param.memorycheck.empty()) {
+			name += "_TRACERS_" + info.param.memorycheck;
+		}
+		return name;
 	}
 };
 
