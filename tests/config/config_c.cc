@@ -192,3 +192,34 @@ TEST_F(ConfigCTest, IntegralConversionTest)
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
 	ASSERT_EQ(uint_max_us, std::numeric_limits<size_t>::max());
 }
+
+TEST_F(ConfigCTest, NotFoundTest)
+{
+	/* all gets should return NotFound when looking for non-existing key */
+	const char *my_string;
+	int ret = pmemkv_config_get_string(config, "non-existent-string", &my_string);
+	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_FOUND);
+
+	int64_t my_int;
+	ret = pmemkv_config_get_int64(config, "non-existent-int", &my_int);
+	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_FOUND);
+
+	size_t my_uint;
+	ret = pmemkv_config_get_uint64(config, "non-existent-uint", &my_uint);
+	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_FOUND);
+
+	double value_double;
+	ret = pmemkv_config_get_double(config, "non-existent-double", &value_double);
+	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_FOUND);
+
+	custom_type *my_object;
+	ret = pmemkv_config_get_object(config, "non-existent-object",
+				       (void **)&my_object);
+	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_FOUND);
+
+	size_t my_object_size = 0;
+	ret = pmemkv_config_get_data(config, "non-existent-data",
+				     (const void **)&my_object, &my_object_size);
+	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_FOUND);
+	ASSERT_EQ(my_object_size, 0);
+}
