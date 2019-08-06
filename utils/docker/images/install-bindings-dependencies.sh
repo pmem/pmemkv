@@ -37,16 +37,76 @@
 
 set -e
 
-# all of the dependencies (gems) needed to run pmemkv-ruby will be saved in
-# /opt/bindings/ruby directory
+RUBY_VERSION=0.8
+PMEMKV_VERSION=0.8
+JNI_VERSION=0.8
+JAVA_VERSION=0.8
+
+PREFIX=/usr
+rm -rf /opt/bindings
+
+#
+# 1) RUBY dependencies - all of the dependencies (gems) needed to run
+#                        pmemkv-ruby will be saved
+#                        in the /opt/bindings/ruby directory
 mkdir -p /opt/bindings/ruby/
-sudo gem install bundler -v '< 2.0'
+gem install bundler -v '< 2.0'
 git clone https://github.com/pmem/pmemkv-ruby.git
 cd pmemkv-ruby
-git checkout 0.8
-# bundle package command copies all of the .gem files needed to run the application
-# into the vendor/cache directory
-sudo bundle package
+git checkout $RUBY_VERSION
+# bundle package command copies all of the .gem files needed to run
+# the application into the vendor/cache directory
+bundle package
 mv -v vendor/cache/* /opt/bindings/ruby/
 cd ..
 rm -rf pmemkv-ruby
+
+#
+# 2) JAVA dependencies - all of the dependencies needed to run
+#                        pmemkv-java will be saved
+#                        in the /opt/bindings/java directory
+mkdir -p /opt/bindings/java/
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
+
+# build and install pmemkv
+git clone https://github.com/pmem/pmemkv.git
+cd pmemkv
+git checkout $PMEMKV_VERSION
+cp /opt/googletest/googletest-*.zip .
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+	-DCMAKE_INSTALL_PREFIX=$PREFIX
+make -j2
+make install
+cd ../..
+
+# build and install pmemkv-jni
+git clone https://github.com/pmem/pmemkv-jni.git
+cd pmemkv-jni
+git checkout $JNI_VERSION
+cp /opt/googletest/googletest-*.zip .
+make
+make install prefix=$PREFIX
+cd ..
+
+# build and install pmemkv-java
+git clone https://github.com/pmem/pmemkv-java.git
+cd pmemkv-java
+git checkout $JAVA_VERSION
+mvn dependency:go-offline
+mvn install
+mv -v ~/.m2/repository /opt/bindings/java/
+cd ..
+
+# uninstall all installed things
+cd pmemkv/build
+make uninstall
+cd ../../pmemkv-jni
+make uninstall
+cd ..
+rm -rf pmemkv pmemkv-jni pmemkv-java
+
+# make the /opt/bindings directory world-readable
+chmod -R a+r /opt/bindings

@@ -65,14 +65,14 @@ git clone https://github.com/pmem/pmemkv-ruby.git
 cd pmemkv-ruby
 git checkout $ruby_version
 mkdir -p vendor/cache/
-echo $USERPASS | sudo -S mv /opt/bindings/ruby/* vendor/cache/
+cp -r /opt/bindings/ruby/* vendor/cache/
 bundle install --local
 bundle exec rspec
 
 echo
-echo "#########################################################################"
-echo "### Verifying building and installing of the pmemkv-jni and java bindings"
-echo "#########################################################################"
+echo "################################################################"
+echo "### Verifying building and installing of the pmemkv-jni bindings"
+echo "################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
@@ -82,11 +82,17 @@ cp /opt/googletest/googletest-*.zip .
 make test
 echo $USERPASS | sudo -S make install prefix=$PREFIX
 
+echo
+echo "#################################################################"
+echo "### Verifying building and installing of the pmemkv-java bindings"
+echo "#################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
 git checkout $java_version
-mvn install
+mkdir -p ~/.m2/repository
+cp -r /opt/bindings/java/repository ~/.m2/
+mvn --offline install
 
 echo
 echo "##################################################################"
