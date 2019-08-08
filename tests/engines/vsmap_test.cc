@@ -18,11 +18,11 @@
  *       from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * "AS IS" AND ANY EXPRESS OR IMLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
  * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * SPECIAL, EXEMLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
@@ -77,7 +77,7 @@ using VSMapLargeTest = VSMapBaseTest<LARGE_SIZE>;
 // TEST SMALL COLLECTIONS
 // =============================================================================================
 
-TEST_F(VSMapTest, SimpleTest)
+TEST_F(VSMapTest, SimpleTest_TRACERS_M)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -96,7 +96,7 @@ TEST_F(VSMapTest, SimpleTest)
 	ASSERT_TRUE(value == "value1");
 }
 
-TEST_F(VSMapTest, BinaryKeyTest)
+TEST_F(VSMapTest, BinaryKeyTest_TRACERS_M)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -132,7 +132,7 @@ TEST_F(VSMapTest, BinaryKeyTest)
 	ASSERT_TRUE(kv->get("a", &value3) == status::OK && value3 == "should_not_change");
 }
 
-TEST_F(VSMapTest, BinaryValueTest)
+TEST_F(VSMapTest, BinaryValueTest_TRACERS_M)
 {
 	std::string value("A\0B\0\0C", 6);
 	ASSERT_TRUE(kv->put("key1", value) == status::OK) << db::errormsg();
@@ -141,7 +141,7 @@ TEST_F(VSMapTest, BinaryValueTest)
 		    (value_out.length() == 6) && (value_out == value));
 }
 
-TEST_F(VSMapTest, EmptyKeyTest)
+TEST_F(VSMapTest, EmptyKeyTest_TRACERS_M)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -169,7 +169,7 @@ TEST_F(VSMapTest, EmptyKeyTest)
 	ASSERT_TRUE(kv->get("\t\t", &value3) == status::OK && value3 == "two-tab");
 }
 
-TEST_F(VSMapTest, EmptyValueTest)
+TEST_F(VSMapTest, EmptyValueTest_TRACERS_M)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -194,21 +194,21 @@ TEST_F(VSMapTest, EmptyValueTest)
 	ASSERT_TRUE(kv->get("two-tab", &value3) == status::OK && value3 == "\t\t");
 }
 
-TEST_F(VSMapTest, GetAppendToExternalValueTest)
+TEST_F(VSMapTest, GetAppendToExternalValueTest_TRACERS_M)
 {
 	ASSERT_TRUE(kv->put("key1", "cool") == status::OK) << db::errormsg();
 	std::string value = "super";
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "supercool");
 }
 
-TEST_F(VSMapTest, GetHeadlessTest)
+TEST_F(VSMapTest, GetHeadlessTest_TRACERS_M)
 {
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("waldo"));
 	std::string value;
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
 }
 
-TEST_F(VSMapTest, GetMultipleTest)
+TEST_F(VSMapTest, GetMultipleTest_TRACERS_M)
 {
 	ASSERT_TRUE(kv->put("abc", "A1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("def", "B2") == status::OK) << db::errormsg();
@@ -235,7 +235,7 @@ TEST_F(VSMapTest, GetMultipleTest)
 	ASSERT_TRUE(kv->get("mno", &value5) == status::OK && value5 == "E5");
 }
 
-TEST_F(VSMapTest, GetMultiple2Test)
+TEST_F(VSMapTest, GetMultiple2Test_TRACERS_M)
 {
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << db::errormsg();
@@ -253,7 +253,7 @@ TEST_F(VSMapTest, GetMultiple2Test)
 	ASSERT_TRUE(kv->get("key3", &value3) == status::OK && value3 == "VALUE3");
 }
 
-TEST_F(VSMapTest, GetNonexistentTest)
+TEST_F(VSMapTest, GetNonexistentTest_TRACERS_M)
 {
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("waldo"));
@@ -261,7 +261,7 @@ TEST_F(VSMapTest, GetNonexistentTest)
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
 }
 
-TEST_F(VSMapTest, PutTest)
+TEST_F(VSMapTest, PutTest_TRACERS_M)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -299,7 +299,7 @@ TEST_F(VSMapTest, PutTest)
 	ASSERT_TRUE(kv->get("key1", &new_value3) == status::OK && new_value3 == "?");
 }
 
-TEST_F(VSMapTest, PutKeysOfDifferentSizesTest)
+TEST_F(VSMapTest, PutKeysOfDifferentSizesTest_TRACERS_M)
 {
 	std::string value;
 	ASSERT_TRUE(kv->put("123456789ABCDE", "A") == status::OK) << db::errormsg();
@@ -338,7 +338,7 @@ TEST_F(VSMapTest, PutKeysOfDifferentSizesTest)
 		    value5 == "E");
 }
 
-TEST_F(VSMapTest, PutValuesOfDifferentSizesTest)
+TEST_F(VSMapTest, PutValuesOfDifferentSizesTest_TRACERS_M)
 {
 	std::string value;
 	ASSERT_TRUE(kv->put("A", "123456789ABCDE") == status::OK) << db::errormsg();
@@ -377,7 +377,7 @@ TEST_F(VSMapTest, PutValuesOfDifferentSizesTest)
 		    value5 == "123456789ABCDEFGHI");
 }
 
-TEST_F(VSMapTest, RemoveAllTest)
+TEST_F(VSMapTest, RemoveAllTest_TRACERS_M)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -395,7 +395,7 @@ TEST_F(VSMapTest, RemoveAllTest)
 	ASSERT_TRUE(kv->get("tmpkey", &value) == status::NOT_FOUND);
 }
 
-TEST_F(VSMapTest, RemoveAndInsertTest)
+TEST_F(VSMapTest, RemoveAndInsertTest_TRACERS_M)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -425,7 +425,7 @@ TEST_F(VSMapTest, RemoveAndInsertTest)
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
 }
 
-TEST_F(VSMapTest, RemoveExistingTest)
+TEST_F(VSMapTest, RemoveExistingTest_TRACERS_M)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -453,19 +453,19 @@ TEST_F(VSMapTest, RemoveExistingTest)
 	ASSERT_TRUE(kv->get("tmpkey2", &value) == status::OK && value == "tmpvalue2");
 }
 
-TEST_F(VSMapTest, RemoveHeadlessTest)
+TEST_F(VSMapTest, RemoveHeadlessTest_TRACERS_M)
 {
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
 }
 
-TEST_F(VSMapTest, RemoveNonexistentTest)
+TEST_F(VSMapTest, RemoveNonexistentTest_TRACERS_M)
 {
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 }
 
-TEST_F(VSMapTest, UsesCountTest)
+TEST_F(VSMapTest, UsesCountTest_TRACERS_M)
 {
 	ASSERT_TRUE(kv->put("A", "1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("AB", "2") == status::OK) << db::errormsg();
@@ -527,7 +527,7 @@ TEST_F(VSMapTest, UsesCountTest)
 	ASSERT_TRUE(cnt == 0);
 }
 
-TEST_F(VSMapTest, UsesGetAllTest)
+TEST_F(VSMapTest, UsesGetAllTest_TRACERS_M)
 {
 	ASSERT_TRUE(kv->put("1", "one") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("2", "two") == status::OK) << db::errormsg();
@@ -570,7 +570,7 @@ TEST_F(VSMapTest, UsesGetAllTest)
 	ASSERT_TRUE(x == "<1>,<one>|<2>,<two>|<记!>,<RR>|");
 }
 
-TEST_F(VSMapTest, UsesGetAllAboveTest)
+TEST_F(VSMapTest, UsesGetAllAboveTest_TRACERS_M)
 {
 	ASSERT_TRUE(kv->put("A", "1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("AB", "2") == status::OK) << db::errormsg();
@@ -635,7 +635,7 @@ TEST_F(VSMapTest, UsesGetAllAboveTest)
 	ASSERT_TRUE(x == "BB,5|BC,6|记!,RR|");
 }
 
-TEST_F(VSMapTest, UsesGetAllBelowTest)
+TEST_F(VSMapTest, UsesGetAllBelowTest_TRACERS_M)
 {
 	ASSERT_TRUE(kv->put("A", "1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("AB", "2") == status::OK) << db::errormsg();
@@ -700,7 +700,7 @@ TEST_F(VSMapTest, UsesGetAllBelowTest)
 	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|");
 }
 
-TEST_F(VSMapTest, UsesGetAllBetweenTest)
+TEST_F(VSMapTest, UsesGetAllBetweenTest_TRACERS_M)
 {
 	ASSERT_TRUE(kv->put("A", "1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("AB", "2") == status::OK) << db::errormsg();
