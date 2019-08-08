@@ -30,64 +30,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LIBPMEMKV_EXCEPTIONS_H
-#define LIBPMEMKV_EXCEPTIONS_H
+#include "../src/libpmemkv.hpp"
+#include <cassert>
 
-#include <stdexcept>
-
-#include "libpmemkv.h"
-
-namespace pmem
+bool test_wrong_engine_name(std::string name)
 {
-namespace kv
+	pmem::kv::db db;
+	return db.open(name) == pmem::kv::status::WRONG_ENGINE_NAME;
+}
+
+int main()
 {
-namespace internal
-{
+	assert(test_wrong_engine_name("non_existent_name"));
 
-struct error : std::runtime_error {
-	error(const std::string &msg, int status_code = PMEMKV_STATUS_FAILED)
-	    : std::runtime_error(msg), status_code(status_code)
-	{
-	}
-	int status_code;
-};
+#ifndef ENGINE_CMAP
+	assert(test_wrong_engine_name("cmap"));
+#endif
 
-struct not_supported : error {
-	not_supported(const std::string &msg) : error(msg, PMEMKV_STATUS_NOT_SUPPORTED)
-	{
-	}
-};
+#ifndef ENGINE_VSMAP
+	assert(test_wrong_engine_name("vsmap"));
+#endif
 
-struct invalid_argument : error {
-	invalid_argument(const std::string &msg)
-	    : error(msg, PMEMKV_STATUS_INVALID_ARGUMENT)
-	{
-	}
-};
+#ifndef ENGINE_VCMAP
+	assert(test_wrong_engine_name("vcmap"));
+#endif
 
-struct config_parsing_error : error {
-	config_parsing_error(const std::string &msg)
-	    : error(msg, PMEMKV_STATUS_CONFIG_PARSING_ERROR)
-	{
-	}
-};
+#ifndef ENGINE_TREE3
+	assert(test_wrong_engine_name("tree3"));
+#endif
 
-struct config_type_error : error {
-	config_type_error(const std::string &msg)
-	    : error(msg, PMEMKV_STATUS_CONFIG_TYPE_ERROR)
-	{
-	}
-};
+#ifndef ENGINE_STREE
+	assert(test_wrong_engine_name("stree"));
+#endif
 
-struct wrong_engine_name : error {
-	wrong_engine_name(const std::string &msg)
-	    : error(msg, PMEMKV_STATUS_WRONG_ENGINE_NAME)
-	{
-	}
-};
+#ifndef ENGINE_CACHING
+	assert(test_wrong_engine_name("caching"));
+#endif
 
-} /* namespace internal */
-} /* namespace kv */
-} /* namespace pmem */
-
-#endif /* LIBPMEMKV_EXCEPTIONS_H */
+	return 0;
+}

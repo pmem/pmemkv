@@ -131,8 +131,8 @@ engine_base::create_engine(const std::string &engine,
 			new pmem::kv::caching(std::move(cfg)));
 #endif
 
-	throw std::runtime_error("Unknown engine name \"" + engine +
-				 "\". Available engines: " + available_engines);
+	throw internal::wrong_engine_name("Unknown engine name \"" + engine +
+					  "\". Available engines: " + available_engines);
 }
 
 status engine_base::count_all(std::size_t &cnt)
