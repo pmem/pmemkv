@@ -48,7 +48,7 @@ public:
 	}
 };
 
-TEST_F(JsonToConfigTest, SimpleTest)
+TEST_F(JsonToConfigTest, SimpleTest_TRACERS_MP)
 {
 	auto ret = pmemkv_config_from_json(
 		config,

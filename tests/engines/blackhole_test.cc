@@ -47,7 +47,7 @@ public:
 	}
 };
 
-TEST_F(BlackholeTest, SimpleTest)
+TEST_F(BlackholeTest, SimpleTest_TRACERS_MP)
 {
 	std::string value;
 	std::size_t cnt = 1;

@@ -62,7 +62,7 @@ static void deleter(custom_type *ct_ptr)
 	ct_ptr->b = '0';
 }
 
-TEST_F(ConfigCppTest, SimpleTest)
+TEST_F(ConfigCppTest, SimpleTest_TRACERS_MP)
 {
 	status s = cfg->put_string("string", "abc");
 	ASSERT_EQ(s, status::OK);
@@ -151,7 +151,7 @@ TEST_F(ConfigCppTest, SimpleTest)
 	delete ptr_deleter;
 }
 
-TEST_F(ConfigCppTest, IntegralConversionTest)
+TEST_F(ConfigCppTest, IntegralConversionTest_TRACERS_MP)
 {
 	status s = cfg->put_int64("int", 123);
 	ASSERT_EQ(s, status::OK);
@@ -204,7 +204,7 @@ TEST_F(ConfigCppTest, IntegralConversionTest)
 	ASSERT_EQ(uint_max_us, std::numeric_limits<size_t>::max());
 }
 
-TEST_F(ConfigCppTest, ConstructorsTest)
+TEST_F(ConfigCppTest, ConstructorsTest_TRACERS_MP)
 {
 	/* assign released C++ config to C config;
 	 * it's null because config is lazy initialized */
@@ -237,7 +237,7 @@ TEST_F(ConfigCppTest, ConstructorsTest)
 	delete move_config;
 }
 
-TEST_F(ConfigCppTest, NotFoundTest)
+TEST_F(ConfigCppTest, NotFoundTest_TRACERS_MP)
 {
 	/* config is nullptr; all gets should return NotFound */
 	std::string my_string;

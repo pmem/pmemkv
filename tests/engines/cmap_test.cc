@@ -99,7 +99,7 @@ using CMapLargeTest = CMapBaseTest<LARGE_SIZE>;
 // TEST SMALL COLLECTIONS
 // =============================================================================================
 
-TEST_F(CMapTest, SimpleTest)
+TEST_F(CMapTest, SimpleTest_TRACERS_MPHD)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -118,7 +118,7 @@ TEST_F(CMapTest, SimpleTest)
 	ASSERT_TRUE(value == "value1");
 }
 
-TEST_F(CMapTest, BinaryKeyTest)
+TEST_F(CMapTest, BinaryKeyTest_TRACERS_MPHD)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -154,7 +154,7 @@ TEST_F(CMapTest, BinaryKeyTest)
 	ASSERT_TRUE(kv->get("a", &value3) == status::OK && value3 == "should_not_change");
 }
 
-TEST_F(CMapTest, BinaryValueTest)
+TEST_F(CMapTest, BinaryValueTest_TRACERS_MPHD)
 {
 	std::string value("A\0B\0\0C", 6);
 	ASSERT_TRUE(kv->put("key1", value) == status::OK) << db::errormsg();
@@ -163,7 +163,7 @@ TEST_F(CMapTest, BinaryValueTest)
 		    (value_out.length() == 6) && (value_out == value));
 }
 
-TEST_F(CMapTest, EmptyKeyTest)
+TEST_F(CMapTest, EmptyKeyTest_TRACERS_MPHD)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -191,7 +191,7 @@ TEST_F(CMapTest, EmptyKeyTest)
 	ASSERT_TRUE(kv->get("\t\t", &value3) == status::OK && value3 == "two-tab");
 }
 
-TEST_F(CMapTest, EmptyValueTest)
+TEST_F(CMapTest, EmptyValueTest_TRACERS_MPHD)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -216,21 +216,21 @@ TEST_F(CMapTest, EmptyValueTest)
 	ASSERT_TRUE(kv->get("two-tab", &value3) == status::OK && value3 == "\t\t");
 }
 
-TEST_F(CMapTest, GetAppendToExternalValueTest)
+TEST_F(CMapTest, GetAppendToExternalValueTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("key1", "cool") == status::OK) << db::errormsg();
 	std::string value = "super";
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "supercool");
 }
 
-TEST_F(CMapTest, GetHeadlessTest)
+TEST_F(CMapTest, GetHeadlessTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("waldo"));
 	std::string value;
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
 }
 
-TEST_F(CMapTest, GetMultipleTest)
+TEST_F(CMapTest, GetMultipleTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("abc", "A1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("def", "B2") == status::OK) << db::errormsg();
@@ -257,7 +257,7 @@ TEST_F(CMapTest, GetMultipleTest)
 	ASSERT_TRUE(kv->get("mno", &value5) == status::OK && value5 == "E5");
 }
 
-TEST_F(CMapTest, GetMultiple2Test)
+TEST_F(CMapTest, GetMultiple2Test_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << db::errormsg();
@@ -275,7 +275,7 @@ TEST_F(CMapTest, GetMultiple2Test)
 	ASSERT_TRUE(kv->get("key3", &value3) == status::OK && value3 == "VALUE3");
 }
 
-TEST_F(CMapTest, GetNonexistentTest)
+TEST_F(CMapTest, GetNonexistentTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("waldo"));
@@ -283,7 +283,7 @@ TEST_F(CMapTest, GetNonexistentTest)
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
 }
 
-TEST_F(CMapTest, PutTest)
+TEST_F(CMapTest, PutTest_TRACERS_MPHD)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -321,7 +321,7 @@ TEST_F(CMapTest, PutTest)
 	ASSERT_TRUE(kv->get("key1", &new_value3) == status::OK && new_value3 == "?");
 }
 
-TEST_F(CMapTest, PutKeysOfDifferentSizesTest)
+TEST_F(CMapTest, PutKeysOfDifferentSizesTest_TRACERS_MPHD)
 {
 	std::string value;
 	ASSERT_TRUE(kv->put("123456789ABCDE", "A") == status::OK) << db::errormsg();
@@ -360,7 +360,7 @@ TEST_F(CMapTest, PutKeysOfDifferentSizesTest)
 		    value5 == "E");
 }
 
-TEST_F(CMapTest, PutValuesOfDifferentSizesTest)
+TEST_F(CMapTest, PutValuesOfDifferentSizesTest_TRACERS_MPHD)
 {
 	std::string value;
 	ASSERT_TRUE(kv->put("A", "123456789ABCDE") == status::OK) << db::errormsg();
@@ -399,7 +399,7 @@ TEST_F(CMapTest, PutValuesOfDifferentSizesTest)
 		    value5 == "123456789ABCDEFGHI");
 }
 
-TEST_F(CMapTest, RemoveAllTest)
+TEST_F(CMapTest, RemoveAllTest_TRACERS_MPHD)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -417,7 +417,7 @@ TEST_F(CMapTest, RemoveAllTest)
 	ASSERT_TRUE(kv->get("tmpkey", &value) == status::NOT_FOUND);
 }
 
-TEST_F(CMapTest, RemoveAndInsertTest)
+TEST_F(CMapTest, RemoveAndInsertTest_TRACERS_MPHD)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -447,7 +447,7 @@ TEST_F(CMapTest, RemoveAndInsertTest)
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
 }
 
-TEST_F(CMapTest, RemoveExistingTest)
+TEST_F(CMapTest, RemoveExistingTest_TRACERS_MPHD)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
@@ -475,19 +475,19 @@ TEST_F(CMapTest, RemoveExistingTest)
 	ASSERT_TRUE(kv->get("tmpkey2", &value) == status::OK && value == "tmpvalue2");
 }
 
-TEST_F(CMapTest, RemoveHeadlessTest)
+TEST_F(CMapTest, RemoveHeadlessTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
 }
 
-TEST_F(CMapTest, RemoveNonexistentTest)
+TEST_F(CMapTest, RemoveNonexistentTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 }
 
-TEST_F(CMapTest, UsesGetAllTest)
+TEST_F(CMapTest, UsesGetAllTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("1", "2") == status::OK) << db::errormsg();
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
@@ -518,14 +518,14 @@ TEST_F(CMapTest, UsesGetAllTest)
 // TEST RECOVERY
 // =============================================================================================
 
-TEST_F(CMapTest, GetHeadlessAfterRecoveryTest)
+TEST_F(CMapTest, GetHeadlessAfterRecoveryTest_TRACERS_MPHD)
 {
 	Restart();
 	std::string value;
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
 }
 
-TEST_F(CMapTest, GetMultipleAfterRecoveryTest)
+TEST_F(CMapTest, GetMultipleAfterRecoveryTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("abc", "A1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("def", "B2") == status::OK) << db::errormsg();
@@ -545,7 +545,7 @@ TEST_F(CMapTest, GetMultipleAfterRecoveryTest)
 	ASSERT_TRUE(kv->get("mno", &value5) == status::OK && value5 == "E5");
 }
 
-TEST_F(CMapTest, GetMultiple2AfterRecoveryTest)
+TEST_F(CMapTest, GetMultiple2AfterRecoveryTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << db::errormsg();
@@ -561,7 +561,7 @@ TEST_F(CMapTest, GetMultiple2AfterRecoveryTest)
 	ASSERT_TRUE(kv->get("key3", &value3) == status::OK && value3 == "VALUE3");
 }
 
-TEST_F(CMapTest, GetNonexistentAfterRecoveryTest)
+TEST_F(CMapTest, GetNonexistentAfterRecoveryTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	Restart();
@@ -569,7 +569,7 @@ TEST_F(CMapTest, GetNonexistentAfterRecoveryTest)
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
 }
 
-TEST_F(CMapTest, PutAfterRecoveryTest)
+TEST_F(CMapTest, PutAfterRecoveryTest_TRACERS_MPHD)
 {
 	std::string value;
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
@@ -592,7 +592,7 @@ TEST_F(CMapTest, PutAfterRecoveryTest)
 	ASSERT_TRUE(kv->get("key1", &new_value3) == status::OK && new_value3 == "?");
 }
 
-TEST_F(CMapTest, RemoveAllAfterRecoveryTest)
+TEST_F(CMapTest, RemoveAllAfterRecoveryTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("tmpkey", "tmpvalue1") == status::OK) << db::errormsg();
 	Restart();
@@ -601,7 +601,7 @@ TEST_F(CMapTest, RemoveAllAfterRecoveryTest)
 	ASSERT_TRUE(kv->get("tmpkey", &value) == status::NOT_FOUND);
 }
 
-TEST_F(CMapTest, RemoveAndInsertAfterRecoveryTest)
+TEST_F(CMapTest, RemoveAndInsertAfterRecoveryTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("tmpkey", "tmpvalue1") == status::OK) << db::errormsg();
 	Restart();
@@ -614,7 +614,7 @@ TEST_F(CMapTest, RemoveAndInsertAfterRecoveryTest)
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
 }
 
-TEST_F(CMapTest, RemoveExistingAfterRecoveryTest)
+TEST_F(CMapTest, RemoveExistingAfterRecoveryTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("tmpkey1", "tmpvalue1") == status::OK) << db::errormsg();
 	ASSERT_TRUE(kv->put("tmpkey2", "tmpvalue2") == status::OK) << db::errormsg();
@@ -626,13 +626,13 @@ TEST_F(CMapTest, RemoveExistingAfterRecoveryTest)
 	ASSERT_TRUE(kv->get("tmpkey2", &value) == status::OK && value == "tmpvalue2");
 }
 
-TEST_F(CMapTest, RemoveHeadlessAfterRecoveryTest)
+TEST_F(CMapTest, RemoveHeadlessAfterRecoveryTest_TRACERS_MPHD)
 {
 	Restart();
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
 }
 
-TEST_F(CMapTest, RemoveNonexistentAfterRecoveryTest)
+TEST_F(CMapTest, RemoveNonexistentAfterRecoveryTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	Restart();

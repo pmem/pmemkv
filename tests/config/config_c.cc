@@ -60,7 +60,7 @@ static void deleter(custom_type *ct_ptr)
 	ct_ptr->b = '0';
 }
 
-TEST_F(ConfigCTest, SimpleTest)
+TEST_F(ConfigCTest, SimpleTest_TRACERS_MP)
 {
 	auto ret = pmemkv_config_put_string(config, "string", "abc");
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
@@ -139,7 +139,7 @@ TEST_F(ConfigCTest, SimpleTest)
 	delete ptr_deleter;
 }
 
-TEST_F(ConfigCTest, IntegralConversionTest)
+TEST_F(ConfigCTest, IntegralConversionTest_TRACERS_MP)
 {
 	auto ret = pmemkv_config_put_int64(config, "int", 123);
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
@@ -193,7 +193,7 @@ TEST_F(ConfigCTest, IntegralConversionTest)
 	ASSERT_EQ(uint_max_us, std::numeric_limits<size_t>::max());
 }
 
-TEST_F(ConfigCTest, NotFoundTest)
+TEST_F(ConfigCTest, NotFoundTest_TRACERS_MP)
 {
 	/* all gets should return NotFound when looking for non-existing key */
 	const char *my_string;
