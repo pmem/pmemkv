@@ -38,10 +38,20 @@
 
 #include "engine.h"
 #include "libpmemkv.h"
+#include "out.h"
 #include <libpmemobj++/pool.hpp>
 
 namespace pmem
 {
+
+/* Helper method which throws an exception when called in a tx */
+static inline void check_outside_tx()
+{
+	if (pmemobj_tx_stage() != TX_STAGE_NONE)
+		throw transaction_scope_error(
+			"Function called inside transaction scope.");
+}
+
 namespace kv
 {
 
