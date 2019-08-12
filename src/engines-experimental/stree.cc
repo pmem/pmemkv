@@ -127,6 +127,11 @@ status stree::put(string_view key, string_view value)
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 
+	if (pmemobj_tx_stage() != TX_STAGE_NONE) {
+		LOG("stree::put() cannot be called in a transaction");
+		return status::TRANSACTION_SCOPE_ERROR;
+	}
+
 	auto result = my_btree->insert(std::make_pair(
 		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()),
 		pstring<internal::stree::MAX_VALUE_SIZE>(value.data(), value.size())));
@@ -143,6 +148,11 @@ status stree::put(string_view key, string_view value)
 status stree::remove(string_view key)
 {
 	LOG("remove key=" << std::string(key.data(), key.size()));
+
+	if (pmemobj_tx_stage() != TX_STAGE_NONE) {
+		LOG("stree::remove() cannot be called in a transaction");
+		return status::TRANSACTION_SCOPE_ERROR;
+	}
 
 	auto result = my_btree->erase(std::string(key.data(), key.size()));
 	return (result == 1) ? status::OK : status::NOT_FOUND;

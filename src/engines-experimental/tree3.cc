@@ -161,6 +161,11 @@ status tree3::put(string_view key, string_view value)
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 
+	if (pmemobj_tx_stage() != TX_STAGE_NONE) {
+		LOG("tree3::put() cannot be called in a transaction");
+		return status::TRANSACTION_SCOPE_ERROR;
+	}
+
 	const auto hash = PearsonHash(key.data(), key.size());
 	// XXX - do not create temporary string
 	auto leafnode = LeafSearch(std::string(key.data(), key.size()));
@@ -202,6 +207,12 @@ status tree3::put(string_view key, string_view value)
 status tree3::remove(string_view key)
 {
 	LOG("remove key=" << std::string(key.data(), key.size()));
+
+	if (pmemobj_tx_stage() != TX_STAGE_NONE) {
+		LOG("tree3::remove() cannot be called in a transaction");
+		return status::TRANSACTION_SCOPE_ERROR;
+	}
+
 	// XXX - do not create temporary string
 	auto leafnode = LeafSearch(std::string(key.data(), key.size()));
 	if (!leafnode) {
