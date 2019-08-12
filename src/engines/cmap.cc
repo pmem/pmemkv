@@ -110,6 +110,11 @@ status cmap::put(string_view key, string_view value)
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 
+	if (pmemobj_tx_stage() != TX_STAGE_NONE) {
+		LOG("cmap::put() cannot be called in a transaction");
+		return status::FAILED;
+	}
+
 	internal::cmap::map_t::accessor acc;
 	// XXX - do not create temporary string
 	bool result = container->insert(
@@ -128,6 +133,11 @@ status cmap::put(string_view key, string_view value)
 status cmap::remove(string_view key)
 {
 	LOG("remove key=" << std::string(key.data(), key.size()));
+
+	if (pmemobj_tx_stage() != TX_STAGE_NONE) {
+		LOG("cmap::remove() cannot be called in a transaction");
+		return status::FAILED;
+	}
 
 	bool erased = container->erase(key);
 	return erased ? status::OK : status::NOT_FOUND;

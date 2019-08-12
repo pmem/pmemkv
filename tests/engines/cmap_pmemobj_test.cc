@@ -34,6 +34,7 @@
 #include "../../src/pmemobj_engine.h"
 #include "gtest/gtest.h"
 #include <libpmemobj++/persistent_ptr.hpp>
+#include <libpmemobj++/transaction.hpp>
 
 #include <cstdio>
 
@@ -638,4 +639,23 @@ TEST_F(CMapPmemobjTest, RemoveNonexistentAfterRecoveryTest)
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
 	Restart();
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
+}
+
+TEST_F(CMapPmemobjTest, TransactionTest)
+{
+	std::string value;
+	ASSERT_TRUE(kv->get("key1", &value) == status::NOT_FOUND);
+
+	pmem::obj::transaction::run(pmpool, [&] {
+		ASSERT_TRUE(kv->put("key1", "value1") == status::FAILED)
+			<< db::errormsg();
+	});
+
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << db::errormsg();
+
+	pmem::obj::transaction::run(pmpool, [&] {
+		ASSERT_TRUE(kv->remove("key1") == status::FAILED) << db::errormsg();
+	});
+
+	ASSERT_TRUE(kv->remove("key1") == status::OK) << db::errormsg();
 }
