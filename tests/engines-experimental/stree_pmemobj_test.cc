@@ -785,3 +785,32 @@ TEST_F(STreePmemobjTest, SingleInnerNodeDescendingAfterRecoveryTest2)
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == SINGLE_INNER_LIMIT);
 }
+
+TEST_F(STreePmemobjTest, TransactionTest)
+{
+	std::string value;
+	ASSERT_TRUE(kv->get("key1", &value) == status::NOT_FOUND);
+
+	pmem::obj::transaction::run(pmpool, [&] {
+		ASSERT_TRUE(kv->put("key1", "value1") == status::TRANSACTION_SCOPE_ERROR)
+			<< errormsg();
+	});
+
+	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
+
+	pmem::obj::transaction::run(pmpool, [&] {
+		ASSERT_TRUE(kv->get("key1", &value) == status::TRANSACTION_SCOPE_ERROR)
+			<< errormsg();
+	});
+
+	value = "";
+	ASSERT_TRUE(kv->get("key1", &value) == status::OK) << errormsg();
+	ASSERT_TRUE(value == "value1") << errormsg();
+
+	pmem::obj::transaction::run(pmpool, [&] {
+		ASSERT_TRUE(kv->remove("key1") == status::TRANSACTION_SCOPE_ERROR)
+			<< errormsg();
+	});
+
+	ASSERT_TRUE(kv->remove("key1") == status::OK) << errormsg();
+}

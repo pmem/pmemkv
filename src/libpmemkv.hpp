@@ -105,8 +105,11 @@ enum class status {
 		PMEMKV_STATUS_OUT_OF_MEMORY, /**< operation failed because there is not
 					       enough memory (or space on the device) */
 	WRONG_ENGINE_NAME =
-		PMEMKV_STATUS_WRONG_ENGINE_NAME /**< engine name does not match any
+		PMEMKV_STATUS_WRONG_ENGINE_NAME, /**< engine name does not match any
 						   available engine */
+	TRANSACTION_SCOPE_ERROR =
+		PMEMKV_STATUS_TRANSACTION_SCOPE_ERROR, /**< there is an error with the
+							  scope of the transaction */
 };
 
 class config {
