@@ -38,7 +38,17 @@
 
 #include "engine.h"
 #include "libpmemkv.h"
+#include "out.h"
 #include <libpmemobj++/pool.hpp>
+
+/* Helper macro which returns status::TRANSACTION_SCOPE_ERROR when called in a tx */
+#define CHECK_OUTSIDE_TX()                                                               \
+	do {                                                                             \
+		if (pmemobj_tx_stage() != TX_STAGE_NONE) {                               \
+			LOG("Function called inside transaction scope.");                \
+			return status::TRANSACTION_SCOPE_ERROR;                          \
+		}                                                                        \
+	} while (0)
 
 namespace pmem
 {

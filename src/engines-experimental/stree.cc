@@ -67,6 +67,7 @@ std::string stree::name()
 status stree::count_all(std::size_t &cnt)
 {
 	LOG("count_all");
+	CHECK_OUTSIDE_TX();
 
 	auto result = std::distance(my_btree->begin(), my_btree->end());
 	assert(result >= 0);
@@ -79,6 +80,7 @@ status stree::count_all(std::size_t &cnt)
 status stree::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("get_all");
+	CHECK_OUTSIDE_TX();
 	for (auto &iterator : *my_btree) {
 		auto ret = callback(iterator.first.c_str(), iterator.first.size(),
 				    iterator.second.c_str(), iterator.second.size(), arg);
@@ -92,6 +94,7 @@ status stree::get_all(get_kv_callback *callback, void *arg)
 status stree::exists(string_view key)
 {
 	LOG("exists for key=" << std::string(key.data(), key.size()));
+	CHECK_OUTSIDE_TX();
 	internal::stree::btree_type::iterator it =
 		my_btree->find(pstring<20>(key.data(), key.size()));
 	if (it == my_btree->end()) {
@@ -104,6 +107,7 @@ status stree::exists(string_view key)
 status stree::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("get using callback for key=" << std::string(key.data(), key.size()));
+	CHECK_OUTSIDE_TX();
 	internal::stree::btree_type::iterator it =
 		my_btree->find(pstring<20>(key.data(), key.size()));
 	if (it == my_btree->end()) {
@@ -119,6 +123,7 @@ status stree::put(string_view key, string_view value)
 {
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
+	CHECK_OUTSIDE_TX();
 
 	auto result = my_btree->insert(std::make_pair(
 		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()),
@@ -136,6 +141,7 @@ status stree::put(string_view key, string_view value)
 status stree::remove(string_view key)
 {
 	LOG("remove key=" << std::string(key.data(), key.size()));
+	CHECK_OUTSIDE_TX();
 
 	auto result = my_btree->erase(std::string(key.data(), key.size()));
 	return (result == 1) ? status::OK : status::NOT_FOUND;
