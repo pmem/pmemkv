@@ -45,7 +45,7 @@ static Basic basic_tests[] = {
 		.test_data_size = 0,
 		.pretest_remove_path = false,
 		.name = "BlackholeEmptyData",
-		.memorycheck = "memcheck_drd",
+		.tracers = "MP",
 	},
 #ifdef ENGINE_CMAP
 	{
@@ -58,7 +58,7 @@ static Basic basic_tests[] = {
 		.test_data_size = 20,
 		.pretest_remove_path = true,
 		.name = "CMapTestShm100bKey100bValue",
-		.memorycheck = "",
+		.tracers = "MPHD",
 	},
 #endif // ENGINE_CMAP
 #ifdef ENGINE_VSMAP
@@ -72,7 +72,7 @@ static Basic basic_tests[] = {
 		.test_data_size = 20,
 		.pretest_remove_path = false,
 		.name = "VSMapTestShm100bKey100bValue",
-		.memorycheck = "",
+		.tracers = "MP",
 	},
 #endif // ENGINE_VSMAP
 #ifdef ENGINE_VCMAP
@@ -86,7 +86,7 @@ static Basic basic_tests[] = {
 		.test_data_size = 20,
 		.pretest_remove_path = false,
 		.name = "VCMapTestShm100bKey100bValue",
-		.memorycheck = "",
+		.tracers = "MPHD",
 	},
 #endif // ENGINE_VCMAP
 #ifdef ENGINE_TREE3
@@ -100,7 +100,7 @@ static Basic basic_tests[] = {
 		.test_data_size = 20,
 		.pretest_remove_path = false,
 		.name = "Tree3TestShm100bKey100bValue",
-		.memorycheck = "",
+		.tracers = "",
 	},
 #endif // ENGINE_TREE3
 
@@ -115,7 +115,7 @@ static Basic basic_tests[] = {
 		.test_data_size = 20,
 		.pretest_remove_path = false,
 		.name = "StreeTestShm100bKey100bValue",
-		.memorycheck = "",
+		.tracers = "",
 	},
 #endif // ENGINE_STREE
 #ifdef ENGINE_CACHING
@@ -129,7 +129,7 @@ static Basic basic_tests[] = {
 		.test_data_size = 20,
 		.pretest_remove_path = false,
 		.name = "CachingShm100bKey100bValue",
-		.memorycheck = "",
+		.tracers = "",
 	},
 #endif // ENGINE_CHACHING
 };
