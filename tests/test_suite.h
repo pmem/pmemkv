@@ -44,6 +44,7 @@ struct Basic {
 	size_t test_data_size;
 	bool pretest_remove_path;
 	std::string name;
+	std::string tracers;
 };
 
 std::ostream &operator<<(std::ostream &stream, const Basic &val)
