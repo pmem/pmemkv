@@ -126,6 +126,7 @@ endfunction()
 
 set(TEST_FILES
 	pmemkv_test.cc
+	pmemkv_c_api_test.cc
 	mock_tx_alloc.cc
 	engines/blackhole_test.cc
 	config/config_c.cc
@@ -165,13 +166,30 @@ if(GTEST)
 	set_target_properties(libgtest PROPERTIES "IMPORTED_LOCATION" "${GTEST}"
 		"IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}")
 else()
-	message(WARNING "Gtest not installed, downloading from the Internet")
-	include(gtest)
+	message(FATAL_ERROR "Gtest not installed in system")
 endif()
 
-include(get_tests.cmake)
-
+include(Dart)
+include(GoogleTest)
 add_executable(pmemkv_test ${TEST_FILES})
+
+add_executable(memcheck valgrind_wrapper.cc)
+add_dependencies(memcheck pmemkv_test)
+
+add_executable(pmemcheck valgrind_wrapper.cc)
+add_dependencies(pmemcheck pmemkv_test)
+
+add_executable(drd valgrind_wrapper.cc)
+add_dependencies(drd pmemkv_test)
+
+add_executable(helgrind valgrind_wrapper.cc)
+add_dependencies(helgrind pmemkv_test)
+
+gtest_discover_tests(pmemkv_test NO_PRETTY_VALUES)
+gtest_discover_tests(memcheck NO_PRETTY_VALUES TEST_SUFFIX _MEMCHECK)
+gtest_discover_tests(pmemcheck NO_PRETTY_VALUES TEST_SUFFIX _PMEMCHECK)
+gtest_discover_tests(drd NO_PRETTY_VALUES TEST_SUFFIX _DRD)
+gtest_discover_tests(helgrind NO_PRETTY_VALUES TEST_SUFFIX _HELGRIND)
 
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
 if(ENGINE_CACHING)
@@ -179,47 +197,11 @@ if(ENGINE_CACHING)
 	target_link_libraries(pmemkv_test acl_cpp protocol acl)
 endif()
 
-# parse tests source files to get the list of all tests
-get_tests(${CMAKE_CURRENT_SOURCE_DIR} "${TEST_FILES}" list_all_tests)
-
 # save lists of source files and all tests in files to check them in the first test
 set(FILE_TEST_FILES ${CMAKE_CURRENT_BINARY_DIR}/test_files.txt)
 set(FILE_ALL_TESTS ${CMAKE_CURRENT_BINARY_DIR}/list_all_tests.txt)
 file(WRITE ${FILE_TEST_FILES} "${TEST_FILES}")
 file(WRITE ${FILE_ALL_TESTS} "${list_all_tests}")
-
-# set groups of tests to be run with Valgrind's memcheck and pmemcheck tools
-set(memcheck_tests
-	BlackholeTest
-	CMapTest
-	VCMapTest
-	VSMapTest
-	ConfigCTest
-	ConfigCppTest
-	JsonToConfigTest)
-
-# set groups of tests to be run with Valgrind's helgrind and drd tools
-set(helgrind_drd_tests
-	CMapTest
-	VCMapTest)
-
-# add a test checking generated tests
-set(TEST_CHECK "check-generated-tests")
-test(${TEST_CHECK} ${TEST_CHECK} ${TEST_CHECK} none)
-
-foreach(test IN ITEMS ${list_all_tests})
-	test("run-one-test" ${test} ${test} none)
-	# remove ".<test_name>" from the "<test_group>.<test_name>" string
-	string(REGEX REPLACE "[.].+" "" test_group ${test})
-	if(${test_group} IN_LIST memcheck_tests)
-		test("run-one-test" "${test}-memcheck" ${test} memcheck)
-		test("run-one-test" "${test}-pmemcheck" ${test} pmemcheck)
-	endif()
-	if(${test_group} IN_LIST helgrind_drd_tests)
-		test("run-one-test" "${test}-helgrind" ${test} helgrind)
-		test("run-one-test" "${test}-drd" ${test} drd)
-	endif()
-endforeach(test)
 
 build_example_pmemkv_basic_c()
 build_example_pmemkv_basic_cpp()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2019, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,38 +30,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../src/libpmemkv.hpp"
-#include "gtest/gtest.h"
+#ifndef TEST_SUITE_H
+#define TEST_SUITE_H
 
-using namespace pmem::kv;
+#include <string>
 
-class BlackholeTest : public testing::Test {
-public:
-	db kv;
-
-	BlackholeTest()
-	{
-		auto s = kv.open("blackhole");
-		if (s != status::OK)
-			throw std::runtime_error(db::errormsg());
-	}
+struct Basic {
+	const char *path;
+	uint64_t size;
+	uint64_t force_create;
+	const char *engine;
+	size_t key_length, value_length;
+	size_t test_data_size;
+	bool pretest_remove_path;
+	std::string name;
+	std::string tracers;
 };
 
-TEST_F(BlackholeTest, SimpleTest_TRACERS_MP)
+std::ostream &operator<<(std::ostream &stream, const Basic &val)
 {
-	std::string value;
-	std::size_t cnt = 1;
-
-	ASSERT_TRUE(kv.count_all(cnt) == status::OK);
-	ASSERT_TRUE(cnt == 0);
-	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
-	ASSERT_TRUE(kv.put("key1", "value1") == status::OK);
-
-	cnt = 1;
-
-	ASSERT_TRUE(kv.count_all(cnt) == status::OK);
-	ASSERT_TRUE(cnt == 0);
-	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
-	ASSERT_TRUE(kv.remove("key1") == status::OK);
-	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
+	stream << val.name;
+	return stream;
 }
+
+#endif // TEST_SUITE_H
