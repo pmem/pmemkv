@@ -234,11 +234,13 @@ echo
 echo "##############################################################"
 echo "### Verifying building of packages"
 echo "##############################################################"
+
+# Fetch git history for `git describe` to work,
+# so that package has proper 'version' field
+[ -f .git/shallow ] && git fetch --unshallow --tags
+
 mkdir $WORKDIR/build
 cd $WORKDIR/build
-
-# Fetch git history for `git describe` to work, so that package has proper 'version' field
-git fetch --unshallow --tags
 
 # Disable VCMAP and VSMAP until we'll get packages for memkind.
 cmake .. -DCMAKE_BUILD_TYPE=Debug \
