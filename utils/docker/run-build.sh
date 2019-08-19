@@ -207,6 +207,11 @@ do
 	make -j2
 	# list all tests in this build
 	ctest -N
+	ctest -R wrong_engine_name_test --output-on-failure
+
+	if [ "$COVERAGE" == "1" ]; then
+		upload_codecov tests
+	fi
 
 	cd -
 	rm -rf $WORKDIR/build

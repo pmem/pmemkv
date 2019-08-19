@@ -102,8 +102,11 @@ enum class status {
 	STOPPED_BY_CB = PMEMKV_STATUS_STOPPED_BY_CB, /**< iteration was stopped by user's
 							callback */
 	OUT_OF_MEMORY =
-		PMEMKV_STATUS_OUT_OF_MEMORY /**< operation failed because there is not
+		PMEMKV_STATUS_OUT_OF_MEMORY, /**< operation failed because there is not
 					       enough memory (or space on the device) */
+	WRONG_ENGINE_NAME =
+		PMEMKV_STATUS_WRONG_ENGINE_NAME /**< engine name does not match any
+						   available engine */
 };
 
 class config {

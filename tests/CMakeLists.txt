@@ -124,6 +124,32 @@ function(build_example_pmemkv_basic_c)
 	endif()
 endfunction()
 
+function(build_wrong_engine_name_test)
+	add_executable(wrong_engine_name_test wrong_engine_name_test.cc)
+	target_include_directories(wrong_engine_name_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+	target_link_libraries(wrong_engine_name_test pmemkv)
+
+	if(ENGINE_VSMAP)
+		target_compile_definitions(wrong_engine_name_test PRIVATE -DENGINE_VSMAP)
+	endif()
+	if(ENGINE_VCMAP)
+		target_compile_definitions(wrong_engine_name_test PRIVATE -DENGINE_VCMAP)
+	endif()
+	if(ENGINE_CMAP)
+		target_compile_definitions(wrong_engine_name_test PRIVATE -DENGINE_CMAP)
+	endif()
+	if(ENGINE_CACHING)
+		target_compile_definitions(wrong_engine_name_test PRIVATE -DENGINE_CACHING)
+	endif()
+	if(ENGINE_STREE)
+		target_compile_definitions(wrong_engine_name_test PRIVATE -DENGINE_STREE)
+	endif()
+	if(ENGINE_TREE3)
+		target_compile_definitions(wrong_engine_name_test PRIVATE -DENGINE_TREE3)
+	endif()
+
+endfunction()
+
 set(TEST_FILES
 	pmemkv_test.cc
 	pmemkv_c_api_test.cc
@@ -205,6 +231,9 @@ file(WRITE ${FILE_ALL_TESTS} "${list_all_tests}")
 
 build_example_pmemkv_basic_c()
 build_example_pmemkv_basic_cpp()
+build_wrong_engine_name_test()
+
+test("run-binary" wrong_engine_name_test wrong_engine_name_test none)
 
 if(ENGINE_CMAP)
 	test("run-binary" ex_pmemkv_basic_c ex_pmemkv_basic_c none)
