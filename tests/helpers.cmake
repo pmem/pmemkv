@@ -70,6 +70,11 @@ function(execute_arg input expectation name)
 	endif()
 endfunction()
 
+# wrapper of execute_arg()
+function(execute name)
+	execute_arg("" 0 ${name} ${ARGN})
+endfunction()
+
 function(run_under_valgrind vg_opt name)
 	message(STATUS "Executing: valgrind ${vg_opt} ${name} ${ARGN}")
 	execute_process(COMMAND valgrind ${vg_opt} ${name} ${ARGN}
@@ -87,6 +92,10 @@ function(run_under_valgrind vg_opt name)
 			"command 'valgrind ${name} ${ARGN}' failed:\n${ERR}")
 	endif()
 
+	if(${TRACER} STREQUAL pmreorder)
+		return(0)
+	endif()
+
 	set(text_passed "ERROR SUMMARY: 0 errors")
 	string(FIND "${ERR}" "${text_passed}" RET)
 	if(RET EQUAL -1)
@@ -95,9 +104,9 @@ function(run_under_valgrind vg_opt name)
 	endif()
 endfunction()
 
-function(execute expectation name)
+function(execute_tracer name)
 	if (${TRACER} STREQUAL "none")
-		execute_arg("" ${expectation} ${name} ${ARGN})
+		execute(${name} ${ARGN})
 	elseif (${TRACER} STREQUAL memcheck)
 		set(MEM_SUPP "${SRC_DIR}/memcheck.supp")
 		set(VG_OPT "--leak-check=full" "--suppressions=${MEM_SUPP}")
@@ -113,7 +122,53 @@ function(execute expectation name)
 	elseif (${TRACER} STREQUAL pmemcheck)
 		set(VG_OPT "--tool=pmemcheck")
 		run_under_valgrind("${VG_OPT}" ${name} ${ARGN})
+	elseif (${TRACER} STREQUAL pmreorder)
+		set(ENV{PMREORDER_EMIT_LOG} 1)
+		if(DEFINED ENV{PMREORDER_STACKTRACE_DEPTH})
+			set(PMREORDER_STACKTRACE_DEPTH $ENV{PMREORDER_STACKTRACE_DEPTH})
+			set(PMREORDER_STACKTRACE "yes")
+		else()
+			set(PMREORDER_STACKTRACE_DEPTH 1)
+			set(PMREORDER_STACKTRACE "no")
+		endif()
+		set(VG_OPT "--tool=pmemcheck" "-q" "--log-stores=yes" "--print-summary=no"
+			"--log-file=${BIN_DIR}/${TEST_NAME}.storelog"
+			"--log-stores-stacktraces=${PMREORDER_STACKTRACE}"
+			"--log-stores-stacktraces-depth=${PMREORDER_STACKTRACE_DEPTH}"
+			"--expect-fence-after-clflush=yes")
+		run_under_valgrind("${VG_OPT}" ${name} ${ARGN})
 	else ()
 		message(FATAL_ERROR "unknown tracer: ${TRACER}")
 	endif ()
+endfunction()
+
+# wrapper of execute_tracer()
+function(pmreorder_create_store_log name)
+	if (NOT ${TRACER} STREQUAL pmreorder)
+		message(FATAL_ERROR "pmreorder_create_store_log() can be called only with the 'pmreorder' tracer.")
+	endif()
+	execute_tracer(${name} ${ARGN})
+endfunction()
+
+#
+# pmreorder_execute -- execute pmreorder
+#
+# Arguments:
+#	engine   - pmreorder engine type (for example 'ReorderAccumulative')
+#	conf_file - path to the configuration file
+#	name     - path to the checker program
+#
+function(pmreorder_execute engine conf_file name)
+	set(ENV{PMEMOBJ_CONF} "copy_on_write.at_open=1")
+
+	set(cmd pmreorder
+		-l ${BIN_DIR}/${TEST_NAME}.storelog
+		-o ${BIN_DIR}/${TEST_NAME}.pmreorder
+		-r ${engine}
+		-x ${conf_file}
+		-p "${name} ${ARGN}")
+
+	execute(${cmd})
+
+	unset(ENV{PMEMOBJ_CONF})
 endfunction()

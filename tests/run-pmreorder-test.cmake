@@ -33,6 +33,17 @@ include(${SRC_DIR}/helpers.cmake)
 
 setup()
 
-execute(0 ${CMAKE_CURRENT_BINARY_DIR}/pmemkv_test --gtest_filter=${TEST_NAME})
+execute_process(COMMAND ${CMAKE_COMMAND} -E remove pool_${TEST_NAME})
+
+# create the pool ('c' command)
+execute(${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME} c pool_${TEST_NAME})
+
+# create the store log while doing inserts ('i' command)
+pmreorder_create_store_log(
+	${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME} i pool_${TEST_NAME})
+
+# execute pmreorder: open the pool and check consistency ('o' command)
+pmreorder_execute(ReorderAccumulative ${SRC_DIR}/pmreorder.conf
+	${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME} o pool_${TEST_NAME})
 
 cleanup()
