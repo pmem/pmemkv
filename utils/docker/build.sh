@@ -88,6 +88,7 @@ fi
 
 if [ "$COVERAGE" == "1" ]; then
 	docker_opts="${docker_opts} `bash <(curl -s https://codecov.io/env)`";
+	ci_env=`bash <(curl -s https://codecov.io/env)`
 fi
 
 if [ -n "$DNS_SERVER" ]; then DNS_SETTING=" --dns=$DNS_SERVER "; fi
@@ -103,7 +104,6 @@ SCRIPTSDIR=$WORKDIR/utils/docker
 
 echo Building ${OS}-${OS_VER}
 
-ci_env=`bash <(curl -s https://codecov.io/env)`
 # Run a container with
 #  - environment variables set (--env)
 #  - host directory containing source mounted (-v)
