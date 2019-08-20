@@ -294,6 +294,18 @@ if(VALGRIND_FOUND)
 
 	if(NOT VALGRIND_PMEMCHECK_FOUND)
 		message(WARNING "Valgrind pmemcheck not found. Some tests will be skipped.")
+	elseif((NOT(PMEMCHECK_VERSION LESS 1.0)) AND PMEMCHECK_VERSION LESS 2.0)
+		message(STATUS "Pmemcheck ${PMEMCHECK_VERSION} found")
+		find_program(PMREORDER names pmreorder HINTS ${CMAKE_INSTALL_PREFIX}/bin)
+		if(PMREORDER)
+			message(STATUS "Pmreorder found")
+			set(ENV{PATH} ${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH})
+			set(PMREORDER_SUPPORTED true CACHE INTERNAL "pmreorder support")
+		endif()
+	else()
+		message(WARNING "Pmreorder will not be used and some tests will be skipped. "
+				"Pmemcheck must be installed in version 1.x "
+				"(currently installed version is ${PMEMCHECK_VERSION})")
 	endif()
 else()
 	message(WARNING "Valgrind not found. Some tests will be skipped.")
