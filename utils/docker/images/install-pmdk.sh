@@ -38,18 +38,10 @@ set -e
 
 git clone https://github.com/pmem/pmdk
 cd pmdk
-# stable-1.6
-git checkout 695e6eba28c53a69a0ef7bad3cc0f45c21ef3e00 
+# stable-1.6: common: fix typo
+git checkout d526eb00eade98ff1caa283751c2d2dc9cf276fb
 
-make BUILD_PACKAGE_CHECK=n $1
-if [ "$1" = "dpkg" ]; then
-      sudo dpkg -i dpkg/libpmem_*.deb dpkg/libpmem-dev_*.deb
-      sudo dpkg -i dpkg/libpmemobj_*.deb dpkg/libpmemobj-dev_*.deb
-elif [ "$1" = "rpm" ]; then
-      sudo rpm -i rpm/*/pmdk-debuginfo-*.rpm
-      sudo rpm -i rpm/*/libpmem-*.rpm
-      sudo rpm -i rpm/*/libpmemobj-*.rpm
-fi
+sudo make EXTRA_CFLAGS="-DUSE_COW_ENV" -j2 install prefix=/usr
 
 cd ..
 rm -r pmdk

@@ -46,6 +46,7 @@ git checkout 26c86b46997d25c818b246f2a143d2248503cc67
 mkdir build
 cd build
 
+PKG_CONFIG_PATH=/usr/lib/pkgconfig/ \
 cmake .. -DCPACK_GENERATOR="$1" -DCMAKE_INSTALL_PREFIX=/usr
 make package
 if [ "$1" = "DEB" ]; then
