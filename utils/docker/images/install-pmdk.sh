@@ -45,10 +45,12 @@ make BUILD_PACKAGE_CHECK=n $1
 if [ "$1" = "dpkg" ]; then
       sudo dpkg -i dpkg/libpmem_*.deb dpkg/libpmem-dev_*.deb
       sudo dpkg -i dpkg/libpmemobj_*.deb dpkg/libpmemobj-dev_*.deb
+      sudo dpkg -i dpkg/pmreorder_*.deb
 elif [ "$1" = "rpm" ]; then
       sudo rpm -i rpm/*/pmdk-debuginfo-*.rpm
       sudo rpm -i rpm/*/libpmem-*.rpm
       sudo rpm -i rpm/*/libpmemobj-*.rpm
+      sudo rpm -i rpm/*/pmreorder-*.rpm
 fi
 
 cd ..
