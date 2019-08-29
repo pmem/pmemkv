@@ -54,7 +54,8 @@ add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc)
 
-set(vg_tracers memcheck helgrind drd pmemcheck)
+set(vg_tracers memcheck helgrind drd pmemcheck pmreorder)
+set(pmemcheck_tracers pmemcheck pmreorder)
 
 #
 # test -- add a test 'test_name'
@@ -63,8 +64,8 @@ set(vg_tracers memcheck helgrind drd pmemcheck)
 #	cmake_file  - cmake file to run the test
 #	test_name   - name of a test to be printed out by ctest (must be uniqe)
 #	test_filter - name of a test in the gtest binary (used as a gtest filter)
-#	tracer      - Valgrind tool (memcheck/helgrind/drd/pmemcheck) used
-#	              to trace the test
+#	tracer      - Valgrind tool (memcheck/helgrind/drd/pmemcheck)
+#	              or pmreorder used to trace the test
 #
 function(test cmake_file test_name test_filter tracer)
 	if (${tracer} IN_LIST vg_tracers)
@@ -75,7 +76,7 @@ function(test cmake_file test_name test_filter tracer)
 			return()
 		endif()
 	endif()
-	if (${tracer} STREQUAL pmemcheck)
+	if (${tracer} IN_LIST pmemcheck_tracers)
 		if (NOT VALGRIND_PMEMCHECK_FOUND)
 			return()
 		endif()
@@ -242,4 +243,9 @@ else()
 	message(WARNING
 		"Examples use cmap engine, which is disabled, hence their execution "
 		"is also disabled. If you want to run them use -DENGINE_CMAP=ON option.")
+endif()
+
+# test pmreorder framework
+if(PMREORDER)
+	test("run-pmreorder-test" wrong_engine_name_test-pmreorder wrong_engine_name_test pmreorder)
 endif()
