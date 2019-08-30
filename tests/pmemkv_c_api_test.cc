@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2019, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,7 +35,7 @@
 #include <map>
 #include <string>
 
-// Tests list
+// Tests and params' list
 #include "basic_tests.h"
 
 class PmemkvCApiTest : public ::testing::TestWithParam<Basic> {
@@ -81,9 +81,8 @@ TEST_P(PmemkvCApiTest, ConfigCreated)
 	ASSERT_NE(cfg, nullptr) << "Config not created";
 	for (const auto &s : init_status) {
 		ASSERT_EQ(s.second, PMEMKV_STATUS_OK)
-			<< "Status error: " << s.first << " with: " << s.second
+			<< "Status error: " << s.first << " with: " << s.second << ". "
 			<< pmemkv_errormsg();
-		;
 	}
 }
 
@@ -110,16 +109,16 @@ TEST_P(PmemkvCApiTest, PutAndGet)
 		ASSERT_EQ(PMEMKV_STATUS_OK, s)
 			<< "Cannot put key: " << key << " with value: " << val;
 	}
-	/// Retrive data from db and compare with prototype
+	/// Retrieve data from db and compare with prototype
 	for (const auto &record : proto_dictionary) {
 		char *buffer = new char[params.value_length + 1];
 		const char *key = record.first.c_str();
 		int s = pmemkv_get_copy(db, key, strlen(key), buffer,
 					params.value_length + 1, NULL);
 		ASSERT_EQ(PMEMKV_STATUS_OK, s) << "Cannot get value for key: " << key
-					       << " " << pmemkv_errormsg();
+					       << ". " << pmemkv_errormsg();
 		ASSERT_STREQ(record.second.c_str(), buffer)
-			<< "Retrived value is different than original";
+			<< "Retrieved value is different than original";
 		delete[] buffer;
 	}
 }

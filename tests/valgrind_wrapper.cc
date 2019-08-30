@@ -52,7 +52,6 @@ std::string get_cwd_rel_path(std::string path)
 
 int main(int argc, char *argv[])
 {
-
 	std::map<std::string, std::pair<std::string, const char *>> tool_options;
 	tool_options["helgrind"] = std::make_pair("H", "--tool=helgrind");
 	tool_options["drd"] = std::make_pair("D", "--tool=drd");
