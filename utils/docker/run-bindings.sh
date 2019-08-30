@@ -45,16 +45,19 @@ set -e
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
 
+function sudo_password() {
+	echo $USERPASS | sudo -Sk $*
+}
+
 # build and install pmemkv
 cd $WORKDIR
-# copy Googletest to the current directory
-cp /opt/googletest/googletest-*.zip .
 mkdir build
 cd build
+
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX
 make -j2
-echo $USERPASS | sudo -S make install
+sudo_password -S make install
 
 echo
 echo "################################################################"
@@ -77,10 +80,12 @@ cd ~
 git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
 git checkout $jni_version
-# copy Googletest to the current directory
+
+# XXX remove when bindings switched to using gtest installed in system
+# Copy Googletest to the current directory
 cp /opt/googletest/googletest-*.zip .
 make test
-echo $USERPASS | sudo -S make install prefix=$PREFIX
+sudo_password -S make install prefix=$PREFIX
 
 echo
 echo "#################################################################"

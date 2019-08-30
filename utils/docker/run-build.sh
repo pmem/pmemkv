@@ -37,11 +37,9 @@
 
 set -e
 
-echo $USERPASS | sudo -S mount -oremount,size=4G /dev/shm
 EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
 
-# XXX use this function
 function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
 }
@@ -98,16 +96,24 @@ function run_example_standalone() {
 	cd -
 }
 
+# Resize /dev/shm, since default one is too small
+sudo_password -S mount -oremount,size=4G /dev/shm
 cd $WORKDIR
 
-# Make sure there is no libpmemkv currently installed
+echo
+echo "### Making sure there is no libpmemkv currently installed"
 echo "---------------------------- Error expected! ------------------------------"
 compile_example_standalone pmemkv_basic_cpp && exit 1
 echo "---------------------------------------------------------------------------"
 
-# make & install
+echo
+echo "##############################################################"
+echo "### Verify make and install (in dir: ${PREFIX})"
+echo "##############################################################"
+
 mkdir build
 cd build
+
 cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DTEST_DIR=/dev/shm \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
@@ -116,7 +122,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug \
 
 make -j2
 ctest --output-on-failure
-echo $USERPASS | sudo -S make install
+sudo_password -S make install
 
 if [ "$COVERAGE" == "1" ]; then
 	upload_codecov tests
@@ -130,7 +136,7 @@ run_example_standalone pmemkv_basic_cpp
 
 # Uninstall libraries
 cd $WORKDIR/build
-echo $USERPASS | sudo -S make uninstall
+sudo_password -S make uninstall
 
 cd ..
 rm -rf build
@@ -193,8 +199,8 @@ engines_flags=(
 
 for engine_flag in "${engines_flags[@]}"
 do
-	mkdir $WORKDIR/build
-	cd $WORKDIR/build
+	mkdir build
+	cd build
 	# testing each engine separately; disabling default engines
 	echo
 	echo "##############################################################"
@@ -213,16 +219,17 @@ do
 		upload_codecov tests
 	fi
 
-	cd -
-	rm -rf $WORKDIR/build
+	cd ..
+	rm -rf build
 done
 
 echo
 echo "##############################################################"
 echo "### Verifying building of all engines"
 echo "##############################################################"
-mkdir $WORKDIR/build
-cd $WORKDIR/build
+mkdir build
+cd build
+
 cmake .. -DENGINE_VSMAP=ON \
 	-DENGINE_VCMAP=ON \
 	-DENGINE_CMAP=ON \
@@ -244,10 +251,10 @@ echo "##############################################################"
 # so that package has proper 'version' field
 [ -f .git/shallow ] && git fetch --unshallow --tags
 
-mkdir $WORKDIR/build
-cd $WORKDIR/build
+mkdir build
+cd build
 
-# Disable VCMAP and VSMAP until we'll get packages for memkind.
+# XXX - Disable VCMAP and VSMAP until we'll get packages for memkind.
 cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DTEST_DIR=/dev/shm \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
@@ -256,7 +263,8 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DENGINE_VCMAP=OFF \
 	-DENGINE_VSMAP=OFF
 
-# Make sure there is no libpmemkv currently installed
+echo
+echo "### Making sure there is no libpmemkv currently installed"
 echo "---------------------------- Error expected! ------------------------------"
 compile_example_standalone pmemkv_basic_cpp && exit 1
 echo "---------------------------------------------------------------------------"
