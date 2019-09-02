@@ -51,8 +51,7 @@ public:
 TEST_F(JsonToConfigTest, SimpleTest_TRACERS_M)
 {
 	auto ret = pmemkv_config_from_json(
-		config,
-		"{\"string\": \"abc\", \"int\": 123, \"bool\": true, \"double\": 12.43}");
+		config, "{\"string\": \"abc\", \"int\": 123, \"bool\": true}");
 #ifdef CONFIG_FROM_JSON
 	// XXX: extend by adding "false", subconfig, negative value
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
@@ -72,13 +71,18 @@ TEST_F(JsonToConfigTest, SimpleTest_TRACERS_M)
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
 	ASSERT_EQ(value_bool, 1);
 
-	double value_double;
-	ret = pmemkv_config_get_double(config, "double", &value_double);
-	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
-	ASSERT_EQ(value_double, 12.43);
-
 	ret = pmemkv_config_get_int64(config, "string", &value_int);
 	ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
+#else
+	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_SUPPORTED);
+#endif
+}
+
+TEST_F(JsonToConfigTest, DoubleTest_TRACERS_M)
+{
+	auto ret = pmemkv_config_from_json(config, "{\"double\": 12.34}");
+#ifdef CONFIG_FROM_JSON
+	ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_PARSING_ERROR);
 #else
 	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_SUPPORTED);
 #endif

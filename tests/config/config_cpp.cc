@@ -70,9 +70,6 @@ TEST_F(ConfigCppTest, SimpleTest_TRACERS_M)
 	s = cfg->put_int64("int", 123);
 	ASSERT_EQ(s, status::OK);
 
-	s = cfg->put_double("double", 12.43);
-	ASSERT_EQ(s, status::OK);
-
 	custom_type *ptr = new custom_type;
 	ptr->a = 10;
 	ptr->b = 'a';
@@ -102,11 +99,6 @@ TEST_F(ConfigCppTest, SimpleTest_TRACERS_M)
 	s = cfg->get_int64("int", value_int);
 	ASSERT_EQ(s, status::OK);
 	ASSERT_EQ(value_int, 123);
-
-	double value_double;
-	s = cfg->get_double("double", value_double);
-	ASSERT_EQ(s, status::OK);
-	ASSERT_EQ(value_double, 12.43);
 
 	custom_type *value_custom_ptr;
 	s = cfg->get_object("object_ptr", value_custom_ptr);
@@ -243,14 +235,12 @@ TEST_F(ConfigCppTest, NotFoundTest_TRACERS_M)
 	std::string my_string;
 	int64_t my_int;
 	uint64_t my_uint;
-	double my_double;
 	custom_type *my_object;
 	size_t my_object_count = 0;
 
 	ASSERT_EQ(cfg->get_string("string", my_string), status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_int64("int", my_int), status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_uint64("uint", my_uint), status::NOT_FOUND);
-	ASSERT_EQ(cfg->get_double("double", my_double), status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_object("object", my_object), status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_data("data", my_object, my_object_count), status::NOT_FOUND);
 	ASSERT_EQ(my_object_count, 0);
@@ -262,7 +252,6 @@ TEST_F(ConfigCppTest, NotFoundTest_TRACERS_M)
 	ASSERT_EQ(cfg->get_string("non-existent-string", my_string), status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_int64("non-existent-int", my_int), status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_uint64("non-existent-uint", my_uint), status::NOT_FOUND);
-	ASSERT_EQ(cfg->get_double("non-existent-double", my_double), status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_object("non-existent-object_ptr", my_object),
 		  status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_data("non-existent-data", my_object, my_object_count),
