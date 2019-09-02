@@ -75,11 +75,6 @@ public:
 		put(key, value);
 	}
 
-	void put_double(const char *key, double value)
-	{
-		put(key, value);
-	}
-
 	void put_string(const char *key, const char *value)
 	{
 		put(key, value);
@@ -182,26 +177,6 @@ public:
 	 * @return 'false' if no item with specified key exists,
 	 * 'true' if item was obtained successfully
 	 *
-	 * @throw pmem::kv::internal::type_error if item has type different than 'double'
-	 */
-	bool get_double(const char *key, double *value)
-	{
-		auto item = get(key);
-		if (item == nullptr)
-			return false;
-
-		if (item->item_type != type::DOUBLE)
-			throw_type_error(key, item->item_type);
-
-		*value = item->double_v;
-
-		return true;
-	}
-
-	/*
-	 * @return 'false' if no item with specified key exists,
-	 * 'true' if item was obtained successfully
-	 *
 	 * @throw pmem::kv::internal::type_error if item has type different than 'string'
 	 */
 	bool get_string(const char *key, const char **value)
@@ -238,18 +213,14 @@ public:
 	}
 
 private:
-	std::string type_names[6] = {"string", "int64", "uint64",
-				     "double", "data",  "object"};
-	enum class type { STRING, INT64, UINT64, DOUBLE, DATA, OBJECT };
+	std::string type_names[6] = {"string", "int64", "uint64", "data", "object"};
+	enum class type { STRING, INT64, UINT64, DATA, OBJECT };
 
 	struct variant {
 		variant(int64_t sint64) : sint64(sint64), item_type(type::INT64)
 		{
 		}
 		variant(uint64_t uint64) : uint64(uint64), item_type(type::UINT64)
-		{
-		}
-		variant(double double_v) : double_v(double_v), item_type(type::DOUBLE)
 		{
 		}
 		variant(const char *string_v)
@@ -279,7 +250,6 @@ private:
 		union {
 			int64_t sint64;
 			uint64_t uint64;
-			double double_v;
 			std::string string_v;
 			std::vector<char> data;
 

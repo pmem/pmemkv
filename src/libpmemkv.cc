@@ -149,14 +149,6 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 				if (status != PMEMKV_STATUS_OK)
 					throw std::runtime_error(
 						"Inserting int to the config failed");
-			} else if (itr->value.IsDouble()) {
-				auto value = itr->value.GetDouble();
-
-				auto status = pmemkv_config_put_double(
-					config, itr->name.GetString(), value);
-				if (status != PMEMKV_STATUS_OK)
-					throw std::runtime_error(
-						"Inserting double to the config failed");
 			} else if (itr->value.IsTrue() || itr->value.IsFalse()) {
 				auto value = itr->value.GetBool();
 
@@ -250,14 +242,6 @@ int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t va
 	});
 }
 
-int pmemkv_config_put_double(pmemkv_config *config, const char *key, double value)
-{
-	return catch_and_return_status(__func__, [&] {
-		config_to_internal(config)->put_double(key, value);
-		return PMEMKV_STATUS_OK;
-	});
-}
-
 int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value)
 {
 	return catch_and_return_status(__func__, [&] {
@@ -298,15 +282,6 @@ int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *v
 {
 	return catch_and_return_status(__func__, [&] {
 		return config_to_internal(config)->get_uint64(key, value)
-			? PMEMKV_STATUS_OK
-			: PMEMKV_STATUS_NOT_FOUND;
-	});
-}
-
-int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *value)
-{
-	return catch_and_return_status(__func__, [&] {
-		return config_to_internal(config)->get_double(key, value)
 			? PMEMKV_STATUS_OK
 			: PMEMKV_STATUS_NOT_FOUND;
 	});
