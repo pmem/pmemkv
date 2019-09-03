@@ -118,19 +118,5 @@ static Basic basic_tests[] = {
 		.tracers = "",
 	},
 #endif // ENGINE_STREE
-#ifdef ENGINE_CACHING
-	{
-		.path = "/dev/shm",
-		.size = (uint64_t)(1024 * 1024 * 1024),
-		.force_create = 1,
-		.engine = "caching",
-		.key_length = 100,
-		.value_length = 100,
-		.test_data_size = 20,
-		.pretest_remove_path = false,
-		.name = "CachingShm100bKey100bValue",
-		.tracers = "",
-	},
-#endif // ENGINE_CHACHING
 };
 #endif // BASIC_TESTS_H_
