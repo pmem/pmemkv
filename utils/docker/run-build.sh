@@ -274,3 +274,16 @@ compile_example_standalone pmemkv_basic_c
 run_example_standalone pmemkv_basic_c
 compile_example_standalone pmemkv_basic_cpp
 run_example_standalone pmemkv_basic_cpp
+
+# Trigger auto doc update on master
+if [[ "$AUTO_DOC_UPDATE" == "1" ]]; then
+	echo "Running auto doc update"
+
+	mkdir -p $WORKDIR/doc_update
+	cd $WORKDIR/doc_update
+
+	$SCRIPTSDIR/run-doc-update.sh
+
+	cd $WORKDIR
+	rm -rf $WORKDIR/doc_update
+fi
