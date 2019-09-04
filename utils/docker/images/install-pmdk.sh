@@ -38,8 +38,7 @@ set -e
 
 git clone https://github.com/pmem/pmdk
 cd pmdk
-# stable-1.6: Merge pull request #3856 from pmem/stable-1.5
-git checkout 7a39dd66eef934727bbb56a3bf34460bbdd92532
+git checkout 1.6.1
 
 make BUILD_PACKAGE_CHECK=n $1
 if [ "$1" = "dpkg" ]; then
