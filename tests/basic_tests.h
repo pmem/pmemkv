@@ -103,7 +103,6 @@ static Basic basic_tests[] = {
 		.tracers = "",
 	},
 #endif // ENGINE_TREE3
-
 #ifdef ENGINE_STREE
 	{
 		.path = "/dev/shm",
