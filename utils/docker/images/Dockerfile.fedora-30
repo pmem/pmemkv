@@ -46,6 +46,7 @@ RUN dnf update -y \
 	clang \
 	cmake \
 	daxctl-devel \
+	doxygen \
 	gcc \
 	gcc-c++ \
 	gdb \
