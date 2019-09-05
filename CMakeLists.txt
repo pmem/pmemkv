@@ -48,6 +48,7 @@ if(NOT CMAKE_BUILD_TYPE)
 		CACHE STRING "Choose a type of build (Debug, Release or RelWithDebInfo)" FORCE)
 endif()
 
+option(BUILD_DOC "build documentation" ON)
 option(BUILD_EXAMPLES "build examples" ON)
 
 option(COVERAGE "run coverage test" OFF)
@@ -346,10 +347,7 @@ install(FILES ${CMAKE_BINARY_DIR}/libpmemkv.pc
 
 set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER "src/libpmemkv.h;src/libpmemkv.hpp")
 
-find_program(PANDOC NAMES pandoc)
-if(NOT PANDOC)
-	message(WARNING "pandoc not found - documentation will not be generated")
-else()
+if(BUILD_DOC)
 	add_subdirectory(doc)
 endif()
 
