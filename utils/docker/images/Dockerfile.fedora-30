@@ -51,7 +51,9 @@ RUN dnf update -y \
 	gcc-c++ \
 	gdb \
 	git \
+	graphviz \
 	gtest-devel \
+	hub \
 	libtool \
 	make \
 	man \
