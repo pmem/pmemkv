@@ -112,11 +112,6 @@ enum class status {
 class config {
 public:
 	config() noexcept;
-
-	/**
-	 * Creates config from pointer to pmemkv_config.
-	 * Ownership is transfered to config class.
-	 */
 	explicit config(pmemkv_config *cfg) noexcept;
 
 	~config();
@@ -209,17 +204,28 @@ private:
 	pmemkv_db *_db;
 };
 
+/**
+ * Default constructor with uninitialized config.
+ */
 inline config::config() noexcept
 {
 	this->_config = nullptr;
 }
 
+/**
+ * Move constructor. Initializes config with another config.
+ * Ownership is transfered to config class.
+ */
 inline config::config(config &&other) noexcept
 {
 	this->_config = other._config;
 	other._config = nullptr;
 }
 
+/**
+ * Move assignment operator. Deletes previous config and replaces
+ * it with another config. Ownership is transfered to config class.
+ */
 inline config &config::operator=(config &&other) noexcept
 {
 	if (this->_config)
@@ -231,17 +237,30 @@ inline config &config::operator=(config &&other) noexcept
 	return *this;
 }
 
+/**
+ * Creates config from pointer to pmemkv_config.
+ * Ownership is transfered to config class.
+ */
 inline config::config(pmemkv_config *cfg) noexcept
 {
 	this->_config = cfg;
 }
 
+/**
+ * Default destructor. Deletes config if initialized.
+ */
 inline config::~config()
 {
 	if (this->_config)
 		pmemkv_config_delete(this->_config);
 }
 
+/**
+ * Initialization function for config.
+ * It's lazy initialized and called within all put functions.
+ *
+ * @return int initialization result; 0 on success
+ */
 inline int config::init() noexcept
 {
 	if (this->_config == nullptr) {
