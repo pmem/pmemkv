@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "../engine.h"
+#include "../pmemobj_engine.h"
 #include "stree/persistent_b_tree.h"
 #include "stree/pstring.h"
 
@@ -43,12 +43,22 @@ namespace pmem
 {
 namespace kv
 {
+namespace internal
+{
+namespace stree
+{
 
 const size_t DEGREE = 64;
 const size_t MAX_KEY_SIZE = 20;
 const size_t MAX_VALUE_SIZE = 200;
 
-class stree : public engine_base {
+typedef persistent::b_tree<pstring<MAX_KEY_SIZE>, pstring<MAX_VALUE_SIZE>, DEGREE>
+	btree_type;
+
+} /* namespace stree */
+} /* namespace internal */
+
+class stree : public pmemobj_engine_base<internal::stree::btree_type> {
 public:
 	stree(std::unique_ptr<internal::config> cfg);
 	~stree();
@@ -68,16 +78,10 @@ public:
 	status remove(string_view key) final;
 
 private:
-	typedef persistent::b_tree<pstring<MAX_KEY_SIZE>, pstring<MAX_VALUE_SIZE>, DEGREE>
-		btree_type;
-	struct RootData {
-		persistent_ptr<btree_type> btree_ptr;
-	};
 	stree(const stree &);
 	void operator=(const stree &);
 	void Recover();
-	pool<RootData> pmpool;
-	btree_type *my_btree;
+	internal::stree::btree_type *my_btree;
 };
 
 } /* namespace kv */

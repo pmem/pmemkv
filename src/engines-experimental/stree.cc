@@ -55,42 +55,14 @@ namespace pmem
 namespace kv
 {
 
-stree::stree(std::unique_ptr<internal::config> cfg)
+stree::stree(std::unique_ptr<internal::config> cfg) : pmemobj_engine_base(cfg)
 {
-	const char *path;
-	std::size_t size;
-
-	if (!cfg->get_string("path", &path))
-		throw internal::invalid_argument(
-			"Config does not contain item with key: \"path\"");
-
-	uint64_t force_create;
-	if (!cfg->get_uint64("force_create", &force_create)) {
-		LOG("Using default force_create = 0");
-		force_create = 0;
-	}
-
-	if (force_create) {
-		if (!cfg->get_uint64("size", &size))
-			throw internal::invalid_argument(
-				"Config does not contain item with key: \"size\"");
-
-		LOG("Creating filesystem pool, path=" << path << ", size="
-						      << std::to_string(size));
-		pmpool = pool<RootData>::create(path, LAYOUT, size, S_IRWXU);
-	} else {
-		LOG("Opening pool, path=" << path);
-		pmpool = pool<RootData>::open(path, LAYOUT);
-	}
-
 	Recover();
 	LOG("Started ok");
 }
 
 stree::~stree()
 {
-	LOG("Stopping");
-	pmpool.close();
 	LOG("Stopped ok");
 }
 
@@ -127,7 +99,8 @@ status stree::get_all(get_kv_callback *callback, void *arg)
 status stree::exists(string_view key)
 {
 	LOG("exists for key=" << std::string(key.data(), key.size()));
-	btree_type::iterator it = my_btree->find(pstring<20>(key.data(), key.size()));
+	internal::stree::btree_type::iterator it =
+		my_btree->find(pstring<20>(key.data(), key.size()));
 	if (it == my_btree->end()) {
 		LOG("  key not found");
 		return status::NOT_FOUND;
@@ -138,7 +111,8 @@ status stree::exists(string_view key)
 status stree::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("get using callback for key=" << std::string(key.data(), key.size()));
-	btree_type::iterator it = my_btree->find(pstring<20>(key.data(), key.size()));
+	internal::stree::btree_type::iterator it =
+		my_btree->find(pstring<20>(key.data(), key.size()));
 	if (it == my_btree->end()) {
 		LOG("  key not found");
 		return status::NOT_FOUND;
@@ -153,11 +127,11 @@ status stree::put(string_view key, string_view value)
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 
-	auto result = my_btree->insert(
-		std::make_pair(pstring<MAX_KEY_SIZE>(key.data(), key.size()),
-			       pstring<MAX_VALUE_SIZE>(value.data(), value.size())));
+	auto result = my_btree->insert(std::make_pair(
+		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()),
+		pstring<internal::stree::MAX_VALUE_SIZE>(value.data(), value.size())));
 	if (!result.second) { // key already exists, so update
-		typename btree_type::value_type &entry = *result.first;
+		typename internal::stree::btree_type::value_type &entry = *result.first;
 		transaction::manual tx(pmpool);
 		conditional_add_to_tx(&(entry.second));
 		entry.second = std::string(value.data(), value.size());
@@ -176,13 +150,16 @@ status stree::remove(string_view key)
 
 void stree::Recover()
 {
-	auto root_data = pmpool.root();
-	if (root_data->btree_ptr) {
-		my_btree = root_data->btree_ptr.get();
+	if (!OID_IS_NULL(*root_oid)) {
+		my_btree = (internal::stree::btree_type *)pmemobj_direct(*root_oid);
 		my_btree->garbage_collection();
 	} else {
-		make_persistent_atomic<btree_type>(pmpool, root_data->btree_ptr);
-		my_btree = root_data->btree_ptr.get();
+		pmem::obj::transaction::manual tx(pmpool);
+		pmem::obj::transaction::snapshot(root_oid);
+		*root_oid =
+			pmem::obj::make_persistent<internal::stree::btree_type>().raw();
+		pmem::obj::transaction::commit();
+		my_btree = (internal::stree::btree_type *)pmemobj_direct(*root_oid);
 	}
 }
 
