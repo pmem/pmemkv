@@ -194,11 +194,15 @@ TEST_F(VCMapTest, EmptyValueTest_TRACERS_MHD)
 	ASSERT_TRUE(kv->get("two-tab", &value3) == status::OK && value3 == "\t\t");
 }
 
-TEST_F(VCMapTest, GetAppendToExternalValueTest_TRACERS_MHD)
+TEST_F(VCMapTest, GetClearExternalValueTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("key1", "cool") == status::OK) << db::errormsg();
 	std::string value = "super";
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "supercool");
+	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "cool");
+
+	value = "super";
+	ASSERT_TRUE(kv->get("non_existent_key", &value) == status::NOT_FOUND &&
+		    value == "super");
 }
 
 TEST_F(VCMapTest, GetHeadlessTest_TRACERS_MHD)
