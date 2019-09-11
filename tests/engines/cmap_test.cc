@@ -216,11 +216,15 @@ TEST_F(CMapTest, EmptyValueTest_TRACERS_MPHD)
 	ASSERT_TRUE(kv->get("two-tab", &value3) == status::OK && value3 == "\t\t");
 }
 
-TEST_F(CMapTest, GetAppendToExternalValueTest_TRACERS_MPHD)
+TEST_F(CMapTest, GetClearExternalValueTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->put("key1", "cool") == status::OK) << db::errormsg();
 	std::string value = "super";
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "supercool");
+	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "cool");
+
+	value = "super";
+	ASSERT_TRUE(kv->get("non_existent_key", &value) == status::NOT_FOUND &&
+		    value == "super");
 }
 
 TEST_F(CMapTest, GetHeadlessTest_TRACERS_MPHD)
