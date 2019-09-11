@@ -572,7 +572,7 @@ static inline void call_get_v_function(const char *value, size_t valuebytes, voi
 static inline void call_get_copy(const char *v, size_t vb, void *arg)
 {
 	auto c = reinterpret_cast<std::string *>(arg);
-	c->append(v, vb);
+	c->assign(v, vb);
 }
 }
 
