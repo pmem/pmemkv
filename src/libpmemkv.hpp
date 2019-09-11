@@ -590,9 +590,8 @@ static inline void call_get_v_function(const char *value, size_t valuebytes, voi
 
 static inline void call_get_copy(const char *v, size_t vb, void *arg)
 {
-	auto c = reinterpret_cast<std::pair<status, std::string *> *>(arg);
-	c->first = status::OK;
-	c->second->append(v, vb);
+	auto c = reinterpret_cast<std::string *>(arg);
+	c->append(v, vb);
 }
 }
 
@@ -736,11 +735,8 @@ inline status db::get(string_view key, std::function<get_v_function> f) noexcept
 
 inline status db::get(string_view key, std::string *value) noexcept
 {
-	std::pair<status, std::string *> ctx = {status::NOT_FOUND, value};
-
-	pmemkv_get(this->_db, key.data(), key.size(), call_get_copy, &ctx);
-
-	return ctx.first;
+	return static_cast<status>(
+		pmemkv_get(this->_db, key.data(), key.size(), call_get_copy, value));
 }
 
 inline status db::put(string_view key, string_view value) noexcept
