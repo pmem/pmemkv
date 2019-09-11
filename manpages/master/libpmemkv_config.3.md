@@ -1,7 +1,7 @@
 ---
 layout: manual
 Content-Style: 'text/css'
-title: _MP(PMEMKV_CONFIG, 3)
+title: PMEMKV_CONFIG
 collection: libpmemkv
 header: PMEMKV_CONFIG
 date: pmemkv version 0.8
