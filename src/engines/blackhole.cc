@@ -136,7 +136,7 @@ status blackhole::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("get key=" << std::string(key.data(), key.size()));
 
-	return status::OK;
+	return status::NOT_FOUND;
 }
 
 status blackhole::put(string_view key, string_view value)
