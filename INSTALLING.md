@@ -33,6 +33,8 @@ Building from Sources
 * [memkind](https://github.com/memkind/memkind) - Volatile memory manager (required by vsmap & vcmap engines)
 * Used only for development & testing:
 	* [pandoc](https://pandoc.org/) - markup converter to generate manpages
+	* [doxygen](http://www.doxygen.nl/) - tool for generating documentation from annotated C++ sources
+	* [graphviz](https://www.graphviz.org/) - open source graph visualization software required by _doxygen_
 	* [perl](https://www.perl.org/) - for whitespace checker script
 	* [clang format 8.0](https://clang.llvm.org/docs/ClangFormat.html) - to format and check coding style
 
