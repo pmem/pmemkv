@@ -34,7 +34,7 @@ date: pmemkv version 0.8
 [comment]: <> ((INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE)
 [comment]: <> (OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.)
 
-[comment]: <> (libpmemkv_config.3 -- man page for libpmemkv configuration API)
+[comment]: <> (libpmemkv_json_config.3 -- man page for libpmemkv_json_config configuration API)
 
 [NAME](#name)<br />
 [SYNOPSIS](#synopsis)<br />
@@ -45,28 +45,14 @@ date: pmemkv version 0.8
 
 # NAME #
 
-**pmemkv_config** - Configuration API for libpmemkv
+**pmemkv_json_config** - Configuration API for libpmemkv_json_config
 
 # SYNOPSIS #
 
 ```c
-#include <libpmemkv.h>
+#include <libpmemkv_json_config.h>
 
-pmemkv_config *pmemkv_config_new(void);
-void pmemkv_config_delete(pmemkv_config *config);
-int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *value,
-			size_t value_size);
-int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value,
-			void (*deleter)(void *));
-int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value);
-int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value);
-int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value);
-int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **value,
-			size_t *value_size);
-int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **value);
-int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value);
-int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value);
-int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);
+int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);
 ```
 
 For general pmemkv description and engines descriptions see **libpmemkv**(7).
@@ -86,62 +72,14 @@ of keys (null-terminated strings) to values. A value can be:
 List of options which are required by pmemkv database is specific to an engine.
 Every engine has documented all supported config parameters (please see **libpmemkv**(7) for details).
 
-`pmemkv_config *pmemkv_config_new(void);`
-:	Creates an instance of configuration for pmemkv database.
+`int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);`
 
-	On failure, NULL is returned.
-
-`void pmemkv_config_delete(pmemkv_config *config);`
-:	Deletes pmemkv_config. Should be called ONLY for configs which were not
-	passed to pmemkv_open (as this function moves ownership of the config to
-	the database).
-
-`int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value);`
-
-:	Puts uint64_t value `value` to pmemkv_config at key `key`.
-
-`int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value);`
-
-:	Puts int64_t value `value` to pmemkv_config at key `key`.
-
-`int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value);`
-
-:	Puts null-terminated string to pmemkv_config. The string is copied to the config.
-
-`int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *value, size_t value_size);`
-
-:	Puts copy of binary data pointed by `value` to pmemkv_config. `value_size`
-	specifies size of the data.
-
-`int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value, void (*deleter)(void *));`
-
-:	Puts `value` to pmemkv_config. `value` can point to arbitrary object.
-	`deleter` parameter specifies function which will be called for `value`
-	when the config is destroyed (using pmemkv_config_delete).
-
-`int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value);`
-
-:	Gets value of a config item with key `key`. Value is copied to variable pointed by
-	`value`.
-
-`int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value);`
-
-:	Gets value of a config item with key `key`. Value is copied to variable pointed by
-	`value`.
-
-`int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);`
-
-:	Gets pointer to a null-terminated string. The string is not copied. After successful call
-	`value` points to string stored in pmemkv_config.
-
-`int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **value, size_t *value_size);`
-
-:	Gets pointer to binary data. Data is not copied. After successful call
-	`*value` points to data stored in pmemkv_config and `value_size` holds size of the data.
-
-`int pmemkv_config_get_object(pmemkv_config *config, const char *key, const void **value);`
-
-:	Gets pointer to an object. After successful call, `*value` points to the object.
+:	Parses JSON string and puts all items found in JSON into `config`. Allowed types
+	in JSON strings and their corresponding types in pmemkv_config are:
+	+ **number** -- int64 or uint64
+	+ **string** -- const char *,
+	+ **object** -- (another JSON string) -> pointer to pmemkv_config (can be obtained using pmemkv_config_get_object)
+	+ **True**, **False** -- int64
 
 Config items stored in pmemkv_config, which were put using a specific function can be obtained
 only using corresponding pmemkv_config_get_ function (for example, config items put using pmemkv_config_put_object
@@ -164,7 +102,6 @@ Possible return values are:
 
 ```c
 #include <libpmemkv.h>
-#include <libpmemkv_json_config.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -248,4 +185,4 @@ int main(){
 
 # SEE ALSO #
 
-**libpmemkv**(7), **libpmemkv**(3) , **libpmemkv_json_config**(3) and **<http://pmem.io>**
+**libpmemkv**(7), **libpmemkv**(3) and **<http://pmem.io>**
