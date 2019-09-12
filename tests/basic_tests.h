@@ -91,45 +91,31 @@ static Basic basic_tests[] = {
 #endif // ENGINE_VCMAP
 #ifdef ENGINE_TREE3
 	{
-		.path = "/dev/shm",
+		.path = "/dev/shm/file",
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "tree3",
 		.key_length = 100,
 		.value_length = 100,
 		.test_data_size = 20,
-		.pretest_remove_path = false,
+		.pretest_remove_path = true,
 		.name = "Tree3TestShm100bKey100bValue",
 		.tracers = "",
 	},
 #endif // ENGINE_TREE3
 #ifdef ENGINE_STREE
 	{
-		.path = "/dev/shm",
+		.path = "/dev/shm/file",
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "stree",
-		.key_length = 100,
-		.value_length = 100,
+		.key_length = 20,
+		.value_length = 200,
 		.test_data_size = 20,
-		.pretest_remove_path = false,
-		.name = "StreeTestShm100bKey100bValue",
+		.pretest_remove_path = true,
+		.name = "StreeTestShm20bKey200bValue",
 		.tracers = "",
 	},
 #endif // ENGINE_STREE
-#ifdef ENGINE_CACHING
-	{
-		.path = "/dev/shm",
-		.size = (uint64_t)(1024 * 1024 * 1024),
-		.force_create = 1,
-		.engine = "caching",
-		.key_length = 100,
-		.value_length = 100,
-		.test_data_size = 20,
-		.pretest_remove_path = false,
-		.name = "CachingShm100bKey100bValue",
-		.tracers = "",
-	},
-#endif // ENGINE_CHACHING
 };
 #endif // BASIC_TESTS_H_
