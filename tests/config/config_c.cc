@@ -68,9 +68,6 @@ TEST_F(ConfigCTest, SimpleTest_TRACERS_M)
 	ret = pmemkv_config_put_int64(config, "int", 123);
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
 
-	ret = pmemkv_config_put_double(config, "double", 12.43);
-	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
-
 	custom_type *ptr = new custom_type;
 	ptr->a = 10;
 	ptr->b = 'a';
@@ -96,11 +93,6 @@ TEST_F(ConfigCTest, SimpleTest_TRACERS_M)
 	ret = pmemkv_config_get_int64(config, "int", &value_int);
 	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
 	ASSERT_EQ(value_int, 123);
-
-	double value_double;
-	ret = pmemkv_config_get_double(config, "double", &value_double);
-	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
-	ASSERT_EQ(value_double, 12.43);
 
 	custom_type *value_custom_ptr;
 	ret = pmemkv_config_get_object(config, "object_ptr", (void **)&value_custom_ptr);
@@ -206,10 +198,6 @@ TEST_F(ConfigCTest, NotFoundTest_TRACERS_M)
 
 	size_t my_uint;
 	ret = pmemkv_config_get_uint64(config, "non-existent-uint", &my_uint);
-	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_FOUND);
-
-	double value_double;
-	ret = pmemkv_config_get_double(config, "non-existent-double", &value_double);
 	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_FOUND);
 
 	custom_type *my_object;

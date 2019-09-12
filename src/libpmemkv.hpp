@@ -131,7 +131,6 @@ public:
 		void (*deleter)(void *) = [](T *value) { delete value; }) noexcept;
 	status put_uint64(const std::string &key, std::uint64_t value) noexcept;
 	status put_int64(const std::string &key, std::int64_t value) noexcept;
-	status put_double(const std::string &key, double value) noexcept;
 	status put_string(const std::string &key, const std::string &value) noexcept;
 
 	template <typename T>
@@ -142,7 +141,6 @@ public:
 
 	status get_uint64(const std::string &key, std::uint64_t &value) const noexcept;
 	status get_int64(const std::string &key, std::int64_t &value) const noexcept;
-	status get_double(const std::string &key, double &value) const noexcept;
 	status get_string(const std::string &key, std::string &value) const noexcept;
 
 	pmemkv_config *release() noexcept;
@@ -350,23 +348,6 @@ inline status config::put_int64(const std::string &key, std::int64_t value) noex
 }
 
 /**
- * Puts double value to a config.
- *
- * @param[in] key The string representing config item's name.
- * @param[in] value The double value.
- *
- * @return pmem::kv::status
- */
-inline status config::put_double(const std::string &key, double value) noexcept
-{
-	if (init() != 0)
-		return status::FAILED;
-
-	return static_cast<status>(
-		pmemkv_config_put_double(this->_config, key.data(), value));
-}
-
-/**
  * Puts string value to a config.
  *
  * @param[in] key The string representing config item's name.
@@ -468,23 +449,6 @@ inline status config::get_int64(const std::string &key, std::int64_t &value) con
 
 	return static_cast<status>(
 		pmemkv_config_get_int64(this->_config, key.data(), &value));
-}
-
-/**
- * Gets double value from a config item with key name.
- *
- * @param[in] key The string representing config item's name.
- * @param[out] value The double value.
- *
- * @return pmem::kv::status
- */
-inline status config::get_double(const std::string &key, double &value) const noexcept
-{
-	if (this->_config == nullptr)
-		return status::NOT_FOUND;
-
-	return static_cast<status>(
-		pmemkv_config_get_double(this->_config, key.data(), &value));
 }
 
 /**

@@ -60,14 +60,12 @@ int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value
 			void (*deleter)(void *));
 int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value);
 int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value);
-int pmemkv_config_put_double(pmemkv_config *config, const char *key, double value);
 int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value);
 int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **value,
 			size_t *value_size);
 int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **value);
 int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value);
 int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value);
-int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *value);
 int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);
 int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);
 ```
@@ -82,7 +80,6 @@ of keys (null-terminated strings) to values. A value can be:
 
 + **uint64_t**
 + **int64_t**
-+ **double**
 + **c-style string**
 + **binary data**
 + **pointer to an object** (with accompanying deleter function)
@@ -107,10 +104,6 @@ Every engine has documented all supported config parameters (please see **libpme
 `int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value);`
 
 :	Puts int64_t value `value` to pmemkv_config at key `key`.
-
-`int pmemkv_config_put_double(pmemkv_config *config, const char *key, double value);`
-
-:	Puts double value `value` to pmemkv_config at key `key`.
 
 `int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value);`
 
@@ -137,11 +130,6 @@ Every engine has documented all supported config parameters (please see **libpme
 :	Gets value of a config item with key `key`. Value is copied to variable pointed by
 	`value`.
 
-`int pmemkv_config_get_double(pmemkv_config *config, const char *key, double *value);`
-
-:	Gets value of a config item with key `key`. Value is copied to variable pointed by
-	`value`.
-
 `int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);`
 
 :	Gets pointer to a null-terminated string. The string is not copied. After successful call
@@ -160,14 +148,14 @@ Every engine has documented all supported config parameters (please see **libpme
 
 :	Parses JSON string and puts all items found in JSON into `config`. Allowed types
 	in JSON strings and their corresponding types in pmemkv_config are:
-	+ **number** -- int64 for integral types and double for floating points,
+	+ **number** -- int64 or uint64
 	+ **string** -- const char *,
 	+ **object** -- (another JSON string) -> pointer to pmemkv_config (can be obtained using pmemkv_config_get_object)
 	+ **True**, **False** -- int64
 
 Config items stored in pmemkv_config, which were put using a specific function can be obtained
-only using corresponding pmemkv_config_get_ function (for example, config items put using pmemkv_config_put_double
-can only be obtained using pmemkv_config_get_double). Exception from this rule
+only using corresponding pmemkv_config_get_ function (for example, config items put using pmemkv_config_put_object
+can only be obtained using pmemkv_config_get_object). Exception from this rule
 are functions for uint64 and int64. If value put by pmemkv_config_put_int64 is in uint64_t range
 it can be obtained using pmemkv_config_get_uint64 and vice versa.
 
