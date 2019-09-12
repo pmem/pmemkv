@@ -66,7 +66,7 @@ option(ENGINE_STREE "enable experimental stree engine" OFF)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 
 option(DEVELOPER_MODE "enable developer's checks" OFF)
-option(CONFIG_FROM_JSON "enable support to load config from json file" ON)
+option(BUILD_JSON_CONFIG "enable building the 'libpmemkv_json_config' library" ON)
 
 if(ENGINE_CMAP)
 	add_definitions(-DENGINE_CMAP)
@@ -103,9 +103,6 @@ if(ENGINE_TREE3)
 	message(STATUS "TREE3 engine is ON")
 else()
 	message(STATUS "TREE3 engine is OFF")
-endif()
-if(CONFIG_FROM_JSON)
-	add_definitions(-DCONFIG_FROM_JSON)
 endif()
 
 set(SOURCE_FILES
@@ -189,11 +186,7 @@ include(FindThreads)
 include(CheckCXXSourceCompiles)
 include(GNUInstallDirs)
 
-if(CONFIG_FROM_JSON)
-	include(rapidjson)
-	set(PKG_CONFIG_REQUIRES RapidJSON)
-endif()
-
+set(PKG_CONFIG_REQUIRES)
 set(DEB_DEPENDS)
 set(RPM_DEPENDS)
 
@@ -316,10 +309,6 @@ add_library(pmemkv SHARED ${SOURCE_FILES})
 target_link_libraries(pmemkv PRIVATE
 	-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv.map)
 
-if(CONFIG_FROM_JSON)
-	target_link_libraries(pmemkv PRIVATE ${RapidJSON_LIBRARIES})
-endif()
-
 if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3)
 	target_link_libraries(pmemkv PRIVATE ${LIBPMEMOBJ++_LIBRARIES})
 endif()
@@ -355,6 +344,35 @@ install(TARGETS pmemkv
 		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+if(BUILD_JSON_CONFIG)
+	include(rapidjson)
+	add_definitions(-DBUILD_JSON_CONFIG)
+	set(PKG_CONFIG_JSON_REQUIRES "pmemkv;RapidJSON")
+
+	set(SOURCE_FILES_JSON_CONFIG
+		src/libpmemkv_json_config.cc
+		src/libpmemkv_json_config.h
+		src/out.cc
+		src/out.h
+	)
+
+	add_library(pmemkv_json_config SHARED ${SOURCE_FILES_JSON_CONFIG})
+	target_link_libraries(pmemkv_json_config PRIVATE pmemkv ${RapidJSON_LIBRARIES}
+		-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv_json_config.map)
+	set_target_properties(pmemkv_json_config
+		PROPERTIES PUBLIC_HEADER "src/libpmemkv_json_config.h")
+
+	configure_file(libpmemkv_json_config.pc.in libpmemkv_json_config.pc @ONLY)
+
+	install(FILES ${CMAKE_BINARY_DIR}/libpmemkv_json_config.pc
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
+	install(TARGETS pmemkv_json_config
+		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 
 configure_file(
 	"${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"

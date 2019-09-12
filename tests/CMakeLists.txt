@@ -173,8 +173,12 @@ set(TEST_FILES
 	engines/blackhole_test.cc
 	config/config_c.cc
 	config/config_cpp.cc
-	config/json_to_config.cc
 )
+
+if(BUILD_JSON_CONFIG)
+	list(APPEND TEST_FILES config/json_to_config.cc)
+endif()
+
 # add each engine's tests source files separately
 if(ENGINE_VSMAP)
 	list(APPEND TEST_FILES engines/vsmap_test.cc)
@@ -236,7 +240,11 @@ gtest_discover_tests(pmemcheck NO_PRETTY_VALUES TEST_SUFFIX _PMEMCHECK)
 gtest_discover_tests(drd NO_PRETTY_VALUES TEST_SUFFIX _DRD)
 gtest_discover_tests(helgrind NO_PRETTY_VALUES TEST_SUFFIX _HELGRIND)
 
-target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
+if(BUILD_JSON_CONFIG)
+	target_link_libraries(pmemkv_test pmemkv pmemkv_json_config libgtest ${CMAKE_DL_LIBS})
+else()
+	target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
+endif()
 
 if(ENGINE_CMAP)
 	target_link_libraries(pmemkv_test ${LIBPMEMOBJ++_LIBRARIES})

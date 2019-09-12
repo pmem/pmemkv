@@ -67,7 +67,6 @@ int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **valu
 int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value);
 int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value);
 int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);
-int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);
 ```
 
 For general description of pmemkv and available engines see **libpmemkv**(7).
@@ -144,15 +143,6 @@ Every engine has documented all supported config parameters (please see **libpme
 
 :	Gets pointer to an object. After successful call, `*value` points to the object.
 
-`int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);`
-
-:	Parses JSON string and puts all items found in JSON into `config`. Allowed types
-	in JSON strings and their corresponding types in pmemkv_config are:
-	+ **number** -- int64 or uint64
-	+ **string** -- const char *,
-	+ **object** -- (another JSON string) -> pointer to pmemkv_config (can be obtained using pmemkv_config_get_object)
-	+ **True**, **False** -- int64
-
 Config items stored in pmemkv_config, which were put using a specific function can be obtained
 only using corresponding pmemkv_config_get_ function (for example, config items put using pmemkv_config_put_object
 can only be obtained using pmemkv_config_get_object). Exception from this rule
@@ -174,6 +164,7 @@ Possible return values are:
 
 ```c
 #include <libpmemkv.h>
+#include <libpmemkv_json_config.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -257,4 +248,4 @@ int main(){
 
 # SEE ALSO #
 
-**libpmemkv**(7), **libpmemkv**(3) and **<http://pmem.io>**
+**libpmemkv**(7), **libpmemkv**(3) , **libpmemkv_json_config**(3) and **<http://pmem.io>**
