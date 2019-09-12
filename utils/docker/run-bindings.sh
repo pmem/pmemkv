@@ -35,7 +35,7 @@
 #
 
 PREFIX=/usr
-ruby_version=0.8
+ruby_version=10cfb602130c96848fbd8350df2ed83f18c9f7cf
 jni_version=0.8
 java_version=0.8
 nodejs_version=d6063f4d165338929ef7607b954cc86d3ebba5f9
