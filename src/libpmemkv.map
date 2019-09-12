@@ -36,7 +36,6 @@ LIBPMEMKV_0.8 {
 	global:
 		pmemkv_close;
 		pmemkv_config_delete;
-		pmemkv_config_from_json;
 		pmemkv_config_get_data;
 		pmemkv_config_get_int64;
 		pmemkv_config_get_object;
