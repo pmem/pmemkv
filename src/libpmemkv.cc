@@ -32,13 +32,6 @@
 
 #include <memory>
 
-#ifdef CONFIG_FROM_JSON
-#include <rapidjson/document.h>
-#include <rapidjson/istreamwrapper.h>
-#include <rapidjson/ostreamwrapper.h>
-#include <rapidjson/writer.h>
-#endif
-
 #include <sys/stat.h>
 
 #include "config.h"
@@ -118,94 +111,6 @@ void pmemkv_config_delete(pmemkv_config *config)
 	} catch (...) {
 		ERR() << "Unspecified failure";
 	}
-}
-
-int pmemkv_config_from_json(pmemkv_config *config, const char *json)
-{
-#ifdef CONFIG_FROM_JSON
-	rapidjson::Document doc;
-	rapidjson::Value::ConstMemberIterator itr;
-
-	assert(config && json);
-
-	try {
-		if (doc.Parse(json).HasParseError())
-			return PMEMKV_STATUS_CONFIG_PARSING_ERROR;
-
-		for (itr = doc.MemberBegin(); itr != doc.MemberEnd(); ++itr) {
-			if (itr->value.IsString()) {
-				auto value = itr->value.GetString();
-
-				auto status = pmemkv_config_put_string(
-					config, itr->name.GetString(), value);
-				if (status != PMEMKV_STATUS_OK)
-					throw std::runtime_error(
-						"Inserting string to the config failed");
-			} else if (itr->value.IsInt64()) {
-				auto value = itr->value.GetInt64();
-
-				auto status = pmemkv_config_put_int64(
-					config, itr->name.GetString(), value);
-				if (status != PMEMKV_STATUS_OK)
-					throw std::runtime_error(
-						"Inserting int to the config failed");
-			} else if (itr->value.IsTrue() || itr->value.IsFalse()) {
-				auto value = itr->value.GetBool();
-
-				auto status = pmemkv_config_put_int64(
-					config, itr->name.GetString(), value);
-				if (status != PMEMKV_STATUS_OK)
-					throw std::runtime_error(
-						"Inserting bool to the config failed");
-			} else if (itr->value.IsObject()) {
-				rapidjson::StringBuffer sb;
-				rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
-				itr->value.Accept(writer);
-
-				auto sub_cfg = pmemkv_config_new();
-
-				if (sub_cfg == nullptr) {
-					ERR() << "Cannot allocate subconfig";
-					return PMEMKV_STATUS_FAILED;
-				}
-
-				auto status =
-					pmemkv_config_from_json(sub_cfg, sb.GetString());
-				if (status != PMEMKV_STATUS_OK) {
-					pmemkv_config_delete(sub_cfg);
-					throw std::runtime_error(
-						"Cannot parse subconfig");
-				}
-
-				status = pmemkv_config_put_object(
-					config, itr->name.GetString(), sub_cfg,
-					(void (*)(void *)) & pmemkv_config_delete);
-				if (status != PMEMKV_STATUS_OK)
-					throw std::runtime_error(
-						"Inserting a new entry to the config failed");
-			} else {
-				static std::string kTypeNames[] = {
-					"Null",  "False",  "True",  "Object",
-					"Array", "String", "Number"};
-
-				throw std::runtime_error(
-					"Unsupported data type in JSON string: " +
-					kTypeNames[itr->value.GetType()]);
-			}
-		}
-	} catch (const std::exception &exc) {
-		ERR() << exc.what();
-		return PMEMKV_STATUS_CONFIG_PARSING_ERROR;
-	} catch (...) {
-		ERR() << "Unspecified failure";
-		return PMEMKV_STATUS_CONFIG_PARSING_ERROR;
-	}
-
-	return PMEMKV_STATUS_OK;
-#else
-	ERR() << "pmemkv_config_from_json requires compile option CONFIG_FROM_JSON=ON";
-	return PMEMKV_STATUS_NOT_SUPPORTED;
-#endif
 }
 
 int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *value,
