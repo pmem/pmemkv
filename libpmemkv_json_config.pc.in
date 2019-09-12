@@ -1,0 +1,12 @@
+version=@VERSION@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@
+includedir=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: pmemkv_json_config
+Description: pmemkv_json_config - helper library for pmemkv
+Version: ${version}
+URL: http://github.com/pmem/pmemkv
+Requires: pmemkv RapidJSON
+Libs: -L${libdir} -lpmemkv_json_config
+Cflags: -I${includedir}

@@ -31,6 +31,7 @@
  */
 
 #include "../../src/libpmemkv.hpp"
+#include "../../src/libpmemkv_json_config.h"
 #include "lib_acl.hpp"
 #include "gtest/gtest.h"
 #include <libmemcached/memcached.h>
