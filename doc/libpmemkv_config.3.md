@@ -70,7 +70,7 @@ int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char 
 int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);
 ```
 
-For general pmemkv description and engines descriptions see **libpmemkv**(7).
+For general description of pmemkv and available engines see **libpmemkv**(7).
 For description of pmemkv core API see **libpmemkv**(3).
 
 # DESCRIPTION #
