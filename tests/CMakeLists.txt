@@ -173,8 +173,12 @@ set(TEST_FILES
 	engines/blackhole_test.cc
 	config/config_c.cc
 	config/config_cpp.cc
-	config/json_to_config.cc
 )
+
+if(BUILD_JSON_CONFIG)
+	list(APPEND TEST_FILES config/json_to_config.cc)
+endif()
+
 # add each engine's tests source files separately
 if(ENGINE_VSMAP)
 	list(APPEND TEST_FILES engines/vsmap_test.cc)
@@ -187,8 +191,12 @@ if(ENGINE_CMAP)
 	list(APPEND TEST_FILES engines/cmap_pmemobj_test.cc)
 endif()
 if(ENGINE_CACHING)
-	if(ENGINE_TREE3)
+	if(ENGINE_TREE3 AND BUILD_JSON_CONFIG)
 		list(APPEND TEST_FILES engines-experimental/caching_test.cc)
+	elseif(NOT BUILD_JSON_CONFIG)
+		message(WARNING
+			"Caching tests require the 'libpmemkv_json_config' library, which is not built, "
+			"hence they are disabled. If you want to run them use -DBUILD_JSON_CONFIG=ON option.")
 	else()
 		message(WARNING
 			"Caching tests are set to work with TREE3 engine, which is disabled, hence "
@@ -238,6 +246,9 @@ gtest_discover_tests(helgrind NO_PRETTY_VALUES TEST_SUFFIX _HELGRIND)
 
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
 
+if(BUILD_JSON_CONFIG)
+	target_link_libraries(pmemkv_test pmemkv_json_config)
+endif()
 if(ENGINE_CMAP)
 	target_link_libraries(pmemkv_test ${LIBPMEMOBJ++_LIBRARIES})
 endif()
