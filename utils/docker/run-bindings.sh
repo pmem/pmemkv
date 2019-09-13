@@ -35,10 +35,10 @@
 #
 
 PREFIX=/usr
-ruby_version=10cfb602130c96848fbd8350df2ed83f18c9f7cf
-jni_version=0.8
+ruby_version=05816856295214d5c114ed488067706df132a784
+jni_version=7805af51fa2ffa25473f0c615dc2354b64bdd17c
 java_version=0.8
-nodejs_version=d6063f4d165338929ef7607b954cc86d3ebba5f9
+nodejs_version=73e9c89bff23ffc32a013a60e2bb1d8eca8df1fa
 
 set -e
 
