@@ -46,7 +46,7 @@ build rpm and deb packages and explains usage of experimental engines and pool s
 Language Bindings
 -----------------
 
-`pmemkv` is written in C/C++ and includes bindings for Java, Ruby, and Node.js applications.
+`pmemkv` is written in C/C++ and includes bindings for Java, Node.js, Python, and Ruby applications.
 
 ![pmemkv-bindings](https://user-images.githubusercontent.com/12031346/60346522-9b015280-99bb-11e9-9aab-8b8c9c9b7acd.png)
 
@@ -60,9 +60,10 @@ Abovementioned bindings are maintained in separate GitHub repos, but are still k
 in sync with the main `pmemkv` distribution.
 
 * Java - https://github.com/pmem/pmemkv-java
+    * \+ Java Native Interface - https://github.com/pmem/pmemkv-jni
 * Node.js - https://github.com/pmem/pmemkv-nodejs
+* Python - https://github.com/pmem/pmemkv-python
 * Ruby - https://github.com/pmem/pmemkv-ruby
-* Python - https://github.com/pmem/pmemkv-python (coming soon!)
 
 <a name="engines"></a>
 
@@ -89,6 +90,6 @@ all language bindings and utilities. Engines are loaded by name at runtime.
 Tools and Utilities
 -------------------
 
-Benchmarks, examples and other helpful utilities are available here:
+Benchmarks' scripts and other helpful utilities are available here:
 
 https://github.com/pmem/pmemkv-tools
