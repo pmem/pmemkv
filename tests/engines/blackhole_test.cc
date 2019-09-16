@@ -43,7 +43,7 @@ public:
 	{
 		auto s = kv.open("blackhole");
 		if (s != status::OK)
-			throw std::runtime_error(db::errormsg());
+			throw std::runtime_error(errormsg());
 	}
 };
 
