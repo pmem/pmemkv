@@ -40,7 +40,7 @@ static thread_local std::string str;
 
 std::ostream &out_err_stream(const char *func)
 {
-	error_stream.clear();
+	error_stream.str(std::string());
 
 	error_stream << "[" << func << "] ";
 
