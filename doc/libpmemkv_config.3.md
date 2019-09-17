@@ -162,19 +162,23 @@ Possible return values are:
 
 # EXAMPLE #
 
+The following example can be found also in the file: `examples/pmemkv_config_c/pmemkv_config.c`.
+
 ```c
+#include <assert.h>
 #include <libpmemkv.h>
 #include <libpmemkv_json_config.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 /* deleter for int pointer */
-void free_int_ptr(void *ptr) {
+void free_int_ptr(void *ptr)
+{
 	free(ptr);
 }
 
-int main(){
+int main()
+{
 	pmemkv_config *config = pmemkv_config_new();
 	assert(config != NULL);
 
@@ -195,19 +199,20 @@ int main(){
 	status = pmemkv_config_get_data(config, "binary", &data, &data_size);
 	assert(status == PMEMKV_STATUS_OK);
 	assert(data_size == 3);
-	assert(((const char*)data)[0] == 'A');
+	assert(((const char *)data)[0] == 'A');
 
 	int *int_ptr = malloc(sizeof(int));
 	*int_ptr = 10;
 
-	/* Put pointer to dynamically allocated object, free_int_ptr is called on pmemkv_config_delete */
+	/* Put pointer to dynamically allocated object, free_int_ptr is called on
+	 * pmemkv_config_delete */
 	status = pmemkv_config_put_object(config, "int_ptr", int_ptr, &free_int_ptr);
 	assert(status == PMEMKV_STATUS_OK);
 
 	int *get_int_ptr;
 
 	/* Get pointer to object stored in config */
-	status = pmemkv_config_get_object(config, "int_ptr", &get_int_ptr);
+	status = pmemkv_config_get_object(config, "int_ptr", (void **)&get_int_ptr);
 	assert(status == PMEMKV_STATUS_OK);
 	assert(*get_int_ptr == 10);
 
@@ -217,8 +222,7 @@ int main(){
 	assert(config_from_json != NULL);
 
 	/* Parse JSON and put all items found into config_from_json */
-	status = pmemkv_config_from_json(config_from_json,
-		"{\"path\":\"/dev/shm\",\
+	status = pmemkv_config_from_json(config_from_json, "{\"path\":\"/dev/shm\",\
 		 \"size\":1073741824,\
 		 \"subconfig\":{\
 			\"size\":1073741824\
@@ -234,7 +238,8 @@ int main(){
 	pmemkv_config *subconfig;
 
 	/* Get pointer to nested configuration "subconfig" */
-	status = pmemkv_config_get_object(config_from_json, "subconfig", &subconfig);
+	status = pmemkv_config_get_object(config_from_json, "subconfig",
+					  (void **)&subconfig);
 	assert(status == PMEMKV_STATUS_OK);
 
 	size_t sub_size;
