@@ -127,6 +127,8 @@ compile_example_standalone pmemkv_basic_c
 run_example_standalone pmemkv_basic_c
 compile_example_standalone pmemkv_basic_cpp
 run_example_standalone pmemkv_basic_cpp
+compile_example_standalone pmemkv_config_c
+run_example_standalone pmemkv_config_c
 
 # Uninstall libraries
 cd $WORKDIR/build
