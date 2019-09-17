@@ -20,10 +20,10 @@ A volatile engine that accepts an unlimited amount of data, but never returns an
 It is always enabled (no CMake option is specified to enable/disable this engine).
 
 * `put` and `remove` always returns `status::OK`
-* `get` always returns `status::OK`
+* `get` always returns `status::NOT_FOUND`
 * `exists` always returns `status::NOT_FOUND`
-* `get_*` never trigger callbacks and always returns `status::OK`
-* `count` always returns 0
+* `get_*` never triggers callback and always returns `status::OK`
+* `count_*` always returns `status::OK` and `cnt` is set to 0
 
 ### Configuration
 
