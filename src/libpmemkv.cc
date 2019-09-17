@@ -87,10 +87,10 @@ static inline int catch_and_return_status(const char *func_name, Function &&f)
 		return PMEMKV_STATUS_OUT_OF_MEMORY;
 	} catch (std::runtime_error &e) {
 		out_err_stream(func_name) << e.what();
-		return PMEMKV_STATUS_FAILED;
+		return PMEMKV_STATUS_UNKNOWN_ERROR;
 	} catch (...) {
 		out_err_stream(func_name) << "Unspecified error";
-		return PMEMKV_STATUS_FAILED;
+		return PMEMKV_STATUS_UNKNOWN_ERROR;
 	}
 }
 
@@ -166,7 +166,7 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 
 				if (sub_cfg == nullptr) {
 					ERR() << "Cannot allocate subconfig";
-					return PMEMKV_STATUS_FAILED;
+					return PMEMKV_STATUS_UNKNOWN_ERROR;
 				}
 
 				auto status =
@@ -427,7 +427,7 @@ static void get_copy_callback(const char *v, size_t vb, void *arg)
 		if (c->buffer != nullptr)
 			memcpy(c->buffer, v, vb);
 	} else {
-		c->result = PMEMKV_STATUS_FAILED;
+		c->result = PMEMKV_STATUS_UNKNOWN_ERROR;
 	}
 }
 

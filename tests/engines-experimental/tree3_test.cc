@@ -1037,7 +1037,7 @@ const std::string LONGSTR =
 TEST_F(TreeFullTest, OutOfSpace1Test)
 {
 	tx_alloc_should_fail = true;
-	ASSERT_TRUE(kv->put("100", "?") == status::FAILED);
+	ASSERT_TRUE(kv->put("100", "?") != status::OK);
 	tx_alloc_should_fail = false;
 	Validate();
 }
@@ -1046,7 +1046,7 @@ TEST_F(TreeFullTest, OutOfSpace2aTest)
 {
 	ASSERT_TRUE(kv->remove("100") == status::OK);
 	tx_alloc_should_fail = true;
-	ASSERT_TRUE(kv->put("100", LONGSTR) == status::FAILED);
+	ASSERT_TRUE(kv->put("100", LONGSTR) != status::OK);
 	tx_alloc_should_fail = false;
 	ASSERT_TRUE(kv->put("100", "100!") == status::OK) << errormsg();
 	Validate();
@@ -1057,7 +1057,7 @@ TEST_F(TreeFullTest, OutOfSpace2bTest)
 	ASSERT_TRUE(kv->remove("100") == status::OK);
 	ASSERT_TRUE(kv->put("100", "100!") == status::OK) << errormsg();
 	tx_alloc_should_fail = true;
-	ASSERT_TRUE(kv->put("100", LONGSTR) == status::FAILED);
+	ASSERT_TRUE(kv->put("100", LONGSTR) != status::OK);
 	tx_alloc_should_fail = false;
 	Validate();
 }
@@ -1065,7 +1065,7 @@ TEST_F(TreeFullTest, OutOfSpace2bTest)
 TEST_F(TreeFullTest, OutOfSpace3aTest)
 {
 	tx_alloc_should_fail = true;
-	ASSERT_TRUE(kv->put("100", LONGSTR) == status::FAILED);
+	ASSERT_TRUE(kv->put("100", LONGSTR) != status::OK);
 	tx_alloc_should_fail = false;
 	Validate();
 }
@@ -1074,7 +1074,7 @@ TEST_F(TreeFullTest, OutOfSpace3bTest)
 {
 	tx_alloc_should_fail = true;
 	for (int i = 0; i <= 99999; i++) {
-		ASSERT_TRUE(kv->put("123456", LONGSTR) == status::FAILED);
+		ASSERT_TRUE(kv->put("123456", LONGSTR) != status::OK);
 	}
 	tx_alloc_should_fail = false;
 	ASSERT_TRUE(kv->remove("4567") == status::OK);
@@ -1085,7 +1085,7 @@ TEST_F(TreeFullTest, OutOfSpace3bTest)
 TEST_F(TreeFullTest, OutOfSpace4aTest)
 {
 	tx_alloc_should_fail = true;
-	ASSERT_TRUE(kv->put(std::to_string(LARGE_LIMIT + 1), "1") == status::FAILED);
+	ASSERT_TRUE(kv->put(std::to_string(LARGE_LIMIT + 1), "1") != status::OK);
 	tx_alloc_should_fail = false;
 	Validate();
 }
@@ -1094,8 +1094,7 @@ TEST_F(TreeFullTest, OutOfSpace4bTest)
 {
 	tx_alloc_should_fail = true;
 	for (int i = 0; i <= 99999; i++) {
-		ASSERT_TRUE(kv->put(std::to_string(LARGE_LIMIT + 1), "1") ==
-			    status::FAILED);
+		ASSERT_TRUE(kv->put(std::to_string(LARGE_LIMIT + 1), "1") != status::OK);
 	}
 	tx_alloc_should_fail = false;
 	ASSERT_TRUE(kv->remove("98765") == status::OK);
@@ -1106,8 +1105,8 @@ TEST_F(TreeFullTest, OutOfSpace4bTest)
 TEST_F(TreeFullTest, OutOfSpace5aTest)
 {
 	tx_alloc_should_fail = true;
-	ASSERT_TRUE(kv->put(LONGSTR, "1") == status::FAILED);
-	ASSERT_TRUE(kv->put(LONGSTR, LONGSTR) == status::FAILED);
+	ASSERT_TRUE(kv->put(LONGSTR, "1") != status::OK);
+	ASSERT_TRUE(kv->put(LONGSTR, LONGSTR) != status::OK);
 	tx_alloc_should_fail = false;
 	Validate();
 }
@@ -1116,8 +1115,8 @@ TEST_F(TreeFullTest, OutOfSpace5bTest)
 {
 	tx_alloc_should_fail = true;
 	for (int i = 0; i <= 99999; i++) {
-		ASSERT_TRUE(kv->put(LONGSTR, "1") == status::FAILED);
-		ASSERT_TRUE(kv->put(LONGSTR, LONGSTR) == status::FAILED);
+		ASSERT_TRUE(kv->put(LONGSTR, "1") != status::OK);
+		ASSERT_TRUE(kv->put(LONGSTR, LONGSTR) != status::OK);
 	}
 	tx_alloc_should_fail = false;
 	ASSERT_TRUE(kv->remove("34567") == status::OK);
@@ -1128,7 +1127,7 @@ TEST_F(TreeFullTest, OutOfSpace5bTest)
 TEST_F(TreeFullTest, OutOfSpace6Test)
 {
 	tx_alloc_should_fail = true;
-	ASSERT_TRUE(kv->put(LONGSTR, "?") == status::FAILED);
+	ASSERT_TRUE(kv->put(LONGSTR, "?") != status::OK);
 	tx_alloc_should_fail = false;
 	std::string str;
 	ASSERT_TRUE(kv->get(LONGSTR, &str) == status::NOT_FOUND);
