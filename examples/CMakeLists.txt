@@ -40,6 +40,9 @@ add_check_whitespace(examples-pmemkv_basic_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemk
 add_cppstyle(examples-pmemkv_pmemobj_basic_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.cpp)
 add_check_whitespace(examples-pmemkv_pmemobj_basic_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.cpp)
 
+add_cppstyle(examples-pmemkv_config_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.c)
+add_check_whitespace(examples-pmemkv_config_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.c)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
 function(add_example name)
@@ -58,3 +61,6 @@ if(ENGINE_CMAP)
 	add_example(pmemkv_pmemobj_basic_cpp pmemkv_pmemobj_cpp/pmemkv_pmemobj_basic.cpp)
 	target_link_libraries(example-pmemkv_pmemobj_basic_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
 endif()
+
+add_example(pmemkv_config_c pmemkv_config_c/pmemkv_config.c)
+target_link_libraries(example-pmemkv_config_c pmemkv pmemkv_json_config)
