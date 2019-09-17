@@ -35,10 +35,10 @@
 #
 
 PREFIX=/usr
-ruby_version=10cfb602130c96848fbd8350df2ed83f18c9f7cf
-jni_version=0.8
+ruby_version="Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR"
+jni_version="Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR"
 java_version=0.8
-nodejs_version=d6063f4d165338929ef7607b954cc86d3ebba5f9
+nodejs_version="Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR"
 
 set -e
 
@@ -64,7 +64,7 @@ echo "################################################################"
 echo "### Verifying building and installing of the pmemkv-ruby binding"
 echo "################################################################"
 cd ~
-git clone https://github.com/pmem/pmemkv-ruby.git
+git clone https://github.com/ldorau/pmemkv-ruby.git
 cd pmemkv-ruby
 git checkout $ruby_version
 mkdir -p vendor/cache/
@@ -77,7 +77,7 @@ echo "################################################################"
 echo "### Verifying building and installing of the pmemkv-jni bindings"
 echo "################################################################"
 cd ~
-git clone https://github.com/pmem/pmemkv-jni.git
+git clone https://github.com/ldorau/pmemkv-jni.git
 cd pmemkv-jni
 git checkout $jni_version
 
@@ -104,7 +104,7 @@ echo "##################################################################"
 echo "### Verifying building and installing of the pmemkv-nodejs binding"
 echo "##################################################################"
 cd ~
-git clone https://github.com/pmem/pmemkv-nodejs.git
+git clone https://github.com/ldorau/pmemkv-nodejs.git
 cd pmemkv-nodejs
 git checkout $nodejs_version
 npm install --save
