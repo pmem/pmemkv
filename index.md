@@ -10,9 +10,9 @@ Rather than being tied to a single language or backing implementation,
 **pmemkv** provides different options for language bindings and storage engines.
 
 The C API of pmemkv is documented in the following manuals:
-* [libpmemkv.3](https://pmem.io/pmemkv/manpages/master/libpmemkv.3.html)
-* [libpmemkv.7](https://pmem.io/pmemkv/manpages/master/libpmemkv.7.html)
-* [libpmemkv_config.3](https://pmem.io/pmemkv/manpages/master/libpmemkv_config.3.html)
+* [libpmemkv.3](https://pmem.io/pmemkv/master/manpages/libpmemkv.3.html)
+* [libpmemkv.7](https://pmem.io/pmemkv/master/manpages/libpmemkv.7.html)
+* [libpmemkv_config.3](https://pmem.io/pmemkv/master/manpages/libpmemkv_config.3.html)
 
 The C++ API of pmemkv is documented in the Doxygen documentation available
 [here](http://pmem.io/pmemkv/master/doxygen/index.html).
