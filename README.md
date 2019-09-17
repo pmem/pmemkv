@@ -14,6 +14,9 @@ Overview
 Rather than being tied to a single language or backing implementation, `pmemkv`
 provides different options for language bindings and storage engines.
 
+There is also a small helper library `pmemkv_json_config` provided.
+See its [manual](doc/libpmemkv_json_config.3.md) for details.
+
 <ul>
 <li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">Installation</a></li>
 <li><a href="#bindings">Language Bindings</a></li>

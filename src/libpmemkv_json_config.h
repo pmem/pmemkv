@@ -30,56 +30,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../src/libpmemkv.hpp"
-#include "../../src/libpmemkv_json_config.h"
-#include "gtest/gtest.h"
+#ifndef LIBPMEMKV_JSON_H
+#define LIBPMEMKV_JSON_H
 
-class JsonToConfigTest : public testing::Test {
-public:
-	pmemkv_config *config;
+#include "libpmemkv.h"
 
-	JsonToConfigTest()
-	{
-		config = pmemkv_config_new();
-	}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-	~JsonToConfigTest()
-	{
-		pmemkv_config_delete(config);
-	}
-};
+int pmemkv_config_from_json(pmemkv_config *config, const char *jsonconfig);
+const char *pmemkv_config_from_json_errormsg(void);
 
-TEST_F(JsonToConfigTest, SimpleTest_TRACERS_M)
-{
-	auto ret = pmemkv_config_from_json(
-		config, "{\"string\": \"abc\", \"int\": 123, \"bool\": true}");
-	// XXX: extend by adding "false", subconfig, negative value
-	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
+#ifdef __cplusplus
+} /* end extern "C" */
+#endif
 
-	const char *value_string;
-	ret = pmemkv_config_get_string(config, "string", &value_string);
-	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
-	ASSERT_TRUE(std::string(value_string) == "abc");
-
-	int64_t value_int;
-	ret = pmemkv_config_get_int64(config, "int", &value_int);
-	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
-	ASSERT_EQ(value_int, 123);
-
-	int64_t value_bool;
-	ret = pmemkv_config_get_int64(config, "bool", &value_bool);
-	ASSERT_EQ(ret, PMEMKV_STATUS_OK);
-	ASSERT_EQ(value_bool, 1);
-
-	ret = pmemkv_config_get_int64(config, "string", &value_int);
-	ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
-}
-
-TEST_F(JsonToConfigTest, DoubleTest_TRACERS_M)
-{
-	auto ret = pmemkv_config_from_json(config, "{\"double\": 12.34}");
-	ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_PARSING_ERROR);
-	ASSERT_EQ(
-		std::string(pmemkv_config_from_json_errormsg()),
-		"[pmemkv_config_from_json] Unsupported data type in JSON string: Number");
-}
+#endif /* LIBPMEMKV_JSON_H */

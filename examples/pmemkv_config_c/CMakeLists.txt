@@ -28,40 +28,16 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-#
-# src/libpmemkv.map -- linker map file for libpmemkv
-#
-LIBPMEMKV_0.8 {
-	global:
-		pmemkv_close;
-		pmemkv_config_delete;
-		pmemkv_config_get_data;
-		pmemkv_config_get_int64;
-		pmemkv_config_get_object;
-		pmemkv_config_get_string;
-		pmemkv_config_get_uint64;
-		pmemkv_config_new;
-		pmemkv_config_put_data;
-		pmemkv_config_put_int64;
-		pmemkv_config_put_object;
-		pmemkv_config_put_string;
-		pmemkv_config_put_uint64;
-		pmemkv_count_above;
-		pmemkv_count_all;
-		pmemkv_count_below;
-		pmemkv_count_between;
-		pmemkv_errormsg;
-		pmemkv_exists;
-		pmemkv_get;
-		pmemkv_get_above;
-		pmemkv_get_all;
-		pmemkv_get_below;
-		pmemkv_get_between;
-		pmemkv_get_copy;
-		pmemkv_open;
-		pmemkv_put;
-		pmemkv_remove;
-	local:
-		*;
-};
+
+cmake_minimum_required(VERSION 3.5)
+project(pmemkv_config C)
+
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+	pkg_check_modules(LIBPMEMKV REQUIRED libpmemkv libpmemkv_json_config)
+else()
+	message(FATAL_ERROR "pkg-config not found")
+endif()
+
+add_executable(pmemkv_config_c pmemkv_config.c)
+target_link_libraries(pmemkv_config_c ${LIBPMEMKV_LIBRARIES})
