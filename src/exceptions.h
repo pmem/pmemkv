@@ -45,7 +45,7 @@ namespace internal
 {
 
 struct error : std::runtime_error {
-	error(const std::string &msg, int status_code = PMEMKV_STATUS_FAILED)
+	error(const std::string &msg, int status_code = PMEMKV_STATUS_UNKNOWN_ERROR)
 	    : std::runtime_error(msg), status_code(status_code)
 	{
 	}

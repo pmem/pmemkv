@@ -205,7 +205,7 @@ status caching::get_all(get_kv_callback *callback, void *arg)
 		for (const auto &itr : removingKeys) {
 			auto s = basePtr->remove(itr);
 			if (s != status::OK)
-				return status::FAILED;
+				return s;
 		}
 	}
 
