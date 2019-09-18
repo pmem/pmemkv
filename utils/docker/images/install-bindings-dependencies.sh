@@ -41,6 +41,7 @@ RUBY_VERSION=0.8
 PMEMKV_VERSION=0.8
 JNI_VERSION=0.8
 JAVA_VERSION=0.8
+NODEJS_VERSION=0.8
 
 PREFIX=/usr
 rm -rf /opt/bindings
@@ -100,13 +101,25 @@ mvn install
 mv -v ~/.m2/repository /opt/bindings/java/
 cd ..
 
+# build and install pmemkv-nodejs
+git clone https://github.com/pmem/pmemkv-nodejs.git
+cd pmemkv-nodejs
+git checkout $NODEJS_VERSION
+npm install --save
+npm test
+mkdir -p /opt/bindings/nodejs/
+cp -rv ./node_modules /opt/bindings/nodejs/
+cd ..
+
 # uninstall all installed things
 cd pmemkv/build
 make uninstall
 cd ../../pmemkv-jni
 make uninstall
+cd ../../pmemkv-nodejs
+npm uninstall
 cd ..
-rm -rf pmemkv pmemkv-jni pmemkv-java
+rm -rf pmemkv pmemkv-jni pmemkv-java pmemkv-nodejs
 
 # make the /opt/bindings directory world-readable
 chmod -R a+r /opt/bindings
