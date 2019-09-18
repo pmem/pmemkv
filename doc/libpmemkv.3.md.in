@@ -179,7 +179,8 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 
 :	Copies value of record with key `k` of length `kb` to user provided buffer.
 	`buffer` points to the value buffer, `buffer_size` specifies its size and `*value_size`
-	is filled in by this function. If the value doesn't fit in the provided buffer then this function returns PMEMKV\_STATUS\_FAILED.
+	is filled in by this function. If the value doesn't fit in the provided buffer
+	then this function returns PMEMKV\_STATUS\_UNKNOWN\_ERROR.
 	Otherwise, in absence of any errors, PMEMKV\_STATUS\_OK is returned.
 	Other possible return values are described in the *ERRORS* section.
 	This function is guaranteed to be implemented by all engines.
@@ -204,7 +205,7 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 Each function, except for *pmemkv_close()* and *pmemkv_errormsg()*, returns one of the following status codes:
 
 + **PMEMKV_STATUS_OK** -- no error
-+ **PMEMKV_STATUS_FAILED** -- unspecified error
++ **PMEMKV_STATUS_UNKNOWN_ERROR** -- unknown error
 + **PMEMKV_STATUS_NOT_FOUND** -- record not found
 + **PMEMKV_STATUS_NOT_SUPPORTED** -- function is not implemented by current engine
 + **PMEMKV_STATUS_INVALID_ARGUMENT** -- argument to function has wrong value

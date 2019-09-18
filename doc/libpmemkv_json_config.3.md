@@ -92,7 +92,7 @@ cmake .. -DBUILD_JSON_CONFIG=OFF
 The *pmemkv_config_from_json()* function returns status. Possible return values are:
 
 + **PMEMKV_STATUS_OK** -- no error
-+ **PMEMKV_STATUS_FAILED** -- unspecified error
++ **PMEMKV_STATUS_UNKNOWN_ERROR** -- unknown error
 + **PMEMKV_STATUS_CONFIG_PARSING_ERROR** -- parsing config data failed
 
 # EXAMPLE #
