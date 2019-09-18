@@ -65,3 +65,20 @@ TEST_F(BlackholeTest, SimpleTest_TRACERS_MP)
 	ASSERT_TRUE(kv.remove("key1") == status::OK);
 	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
 }
+
+TEST_F(BlackholeTest, ErrormsgTest)
+{
+	auto s = kv.open("non-existing name");
+	ASSERT_TRUE(s == pmem::kv::status::WRONG_ENGINE_NAME);
+
+	auto err = pmem::kv::errormsg();
+	ASSERT_TRUE(err.size() > 0);
+
+	s = kv.open("non-existing name");
+	ASSERT_TRUE(s == pmem::kv::status::WRONG_ENGINE_NAME);
+	s = kv.open("non-existing name");
+	ASSERT_TRUE(s == pmem::kv::status::WRONG_ENGINE_NAME);
+
+	/* Test whether errormsg is cleared correctly after each error */
+	ASSERT_TRUE(pmem::kv::errormsg() == err);
+}
