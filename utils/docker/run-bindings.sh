@@ -107,5 +107,6 @@ cd ~
 git clone https://github.com/pmem/pmemkv-nodejs.git
 cd pmemkv-nodejs
 git checkout $nodejs_version
+cp -r /opt/bindings/nodejs/node_modules .
 npm install --save
 npm test
