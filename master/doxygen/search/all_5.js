@@ -6,7 +6,6 @@ var searchData=
   ['get_5fbelow',['get_below',['../classpmem_1_1kv_1_1db.html#ad8c8aba193345dc3c30336ab349b6066',1,'pmem::kv::db::get_below(string_view key, get_kv_callback *callback, void *arg) noexcept'],['../classpmem_1_1kv_1_1db.html#a95e15e03d045b838b870960ac638c289',1,'pmem::kv::db::get_below(string_view key, std::function&lt; get_kv_function &gt; f) noexcept']]],
   ['get_5fbetween',['get_between',['../classpmem_1_1kv_1_1db.html#aadc338822098cc657cdb944962319b70',1,'pmem::kv::db::get_between(string_view key1, string_view key2, get_kv_callback *callback, void *arg) noexcept'],['../classpmem_1_1kv_1_1db.html#a2af6ddc03f117464155f79abdba66c7d',1,'pmem::kv::db::get_between(string_view key1, string_view key2, std::function&lt; get_kv_function &gt; f) noexcept']]],
   ['get_5fdata',['get_data',['../classpmem_1_1kv_1_1config.html#ac97a0c8d0e9ac021a739c5ff7f054f85',1,'pmem::kv::config']]],
-  ['get_5fdouble',['get_double',['../classpmem_1_1kv_1_1config.html#a3df3ba1e4e422df99ac1bf29b44d8fcb',1,'pmem::kv::config']]],
   ['get_5fint64',['get_int64',['../classpmem_1_1kv_1_1config.html#a701c6892d4c18dac018f0362ab25acc4',1,'pmem::kv::config']]],
   ['get_5fkv_5fcallback',['get_kv_callback',['../namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d',1,'pmem::kv']]],
   ['get_5fkv_5ffunction',['get_kv_function',['../namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4',1,'pmem::kv']]],
