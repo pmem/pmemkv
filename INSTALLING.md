@@ -30,15 +30,15 @@ Building from Sources
 * [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings for PMDK (required by all engines except blackhole and caching)
 * [TBB](https://github.com/01org/tbb) - Thread Building Blocks (requiered by cmap & vcmap engines)
 * [memkind](https://github.com/memkind/memkind) - Volatile memory manager (required by vsmap & vcmap engines)
-* (optional) [RapidJSON](https://github.com/tencent/rapidjson) - JSON parser (required by `libpmemkv_json_config` helper library)
+* [RapidJSON](https://github.com/tencent/rapidjson) - JSON parser (required by `libpmemkv_json_config` helper library)
 * Used only for development & testing:
 	* [pandoc](https://pandoc.org/) - markup converter to generate manpages
 	* [doxygen](http://www.doxygen.nl/) - tool for generating documentation from annotated C++ sources
-	* [graphviz](https://www.graphviz.org/) - open source graph visualization software required by _doxygen_
+	* [graphviz](https://www.graphviz.org/) - graph visualization software required by _doxygen_
 	* [perl](https://www.perl.org/) - for whitespace checker script
 	* [clang format 8.0](https://clang.llvm.org/docs/ClangFormat.html) - to format and check coding style
 
-**Building and running tests**
+**Building pmemkv and running tests**
 
 ```sh
 git clone https://github.com/pmem/pmemkv
