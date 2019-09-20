@@ -42,9 +42,19 @@ struct Basic {
 	const char *engine;
 	size_t key_length, value_length;
 	size_t test_data_size;
-	bool pretest_remove_path;
 	std::string name;
 	std::string tracers;
+	bool use_file;
+
+	std::string abs_path;
+	std::string get_path()
+	{
+		abs_path = path;
+		if (use_file) {
+			abs_path.append("/" + name);
+		}
+		return abs_path;
+	}
 };
 
 std::ostream &operator<<(std::ostream &stream, const Basic &val)

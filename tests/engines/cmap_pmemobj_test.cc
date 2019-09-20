@@ -33,17 +33,19 @@
 #include "../../src/libpmemkv.hpp"
 #include "../../src/pmemobj_engine.h"
 #include "gtest/gtest.h"
+#include <cstdio>
 #include <libpmemobj++/persistent_ptr.hpp>
 #include <libpmemobj++/transaction.hpp>
 
-#include <cstdio>
-
 using namespace pmem::kv;
 
-const std::string PATH = "/dev/shm/pmemkv";
+extern std::string test_path;
 const size_t SIZE = 1024ull * 1024ull * 512ull;
 
 class CMapPmemobjTest : public testing::Test {
+private:
+	std::string PATH = test_path + "/cmap_pmemobj_test";
+
 public:
 	db *kv;
 
