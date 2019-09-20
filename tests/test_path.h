@@ -30,48 +30,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_SUITE_H
-#define TEST_SUITE_H
+#ifndef TEST_PATH_H
+#define TEST_PATH_H
 
 #include <string>
 
-struct Basic {
-	const char *path;
-	/* size parameter passed to engine config */
-	uint64_t size;
-	/* force_create parameter passed to engine config */
-	uint64_t force_create;
-	/* Engine name */
-	const char *engine;
-	/* Key length */
-	size_t key_length;
-	/* Max size of data  */
-	size_t value_length;
-	/* size of actually inserted data */
-	size_t test_data_size;
-	/* test name */
-	std::string name;
-	/* Marker for build system, which tracers should be used */
-	std::string tracers;
-	/* parameter, which specifies if engine should treat path as file or
-	 * directory */
-	bool use_file;
+extern std::string test_path;
+extern std::string extended_test_path;
 
-	std::string abs_path;
-	std::string get_path()
-	{
-		abs_path = path;
-		if (use_file) {
-			abs_path.append("/" + name);
-		}
-		return abs_path;
-	}
-};
-
-std::ostream &operator<<(std::ostream &stream, const Basic &val)
-{
-	stream << val.name;
-	return stream;
-}
-
-#endif // TEST_SUITE_H
+#endif // TEST_PATH_H
