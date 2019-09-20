@@ -36,13 +36,14 @@
 
 using namespace pmem::kv;
 
-const std::string PATH = "/dev/shm/pmemkv";
+extern std::string test_path;
 const size_t SIZE = 1024ull * 1024ull * 512ull;
 const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
 
 template <size_t POOL_SIZE>
 class STreeBaseTest : public testing::Test {
 public:
+	std::string PATH = test_path + "/stree_test";
 	db *kv;
 
 	STreeBaseTest()
