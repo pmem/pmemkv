@@ -32,17 +32,21 @@
 
 #include "../../src/libpmemkv.hpp"
 #include "gtest/gtest.h"
+#include <string>
 
 #include <cstdio>
 
 using namespace pmem::kv;
 
-const std::string PATH = "/dev/shm/pmemkv";
+extern std::string test_path;
 const size_t SIZE = 1024ull * 1024ull * 512ull;
 const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
 
 template <size_t POOL_SIZE>
 class CMapBaseTest : public testing::Test {
+private:
+	std::string PATH = test_path + "/cmap_test";
+
 public:
 	db *kv;
 
@@ -66,9 +70,7 @@ protected:
 	void Start(bool create)
 	{
 		config cfg;
-
 		auto cfg_s = cfg.put_string("path", PATH);
-
 		if (cfg_s != status::OK)
 			throw std::runtime_error("putting 'path' to config failed");
 

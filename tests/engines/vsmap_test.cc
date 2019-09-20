@@ -32,20 +32,27 @@
 
 #include "../../src/libpmemkv.hpp"
 #include "gtest/gtest.h"
+#include <sys/stat.h>
+
+#include <cstdio>
 
 using namespace pmem::kv;
 
-const std::string PATH = "/dev/shm";
+extern std::string test_path;
 const size_t SIZE = 1024ull * 1024ull * 512ull;
 const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
 
 template <size_t POOL_SIZE>
 class VSMapBaseTest : public testing::Test {
+private:
+	std::string PATH = test_path + "/vsmap_test";
+
 public:
 	db *kv;
 
 	VSMapBaseTest()
 	{
+		mkdir(PATH.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 		config cfg;
 
 		auto cfg_s = cfg.put_string("path", PATH);
@@ -67,6 +74,7 @@ public:
 	~VSMapBaseTest()
 	{
 		delete kv;
+		std::remove(PATH.c_str());
 	}
 };
 
