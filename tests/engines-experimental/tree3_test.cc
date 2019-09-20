@@ -37,8 +37,7 @@
 
 using namespace pmem::kv;
 
-const std::string PATH = "/dev/shm/pmemkv";
-const std::string PATH_CACHED = "/tmp/pmemkv";
+extern std::string test_path;
 const size_t SIZE = ((size_t)(1024 * 1024 * 1104));
 
 config getConfig(const std::string &path, size_t size, bool create = true)
@@ -67,6 +66,7 @@ config getConfig(const std::string &path, size_t size, bool create = true)
 
 class TreeEmptyTest : public testing::Test {
 public:
+	std::string PATH = test_path + "/tree3_empty_test";
 	TreeEmptyTest()
 	{
 		std::remove(PATH.c_str());
@@ -75,7 +75,9 @@ public:
 
 class TreeTest : public testing::Test {
 public:
-public:
+	std::string PATH = test_path + "/tree3_test";
+	const std::string PATH_CACHED = test_path + "/tree3_cached_test";
+
 	db *kv;
 
 	TreeTest()
@@ -954,6 +956,9 @@ TEST_F(TreeTest, LargeDescendingAfterRecoveryTest)
 
 class TreeFullTest : public testing::Test {
 public:
+	std::string PATH = test_path + "/tree3_full_test";
+	const std::string PATH_CACHED = test_path + "/tree3_full_cached_test";
+
 	db *kv;
 
 	TreeFullTest()
