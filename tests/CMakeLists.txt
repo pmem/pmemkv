@@ -238,11 +238,11 @@ add_dependencies(drd pmemkv_test)
 add_executable(helgrind valgrind_wrapper.cc)
 add_dependencies(helgrind pmemkv_test)
 
-gtest_discover_tests(pmemkv_test NO_PRETTY_VALUES)
-gtest_discover_tests(memcheck NO_PRETTY_VALUES TEST_SUFFIX _MEMCHECK)
-gtest_discover_tests(pmemcheck NO_PRETTY_VALUES TEST_SUFFIX _PMEMCHECK)
-gtest_discover_tests(drd NO_PRETTY_VALUES TEST_SUFFIX _DRD)
-gtest_discover_tests(helgrind NO_PRETTY_VALUES TEST_SUFFIX _HELGRIND)
+gtest_discover_tests(pmemkv_test EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES)
+gtest_discover_tests(memcheck EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _MEMCHECK)
+gtest_discover_tests(pmemcheck EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _PMEMCHECK)
+gtest_discover_tests(drd EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _DRD)
+gtest_discover_tests(helgrind EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _HELGRIND)
 
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
 
