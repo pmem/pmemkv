@@ -87,8 +87,8 @@ using get_v_callback = pmemkv_get_v_callback;
  * Functions' return status, providing information on errors or success.
  */
 enum class status {
-	OK = PMEMKV_STATUS_OK,		     /**< no error */
-	FAILED = PMEMKV_STATUS_FAILED,       /**< unspecified error */
+	OK = PMEMKV_STATUS_OK,			     /**< no error */
+	UNKNOWN_ERROR = PMEMKV_STATUS_UNKNOWN_ERROR, /**< unknown error */
 	NOT_FOUND = PMEMKV_STATUS_NOT_FOUND, /**< record (or config item) not found */
 	NOT_SUPPORTED = PMEMKV_STATUS_NOT_SUPPORTED, /**< function is not implemented by
 							current engine */
@@ -284,7 +284,7 @@ inline status config::put_data(const std::string &key, const T *value,
 			       const std::size_t count) noexcept
 {
 	if (init() != 0)
-		return status::FAILED;
+		return status::UNKNOWN_ERROR;
 
 	return static_cast<status>(pmemkv_config_put_data(
 		this->_config, key.data(), (void *)value, count * sizeof(T)));
@@ -305,7 +305,7 @@ inline status config::put_object(const std::string &key, T *value,
 				 void (*deleter)(void *)) noexcept
 {
 	if (init() != 0)
-		return status::FAILED;
+		return status::UNKNOWN_ERROR;
 
 	return static_cast<status>(pmemkv_config_put_object(this->_config, key.data(),
 							    (void *)value, deleter));
@@ -322,7 +322,7 @@ inline status config::put_object(const std::string &key, T *value,
 inline status config::put_uint64(const std::string &key, std::uint64_t value) noexcept
 {
 	if (init() != 0)
-		return status::FAILED;
+		return status::UNKNOWN_ERROR;
 
 	return static_cast<status>(
 		pmemkv_config_put_uint64(this->_config, key.data(), value));
@@ -339,7 +339,7 @@ inline status config::put_uint64(const std::string &key, std::uint64_t value) no
 inline status config::put_int64(const std::string &key, std::int64_t value) noexcept
 {
 	if (init() != 0)
-		return status::FAILED;
+		return status::UNKNOWN_ERROR;
 
 	return static_cast<status>(
 		pmemkv_config_put_int64(this->_config, key.data(), value));
@@ -357,7 +357,7 @@ inline status config::put_string(const std::string &key,
 				 const std::string &value) noexcept
 {
 	if (init() != 0)
-		return status::FAILED;
+		return status::UNKNOWN_ERROR;
 
 	return static_cast<status>(
 		pmemkv_config_put_string(this->_config, key.data(), value.data()));

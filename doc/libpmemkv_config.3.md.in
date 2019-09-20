@@ -155,7 +155,7 @@ Each function, except for *pmemkv_config_new()* and *pmemkv_config_delete()*, re
 Possible return values are:
 
 + **PMEMKV_STATUS_OK** -- no error
-+ **PMEMKV_STATUS_FAILED** -- unspecified error
++ **PMEMKV_STATUS_UNKNOWN_ERROR** -- unknown error
 + **PMEMKV_STATUS_NOT_FOUND** -- record (or config item) not found
 + **PMEMKV_STATUS_CONFIG_PARSING_ERROR** -- parsing data to config failed
 + **PMEMKV_STATUS_CONFIG_TYPE_ERROR** -- config item has different type than expected
