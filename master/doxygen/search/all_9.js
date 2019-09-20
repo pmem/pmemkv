@@ -1,7 +1,11 @@
 var searchData=
 [
-  ['ok',['OK',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231ae0aa021e21dddbd6d8cecec71e9cf564',1,'pmem::kv']]],
-  ['open',['open',['../classpmem_1_1kv_1_1db.html#ad7fcaea07272f24181851a560a3acd88',1,'pmem::kv::db::open(const std::string &amp;engine_name) noexcept'],['../classpmem_1_1kv_1_1db.html#abe4eeed0b0fe9bdc12faa98610c342cf',1,'pmem::kv::db::open(const std::string &amp;engine_name, config &amp;&amp;cfg) noexcept']]],
-  ['operator_3d',['operator=',['../classpmem_1_1kv_1_1string__view.html#a975f4d95bb95dc146cf8a840602a6b85',1,'pmem::kv::string_view::operator=()'],['../classpmem_1_1kv_1_1config.html#a70eef7c989f4cc6a27b12a944a138442',1,'pmem::kv::config::operator=(const config &amp;other)=delete'],['../classpmem_1_1kv_1_1config.html#a206c04471a1fab7400a0e0e87760fda9',1,'pmem::kv::config::operator=(config &amp;&amp;other) noexcept'],['../classpmem_1_1kv_1_1db.html#ab55eb305c493fa37ca51ea26e3006a7a',1,'pmem::kv::db::operator=(const db &amp;other)=delete'],['../classpmem_1_1kv_1_1db.html#abae80185b91e8cb0de54026576118e1b',1,'pmem::kv::db::operator=(db &amp;&amp;other) noexcept']]],
-  ['out_5fof_5fmemory',['OUT_OF_MEMORY',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231ac56ddb8056b120c9d5fee05981f219c6',1,'pmem::kv']]]
+  ['kv',['kv',['../namespacepmem_1_1kv.html',1,'pmem']]],
+  ['pmem',['pmem',['../namespacepmem.html',1,'']]],
+  ['put',['put',['../classpmem_1_1kv_1_1db.html#a31dbecf3c960dec47d4a04328b9efd92',1,'pmem::kv::db']]],
+  ['put_5fdata',['put_data',['../classpmem_1_1kv_1_1config.html#af6c8419518a384cdce1f36cd2a1e4545',1,'pmem::kv::config']]],
+  ['put_5fint64',['put_int64',['../classpmem_1_1kv_1_1config.html#ad9020906aa23b44157ce25fc83c425c8',1,'pmem::kv::config']]],
+  ['put_5fobject',['put_object',['../classpmem_1_1kv_1_1config.html#a6623d29c14151c185cab4d8ea69251b4',1,'pmem::kv::config']]],
+  ['put_5fstring',['put_string',['../classpmem_1_1kv_1_1config.html#a6b14f4878bd1ba832e43da8bf2a6ffc9',1,'pmem::kv::config']]],
+  ['put_5fuint64',['put_uint64',['../classpmem_1_1kv_1_1config.html#a3b21e4344c87f542f6e2b6fc152e74a9',1,'pmem::kv::config']]]
 ];
