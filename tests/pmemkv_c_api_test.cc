@@ -32,8 +32,10 @@
 
 #include "../src/libpmemkv.h"
 #include "gtest/gtest.h"
+#include <cstdio>
 #include <map>
 #include <string>
+#include <sys/stat.h>
 
 // Tests and params' list
 #include "basic_tests.h"
@@ -41,15 +43,16 @@
 class PmemkvCApiTest : public ::testing::TestWithParam<Basic> {
 public:
 	std::map<std::string, int> init_status;
-
 	pmemkv_config *cfg = pmemkv_config_new();
 	pmemkv_db *db = NULL;
 	Basic params = GetParam();
+	std::string path;
 	PmemkvCApiTest()
 	{
-		if (params.pretest_remove_path)
-			std::remove(params.path);
-		init_status["path"] = pmemkv_config_put_string(cfg, "path", params.path);
+		path = params.get_path();
+		if (!params.use_file)
+			mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		init_status["path"] = pmemkv_config_put_string(cfg, "path", path.c_str());
 		init_status["size"] = pmemkv_config_put_uint64(cfg, "size", params.size);
 		init_status["force_create"] = pmemkv_config_put_uint64(
 			cfg, "force_create", params.force_create);
@@ -60,6 +63,7 @@ public:
 	~PmemkvCApiTest()
 	{
 		pmemkv_close(db);
+		std::remove(path.c_str());
 	}
 };
 
