@@ -120,7 +120,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DCOVERAGE=$COVERAGE \
 	-DDEVELOPER_MODE=1
 
-make -j2
+make -j$(nproc)
 ctest --output-on-failure
 sudo_password -S make install
 
@@ -157,7 +157,7 @@ CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DDEVELOPER_MODE=1 \
 	-DCXX_STANDARD=20
 
-make -j2
+make -j$(nproc)
 # Run basic tests
 ctest -R "SimpleTest"
 
@@ -178,7 +178,7 @@ CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DDEVELOPER_MODE=1 \
 	-DCXX_STANDARD=20
 
-make -j2
+make -j$(nproc)
 # Run basic tests
 ctest -R "SimpleTest"
 
@@ -212,7 +212,7 @@ do
 		-DENGINE_VCMAP=OFF \
 		-DENGINE_CMAP=OFF \
 		-D$engine_flag=ON
-	make -j2
+	make -j$(nproc)
 	# list all tests in this build
 	ctest -N
 	ctest -R wrong_engine_name_test --output-on-failure
@@ -237,7 +237,7 @@ cmake .. -DENGINE_VSMAP=ON \
 	-DENGINE_CMAP=ON \
 	-DENGINE_STREE=ON \
 	-DENGINE_TREE3=ON
-make -j2
+make -j$(nproc)
 # list all tests in this build
 ctest -N
 
