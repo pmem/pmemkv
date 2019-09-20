@@ -60,9 +60,9 @@ make -j2
 sudo_password -S make install
 
 echo
-echo "################################################################"
-echo "### Verifying building and installing of the pmemkv-ruby binding"
-echo "################################################################"
+echo "##################################################################"
+echo "### Verifying building and installing of the pmemkv-ruby bindings "
+echo "##################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-ruby.git
 cd pmemkv-ruby
@@ -73,9 +73,9 @@ bundle install --local
 bundle exec rspec
 
 echo
-echo "################################################################"
-echo "### Verifying building and installing of the pmemkv-jni bindings"
-echo "################################################################"
+echo "#################################################################"
+echo "### Verifying building and installing of the pmemkv-jni bindings "
+echo "#################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
@@ -88,9 +88,9 @@ make test
 sudo_password -S make install prefix=$PREFIX
 
 echo
-echo "#################################################################"
-echo "### Verifying building and installing of the pmemkv-java bindings"
-echo "#################################################################"
+echo "##################################################################"
+echo "### Verifying building and installing of the pmemkv-java bindings "
+echo "##################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
@@ -100,9 +100,9 @@ cp -r /opt/bindings/java/repository ~/.m2/
 mvn --offline install
 
 echo
-echo "##################################################################"
-echo "### Verifying building and installing of the pmemkv-nodejs binding"
-echo "##################################################################"
+echo "####################################################################"
+echo "### Verifying building and installing of the pmemkv-nodejs bindings "
+echo "####################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-nodejs.git
 cd pmemkv-nodejs
