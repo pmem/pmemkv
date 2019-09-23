@@ -75,6 +75,10 @@ public:
 	virtual status get(string_view key, get_v_callback *callback, void *arg) = 0;
 	virtual status put(string_view key, string_view value) = 0;
 	virtual status remove(string_view key) = 0;
+
+private:
+	void check_config_null(const std::string &engine_name,
+			       std::unique_ptr<internal::config> &cfg);
 };
 
 } /* namespace kv */
