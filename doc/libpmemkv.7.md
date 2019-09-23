@@ -155,11 +155,13 @@ Bindings for other languages are available on GitHub. Currently they support onl
 
 Existing bindings:
 
-+ Ruby - for details see <https://github.com/pmem/pmemkv-ruby>
-
 + JNI & Java - for details see <https://github.com/pmem/pmemkv-java>
 
 + Node.js - for details see <https://github.com/pmem/pmemkv-nodejs>
+
++ Python - for details see <https://github.com/pmem/pmemkv-python>
+
++ Ruby - for details see <https://github.com/pmem/pmemkv-ruby>
 
 # SEE ALSO #
 
