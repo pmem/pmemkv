@@ -40,8 +40,8 @@ set -e
 git clone https://github.com/pmem/libpmemobj-cpp
 cd libpmemobj-cpp
 
-# Add transaction_out_of_memory exception; July 15th
-git checkout 26c86b46997d25c818b246f2a143d2248503cc67
+# Merge pull request #430 from igchor/fix_string_sso_usage, 20.09.2019
+git checkout b29053fc2429e9cd710d1635a0fe8ec150735aec
 
 mkdir build
 cd build
