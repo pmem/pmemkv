@@ -173,5 +173,16 @@ TEST_P(PmemkvCApiTest, CheckNullDB)
 	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
 }
 
+TEST_P(PmemkvCApiTest, NullConfig)
+{
+	/* XXX solve it generically, for all tests */
+	if (params.engine == std::string("blackhole"))
+		return;
+	pmemkv_config *empty_cfg = NULL;
+	pmemkv_db *db = NULL;
+	int s = pmemkv_open(params.engine, empty_cfg, &db);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
+}
+
 INSTANTIATE_TEST_CASE_P(basic_tests, PmemkvCApiTest, ::testing::ValuesIn(basic_tests),
 			GetTestName());
