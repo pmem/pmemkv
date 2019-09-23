@@ -39,13 +39,6 @@
 #include "../out.h"
 #include "stree.h"
 
-#define DO_LOG 0
-#define LOG(msg)                                                                         \
-	do {                                                                             \
-		if (DO_LOG)                                                              \
-			std::cout << "[stree] " << msg << "\n";                          \
-	} while (0)
-
 using pmem::detail::conditional_add_to_tx;
 using pmem::obj::make_persistent_atomic;
 using pmem::obj::transaction;

@@ -46,6 +46,7 @@
 #include <libpmemobj++/persistent_ptr.hpp>
 #include <libpmemobj++/transaction.hpp>
 
+#undef LOG
 #define LOG(msg) std::cout << msg << std::endl
 
 using namespace pmem::kv;
