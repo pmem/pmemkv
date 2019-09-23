@@ -724,3 +724,11 @@ TEST_F(CMapLargeTest, LargeDescendingAfterRecoveryTest)
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == LARGE_LIMIT);
 }
+
+/* XXX port it to other engines */
+TEST_F(CMapTest, NullConfigTest)
+{
+	config empty_c_cfg;
+	auto s = kv->open("cmap", std::move(empty_c_cfg));
+	ASSERT_TRUE(s == status::INVALID_ARGUMENT) << errormsg();
+}
