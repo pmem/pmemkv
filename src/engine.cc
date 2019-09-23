@@ -101,34 +101,59 @@ engine_base::create_engine(const std::string &engine,
 			new pmem::kv::blackhole(std::move(cfg)));
 
 #ifdef ENGINE_CMAP
-	if (engine == "cmap")
+	if (engine == "cmap") {
+		if (!cfg) {
+			throw internal::invalid_argument(
+				"Config cannot be null for the '" + engine + "' engine");
+		}
 		return std::unique_ptr<engine_base>(new pmem::kv::cmap(std::move(cfg)));
+	}
 #endif
 
 #ifdef ENGINE_VSMAP
-	if (engine == "vsmap")
+	if (engine == "vsmap") {
+		if (!cfg)
+			throw internal::invalid_argument(
+				"Config cannot be null for the '" + engine + "' engine");
 		return std::unique_ptr<engine_base>(new pmem::kv::vsmap(std::move(cfg)));
+	}
 #endif
 
 #ifdef ENGINE_VCMAP
-	if (engine == "vcmap")
+	if (engine == "vcmap") {
+		if (!cfg)
+			throw internal::invalid_argument(
+				"Config cannot be null for the '" + engine + "' engine");
 		return std::unique_ptr<engine_base>(new pmem::kv::vcmap(std::move(cfg)));
+	}
 #endif
 
 #ifdef ENGINE_TREE3
-	if (engine == "tree3")
+	if (engine == "tree3") {
+		if (!cfg)
+			throw internal::invalid_argument(
+				"Config cannot be null for the '" + engine + "' engine");
 		return std::unique_ptr<engine_base>(new pmem::kv::tree3(std::move(cfg)));
+	}
 #endif
 
 #ifdef ENGINE_STREE
-	if (engine == "stree")
+	if (engine == "stree") {
+		if (!cfg)
+			throw internal::invalid_argument(
+				"Config cannot be null for the '" + engine + "' engine");
 		return std::unique_ptr<engine_base>(new pmem::kv::stree(std::move(cfg)));
+	}
 #endif
 
 #ifdef ENGINE_CACHING
-	if (engine == "caching")
+	if (engine == "caching") {
+		if (!cfg)
+			throw internal::invalid_argument(
+				"Config cannot be null for the '" + engine + "' engine");
 		return std::unique_ptr<engine_base>(
 			new pmem::kv::caching(std::move(cfg)));
+	}
 #endif
 
 	throw internal::wrong_engine_name("Unknown engine name \"" + engine +
