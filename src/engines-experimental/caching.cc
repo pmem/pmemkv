@@ -39,12 +39,6 @@
 #include <memory>
 #include <unistd.h>
 
-#define DO_LOG 0
-#define LOG(msg)                                                                         \
-	do {                                                                             \
-		if (DO_LOG)                                                              \
-			std::cout << "[caching] " << msg << "\n";                        \
-	} while (0)
 #define ZERO 0
 
 namespace pmem
