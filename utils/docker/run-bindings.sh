@@ -35,10 +35,12 @@
 #
 
 PREFIX=/usr
+
 RUBY_VERSION=99d1bfc05d116d35d0e96541ece9b9df831d95a0
 JNI_VERSION=78b81de8266ec690fb41b5f4e62948e200640cbe
 JAVA_VERSION=0.8
 NODEJS_VERSION=5cf32b58839617618fa4c40af620686a403564c6
+PYTHON_VERSION=834c48b2a8bba3714702a6ba8f406387d282130f
 
 set -e
 
@@ -110,3 +112,17 @@ git checkout $NODEJS_VERSION
 cp -r /opt/bindings/nodejs/node_modules .
 npm install --save
 npm test
+
+echo
+echo "####################################################################"
+echo "### Verifying building and installing of the pmemkv-python bindings "
+echo "####################################################################"
+cd ~
+git clone https://github.com/pmem/pmemkv-python.git
+cd pmemkv-python
+git checkout $PYTHON_VERSION
+python3 setup.py install --user
+cd tests
+python3 -m unittest -v pmemkv_tests.py
+cd ../examples
+PMEM_IS_PMEM_FORCE=1 python3 basic_example.py
