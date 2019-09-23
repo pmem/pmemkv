@@ -35,13 +35,6 @@
 
 #include <unistd.h>
 
-#define DO_LOG 0
-#define LOG(msg)                                                                         \
-	do {                                                                             \
-		if (DO_LOG)                                                              \
-			std::cout << "[cmap] " << msg << "\n";                           \
-	} while (0)
-
 namespace pmem
 {
 namespace kv
