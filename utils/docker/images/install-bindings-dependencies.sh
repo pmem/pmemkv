@@ -37,11 +37,20 @@
 
 set -e
 
-PMEMKV_VERSION=0.8
-RUBY_VERSION=0.8
-JNI_VERSION=0.8
-JAVA_VERSION=0.8
-NODEJS_VERSION=0.8
+# Merge pull request #442 from ldorau/Install-pmemkv-nodejs-dependencies-in-the-Docker-image, 23.09.2019
+PMEMKV_VERSION=a7746b7d7f2d40ebd1272cebffdc037c449c3915
+
+# Merge pull request #36 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
+RUBY_VERSION=99d1bfc05d116d35d0e96541ece9b9df831d95a0
+
+# Merge pull request #29 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
+JNI_VERSION=78b81de8266ec690fb41b5f4e62948e200640cbe
+
+# Merge pull request #26 from ldorau/Update-gitignore, 16.09.2019
+JAVA_VERSION=30c2a897574aa2552bd3e651e4e57f2469da5767
+
+# Merge pull request #34 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
+NODEJS_VERSION=5cf32b58839617618fa4c40af620686a403564c6
 
 PREFIX=/usr
 rm -rf /opt/bindings
