@@ -35,10 +35,10 @@
 #
 
 PREFIX=/usr
-ruby_version=99d1bfc05d116d35d0e96541ece9b9df831d95a0
-jni_version=78b81de8266ec690fb41b5f4e62948e200640cbe
-java_version=0.8
-nodejs_version=5cf32b58839617618fa4c40af620686a403564c6
+RUBY_VERSION=99d1bfc05d116d35d0e96541ece9b9df831d95a0
+JNI_VERSION=78b81de8266ec690fb41b5f4e62948e200640cbe
+JAVA_VERSION=0.8
+NODEJS_VERSION=5cf32b58839617618fa4c40af620686a403564c6
 
 set -e
 
@@ -66,7 +66,7 @@ echo "##################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-ruby.git
 cd pmemkv-ruby
-git checkout $ruby_version
+git checkout $RUBY_VERSION
 mkdir -p vendor/cache/
 cp -r /opt/bindings/ruby/* vendor/cache/
 bundle install --local
@@ -79,7 +79,7 @@ echo "#################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
-git checkout $jni_version
+git checkout $JNI_VERSION
 
 # XXX remove when bindings switched to using gtest installed in system
 # Copy Googletest to the current directory
@@ -94,7 +94,7 @@ echo "##################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
-git checkout $java_version
+git checkout $JAVA_VERSION
 mkdir -p ~/.m2/repository
 cp -r /opt/bindings/java/repository ~/.m2/
 mvn --offline install
@@ -106,7 +106,7 @@ echo "####################################################################"
 cd ~
 git clone https://github.com/pmem/pmemkv-nodejs.git
 cd pmemkv-nodejs
-git checkout $nodejs_version
+git checkout $NODEJS_VERSION
 cp -r /opt/bindings/nodejs/node_modules .
 npm install --save
 npm test
