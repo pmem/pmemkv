@@ -66,6 +66,7 @@ TEST_F(BlackholeTest, SimpleTest_TRACERS_MP)
 	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
 }
 
+/* XXX port it to other engines */
 TEST_F(BlackholeTest, ErrormsgTest)
 {
 	auto s = kv.open("non-existing name");
