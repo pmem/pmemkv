@@ -58,9 +58,15 @@ cp /opt/googletest/googletest-*.zip .
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-	-DCMAKE_INSTALL_PREFIX=$PREFIX
+	-DCMAKE_INSTALL_PREFIX=$PREFIX \
+	-DENGINE_CMAP=OFF \
+	-DENGINE_VCMAP=OFF \
+	-DENGINE_VSMAP=OFF \
+	-DENGINE_CACHING=OFF \
+	-DENGINE_STREE=OFF \
+	-DENGINE_TREE3=OFF
 make -j2
-make install
+make -j2 install
 
 #
 # 2) RUBY dependencies - all of the dependencies (gems) needed to run
