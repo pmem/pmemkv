@@ -211,3 +211,42 @@ TEST_F(ConfigCTest, NotFoundTest_TRACERS_M)
 	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_FOUND);
 	ASSERT_EQ(my_object_size, 0);
 }
+
+/* Test if null can be passed as config to pmemkv_config_* functions */
+TEST_F(ConfigCTest, NullConfigTest)
+{
+	auto ret = pmemkv_config_put_string(nullptr, "string", "abc");
+	ASSERT_EQ(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	ret = pmemkv_config_put_int64(nullptr, "int", 123);
+	ASSERT_EQ(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	custom_type *ptr = new custom_type;
+	ptr->a = 10;
+	ptr->b = 'a';
+	ret = pmemkv_config_put_object(nullptr, "object_ptr", ptr, nullptr);
+	ASSERT_EQ(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	ret = pmemkv_config_put_data(nullptr, "object", ptr, sizeof(*ptr));
+	ASSERT_EQ(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	const char *value_string;
+	ret = pmemkv_config_get_string(nullptr, "string", &value_string);
+	ASSERT_EQ(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	int64_t value_int;
+	ret = pmemkv_config_get_int64(nullptr, "int", &value_int);
+	ASSERT_EQ(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	custom_type *value_custom_ptr;
+	ret = pmemkv_config_get_object(nullptr, "object_ptr", (void **)&value_custom_ptr);
+	ASSERT_EQ(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	custom_type *value_custom;
+	size_t value_custom_size;
+	ret = pmemkv_config_get_data(nullptr, "object", (const void **)&value_custom,
+				     &value_custom_size);
+	ASSERT_EQ(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	delete ptr;
+}

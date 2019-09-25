@@ -116,6 +116,9 @@ void pmemkv_config_delete(pmemkv_config *config)
 int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *value,
 			   size_t value_size)
 {
+	if (!config)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		config_to_internal(config)->put_data(key, value, value_size);
 		return PMEMKV_STATUS_OK;
@@ -125,6 +128,9 @@ int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *v
 int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value,
 			     void (*deleter)(void *))
 {
+	if (!config)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		config_to_internal(config)->put_object(key, value, deleter);
 		return PMEMKV_STATUS_OK;
@@ -133,6 +139,9 @@ int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value
 
 int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value)
 {
+	if (!config)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		config_to_internal(config)->put_int64(key, value);
 		return PMEMKV_STATUS_OK;
@@ -141,6 +150,9 @@ int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t valu
 
 int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value)
 {
+	if (!config)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		config_to_internal(config)->put_uint64(key, value);
 		return PMEMKV_STATUS_OK;
@@ -149,6 +161,9 @@ int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t va
 
 int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value)
 {
+	if (!config)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		config_to_internal(config)->put_string(key, value);
 		return PMEMKV_STATUS_OK;
@@ -158,6 +173,9 @@ int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char 
 int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **value,
 			   size_t *value_size)
 {
+	if (!config)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return config_to_internal(config)->get_data(key, value, value_size)
 			? PMEMKV_STATUS_OK
@@ -167,6 +185,9 @@ int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **
 
 int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **value)
 {
+	if (!config)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return config_to_internal(config)->get_object(key, value)
 			? PMEMKV_STATUS_OK
@@ -176,6 +197,9 @@ int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **valu
 
 int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value)
 {
+	if (!config)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return config_to_internal(config)->get_int64(key, value)
 			? PMEMKV_STATUS_OK
@@ -185,6 +209,9 @@ int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *val
 
 int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value)
 {
+	if (!config)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return config_to_internal(config)->get_uint64(key, value)
 			? PMEMKV_STATUS_OK
@@ -194,6 +221,9 @@ int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *v
 
 int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value)
 {
+	if (!config)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return config_to_internal(config)->get_string(key, value)
 			? PMEMKV_STATUS_OK
@@ -203,7 +233,7 @@ int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char 
 
 int pmemkv_open(const char *engine_c_str, pmemkv_config *config, pmemkv_db **db)
 {
-	if (db == nullptr)
+	if (!db)
 		return PMEMKV_STATUS_INVALID_ARGUMENT;
 
 	return catch_and_return_status(__func__, [&] {
@@ -232,12 +262,18 @@ void pmemkv_close(pmemkv_db *db)
 
 int pmemkv_count_all(pmemkv_db *db, size_t *cnt)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(
 		__func__, [&] { return db_to_internal(db)->count_all(*cnt); });
 }
 
 int pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb, size_t *cnt)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->count_above(pmem::kv::string_view(k, kb),
 						       *cnt);
@@ -246,6 +282,9 @@ int pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb, size_t *cnt)
 
 int pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb, size_t *cnt)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->count_below(pmem::kv::string_view(k, kb),
 						       *cnt);
@@ -255,6 +294,9 @@ int pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb, size_t *cnt)
 int pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
 			 size_t kb2, size_t *cnt)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->count_between(pmem::kv::string_view(k1, kb1),
 							 pmem::kv::string_view(k2, kb2),
@@ -264,6 +306,9 @@ int pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *
 
 int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(
 		__func__, [&] { return db_to_internal(db)->get_all(c, arg); });
 }
@@ -271,6 +316,9 @@ int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg)
 int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
 		     void *arg)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->get_above(pmem::kv::string_view(k, kb), c,
 						     arg);
@@ -280,6 +328,9 @@ int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_call
 int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
 		     void *arg)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->get_below(pmem::kv::string_view(k, kb), c,
 						     arg);
@@ -289,6 +340,9 @@ int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_call
 int pmemkv_get_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2,
 		       size_t kb2, pmemkv_get_kv_callback *c, void *arg)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->get_between(pmem::kv::string_view(k1, kb1),
 						       pmem::kv::string_view(k2, kb2), c,
@@ -298,6 +352,9 @@ int pmemkv_get_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2
 
 int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->exists(pmem::kv::string_view(k, kb));
 	});
@@ -306,6 +363,9 @@ int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb)
 int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c,
 	       void *arg)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->get(pmem::kv::string_view(k, kb), c, arg);
 	});
@@ -339,6 +399,9 @@ static void get_copy_callback(const char *v, size_t vb, void *arg)
 int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
 		    size_t buffer_size, size_t *value_size)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	GetCopyCallbackContext ctx = {PMEMKV_STATUS_NOT_FOUND, buffer_size, buffer,
 				      value_size};
 
@@ -358,6 +421,9 @@ int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
 
 int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->put(pmem::kv::string_view(k, kb),
 					       pmem::kv::string_view(v, vb));
@@ -366,6 +432,9 @@ int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb
 
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb)
 {
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->remove(pmem::kv::string_view(k, kb));
 	});
