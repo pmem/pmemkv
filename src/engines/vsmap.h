@@ -70,12 +70,22 @@ public:
 	status remove(string_view key) final;
 
 private:
+#ifdef USE_LIBMEMKIND_NAMESPACE
+	using storage_type = std::basic_string<char, std::char_traits<char>,
+					       libmemkind::pmem::allocator<char>>;
+#else
 	using storage_type =
 		std::basic_string<char, std::char_traits<char>, pmem::allocator<char>>;
+#endif
 
 	using key_type = storage_type;
 	using mapped_type = storage_type;
+#ifdef USE_LIBMEMKIND_NAMESPACE
+	using map_allocator_type =
+		libmemkind::pmem::allocator<std::pair<key_type, mapped_type>>;
+#else
 	using map_allocator_type = pmem::allocator<std::pair<key_type, mapped_type>>;
+#endif
 	using map_type = std::map<key_type, mapped_type, std::less<key_type>,
 				  std::scoped_allocator_adaptor<map_allocator_type>>;
 

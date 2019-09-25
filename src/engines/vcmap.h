@@ -63,10 +63,19 @@ public:
 	status remove(string_view key) final;
 
 private:
+#ifdef USE_LIBMEMKIND_NAMESPACE
+	typedef libmemkind::pmem::allocator<char> ch_allocator_t;
+#else
 	typedef pmem::allocator<char> ch_allocator_t;
+#endif
 	typedef std::basic_string<char, std::char_traits<char>, ch_allocator_t>
 		pmem_string;
+#ifdef USE_LIBMEMKIND_NAMESPACE
+	typedef libmemkind::pmem::allocator<std::pair<pmem_string, pmem_string>>
+		kv_allocator_t;
+#else
 	typedef pmem::allocator<std::pair<pmem_string, pmem_string>> kv_allocator_t;
+#endif
 	typedef tbb::concurrent_hash_map<pmem_string, pmem_string,
 					 tbb::tbb_hash_compare<pmem_string>,
 					 std::scoped_allocator_adaptor<kv_allocator_t>>

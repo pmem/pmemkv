@@ -53,3 +53,22 @@ endif()
 
 link_directories(${MEMKIND_LIBRARY_DIRS})
 include_directories(${MEMKIND_INCLUDE_DIRS})
+
+# XXX temporary solution for https://github.com/pmem/pmemkv/issues/429
+set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
+set(CMAKE_REQUIRED_INCLUDES ${MEMKIND_INCLUDE_DIR})
+CHECK_CXX_SOURCE_COMPILES(
+        "#include <pmem_allocator.h>
+        int main() {
+		libmemkind::pmem::allocator<int> *alc = nullptr;
+		(void)alc;
+        }"
+        LIBMEMKIND_NAMESPACE_PRESENT)
+set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
+
+if(NOT LIBMEMKIND_NAMESPACE_PRESENT)
+	message(STATUS "libmemkind namespace not found (available in memkind > 1.9.0). "
+					"Old namespace will be used for 'pmem::allocator'.")
+else()
+	add_definitions(-DUSE_LIBMEMKIND_NAMESPACE)
+endif()
