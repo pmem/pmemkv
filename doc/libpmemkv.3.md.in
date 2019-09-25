@@ -215,6 +215,11 @@ Each function, except for *pmemkv_close()* and *pmemkv_errormsg()*, returns one 
 + **PMEMKV_STATUS_OUT_OF_MEMORY** -- operation failed because there is not enough memory (or space on the device)
 + **PMEMKV_STATUS_WRONG_ENGINE_NAME** -- engine name does not match any available engine
 
+Status returned from a function can change in a future version of a library to a more specific one.
+For example, if a function returns PMEMKV_STATUS_UNKNOWN_ERROR, it is possible that in future
+versions it will return PMEMKV_STATUS_INVALID_ARGUMENT. Recommended way to check for an error
+is to compare status with PMEMKV_STATUS_OK.
+
 # EXAMPLE #
 
 ```c
