@@ -29,27 +29,46 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 if(PKG_CONFIG_FOUND)
-    pkg_check_modules(MEMKIND memkind)
+	pkg_check_modules(MEMKIND memkind)
 endif()
 
 if(NOT MEMKIND_FOUND)
-    # try old method
-    include(FindPackageHandleStandardArgs)
-    find_path(MEMKIND_INCLUDE_DIR pmem_allocator.h)
-    find_library(MEMKIND_LIBRARY NAMES memkind libmemkind)
-    mark_as_advanced(MEMKIND_LIBRARY MEMKIND_INCLUDE_DIR)
-    find_package_handle_standard_args(MEMKIND DEFAULT_MSG MEMKIND_INCLUDE_DIR MEMKIND_LIBRARY)
+	# try old method
+	include(FindPackageHandleStandardArgs)
+	find_path(MEMKIND_INCLUDE_DIR pmem_allocator.h)
+	find_library(MEMKIND_LIBRARY NAMES memkind libmemkind)
+	mark_as_advanced(MEMKIND_LIBRARY MEMKIND_INCLUDE_DIR)
+	find_package_handle_standard_args(MEMKIND DEFAULT_MSG MEMKIND_INCLUDE_DIR MEMKIND_LIBRARY)
 
-    if(MEMKIND_FOUND)
-        set(MEMKIND_LIBRARIES ${MEMKIND_LIBRARY})
-        set(MEMKIND_INCLUDE_DIRS ${MEMKIND_INCLUDE_DIR})
-        message(STATUS "Memkind library found the old way (w/o pkg-config)")
-    endif()
+	if(MEMKIND_FOUND)
+		set(MEMKIND_LIBRARIES ${MEMKIND_LIBRARY})
+		set(MEMKIND_INCLUDE_DIRS ${MEMKIND_INCLUDE_DIR})
+		message(STATUS "Memkind library found the old way (w/o pkg-config)")
+	endif()
 endif()
 
 if(NOT MEMKIND_FOUND)
-    message(FATAL_ERROR "Memkind library not found")
+	message(FATAL_ERROR "Memkind library not found")
 endif()
 
 link_directories(${MEMKIND_LIBRARY_DIRS})
 include_directories(${MEMKIND_INCLUDE_DIRS})
+
+# XXX temporary solution for https://github.com/pmem/pmemkv/issues/429
+set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
+set(CMAKE_REQUIRED_INCLUDES ${MEMKIND_INCLUDE_DIR})
+CHECK_CXX_SOURCE_COMPILES(
+		"#include <pmem_allocator.h>
+		int main(void) {
+		libmemkind::pmem::allocator<int> *alc = nullptr;
+		(void)alc;
+		}"
+		LIBMEMKIND_NAMESPACE_PRESENT)
+set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
+
+if(LIBMEMKIND_NAMESPACE_PRESENT)
+	add_definitions(-DUSE_LIBMEMKIND_NAMESPACE)
+else()
+	message(STATUS "libmemkind namespace not found (available in memkind > 1.9.0). "
+					"Old namespace will be used for 'pmem::allocator'.")
+endif()

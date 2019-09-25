@@ -38,6 +38,12 @@
 #include <string>
 #include <tbb/concurrent_hash_map.h>
 
+#ifdef USE_LIBMEMKIND_NAMESPACE
+namespace memkind_ns = libmemkind::pmem;
+#else
+namespace memkind_ns = pmem;
+#endif
+
 namespace pmem
 {
 namespace kv
@@ -63,10 +69,10 @@ public:
 	status remove(string_view key) final;
 
 private:
-	typedef pmem::allocator<char> ch_allocator_t;
+	typedef memkind_ns::allocator<char> ch_allocator_t;
 	typedef std::basic_string<char, std::char_traits<char>, ch_allocator_t>
 		pmem_string;
-	typedef pmem::allocator<std::pair<pmem_string, pmem_string>> kv_allocator_t;
+	typedef memkind_ns::allocator<std::pair<pmem_string, pmem_string>> kv_allocator_t;
 	typedef tbb::concurrent_hash_map<pmem_string, pmem_string,
 					 tbb::tbb_hash_compare<pmem_string>,
 					 std::scoped_allocator_adaptor<kv_allocator_t>>
