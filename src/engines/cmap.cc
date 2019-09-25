@@ -136,14 +136,14 @@ void cmap::Recover()
 {
 	if (!OID_IS_NULL(*root_oid)) {
 		container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(*root_oid);
-		container->initialize();
+		container->runtime_initialize();
 	} else {
 		pmem::obj::transaction::manual tx(pmpool);
 		pmem::obj::transaction::snapshot(root_oid);
 		*root_oid = pmem::obj::make_persistent<internal::cmap::map_t>().raw();
 		pmem::obj::transaction::commit();
 		container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(*root_oid);
-		container->initialize(true);
+		container->runtime_initialize(true);
 	}
 }
 
