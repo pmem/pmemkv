@@ -50,6 +50,7 @@ extern "C" {
 #define PMEMKV_STATUS_STOPPED_BY_CB 7
 #define PMEMKV_STATUS_OUT_OF_MEMORY 8
 #define PMEMKV_STATUS_WRONG_ENGINE_NAME 9
+#define PMEMKV_STATUS_TRANSACTION_SCOPE_ERROR 10
 
 typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;

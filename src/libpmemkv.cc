@@ -39,6 +39,7 @@
 #include "exceptions.h"
 #include "libpmemkv.h"
 #include "libpmemkv.hpp"
+#include "libpmemobj++/pexceptions.hpp"
 #include "out.h"
 
 #include <iostream>
@@ -81,6 +82,9 @@ static inline int catch_and_return_status(const char *func_name, Function &&f)
 	} catch (std::runtime_error &e) {
 		out_err_stream(func_name) << e.what();
 		return PMEMKV_STATUS_UNKNOWN_ERROR;
+	} catch (pmem::transaction_scope_error &e) {
+		out_err_stream(func_name) << e.what();
+		return PMEMKV_STATUS_TRANSACTION_SCOPE_ERROR;
 	} catch (...) {
 		out_err_stream(func_name) << "Unspecified error";
 		return PMEMKV_STATUS_UNKNOWN_ERROR;

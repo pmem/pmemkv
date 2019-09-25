@@ -37,6 +37,13 @@
 
 std::ostream &out_err_stream(const char *func);
 
+#define DO_LOG 0
+#define LOG(msg)                                                                         \
+	do {                                                                             \
+		if (DO_LOG)                                                              \
+			std::cout << "[" << name() << "] " << msg << "\n";               \
+	} while (0)
+
 #define ERR() out_err_stream(__func__)
 
 const char *out_get_errormsg(void);
