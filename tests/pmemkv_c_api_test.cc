@@ -47,20 +47,27 @@ public:
 	pmemkv_db *db = NULL;
 	Basic params = GetParam();
 	std::string path;
-	PmemkvCApiTest()
+	void SetUp()
 	{
 		path = params.get_path();
 		if (!params.use_file)
 			mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		init_status["path"] = pmemkv_config_put_string(cfg, "path", path.c_str());
-		init_status["size"] = pmemkv_config_put_uint64(cfg, "size", params.size);
-		init_status["force_create"] = pmemkv_config_put_uint64(
-			cfg, "force_create", params.force_create);
-
-		init_status["start_engine"] = pmemkv_open(params.engine, cfg, &db);
+		ASSERT_NE(cfg, nullptr) << "Config not created";
+		ASSERT_EQ(pmemkv_config_put_string(cfg, "path", path.c_str()),
+			  PMEMKV_STATUS_OK)
+			<< pmemkv_errormsg();
+		ASSERT_EQ(pmemkv_config_put_uint64(cfg, "size", params.size),
+			  PMEMKV_STATUS_OK)
+			<< pmemkv_errormsg();
+		ASSERT_EQ(pmemkv_config_put_uint64(cfg, "force_create",
+						   params.force_create),
+			  PMEMKV_STATUS_OK)
+			<< pmemkv_errormsg();
+		ASSERT_EQ(pmemkv_open(params.engine, cfg, &db), PMEMKV_STATUS_OK)
+			<< pmemkv_errormsg();
 	}
 
-	~PmemkvCApiTest()
+	void TearDown()
 	{
 		pmemkv_close(db);
 		if (params.force_create == 1)
@@ -80,16 +87,6 @@ struct GetTestName {
 		return name;
 	}
 };
-
-TEST_P(PmemkvCApiTest, ConfigCreated)
-{
-	ASSERT_NE(cfg, nullptr) << "Config not created";
-	for (const auto &s : init_status) {
-		ASSERT_EQ(s.second, PMEMKV_STATUS_OK)
-			<< "Status error: " << s.first << " with: " << s.second << ". "
-			<< pmemkv_errormsg();
-	}
-}
 
 TEST_P(PmemkvCApiTest, PutAndGet)
 {
