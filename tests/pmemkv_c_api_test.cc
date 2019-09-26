@@ -97,7 +97,7 @@ TEST_P(PmemkvCApiTest, PutAndGet)
 	 */
 	std::map<std::string, std::string> proto_dictionary;
 	/// Create test dictionary
-	for (size_t i = 0; i < params.test_data_size; i++) {
+	for (size_t i = 0; i < params.test_value_length; i++) {
 		std::string key = std::to_string(i);
 		key.insert(key.begin(), params.key_length - key.length(), '0');
 		std::string val = std::to_string(i);
