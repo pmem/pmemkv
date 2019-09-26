@@ -32,10 +32,25 @@
 
 #include "../../src/libpmemkv.hpp"
 #include "gtest/gtest.h"
-
 #include <cstdio>
+#include <thread>
 
 using namespace pmem::kv;
+
+template <typename Function>
+void parallel_exec(size_t concurrency, Function f)
+{
+	std::vector<std::thread> threads;
+	threads.reserve(concurrency);
+
+	for (size_t i = 0; i < concurrency; ++i) {
+		threads.emplace_back(f, i);
+	}
+
+	for (auto &t : threads) {
+		t.join();
+	}
+}
 
 const std::string PATH = "/dev/shm/pmemkv";
 const size_t SIZE = 1024ull * 1024ull * 512ull;
@@ -515,6 +530,33 @@ TEST_F(CMapTest, UsesGetAllTest_TRACERS_MPHD)
 		},
 		&result);
 	ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");
+}
+
+TEST_F(CMapTest, SimpleMultithreadedTest_TRACERS_MPHD)
+{
+	size_t concurrency = 8;
+	size_t thread_items = 50;
+	parallel_exec(concurrency, [&](size_t thread_id) {
+		int begin = thread_id * thread_items;
+		int end = begin + int(thread_items);
+		for (int i = begin; i < end; i++) {
+			std::string istr = std::to_string(i);
+			ASSERT_TRUE(kv->put(istr, (istr + "!")) == status::OK)
+				<< errormsg();
+			std::string value;
+			ASSERT_TRUE(kv->get(istr, &value) == status::OK &&
+				    value == (istr + "!"));
+		}
+		for (int i = begin; i < end; i++) {
+			std::string istr = std::to_string(i);
+			std::string value;
+			ASSERT_TRUE(kv->get(istr, &value) == status::OK &&
+				    value == (istr + "!"));
+		}
+	});
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_TRUE(cnt == concurrency * thread_items);
 }
 
 // =============================================================================================
