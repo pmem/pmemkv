@@ -38,8 +38,8 @@ set -e
 
 git clone https://github.com/memkind/memkind
 cd memkind
-# 1.9.0
-git checkout v1.9.0
+# v1.9.0-73-g1ece023; 25.09.2019, contains new libmemkind namespace
+git checkout 1ece023b9c06a68d3f329786d1c4c0e65cef390f
 
 ./build.sh --prefix=/usr
 sudo make install

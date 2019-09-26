@@ -37,8 +37,8 @@
 
 set -e
 
-# Merge pull request #445 from ldorau/Add-testing-python-bindings-on-Travis, 24.09.2019
-PMEMKV_VERSION=99585189eba2e0a4d3e70aa17055557c0ab96789
+# 27.09.2019; contains handling of new memkind namespace for pmem::allocator
+PMEMKV_VERSION=70b4a1272dc0e0be1ed716ff8797092396295759
 
 # Merge pull request #36 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
 RUBY_VERSION=99d1bfc05d116d35d0e96541ece9b9df831d95a0
