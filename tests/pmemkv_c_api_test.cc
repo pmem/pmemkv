@@ -138,43 +138,43 @@ TEST_P(PmemkvCApiTest, CheckNullDB)
 
 	int s = pmemkv_count_all(NULL, &cnt);
 	(void)s;
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_count_above(NULL, key1, strlen(key1), &cnt);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_count_below(NULL, key1, strlen(key1), &cnt);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_count_between(NULL, key1, strlen(key1), key2, strlen(key2), &cnt);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get_all(NULL, NULL, NULL);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get_above(NULL, key1, strlen(key1), NULL, NULL);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get_below(NULL, key1, strlen(key1), NULL, NULL);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get_between(NULL, key1, strlen(key1), key2, strlen(key2), NULL, NULL);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_exists(NULL, key1, strlen(key1));
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get(NULL, key1, strlen(key1), NULL, NULL);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get_copy(NULL, key1, strlen(key1), val, 10, &cnt);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_put(NULL, key1, strlen(key1), value1, strlen(value1));
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_remove(NULL, key1, strlen(key1));
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 }
 
 INSTANTIATE_TEST_CASE_P(basic_tests, PmemkvCApiTest, ::testing::ValuesIn(basic_tests),
