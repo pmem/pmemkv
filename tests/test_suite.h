@@ -49,7 +49,7 @@ struct Basic {
 	/* max size of data  */
 	size_t value_length;
 	/* size of actually inserted data */
-	size_t test_data_size;
+	size_t test_value_length;
 	/* test name */
 	std::string name;
 	/* markers for build system, which tracers should be used:
