@@ -32,89 +32,91 @@
 #ifndef BASIC_TESTS_H
 #define BASIC_TESTS_H
 
+#include "test_path.h"
 #include "test_suite.h"
+#include <string>
 
 static Basic basic_tests[] = {
 	{
-		.path = "/dev/shm",
+		.path = test_path.data(),
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 0,
 		.engine = "blackhole",
 		.key_length = 0,
 		.value_length = 0,
-		.test_data_size = 0,
-		.pretest_remove_path = false,
+		.test_value_length = 0,
 		.name = "BlackholeEmptyData",
 		.tracers = "MP",
+		.use_file = false,
 	},
 #ifdef ENGINE_CMAP
 	{
-		.path = "/dev/shm/file",
+		.path = test_path.data(),
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "cmap",
 		.key_length = 100,
 		.value_length = 100,
-		.test_data_size = 20,
-		.pretest_remove_path = true,
-		.name = "CMapTestShm100bKey100bValue",
+		.test_value_length = 20,
+		.name = "CMapTest100bKey100bValue",
 		.tracers = "MPHD",
+		.use_file = true,
 	},
 #endif // ENGINE_CMAP
 #ifdef ENGINE_VSMAP
 	{
-		.path = "/dev/shm",
+		.path = test_path.data(),
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "vsmap",
 		.key_length = 100,
 		.value_length = 100,
-		.test_data_size = 20,
-		.pretest_remove_path = false,
-		.name = "VSMapTestShm100bKey100bValue",
+		.test_value_length = 20,
+		.name = "VSMapTest100bKey100bValue",
 		.tracers = "MP",
+		.use_file = false,
 	},
 #endif // ENGINE_VSMAP
 #ifdef ENGINE_VCMAP
 	{
-		.path = "/dev/shm",
+		.path = test_path.data(),
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "vcmap",
 		.key_length = 100,
 		.value_length = 100,
-		.test_data_size = 20,
-		.pretest_remove_path = false,
-		.name = "VCMapTestShm100bKey100bValue",
+		.test_value_length = 20,
+		.name = "VCMapTest100bKey100bValue",
 		.tracers = "MPHD",
+		.use_file = false,
 	},
 #endif // ENGINE_VCMAP
 #ifdef ENGINE_TREE3
 	{
-		.path = "/dev/shm/file",
+		.path = test_path.data(),
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "tree3",
 		.key_length = 100,
 		.value_length = 100,
-		.test_data_size = 20,
-		.pretest_remove_path = true,
-		.name = "Tree3TestShm100bKey100bValue",
+		.test_value_length = 20,
+		.name = "Tree3Test100bKey100bValue",
 		.tracers = "",
+		.use_file = true,
 	},
 #endif // ENGINE_TREE3
 #ifdef ENGINE_STREE
 	{
-		.path = "/dev/shm/file",
+		.path = test_path.data(),
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "stree",
 		.key_length = 20,
 		.value_length = 200,
-		.test_data_size = 20,
-		.pretest_remove_path = true,
-		.name = "StreeTestShm20bKey200bValue",
+		.test_value_length = 20,
+		.name = "StreeTest20bKey200bValue",
 		.tracers = "",
+		.use_file = true,
 	},
 #endif // ENGINE_STREE
 };

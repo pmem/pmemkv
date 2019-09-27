@@ -32,8 +32,10 @@
 
 #include "../src/libpmemkv.h"
 #include "gtest/gtest.h"
+#include <cstdio>
 #include <map>
 #include <string>
+#include <sys/stat.h>
 
 // Tests and params' list
 #include "basic_tests.h"
@@ -41,25 +43,37 @@
 class PmemkvCApiTest : public ::testing::TestWithParam<Basic> {
 public:
 	std::map<std::string, int> init_status;
-
-	pmemkv_config *cfg = pmemkv_config_new();
 	pmemkv_db *db = NULL;
 	Basic params = GetParam();
-	PmemkvCApiTest()
-	{
-		if (params.pretest_remove_path)
-			std::remove(params.path);
-		init_status["path"] = pmemkv_config_put_string(cfg, "path", params.path);
-		init_status["size"] = pmemkv_config_put_uint64(cfg, "size", params.size);
-		init_status["force_create"] = pmemkv_config_put_uint64(
-			cfg, "force_create", params.force_create);
+	std::string path;
 
-		init_status["start_engine"] = pmemkv_open(params.engine, cfg, &db);
+	void SetUp()
+	{
+		path = params.get_path();
+		if (!params.use_file)
+			mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+		pmemkv_config *cfg = pmemkv_config_new();
+		ASSERT_NE(cfg, nullptr) << pmemkv_errormsg();
+		ASSERT_EQ(pmemkv_config_put_string(cfg, "path", path.c_str()),
+			  PMEMKV_STATUS_OK)
+			<< pmemkv_errormsg();
+		ASSERT_EQ(pmemkv_config_put_uint64(cfg, "size", params.size),
+			  PMEMKV_STATUS_OK)
+			<< pmemkv_errormsg();
+		ASSERT_EQ(pmemkv_config_put_uint64(cfg, "force_create",
+						   params.force_create),
+			  PMEMKV_STATUS_OK)
+			<< pmemkv_errormsg();
+		ASSERT_EQ(pmemkv_open(params.engine, cfg, &db), PMEMKV_STATUS_OK)
+			<< pmemkv_errormsg();
 	}
 
-	~PmemkvCApiTest()
+	void TearDown()
 	{
 		pmemkv_close(db);
+		if (params.force_create == 1)
+			std::remove(path.c_str());
 	}
 };
 
@@ -76,16 +90,6 @@ struct GetTestName {
 	}
 };
 
-TEST_P(PmemkvCApiTest, ConfigCreated)
-{
-	ASSERT_NE(cfg, nullptr) << "Config not created";
-	for (const auto &s : init_status) {
-		ASSERT_EQ(s.second, PMEMKV_STATUS_OK)
-			<< "Status error: " << s.first << " with: " << s.second << ". "
-			<< pmemkv_errormsg();
-	}
-}
-
 TEST_P(PmemkvCApiTest, PutAndGet)
 {
 	/**
@@ -93,7 +97,7 @@ TEST_P(PmemkvCApiTest, PutAndGet)
 	 */
 	std::map<std::string, std::string> proto_dictionary;
 	/// Create test dictionary
-	for (size_t i = 0; i < params.test_data_size; i++) {
+	for (size_t i = 0; i < params.test_value_length; i++) {
 		std::string key = std::to_string(i);
 		key.insert(key.begin(), params.key_length - key.length(), '0');
 		std::string val = std::to_string(i);
@@ -134,43 +138,43 @@ TEST_P(PmemkvCApiTest, CheckNullDB)
 
 	int s = pmemkv_count_all(NULL, &cnt);
 	(void)s;
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_count_above(NULL, key1, strlen(key1), &cnt);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_count_below(NULL, key1, strlen(key1), &cnt);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_count_between(NULL, key1, strlen(key1), key2, strlen(key2), &cnt);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get_all(NULL, NULL, NULL);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get_above(NULL, key1, strlen(key1), NULL, NULL);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get_below(NULL, key1, strlen(key1), NULL, NULL);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get_between(NULL, key1, strlen(key1), key2, strlen(key2), NULL, NULL);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_exists(NULL, key1, strlen(key1));
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get(NULL, key1, strlen(key1), NULL, NULL);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_get_copy(NULL, key1, strlen(key1), val, 10, &cnt);
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_put(NULL, key1, strlen(key1), value1, strlen(value1));
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 
 	s = pmemkv_remove(NULL, key1, strlen(key1));
-	assert(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 }
 
 INSTANTIATE_TEST_CASE_P(basic_tests, PmemkvCApiTest, ::testing::ValuesIn(basic_tests),

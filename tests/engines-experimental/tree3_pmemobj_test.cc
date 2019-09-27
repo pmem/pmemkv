@@ -39,11 +39,12 @@
 
 using namespace pmem::kv;
 
-const std::string PATH = "/dev/shm/pmemkv";
+extern std::string test_path;
 const size_t SIZE = 1024ull * 1024ull * 512ull;
 
 class TreePmemobjTest : public testing::Test {
 public:
+	std::string PATH = test_path + "/tree3_pmemobj_test";
 	db *kv;
 
 	TreePmemobjTest()
