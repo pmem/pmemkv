@@ -34,12 +34,29 @@
 #include "gtest/gtest.h"
 #include <cstdio>
 #include <string>
+#include <thread>
+#include <vector>
 
 using namespace pmem::kv;
 
 extern std::string test_path;
 const size_t SIZE = 1024ull * 1024ull * 512ull;
 const size_t LARGE_SIZE = 1024ull * 1024ull * 1024ull * 2ull;
+
+template <typename Function>
+void parallel_exec(size_t threads_number, Function f)
+{
+	std::vector<std::thread> threads;
+	threads.reserve(threads_number);
+
+	for (size_t i = 0; i < threads_number; ++i) {
+		threads.emplace_back(f, i);
+	}
+
+	for (auto &t : threads) {
+		t.join();
+	}
+}
 
 template <size_t POOL_SIZE>
 class CMapBaseTest : public testing::Test {
@@ -516,6 +533,33 @@ TEST_F(CMapTest, UsesGetAllTest_TRACERS_MPHD)
 		},
 		&result);
 	ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");
+}
+
+TEST_F(CMapTest, SimpleMultithreadedTest_TRACERS_MPHD)
+{
+	size_t threads_number = 8;
+	size_t thread_items = 50;
+	parallel_exec(threads_number, [&](size_t thread_id) {
+		size_t begin = thread_id * thread_items;
+		size_t end = begin + thread_items;
+		for (auto i = begin; i < end; i++) {
+			std::string istr = std::to_string(i);
+			ASSERT_TRUE(kv->put(istr, (istr + "!")) == status::OK)
+				<< errormsg();
+			std::string value;
+			ASSERT_TRUE(kv->get(istr, &value) == status::OK &&
+				    value == (istr + "!"));
+		}
+		for (auto i = begin; i < end; i++) {
+			std::string istr = std::to_string(i);
+			std::string value;
+			ASSERT_TRUE(kv->get(istr, &value) == status::OK &&
+				    value == (istr + "!"));
+		}
+	});
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_TRUE(cnt == threads_number * thread_items);
 }
 
 // =============================================================================================
