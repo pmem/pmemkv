@@ -65,6 +65,8 @@ cd $WORKDIR
 mkdir build
 cd build
 
+# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
+PKG_CONFIG_PATH=/opt/memkind-stable/lib/pkgconfig/:$PKG_CONFIG_PATH \
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX
 make -j2
@@ -81,7 +83,8 @@ git checkout $RUBY_VERSION
 mkdir -p vendor/cache/
 cp -r /opt/bindings/ruby/* vendor/cache/
 bundle install --local
-bundle exec rspec
+# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
+LD_LIBRARY_PATH=/opt/memkind-stable/lib/:$LD_LIBRARY_PATH bundle exec rspec
 
 echo
 echo "#################################################################"
@@ -95,7 +98,8 @@ git checkout $JNI_VERSION
 # XXX remove when bindings switched to using gtest installed in system
 # Copy Googletest to the current directory
 cp /opt/googletest/googletest-*.zip .
-make test
+# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
+LD_LIBRARY_PATH=/opt/memkind-stable/lib/:$LD_LIBRARY_PATH make test
 sudo_password -S make install prefix=$PREFIX
 
 echo
@@ -108,7 +112,8 @@ cd pmemkv-java
 git checkout $JAVA_VERSION
 mkdir -p ~/.m2/repository
 cp -r /opt/bindings/java/repository ~/.m2/
-mvn --offline install
+# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
+LD_LIBRARY_PATH=/opt/memkind-stable/lib/:$LD_LIBRARY_PATH mvn --offline install
 
 echo
 echo "####################################################################"
@@ -120,7 +125,8 @@ cd pmemkv-nodejs
 git checkout $NODEJS_VERSION
 cp -r /opt/bindings/nodejs/node_modules .
 npm install --save
-npm test
+# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
+LD_LIBRARY_PATH=/opt/memkind-stable/lib/:$LD_LIBRARY_PATH npm test
 
 echo
 echo "####################################################################"
@@ -132,6 +138,8 @@ cd pmemkv-python
 git checkout $PYTHON_VERSION
 python3 setup.py install --user
 cd tests
-python3 -m unittest -v pmemkv_tests.py
+# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
+LD_LIBRARY_PATH=/opt/memkind-stable/lib/:$LD_LIBRARY_PATH python3 -m unittest -v pmemkv_tests.py
 cd ../examples
-PMEM_IS_PMEM_FORCE=1 python3 basic_example.py
+# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
+LD_LIBRARY_PATH=/opt/memkind-stable/lib/:$LD_LIBRARY_PATH PMEM_IS_PMEM_FORCE=1 python3 basic_example.py
