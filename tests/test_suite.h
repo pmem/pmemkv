@@ -37,7 +37,7 @@
 
 struct Basic {
 	/* path parameter passed to engine config */
-	const char *path;
+	std::string *path;
 	/* size parameter passed to engine config */
 	uint64_t size;
 	/* force_create parameter passed to engine config */
@@ -64,7 +64,7 @@ struct Basic {
 
 	std::string get_path()
 	{
-		std::string abs_path(path);
+		std::string abs_path(*path);
 		if (use_file) {
 			abs_path.append("/" + name);
 		}

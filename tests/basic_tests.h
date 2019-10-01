@@ -38,7 +38,7 @@
 
 static Basic basic_tests[] = {
 	{
-		.path = test_path.data(),
+		.path = &test_path,
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 0,
 		.engine = "blackhole",
@@ -51,7 +51,7 @@ static Basic basic_tests[] = {
 	},
 #ifdef ENGINE_CMAP
 	{
-		.path = test_path.data(),
+		.path = &test_path,
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "cmap",
@@ -65,7 +65,7 @@ static Basic basic_tests[] = {
 #endif // ENGINE_CMAP
 #ifdef ENGINE_VSMAP
 	{
-		.path = test_path.data(),
+		.path = &test_path,
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "vsmap",
@@ -79,7 +79,7 @@ static Basic basic_tests[] = {
 #endif // ENGINE_VSMAP
 #ifdef ENGINE_VCMAP
 	{
-		.path = test_path.data(),
+		.path = &test_path,
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "vcmap",
@@ -93,7 +93,7 @@ static Basic basic_tests[] = {
 #endif // ENGINE_VCMAP
 #ifdef ENGINE_TREE3
 	{
-		.path = test_path.data(),
+		.path = &test_path,
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "tree3",
@@ -107,7 +107,7 @@ static Basic basic_tests[] = {
 #endif // ENGINE_TREE3
 #ifdef ENGINE_STREE
 	{
-		.path = test_path.data(),
+		.path = &test_path,
 		.size = (uint64_t)(1024 * 1024 * 1024),
 		.force_create = 1,
 		.engine = "stree",
