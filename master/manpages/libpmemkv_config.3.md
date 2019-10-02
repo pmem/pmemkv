@@ -83,6 +83,10 @@ of keys (null-terminated strings) to values. A value can be:
 + **binary data**
 + **pointer to an object** (with accompanying deleter function)
 
+It also delivers methods to store and read configuration items provided by
+a user. Once the configuration object is set (with all required parameters),
+it can be passed to *pmemkv_open()* method.
+
 List of options which are required by pmemkv database is specific to an engine.
 Every engine has documented all supported config parameters (please see **libpmemkv**(7) for details).
 
