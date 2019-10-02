@@ -31,7 +31,8 @@
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#              environment prepared for running pmemkv build and tests.
+#				environment prepared for executing build and tests
+#				of pmemkv-* bindings repositories.
 #
 
 # Pull base image
@@ -97,7 +98,7 @@ RUN ./install-libpmemobj-cpp.sh DEB
 
 # Install memkind
 COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh
+RUN ./install-memkind.sh sys
 
 # Bindings
 COPY install-bindings-dependencies.sh install-bindings-dependencies.sh

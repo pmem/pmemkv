@@ -31,8 +31,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# install-memkind.sh - installs newest memkind (master)
-#
+# install-memkind.sh <install_in_sys> -
+#	if argument is given and equals to "sys" then it installs master version in sys path
+#	otherwise it installs master and stable versions in /opt directory
 
 set -e
 
@@ -51,6 +52,19 @@ cp -R memkind_git memkind_git_stable
 # install (in home's subdirectory) current master
 cd $WORKDIR/memkind_git
 git checkout $MEMKIND_MASTER_VERSION
+
+if [ "$1" = "sys" ]; then
+	./autogen.sh
+	./configure --prefix=/usr
+	make -j$(nproc)
+	make install
+
+	# cleanup
+	cd $WORKDIR
+	rm -r memkind_git
+	rm -r memkind_git_stable
+	exit 0
+fi
 
 mkdir /opt/memkind-master
 ./autogen.sh
