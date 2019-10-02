@@ -36,9 +36,9 @@
 
 set -e
 
-git clone https://github.com/pmem/pmdk
+git clone https://github.com/pmem/pmdk --shallow-since=2019-09-26
 cd pmdk
-git checkout 1.6.1
+git checkout 1.7
 
 make BUILD_PACKAGE_CHECK=n $1
 if [ "$1" = "dpkg" ]; then
