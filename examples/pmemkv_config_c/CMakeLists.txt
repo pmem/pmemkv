@@ -39,5 +39,7 @@ else()
 	message(FATAL_ERROR "pkg-config not found")
 endif()
 
+include_directories(${LIBPMEMKV_INCLUDE_DIRS})
+link_directories(${LIBPMEMKV_LIBRARY_DIRS})
 add_executable(pmemkv_config_c pmemkv_config.c)
 target_link_libraries(pmemkv_config_c ${LIBPMEMKV_LIBRARIES})
