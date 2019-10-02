@@ -35,9 +35,8 @@
 #include "../pmemobj_engine.h"
 #include "../polymorphic_string.h"
 
-#include <libpmemobj++/persistent_ptr.hpp>
-#define LIBPMEMOBJ_CPP_USE_TBB_RW_MUTEX 1
 #include <libpmemobj++/experimental/concurrent_hash_map.hpp>
+#include <libpmemobj++/persistent_ptr.hpp>
 
 namespace pmem
 {
