@@ -38,6 +38,10 @@
 #include <string>
 #include <utility>
 
+#if __cpp_lib_string_view
+#include <string_view>
+#endif
+
 #include "libpmemkv.h"
 
 namespace pmem
