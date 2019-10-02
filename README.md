@@ -84,6 +84,9 @@ all language bindings and utilities. Engines are loaded by name at runtime.
 | [stree](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#stree) | Sorted persistent B+ tree | Yes | No | Yes |
 | [caching](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#caching) | Caching for remote Memcached or Redis server | Yes | No | - |
 
+The production quality engines are described in the [libpmemkv(7)](https://pmem.io/pmemkv/master/manpages/libpmemkv.7.html) manual
+and the experimental engines are described in the [ENGINES-experimental.md](https://github.com/pmem/pmemkv/blob/master/ENGINES-experimental.md) file.
+
 [Contributing a new engine](https://github.com/pmem/pmemkv/blob/master/CONTRIBUTING.md#engines) is easy and encouraged!
 
 <a name="tools"></a>
