@@ -53,6 +53,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	doxygen \
 	fakeroot \
 	git \
+	graphviz \
 	libc6-dbg \
 	libdaxctl-dev \
 	libgtest-dev \
