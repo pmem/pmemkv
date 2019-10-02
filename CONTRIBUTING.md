@@ -161,7 +161,6 @@ Next we'll walk you through the steps of creating a new engine.
 
 ### Documentation
 
-* In `ENGINES.md`, add `mytree` section
 * In `README.md`, link `mytree` in the table of supported engines
 * Update manpages in `doc` directory
 
@@ -196,5 +195,8 @@ if(ENGINE_MYTREE)
 endif()
 ```
 
-As noted in the example above, the experimental CMake module should use `-experimental` suffix
-in the file name.
+As noted in the example above, the experimental CMake module should use `-experimental` suffix in the file name.
+
+### Documentation
+
+* In `ENGINES-experimental.md`, add `mytree` section
