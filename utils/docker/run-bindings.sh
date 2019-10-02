@@ -45,11 +45,11 @@ JNI_VERSION=78b81de8266ec690fb41b5f4e62948e200640cbe
 # Merge pull request #26 from ldorau/Update-gitignore, 16.09.2019
 JAVA_VERSION=30c2a897574aa2552bd3e651e4e57f2469da5767
 
-# Merge pull request #34 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
-NODEJS_VERSION=5cf32b58839617618fa4c40af620686a403564c6
+# Merge pull request #38 from lukaszstolarczuk/replace-json-config, 01.10.2019
+NODEJS_VERSION=9e3f0edd8f10d0d6f011fd22354ce1b4efe36f84
 
-# Merge pull request #9 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 23.09.2019
-PYTHON_VERSION=834c48b2a8bba3714702a6ba8f406387d282130f
+# Merge pull request #10 from ldorau/Throw-an-exception-in-pmemkv_NI_Get, 01.10.2019
+PYTHON_VERSION=824bfec5976cb19e387b32d82fc19c763000ef88
 
 set -e
 
