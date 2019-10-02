@@ -37,8 +37,8 @@
 
 set -e
 
-# Merge pull request #445 from ldorau/Add-testing-python-bindings-on-Travis, 24.09.2019
-PMEMKV_VERSION=99585189eba2e0a4d3e70aa17055557c0ab96789
+# 27.09.2019; contains handling of new memkind namespace for pmem::allocator
+PMEMKV_VERSION=70b4a1272dc0e0be1ed716ff8797092396295759
 
 # Merge pull request #36 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
 RUBY_VERSION=99d1bfc05d116d35d0e96541ece9b9df831d95a0
@@ -67,6 +67,9 @@ cp /opt/googletest/googletest-*.zip .
 mkdir build
 cd build
 # only VSMAP engine is enabled, because Java tests need it
+
+# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
+PKG_CONFIG_PATH=/opt/memkind-stable/lib/pkgconfig/:$PKG_CONFIG_PATH \
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DENGINE_VSMAP=ON \
@@ -117,7 +120,8 @@ git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
 git checkout $JAVA_VERSION
 mvn dependency:go-offline
-mvn install
+# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
+LD_LIBRARY_PATH=/opt/memkind-stable/lib/:$LD_LIBRARY_PATH mvn install
 mv -v ~/.m2/repository /opt/bindings/java/
 
 #

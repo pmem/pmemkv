@@ -36,13 +36,41 @@
 
 set -e
 
-git clone https://github.com/memkind/memkind
-cd memkind
-# 1.9.0
-git checkout v1.9.0
+# v1.9.0-73-g1ece023; 25.09.2019, contains new libmemkind namespace
+MEMKIND_MASTER_VERSION=1ece023b9c06a68d3f329786d1c4c0e65cef390f
 
-./build.sh --prefix=/usr
-sudo make install
+# v1.9.0; latest release
+MEMKIND_STABLE_VERSION=v1.9.0
 
-cd ..
-rm -r memkind
+WORKDIR=$(pwd)
+
+git clone https://github.com/memkind/memkind memkind_git
+# copy is made because `make clean` (after one installation) may omit some files
+cp -R memkind_git memkind_git_stable
+
+# install (in home's subdirectory) current master
+cd $WORKDIR/memkind_git
+git checkout $MEMKIND_MASTER_VERSION
+
+mkdir /opt/memkind-master
+./autogen.sh
+./configure --prefix=/opt/memkind-master
+make -j$(nproc)
+make install
+
+cd $WORKDIR
+rm -r memkind_git
+
+# install (in home's subdirectory) latest stable release
+cd $WORKDIR/memkind_git_stable
+git checkout $MEMKIND_STABLE_VERSION
+
+mkdir /opt/memkind-stable
+./build_jemalloc.sh
+./autogen.sh
+./configure --prefix=/opt/memkind-stable
+make -j$(nproc)
+make install
+
+cd $WORKDIR
+rm -r memkind_git_stable
