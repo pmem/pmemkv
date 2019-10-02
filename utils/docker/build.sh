@@ -77,6 +77,9 @@ if [[ "$command" == "" ]]; then
 		normal)
 			command="./run-build.sh";
 			;;
+		building)
+			command="./run-test-building.sh";
+			;;
 		coverity)
 			command="./run-coverity.sh";
 			;;
