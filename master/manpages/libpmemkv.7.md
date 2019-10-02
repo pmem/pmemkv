@@ -79,10 +79,10 @@ Each engine can be manually turned on and off at build time, using CMake options
 
 ## cmap
 
-A persistent concurrent engine, backed by a hashmap that allows calling get, put, and remove concurrently from multiple threads.
+A persistent concurrent engine, backed by a hashmap that allows calling get, put, and remove concurrently from multiple threads and ensures good scalability. Rest of the methods (e.g. range query methods) are not thread-safe and should not be called from more than one thread.
 Data stored using this engine is persistent and guaranteed to be consistent in case of any kind of interruption (crash / power loss / etc).
 
-Internally this engine uses persistent concurrent hashmap and persistent string from libpmemobj-cpp library (for details see <https://github.com/pmem/libpmemobj-cpp>). Persistent string is used as a type of a key and a value.
+Internally this engine uses persistent concurrent hashmap and persistent string from libpmemobj-cpp library (for details see <https://github.com/pmem/libpmemobj-cpp>). Persistent string is used as a type of a key and a value. Engine's functions should not be called within libpmemobj transactions (improper call by user will result thrown exception).
 TBB and libpmemobj-cpp packages are required.
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
@@ -147,7 +147,7 @@ No supported configuration parameters.
 ### Experimental engines
 
 There are also more engines in various states of development, for details see <https://github.com/pmem/pmemkv>.
-Two of them (tree3 and stree) requires the config parameters like cmap.
+Two of them (tree3 and stree) requires the config parameters like cmap and similarly to cmap should not be used within transaction(s).
 
 # BINDINGS #
 
@@ -155,11 +155,13 @@ Bindings for other languages are available on GitHub. Currently they support onl
 
 Existing bindings:
 
-+ Ruby - for details see <https://github.com/pmem/pmemkv-ruby>
-
 + JNI & Java - for details see <https://github.com/pmem/pmemkv-java>
 
 + Node.js - for details see <https://github.com/pmem/pmemkv-nodejs>
+
++ Python - for details see <https://github.com/pmem/pmemkv-python>
+
++ Ruby - for details see <https://github.com/pmem/pmemkv-ruby>
 
 # SEE ALSO #
 

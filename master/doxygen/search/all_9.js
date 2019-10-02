@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['pmemkv',['pmemkv',['../index.html',1,'']]],
   ['kv',['kv',['../namespacepmem_1_1kv.html',1,'pmem']]],
   ['pmem',['pmem',['../namespacepmem.html',1,'']]],
   ['put',['put',['../classpmem_1_1kv_1_1db.html#a31dbecf3c960dec47d4a04328b9efd92',1,'pmem::kv::db']]],
