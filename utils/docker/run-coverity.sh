@@ -40,6 +40,7 @@ cd $WORKDIR
 
 mkdir build
 cd build
+PKG_CONFIG_PATH=/opt/memkind-master/lib/pkgconfig/:$PKG_CONFIG_PATH \
 cmake .. -DCMAKE_BUILD_TYPE=Debug
 
 export COVERITY_SCAN_PROJECT_NAME="$TRAVIS_REPO_SLUG"
