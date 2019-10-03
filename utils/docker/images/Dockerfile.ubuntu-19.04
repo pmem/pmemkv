@@ -68,6 +68,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	pandoc \
 	pkg-config \
 	rapidjson-dev \
+	ruby \
 	sudo \
 	wget \
 	whois \
