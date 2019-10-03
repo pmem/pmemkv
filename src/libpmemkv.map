@@ -32,7 +32,7 @@
 #
 # src/libpmemkv.map -- linker map file for libpmemkv
 #
-LIBPMEMKV_0.8 {
+LIBPMEMKV_1.0 {
 	global:
 		pmemkv_close;
 		pmemkv_config_delete;

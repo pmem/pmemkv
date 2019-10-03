@@ -32,7 +32,7 @@
 #
 # src/libpmemkv_json_config.map -- linker map file for libpmemkv_json_config
 #
-LIBPMEMKV_JSON_CONFIG_0.8 {
+LIBPMEMKV_JSON_CONFIG_1.0 {
 	global:
 		pmemkv_config_from_json;
 		pmemkv_config_from_json_errormsg;
