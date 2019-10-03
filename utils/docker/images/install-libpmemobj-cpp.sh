@@ -37,10 +37,10 @@
 
 set -e
 
-git clone https://github.com/pmem/libpmemobj-cpp
+git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
 cd libpmemobj-cpp
 
-git checkout 1.8-rc1
+git checkout 1.8
 
 mkdir build
 cd build
