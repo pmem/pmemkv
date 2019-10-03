@@ -155,7 +155,9 @@ Bindings for other languages are available on GitHub. Currently they support onl
 
 Existing bindings:
 
-+ JNI & Java - for details see <https://github.com/pmem/pmemkv-java>
++ Java - for details see <https://github.com/pmem/pmemkv-java>
+
++ JNI - for details see <https://github.com/pmem/pmemkv-jni>
 
 + Node.js - for details see <https://github.com/pmem/pmemkv-nodejs>
 
