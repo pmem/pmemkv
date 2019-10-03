@@ -7,8 +7,7 @@
 
 Key/Value Datastore for Persistent Memory
 
-Overview
---------
+## Overview
 
 `pmemkv` is a local/embedded key-value datastore optimized for persistent memory.
 Rather than being tied to a single language or backing implementation, `pmemkv`
@@ -17,34 +16,24 @@ provides different options for language bindings and storage engines.
 There is also a small helper library `pmemkv_json_config` provided.
 See its [manual](doc/libpmemkv_json_config.3.md) for details.
 
-<ul>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">Installation</a></li>
-<li><a href="#bindings">Language Bindings</a></li>
-<li><a href="#engines">Storage Engines</a></li>
-<li><a href="#tools">Tools and Utilities</a></li>
-</ul>
+- [Installation](#installation)
+- [Language Bindings](#language-bindings)
+- [Storage Engines](#storage-engines)
+- [Tools and Utilities](#tools-and-utilities)
 
-<a name="installation"></a>
+## Installation
 
-Installation
-------------
-
-<a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md">Installation</a> guide
+[Installation guide](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md)
 provides detailed instructions how to build and install `pmemkv` from sources,
 build rpm and deb packages and explains usage of experimental engines and pool sets.
 
-<ul>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources">Building From Sources</a></li>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora">Installing on Fedora</a></li>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#ubuntu">Installing on Ubuntu</a></li>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#build_package">Building packages</a></li>
-<li><a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental">Using Experimental Engines</a></li>
-</ul>
+- [Building From Sources](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources)
+- [Installing on Fedora](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora)
+- [Installing on Ubuntu](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#ubuntu)
+- [Building packages](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#build_package)
+- [Using Experimental Engines](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental)
 
-<a name="bindings"></a>
-
-Language Bindings
------------------
+## Language Bindings
 
 `pmemkv` is written in C/C++ and it is used by bindings for Java, Node.js,
 Python, and Ruby applications.
@@ -66,10 +55,7 @@ in sync with the main `pmemkv` distribution.
 * Python - https://github.com/pmem/pmemkv-python
 * Ruby - https://github.com/pmem/pmemkv-ruby
 
-<a name="engines"></a>
-
-Storage Engines
----------------
+## Storage Engines
 
 `pmemkv` provides multiple storage engines that conform to the same common API, so every engine can be used with
 all language bindings and utilities. Engines are loaded by name at runtime.
@@ -84,12 +70,12 @@ all language bindings and utilities. Engines are loaded by name at runtime.
 | [stree](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#stree) | Sorted persistent B+ tree | Yes | No | Yes |
 | [caching](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#caching) | Caching for remote Memcached or Redis server | Yes | No | - |
 
+The production quality engines are described in the [libpmemkv(7)](https://pmem.io/pmemkv/master/manpages/libpmemkv.7.html) manual
+and the experimental engines are described in the [ENGINES-experimental.md](https://github.com/pmem/pmemkv/blob/master/ENGINES-experimental.md) file.
+
 [Contributing a new engine](https://github.com/pmem/pmemkv/blob/master/CONTRIBUTING.md#engines) is easy and encouraged!
 
-<a name="tools"></a>
-
-Tools and Utilities
--------------------
+## Tools and Utilities
 
 Benchmarks' scripts and other helpful utilities are available here:
 
