@@ -13,6 +13,7 @@ The C API of pmemkv is documented in the following manuals:
 * [libpmemkv.3](https://pmem.io/pmemkv/master/manpages/libpmemkv.3.html)
 * [libpmemkv.7](https://pmem.io/pmemkv/master/manpages/libpmemkv.7.html)
 * [libpmemkv_config.3](https://pmem.io/pmemkv/master/manpages/libpmemkv_config.3.html)
+* [libpmemkv_json_config.3](https://pmem.io/pmemkv/master/manpages/libpmemkv_json_config.3.html)
 
 The C++ API of pmemkv is documented in the Doxygen documentation available
 [here](http://pmem.io/pmemkv/master/doxygen/index.html).
