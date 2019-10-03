@@ -37,8 +37,8 @@
 
 set -e
 
-# 27.09.2019; contains handling of new memkind namespace for pmem::allocator
-PMEMKV_VERSION=70b4a1272dc0e0be1ed716ff8797092396295759
+# 03.10.2019; contains libpmemobj new (non-experimental) namespace for containers
+PMEMKV_VERSION=7bb72710c3a24e17b52e49bac64abfbaf15d138c
 
 # Merge pull request #36 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
 RUBY_VERSION=99d1bfc05d116d35d0e96541ece9b9df831d95a0
@@ -49,8 +49,8 @@ JNI_VERSION=78b81de8266ec690fb41b5f4e62948e200640cbe
 # Merge pull request #26 from ldorau/Update-gitignore, 16.09.2019
 JAVA_VERSION=30c2a897574aa2552bd3e651e4e57f2469da5767
 
-# Merge pull request #34 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
-NODEJS_VERSION=5cf32b58839617618fa4c40af620686a403564c6
+# Merge pull request #38 from lukaszstolarczuk/replace-json-config, 01.10.2019
+NODEJS_VERSION=9e3f0edd8f10d0d6f011fd22354ce1b4efe36f84
 
 PREFIX=/usr
 rm -rf /opt/bindings
@@ -68,8 +68,6 @@ mkdir build
 cd build
 # only VSMAP engine is enabled, because Java tests need it
 
-# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
-PKG_CONFIG_PATH=/opt/memkind-stable/lib/pkgconfig/:$PKG_CONFIG_PATH \
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DENGINE_VSMAP=ON \
@@ -121,8 +119,7 @@ git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
 git checkout $JAVA_VERSION
 mvn dependency:go-offline
-# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
-LD_LIBRARY_PATH=/opt/memkind-stable/lib/:$LD_LIBRARY_PATH mvn install
+mvn install
 mv -v ~/.m2/repository /opt/bindings/java/
 
 #
