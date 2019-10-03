@@ -9,21 +9,21 @@ are logged as GitHub issues.*
 Contents
 --------
 
-<ul>
-<li><a href="#building_from_sources">Building from Sources</a></li>
-<li><a href="#fedora">Installing on Fedora</a></li>
-<li><a href="#ubuntu">Installing on Ubuntu</a></li>
-<li><a href="#experimental">Using Experimental Engines</a></li>
-<li><a href="#build_package">Building packages</a></li>
-<li><a href="#pool_set">Using a Pool Set</a></li>
-</ul>
+[Building from Sources](#Building-from-Sources)
 
-<a name="building_from_sources"></a>
+[Installing on Fedora](#Installing-on-Fedora)
 
-Building from Sources
----------------------
+[Installing on Ubuntu](#Installing-on-Ubuntu)
 
-**Prerequisites**
+[Using Experimental Engines](#Using-Experimental-Engines)
+
+[Building packages](#Building-packages)
+
+[Using a Pool Set](#Using-a-Pool-Set)
+
+## Building from Sources
+
+### Prerequisites
 
 * 64-bit Linux (OSX and Windows are not yet supported)
 * [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit
@@ -38,7 +38,7 @@ Building from Sources
 	* [perl](https://www.perl.org/) - for whitespace checker script
 	* [clang format 8.0](https://clang.llvm.org/docs/ClangFormat.html) - to format and check coding style
 
-**Building pmemkv and running tests**
+### Building pmemkv and running tests
 
 ```sh
 git clone https://github.com/pmem/pmemkv
@@ -72,7 +72,7 @@ instead of:
 cmake ..
 ```
 
-**Managing shared library**
+### Managing shared library
 
 To package `pmemkv` as a shared library and install on your system:
 
@@ -90,7 +90,7 @@ sudo make install		# install to path specified by CMAKE_INSTALL_PREFIX
 sudo make uninstall		# remove shared library and headers from path specified by CMAKE_INSTALL_PREFIX
 ```
 
-**Out-of-source builds**
+### Out-of-source builds
 
 If the standard build does not suit your needs, create your own
 out-of-source build and run tests like this:
@@ -104,10 +104,7 @@ make
 make test            # or 'ctest --output-on-failure'
 ```
 
-<a name="fedora"></a>
-
-Installing on Fedora
---------------------
+## Installing on Fedora
 
 Install required packages:
 
@@ -158,12 +155,9 @@ cd memkind
 su -c 'make install'
 ```
 
-Finally <a href="#building_from_sources">build and install pmemkv from sources</a>.
+Finally [build and install pmemkv from sources](#Building-packages)
 
-<a name="ubuntu"></a>
-
-Installing on Ubuntu
---------------------
+## Installing on Ubuntu
 
 Install required packages:
 
@@ -213,12 +207,9 @@ cd memkind
 sudo make install
 ```
 
-Finally <a href="#building_from_sources">build and install pmemkv from sources</a>.
+Finally [build and install pmemkv from sources](#Building-packages)
 
-<a name="experimental"></a>
-
-Using Experimental Engines
---------------------------
+## Using Experimental Engines
 
 To enable experimental engine(s) use adequate CMake parameter, e.g.:
 
@@ -262,10 +253,9 @@ cd ../lib_protocol
 make
 ```
 
-<a name="build_package"></a>
 
-Building packages
------------------
+## Building packages
+
 ```sh
 ...
 cmake .. -DCPACK_GENERATOR="$GEN" -DCMAKE_INSTALL_PREFIX=/usr
@@ -276,10 +266,8 @@ $GEN is a type of package generator and can be RPM or DEB
 
 CMAKE_INSTALL_PREFIX must be set to a destination where packages will be installed
 
-<a name="pool_set"></a>
 
-Using a Pool Set
-----------------
+## Using a Pool Set
 
 First create a pool set descriptor:  (`~/pmemkv.poolset` in this example)
 
