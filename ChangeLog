@@ -1,3 +1,28 @@
+Thu Oct 03 2019 Szymon Romik <szymon.romik@intel.com>
+
+	* Version 1.0
+
+	This is the first release of pmemkv project which guarantees backward
+	compatibility.
+
+	Optimizations:
+	- refactored core for libpmemobj-based engines
+	- adjusted cmap engine to libpmemobj-cpp 1.8 optimizations
+
+	Features:
+	- generic support for libpmemobj-based engines for handling persistent
+		pointers as a config parameter
+
+	Changes in tests and build system:
+	- added support for generic tests parameterized by engine type
+	- added framework for pmemreorder tests
+
+	Others:
+	- added new error statuses
+	- added C++ API for config structure
+	- added doxygen documentation for C++ API
+	- moved configuration from JSON string to new optional library
+
 Fri Jun 28 2019 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 0.8
