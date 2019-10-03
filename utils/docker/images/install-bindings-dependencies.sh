@@ -68,8 +68,6 @@ mkdir build
 cd build
 # only VSMAP engine is enabled, because Java tests need it
 
-# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
-PKG_CONFIG_PATH=/opt/memkind-stable/lib/pkgconfig/:$PKG_CONFIG_PATH \
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DENGINE_VSMAP=ON \
@@ -121,8 +119,7 @@ git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
 git checkout $JAVA_VERSION
 mvn dependency:go-offline
-# XXX temporarily used memkind-stable, since master won't work with current pmemkv's master
-LD_LIBRARY_PATH=/opt/memkind-stable/lib/:$LD_LIBRARY_PATH mvn install
+mvn install
 mv -v ~/.m2/repository /opt/bindings/java/
 
 #
