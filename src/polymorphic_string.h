@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include <libpmemobj++/experimental/string.hpp>
+#include <libpmemobj++/container/string.hpp>
 #include <libpmemobj++/p.hpp>
 #include <string>
 
@@ -44,7 +44,7 @@ namespace kv
 {
 class polymorphic_string {
 public:
-	using pmem_string = pmem::obj::experimental::string;
+	using pmem_string = pmem::obj::string;
 	polymorphic_string()
 	{
 		construct();
