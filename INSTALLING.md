@@ -1,4 +1,5 @@
 # Installing pmemkv
+
 Key/Value Datastore for Persistent Memory
 
 *This is experimental pre-release software and should not be used in
@@ -6,22 +7,16 @@ production systems. APIs and file formats may change at any time without
 preserving backwards compatibility. All known issues and limitations
 are logged as GitHub issues.*
 
-Contents
---------
+## Contents
 
-<ul>
-<li><a href="#building_from_sources">Building from Sources</a></li>
-<li><a href="#fedora">Installing on Fedora</a></li>
-<li><a href="#ubuntu">Installing on Ubuntu</a></li>
-<li><a href="#experimental">Using Experimental Engines</a></li>
-<li><a href="#build_package">Building packages</a></li>
-<li><a href="#pool_set">Using a Pool Set</a></li>
-</ul>
+- [Building from Sources](#building-from-sources)
+- [Installing on Fedora](#installing-on-fedora)
+- [Installing on Ubuntu](#installing-on-ubuntu)
+- [Using Experimental Engines](#using-experimental-engines)
+- [Building packages](#building-packages)
+- [Using a Pool Set](#using-a-pool-set)
 
-<a name="building_from_sources"></a>
-
-Building from Sources
----------------------
+## Building from Sources
 
 **Prerequisites**
 
@@ -104,10 +99,7 @@ make
 make test            # or 'ctest --output-on-failure'
 ```
 
-<a name="fedora"></a>
-
-Installing on Fedora
---------------------
+## Installing on Fedora
 
 Install required packages:
 
@@ -158,12 +150,9 @@ cd memkind
 su -c 'make install'
 ```
 
-Finally <a href="#building_from_sources">build and install pmemkv from sources</a>.
+Finally [build and install pmemkv from sources](#building-from-sources).
 
-<a name="ubuntu"></a>
-
-Installing on Ubuntu
---------------------
+## Installing on Ubuntu
 
 Install required packages:
 
@@ -213,12 +202,9 @@ cd memkind
 sudo make install
 ```
 
-Finally <a href="#building_from_sources">build and install pmemkv from sources</a>.
+Finally [build and install pmemkv from sources](#building-from-sources).
 
-<a name="experimental"></a>
-
-Using Experimental Engines
---------------------------
+## Using Experimental Engines
 
 To enable experimental engine(s) use adequate CMake parameter, e.g.:
 
@@ -262,10 +248,8 @@ cd ../lib_protocol
 make
 ```
 
-<a name="build_package"></a>
+## Building packages
 
-Building packages
------------------
 ```sh
 ...
 cmake .. -DCPACK_GENERATOR="$GEN" -DCMAKE_INSTALL_PREFIX=/usr
@@ -276,10 +260,7 @@ $GEN is a type of package generator and can be RPM or DEB
 
 CMAKE_INSTALL_PREFIX must be set to a destination where packages will be installed
 
-<a name="pool_set"></a>
-
-Using a Pool Set
-----------------
+## Using a Pool Set
 
 First create a pool set descriptor:  (`~/pmemkv.poolset` in this example)
 

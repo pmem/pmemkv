@@ -1,25 +1,17 @@
 # Contributing to pmemkv
 
-<ul>
-<li><a href="#issues">Opening New Issues</a></li>
-<li><a href="#style">Code Style</a></li>
-<li><a href="#pull_requests">Submitting Pull Requests</a></li>
-<li><a href="#engines">Creating New Engines</a></li>
-<li><a href="#experimental">Creating Experimental Engines</a></li>
-</ul>
+- [Opening New Issues](#opening-new-issues)
+- [Code Style](#code-style)
+- [Submitting Pull Requests](#submitting-pull-requests)
+- [Creating New Engines](#creating-new-engines)
+- [Creating Experimental Engines](#creating-experimental-engines)
 
-<a name="issues"></a>
-
-Opening New Issues
-------------------
+# Opening New Issues
 
 Please log bugs or suggestions as [GitHub issues](https://github.com/pmem/pmemkv/issues).
 Details such as OS and PMDK version are always appreciated.
 
-<a name="style"></a>
-
-Code Style
-----------
+# Code Style
 
 * See `.clang-format` file in the repository for details
 * Indent with tabs (width: 8)
@@ -40,10 +32,7 @@ make cppformat
 
 **NOTE**: We're using specific clang-format - version exactly **8.0** is required.
 
-<a name="pull_requests"></a>
-
-Submitting Pull Requests
-------------------------
+# Submitting Pull Requests
 
 We take outside code contributions to `PMEMKV` through GitHub pull requests.
 
@@ -91,10 +80,7 @@ to use your real name (not an alias) when committing your changes to PMEMKV:
 Author: Random J Developer <random@developer.example.org>
 ```
 
-<a name="engines"></a>
-
-Creating New Engines
---------------------
+# Creating New Engines
 
 There are several motivations to create a `pmemkv` storage engine:
 
@@ -164,10 +150,7 @@ Next we'll walk you through the steps of creating a new engine.
 * In `README.md`, link `mytree` in the table of supported engines
 * Update manpages in `doc` directory
 
-<a name="experimental"></a>
-
-Creating Experimental Engines
------------------------------
+# Creating Experimental Engines
 
 The instructions above describe creating an engine that is considered stable. If you want,
 you can mark an engine as experimental and not include it in a build by default.
