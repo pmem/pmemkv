@@ -22,6 +22,6 @@ The C++ API of pmemkv is documented in the Doxygen documentation available
 
 The following series of blog articles provides a tutorial introduction to **pmemkv**:
 
-* [Part 1 - Introduction](http://pmem.io/2017/02/21/pmemkv-intro.html)
-* [Part 2 - Zero-copy leaf splits in pmemkv](http://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html)
-* [Part 3 - Benchmarking with different storage engines using pmemkv](http://pmem.io/2017/12/27/pmemkv-benchmarking-engines.html)
+* [Introduction](http://pmem.io/2017/02/21/pmemkv-intro.html)
+* [Zero-copy leaf splits in pmemkv](http://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html)
+* [Benchmarking with different storage engines using pmemkv](http://pmem.io/2017/12/27/pmemkv-benchmarking-engines.html)
