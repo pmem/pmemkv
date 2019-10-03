@@ -125,6 +125,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DDEVELOPER_MODE=1
 
 make -j$(nproc)
+make doc
 ctest --output-on-failure
 sudo_password -S make install
 
