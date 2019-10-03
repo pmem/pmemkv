@@ -275,15 +275,14 @@ build_wrong_engine_name_test()
 
 test("run-binary" wrong_engine_name_test wrong_engine_name_test none)
 
-
-if(ENGINE_CMAP AND BUILD_EXAMPLES)
+if(BUILD_EXAMPLES AND ENGINE_CMAP)
 	build_example_pmemkv_basic_c()
 	build_example_pmemkv_basic_cpp()
 	build_example_pmemkv_pmemobj_basic_cpp()
 	test("run-binary" ex_pmemkv_basic_c ex_pmemkv_basic_c none)
 	test("run-binary" ex_pmemkv_basic_cpp ex_pmemkv_basic_cpp none)
 	test("run-binary" ex_pmemkv_pmemobj_basic_cpp ex_pmemkv_pmemobj_basic_cpp none)
-else()
+elseif(BUILD_EXAMPLES AND NOT ENGINE_CMAP)
 	message(WARNING
 		"Examples use cmap engine, which is disabled, hence their execution "
 		"is also disabled. If you want to run them use -DENGINE_CMAP=ON option.")
