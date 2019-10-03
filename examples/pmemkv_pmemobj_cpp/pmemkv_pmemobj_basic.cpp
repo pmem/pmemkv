@@ -40,8 +40,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <libpmemkv.hpp>
-#include <libpmemobj++/experimental/string.hpp>
-#include <libpmemobj++/experimental/vector.hpp>
+#include <libpmemobj++/container/string.hpp>
+#include <libpmemobj++/container/vector.hpp>
 #include <libpmemobj++/make_persistent.hpp>
 #include <libpmemobj++/persistent_ptr.hpp>
 #include <libpmemobj++/transaction.hpp>
@@ -50,13 +50,13 @@
 #define LOG(msg) std::cout << msg << std::endl
 
 using namespace pmem::kv;
-using pmemoid_vector = pmem::obj::experimental::vector<PMEMoid>;
+using pmemoid_vector = pmem::obj::vector<PMEMoid>;
 
 const uint64_t SIZE = 1024UL * 1024UL * 1024UL;
 
 struct Root {
 	pmem::obj::persistent_ptr<pmemoid_vector> oids;
-	pmem::obj::persistent_ptr<pmem::obj::experimental::string> str;
+	pmem::obj::persistent_ptr<pmem::obj::string> str;
 };
 
 int main(int argc, char *argv[])
@@ -75,8 +75,7 @@ int main(int argc, char *argv[])
 
 		pmem::obj::transaction::run(pop, [&] {
 			pop.root()->oids = pmem::obj::make_persistent<pmemoid_vector>();
-			pop.root()->str = pmem::obj::make_persistent<
-				pmem::obj::experimental::string>();
+			pop.root()->str = pmem::obj::make_persistent<pmem::obj::string>();
 
 			pop.root()->oids->emplace_back(OID_NULL);
 			pop.root()->oids->emplace_back(OID_NULL);

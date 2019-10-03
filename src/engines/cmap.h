@@ -37,7 +37,7 @@
 
 #include <libpmemobj++/persistent_ptr.hpp>
 #define LIBPMEMOBJ_CPP_USE_TBB_RW_MUTEX 1
-#include <libpmemobj++/experimental/concurrent_hash_map.hpp>
+#include <libpmemobj++/container/concurrent_hash_map.hpp>
 
 namespace pmem
 {
@@ -86,8 +86,7 @@ private:
 };
 
 using string_t = pmem::kv::polymorphic_string;
-using map_t =
-	pmem::obj::experimental::concurrent_hash_map<string_t, string_t, string_hasher>;
+using map_t = pmem::obj::concurrent_hash_map<string_t, string_t, string_hasher>;
 
 } /* namespace cmap */
 } /* namespace internal */
