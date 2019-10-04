@@ -71,6 +71,7 @@ int main()
 	assert(((const char *)data)[0] == 'A');
 
 	int *int_ptr = malloc(sizeof(int));
+	assert(int_ptr != NULL);
 	*int_ptr = 10;
 
 	/* Put pointer to dynamically allocated object, free_int_ptr is called on
@@ -117,4 +118,6 @@ int main()
 	assert(sub_size == 1073741824);
 
 	pmemkv_config_delete(config_from_json);
+
+	return 0;
 }
