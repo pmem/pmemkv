@@ -4,7 +4,7 @@ Content-Style: 'text/css'
 title: _MP(PMEMKV_JSON_CONFIG, 3)
 collection: libpmemkv
 header: PMEMKV_JSON_CONFIG
-date: pmemkv_json_config version 0.8
+date: pmemkv_json_config version 1.0
 ...
 
 [comment]: <> (Copyright 2019, Intel Corporation)
