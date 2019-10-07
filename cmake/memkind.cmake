@@ -33,6 +33,9 @@ if(PKG_CONFIG_FOUND)
 endif()
 
 if(NOT MEMKIND_FOUND)
+	unset(MEMKIND_LIBRARY CACHE)
+	unset(MEMKIND_INCLUDEDIR CACHE)
+
 	# try old method
 	include(FindPackageHandleStandardArgs)
 	find_path(MEMKIND_INCLUDEDIR pmem_allocator.h)
