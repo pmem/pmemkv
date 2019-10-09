@@ -116,7 +116,7 @@ TEST_F(ConfigCppTest, SimpleTest_TRACERS_M)
 	size_t value_custom_count;
 	s = cfg->get_data("object", value_custom, value_custom_count);
 	ASSERT_EQ(s, status::OK);
-	ASSERT_EQ(value_custom_count, 1);
+	ASSERT_EQ(value_custom_count, 1U);
 	ASSERT_EQ(value_custom->a, 10);
 	ASSERT_EQ(value_custom->b, 'a');
 
@@ -124,7 +124,7 @@ TEST_F(ConfigCppTest, SimpleTest_TRACERS_M)
 	size_t value_array_count;
 	s = cfg->get_data("array", value_array, value_array_count);
 	ASSERT_EQ(s, status::OK);
-	ASSERT_EQ(value_array_count, 3);
+	ASSERT_EQ(value_array_count, 3U);
 	ASSERT_EQ(value_array[0], 1);
 	ASSERT_EQ(value_array[1], 15);
 	ASSERT_EQ(value_array[2], 77);
@@ -243,7 +243,7 @@ TEST_F(ConfigCppTest, NotFoundTest_TRACERS_M)
 	ASSERT_EQ(cfg->get_uint64("uint", my_uint), status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_object("object", my_object), status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_data("data", my_object, my_object_count), status::NOT_FOUND);
-	ASSERT_EQ(my_object_count, 0);
+	ASSERT_EQ(my_object_count, 0U);
 
 	/* initialize config with any put */
 	cfg->put_int64("init", 0);
@@ -256,5 +256,5 @@ TEST_F(ConfigCppTest, NotFoundTest_TRACERS_M)
 		  status::NOT_FOUND);
 	ASSERT_EQ(cfg->get_data("non-existent-data", my_object, my_object_count),
 		  status::NOT_FOUND);
-	ASSERT_EQ(my_object_count, 0);
+	ASSERT_EQ(my_object_count, 0U);
 }
