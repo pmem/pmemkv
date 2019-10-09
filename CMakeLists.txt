@@ -164,8 +164,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.8)
 set(LIBPMEMOBJ_REQUIRED_VERSION 1.7)
 
+if(DEVELOPER_MODE)
+	add_common_flag(-Werror)
+endif()
+
 add_common_flag(-Wall)
-add_common_flag(-Werror)
 add_common_flag(-Wpointer-arith)
 add_common_flag(-Wsign-compare)
 add_common_flag(-Wunreachable-code-return)
