@@ -146,7 +146,9 @@ Install latest memkind:
 cd ~
 git clone https://github.com/memkind/memkind
 cd memkind
-./build.sh
+./autogen.sh
+./configure
+make
 su -c 'make install'
 ```
 
@@ -198,7 +200,9 @@ Install latest memkind:
 cd ~
 git clone https://github.com/memkind/memkind
 cd memkind
-./build.sh
+./autogen.sh
+./configure
+make
 sudo make install
 ```
 
