@@ -32,6 +32,7 @@
 
 #include "test_path.h"
 #include "gtest/gtest.h"
+#include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <string>
