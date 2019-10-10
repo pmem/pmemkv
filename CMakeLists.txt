@@ -306,6 +306,12 @@ else()
 endif()
 
 add_library(pmemkv SHARED ${SOURCE_FILES})
+
+# Disgusting workaroud for symlink relocation cpack issue on fedora30.
+if(NOT CPACK_GENERATOR)
+	set_target_properties(pmemkv PROPERTIES SOVERSION 1)
+endif()
+
 target_link_libraries(pmemkv PRIVATE
 	-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv.map)
 
