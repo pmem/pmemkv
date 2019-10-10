@@ -57,7 +57,7 @@ if [ "$1" = "sys" ]; then
 	./autogen.sh
 	./configure --prefix=/usr
 	make -j$(nproc)
-	make install
+	make -j$(nproc) install
 
 	# cleanup
 	cd $WORKDIR
@@ -70,7 +70,7 @@ mkdir /opt/memkind-master
 ./autogen.sh
 ./configure --prefix=/opt/memkind-master
 make -j$(nproc)
-make install
+make -j$(nproc) install
 
 cd $WORKDIR
 rm -r memkind_git
@@ -84,7 +84,7 @@ mkdir /opt/memkind-stable
 ./autogen.sh
 ./configure --prefix=/opt/memkind-stable
 make -j$(nproc)
-make install
+make -j$(nproc) install
 
 cd $WORKDIR
 rm -r memkind_git_stable

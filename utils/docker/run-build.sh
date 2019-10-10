@@ -81,7 +81,7 @@ function compile_example_standalone() {
 		return 1
 	fi
 
-	LD_LIBRARY_PATH=$MEMKIND_DEFAULT_LD_LIBRARY_PATH:$LD_LIBRARY_PATH make
+	LD_LIBRARY_PATH=$MEMKIND_DEFAULT_LD_LIBRARY_PATH:$LD_LIBRARY_PATH make -j$(nproc)
 	cd -
 }
 
@@ -111,7 +111,7 @@ echo "--------------------------------------------------------------------------
 
 echo
 echo "##############################################################"
-echo "### Verify make and install (in dir: ${PREFIX})"
+echo "### Verify build and install (in dir: ${PREFIX})"
 echo "##############################################################"
 
 mkdir $WORKDIR/build
@@ -125,9 +125,9 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DDEVELOPER_MODE=1
 
 make -j$(nproc)
-make doc
+make -j$(nproc) doc
 ctest --output-on-failure
-sudo_password -S make install
+sudo_password -S make -j$(nproc) install
 
 if [ "$COVERAGE" == "1" ]; then
 	upload_codecov tests

@@ -77,8 +77,8 @@ cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DENGINE_STREE=OFF \
 	-DBUILD_EXAMPLES=OFF \
 	-DENGINE_TREE3=OFF
-make -j2
-make -j2 install
+make -j$(nproc)
+make -j$(nproc) install
 
 #
 # 2) RUBY dependencies - all of the dependencies (gems) needed to run
