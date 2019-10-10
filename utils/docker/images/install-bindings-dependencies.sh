@@ -103,7 +103,7 @@ git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
 git checkout $JNI_VERSION
 cp /opt/googletest/googletest-*.zip .
-make
+make test
 make install prefix=$PREFIX
 
 #
