@@ -54,7 +54,7 @@ cd $CURR_DIR/pmemkv/build
 
 PKG_CONFIG_PATH=/opt/memkind-master/lib/pkgconfig/:$PKG_CONFIG_PATH \
 cmake .. -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
-make doc
+make -j$(nproc) doc
 cp $CURR_DIR/pmemkv/build/man/tmp/*.md $CURR_DIR/pmemkv/doc/
 cp -r $CURR_DIR/pmemkv/doc $CURR_DIR/
 cp -r $CURR_DIR/pmemkv/build/doc/cpp_html $CURR_DIR/

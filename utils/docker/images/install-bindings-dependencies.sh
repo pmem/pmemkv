@@ -77,8 +77,8 @@ cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DENGINE_STREE=OFF \
 	-DBUILD_EXAMPLES=OFF \
 	-DENGINE_TREE3=OFF
-make -j2
-make -j2 install
+make -j$(nproc)
+make -j$(nproc) install
 
 #
 # 2) RUBY dependencies - all of the dependencies (gems) needed to run
@@ -103,7 +103,7 @@ git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
 git checkout $JNI_VERSION
 cp /opt/googletest/googletest-*.zip .
-make
+make test
 make install prefix=$PREFIX
 
 #

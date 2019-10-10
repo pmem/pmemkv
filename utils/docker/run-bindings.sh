@@ -67,8 +67,8 @@ cd build
 
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX
-make -j2
-sudo_password -S make install
+make -j$(nproc)
+sudo_password -S make -j$(nproc) install
 
 echo
 echo "##################################################################"

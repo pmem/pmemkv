@@ -46,7 +46,7 @@ mkdir build
 cd build
 
 cmake .. -DCPACK_GENERATOR="$1" -DCMAKE_INSTALL_PREFIX=/usr
-make package
+make -j$(nproc) package
 if [ "$1" = "DEB" ]; then
       sudo dpkg -i libpmemobj++*.deb
 elif [ "$1" = "RPM" ]; then
