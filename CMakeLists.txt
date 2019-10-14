@@ -306,6 +306,7 @@ else()
 endif()
 
 add_library(pmemkv SHARED ${SOURCE_FILES})
+set_target_properties(pmemkv PROPERTIES SOVERSION 1)
 target_link_libraries(pmemkv PRIVATE
 	-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv.map)
 
