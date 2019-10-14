@@ -43,25 +43,25 @@ function(set_version VERSION)
 	execute_process(COMMAND git describe
 			OUTPUT_VARIABLE GIT_VERSION)
 	if(GIT_VERSION)
-		# 1.5-rc1-19-gb8f78a329 -> 1.5-rc1+git19.gb8f78a329
+		# 1.5-rc1-19-gb8f78a329 -> 1.5-rc1.git19.gb8f78a329
 		string(REGEX MATCHALL
 			"([0-9.]*)-rc([0-9]*)-([0-9]*)-([0-9a-g]*)"
 			MATCHES
 			${GIT_VERSION})
 		if(MATCHES)
 			set(VERSION
-				"${CMAKE_MATCH_1}-rc${CMAKE_MATCH_2}+git${CMAKE_MATCH_3}.${CMAKE_MATCH_4}"
+				"${CMAKE_MATCH_1}-rc${CMAKE_MATCH_2}.git${CMAKE_MATCH_3}.${CMAKE_MATCH_4}"
 				PARENT_SCOPE)
 		endif()
 
-		# 1.5-19-gb8f78a329 -> 1.5+git19.gb8f78a329
+		# 1.5-19-gb8f78a329 -> 1.5-git19.gb8f78a329
 		string(REGEX MATCHALL
 			"\([0-9.]*\)-\([0-9]*\)-\([0-9a-g]*\)"
 			MATCHES
 			${GIT_VERSION})
 		if(MATCHES)
 			set(VERSION
-				"${CMAKE_MATCH_1}+git${CMAKE_MATCH_2}.${CMAKE_MATCH_3}"
+				"${CMAKE_MATCH_1}-git${CMAKE_MATCH_2}.${CMAKE_MATCH_3}"
 				PARENT_SCOPE)
 		endif()
 	else()
