@@ -27,6 +27,8 @@ are logged as GitHub issues.*
 * [memkind](https://github.com/memkind/memkind) - Volatile memory manager (required by vsmap & vcmap engines)
 * [RapidJSON](https://github.com/tencent/rapidjson) - JSON parser (required by `libpmemkv_json_config` helper library)
 * Used only for development & testing:
+	* [valgrind](https://github.com/pmem/valgrind) - tool for profiling and memory leak detection. *pmem* forked version with *pmemcheck*
+		tool is recommended, but upstream/original [valgrind](http://valgrind.org/) is also compatible (package valgrind-devel is required).
 	* [pandoc](https://pandoc.org/) - markup converter to generate manpages
 	* [doxygen](http://www.doxygen.nl/) - tool for generating documentation from annotated C++ sources
 	* [graphviz](https://www.graphviz.org/) - graph visualization software required by _doxygen_
