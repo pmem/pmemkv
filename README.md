@@ -23,15 +23,16 @@ See its [manual](doc/libpmemkv_json_config.3.md) for details.
 
 ## Installation
 
-[Installation guide](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md)
+[Installation guide](INSTALLING.md)
 provides detailed instructions how to build and install `pmemkv` from sources,
 build rpm and deb packages and explains usage of experimental engines and pool sets.
 
-- [Building From Sources](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#building_from_sources)
-- [Installing on Fedora](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#fedora)
-- [Installing on Ubuntu](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#ubuntu)
-- [Building packages](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#build_package)
-- [Using Experimental Engines](https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental)
+- [Building from Sources](INSTALLING.md#building-from-sources)
+- [Installing on Fedora](INSTALLING.md#installing-on-fedora)
+- [Installing on Ubuntu](INSTALLING.md#installing-on-ubuntu)
+- [Using Experimental Engines](INSTALLING.md#using-experimental-engines)
+- [Building packages](INSTALLING.md#building-packages)
+- [Using a Pool Set](INSTALLING.md#using-a-pool-set)
 
 ## Language Bindings
 
@@ -42,7 +43,7 @@ Python, and Ruby applications.
 
 ### C/C++ Examples
 
-Examples for C and C++ can be found within this repository in [examples directory](https://github.com/pmem/pmemkv/tree/master/examples).
+Examples for C and C++ can be found within this repository in [examples directory](./examples/).
 
 ### Other Languages
 
@@ -62,18 +63,18 @@ all language bindings and utilities. Engines are loaded by name at runtime.
 
 | Engine Name  | Description | Experimental? | Concurrent? | Sorted? |
 | ------------ | ----------- | ------------- | ----------- | ------- |
-| [blackhole](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#blackhole) | Accepts everything, returns nothing | No | Yes | No |
-| [cmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#cmap) | Concurrent hash map | No | Yes | No |
-| [vsmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vsmap) | Volatile sorted hash map | No | No | Yes |
-| [vcmap](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#vcmap) | Volatile concurrent hash map | No | Yes | No |
-| [tree3](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#tree3) | Persistent B+ tree | Yes | No | No |
-| [stree](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#stree) | Sorted persistent B+ tree | Yes | No | Yes |
-| [caching](https://github.com/pmem/pmemkv/blob/master/ENGINES.md#caching) | Caching for remote Memcached or Redis server | Yes | No | - |
+| [blackhole](doc/libpmemkv.7.md#blackhole) | Accepts everything, returns nothing | No | Yes | No |
+| [cmap](doc/libpmemkv.7.md#cmap) | Concurrent hash map | No | Yes | No |
+| [vsmap](doc/libpmemkv.7.md#vsmap) | Volatile sorted hash map | No | No | Yes |
+| [vcmap](doc/libpmemkv.7.md#vcmap) | Volatile concurrent hash map | No | Yes | No |
+| [tree3](ENGINES-experimental.md#tree3) | Persistent B+ tree | Yes | No | No |
+| [stree](ENGINES-experimental.md#stree) | Sorted persistent B+ tree | Yes | No | Yes |
+| [caching](ENGINES-experimental.md#caching) | Caching for remote Memcached or Redis server | Yes | No | - |
 
-The production quality engines are described in the [libpmemkv(7)](https://pmem.io/pmemkv/master/manpages/libpmemkv.7.html) manual
-and the experimental engines are described in the [ENGINES-experimental.md](https://github.com/pmem/pmemkv/blob/master/ENGINES-experimental.md) file.
+The production quality engines are described in the [libpmemkv(7)](doc/libpmemkv.7.md#engines) manual
+and the experimental engines are described in the [ENGINES-experimental.md](ENGINES-experimental.md) file.
 
-[Contributing a new engine](https://github.com/pmem/pmemkv/blob/master/CONTRIBUTING.md#engines) is easy and encouraged!
+[Contributing a new engine](CONTRIBUTING.md#creating-new-engines) is easy and encouraged!
 
 ## Tools and Utilities
 
