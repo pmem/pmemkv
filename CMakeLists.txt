@@ -50,6 +50,7 @@ endif()
 
 option(BUILD_DOC "build documentation" ON)
 option(BUILD_EXAMPLES "build examples" ON)
+option(BUILD_TESTS "build tests" ON)
 option(BUILD_JSON_CONFIG "build the 'libpmemkv_json_config' library" ON)
 
 option(COVERAGE "run coverage test" OFF)
@@ -286,28 +287,6 @@ else()
 	find_package(VALGRIND QUIET)
 endif()
 
-if(VALGRIND_FOUND)
-	find_pmemcheck()
-
-	if(NOT VALGRIND_PMEMCHECK_FOUND)
-		message(WARNING "Valgrind pmemcheck not found. Some tests will be skipped.")
-	elseif((NOT(PMEMCHECK_VERSION LESS 1.0)) AND PMEMCHECK_VERSION LESS 2.0)
-		message(STATUS "Pmemcheck ${PMEMCHECK_VERSION} found")
-		find_program(PMREORDER names pmreorder HINTS ${CMAKE_INSTALL_PREFIX}/bin)
-		if(PMREORDER)
-			message(STATUS "Pmreorder found")
-			set(ENV{PATH} ${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH})
-			set(PMREORDER_SUPPORTED true CACHE INTERNAL "pmreorder support")
-		endif()
-	else()
-		message(WARNING "Pmreorder will not be used and some tests will be skipped. "
-				"Pmemcheck must be installed in version 1.x "
-				"(currently installed version is ${PMEMCHECK_VERSION})")
-	endif()
-else()
-	message(WARNING "Valgrind not found. Some tests will be skipped.")
-endif()
-
 add_library(pmemkv SHARED ${SOURCE_FILES})
 set_target_properties(pmemkv PROPERTIES SOVERSION 1)
 target_link_libraries(pmemkv PRIVATE
@@ -331,8 +310,32 @@ target_include_directories(pmemkv PRIVATE src/valgrind)
 # Enable libpmemobj-cpp valgrind annotations
 target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_ENABLED=1)
 
-enable_testing()
-add_subdirectory(tests)
+if(BUILD_TESTS)
+	if(VALGRIND_FOUND)
+		find_pmemcheck()
+
+		if(NOT VALGRIND_PMEMCHECK_FOUND)
+			message(WARNING "Valgrind pmemcheck not found. Some tests will be skipped.")
+		elseif((NOT(PMEMCHECK_VERSION LESS 1.0)) AND PMEMCHECK_VERSION LESS 2.0)
+			message(STATUS "Pmemcheck ${PMEMCHECK_VERSION} found")
+			find_program(PMREORDER names pmreorder HINTS ${CMAKE_INSTALL_PREFIX}/bin)
+			if(PMREORDER)
+				message(STATUS "Pmreorder found")
+				set(ENV{PATH} ${CMAKE_INSTALL_PREFIX}/bin:$ENV{PATH})
+				set(PMREORDER_SUPPORTED true CACHE INTERNAL "pmreorder support")
+			endif()
+		else()
+			message(WARNING "Pmreorder will not be used and some tests will be skipped. "
+					"Pmemcheck must be installed in version 1.x "
+					"(currently installed version is ${PMEMCHECK_VERSION})")
+		endif()
+	else()
+		message(WARNING "Valgrind not found. Some tests will be skipped.")
+	endif()
+
+	enable_testing()
+	add_subdirectory(tests)
+endif()
 
 configure_file(libpmemkv.pc.in libpmemkv.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/libpmemkv.pc
