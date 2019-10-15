@@ -103,7 +103,7 @@ Caching engine itself requires server connection settings. Part of the config re
 
 ### Prerequisites
 
-Memcached and libacl (<a href="https://github.com/pmem/pmemkv/blob/master/INSTALLING.md#experimental">see here for installation guide</a>)
+Memcached and libacl (<a href="INSTALLING.md#using-experimental-engines">see here for installation guide</a>)
 packages are required.
 
 

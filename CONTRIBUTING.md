@@ -21,12 +21,12 @@ Details such as OS and PMDK version are always appreciated.
 If you want to check and format your source code properly you can use CMake's `DEVELOPER_MODE`
 option. When enabled additional checks are switched on (cppstyle, whitespaces and headers).
 
-```
+```sh
 cmake .. -DDEVELOPER_MODE=ON
 ```
 
 If you just want to format your code you can make adequate target:
-```
+```sh
 make cppformat
 ```
 
@@ -38,7 +38,7 @@ We take outside code contributions to `PMEMKV` through GitHub pull requests.
 
 **NOTE: If you do decide to implement code changes and contribute them,
 please make sure you agree your contribution can be made available under the
-[BSD-style License used for PMEMKV](https://github.com/pmem/pmemkv/blob/master/LICENSE).**
+[BSD-style License used for PMEMKV](LICENSE).**
 
 **NOTE: Submitting your changes also means that you certify the following:**
 
@@ -126,7 +126,7 @@ Next we'll walk you through the steps of creating a new engine.
     * Add a build option for a new engine with a name like `ENGINE_MYTREE`
     and use it to ifdef all includes, dependencies and linking you may add
     * Add definition of the new option, like `-DENGINE_MYTREE`, so it can
-    be used to ifdef engine-specific code (e.g. in libpmemkv.cc), like:
+    be used to ifdef engine-specific code (e.g. in `libpmemkv.cc`), like:
     ```
     #ifdef ENGINE_MYTREE
     ...
@@ -143,7 +143,7 @@ Next we'll walk you through the steps of creating a new engine.
 * In `src/engine.cc`:
     * Add `#include "engines/mytree.h"` (within `#ifdef ENGINE_MYTREE` clause)
     * Update `create_engine` to return new `my_tree` instances
-* Build & verify engine now works with high-level bindings (see [README](https://github.com/pmem/pmemkv#bindings) for information on current bindings)
+* Build & verify engine now works with high-level bindings (see [README](README.md#language-bindings) for information on current bindings)
 
 ### Documentation
 
@@ -172,7 +172,7 @@ Whole engine-specific code (located in common source files) should be ifdef'd ou
 Extend existing section in `CMakeLists.txt` if your experimental engine requires libraries that
 are not yet included in the default build.
 
-```
+```cmake
 if(ENGINE_MYTREE)
     include(foo-experimental)
 endif()
