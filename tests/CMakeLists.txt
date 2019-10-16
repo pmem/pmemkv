@@ -163,7 +163,6 @@ function(build_wrong_engine_name_test)
 	if(ENGINE_TREE3)
 		target_compile_definitions(wrong_engine_name_test PRIVATE -DENGINE_TREE3)
 	endif()
-
 endfunction()
 
 set(TEST_FILES
@@ -212,14 +211,25 @@ if(ENGINE_TREE3)
 	list(APPEND TEST_FILES engines-experimental/tree3_pmemobj_test.cc)
 endif()
 
-find_library(GTEST NAMES gtest gtest.a)
+# CMake option 'CMAKE_PREFIX_PATH' will be prioritized
+# over system paths in find_library and find_path calls
+find_library(GTEST NAMES gtest)
 if(GTEST)
-	message(STATUS "Gtest found at ${GTEST}")
+	message(STATUS "Gtest found in ${GTEST}")
+
+	find_path(GTEST_INCLUDEDIR "gtest/gtest.h")
+	if (GTEST_INCLUDEDIR)
+		message(STATUS "Gtest headers found in ${GTEST_INCLUDEDIR}")
+		include_directories(${GTEST_INCLUDEDIR})
+	endif()
+
 	add_library(libgtest IMPORTED STATIC GLOBAL)
 	set_target_properties(libgtest PROPERTIES "IMPORTED_LOCATION" "${GTEST}"
 		"IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}")
 else()
-	message(FATAL_ERROR "Gtest not installed in system")
+	message(FATAL_ERROR "Gtest is not installed or couldn't be found. Try using cmake option "
+						"-DCMAKE_PREFIX_PATH=<dir with lib and include dirs for gtest>. "
+						"Use e.g. like 'cmake .. -DCMAKE_PREFIX_PATH=/install/path/gtest/'")
 endif()
 
 include(Dart)
