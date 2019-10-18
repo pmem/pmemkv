@@ -367,6 +367,7 @@ if(BUILD_JSON_CONFIG)
 	)
 
 	add_library(pmemkv_json_config SHARED ${SOURCE_FILES_JSON_CONFIG})
+	set_target_properties(pmemkv_json_config  PROPERTIES SOVERSION 1)
 	target_link_libraries(pmemkv_json_config PRIVATE pmemkv ${RapidJSON_LIBRARIES}
 		-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv_json_config.map)
 	set_target_properties(pmemkv_json_config
