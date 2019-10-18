@@ -209,7 +209,7 @@ TEST_F(ConfigCTest, NotFoundTest_TRACERS_M)
 	ret = pmemkv_config_get_data(config, "non-existent-data",
 				     (const void **)&my_object, &my_object_size);
 	ASSERT_EQ(ret, PMEMKV_STATUS_NOT_FOUND);
-	ASSERT_EQ(my_object_size, 0);
+	ASSERT_EQ(my_object_size, 0U);
 }
 
 /* Test if null can be passed as config to pmemkv_config_* functions */

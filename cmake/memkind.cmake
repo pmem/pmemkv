@@ -33,6 +33,9 @@ if(PKG_CONFIG_FOUND)
 endif()
 
 if(NOT MEMKIND_FOUND)
+	unset(MEMKIND_LIBRARY CACHE)
+	unset(MEMKIND_INCLUDEDIR CACHE)
+
 	# try old method
 	include(FindPackageHandleStandardArgs)
 	find_path(MEMKIND_INCLUDEDIR pmem_allocator.h)
@@ -69,6 +72,7 @@ set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
 if(LIBMEMKIND_NAMESPACE_PRESENT)
 	add_definitions(-DUSE_LIBMEMKIND_NAMESPACE)
 else()
-	message(STATUS "libmemkind namespace not found (available in memkind > 1.9.0). "
-					"Old namespace will be used for 'pmem::allocator'.")
+	message(STATUS "libmemkind namespace not found (available in memkind >= 1.10; "
+		"not yet released at this time; you want at least commit 3f321feb). "
+		"Old namespace will be used for 'pmem::allocator'.")
 endif()

@@ -82,7 +82,7 @@ function compile_example_standalone() {
 		return 1
 	fi
 
-	LD_LIBRARY_PATH=$MEMKIND_DEFAULT_LD_LIBRARY_PATH:$LD_LIBRARY_PATH make
+	LD_LIBRARY_PATH=$MEMKIND_DEFAULT_LD_LIBRARY_PATH:$LD_LIBRARY_PATH make -j$(nproc)
 	cd -
 }
 
@@ -261,7 +261,7 @@ echo "---------------------------- Error expected! -----------------------------
 compile_example_standalone pmemkv_basic_cpp && exit 1
 echo "---------------------------------------------------------------------------"
 
-make package
+make -j$(nproc) package
 
 if [ $PACKAGE_MANAGER = "deb" ]; then
 	sudo_password dpkg -i libpmemkv*.deb

@@ -163,7 +163,6 @@ function(build_wrong_engine_name_test)
 	if(ENGINE_TREE3)
 		target_compile_definitions(wrong_engine_name_test PRIVATE -DENGINE_TREE3)
 	endif()
-
 endfunction()
 
 set(TEST_FILES
@@ -212,37 +211,51 @@ if(ENGINE_TREE3)
 	list(APPEND TEST_FILES engines-experimental/tree3_pmemobj_test.cc)
 endif()
 
-find_library(GTEST NAMES gtest gtest.a)
+# CMake option 'CMAKE_PREFIX_PATH' will be prioritized
+# over system paths in find_library and find_path calls
+find_library(GTEST NAMES gtest)
 if(GTEST)
-	message(STATUS "Gtest found at ${GTEST}")
+	message(STATUS "Gtest found in ${GTEST}")
+
+	find_path(GTEST_INCLUDEDIR "gtest/gtest.h")
+	if (GTEST_INCLUDEDIR)
+		message(STATUS "Gtest headers found in ${GTEST_INCLUDEDIR}")
+		include_directories(${GTEST_INCLUDEDIR})
+	endif()
+
 	add_library(libgtest IMPORTED STATIC GLOBAL)
 	set_target_properties(libgtest PROPERTIES "IMPORTED_LOCATION" "${GTEST}"
 		"IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}")
 else()
-	message(FATAL_ERROR "Gtest not installed in system")
+	message(FATAL_ERROR "Gtest is not installed or couldn't be found. Try using cmake option "
+						"-DCMAKE_PREFIX_PATH=<dir with lib and include dirs for gtest>. "
+						"Use e.g. like 'cmake .. -DCMAKE_PREFIX_PATH=/install/path/gtest/'")
 endif()
 
 include(Dart)
 include(GoogleTest)
 add_executable(pmemkv_test ${TEST_FILES})
-
-add_executable(memcheck valgrind_wrapper.cc)
-add_dependencies(memcheck pmemkv_test)
-
-add_executable(pmemcheck valgrind_wrapper.cc)
-add_dependencies(pmemcheck pmemkv_test)
-
-add_executable(drd valgrind_wrapper.cc)
-add_dependencies(drd pmemkv_test)
-
-add_executable(helgrind valgrind_wrapper.cc)
-add_dependencies(helgrind pmemkv_test)
-
 gtest_discover_tests(pmemkv_test EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES)
-gtest_discover_tests(memcheck EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _MEMCHECK)
-gtest_discover_tests(pmemcheck EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _PMEMCHECK)
-gtest_discover_tests(drd EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _DRD)
-gtest_discover_tests(helgrind EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _HELGRIND)
+
+if (VALGRIND_FOUND AND NOT COVERAGE)
+	add_executable(memcheck valgrind_wrapper.cc)
+	add_dependencies(memcheck pmemkv_test)
+	gtest_discover_tests(memcheck EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _MEMCHECK)
+
+	add_executable(drd valgrind_wrapper.cc)
+	add_dependencies(drd pmemkv_test)
+	gtest_discover_tests(drd EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _DRD)
+
+	add_executable(helgrind valgrind_wrapper.cc)
+	add_dependencies(helgrind pmemkv_test)
+	gtest_discover_tests(helgrind EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _HELGRIND)
+endif()
+
+if (VALGRIND_PMEMCHECK_FOUND AND NOT COVERAGE)
+	add_executable(pmemcheck valgrind_wrapper.cc)
+	add_dependencies(pmemcheck pmemkv_test)
+	gtest_discover_tests(pmemcheck EXTRA_ARGS --test_dir ${TEST_DIR} NO_PRETTY_VALUES TEST_SUFFIX _PMEMCHECK)
+endif()
 
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
 
@@ -289,6 +302,6 @@ elseif(BUILD_EXAMPLES AND NOT ENGINE_CMAP)
 endif()
 
 # test pmreorder framework
-if(PMREORDER)
+if(PMREORDER_SUPPORTED)
 	test("run-pmreorder-test" wrong_engine_name_test-pmreorder wrong_engine_name_test pmreorder)
 endif()

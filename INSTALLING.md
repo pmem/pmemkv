@@ -23,10 +23,13 @@ are logged as GitHub issues.*
 * 64-bit Linux (OSX and Windows are not yet supported)
 * [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.7
 * [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings 1.8 for PMDK (required by all engines except blackhole and caching)
-* [TBB](https://github.com/01org/tbb) - Thread Building Blocks (requiered by cmap & vcmap engines)
 * [memkind](https://github.com/memkind/memkind) - Volatile memory manager (required by vsmap & vcmap engines)
+* [TBB](https://github.com/01org/tbb) - Thread Building Blocks (required by vcmap engine)
 * [RapidJSON](https://github.com/tencent/rapidjson) - JSON parser (required by `libpmemkv_json_config` helper library)
 * Used only for development & testing:
+	* [GoogleTest](https://github.com/google/googletest) - test framework, version >= 1.8
+	* [valgrind](https://github.com/pmem/valgrind) - tool for profiling and memory leak detection. *pmem* forked version with *pmemcheck*
+		tool is recommended, but upstream/original [valgrind](http://valgrind.org/) is also compatible (package valgrind-devel is required).
 	* [pandoc](https://pandoc.org/) - markup converter to generate manpages
 	* [doxygen](http://www.doxygen.nl/) - tool for generating documentation from annotated C++ sources
 	* [graphviz](https://www.graphviz.org/) - graph visualization software required by _doxygen_
@@ -146,7 +149,9 @@ Install latest memkind:
 cd ~
 git clone https://github.com/memkind/memkind
 cd memkind
-./build.sh
+./autogen.sh
+./configure
+make
 su -c 'make install'
 ```
 
@@ -198,7 +203,9 @@ Install latest memkind:
 cd ~
 git clone https://github.com/memkind/memkind
 cd memkind
-./build.sh
+./autogen.sh
+./configure
+make
 sudo make install
 ```
 
@@ -256,13 +263,13 @@ cmake .. -DCPACK_GENERATOR="$GEN" -DCMAKE_INSTALL_PREFIX=/usr
 make package
 ```
 
-$GEN is a type of package generator and can be RPM or DEB
+$GEN is a type of package generator and can be RPM or DEB.
 
-CMAKE_INSTALL_PREFIX must be set to a destination where packages will be installed
+CMAKE_INSTALL_PREFIX must be set to a destination where packages will be installed.
 
 ## Using a Pool Set
 
-First create a pool set descriptor:  (`~/pmemkv.poolset` in this example)
+First create a pool set descriptor (`~/pmemkv.poolset` in this example):
 
 ```
 PMEMPOOLSET
