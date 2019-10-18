@@ -12,6 +12,7 @@ Key/Value Datastore for Persistent Memory
 `pmemkv` is a local/embedded key-value datastore optimized for persistent memory.
 Rather than being tied to a single language or backing implementation, `pmemkv`
 provides different options for language bindings and storage engines.
+For more information, see http://pmem.io/pmemkv.
 
 There is also a small helper library `pmemkv_json_config` provided.
 See its [manual](doc/libpmemkv_json_config.3.md) for details.
