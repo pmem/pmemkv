@@ -66,25 +66,29 @@ if(PANDOC)
 		COMMAND ${CMAKE_SOURCE_DIR}/utils/md2man/md2man.sh
 			${CMAKE_SOURCE_DIR}/doc/libpmemkv.7.md
 			${CMAKE_SOURCE_DIR}/utils/md2man/default.man
-			${CMAKE_BINARY_DIR}/man/libpmemkv.7)
+			${CMAKE_BINARY_DIR}/man/libpmemkv.7
+			${VERSION})
 	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/libpmemkv.3
 		MAIN_DEPENDENCY ${CMAKE_BINARY_DIR}/man/tmp/libpmemkv.3.md
 		COMMAND ${CMAKE_SOURCE_DIR}/utils/md2man/md2man.sh
 			${CMAKE_BINARY_DIR}/man/tmp/libpmemkv.3.md
 			${CMAKE_SOURCE_DIR}/utils/md2man/default.man
-			${CMAKE_BINARY_DIR}/man/libpmemkv.3)
+			${CMAKE_BINARY_DIR}/man/libpmemkv.3
+			${VERSION})
 	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/libpmemkv_config.3
 		MAIN_DEPENDENCY ${CMAKE_BINARY_DIR}/man/tmp/libpmemkv_config.3.md
 		COMMAND ${CMAKE_SOURCE_DIR}/utils/md2man/md2man.sh
 			${CMAKE_BINARY_DIR}/man/tmp/libpmemkv_config.3.md
 			${CMAKE_SOURCE_DIR}/utils/md2man/default.man
-			${CMAKE_BINARY_DIR}/man/libpmemkv_config.3)
+			${CMAKE_BINARY_DIR}/man/libpmemkv_config.3
+			${VERSION})
 	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/libpmemkv_json_config.3
 		MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/doc/libpmemkv_json_config.3.md
 		COMMAND ${CMAKE_SOURCE_DIR}/utils/md2man/md2man.sh
 			${CMAKE_SOURCE_DIR}/doc/libpmemkv_json_config.3.md
 			${CMAKE_SOURCE_DIR}/utils/md2man/default.man
-			${CMAKE_BINARY_DIR}/man/libpmemkv_json_config.3)
+			${CMAKE_BINARY_DIR}/man/libpmemkv_json_config.3
+			${VERSION})
 
 	# install manpages
 	install(FILES ${CMAKE_BINARY_DIR}/man/libpmemkv.7
