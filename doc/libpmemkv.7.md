@@ -4,7 +4,7 @@ Content-Style: 'text/css'
 title: _MP(PMEMKV, 7)
 collection: libpmemkv
 header: PMEMKV
-date: pmemkv version 1.0
+secondary_title: pmemkv
 ...
 
 [comment]: <> (Copyright 2019, Intel Corporation)
