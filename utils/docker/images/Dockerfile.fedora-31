@@ -35,7 +35,7 @@
 #
 
 # Pull base image
-FROM fedora:30
+FROM fedora:31
 MAINTAINER lukasz.stolarczuk@intel.com
 
 # Install basic tools
@@ -94,13 +94,12 @@ RUN ./install-memkind.sh
 ENV USER user
 ENV USERPASS pass
 RUN useradd -m $USER
-RUN echo $USERPASS | passwd $USER --stdin
+RUN echo "$USER:$USERPASS" | chpasswd
 RUN gpasswd wheel -a $USER
 USER $USER
 
 # Set required environment variables
 ENV OS fedora
-ENV OS_VER 30
+ENV OS_VER 31
 ENV PACKAGE_MANAGER rpm
 ENV NOTTY 1
-
