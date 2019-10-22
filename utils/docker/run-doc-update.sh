@@ -52,7 +52,6 @@ git rebase upstream/master
 mkdir $CURR_DIR/pmemkv/build
 cd $CURR_DIR/pmemkv/build
 
-PKG_CONFIG_PATH=/opt/memkind-master/lib/pkgconfig/:$PKG_CONFIG_PATH \
 cmake .. -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF
 make -j$(nproc) doc
 cp $CURR_DIR/pmemkv/build/man/tmp/*.md $CURR_DIR/pmemkv/doc/

@@ -58,6 +58,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	libdaxctl-dev \
 	libgtest-dev \
 	libndctl-dev \
+	libmemkind-dev \
 	libnode-dev \
 	libnuma-dev \
 	libtbb-dev \
@@ -85,10 +86,6 @@ RUN ./install-pmdk.sh dpkg
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
 RUN ./install-libpmemobj-cpp.sh DEB
-
-# Install memkind
-COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh
 
 # Add user
 ENV USER user

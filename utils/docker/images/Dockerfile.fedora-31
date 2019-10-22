@@ -57,6 +57,7 @@ RUN dnf update -y \
 	libtool \
 	make \
 	man \
+	memkind-devel \
 	ndctl-devel \
 	numactl-devel \
 	pandoc \
@@ -85,10 +86,6 @@ RUN ./install-pmdk.sh rpm
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
 RUN ./install-libpmemobj-cpp.sh RPM
-
-# Install memkind
-COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh
 
 # Add user
 ENV USER user
