@@ -216,15 +216,11 @@ echo "##############################################################"
 mkdir $WORKDIR/build
 cd $WORKDIR/build
 
-# XXX - Disable VCMAP and VSMAP until we'll get packages for memkind.
-PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DTEST_DIR=$TEST_DIR \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DDEVELOPER_MODE=1 \
-	-DCPACK_GENERATOR=$PACKAGE_MANAGER \
-	-DENGINE_VCMAP=OFF \
-	-DENGINE_VSMAP=OFF
+	-DCPACK_GENERATOR=$PACKAGE_MANAGER
 
 echo
 echo "### Making sure there is no libpmemkv currently installed"
