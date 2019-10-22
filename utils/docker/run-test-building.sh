@@ -40,9 +40,12 @@ set -e
 
 EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
+<<<<<<< HEAD
 MEMKIND_DEFAULT_PKG_CONFIG_PATH=/opt/memkind-master/lib/pkgconfig/
 MEMKIND_DEFAULT_LD_LIBRARY_PATH=/opt/memkind-master/lib
 TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
+=======
+>>>>>>> Use in dockerimages memkind from package
 
 function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
@@ -74,7 +77,6 @@ function compile_example_standalone() {
 	mkdir $EXAMPLE_TEST_DIR
 	cd $EXAMPLE_TEST_DIR
 
-	PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 	cmake $WORKDIR/examples/$1
 
 	# exit on error
@@ -83,7 +85,7 @@ function compile_example_standalone() {
 		return 1
 	fi
 
-	LD_LIBRARY_PATH=$MEMKIND_DEFAULT_LD_LIBRARY_PATH:$LD_LIBRARY_PATH make -j$(nproc)
+	make -j$(nproc)
 	cd -
 }
 
@@ -91,7 +93,7 @@ function run_example_standalone() {
 	cd $EXAMPLE_TEST_DIR
 
 	rm -f pool
-	LD_LIBRARY_PATH=$MEMKIND_DEFAULT_LD_LIBRARY_PATH:$LD_LIBRARY_PATH ./$1 pool
+	./$1 pool
 	# exit on error
 	if [[ $? != 0 ]]; then
 		cd -
@@ -110,7 +112,6 @@ echo "##############################################################"
 mkdir $WORKDIR/build
 cd $WORKDIR/build
 
-PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DTEST_DIR=$TEST_DIR \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
@@ -132,7 +133,6 @@ echo "##############################################################"
 mkdir $WORKDIR/build
 cd $WORKDIR/build
 
-PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 	-DTEST_DIR=$TEST_DIR \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
@@ -173,7 +173,6 @@ do
 	echo "##############################################################"
 	echo "### Verifying building of the '$engine_flag' engine"
 	echo "##############################################################"
-	PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 	cmake .. -DENGINE_VSMAP=OFF \
 		-DENGINE_VCMAP=OFF \
 		-DENGINE_CMAP=OFF \
@@ -198,7 +197,6 @@ echo "##############################################################"
 mkdir $WORKDIR/build
 cd $WORKDIR/build
 
-PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 cmake .. -DENGINE_VSMAP=ON \
 	-DENGINE_VCMAP=ON \
 	-DENGINE_CMAP=ON \
@@ -207,25 +205,6 @@ cmake .. -DENGINE_VSMAP=ON \
 make -j$(nproc)
 # list all tests in this build
 ctest -N
-
-cd $WORKDIR
-rm -rf $WORKDIR/build
-
-echo
-echo "##############################################################"
-echo "### Verifying building with latest stable memkind release"
-echo "##############################################################"
-mkdir $WORKDIR/build
-cd $WORKDIR/build
-
-PKG_CONFIG_PATH=/opt/memkind-stable/lib/pkgconfig/:$PKG_CONFIG_PATH \
-cmake .. -DTEST_DIR=$TEST_DIR \
-	-DENGINE_VSMAP=ON \
-	-DENGINE_VCMAP=ON \
-	-DENGINE_CMAP=OFF
-make -j$(nproc)
-# Run basic tests
-ctest -R "SimpleTest"
 
 cd $WORKDIR
 rm -rf $WORKDIR/build
