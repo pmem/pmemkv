@@ -61,6 +61,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	libndctl-dev \
 	libnode-dev \
 	libnuma-dev \
+	libmemkind-dev \
 	libtbb-dev \
 	libtext-diff-perl \
 	libtool \
@@ -95,10 +96,6 @@ RUN ./install-pmdk.sh dpkg
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
 RUN ./install-libpmemobj-cpp.sh DEB
-
-# Install memkind
-COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh sys
 
 # Bindings
 COPY install-bindings-dependencies.sh install-bindings-dependencies.sh

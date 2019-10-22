@@ -39,8 +39,6 @@ set -e
 
 EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
-MEMKIND_DEFAULT_PKG_CONFIG_PATH=/opt/memkind-master/lib/pkgconfig/
-MEMKIND_DEFAULT_LD_LIBRARY_PATH=/opt/memkind-master/lib
 
 function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
@@ -72,7 +70,6 @@ function compile_example_standalone() {
 	mkdir $EXAMPLE_TEST_DIR
 	cd $EXAMPLE_TEST_DIR
 
-	PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 	cmake $WORKDIR/examples/$1
 
 	# exit on error
@@ -81,7 +78,7 @@ function compile_example_standalone() {
 		return 1
 	fi
 
-	LD_LIBRARY_PATH=$MEMKIND_DEFAULT_LD_LIBRARY_PATH:$LD_LIBRARY_PATH make -j$(nproc)
+	make -j$(nproc)
 	cd -
 }
 
@@ -89,7 +86,7 @@ function run_example_standalone() {
 	cd $EXAMPLE_TEST_DIR
 
 	rm -f pool
-	LD_LIBRARY_PATH=$MEMKIND_DEFAULT_LD_LIBRARY_PATH:$LD_LIBRARY_PATH ./$1 pool
+	./$1 pool
 	# exit on error
 	if [[ $? != 0 ]]; then
 		cd -
@@ -117,7 +114,6 @@ echo "##############################################################"
 mkdir $WORKDIR/build
 cd $WORKDIR/build
 
-PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DTEST_DIR=/dev/shm \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
