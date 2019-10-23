@@ -115,6 +115,7 @@ docker run --privileged=true --name=$containerName -ti \
 	$DNS_SETTING \
 	${docker_opts} \
 	$ci_env \
+	--shm-size=4G \
 	--env http_proxy=$http_proxy \
 	--env https_proxy=$https_proxy \
 	--env AUTO_DOC_UPDATE=$AUTO_DOC_UPDATE \

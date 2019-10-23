@@ -100,10 +100,6 @@ function run_example_standalone() {
 	cd -
 }
 
-# Resize /dev/shm, since default one is too small
-sudo_password -S mount -oremount,size=4G /dev/shm
-echo
-
 cd $WORKDIR
 
 echo
