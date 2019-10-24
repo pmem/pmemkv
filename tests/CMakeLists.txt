@@ -35,13 +35,15 @@ add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/*.h
 		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc)
+		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.cc)
 
 add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/*.h
 		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc)
+		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.cc)
 
 set(vg_tracers memcheck helgrind drd pmemcheck pmreorder)
 set(pmemcheck_tracers pmemcheck pmreorder)
