@@ -92,6 +92,7 @@ function(test cmake_file test_name test_filter tracer)
 			-DTRACER=${tracer}
 			-DFILE_TEST_FILES=${FILE_TEST_FILES}
 			-DFILE_ALL_TESTS=${FILE_ALL_TESTS}
+			${ARGN}
 			-P ${CMAKE_CURRENT_SOURCE_DIR}/${cmake_file}.cmake)
 
 	set_tests_properties(${test_name} PROPERTIES
