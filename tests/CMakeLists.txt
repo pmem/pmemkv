@@ -95,7 +95,7 @@ function(test cmake_file test_name test_filter tracer)
 			-P ${CMAKE_CURRENT_SOURCE_DIR}/${cmake_file}.cmake)
 
 	set_tests_properties(${test_name} PROPERTIES
-		ENVIRONMENT "LC_ALL=C;PATH=$ENV{PATH};PMEM_IS_PMEM_FORCE=1"
+		ENVIRONMENT "LC_ALL=C;PATH=$ENV{PATH}"
 		TIMEOUT 300)
 endfunction()
 

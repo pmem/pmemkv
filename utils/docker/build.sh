@@ -128,6 +128,7 @@ docker run --privileged=true --name=$containerName -ti \
 	--env COVERITY_SCAN_TOKEN=$COVERITY_SCAN_TOKEN \
 	--env COVERITY_SCAN_NOTIFICATION_EMAIL=$COVERITY_SCAN_NOTIFICATION_EMAIL \
 	--env TEST_BUILD=$TEST_BUILD \
+	--env PMEM_IS_PMEM_FORCE=1 \
 	-v $HOST_WORKDIR:$WORKDIR \
 	-v /etc/localtime:/etc/localtime \
 	-w $SCRIPTSDIR \

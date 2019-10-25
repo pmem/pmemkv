@@ -134,4 +134,4 @@ python3 setup.py install --user
 cd tests
 python3 -m unittest -v pmemkv_tests.py
 cd ../examples
-PMEM_IS_PMEM_FORCE=1 python3 basic_example.py
+python3 basic_example.py

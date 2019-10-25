@@ -15,6 +15,7 @@ are logged as GitHub issues.*
 - [Using Experimental Engines](#using-experimental-engines)
 - [Building packages](#building-packages)
 - [Using a Pool Set](#using-a-pool-set)
+- [Testing Without Persistent Memory](#testing-without-persistent-memory)
 
 ## Building from Sources
 
@@ -282,3 +283,13 @@ Next initialize the pool set:
 ```sh
 pmempool create --layout pmemkv obj ~/pmemkv.poolset
 ```
+
+## Testing Without Persistent Memory
+
+To use pmemkv (most likely for testing) without a persisten memory, PMDK's flag:
+```bash
+PMEM_IS_PMEM_FORCE=1
+```
+has to be used.
+
+For more information see manpage [libpmem(7)][https://pmem.io/pmdk/manpages/linux/master/libpmem/libpmem.7.html#environment).

@@ -34,6 +34,7 @@ build rpm and deb packages and explains usage of experimental engines and pool s
 - [Using Experimental Engines](INSTALLING.md#using-experimental-engines)
 - [Building packages](INSTALLING.md#building-packages)
 - [Using a Pool Set](INSTALLING.md#using-a-pool-set)
+- [Testing Without Persistent Memory](INSTALLING.md#testing-without-persistent-memory)
 
 ## Language Bindings
 
