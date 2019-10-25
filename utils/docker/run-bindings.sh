@@ -36,20 +36,20 @@
 
 PREFIX=/usr
 
-# Merge pull request #36 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
-RUBY_VERSION=99d1bfc05d116d35d0e96541ece9b9df831d95a0
+# Merge pull request #42 from ldorau/Fix-repo-name-in-CONTRIBUTING.md, 22.10.2019
+RUBY_VERSION=972057c8c8481485b1be4b9f73ba39c869197bf8
 
-# Merge pull request #29 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
-JNI_VERSION=78b81de8266ec690fb41b5f4e62948e200640cbe
+# Merge pull request #32 from ldorau/Fix-repo-name-in-CONTRIBUTING.md, 22.10.2019
+JNI_VERSION=85b49234e9ec35e83259eb8f7c14f52f431a74b0
 
-# Merge pull request #26 from ldorau/Update-gitignore, 16.09.2019
-JAVA_VERSION=30c2a897574aa2552bd3e651e4e57f2469da5767
+# Merge pull request #31 from ldorau/Fix-repo-name-in-CONTRIBUTING.md, 22.10.2019
+JAVA_VERSION=e83a99b9a764bd961103ceef1b2c971022ce0827
 
-# Merge pull request #38 from lukaszstolarczuk/replace-json-config, 01.10.2019
-NODEJS_VERSION=9e3f0edd8f10d0d6f011fd22354ce1b4efe36f84
+# Merge pull request #46 from ldorau/Add-j$nproc-to-make-command, 22.10.2019
+NODEJS_VERSION=06dc6313d2a20a8dd6d4b4d30544b32d9d0e8d90
 
-# Merge pull request #10 from ldorau/Throw-an-exception-in-pmemkv_NI_Get, 01.10.2019
-PYTHON_VERSION=824bfec5976cb19e387b32d82fc19c763000ef88
+# Merge pull request #13 from ldorau/Fix-repo-name-in-CONTRIBUTING.md, 22.10.2019
+PYTHON_VERSION=4b10e5230d79cb2d440d015248c6ddb3cd2502de
 
 set -e
 
