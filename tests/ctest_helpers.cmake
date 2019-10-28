@@ -29,7 +29,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-set(DEFAULT_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set(DEFAULT_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/test)
 
 set(TEST_DIR ${DEFAULT_TEST_DIR}
 	CACHE STRING "working directory for tests")
@@ -44,6 +44,8 @@ endif()
 
 set(vg_tracers memcheck helgrind drd pmemcheck pmreorder)
 set(pmemcheck_tracers pmemcheck pmreorder)
+
+file(MAKE_DIRECTORY ${DEFAULT_TEST_DIR})
 
 #
 # test -- add a test 'test_name'
