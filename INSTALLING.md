@@ -23,7 +23,7 @@ are logged as GitHub issues.*
 * 64-bit Linux (OSX and Windows are not yet supported)
 * [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.7
 * [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings 1.8 for PMDK (required by all engines except blackhole and caching)
-* [memkind](https://github.com/memkind/memkind) - Volatile memory manager (required by vsmap & vcmap engines)
+* [memkind](https://github.com/memkind/memkind) - Volatile memory manager 1.8.0 (required by vsmap & vcmap engines)
 * [TBB](https://github.com/01org/tbb) - Thread Building Blocks (required by vcmap engine)
 * [RapidJSON](https://github.com/tencent/rapidjson) - JSON parser (required by `libpmemkv_json_config` helper library)
 * Used only for development & testing:
