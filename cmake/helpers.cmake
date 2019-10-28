@@ -54,11 +54,12 @@ function(set_version VERSION)
 			set(VERSION
 				"${CMAKE_MATCH_1}-rc${CMAKE_MATCH_2}.git${CMAKE_MATCH_3}.${CMAKE_MATCH_4}"
 				PARENT_SCOPE)
+			return()
 		endif()
 
 		# 1.5-19-gb8f78a329 -> 1.5-git19.gb8f78a329
 		string(REGEX MATCHALL
-			"\([0-9.]*\)-\([0-9]*\)-\([0-9a-g]*\)"
+			"([0-9.]*)-([0-9]*)-([0-9a-g]*)"
 			MATCHES
 			${GIT_VERSION})
 		if(MATCHES)
