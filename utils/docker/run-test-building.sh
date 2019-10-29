@@ -42,6 +42,7 @@ EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
 MEMKIND_DEFAULT_PKG_CONFIG_PATH=/opt/memkind-master/lib/pkgconfig/
 MEMKIND_DEFAULT_LD_LIBRARY_PATH=/opt/memkind-master/lib
+TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
 
 function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
@@ -100,10 +101,6 @@ function run_example_standalone() {
 	cd -
 }
 
-# Resize /dev/shm, since default one is too small
-sudo_password -S mount -oremount,size=4G /dev/shm
-echo
-
 cd $WORKDIR
 
 echo
@@ -115,7 +112,7 @@ cd $WORKDIR/build
 
 PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
-	-DTEST_DIR=/dev/shm \
+	-DTEST_DIR=$TEST_DIR \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE \
 	-DDEVELOPER_MODE=1 \
@@ -137,7 +134,7 @@ cd $WORKDIR/build
 
 PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
-	-DTEST_DIR=/dev/shm \
+	-DTEST_DIR=$TEST_DIR \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE \
 	-DDEVELOPER_MODE=1 \
@@ -222,7 +219,7 @@ mkdir $WORKDIR/build
 cd $WORKDIR/build
 
 PKG_CONFIG_PATH=/opt/memkind-stable/lib/pkgconfig/:$PKG_CONFIG_PATH \
-cmake .. -DTEST_DIR=/dev/shm \
+cmake .. -DTEST_DIR=$TEST_DIR \
 	-DENGINE_VSMAP=ON \
 	-DENGINE_VCMAP=ON \
 	-DENGINE_CMAP=OFF
@@ -248,7 +245,7 @@ cd $WORKDIR/build
 # XXX - Disable VCMAP and VSMAP until we'll get packages for memkind.
 PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 cmake .. -DCMAKE_BUILD_TYPE=Debug \
-	-DTEST_DIR=/dev/shm \
+	-DTEST_DIR=$TEST_DIR \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DDEVELOPER_MODE=1 \
 	-DCPACK_GENERATOR=$PACKAGE_MANAGER \

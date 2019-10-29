@@ -41,6 +41,7 @@ EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
 MEMKIND_DEFAULT_PKG_CONFIG_PATH=/opt/memkind-master/lib/pkgconfig/
 MEMKIND_DEFAULT_LD_LIBRARY_PATH=/opt/memkind-master/lib
+TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
 
 function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
@@ -99,8 +100,6 @@ function run_example_standalone() {
 	cd -
 }
 
-# Resize /dev/shm, since default one is too small
-sudo_password -S mount -oremount,size=4G /dev/shm
 cd $WORKDIR
 
 echo
@@ -119,7 +118,7 @@ cd $WORKDIR/build
 
 PKG_CONFIG_PATH=$MEMKIND_DEFAULT_PKG_CONFIG_PATH:$PKG_CONFIG_PATH \
 cmake .. -DCMAKE_BUILD_TYPE=Debug \
-	-DTEST_DIR=/dev/shm \
+	-DTEST_DIR=$TEST_DIR \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE \
 	-DDEVELOPER_MODE=1
