@@ -34,15 +34,19 @@ with the following exceptions:
 
 * These files:
   * master/doxygen/jquery.js
+  * v1.0/doxygen/jquery.js
   are dual licensed under the MIT or GPL Version 2 license
   (see: http://jquery.org/license).
 
 * These files:
   * sizzle.js (included in master/doxygen/jquery.js)
+  * sizzle.js (included in v1.0/doxygen/jquery.js)
   are released under the MIT, BSD and GPL licenses
   (see: http://sizzle.com).
 
 * These files:
   * master/doxygen/search/search.js
+  * v1.0/doxygen/search/search.js
   * master/doxygen/dynsections.js
+  * v1.0/doxygen/dynsections.js
   are licensed under the GPL.
