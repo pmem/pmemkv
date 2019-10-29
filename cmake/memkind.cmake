@@ -29,7 +29,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 if(PKG_CONFIG_FOUND)
-	pkg_check_modules(MEMKIND memkind)
+	pkg_check_modules(MEMKIND memkind>=${MEMKIND_REQUIRED_VERSION})
 endif()
 
 if(NOT MEMKIND_FOUND)
@@ -47,11 +47,9 @@ if(NOT MEMKIND_FOUND)
 		set(MEMKIND_LIBRARIES ${MEMKIND_LIBRARY})
 		set(MEMKIND_INCLUDE_DIRS ${MEMKIND_INCLUDEDIR})
 		message(STATUS "Memkind library found the old way (w/o pkg-config)")
+	else()
+		message(FATAL_ERROR "Memkind library (>=${MEMKIND_REQUIRED_VERSION}) not found")
 	endif()
-endif()
-
-if(NOT MEMKIND_FOUND)
-	message(FATAL_ERROR "Memkind library not found")
 endif()
 
 link_directories(${MEMKIND_LIBRARY_DIRS})

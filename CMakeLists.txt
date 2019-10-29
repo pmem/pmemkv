@@ -165,6 +165,7 @@ set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.8)
 set(LIBPMEMOBJ_REQUIRED_VERSION 1.7)
+set(MEMKIND_REQUIRED_VERSION 1.8.0)
 
 if(DEVELOPER_MODE)
 	add_common_flag(-Werror)
@@ -204,9 +205,9 @@ endif()
 
 if(ENGINE_VSMAP OR ENGINE_VCMAP)
 	include(memkind)
-	list(APPEND PKG_CONFIG_REQUIRES memkind)
-	list(APPEND RPM_DEPENDS memkind)
-	list(APPEND DEB_DEPENDS libmemkind0)
+	list(APPEND PKG_CONFIG_REQUIRES "memkind >= ${MEMKIND_REQUIRED_VERSION}")
+	list(APPEND RPM_DEPENDS "memkind >= ${MEMKIND_REQUIRED_VERSION}")
+	list(APPEND DEB_DEPENDS "libmemkind0 (>= ${MEMKIND_REQUIRED_VERSION})")
 endif()
 
 if(ENGINE_VCMAP)
@@ -367,6 +368,7 @@ if(BUILD_JSON_CONFIG)
 	)
 
 	add_library(pmemkv_json_config SHARED ${SOURCE_FILES_JSON_CONFIG})
+	set_target_properties(pmemkv_json_config  PROPERTIES SOVERSION 1)
 	target_link_libraries(pmemkv_json_config PRIVATE pmemkv ${RapidJSON_LIBRARIES}
 		-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv_json_config.map)
 	set_target_properties(pmemkv_json_config

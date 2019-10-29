@@ -1,3 +1,15 @@
+Mon Oct 28 2019 Szymon Romik <szymon.romik@intel.com>
+
+	* Version 1.0.1
+
+	This is a bugfix release for pmemkv 1.0
+
+	Major fixes:
+	- fix finding memkind package
+	- fix finding gtest in user-defined paths
+	- add SOVERSION
+	- skip valgrind and pmemcheck tests if they are not installed
+
 Fri Oct 04 2019 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.0
