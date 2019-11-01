@@ -339,6 +339,70 @@ public:
 			return end();
 	}
 
+	iterator lower_bound(const key_type &key)
+	{
+		assert(std::is_sorted(begin(), end(),
+				      [](const_reference a, const_reference b) {
+					      return a.first < b.first;
+				      }));
+		iterator it = std::lower_bound(
+			begin(), end(), key, [](const_reference entry, const TKey &key) {
+				return entry.first < key;
+			});
+		if (it == end() || it->first == key || it->first > key)
+			return it;
+		else
+			return end();
+	}
+
+	const_iterator lower_bound(const key_type &key) const
+	{
+		assert(std::is_sorted(begin(), end(),
+				      [](const_reference a, const_reference b) {
+					      return a.first < b.first;
+				      }));
+		const_iterator it = std::lower_bound(
+			begin(), end(), key, [](const_reference entry, const TKey &key) {
+				return entry.first < key;
+			});
+		if (it == end() || it->first == key || it->first > key)
+			return it;
+		else
+			return end();
+	}
+
+	iterator upper_bound(const key_type &key)
+	{
+		assert(std::is_sorted(begin(), end(),
+				      [](const_reference a, const_reference b) {
+					      return a.first < b.first;
+				      }));
+		iterator it = std::upper_bound(begin(), end(), key,
+					 [](const TKey &key, const_reference entry) {
+				return key < entry.first;
+			});
+		if (it == end() || it->first > key)
+			return it;
+		else
+			return end();
+	}
+
+	const_iterator upper_bound(const key_type &key) const
+	{
+		assert(std::is_sorted(begin(), end(),
+				      [](const_reference a, const_reference b) {
+					      return a.first < b.first;
+				      }));
+		const_iterator it = std::upper_bound(begin(), end(), key,
+					 [](const TKey &key, const_reference entry) {
+				return key < entry.first;
+			});
+		if (it == end() || it->first > key)
+			return it;
+		else
+			return end();
+	}
+
 	size_t erase(pool_base &pop, const key_type &key)
 	{
 		assert(std::is_sorted(begin(), end(),
@@ -1408,6 +1472,59 @@ public:
 			return end();
 
 		typename leaf_node_type::const_iterator leaf_it = leaf->find(key);
+		if (leaf->end() == leaf_it)
+			return end();
+
+		return const_iterator(leaf, leaf_it);
+	}
+
+	iterator lower_bound(const key_type &key)
+	{
+		leaf_node_type *leaf = find_leaf_node(key);
+		if (leaf == nullptr)
+			return end();
+
+		typename leaf_node_type::iterator leaf_it = leaf->lower_bound(key);
+		if (leaf->end() == leaf_it)
+			return end();
+
+		return iterator(leaf, leaf_it);
+	}
+
+	const_iterator lower_bound(const key_type &key) const
+	{
+		const leaf_node_type *leaf = find_leaf_node(key);
+		if (leaf == nullptr)
+			return end();
+
+		typename leaf_node_type::const_iterator leaf_it =
+			leaf->lower_bound(key);
+		if (leaf->end() == leaf_it)
+			return end();
+
+		return const_iterator(leaf, leaf_it);
+	}
+
+	iterator upper_bound(const key_type &key)
+	{
+		leaf_node_type *leaf = find_leaf_node(key);
+		if (leaf == nullptr)
+			return end();
+
+		typename leaf_node_type::iterator leaf_it = leaf->upper_bound(key);
+		if (leaf->end() == leaf_it)
+			return end();
+
+		return iterator(leaf, leaf_it);
+	}
+
+	const_iterator upper_bound(const key_type &key) const
+	{
+		const leaf_node_type *leaf = find_leaf_node(key);
+		if (leaf == nullptr)
+			return end();
+
+		typename leaf_node_type::const_iterator leaf_it = leaf->upper_bound(key);
 		if (leaf->end() == leaf_it)
 			return end();
 
