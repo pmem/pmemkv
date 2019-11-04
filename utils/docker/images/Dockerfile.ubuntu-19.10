@@ -31,12 +31,11 @@
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#				environment prepared for executing build and tests
-#				of pmemkv-* bindings repositories.
+#              environment prepared for running pmemkv build and tests.
 #
 
 # Pull base image
-FROM ubuntu:19.04
+FROM ubuntu:19.10
 MAINTAINER lukasz.stolarczuk@intel.com
 
 # Update the Apt cache and install basic tools
@@ -59,30 +58,22 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	libdaxctl-dev \
 	libgtest-dev \
 	libndctl-dev \
+	libmemkind-dev \
 	libnode-dev \
 	libnuma-dev \
 	libtbb-dev \
 	libtext-diff-perl \
 	libtool \
 	libunwind8-dev \
-	maven \
-	npm \
 	numactl \
-	openjdk-8-jdk \
 	pandoc \
 	pkg-config \
-	python3-dev \
-	python3-distutils \
 	rapidjson-dev \
-	ruby-dev \
+	ruby \
 	sudo \
 	wget \
 	whois \
  && rm -rf /var/lib/apt/lists/*
-
-# Install Googletest
-COPY install-googletest.sh install-googletest.sh
-RUN ./install-googletest.sh
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -96,14 +87,6 @@ RUN ./install-pmdk.sh dpkg
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
 RUN ./install-libpmemobj-cpp.sh DEB
 
-# Install memkind
-COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh sys
-
-# Bindings
-COPY install-bindings-dependencies.sh install-bindings-dependencies.sh
-RUN ./install-bindings-dependencies.sh
-
 # Add user
 ENV USER user
 ENV USERPASS pass
@@ -112,6 +95,6 @@ USER $USER
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER 19.04
+ENV OS_VER 19.10
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1

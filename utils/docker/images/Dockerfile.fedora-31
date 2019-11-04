@@ -30,49 +30,50 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
+# Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
 #              environment prepared for running pmemkv build and tests.
 #
 
 # Pull base image
-FROM ubuntu:19.04
+FROM fedora:31
 MAINTAINER lukasz.stolarczuk@intel.com
 
-# Update the Apt cache and install basic tools
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+# Install basic tools
+RUN dnf update -y \
+ && dnf install -y \
 	autoconf \
 	automake \
-	build-essential \
 	clang \
-	clang-format \
 	cmake \
-	curl \
-	debhelper \
-	devscripts \
+	daxctl-devel \
 	doxygen \
-	fakeroot \
+	gcc \
+	gcc-c++ \
+	gdb \
 	git \
 	graphviz \
-	libc6-dbg \
-	libdaxctl-dev \
-	libgtest-dev \
-	libndctl-dev \
-	libnode-dev \
-	libnuma-dev \
-	libtbb-dev \
-	libtext-diff-perl \
+	gtest-devel \
+	hub \
 	libtool \
-	libunwind8-dev \
-	numactl \
+	make \
+	man \
+	memkind-devel \
+	ndctl-devel \
+	numactl-devel \
 	pandoc \
-	pkg-config \
-	rapidjson-dev \
-	ruby \
+	passwd \
+	perl-Text-Diff \
+	rapidjson-devel \
+	rpm-build \
 	sudo \
+	tbb-devel \
+	unzip \
 	wget \
-	whois \
- && rm -rf /var/lib/apt/lists/*
+	which \
+&& dnf clean all
+
+# Install glibc-debuginfo
+RUN dnf debuginfo-install -y glibc
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -80,24 +81,22 @@ RUN ./install-valgrind.sh
 
 # Install pmdk
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh dpkg
+RUN ./install-pmdk.sh rpm
 
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh DEB
-
-# Install memkind
-COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh
+RUN ./install-libpmemobj-cpp.sh RPM
 
 # Add user
 ENV USER user
 ENV USERPASS pass
-RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
+RUN useradd -m $USER
+RUN echo "$USER:$USERPASS" | chpasswd
+RUN gpasswd wheel -a $USER
 USER $USER
 
 # Set required environment variables
-ENV OS ubuntu
-ENV OS_VER 19.04
-ENV PACKAGE_MANAGER deb
+ENV OS fedora
+ENV OS_VER 31
+ENV PACKAGE_MANAGER rpm
 ENV NOTTY 1
