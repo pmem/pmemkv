@@ -242,6 +242,14 @@ run_example_standalone pmemkv_basic_c
 compile_example_standalone pmemkv_basic_cpp
 run_example_standalone pmemkv_basic_cpp
 
+# Clean after installation
+if [ $PACKAGE_MANAGER = "deb" ]; then
+	sudo_password dpkg -r libpmemkv-dev
+elif [ $PACKAGE_MANAGER = "rpm" ]; then
+	sudo_password rpm -e --nodeps libpmemkv-devel
+fi
+rm -rf $WORKDIR/build
+
 # Trigger auto doc update on master
 if [[ "$AUTO_DOC_UPDATE" == "1" ]]; then
 	echo "Running auto doc update"
