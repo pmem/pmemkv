@@ -100,6 +100,22 @@ status vsmap::count_above(string_view key, std::size_t &cnt)
 	return status::OK;
 }
 
+status vsmap::count_equal_above(string_view key, std::size_t &cnt)
+{
+	LOG("count_equal_above for key=" << std::string(key.data(), key.size()));
+	std::size_t result = 0;
+	// XXX - do not create temporary string
+	auto it = pmem_kv_container.lower_bound(
+		key_type(key.data(), key.size(), kv_allocator));
+	auto end = pmem_kv_container.end();
+	for (; it != end; it++)
+		result++;
+
+	cnt = result;
+
+	return status::OK;
+}
+
 status vsmap::count_below(string_view key, std::size_t &cnt)
 {
 	LOG("count_below for key=" << std::string(key.data(), key.size()));
@@ -154,6 +170,24 @@ status vsmap::get_above(string_view key, get_kv_callback *callback, void *arg)
 	LOG("get_above for key=" << std::string(key.data(), key.size()));
 	// XXX - do not create temporary string
 	auto it = pmem_kv_container.upper_bound(
+		key_type(key.data(), key.size(), kv_allocator));
+	auto end = pmem_kv_container.end();
+	for (; it != end; it++) {
+		auto ret = callback(it->first.c_str(), it->first.size(),
+				    it->second.c_str(), it->second.size(), arg);
+
+		if (ret != 0)
+			return status::STOPPED_BY_CB;
+	}
+
+	return status::OK;
+}
+
+status vsmap::get_equal_above(string_view key, get_kv_callback *callback, void *arg)
+{
+	LOG("get_equal_above for key=" << std::string(key.data(), key.size()));
+	// XXX - do not create temporary string
+	auto it = pmem_kv_container.lower_bound(
 		key_type(key.data(), key.size(), kv_allocator));
 	auto end = pmem_kv_container.end();
 	for (; it != end; it++) {

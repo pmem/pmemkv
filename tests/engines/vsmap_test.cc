@@ -646,6 +646,70 @@ TEST_F(VSMapTest, UsesGetAllAboveTest_TRACERS_M)
 	ASSERT_TRUE(x == "BB,5|BC,6|记!,RR|");
 }
 
+TEST_F(VSMapTest, UsesGetAllEqualAboveTest_TRACERS_M)
+{
+	ASSERT_TRUE(kv->put("A", "1") == status::OK) << errormsg();
+	ASSERT_TRUE(kv->put("AB", "2") == status::OK) << errormsg();
+	ASSERT_TRUE(kv->put("AC", "3") == status::OK) << errormsg();
+	ASSERT_TRUE(kv->put("B", "4") == status::OK) << errormsg();
+	ASSERT_TRUE(kv->put("BB", "5") == status::OK) << errormsg();
+	ASSERT_TRUE(kv->put("BC", "6") == status::OK) << errormsg();
+
+	std::string x;
+	kv->get_equal_above("B", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
+		return 0;
+	});
+	ASSERT_TRUE(x == "B,4|BB,5|BC,6|");
+
+	x = "";
+	kv->get_equal_above("", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
+		return 0;
+	});
+	ASSERT_TRUE(x == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|");
+
+	x = "";
+	kv->get_equal_above("ZZZ", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
+		return 0;
+	});
+	ASSERT_TRUE(x.empty());
+
+	x = "";
+	kv->get_equal_above("B", [&](string_view k, string_view v) {
+		x.append(k.data(), k.size())
+			.append(",")
+			.append(v.data(), v.size())
+			.append("|");
+		return 0;
+	});
+	ASSERT_TRUE(x == "B,4|BB,5|BC,6|");
+
+	ASSERT_TRUE(kv->put("记!", "RR") == status::OK) << errormsg();
+	x = "";
+	kv->get_equal_above("B",
+		      [](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+			      const auto c = ((std::string *)arg);
+			      c->append(std::string(k, kb))
+				      .append(",")
+				      .append(std::string(v, vb))
+				      .append("|");
+			      return 0;
+		      },
+		      &x);
+	ASSERT_TRUE(x == "B,4|BB,5|BC,6|记!,RR|");
+}
+
 TEST_F(VSMapTest, UsesGetAllBelowTest_TRACERS_M)
 {
 	ASSERT_TRUE(kv->put("A", "1") == status::OK) << errormsg();

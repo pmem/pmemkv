@@ -167,6 +167,11 @@ status engine_base::count_above(string_view key, std::size_t &cnt)
 	return status::NOT_SUPPORTED;
 }
 
+status engine_base::count_equal_above(string_view key, std::size_t &cnt)
+{
+	return status::NOT_SUPPORTED;
+}
+
 status engine_base::count_below(string_view key, std::size_t &cnt)
 {
 	return status::NOT_SUPPORTED;
@@ -182,6 +187,11 @@ status engine_base::get_all(get_kv_callback *callback, void *arg)
 }
 
 status engine_base::get_above(string_view key, get_kv_callback *callback, void *arg)
+{
+	return status::NOT_SUPPORTED;
+}
+
+status engine_base::get_equal_above(string_view key, get_kv_callback *callback, void *arg)
 {
 	return status::NOT_SUPPORTED;
 }

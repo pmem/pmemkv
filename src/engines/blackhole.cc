@@ -71,6 +71,15 @@ status blackhole::count_above(string_view key, std::size_t &cnt)
 	return status::OK;
 }
 
+status blackhole::count_equal_above(string_view key, std::size_t &cnt)
+{
+	LOG("count_equal_above for key=" << std::string(key.data(), key.size()));
+
+	cnt = 0;
+
+	return status::OK;
+}
+
 status blackhole::count_below(string_view key, std::size_t &cnt)
 {
 	LOG("count_below for key=" << std::string(key.data(), key.size()));
@@ -99,6 +108,13 @@ status blackhole::get_all(get_kv_callback *callback, void *arg)
 status blackhole::get_above(string_view key, get_kv_callback *callback, void *arg)
 {
 	LOG("get_above for key=" << std::string(key.data(), key.size()));
+
+	return status::OK;
+}
+
+status blackhole::get_equal_above(string_view key, get_kv_callback *callback, void *arg)
+{
+	LOG("get_equal_above for key=" << std::string(key.data(), key.size()));
 
 	return status::OK;
 }

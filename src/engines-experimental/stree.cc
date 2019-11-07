@@ -77,13 +77,29 @@ status stree::count_all(std::size_t &cnt)
 	return status::OK;
 }
 
-// above or equal to key, key inclusive
+// above key, key exclusive
 status stree::count_above(string_view key, std::size_t &cnt)
 {
 	LOG("count_above key>=" << std::string(key.data(), key.size()));
 	check_outside_tx();
 
-	internal::stree::btree_type::iterator it = my_btree->find_equal_greater(
+	internal::stree::btree_type::iterator it = my_btree->upper_bound(
+		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
+	auto result = std::distance(it, my_btree->end());
+	assert(result >= 0);
+
+	cnt = static_cast<std::size_t>(result);
+
+	return status::OK;
+}
+
+// above or equal to key, key inclusive
+status stree::count_equal_above(string_view key, std::size_t &cnt)
+{
+	LOG("count_above key>=" << std::string(key.data(), key.size()));
+	check_outside_tx();
+
+	internal::stree::btree_type::iterator it = my_btree->lower_bound(
 		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
 	auto result = std::distance(it, my_btree->end());
 	assert(result >= 0);
@@ -99,7 +115,7 @@ status stree::count_below(string_view key, std::size_t &cnt)
 	LOG("count_below key<" << std::string(key.data(), key.size()));
 	check_outside_tx();
 
-	internal::stree::btree_type::iterator it = my_btree->find_equal_greater(
+	internal::stree::btree_type::iterator it = my_btree->lower_bound(
 		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
 	auto result = std::distance(my_btree->begin(), it);
 	assert(result >= 0);
@@ -114,9 +130,9 @@ status stree::count_between(string_view key1, string_view key2, std::size_t &cnt
 	LOG("count_between key range=[" << std::string(key1.data(), key1.size()) <<"," << std::string(key2.data(), key2.size()) << ")");
 	check_outside_tx();
 
-	internal::stree::btree_type::iterator it1 = my_btree->find_equal_greater(
+	internal::stree::btree_type::iterator it1 = my_btree->lower_bound(
 		pstring<internal::stree::MAX_KEY_SIZE>(key1.data(), key1.size()));
-	internal::stree::btree_type::iterator it2 = my_btree->find_equal_greater(
+	internal::stree::btree_type::iterator it2 = my_btree->lower_bound(
 		pstring<internal::stree::MAX_KEY_SIZE>(key2.data(), key2.size()));
 	auto result = std::distance(it1, it2);
 	assert(result >= 0);
@@ -140,12 +156,30 @@ status stree::get_all(get_kv_callback *callback, void *arg)
 	return status::OK;
 }
 
-// [key, end), above or equal to key
+// (key, end), above key
 status stree::get_above(string_view key, get_kv_callback *callback, void *arg)
 {
 	LOG("get_above start key>=" << std::string(key.data(), key.size()));
 	check_outside_tx();
-	internal::stree::btree_type::iterator it = my_btree->find_equal_greater(
+	internal::stree::btree_type::iterator it = my_btree->upper_bound(
+		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
+	while (it != my_btree->end()) {
+		auto ret = callback((*it).first.c_str(), (*it).first.size(),
+				    (*it).second.c_str(), (*it).second.size(), arg);
+		if (ret != 0)
+			return status::STOPPED_BY_CB;
+		it++;
+	}
+
+	return status::OK;
+}
+
+// [key, end), above or equal to key
+status stree::get_equal_above(string_view key, get_kv_callback *callback, void *arg)
+{
+	LOG("get_equal_above start key>=" << std::string(key.data(), key.size()));
+	check_outside_tx();
+	internal::stree::btree_type::iterator it = my_btree->lower_bound(
 		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
 	while (it != my_btree->end()) {
 		auto ret = callback((*it).first.c_str(), (*it).first.size(),
@@ -165,9 +199,7 @@ status stree::get_below(string_view key, get_kv_callback *callback, void *arg)
 	check_outside_tx();
 	auto pskey = pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size());
 	internal::stree::btree_type::iterator it = my_btree->begin();
-	while (it != my_btree->end()) {
-		if ((*it).first > pskey || (*it).first == pskey)
-			break;
+	while (it != my_btree->end() && (*it).first < pskey) {
 		auto ret = callback((*it).first.c_str(), (*it).first.size(), (*it).second.c_str(), (*it).second.size(), arg);
 		if (ret != 0)
 			return status::STOPPED_BY_CB;
@@ -186,10 +218,8 @@ status stree::get_between(string_view key1, string_view key2, get_kv_callback *c
 	auto pskey1 = pstring<internal::stree::MAX_KEY_SIZE>(key1.data(), key1.size());
 	auto pskey2 = pstring<internal::stree::MAX_KEY_SIZE>(key2.data(), key2.size());
 	internal::stree::btree_type::iterator it =
-		my_btree->find_equal_greater(pskey1);
-	while (it != my_btree->end()) {
-		if ((*it).first > pskey2 || (*it).first == pskey2)
-			break;
+		my_btree->lower_bound(pskey1);
+	while (it != my_btree->end() && (*it).first < pskey2) {
 		auto ret = callback((*it).first.c_str(), (*it).first.size(), (*it).second.c_str(), (*it).second.size(), arg);
 		if (ret != 0)
 			return status::STOPPED_BY_CB;
