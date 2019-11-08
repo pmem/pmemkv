@@ -31,59 +31,48 @@
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#				environment prepared for executing build and tests
-#				of pmemkv-* bindings repositories.
+#              environment prepared for running libpmemobj-cpp tests.
 #
 
 # Pull base image
-FROM ubuntu:19.10
+FROM archlinux/base:latest
 MAINTAINER szymon.romik@intel.com
 
 # Update the Apt cache and install basic tools
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN pacman -Syu --noconfirm
+RUN pacman -S --noconfirm \
+	asciidoc \
 	autoconf \
 	automake \
-	build-essential \
+	bash-completion \
 	clang \
-	clang-format \
 	cmake \
-	curl \
-	debhelper \
-	devscripts \
 	doxygen \
-	fakeroot \
+	file \
+	gcc \
+	gdb \
 	git \
 	graphviz \
-	libc6-dbg \
-	libdaxctl-dev \
-	libgtest-dev \
-	libndctl-dev \
-	libnode-dev \
-	libnuma-dev \
-	libmemkind-dev \
-	libtbb-dev \
-	libtext-diff-perl \
-	libtool \
-	libunwind8-dev \
-	maven \
-	npm \
+	gtest \
+	intel-tbb \
+	libunwind \
+	llvm \
+	make \
 	numactl \
-	openjdk-8-jdk \
-	pandoc \
+	perl-text-diff \
 	pkg-config \
-	python3-dev \
-	python3-distutils \
-	rapidjson-dev \
-	ruby-dev \
+	rapidjson \
+	ruby \
+	sfml \
 	sudo \
 	wget \
+	which \
 	whois \
- && rm -rf /var/lib/apt/lists/*
+	xmlto
 
-# Install Googletest
-COPY install-googletest.sh install-googletest.sh
-RUN ./install-googletest.sh
+# Install libndctl
+COPY install-libndctl.sh install-libndctl.sh
+RUN ./install-libndctl.sh archlinux-base
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -91,24 +80,34 @@ RUN ./install-valgrind.sh
 
 # Install pmdk
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh dpkg
+RUN ./install-pmdk.sh
 
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh DEB
+RUN ./install-libpmemobj-cpp.sh
 
-# Bindings
-COPY install-bindings-dependencies.sh install-bindings-dependencies.sh
-RUN ./install-bindings-dependencies.sh
+# Install memkind
+COPY install-memkind.sh install-memkind.sh
+RUN ./install-memkind.sh
 
 # Add user
 ENV USER user
-ENV USERPASS pass
-RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
+ENV USERPASS p1a2s3s4
+ENV PFILE ./password
+RUN useradd -m $USER
+RUN echo $USERPASS > $PFILE
+RUN echo $USERPASS >> $PFILE
+RUN passwd $USER < $PFILE
+RUN rm -f $PFILE
+RUN sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
+RUN gpasswd wheel -a $USER
 USER $USER
 
+# Clean the cache of packages
+RUN rm -rf /var/cache/pacman/pkg/*
+
 # Set required environment variables
-ENV OS ubuntu
-ENV OS_VER 19.10
-ENV PACKAGE_MANAGER deb
+ENV OS archlinux-base
+ENV OS_VER latest
+ENV PACKAGE_MANAGER pacman
 ENV NOTTY 1

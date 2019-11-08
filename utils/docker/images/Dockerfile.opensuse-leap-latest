@@ -30,85 +30,105 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#				environment prepared for executing build and tests
-#				of pmemkv-* bindings repositories.
+# Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
+#              environment prepared for running pmemkv build and tests.
 #
 
 # Pull base image
-FROM ubuntu:19.10
+FROM opensuse/leap:latest
 MAINTAINER szymon.romik@intel.com
 
-# Update the Apt cache and install basic tools
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+# Update the OS
+RUN zypper dup -y
+
+# Update all packages
+RUN zypper update -y
+
+# Enable the debuginfo repo
+RUN zypper mr -e repo-debug
+
+# Install basic tools
+RUN zypper install -y \
 	autoconf \
 	automake \
-	build-essential \
+	bash-completion \
 	clang \
-	clang-format \
 	cmake \
-	curl \
-	debhelper \
-	devscripts \
 	doxygen \
-	fakeroot \
+	fdupes \
+	gcc \
+	gcc-c++ \
+	gdb \
+	glibc-debuginfo \
 	git \
 	graphviz \
-	libc6-dbg \
-	libdaxctl-dev \
-	libgtest-dev \
-	libndctl-dev \
-	libnode-dev \
-	libnuma-dev \
-	libmemkind-dev \
-	libtbb-dev \
-	libtext-diff-perl \
+	gtest \
+	hub \
+	keyutils-devel \
 	libtool \
-	libunwind8-dev \
-	maven \
-	npm \
-	numactl \
-	openjdk-8-jdk \
+	make \
+	man \
+	libjson-c-devel \
+	libkmod-devel \
+	libndctl-devel \
+	libnuma-devel \
+	libudev-devel \
+	libuuid-devel \
 	pandoc \
-	pkg-config \
-	python3-dev \
-	python3-distutils \
-	rapidjson-dev \
-	ruby-dev \
+	perl-Text-Diff \
+	'pkgconfig(bash-completion)' \
+	rapidjson-devel \
+	rpm-build \
 	sudo \
+	unzip \
 	wget \
-	whois \
- && rm -rf /var/lib/apt/lists/*
+	which
 
-# Install Googletest
-COPY install-googletest.sh install-googletest.sh
-RUN ./install-googletest.sh
+# Install a newer version of TBB
+RUN zypper addrepo http://download.opensuse.org/repositories/Education/openSUSE_Leap_15.1/ education
+RUN zypper --gpg-auto-import-keys install -y \
+	tbb-devel-2019_20190605-lp151.72.1.x86_64 \
+	libtbb2-2019_20190605-lp151.72.1.x86_64 \
+	libtbbmalloc2-2019_20190605-lp151.72.1.x86_64
+
+RUN zypper clean all
+
+# Install libndctl
+COPY install-libndctl.sh install-libndctl.sh
+RUN ./install-libndctl.sh opensuse
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
+RUN ./install-valgrind.sh opensuse
 
 # Install pmdk
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh dpkg
+RUN ./install-pmdk.sh rpm
 
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh DEB
+RUN ./install-libpmemobj-cpp.sh RPM
 
-# Bindings
-COPY install-bindings-dependencies.sh install-bindings-dependencies.sh
-RUN ./install-bindings-dependencies.sh
+# Install memkind
+COPY install-memkind.sh install-memkind.sh
+RUN ./install-memkind.sh opensuse
 
 # Add user
 ENV USER user
-ENV USERPASS pass
-RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
+ENV USERPASS p1a2s3s4
+ENV PFILE ./password
+RUN useradd -m $USER
+RUN echo $USERPASS > $PFILE
+RUN echo $USERPASS >> $PFILE
+RUN passwd $USER < $PFILE
+RUN rm -f $PFILE
+RUN sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
+RUN groupadd wheel
+RUN gpasswd wheel -a $USER
 USER $USER
 
 # Set required environment variables
-ENV OS ubuntu
-ENV OS_VER 19.10
-ENV PACKAGE_MANAGER deb
+ENV OS opensuse-leap
+ENV OS_VER latest
+ENV PACKAGE_MANAGER rpm
 ENV NOTTY 1
