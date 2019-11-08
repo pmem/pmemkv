@@ -1,0 +1,128 @@
+#
+# Copyright 2016-2019, Intel Corporation
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in
+#       the documentation and/or other materials provided with the
+#       distribution.
+#
+#     * Neither the name of the copyright holder nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#
+# Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
+#              environment prepared for running pmemkv build and tests.
+#
+
+# Pull base image
+FROM opensuse/tumbleweed:latest
+MAINTAINER lukasz.stolarczuk@intel.com
+
+# Update the OS
+RUN zypper dup -y
+
+# Update all packages
+RUN zypper update -y
+
+# Enable the debuginfo repo
+RUN zypper mr -e repo-debug
+
+# Install basic tools
+RUN zypper install -y \
+	autoconf \
+	automake \
+	bash-completion \
+	clang \
+	cmake \
+	doxygen \
+	fdupes \
+	gcc \
+	gcc-c++ \
+	gdb \
+	glibc-debuginfo \
+	git \
+	graphviz \
+	gtest \
+	hub \
+	keyutils-devel \
+	libtool \
+	make \
+	man \
+	libjson-c-devel \
+	libkmod-devel \
+	libndctl-devel \
+	libnuma-devel \
+	libudev-devel \
+	libuuid-devel \
+	pandoc \
+	perl-Text-Diff \
+	'pkgconfig(bash-completion)' \
+	rapidjson-devel \
+	rpm-build \
+	sudo \
+	tbb-devel \
+	unzip \
+	wget \
+	which
+
+RUN zypper clean all
+
+# Install libndctl
+COPY install-libndctl.sh install-libndctl.sh
+RUN ./install-libndctl.sh opensuse
+
+# Install valgrind
+COPY install-valgrind.sh install-valgrind.sh
+RUN ./install-valgrind.sh opensuse
+
+# Install pmdk
+COPY install-pmdk.sh install-pmdk.sh
+RUN ./install-pmdk.sh rpm
+
+# Install pmdk c++ bindings
+COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
+RUN ./install-libpmemobj-cpp.sh RPM
+
+# Install memkind
+COPY install-memkind.sh install-memkind.sh
+RUN ./install-memkind.sh sys opensuse
+
+# Add user
+ENV USER user
+ENV USERPASS p1a2s3s4
+ENV PFILE ./password
+RUN useradd -m $USER
+RUN echo $USERPASS > $PFILE
+RUN echo $USERPASS >> $PFILE
+RUN passwd $USER < $PFILE
+RUN rm -f $PFILE
+RUN sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
+RUN groupadd wheel
+RUN gpasswd wheel -a $USER
+USER $USER
+
+# Set required environment variables
+ENV OS opensuse-tumbleweed
+ENV OS_VER latest
+ENV PACKAGE_MANAGER rpm
+ENV NOTTY 1
