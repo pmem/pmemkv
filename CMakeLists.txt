@@ -70,6 +70,10 @@ option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 
 option(DEVELOPER_MODE "enable developer's checks" OFF)
 
+# Do not treat include directories from the interfaces
+# of consumed Imported Targets as SYSTEM by default.
+set(CMAKE_NO_SYSTEM_FROM_IMPORTED 1)
+
 if(ENGINE_CMAP)
 	add_definitions(-DENGINE_CMAP)
 	message(STATUS "CMAP engine is ON")
