@@ -75,6 +75,7 @@ public:
 	~CMapBaseTest()
 	{
 		delete kv;
+		std::remove(PATH.c_str());
 	}
 	void Restart()
 	{
