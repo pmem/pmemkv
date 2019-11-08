@@ -38,9 +38,12 @@ set -e
 
 PACKAGE_MANAGER=$1
 
+# stable-1.7: Merge pull request #4097 from pmem/stable-1.6, 5.11.2019
+PMDK_VERSION="31cea307b2b7c0c0d0d209b8c5f47adc9d1353a0"
+
 git clone https://github.com/pmem/pmdk --shallow-since=2019-09-26
 cd pmdk
-git checkout 1.7
+git checkout $PMDK_VERSION
 
 if [ "$PACKAGE_MANAGER" = "" ]; then
 	make -j$(nproc) install prefix=/usr
