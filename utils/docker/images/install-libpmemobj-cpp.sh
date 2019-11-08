@@ -37,6 +37,8 @@
 
 set -e
 
+PACKAGE_MANAGER=$1
+
 git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
 cd libpmemobj-cpp
 
@@ -45,11 +47,17 @@ git checkout 1.8
 mkdir build
 cd build
 
-cmake .. -DCPACK_GENERATOR="$1" -DCMAKE_INSTALL_PREFIX=/usr
-make -j$(nproc) package
-if [ "$1" = "DEB" ]; then
+cmake .. -DCPACK_GENERATOR="$PACKAGE_MANAGER" -DCMAKE_INSTALL_PREFIX=/usr
+
+if [ "$PACKAGE_MANAGER" = "" ]; then
+	make -j$(nproc) install
+else
+	make -j$(nproc) package
+fi
+
+if [ "$PACKAGE_MANAGER" = "DEB" ]; then
       sudo dpkg -i libpmemobj++*.deb
-elif [ "$1" = "RPM" ]; then
+elif [ "$PACKAGE_MANAGER" = "RPM" ]; then
       sudo rpm -i libpmemobj++*.rpm
 fi
 
