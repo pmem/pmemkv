@@ -40,6 +40,7 @@ set -e
 EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
 TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
+BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:ON}
 
 function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
@@ -118,6 +119,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DCOVERAGE=$COVERAGE \
 	-DENGINE_STREE=1 \
+	-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
 	-DDEVELOPER_MODE=1
 
 make -j$(nproc)
