@@ -38,6 +38,11 @@
 FROM fedora:31
 MAINTAINER szymon.romik@intel.com
 
+# Additional parameters to build docker without building components
+ARG SKIP_VALGRIND_BUILD
+ARG SKIP_PMDK_BUILD
+ARG SKIP_LIBPMEMOBJCPP_BUILD
+
 # Install basic tools
 RUN dnf update -y \
  && dnf install -y \
