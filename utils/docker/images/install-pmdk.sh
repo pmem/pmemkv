@@ -36,6 +36,10 @@
 
 set -e
 
+if [ "${SKIP_PMDK_BUILD}" ]; then \
+	exit
+fi
+
 PACKAGE_MANAGER=$1
 
 # stable-1.7: Merge pull request #4097 from pmem/stable-1.6, 5.11.2019
