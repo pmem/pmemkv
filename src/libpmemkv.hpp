@@ -982,7 +982,7 @@ inline status db::get_equal_above(string_view key, std::function<get_kv_function
  *
  * Keys are sorted in lexicographical order (see std::lexicographical_compare).
  *
- * @param[in] key sets the lower bound for querying
+ * @param[in] key sets the upper bound for querying
  * @param[in] callback function to be called for each returned element
  * @param[in] arg additional arguments to be passed to callback
  *
@@ -1004,7 +1004,7 @@ inline status db::get_equal_below(string_view key, get_kv_callback *callback,
  *
  * Keys are sorted in lexicographical order (see std::lexicographical_compare).
  *
- * @param[in] key sets the lower bound for querying
+ * @param[in] key sets the upper bound for querying
  * @param[in] f function called for each returned element, it is called with params:
  *				key and value
  *
