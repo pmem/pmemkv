@@ -38,6 +38,11 @@
 FROM centos:8
 MAINTAINER szymon.romik@intel.com
 
+# Additional parameters to build docker without building components
+ARG SKIP_VALGRIND_BUILD
+ARG SKIP_PMDK_BUILD
+ARG SKIP_LIBPMEMOBJCPP_BUILD
+
 RUN dnf update -y
 RUN dnf install -y epel-release
 RUN dnf install -y 'dnf-command(config-manager)'

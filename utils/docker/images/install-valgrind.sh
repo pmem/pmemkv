@@ -36,6 +36,10 @@
 
 set -e
 
+if [ "${SKIP_VALGRIND_BUILD}" ]; then
+	exit
+fi
+
 OS=$1
 
 git clone https://github.com/pmem/valgrind.git
