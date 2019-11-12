@@ -40,7 +40,8 @@ set -e
 git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
 cd libpmemobj-cpp
 
-git checkout 1.8
+# Merge pull request #517 from ldorau/Adjust-install-libndctl.sh-script-to-Arch-Linux, 12.11.2019
+git checkout 93a5f5ff48c7047cc8d764aa672fc5095a7138bc
 
 mkdir build
 cd build
