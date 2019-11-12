@@ -86,16 +86,25 @@ COPY install-googletest.sh install-googletest.sh
 RUN ./install-googletest.sh
 
 # Install valgrind
+ARG SKIP_VALGRIND_BUILD
 COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
+RUN if [ ! "${SKIP_VALGRIND_BUILD}" ]; then \
+	./install-valgrind.sh; else \
+	echo "Valgrind not installed"; fi
 
 # Install pmdk
+ARG SKIP_PMDK_BUILD
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh dpkg
+RUN if [ ! "${SKIP_PMDK_BUILD}" ]; then \
+	./install-pmdk.sh dpkg; else \
+	echo "PMDK not installed"; fi
 
 # Install pmdk c++ bindings
+ARG SKIP_LIBPMEMOBJCPP_BUILD
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh DEB
+RUN if [ ! "${SKIP_LIBPMEMOBJCPP_BUILD}" ]; then \
+	./install-libpmemobj-cpp.sh DEB; else \
+	echo "libpmemobj-cpp not installed"; fi
 
 # Bindings
 COPY install-bindings-dependencies.sh install-bindings-dependencies.sh

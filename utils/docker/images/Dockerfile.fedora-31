@@ -76,16 +76,25 @@ RUN dnf update -y \
 RUN dnf debuginfo-install -y glibc
 
 # Install valgrind
+ARG SKIP_VALGRIND_BUILD
 COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
+RUN if [ ! "${SKIP_VALGRIND_BUILD}" ]; then \
+	./install-valgrind.sh; else \
+	echo "Valgrind not installed"; fi
 
 # Install pmdk
+ARG SKIP_PMDK_BUILD
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh rpm
+RUN if [ ! "${SKIP_PMDK_BUILD}" ]; then \
+	./install-pmdk.sh rpm; else \
+	echo "PMDK not installed"; fi
 
 # Install pmdk c++ bindings
+ARG SKIP_LIBPMEMOBJCPP_BUILD
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh RPM
+RUN if [ ! "${SKIP_LIBPMEMOBJCPP_BUILD}" ]; then \
+	./install-libpmemobj-cpp.sh RPM; else \
+	echo "libpmemobj-cpp not installed"; fi
 
 # Add user
 ENV USER user
