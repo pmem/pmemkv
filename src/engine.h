@@ -61,6 +61,7 @@ public:
 	virtual status count_all(std::size_t &cnt);
 	virtual status count_above(string_view key, std::size_t &cnt);
 	virtual status count_equal_above(string_view key, std::size_t &cnt);
+	virtual status count_equal_below(string_view key, std::size_t &cnt);
 	virtual status count_below(string_view key, std::size_t &cnt);
 	virtual status count_between(string_view key1, string_view key2,
 				     std::size_t &cnt);
@@ -68,6 +69,7 @@ public:
 	virtual status get_all(get_kv_callback *callback, void *arg);
 	virtual status get_above(string_view key, get_kv_callback *callback, void *arg);
 	virtual status get_equal_above(string_view key, get_kv_callback *callback, void *arg);
+	virtual status get_equal_below(string_view key, get_kv_callback *callback, void *arg);
 	virtual status get_below(string_view key, get_kv_callback *callback, void *arg);
 	virtual status get_between(string_view key1, string_view key2,
 				   get_kv_callback *callback, void *arg);

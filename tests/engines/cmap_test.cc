@@ -74,10 +74,12 @@ public:
 
 	~CMapBaseTest()
 	{
+		kv->close();
 		delete kv;
 	}
 	void Restart()
 	{
+		kv->close();
 		delete kv;
 		Start(false);
 	}

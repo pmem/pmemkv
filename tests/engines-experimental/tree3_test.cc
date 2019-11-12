@@ -88,10 +88,12 @@ public:
 
 	~TreeTest()
 	{
+		kv->close();
 		delete kv;
 	}
 	void Restart()
 	{
+		kv->close();
 		delete kv;
 		Start(false);
 	}
