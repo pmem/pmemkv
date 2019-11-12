@@ -37,6 +37,10 @@
 
 set -e
 
+if [ "${SKIP_LIBPMEMOBJCPP_BUILD}" ]; then
+	exit
+fi
+
 PACKAGE_MANAGER=$1
 
 git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02

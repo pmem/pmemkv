@@ -38,6 +38,11 @@
 FROM archlinux/base:latest
 MAINTAINER szymon.romik@intel.com
 
+# Additional parameters to build docker without building components
+ARG SKIP_VALGRIND_BUILD
+ARG SKIP_PMDK_BUILD
+ARG SKIP_LIBPMEMOBJCPP_BUILD
+
 # Update the pacman cache and install basic tools
 RUN pacman -Syu --noconfirm
 RUN pacman -S --noconfirm \
