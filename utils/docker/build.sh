@@ -129,6 +129,7 @@ docker run --privileged=true --name=$containerName -ti \
 	--env COVERITY_SCAN_NOTIFICATION_EMAIL=$COVERITY_SCAN_NOTIFICATION_EMAIL \
 	--env TEST_BUILD=$TEST_BUILD \
 	--env DEFAULT_TEST_DIR=/dev/shm \
+	--env BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON} \
 	--shm-size=4G \
 	-v $HOST_WORKDIR:$WORKDIR \
 	-v /etc/localtime:/etc/localtime \
