@@ -36,12 +36,23 @@
 
 set -e
 
+OS=$1
+
 git clone https://github.com/pmem/valgrind.git
 cd valgrind
 # valgrind v3.14 with pmemcheck: fix memcheck failure on Ubuntu-19.04
 git checkout 0965e35d7fd5c7941dc3f2a0c981cb8386c479d3
+
+# set 'libdir'
+LIBDIR=/usr/lib
+case $(echo $OS | cut -d'-' -f1) in
+	centos|opensuse)
+		LIBDIR=/usr/lib64
+		;;
+esac
+
 ./autogen.sh
-./configure --prefix=/usr
+./configure --prefix=/usr --libdir=$LIBDIR
 make -j$(nproc)
 sudo make -j$(nproc) install
 cd ..
