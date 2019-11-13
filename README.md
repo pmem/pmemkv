@@ -21,6 +21,7 @@ See its [manual](doc/libpmemkv_json_config.3.md) for details.
 - [Language Bindings](#language-bindings)
 - [Storage Engines](#storage-engines)
 - [Tools and Utilities](#tools-and-utilities)
+- [API](#api)
 
 ## Installation
 
@@ -82,3 +83,10 @@ and the experimental engines are described in the [ENGINES-experimental.md](ENGI
 Benchmarks' scripts and other helpful utilities are available here:
 
 https://github.com/pmem/pmemkv-tools
+
+## API
+The C++ API of pmemkv is documented in the Doxygen documentation listed below:
+
+- [master](https://pmem.io/pmemkv/master/doxygen/index.html)
+- [v1.0](https://pmem.io/pmemkv/v1.0/doxygen/index.html)
+
