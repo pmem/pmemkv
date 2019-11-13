@@ -56,6 +56,8 @@ public:
 	{
 		delete kv;
 		pmpool.close();
+
+		std::remove(PATH.c_str());
 	}
 	void Restart()
 	{
