@@ -259,6 +259,13 @@ endif()
 
 target_link_libraries(pmemkv_test pmemkv libgtest ${CMAKE_DL_LIBS})
 
+# XXX It should be removed when all supported distributions update gtest
+# to at least v1.9.0.20190831-1
+# and the 'INSTANTIATE_TEST_CASE_P' macro can be replaced
+# with the 'INSTANTIATE_TEST_SUITE_P' macro.
+# See https://github.com/pmem/pmemkv/issues/527 for more details.
+target_compile_options(pmemkv_test PUBLIC "-Wno-deprecated-declarations")
+
 if(BUILD_JSON_CONFIG)
 	target_link_libraries(pmemkv_test pmemkv_json_config)
 endif()
