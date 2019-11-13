@@ -41,6 +41,7 @@ set -e
 EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
 TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
+TEST_PACKAGES=${TEST_PACKAGES:-ON}
 
 function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
@@ -230,17 +231,19 @@ echo "--------------------------------------------------------------------------
 
 make -j$(nproc) package
 
-if [ $PACKAGE_MANAGER = "deb" ]; then
-	sudo_password dpkg -i libpmemkv*.deb
-elif [ $PACKAGE_MANAGER = "rpm" ]; then
-	sudo_password rpm -i libpmemkv*.rpm
-fi
+if [ "$TEST_PACKAGES" == "ON" ]; then
+	if [ $PACKAGE_MANAGER = "deb" ]; then
+		sudo_password dpkg -i libpmemkv*.deb
+	elif [ $PACKAGE_MANAGER = "rpm" ]; then
+		sudo_password rpm -i libpmemkv*.rpm
+	fi
 
-# Verify installed packages
-compile_example_standalone pmemkv_basic_c
-run_example_standalone pmemkv_basic_c
-compile_example_standalone pmemkv_basic_cpp
-run_example_standalone pmemkv_basic_cpp
+	# Verify installed packages
+	compile_example_standalone pmemkv_basic_c
+	run_example_standalone pmemkv_basic_c
+	compile_example_standalone pmemkv_basic_cpp
+	run_example_standalone pmemkv_basic_cpp
+fi
 
 # Trigger auto doc update on master
 if [[ "$AUTO_DOC_UPDATE" == "1" ]]; then
