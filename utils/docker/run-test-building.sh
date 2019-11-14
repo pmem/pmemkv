@@ -227,28 +227,37 @@ echo "##############################################################"
 echo "### Verifying building of packages"
 echo "##############################################################"
 
-# Fetch git history for `git describe` to work,
-# so that package has proper 'version' field
-[ -f .git/shallow ] && git fetch --unshallow --tags
-
-mkdir $WORKDIR/build
-cd $WORKDIR/build
-
-cmake .. -DCMAKE_BUILD_TYPE=Debug \
-	-DTEST_DIR=$TEST_DIR \
-	-DCMAKE_INSTALL_PREFIX=$PREFIX \
-	-DDEVELOPER_MODE=1 \
-	-DCPACK_GENERATOR=$PACKAGE_MANAGER
-
-echo
-echo "### Making sure there is no libpmemkv currently installed"
-echo "---------------------------- Error expected! ------------------------------"
-compile_example_standalone pmemkv_basic_cpp && exit 1
-echo "---------------------------------------------------------------------------"
-
-make -j$(nproc) package
+# building of packages should be verified only if PACKAGE_MANAGER equals 'rpm' or 'deb'
+case $PACKAGE_MANAGER in
+	rpm|deb)
+		;;
+	*)
+		TEST_PACKAGES=OFF
+		;;
+esac
 
 if [ "$TEST_PACKAGES" == "ON" ]; then
+	# Fetch git history for `git describe` to work,
+	# so that package has proper 'version' field
+	[ -f .git/shallow ] && git fetch --unshallow --tags
+
+	mkdir $WORKDIR/build
+	cd $WORKDIR/build
+
+	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+		-DTEST_DIR=$TEST_DIR \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DDEVELOPER_MODE=1 \
+		-DCPACK_GENERATOR=$PACKAGE_MANAGER
+
+	echo
+	echo "### Making sure there is no libpmemkv currently installed"
+	echo "---------------------------- Error expected! ------------------------------"
+	compile_example_standalone pmemkv_basic_cpp && exit 1
+	echo "---------------------------------------------------------------------------"
+
+	make -j$(nproc) package
+
 	if [ $PACKAGE_MANAGER = "deb" ]; then
 		sudo_password dpkg -i libpmemkv*.deb
 	elif [ $PACKAGE_MANAGER = "rpm" ]; then
@@ -267,9 +276,10 @@ if [ "$TEST_PACKAGES" == "ON" ]; then
 	elif [ $PACKAGE_MANAGER = "rpm" ]; then
 		sudo_password rpm -e --nodeps libpmemkv-devel
 	fi
-fi
 
-rm -rf $WORKDIR/build
+	cd $WORKDIR
+	rm -rf $WORKDIR/build
+fi
 
 # Trigger auto doc update on master
 if [[ "$AUTO_DOC_UPDATE" == "1" ]]; then
