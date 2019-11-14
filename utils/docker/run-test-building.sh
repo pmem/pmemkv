@@ -99,49 +99,66 @@ function run_example_standalone() {
 	cd -
 }
 
+function run_test_check_support_cpp20_gcc() {
+	CWD=$(pwd)
+	echo
+	echo "##############################################################"
+	echo "### Checking C++20 support in g++"
+	echo "##############################################################"
+	mkdir $WORKDIR/build
+	cd $WORKDIR/build
+
+	CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
+		-DTEST_DIR=$TEST_DIR \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DCOVERAGE=$COVERAGE \
+		-DDEVELOPER_MODE=1 \
+		-DCXX_STANDARD=20
+
+	make -j$(nproc)
+	# Run basic tests
+	ctest -R "SimpleTest"
+
+	cd $CWD
+	rm -rf $WORKDIR/build
+}
+
+function run_test_check_support_cpp20_clang() {
+	CWD=$(pwd)
+	echo
+	echo "##############################################################"
+	echo "### Checking C++20 support in clang++"
+	echo "##############################################################"
+	mkdir $WORKDIR/build
+	cd $WORKDIR/build
+
+	CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
+		-DTEST_DIR=$TEST_DIR \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DCOVERAGE=$COVERAGE \
+		-DDEVELOPER_MODE=1 \
+		-DCXX_STANDARD=20
+
+	make -j$(nproc)
+	# Run basic tests
+	ctest -R "SimpleTest"
+
+	cd $CWD
+	rm -rf $WORKDIR/build
+}
+
 cd $WORKDIR
 
-echo
-echo "##############################################################"
-echo "### Checking C++20 support in g++"
-echo "##############################################################"
-mkdir $WORKDIR/build
-cd $WORKDIR/build
+CMAKE_VERSION=$(cmake --version | head -n1 | grep -oE '[0-9].[0-9]*')
+CMAKE_VERSION_MAJOR=$(echo $CMAKE_VERSION | cut -d. -f1)
+CMAKE_VERSION_MINOR=$(echo $CMAKE_VERSION | cut -d. -f2)
+CMAKE_VERSION_NUMBER=$((100 * $CMAKE_VERSION_MAJOR + $CMAKE_VERSION_MINOR))
 
-CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
-	-DTEST_DIR=$TEST_DIR \
-	-DCMAKE_INSTALL_PREFIX=$PREFIX \
-	-DCOVERAGE=$COVERAGE \
-	-DDEVELOPER_MODE=1 \
-	-DCXX_STANDARD=20
-
-make -j$(nproc)
-# Run basic tests
-ctest -R "SimpleTest"
-
-cd $WORKDIR
-rm -rf $WORKDIR/build
-
-echo
-echo "##############################################################"
-echo "### Checking C++20 support in clang++"
-echo "##############################################################"
-mkdir $WORKDIR/build
-cd $WORKDIR/build
-
-CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
-	-DTEST_DIR=$TEST_DIR \
-	-DCMAKE_INSTALL_PREFIX=$PREFIX \
-	-DCOVERAGE=$COVERAGE \
-	-DDEVELOPER_MODE=1 \
-	-DCXX_STANDARD=20
-
-make -j$(nproc)
-# Run basic tests
-ctest -R "SimpleTest"
-
-cd $WORKDIR
-rm -rf $WORKDIR/build
+# CXX_STANDARD==20 is supported since CMake 3.12
+if [ $CMAKE_VERSION_NUMBER -ge 312 ]; then
+	run_test_check_support_cpp20_gcc
+	run_test_check_support_cpp20_clang
+fi
 
 echo
 echo "##############################################################"
