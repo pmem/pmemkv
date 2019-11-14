@@ -229,7 +229,14 @@ echo "---------------------------- Error expected! -----------------------------
 compile_example_standalone pmemkv_basic_cpp && exit 1
 echo "---------------------------------------------------------------------------"
 
-make -j$(nproc) package
+case $PACKAGE_MANAGER in
+	rpm|deb)
+		make -j$(nproc) package
+		;;
+	*)
+		TEST_PACKAGES=OFF
+		;;
+esac
 
 if [ "$TEST_PACKAGES" == "ON" ]; then
 	if [ $PACKAGE_MANAGER = "deb" ]; then
