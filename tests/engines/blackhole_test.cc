@@ -81,71 +81,76 @@ TEST_F(BlackholeTest, GetRangeTest_TRACERS_MP)
 
 	ASSERT_TRUE(kv.count_above("key1", cnt) == status::OK);
 	ASSERT_EQ(0, cnt);
-	ASSERT_TRUE(kv.get_above("key1",
-				  [](const char *k, size_t kb, const char *v, size_t vb,
-				     void *arg) {
-					  const auto c = ((std::string *)arg);
-					  c->append(std::string(k, kb));
-					  c->append(std::string(v, vb));
-					  return 0;
-				  },
-				  &result) == status::NOT_FOUND);
+	ASSERT_TRUE(kv.get_above(
+			    "key1",
+			    [](const char *k, size_t kb, const char *v, size_t vb,
+			       void *arg) {
+				    const auto c = ((std::string *)arg);
+				    c->append(std::string(k, kb));
+				    c->append(std::string(v, vb));
+				    return 0;
+			    },
+			    &result) == status::NOT_FOUND);
 	ASSERT_TRUE(result.empty());
 
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv.count_equal_above("key1", cnt) == status::OK);
 	ASSERT_EQ(0, cnt);
-	ASSERT_TRUE(kv.get_equal_above("key1",
-					[](const char *k, size_t kb, const char *v,
-					   size_t vb, void *arg) {
-						const auto c = ((std::string *)arg);
-						c->append(std::string(k, kb));
-						c->append(std::string(v, vb));
-						return 0;
-					},
-					&result) == status::NOT_FOUND);
+	ASSERT_TRUE(kv.get_equal_above(
+			    "key1",
+			    [](const char *k, size_t kb, const char *v, size_t vb,
+			       void *arg) {
+				    const auto c = ((std::string *)arg);
+				    c->append(std::string(k, kb));
+				    c->append(std::string(v, vb));
+				    return 0;
+			    },
+			    &result) == status::NOT_FOUND);
 	ASSERT_TRUE(result.empty());
 
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv.count_below("key1", cnt) == status::OK);
 	ASSERT_EQ(0, cnt);
-	ASSERT_TRUE(kv.get_below("key1",
-				  [](const char *k, size_t kb, const char *v, size_t vb,
-				     void *arg) {
-					  const auto c = ((std::string *)arg);
-					  c->append(std::string(k, kb));
-					  c->append(std::string(v, vb));
-					  return 0;
-				  },
-				  &result) == status::NOT_FOUND);
+	ASSERT_TRUE(kv.get_below(
+			    "key1",
+			    [](const char *k, size_t kb, const char *v, size_t vb,
+			       void *arg) {
+				    const auto c = ((std::string *)arg);
+				    c->append(std::string(k, kb));
+				    c->append(std::string(v, vb));
+				    return 0;
+			    },
+			    &result) == status::NOT_FOUND);
 	ASSERT_TRUE(result.empty());
 
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv.count_equal_below("key1", cnt) == status::OK);
 	ASSERT_EQ(0, cnt);
-	ASSERT_TRUE(kv.get_equal_below("key1",
-					[](const char *k, size_t kb, const char *v,
-					   size_t vb, void *arg) {
-						const auto c = ((std::string *)arg);
-						c->append(std::string(k, kb));
-						c->append(std::string(v, vb));
-						return 0;
-					},
-					&result) == status::NOT_FOUND);
+	ASSERT_TRUE(kv.get_equal_below(
+			    "key1",
+			    [](const char *k, size_t kb, const char *v, size_t vb,
+			       void *arg) {
+				    const auto c = ((std::string *)arg);
+				    c->append(std::string(k, kb));
+				    c->append(std::string(v, vb));
+				    return 0;
+			    },
+			    &result) == status::NOT_FOUND);
 	ASSERT_TRUE(result.empty());
 
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv.count_between("", "key3", cnt) == status::OK);
 	ASSERT_EQ(0, cnt);
-	ASSERT_TRUE(kv.get_between("", "key3",
-					  [](const char *k, size_t kb, const char *v,
-					     size_t vb, void *arg) {
-						  const auto c = ((std::string *)arg);
-						  c->append(std::string(k, kb));
-						  c->append(std::string(v, vb));
-						  return 0;
-					  },
-					  &result) == status::NOT_FOUND);
+	ASSERT_TRUE(kv.get_between(
+			    "", "key3",
+			    [](const char *k, size_t kb, const char *v, size_t vb,
+			       void *arg) {
+				    const auto c = ((std::string *)arg);
+				    c->append(std::string(k, kb));
+				    c->append(std::string(v, vb));
+				    return 0;
+			    },
+			    &result) == status::NOT_FOUND);
 	ASSERT_TRUE(result.empty());
 }
 
