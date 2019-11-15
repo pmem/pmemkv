@@ -30,15 +30,15 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#              environment prepared for running libpmemobj-cpp tests.
+# Dockerfile - a 'recipe' for Docker to build an image of environment
+#              prepared for running libpmemobj-cpp tests.
 #
 
 # Pull base image
 FROM archlinux/base:latest
 MAINTAINER szymon.romik@intel.com
 
-# Update the Apt cache and install basic tools
+# Update the pacman cache and install basic tools
 RUN pacman -Syu --noconfirm
 RUN pacman -S --noconfirm \
 	asciidoc \
