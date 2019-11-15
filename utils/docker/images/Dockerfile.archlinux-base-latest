@@ -38,7 +38,7 @@
 FROM archlinux/base:latest
 MAINTAINER szymon.romik@intel.com
 
-# Update the Apt cache and install basic tools
+# Update the pacman cache and install basic tools
 RUN pacman -Syu --noconfirm
 RUN pacman -S --noconfirm \
 	asciidoc \
