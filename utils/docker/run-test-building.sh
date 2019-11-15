@@ -42,6 +42,7 @@ EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
 TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
 TEST_PACKAGES=${TEST_PACKAGES:-ON}
+BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
 
 function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
@@ -111,6 +112,7 @@ function run_test_check_support_cpp20_gcc() {
 	CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 		-DTEST_DIR=$TEST_DIR \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
 		-DCOVERAGE=$COVERAGE \
 		-DDEVELOPER_MODE=1 \
 		-DCXX_STANDARD=20
@@ -135,6 +137,7 @@ function run_test_check_support_cpp20_clang() {
 	CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 		-DTEST_DIR=$TEST_DIR \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
 		-DCOVERAGE=$COVERAGE \
 		-DDEVELOPER_MODE=1 \
 		-DCXX_STANDARD=20
@@ -189,6 +192,7 @@ do
 	cmake .. -DENGINE_VSMAP=OFF \
 		-DENGINE_VCMAP=OFF \
 		-DENGINE_CMAP=OFF \
+		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
 		-D$engine_flag=ON
 	make -j$(nproc)
 	# list all tests in this build
@@ -214,7 +218,8 @@ cmake .. -DENGINE_VSMAP=ON \
 	-DENGINE_VCMAP=ON \
 	-DENGINE_CMAP=ON \
 	-DENGINE_STREE=ON \
-	-DENGINE_TREE3=ON
+	-DENGINE_TREE3=ON \
+	-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG}
 make -j$(nproc)
 # list all tests in this build
 ctest -N
@@ -238,6 +243,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug \
 	-DTEST_DIR=$TEST_DIR \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DDEVELOPER_MODE=1 \
+	-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
 	-DCPACK_GENERATOR=$PACKAGE_MANAGER
 
 echo
