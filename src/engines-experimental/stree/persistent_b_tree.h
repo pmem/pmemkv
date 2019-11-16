@@ -1478,6 +1478,14 @@ public:
 		return const_iterator(leaf, leaf_it);
 	}
 
+	/**
+	 * Returns an iterator pointing to the least element which is larger than or equal to the given key.
+	 * Keys are sorted in lexicographical order (see std::lexicographical_compare).
+	 *
+	 * @param[in] key sets the lower bound (inclusive)
+	 *
+	 * @return iterator
+	 */
 	iterator lower_bound(const key_type &key)
 	{
 		leaf_node_type *leaf = find_leaf_node(key);
@@ -1491,6 +1499,14 @@ public:
 		return iterator(leaf, leaf_it);
 	}
 
+	/**
+	 * Returns a const iterator pointing to the least element which is larger than or equal to the given key.
+	 * Keys are sorted in lexicographical order (see std::lexicographical_compare).
+	 *
+	 * @param[in] key sets the lower bound (inclusive)
+	 *
+	 * @return const_iterator
+	 */
 	const_iterator lower_bound(const key_type &key) const
 	{
 		const leaf_node_type *leaf = find_leaf_node(key);
@@ -1505,6 +1521,14 @@ public:
 		return const_iterator(leaf, leaf_it);
 	}
 
+	/**
+	 * Returns an iterator pointing to the least element which is larger than the given key.
+	 * Keys are sorted in lexicographical order (see std::lexicographical_compare).
+	 *
+	 * @param[in] key sets the lower bound (exclusive)
+	 *
+	 * @return iterator
+	 */
 	iterator upper_bound(const key_type &key)
 	{
 		leaf_node_type *leaf = find_leaf_node(key);
@@ -1518,6 +1542,14 @@ public:
 		return iterator(leaf, leaf_it);
 	}
 
+	/**
+	 * Returns a const iterator pointing to the least element which is larger than the given key.
+	 * Keys are sorted in lexicographical order (see std::lexicographical_compare).
+	 *
+	 * @param[in] key sets the lower bound (exclusive)
+	 *
+	 * @return const_iterator
+	 */
 	const_iterator upper_bound(const key_type &key) const
 	{
 		const leaf_node_type *leaf = find_leaf_node(key);

@@ -69,7 +69,6 @@ TEST_F(BlackholeTest, SimpleTest_TRACERS_MP)
 	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv.remove("key1") == status::OK);
 	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
-
 }
 
 TEST_F(BlackholeTest, GetRangeTest_TRACERS_MP)
