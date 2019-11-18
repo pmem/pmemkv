@@ -72,6 +72,7 @@ public:
 
 	~VCMapBaseTest()
 	{
+		kv->close();
 		delete kv;
 		std::remove(PATH.c_str());
 	}

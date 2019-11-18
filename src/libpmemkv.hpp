@@ -240,6 +240,8 @@ public:
 
 	status count_all(std::size_t &cnt) noexcept;
 	status count_above(string_view key, std::size_t &cnt) noexcept;
+	status count_equal_above(string_view key, std::size_t &cnt) noexcept;
+	status count_equal_below(string_view key, std::size_t &cnt) noexcept;
 	status count_below(string_view key, std::size_t &cnt) noexcept;
 	status count_between(string_view key1, string_view key2,
 			     std::size_t &cnt) noexcept;
@@ -249,6 +251,12 @@ public:
 
 	status get_above(string_view key, get_kv_callback *callback, void *arg) noexcept;
 	status get_above(string_view key, std::function<get_kv_function> f) noexcept;
+
+	status get_equal_above(string_view key, get_kv_callback *callback, void *arg) noexcept;
+	status get_equal_above(string_view key, std::function<get_kv_function> f) noexcept;
+
+	status get_equal_below(string_view key, get_kv_callback *callback, void *arg) noexcept;
+	status get_equal_below(string_view key, std::function<get_kv_function> f) noexcept;
 
 	status get_below(string_view key, get_kv_callback *callback, void *arg) noexcept;
 	status get_below(string_view key, std::function<get_kv_function> f) noexcept;
@@ -781,6 +789,38 @@ inline status db::count_above(string_view key, std::size_t &cnt) noexcept
 
 /**
  * It returns number of currently stored elements in pmem::kv::db, whose keys
+ * are greater than or equal to the given *key*.
+ * Keys are sorted in lexicographical order (see std::lexicographical_compare).
+ *
+ * @param[in] key sets the lower bound of counting
+ * @param[out] cnt number of records in pmem::kv::db matching query
+ *
+ * @return pmem::kv::status
+ */
+inline status db::count_equal_above(string_view key, std::size_t &cnt) noexcept
+{
+	return static_cast<status>(
+		pmemkv_count_equal_above(this->_db, key.data(), key.size(), &cnt));
+}
+
+/**
+ * It returns number of currently stored elements in pmem::kv::db, whose keys
+ * are lower than or equal to the given *key*.
+ * Keys are sorted in lexicographical order (see std::lexicographical_compare).
+ *
+ * @param[in] key sets the lower bound of counting
+ * @param[out] cnt number of records in pmem::kv::db matching query
+ *
+ * @return pmem::kv::status
+ */
+inline status db::count_equal_below(string_view key, std::size_t &cnt) noexcept
+{
+	return static_cast<status>(
+		pmemkv_count_equal_below(this->_db, key.data(), key.size(), &cnt));
+}
+
+/**
+ * It returns number of currently stored elements in pmem::kv::db, whose keys
  * are less than the given *key*.
  * Keys are sorted in lexicographical order (see std::lexicographical_compare).
  *
@@ -850,7 +890,7 @@ inline status db::get_all(std::function<get_kv_function> f) noexcept
  * whose keys are greater than the given *key*.
  * Arguments passed to the callback function are: pointer to a key, size of the
  * key, pointer to a value, size of the value and *arg* specified by the user.
- * Callback can stop iteration by returning non-zero value. In that case *get_all()*
+ * Callback can stop iteration by returning non-zero value. In that case *get_above()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
  * Keys are sorted in lexicographical order (see std::lexicographical_compare).
@@ -871,7 +911,7 @@ inline status db::get_above(string_view key, get_kv_callback *callback,
 /**
  * Executes function for every record stored in pmem::kv::db, whose keys are
  * greater than the given *key*.
- * Callback can stop iteration by returning non-zero value. In that case *get_all()*
+ * Callback can stop iteration by returning non-zero value. In that case *get_above()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
  * Keys are sorted in lexicographical order (see std::lexicographical_compare).
@@ -890,10 +930,99 @@ inline status db::get_above(string_view key, std::function<get_kv_function> f) n
 
 /**
  * Executes (C-like) callback function for every record stored in pmem::kv::db,
- * whose keys are less than the given *key*.
+ * whose keys are greater than or equal to the given *key*.
  * Arguments passed to the callback function are: pointer to a key, size of the
  * key, pointer to a value, size of the value and *arg* specified by the user.
- * Callback can stop iteration by returning non-zero value. In that case *get_all()*
+ * Callback can stop iteration by returning non-zero value. In that case *get_equal_above()*
+ * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
+ *
+ * Keys are sorted in lexicographical order (see std::lexicographical_compare).
+ *
+ * @param[in] key sets the lower bound for querying
+ * @param[in] callback function to be called for each returned element
+ * @param[in] arg additional arguments to be passed to callback
+ *
+ * @return pmem::kv::status
+ */
+inline status db::get_equal_above(string_view key, get_kv_callback *callback,
+			    void *arg) noexcept
+{
+	return static_cast<status>(
+		pmemkv_get_equal_above(this->_db, key.data(), key.size(), callback, arg));
+}
+
+/**
+ * Executes function for every record stored in pmem::kv::db, whose keys are
+ * greater than or equal to the given *key*.
+ * Callback can stop iteration by returning non-zero value. In that case *get_equal_above()*
+ * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
+ *
+ * Keys are sorted in lexicographical order (see std::lexicographical_compare).
+ *
+ * @param[in] key sets the lower bound for querying
+ * @param[in] f function called for each returned element, it is called with params:
+ *				key and value
+ *
+ * @return pmem::kv::status
+ */
+inline status db::get_equal_above(string_view key, std::function<get_kv_function> f) noexcept
+{
+	return static_cast<status>(pmemkv_get_equal_above(this->_db, key.data(), key.size(),
+						    call_get_kv_function, &f));
+}
+
+/**
+ * Executes (C-like) callback function for every record stored in pmem::kv::db,
+ * whose keys are lower than or equal to the given *key*.
+ * Arguments passed to the callback function are: pointer to a key, size of the
+ * key, pointer to a value, size of the value and *arg* specified by the user.
+ * Callback can stop iteration by returning non-zero value. In that case
+ * *get_equal_below()* returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues
+ * iteration.
+ *
+ * Keys are sorted in lexicographical order (see std::lexicographical_compare).
+ *
+ * @param[in] key sets the upper bound for querying
+ * @param[in] callback function to be called for each returned element
+ * @param[in] arg additional arguments to be passed to callback
+ *
+ * @return pmem::kv::status
+ */
+inline status db::get_equal_below(string_view key, get_kv_callback *callback,
+				  void *arg) noexcept
+{
+	return static_cast<status>(
+		pmemkv_get_equal_below(this->_db, key.data(), key.size(), callback, arg));
+}
+
+/**
+ * Executes function for every record stored in pmem::kv::db, whose keys are
+ * lower than or equal to the given *key*.
+ * Callback can stop iteration by returning non-zero value. In that case
+ **get_equal_below()* returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues
+ *iteration.
+ *
+ * Keys are sorted in lexicographical order (see std::lexicographical_compare).
+ *
+ * @param[in] key sets the upper bound for querying
+ * @param[in] f function called for each returned element, it is called with params:
+ *				key and value
+ *
+ * @return pmem::kv::status
+ */
+inline status db::get_equal_below(string_view key,
+				  std::function<get_kv_function> f) noexcept
+{
+	return static_cast<status>(pmemkv_get_equal_below(this->_db, key.data(), key.size(),
+		call_get_kv_function, &f));
+}
+
+/**
+ * Executes (C-like) callback function for every record stored in pmem::kv::db,
+ * whose keys are lower than the given *key*.
+ * Arguments passed to the callback function are: pointer to a key, size of the
+ * key, pointer to a value, size of the value and *arg* specified by the user.
+ * Callback can stop iteration by returning non-zero value. In that case *get_below()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
  * Keys are sorted in lexicographical order (see std::lexicographical_compare).
@@ -914,7 +1043,7 @@ inline status db::get_below(string_view key, get_kv_callback *callback,
 /**
  * Executes function for every record stored in pmem::kv::db, whose keys are
  * less than the given *key*.
- * Callback can stop iteration by returning non-zero value. In that case *get_all()*
+ * Callback can stop iteration by returning non-zero value. In that case *get_below()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
  * Keys are sorted in lexicographical order (see std::lexicographical_compare).
@@ -936,7 +1065,7 @@ inline status db::get_below(string_view key, std::function<get_kv_function> f) n
  * whose keys are greater than the *key1* and less than the *key2*.
  * Arguments passed to the callback function are: pointer to a key, size of the
  * key, pointer to a value, size of the value and *arg* specified by the user.
- * Callback can stop iteration by returning non-zero value. In that case *get_all()*
+ * Callback can stop iteration by returning non-zero value. In that case *get_between()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
  * Keys are sorted in lexicographical order (see std::lexicographical_compare).
@@ -958,7 +1087,7 @@ inline status db::get_between(string_view key1, string_view key2,
 /**
  * Executes function for every record stored in pmem::kv::db, whose keys
  * are greater than the *key1* and less than the *key2*.
- * Callback can stop iteration by returning non-zero value. In that case *get_all()*
+ * Callback can stop iteration by returning non-zero value. In that case *get_between()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
  * Keys are sorted in lexicographical order (see std::lexicographical_compare).
