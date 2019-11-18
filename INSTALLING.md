@@ -34,7 +34,7 @@ are logged as GitHub issues.*
 	* [doxygen](http://www.doxygen.nl/) - tool for generating documentation from annotated C++ sources
 	* [graphviz](https://www.graphviz.org/) - graph visualization software required by _doxygen_
 	* [perl](https://www.perl.org/) - for whitespace checker script
-	* [clang format 8.0](https://clang.llvm.org/docs/ClangFormat.html) - to format and check coding style
+	* [clang format](https://clang.llvm.org/docs/ClangFormat.html) - to format and check coding style, version 9.0 is required
 
 **Building pmemkv and running tests**
 
