@@ -150,6 +150,57 @@ function run_test_check_support_cpp20_clang() {
 	rm -rf $WORKDIR/build
 }
 
+function verify_building_of_packages() {
+	echo
+	echo "##############################################################"
+	echo "### Verifying building of packages"
+	echo "##############################################################"
+
+	# Fetch git history for `git describe` to work,
+	# so that package has proper 'version' field
+	[ -f .git/shallow ] && git fetch --unshallow --tags
+
+	mkdir $WORKDIR/build
+	cd $WORKDIR/build
+
+	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+		-DTEST_DIR=$TEST_DIR \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DDEVELOPER_MODE=1 \
+		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
+		-DCPACK_GENERATOR=$PACKAGE_MANAGER
+
+	echo
+	echo "### Making sure there is no libpmemkv currently installed"
+	echo "---------------------------- Error expected! ------------------------------"
+	compile_example_standalone pmemkv_basic_cpp && exit 1
+	echo "---------------------------------------------------------------------------"
+
+	make -j$(nproc) package
+
+	if [ $PACKAGE_MANAGER = "deb" ]; then
+		sudo_password dpkg -i libpmemkv*.deb
+	elif [ $PACKAGE_MANAGER = "rpm" ]; then
+		sudo_password rpm -i libpmemkv*.rpm
+	fi
+
+	# Verify installed packages
+	compile_example_standalone pmemkv_basic_c
+	run_example_standalone pmemkv_basic_c
+	compile_example_standalone pmemkv_basic_cpp
+	run_example_standalone pmemkv_basic_cpp
+
+	# Clean after installation
+	if [ $PACKAGE_MANAGER = "deb" ]; then
+		sudo_password dpkg -r libpmemkv-dev
+	elif [ $PACKAGE_MANAGER = "rpm" ]; then
+		sudo_password rpm -e --nodeps libpmemkv-devel
+	fi
+
+	cd $WORKDIR
+	rm -rf $WORKDIR/build
+}
+
 cd $WORKDIR
 
 CMAKE_VERSION=$(cmake --version | head -n1 | grep -oE '[0-9].[0-9]*')
@@ -227,55 +278,15 @@ ctest -N
 cd $WORKDIR
 rm -rf $WORKDIR/build
 
-echo
-echo "##############################################################"
-echo "### Verifying building of packages"
-echo "##############################################################"
-
-# Fetch git history for `git describe` to work,
-# so that package has proper 'version' field
-[ -f .git/shallow ] && git fetch --unshallow --tags
-
-mkdir $WORKDIR/build
-cd $WORKDIR/build
-
-cmake .. -DCMAKE_BUILD_TYPE=Debug \
-	-DTEST_DIR=$TEST_DIR \
-	-DCMAKE_INSTALL_PREFIX=$PREFIX \
-	-DDEVELOPER_MODE=1 \
-	-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
-	-DCPACK_GENERATOR=$PACKAGE_MANAGER
-
-echo
-echo "### Making sure there is no libpmemkv currently installed"
-echo "---------------------------- Error expected! ------------------------------"
-compile_example_standalone pmemkv_basic_cpp && exit 1
-echo "---------------------------------------------------------------------------"
-
-make -j$(nproc) package
-
-if [ "$TEST_PACKAGES" == "ON" ]; then
-	if [ $PACKAGE_MANAGER = "deb" ]; then
-		sudo_password dpkg -i libpmemkv*.deb
-	elif [ $PACKAGE_MANAGER = "rpm" ]; then
-		sudo_password rpm -i libpmemkv*.rpm
-	fi
-
-	# Verify installed packages
-	compile_example_standalone pmemkv_basic_c
-	run_example_standalone pmemkv_basic_c
-	compile_example_standalone pmemkv_basic_cpp
-	run_example_standalone pmemkv_basic_cpp
-
-	# Clean after installation
-	if [ $PACKAGE_MANAGER = "deb" ]; then
-		sudo_password dpkg -r libpmemkv-dev
-	elif [ $PACKAGE_MANAGER = "rpm" ]; then
-		sudo_password rpm -e --nodeps libpmemkv-devel
-	fi
-fi
-
-rm -rf $WORKDIR/build
+# building of packages should be verified only if PACKAGE_MANAGER equals 'rpm' or 'deb'
+case $PACKAGE_MANAGER in
+	rpm|deb)
+		[ "$TEST_PACKAGES" == "ON" ] && verify_building_of_packages
+		;;
+	*)
+		echo "Notice: skipping building of packages because PACKAGE_MANAGER is not equal 'rpm' nor 'deb' ..."
+		;;
+esac
 
 # Trigger auto doc update on master
 if [[ "$AUTO_DOC_UPDATE" == "1" ]]; then
