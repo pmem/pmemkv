@@ -8,5 +8,7 @@ var searchData=
   ['count_5fabove',['count_above',['../classpmem_1_1kv_1_1db.html#a39d9dd4dafa5f9918666dfc82ae5b4c1',1,'pmem::kv::db']]],
   ['count_5fall',['count_all',['../classpmem_1_1kv_1_1db.html#a045d8e25af7fcbeae241a86009bcb950',1,'pmem::kv::db']]],
   ['count_5fbelow',['count_below',['../classpmem_1_1kv_1_1db.html#a8f2c91118f8bccfe9b2b8c7447b4a11b',1,'pmem::kv::db']]],
-  ['count_5fbetween',['count_between',['../classpmem_1_1kv_1_1db.html#a82271c073c7374d8e3bb4553aba00a5c',1,'pmem::kv::db']]]
+  ['count_5fbetween',['count_between',['../classpmem_1_1kv_1_1db.html#a82271c073c7374d8e3bb4553aba00a5c',1,'pmem::kv::db']]],
+  ['count_5fequal_5fabove',['count_equal_above',['../classpmem_1_1kv_1_1db.html#adb4fd35487a8003e5da86e9f63fe177f',1,'pmem::kv::db']]],
+  ['count_5fequal_5fbelow',['count_equal_below',['../classpmem_1_1kv_1_1db.html#af8422e62900d3dc256e5a6138bf97d10',1,'pmem::kv::db']]]
 ];
