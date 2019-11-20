@@ -55,8 +55,10 @@ public:
 
 	status get_all(get_kv_callback *callback, void *arg) final;
 	status get_above(string_view key, get_kv_callback *callback, void *arg) final;
-	status get_equal_above(string_view key, get_kv_callback *callback, void *arg) final;
-	status get_equal_below(string_view key, get_kv_callback *callback, void *arg) final;
+	status get_equal_above(string_view key, get_kv_callback *callback,
+			       void *arg) final;
+	status get_equal_below(string_view key, get_kv_callback *callback,
+			       void *arg) final;
 	status get_below(string_view key, get_kv_callback *callback, void *arg) final;
 	status get_between(string_view key1, string_view key2, get_kv_callback *callback,
 			   void *arg) final;

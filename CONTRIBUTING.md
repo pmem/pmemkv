@@ -19,10 +19,11 @@ Details such as OS and PMDK version are always appreciated.
 * Space before '*' and '&' (rather than after)
 
 If you want to check and format your source code properly you can use CMake's `DEVELOPER_MODE`
-option. When enabled additional checks are switched on (cppstyle, whitespaces and headers).
+and `CHECK_CPP_STYLE` options. When enabled additional checks are switched on
+(cppstyle, whitespaces and headers).
 
 ```sh
-cmake .. -DDEVELOPER_MODE=ON
+cmake .. -DDEVELOPER_MODE=ON -DCHECK_CPP_STYLE=ON
 ```
 
 If you just want to format your code you can make adequate target:
@@ -30,7 +31,7 @@ If you just want to format your code you can make adequate target:
 make cppformat
 ```
 
-**NOTE**: We're using specific clang-format - version exactly **8.0** is required.
+**NOTE**: We're using specific clang-format - version exactly **9.0** is required.
 
 # Submitting Pull Requests
 

@@ -291,7 +291,7 @@ int pmemkv_count_equal_above(pmemkv_db *db, const char *k, size_t kb, size_t *cn
 
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->count_equal_above(pmem::kv::string_view(k, kb),
-						       *cnt);
+							     *cnt);
 	});
 }
 
@@ -351,15 +351,15 @@ int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_call
 	});
 }
 
-int pmemkv_get_equal_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c,
-		     void *arg)
+int pmemkv_get_equal_above(pmemkv_db *db, const char *k, size_t kb,
+			   pmemkv_get_kv_callback *c, void *arg)
 {
 	if (!db)
 		return PMEMKV_STATUS_INVALID_ARGUMENT;
 
 	return catch_and_return_status(__func__, [&] {
-		return db_to_internal(db)->get_equal_above(pmem::kv::string_view(k, kb), c,
-						     arg);
+		return db_to_internal(db)->get_equal_above(pmem::kv::string_view(k, kb),
+							   c, arg);
 	});
 }
 

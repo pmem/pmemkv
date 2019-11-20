@@ -104,7 +104,7 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 						"Inserting a new entry to the config failed");
 			} else {
 				static std::string kTypeNames[] = {
-					"Null",  "False",  "True",  "Object",
+					"Null",	 "False",  "True",  "Object",
 					"Array", "String", "Number"};
 
 				throw std::runtime_error(

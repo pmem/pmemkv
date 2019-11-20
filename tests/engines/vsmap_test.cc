@@ -713,16 +713,17 @@ TEST_F(VSMapTest, UsesGetAllEqualAboveTest_TRACERS_M)
 	ASSERT_TRUE(kv->count_equal_above("B", cnt) == status::OK);
 	ASSERT_EQ(4, cnt);
 	x = "";
-	kv->get_equal_above("B",
-		      [](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			      const auto c = ((std::string *)arg);
-			      c->append(std::string(k, kb))
-				      .append(",")
-				      .append(std::string(v, vb))
-				      .append("|");
-			      return 0;
-		      },
-		      &x);
+	kv->get_equal_above(
+		"B",
+		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
+			const auto c = ((std::string *)arg);
+			c->append(std::string(k, kb))
+				.append(",")
+				.append(std::string(v, vb))
+				.append("|");
+			return 0;
+		},
+		&x);
 	ASSERT_TRUE(x == "B,4|BB,5|BC,6|记!,RR|");
 }
 

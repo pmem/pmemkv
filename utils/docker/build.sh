@@ -131,6 +131,7 @@ docker run --privileged=true --name=$containerName -ti \
 	--env DEFAULT_TEST_DIR=/dev/shm \
 	--env TEST_PACKAGES=${TEST_PACKAGES:-ON} \
 	--env BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON} \
+	--env CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-ON} \
 	--shm-size=4G \
 	-v $HOST_WORKDIR:$WORKDIR \
 	-v /etc/localtime:/etc/localtime \

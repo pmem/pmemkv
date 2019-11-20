@@ -69,6 +69,7 @@ option(ENGINE_STREE "enable experimental stree engine" OFF)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 
 option(DEVELOPER_MODE "enable developer's checks" OFF)
+option(CHECK_CPP_STYLE "check code style of C++ sources" OFF)
 
 # Do not treat include directories from the interfaces
 # of consumed Imported Targets as SYSTEM by default.
@@ -255,19 +256,20 @@ add_custom_target(check-whitespace-main
 
 add_dependencies(check-whitespace check-whitespace-main)
 
-if(DEVELOPER_MODE)
-	find_program(CLANG_FORMAT NAMES clang-format clang-format-8.0)
-	set(CLANG_FORMAT_REQUIRED "8.0")
+if(CHECK_CPP_STYLE)
+	find_program(CLANG_FORMAT NAMES clang-format clang-format-9.0)
+	set(CLANG_FORMAT_REQUIRED "9.0")
 	if(CLANG_FORMAT)
 		get_program_version(${CLANG_FORMAT} CLANG_FORMAT_VERSION)
 		if(NOT (CLANG_FORMAT_VERSION VERSION_EQUAL CLANG_FORMAT_REQUIRED))
-			message(WARNING "required clang-format version is ${CLANG_FORMAT_REQUIRED} (version ${CLANG_FORMAT_VERSION} is installed)")
-			unset(CLANG_FORMAT CACHE)
+			message(FATAL_ERROR "required clang-format version is ${CLANG_FORMAT_REQUIRED} (version ${CLANG_FORMAT_VERSION} is installed)")
 		endif()
 	else()
-		message(WARNING "clang-format not found - C++ sources will not be checked (needed version: ${CLANG_FORMAT_REQUIRED})")
+		message(WARNING "clang-format not found - C++ sources will not be checked (required version: ${CLANG_FORMAT_REQUIRED})")
 	endif()
+endif()
 
+if(DEVELOPER_MODE)
 	if(NOT PERL_FOUND)
 		message(FATAL_ERROR "Perl not found")
 	endif()

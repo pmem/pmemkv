@@ -62,10 +62,10 @@ namespace tree3
 {
 
 #define INNER_KEYS 4				// maximum keys for inner nodes
-#define INNER_KEYS_MIDPOINT (INNER_KEYS / 2)    // halfway point within the node
+#define INNER_KEYS_MIDPOINT (INNER_KEYS / 2)	// halfway point within the node
 #define INNER_KEYS_UPPER ((INNER_KEYS / 2) + 1) // index where upper half of keys begins
 #define LEAF_KEYS 48				// maximum keys in tree nodes
-#define LEAF_KEYS_MIDPOINT (LEAF_KEYS / 2)      // halfway point within the node
+#define LEAF_KEYS_MIDPOINT (LEAF_KEYS / 2)	// halfway point within the node
 
 class KVSlot {
 public:
@@ -185,7 +185,7 @@ struct KVNode {		      // volatile nodes of the tree
 
 struct KVInnerNode final : KVNode {		     // volatile inner nodes of the tree
 	uint8_t keycount;			     // count of keys in this node
-	std::string keys[INNER_KEYS + 1];	    // child keys plus one overflow slot
+	std::string keys[INNER_KEYS + 1];	     // child keys plus one overflow slot
 	unique_ptr<KVNode> children[INNER_KEYS + 2]; // child nodes plus one overflow slot
 	void assert_invariants();
 };
@@ -242,7 +242,7 @@ protected:
 	void Recover();
 
 private:
-	tree3(const tree3 &);	  // prevent copying
+	tree3(const tree3 &);	       // prevent copying
 	void operator=(const tree3 &); // prevent assigning
 	vector<persistent_ptr<internal::tree3::KVLeaf>>
 		leaves_prealloc;		      // persisted but unused leaves
