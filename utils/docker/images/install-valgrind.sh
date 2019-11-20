@@ -36,6 +36,11 @@
 
 set -e
 
+if [ "${SKIP_VALGRIND_BUILD}" ]; then
+	echo "Variable 'SKIP_VALGRIND_BUILD' is set; skipping building valgrind (pmem's fork)"
+	exit
+fi
+
 OS=$1
 
 git clone https://github.com/pmem/valgrind.git

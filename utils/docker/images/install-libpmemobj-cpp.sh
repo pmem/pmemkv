@@ -37,6 +37,11 @@
 
 set -e
 
+if [ "${SKIP_LIBPMEMOBJCPP_BUILD}" ]; then
+	echo "Variable 'SKIP_LIBPMEMOBJCPP_BUILD' is set; skipping building libpmemobj-cpp"
+	exit
+fi
+
 PACKAGE_MANAGER=$1
 
 git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
