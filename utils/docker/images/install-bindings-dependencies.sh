@@ -63,7 +63,6 @@ WORKDIR=$(pwd)
 git clone https://github.com/pmem/pmemkv.git
 cd pmemkv
 git checkout $PMEMKV_VERSION
-cp /opt/googletest/googletest-*.zip .
 mkdir build
 cd build
 # only VSMAP engine is enabled, because Java tests need it
@@ -102,7 +101,6 @@ cd $WORKDIR
 git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
 git checkout $JNI_VERSION
-cp /opt/googletest/googletest-*.zip .
 make test
 make install prefix=$PREFIX
 
