@@ -111,8 +111,6 @@ make install prefix=$PREFIX
 #                        in the /opt/bindings/java directory
 cd $WORKDIR
 mkdir -p /opt/bindings/java/
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
 
 git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
