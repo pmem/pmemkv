@@ -94,9 +94,6 @@ git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
 git checkout $JNI_VERSION
 
-# XXX remove when bindings switched to using gtest installed in system
-# Copy Googletest to the current directory
-cp /opt/googletest/googletest-*.zip .
 make test
 sudo_password -S make install prefix=$PREFIX
 
