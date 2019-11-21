@@ -30,13 +30,19 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
+# Dockerfile - a 'recipe' for Docker to build an image of opensuse-based
 #              environment prepared for running pmemkv build and tests.
 #
 
 # Pull base image
 FROM opensuse/leap:latest
 MAINTAINER szymon.romik@intel.com
+
+# Set required environment variables
+ENV OS opensuse-leap
+ENV OS_VER latest
+ENV PACKAGE_MANAGER rpm
+ENV NOTTY 1
 
 # Additional parameters to build docker without building components
 ARG SKIP_VALGRIND_BUILD
@@ -133,9 +139,3 @@ RUN sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g'
 RUN groupadd wheel
 RUN gpasswd wheel -a $USER
 USER $USER
-
-# Set required environment variables
-ENV OS opensuse-leap
-ENV OS_VER latest
-ENV PACKAGE_MANAGER rpm
-ENV NOTTY 1
