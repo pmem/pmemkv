@@ -55,9 +55,6 @@ set -e
 
 ./prepare-for-build.sh
 
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
-
 function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
 }
