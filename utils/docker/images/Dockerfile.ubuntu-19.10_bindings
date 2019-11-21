@@ -41,7 +41,7 @@ MAINTAINER szymon.romik@intel.com
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER 19.10
+ENV OS_VER 19.10_bindings
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
 
