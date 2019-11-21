@@ -32,7 +32,8 @@
 
 #
 # install-bindings-dependencies.sh - installs dependencies for bindings
-# that they can be built offline
+#		so they can be built offline. This step is optional while
+#		setting up local environment.
 #
 
 set -e

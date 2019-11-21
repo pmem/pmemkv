@@ -45,8 +45,8 @@ OS=$1
 
 git clone https://github.com/pmem/valgrind.git
 cd valgrind
-# valgrind v3.14 with pmemcheck: fix memcheck failure on Ubuntu-19.04
-git checkout 0965e35d7fd5c7941dc3f2a0c981cb8386c479d3
+# valgrind v3.15 with pmemcheck
+git checkout c27a8a2f973414934e63f1e94bc84c0a580e3840
 
 # set OS-specific configure options
 OS_SPECIFIC=""
