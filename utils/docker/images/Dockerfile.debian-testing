@@ -38,6 +38,12 @@
 FROM debian:testing
 MAINTAINER szymon.romik@intel.com
 
+# Set required environment variables
+ENV OS debian
+ENV OS_VER testing
+ENV PACKAGE_MANAGER deb
+ENV NOTTY 1
+
 # Additional parameters to build docker without building components
 ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
@@ -97,9 +103,3 @@ ENV USER user
 ENV USERPASS pass
 RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
 USER $USER
-
-# Set required environment variables
-ENV OS debian
-ENV OS_VER testing
-ENV PACKAGE_MANAGER deb
-ENV NOTTY 1
