@@ -31,16 +31,16 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# install-memkind.sh <install_in_sys> -
-#	if argument is given and equals to "sys" then it installs master version in sys path
-#	otherwise it installs master and stable versions in /opt directory
+# install-memkind.sh <OS> - installs memkind from sources; depends on
+#		the system it uses proper installation paramaters
+#
 
 set -e
 
 OS=$1
 
-# v1.9.0-73-g1ece023; 25.09.2019, contains new libmemkind namespace
-MEMKIND_VERSION=1ece023b9c06a68d3f329786d1c4c0e65cef390f
+# master: Merge pull request #306 from PatKamin/add-emit-in-test_dax_kmem, 21.11.2019
+MEMKIND_VERSION=73a3c0ed36553caaa14602bcc0f5648bd235bcf7
 
 WORKDIR=$(pwd)
 
