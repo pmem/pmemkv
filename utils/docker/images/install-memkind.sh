@@ -31,9 +31,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# install-memkind.sh <install_in_sys> -
-#	if argument is given and equals to "sys" then it installs master version in sys path
-#	otherwise it installs master and stable versions in /opt directory
+# install-memkind.sh <OS> - installs memkind from sources; depends on
+#		the system it uses proper installation paramaters
+#
 
 set -e
 
