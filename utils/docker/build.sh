@@ -55,8 +55,6 @@ if [[ -z "$HOST_WORKDIR" ]]; then
 	HOST_WORKDIR=$(readlink -f ../..)
 fi
 
-chmod -R a+w $HOST_WORKDIR
-
 if [[ "$TRAVIS_EVENT_TYPE" == "cron" || "$TRAVIS_BRANCH" == "coverity_scan" ]]; then
 	if [[ "$TYPE" != "coverity" ]]; then
 		echo "Skipping non-Coverity job for cron/Coverity build"

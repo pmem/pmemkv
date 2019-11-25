@@ -53,6 +53,8 @@ PYTHON_VERSION=824bfec5976cb19e387b32d82fc19c763000ef88
 
 set -e
 
+./prepare-for-build.sh
+
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
 
