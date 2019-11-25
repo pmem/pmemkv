@@ -55,8 +55,6 @@ if [[ -z "$HOST_WORKDIR" ]]; then
 	HOST_WORKDIR=$(readlink -f ../..)
 fi
 
-chmod -R a+w $HOST_WORKDIR
-
 if [[ "$TRAVIS_EVENT_TYPE" == "cron" || "$TRAVIS_BRANCH" == "coverity_scan" ]]; then
 	if [[ "$TYPE" != "coverity" ]]; then
 		echo "Skipping non-Coverity job for cron/Coverity build"
@@ -105,9 +103,13 @@ fi
 WORKDIR=/pmemkv
 SCRIPTSDIR=$WORKDIR/utils/docker
 
-echo Building ${OS}-${OS_VER}
+# check if we are running on a CI (Travis or GitHub Actions)
+[ -n "$GITHUB_ACTIONS" -o -n "$TRAVIS" ] && CI_RUN="YES" || CI_RUN="NO"
 
+# do not allocate a pseudo-TTY if we are running on GitHub Actions
 [ ! $GITHUB_ACTIONS ] && TTY='-t' || TTY=''
+
+echo Building ${OS}-${OS_VER}
 
 # Run a container with
 #  - environment variables set (--env)
@@ -134,6 +136,7 @@ docker run --privileged=true --name=$containerName -i $TTY \
 	--env TEST_PACKAGES=${TEST_PACKAGES:-ON} \
 	--env BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON} \
 	--env CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-ON} \
+	--env CI_RUN=$CI_RUN \
 	--shm-size=4G \
 	-v $HOST_WORKDIR:$WORKDIR \
 	-v /etc/localtime:/etc/localtime \
