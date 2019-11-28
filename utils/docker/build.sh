@@ -107,11 +107,13 @@ SCRIPTSDIR=$WORKDIR/utils/docker
 
 echo Building ${OS}-${OS_VER}
 
+[ ! $GITHUB_ACTIONS ] && TTY='-t' || TTY=''
+
 # Run a container with
 #  - environment variables set (--env)
 #  - host directory containing source mounted (-v)
 #  - working directory set (-w)
-docker run --privileged=true --name=$containerName -ti \
+docker run --privileged=true --name=$containerName -i $TTY \
 	$DNS_SETTING \
 	${docker_opts} \
 	$ci_env \
