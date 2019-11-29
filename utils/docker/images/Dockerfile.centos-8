@@ -76,11 +76,17 @@ RUN dnf install -y \
 	tbb-devel \
 	unzip \
 	wget \
-	which \
-&& dnf clean all
+	which
 
 # Install glibc-debuginfo
 RUN dnf debuginfo-install -y glibc
+
+# Use old EPEL (from Centos 7) and install missing package
+RUN dnf remove -y epel-release
+RUN wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
+	&& dnf install -y epel-release-latest-7.noarch.rpm
+RUN dnf install -y rapidjson-devel \
+	&& dnf clean all
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
