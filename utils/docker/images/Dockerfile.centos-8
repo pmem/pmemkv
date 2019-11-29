@@ -49,8 +49,7 @@ RUN dnf install -y 'dnf-command(config-manager)'
 RUN dnf config-manager --set-enabled PowerTools
 
 # Install basic tools
-RUN dnf update -y \
- && dnf install -y \
+RUN dnf install -y \
 	autoconf \
 	automake \
 	clang \
