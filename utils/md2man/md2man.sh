@@ -50,9 +50,10 @@ set -o pipefail
 filename=$1
 template=$2
 outfile=$3
+version=$4
 title=`sed -n 's/^title:\ _MP(*\([A-Za-z_-]*\).*$/\1/p' $filename`
 section=`sed -n 's/^title:.*\([0-9]\))$/\1/p' $filename`
-version=`sed -n 's/^date:\ *\(.*\)$/\1/p' $filename`
+secondary_title=`sed -n 's/^secondary_title:\ *\(.*\)$/\1/p' $filename`
 
 dt="$(date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%F)"
 # since genereted docs are not kept in the repo the output dir may not exist
@@ -63,7 +64,7 @@ cat $filename | sed -n -e '/# NAME #/,$p' |\
 	pandoc -s -t man -o $outfile --template=$template \
 	-V title=$title -V section=$section \
 	-V date="$dt" -V version="$version" \
-	-V year=$(date +"%Y") |
+	-V year=$(date +"%Y") -V secondary_title="$secondary_title" |
 sed '/^\.IP/{
 N
 /\n\.nf/{
