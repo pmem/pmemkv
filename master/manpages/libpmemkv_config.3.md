@@ -4,7 +4,7 @@ Content-Style: 'text/css'
 title: PMEMKV_CONFIG
 collection: libpmemkv
 header: PMEMKV_CONFIG
-date: pmemkv version 1.0.1
+secondary_title: pmemkv
 ...
 
 [comment]: <> (Copyright 2019, Intel Corporation)
