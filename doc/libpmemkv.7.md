@@ -125,8 +125,8 @@ No supported configuration parameters.
 
 ### Experimental engines
 
-There are also more engines in various states of development, for details see <https://github.com/pmem/pmemkv>.
-Two of them (tree3 and stree) requires the config parameters like cmap and similarly to cmap should not be used within libpmemobj transaction(s).
+There are also more engines in various states of development, for details see <https://github.com/pmem/pmemkv/blob/master/ENGINES-experimental.md>.
+Three of them (tree3, stree and csmap) requires the config parameters like cmap and similarly to cmap should not be used within libpmemobj transaction(s).
 
 # BINDINGS #
 
