@@ -38,6 +38,7 @@ endif()
 # Each engine can be enabled separately.
 # By default all experimental engines are turned off.
 option(ENGINE_CMAP "enable cmap engine" ON)
+option(ENGINE_CSMAP "enable cmap engine" ON)
 option(ENGINE_VCMAP "enable vcmap engine" ON)
 option(ENGINE_VSMAP "enable vsmap engine" ON)
 option(ENGINE_CACHING "enable experimental caching engine" OFF)
@@ -56,6 +57,12 @@ if(ENGINE_CMAP)
 	message(STATUS "CMAP engine is ON")
 else()
 	message(STATUS "CMAP engine is OFF")
+endif()
+if(ENGINE_CSMAP)
+	add_definitions(-DENGINE_CSMAP)
+	message(STATUS "CSMAP engine is ON")
+else()
+	message(STATUS "CSMAP engine is OFF")
 endif()
 if(ENGINE_VCMAP)
 	add_definitions(-DENGINE_VCMAP)
@@ -104,6 +111,12 @@ if(ENGINE_CMAP)
 		src/engines/cmap.cc
 	)
 endif()
+if(ENGINE_CSMAP)
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/csmap.h
+		src/engines-experimental/csmap.cc
+	)
+endif()
 if(ENGINE_VCMAP)
 	list(APPEND SOURCE_FILES
 		src/engines/vcmap.h
@@ -138,7 +151,7 @@ if(ENGINE_TREE3)
 endif()
 
 
-set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
+set(CXX_STANDARD 14 CACHE STRING "C++ language standard")
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
@@ -178,7 +191,7 @@ set(PKG_CONFIG_REQUIRES)
 set(DEB_DEPENDS)
 set(RPM_DEPENDS)
 
-if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3)
+if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_CSMAP OR ENGINE_STREE OR ENGINE_TREE3)
 	include(libpmemobj++)
 	list(APPEND PKG_CONFIG_REQUIRES "libpmemobj++ >= ${LIBPMEMOBJ_CPP_REQUIRED_VERSION}")
 	list(APPEND RPM_DEPENDS "libpmemobj >= ${LIBPMEMOBJ_REQUIRED_VERSION}")
@@ -266,7 +279,7 @@ set_target_properties(pmemkv PROPERTIES SOVERSION 1)
 target_link_libraries(pmemkv PRIVATE
 	-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv.map)
 
-if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3)
+if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_CSMAP OR ENGINE_STREE OR ENGINE_TREE3)
 	target_link_libraries(pmemkv PRIVATE ${LIBPMEMOBJ++_LIBRARIES})
 endif()
 if(ENGINE_VSMAP OR ENGINE_VCMAP)

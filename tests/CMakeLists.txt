@@ -294,6 +294,148 @@ if(ENGINE_CMAP)
 			PARAMS 1000 100 200)
 endif(ENGINE_CMAP)
 ################################################################################
+###################################### CSMAP ###################################
+if(ENGINE_CSMAP)
+	add_engine_test(ENGINE csmap
+			BINARY c_api_null_db_config
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY put_get_remove
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY put_get_remove_params
+			TRACERS none
+			SCRIPT pmemobj_based/default.cmake
+			DB_SIZE 4G PARAMS 400000)
+
+	add_engine_test(ENGINE csmap
+			BINARY put_get_remove_params
+			TRACERS memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			DB_SIZE 1G PARAMS 4000)
+
+	add_engine_test(ENGINE csmap
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE csmap
+			BINARY error_handling_oom
+			TRACERS none
+			SCRIPT pmemobj_based/default.cmake
+			DB_SIZE 50M)
+
+	add_engine_test(ENGINE csmap
+			BINARY iterate
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY sorted_iterate
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY concurrent_put_get_remove
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+		add_engine_test(ENGINE csmap
+				BINARY concurrent_put_get_remove
+				TRACERS drd helgrind
+				SCRIPT pmemobj_based/default.cmake)
+	endif()
+
+	add_engine_test(ENGINE csmap
+			BINARY persistent_put_get_std_map_multiple_reopen
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE csmap
+			BINARY persistent_not_found_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY persistent_overwrite_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY persistent_put_remove_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY persistent_put_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY persistent_put_verify_asc_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake
+			DB_SIZE 1G PARAMS 4000)
+
+	add_engine_test(ENGINE csmap
+			BINARY persistent_put_verify_desc_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake
+			DB_SIZE 1G PARAMS 4000)
+
+	add_engine_test(ENGINE csmap
+			BINARY pmemobj_error_handling_tx_oom
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake
+			DB_SIZE 200M)
+
+	add_engine_test(ENGINE csmap
+			BINARY pmemobj_error_handling_create
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/pmemobj/error_handling_create.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY pmemobj_error_handling_tx_oid
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/pmemobj/error_handling_tx_oid.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY pmemobj_error_handling_tx_path
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/pmemobj/error_handling_tx_path.cmake)
+
+	# XXX - CSMAP does not support defrag yet
+	# add_engine_test(ENGINE csmap
+	#		BINARY pmemobj_error_handling_defrag
+	#		TRACERS none memcheck
+	#		SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY pmemobj_put_get_std_map_defrag
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE csmap
+			BINARY pmemobj_put_get_std_map_oid
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_oid.cmake
+			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE csmap
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			PARAMS 1000 100 200)
+endif(ENGINE_CSMAP)
+################################################################################
 ###################################### VCMAP ###################################
 if(ENGINE_VCMAP)
 	add_engine_test(ENGINE vcmap
