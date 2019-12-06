@@ -156,6 +156,7 @@ engines_flags=(
 	ENGINE_VSMAP
 	ENGINE_VCMAP
 	ENGINE_CMAP
+	ENGINE_CSMAP
 	# XXX: caching engine requires libacl and memcached installed in docker images
 	# and firstly we need to remove hardcoded INCLUDE paths (see #244)
 	# ENGINE_CACHING
@@ -174,9 +175,11 @@ do
 	echo "##############################################################"
 	echo "### Verifying building of the '$engine_flag' engine"
 	echo "##############################################################"
-	cmake .. -DENGINE_VSMAP=OFF \
+	cmake .. -DCXX_STANDARD=14 \
+		-DENGINE_VSMAP=OFF \
 		-DENGINE_VCMAP=OFF \
 		-DENGINE_CMAP=OFF \
+		-DENGINE_CSMAP=OFF \
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
 		-D$engine_flag=ON
 	make -j$(nproc)
@@ -199,9 +202,11 @@ echo "##############################################################"
 mkdir $WORKDIR/build
 cd $WORKDIR/build
 
-cmake .. -DENGINE_VSMAP=ON \
+cmake .. -DCXX_STANDARD=14 \
+	-DENGINE_VSMAP=ON \
 	-DENGINE_VCMAP=ON \
 	-DENGINE_CMAP=ON \
+	-DENGINE_CSMAP=ON \
 	-DENGINE_STREE=ON \
 	-DENGINE_TREE3=ON \
 	-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG}

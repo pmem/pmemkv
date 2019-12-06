@@ -43,6 +43,23 @@ a given key. Leaf modifications are accelerated using
 
 Libpmemobj-cpp package is required.
 
+# csmap
+
+A persistent, concurrent and sorted engine, backed by a skip list.
+It is disabled by default. It can be enabled in CMake using the `ENGINE_CSMAP` option (requires C++14 support).
+
+All methods of csmap are thread safe. Put, get, count_\* and get_\* scale with the number of threads.
+Remove method is currently implemented to take a global lock - it blocks all other threads.
+
+### Configuration
+
+* **path** -- Path to the database file
+	+ type: string
+* **force_create** -- If 0, pmemkv opens the file specified by 'path', otherwise it creates the file
+	+ type: uint64_t
+	+ default value: 0
+* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+	+ type: uint64_t
 
 # stree
 
