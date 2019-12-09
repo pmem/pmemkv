@@ -87,7 +87,7 @@ TBB and libpmemobj-cpp packages are required.
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
-* **path** -- Path to the database file.
+* **path** -- Path to a database file or to a poolset file (see **poolset**(5) for details).
 	+ type: string
 * **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it.
 	+ type: uint64_t
@@ -105,6 +105,9 @@ The following table shows three possible combinations of parameters (where '-' m
 | **1** | set | 0 | - | - |
 | **2** | set | 1 | set | - |
 | **3** | - | - | - | set |
+
+A database file or a poolset file can also be created using `pmempool` utility (see **pmempool-create**(1)).
+When using `pmempool create`, "pmemkv" should be passed as layout. Only PMEMOBJ pools are supported.
 
 ## vcmap
 
