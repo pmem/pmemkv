@@ -115,7 +115,7 @@ Memkind, TBB and libpmemobj-cpp packages are required.
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
-* **path** -- Path to the database file
+* **path** -- Path to existing directory
 	+ type: string
 * **size** --  Specifies size of the database [in bytes]
 	+ type: uint64_t
@@ -130,7 +130,7 @@ Memkind and libpmemobj-cpp packages are required.
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
-* **path** -- Path to the database file
+* **path** -- Path to existing directory
 	+ type: string
 * **size** --  Specifies size of the database [in bytes]
 	+ type: uint64_t
@@ -147,7 +147,7 @@ No supported configuration parameters.
 ### Experimental engines
 
 There are also more engines in various states of development, for details see <https://github.com/pmem/pmemkv>.
-Two of them (tree3 and stree) requires the config parameters like cmap and similarly to cmap should not be used within transaction(s).
+Two of them (tree3 and stree) requires the config parameters like cmap and similarly to cmap should not be used within libpmemobj transaction(s).
 
 # BINDINGS #
 
