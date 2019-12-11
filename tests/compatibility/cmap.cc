@@ -127,5 +127,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	static_assert(sizeof(pmem::kv::polymorphic_string) == 40);
+
 	return 0;
 }
