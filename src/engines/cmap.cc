@@ -108,17 +108,7 @@ status cmap::put(string_view key, string_view value)
 		       << ", value.size=" << std::to_string(value.size()));
 	check_outside_tx();
 
-	internal::cmap::map_t::accessor acc;
-	// XXX - do not create temporary string
-	bool result = container->insert(
-		acc,
-		internal::cmap::map_t::value_type(internal::cmap::string_t(key),
-						  internal::cmap::string_t(value)));
-	if (!result) {
-		pmem::obj::transaction::manual tx(pmpool);
-		acc->second = value;
-		pmem::obj::transaction::commit();
-	}
+	container->insert_or_assign(key, value);
 
 	return status::OK;
 }

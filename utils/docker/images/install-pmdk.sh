@@ -46,7 +46,7 @@ PACKAGE_MANAGER=$1
 # devel-1.8: Merge pull request #4497 from marcinslusarz/build, 23.01.2020
 PMDK_VERSION="1947982d15ebb3d107e781cdc1484ef4ce81cc41"
 
-git clone https://github.com/pmem/pmdk --shallow-since=2019-09-26
+git clone https://github.com/pmem/pmdk --shallow-since=2019-09-26 --no-single-branch
 cd pmdk
 git checkout $PMDK_VERSION
 
