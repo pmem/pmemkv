@@ -43,10 +43,10 @@ fi
 
 PACKAGE_MANAGER=$1
 
-# stable-1.7: Merge pull request #4097 from pmem/stable-1.6, 5.11.2019
-PMDK_VERSION="31cea307b2b7c0c0d0d209b8c5f47adc9d1353a0"
+# devel-1.8: Merge pull request #4497 from marcinslusarz/build, 23.01.2020
+PMDK_VERSION="1947982d15ebb3d107e781cdc1484ef4ce81cc41"
 
-git clone https://github.com/pmem/pmdk --shallow-since=2019-09-26
+git clone https://github.com/pmem/pmdk --shallow-since=2019-09-26 --no-single-branch
 cd pmdk
 git checkout $PMDK_VERSION
 

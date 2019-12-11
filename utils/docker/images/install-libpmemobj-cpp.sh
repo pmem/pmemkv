@@ -47,8 +47,8 @@ PACKAGE_MANAGER=$1
 git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
 cd libpmemobj-cpp
 
-# Merge pull request #517 from ldorau/Adjust-install-libndctl.sh-script-to-Arch-Linux, 12.11.2019
-git checkout 93a5f5ff48c7047cc8d764aa672fc5095a7138bc
+# Merge pull request #621 from ldorau/Update-PMDK-to-newest-devel-1.8, 24.01.2020
+git checkout c25c1f52f66eb693c39cf9f4156730eff332c75b
 
 mkdir build
 cd build
