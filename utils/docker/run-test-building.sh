@@ -38,6 +38,8 @@
 
 set -e
 
+./prepare-for-build.sh
+
 EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
 TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
