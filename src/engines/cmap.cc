@@ -110,15 +110,7 @@ status cmap::put(string_view key, string_view value)
 
 	internal::cmap::map_t::accessor acc;
 	// XXX - do not create temporary string
-	bool result = container->insert(
-		acc,
-		internal::cmap::map_t::value_type(internal::cmap::string_t(key),
-						  internal::cmap::string_t(value)));
-	if (!result) {
-		pmem::obj::transaction::manual tx(pmpool);
-		acc->second = value;
-		pmem::obj::transaction::commit();
-	}
+	container->insert_or_assign(key, value);
 
 	return status::OK;
 }
@@ -138,12 +130,16 @@ void cmap::Recover()
 		container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(*root_oid);
 		container->runtime_initialize();
 	} else {
-		pmem::obj::transaction::manual tx(pmpool);
-		pmem::obj::transaction::snapshot(root_oid);
-		*root_oid = pmem::obj::make_persistent<internal::cmap::map_t>().raw();
-		pmem::obj::transaction::commit();
+		/* scope needed to call pmemobj_tx_end in tx destructor */
+		{
+			pmem::obj::transaction::manual tx(pmpool);
+			pmem::obj::transaction::snapshot(root_oid);
+			*root_oid =
+				pmem::obj::make_persistent<internal::cmap::map_t>().raw();
+			pmem::obj::transaction::commit();
+		}
 		container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(*root_oid);
-		container->runtime_initialize(true);
+		container->runtime_initialize();
 	}
 }
 
