@@ -15,3 +15,6 @@ pmemkv_config_c/pmemkv_config.c -- contains example usage of
 
 pmemkv_pmemobj_cpp/pmemkv_pmemobj_basic.cpp -- contains example usage
 		of pmemkv supporting multiple engines
+
+pmemkv_open_cpp/pmemkv_open_cpp -- contains example usage
+		of pmemkv for already existing pools (and poolsets)
