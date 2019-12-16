@@ -90,7 +90,7 @@ function run_example_standalone() {
 	cd $EXAMPLE_TEST_DIR
 
 	rm -f pool
-	LD_LIBRARY_PATH=$MEMKIND_DEFAULT_LD_LIBRARY_PATH:$LD_LIBRARY_PATH ./$1 pool
+	LD_LIBRARY_PATH=$MEMKIND_DEFAULT_LD_LIBRARY_PATH:$LD_LIBRARY_PATH ./$1 $2
 	# exit on error
 	if [[ $? != 0 ]]; then
 		cd -
@@ -134,11 +134,15 @@ fi
 
 # Verify installed libraries
 compile_example_standalone pmemkv_basic_c
-run_example_standalone pmemkv_basic_c
+run_example_standalone pmemkv_basic_c pool
 compile_example_standalone pmemkv_basic_cpp
-run_example_standalone pmemkv_basic_cpp
+run_example_standalone pmemkv_basic_cpp pool
 compile_example_standalone pmemkv_config_c
-run_example_standalone pmemkv_config_c
+run_example_standalone pmemkv_config_c pool
+
+compile_example_standalone pmemkv_open_cpp
+pmempool create -l "pmemkv" obj $WORKDIR/examples/example.poolset
+run_example_standalone pmemkv_open_cpp $WORKDIR/examples/example.poolset
 
 # Uninstall libraries
 cd $WORKDIR/build
