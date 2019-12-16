@@ -1,0 +1,3 @@
+PMEMPOOLSET
+1G /dev/shm/pool.part0
+1G /dev/shm/pool.part1
