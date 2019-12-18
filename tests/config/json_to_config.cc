@@ -83,3 +83,11 @@ TEST_F(JsonToConfigTest, DoubleTest_TRACERS_M)
 		std::string(pmemkv_config_from_json_errormsg()),
 		"[pmemkv_config_from_json] Unsupported data type in JSON string: Number");
 }
+
+TEST_F(JsonToConfigTest, MalformedInput_TRACERS_M)
+{
+	auto ret = pmemkv_config_from_json(config, "{\"int\": 12");
+	ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_PARSING_ERROR);
+	ASSERT_EQ(std::string(pmemkv_config_from_json_errormsg()),
+		  "[pmemkv_config_from_json] Config parsing failed");
+}
