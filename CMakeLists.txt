@@ -238,7 +238,6 @@ add_executable(check_license EXCLUDE_FROM_ALL utils/check_license/check-license.
 
 add_custom_target(checkers ALL)
 add_custom_target(cppstyle)
-add_custom_target(cppformat)
 add_custom_target(check-whitespace)
 add_custom_target(check-license
 	COMMAND ${CMAKE_SOURCE_DIR}/utils/check_license/check-headers.sh
@@ -267,6 +266,7 @@ if(CHECK_CPP_STYLE)
 	else()
 		message(WARNING "clang-format not found - C++ sources will not be checked (required version: ${CLANG_FORMAT_REQUIRED})")
 	endif()
+	add_custom_target(cppformat)
 endif()
 
 if(DEVELOPER_MODE)
