@@ -39,8 +39,8 @@ set -e
 
 OS=$1
 
-# v1.9.0-73-g1ece023; 25.09.2019, contains new libmemkind namespace
-MEMKIND_VERSION=1ece023b9c06a68d3f329786d1c4c0e65cef390f
+# v.1.10.0, contains new libmemkind namespace
+MEMKIND_VERSION=v.1.10.0
 
 WORKDIR=$(pwd)
 
