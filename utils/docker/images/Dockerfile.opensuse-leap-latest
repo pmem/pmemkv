@@ -81,7 +81,6 @@ RUN zypper install -y \
 	rapidjson-devel \
 	rpm-build \
 	sudo \
-	tbb-devel \
 	unzip \
 	wget \
 	which
@@ -91,12 +90,10 @@ RUN zypper mr -e repo-debug
 RUN zypper install -y \
 	glibc-debuginfo
 
-# Install a newer version of TBB
+# Install a newer version of TBB from the Education repository
 RUN zypper addrepo http://download.opensuse.org/repositories/Education/openSUSE_Leap_15.1/ education
 RUN zypper --gpg-auto-import-keys install -y \
-	tbb-devel-2019_20190605-lp151.72.1.x86_64 \
-	libtbb2-2019_20190605-lp151.72.1.x86_64 \
-	libtbbmalloc2-2019_20190605-lp151.72.1.x86_64
+	tbb-devel
 
 RUN zypper clean all
 
