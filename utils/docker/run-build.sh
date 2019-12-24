@@ -138,6 +138,8 @@ compile_example_standalone pmemkv_basic_c
 run_example_standalone pmemkv_basic_c pool
 compile_example_standalone pmemkv_basic_cpp
 run_example_standalone pmemkv_basic_cpp pool
+compile_example_standalone pmemkv_pmemobj_basic_cpp
+run_example_standalone pmemkv_pmemobj_basic_cpp pool
 compile_example_standalone pmemkv_config_c
 run_example_standalone pmemkv_config_c pool
 
