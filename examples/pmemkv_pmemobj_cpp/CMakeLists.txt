@@ -1,5 +1,5 @@
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,7 +30,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 cmake_minimum_required(VERSION 3.5)
-project(pmemkv_pmemobj_basic CXX)
+project(pmemkv_pmemobj CXX)
 
 set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.8)
 
@@ -44,5 +44,5 @@ endif()
 
 include_directories(${LIBPMEMKV_INCLUDE_DIRS})
 link_directories(${LIBPMEMKV_LIBRARY_DIRS})
-add_executable(pmemkv_pmemobj_basic_cpp pmemkv_pmemobj_basic.cpp)
-target_link_libraries(pmemkv_pmemobj_basic_cpp ${LIBPMEMKV_LIBRARIES} ${LIBPMEMOBJ++_LIBRARIES})
+add_executable(pmemkv_pmemobj_cpp pmemkv_pmemobj.cpp)
+target_link_libraries(pmemkv_pmemobj_cpp ${LIBPMEMKV_LIBRARIES} ${LIBPMEMOBJ++_LIBRARIES})

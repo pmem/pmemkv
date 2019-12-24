@@ -1,5 +1,5 @@
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -61,8 +61,8 @@ add_example(pmemkv_basic_c pmemkv_basic_c/pmemkv_basic.c)
 target_link_libraries(example-pmemkv_basic_c pmemkv)
 
 if(ENGINE_CMAP)
-	add_example(pmemkv_pmemobj_basic_cpp pmemkv_pmemobj_cpp/pmemkv_pmemobj_basic.cpp)
-	target_link_libraries(example-pmemkv_pmemobj_basic_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
+	add_example(pmemkv_pmemobj_cpp pmemkv_pmemobj_cpp/pmemkv_pmemobj.cpp)
+	target_link_libraries(example-pmemkv_pmemobj_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
 endif()
 
 if(BUILD_JSON_CONFIG)
