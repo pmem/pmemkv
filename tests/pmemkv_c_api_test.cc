@@ -177,7 +177,12 @@ TEST_P(PmemkvCApiTest, CheckNullDB)
 	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 }
 
-TEST_P(PmemkvCApiTest, NullConfig)
+class PmemkvCApiConfigTest : public ::testing::TestWithParam<Basic> {
+public:
+	Basic params = GetParam();
+};
+
+TEST_P(PmemkvCApiConfigTest, NullConfig)
 {
 	/* XXX solve it generically, for all tests */
 	if (params.engine == std::string("blackhole"))
@@ -186,7 +191,33 @@ TEST_P(PmemkvCApiTest, NullConfig)
 	pmemkv_db *db = NULL;
 	int s = pmemkv_open(params.engine, empty_cfg, &db);
 	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
+	pmemkv_close(db);
+}
+
+TEST_P(PmemkvCApiConfigTest, NonExistingPath)
+{
+	/*Create path for non-existing file*/
+	char nonexisting_file_path[L_tmpnam];
+	tmpnam(nonexisting_file_path);
+	pmemkv_config *cfg = pmemkv_config_new();
+	pmemkv_db *db = NULL;
+	ASSERT_NE(cfg, nullptr) << pmemkv_errormsg();
+	ASSERT_EQ(pmemkv_config_put_string(cfg, "path", nonexisting_file_path),
+		  PMEMKV_STATUS_OK)
+		<< pmemkv_errormsg();
+	ASSERT_EQ(pmemkv_config_put_uint64(cfg, "size", params.size), PMEMKV_STATUS_OK)
+		<< pmemkv_errormsg();
+	ASSERT_EQ(pmemkv_config_put_uint64(cfg, "force_create", params.force_create),
+		  PMEMKV_STATUS_OK);
+	int s = pmemkv_open(params.engine, cfg, &db);
+	ASSERT_TRUE((s == PMEMKV_STATUS_INVALID_ARGUMENT) || (s == PMEMKV_STATUS_OK))
+		<< pmemkv_errormsg() << " return code: " << s
+		<< " path: " << nonexisting_file_path;
+	pmemkv_close(db);
 }
 
 INSTANTIATE_TEST_CASE_P(basic_tests, PmemkvCApiTest, ::testing::ValuesIn(basic_tests),
 			GetTestName());
+
+INSTANTIATE_TEST_CASE_P(config_tests, PmemkvCApiConfigTest,
+			::testing::ValuesIn(basic_tests), GetTestName());
