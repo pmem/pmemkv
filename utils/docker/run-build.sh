@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -138,6 +138,8 @@ compile_example_standalone pmemkv_basic_c
 run_example_standalone pmemkv_basic_c pool
 compile_example_standalone pmemkv_basic_cpp
 run_example_standalone pmemkv_basic_cpp pool
+compile_example_standalone pmemkv_pmemobj_cpp
+run_example_standalone pmemkv_pmemobj_cpp pool
 compile_example_standalone pmemkv_config_c
 run_example_standalone pmemkv_config_c pool
 
