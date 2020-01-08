@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +33,7 @@
 #include "../../src/libpmemkv.hpp"
 #include "../../src/libpmemkv_json_config.h"
 #include "gtest/gtest.h"
+#include <vector>
 
 class JsonToConfigTest : public testing::Test {
 public:
@@ -86,8 +87,13 @@ TEST_F(JsonToConfigTest, DoubleTest_TRACERS_M)
 
 TEST_F(JsonToConfigTest, MalformedInput_TRACERS_M)
 {
-	auto ret = pmemkv_config_from_json(config, "{\"int\": 12");
-	ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_PARSING_ERROR);
-	ASSERT_EQ(std::string(pmemkv_config_from_json_errormsg()),
-		  "[pmemkv_config_from_json] Config parsing failed");
+	std::vector<const char *> malformed_inputs = {
+		"{\"int\": 12",
+		"\"{\\\"path\\\":\\\"/dev/shm\\\",\\\"size\\\":1073741824}\""};
+	for (auto &input : malformed_inputs) {
+		auto ret = pmemkv_config_from_json(config, input);
+		ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_PARSING_ERROR);
+		ASSERT_EQ(std::string(pmemkv_config_from_json_errormsg()),
+			  "[pmemkv_config_from_json] Config parsing failed");
+	}
 }
