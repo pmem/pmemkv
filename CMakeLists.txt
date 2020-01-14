@@ -1,5 +1,5 @@
 #
-# Copyright 2017-2019, Intel Corporation
+# Copyright 2017-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -260,7 +260,7 @@ if(CHECK_CPP_STYLE)
 	find_program(CLANG_FORMAT NAMES clang-format clang-format-9.0)
 	set(CLANG_FORMAT_REQUIRED "9.0")
 	if(CLANG_FORMAT)
-		get_program_version(${CLANG_FORMAT} CLANG_FORMAT_VERSION)
+		get_program_version_major_minor(${CLANG_FORMAT} CLANG_FORMAT_VERSION)
 		if(NOT (CLANG_FORMAT_VERSION VERSION_EQUAL CLANG_FORMAT_REQUIRED))
 			message(FATAL_ERROR "required clang-format version is ${CLANG_FORMAT_REQUIRED} (version ${CLANG_FORMAT_VERSION} is installed)")
 		endif()
