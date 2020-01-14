@@ -1,6 +1,7 @@
 .*
 !.gitignore
 !.gitattributes
+!.github/
 !.travis.yml
 !.clang-format
 *.d
