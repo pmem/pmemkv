@@ -1,5 +1,5 @@
 #
-# Copyright 2017-2019, Intel Corporation
+# Copyright 2017-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -244,8 +244,7 @@ add_custom_target(check-license
 	COMMAND ${CMAKE_SOURCE_DIR}/utils/check_license/check-headers.sh
 		${CMAKE_SOURCE_DIR}
 		${CMAKE_BINARY_DIR}/check_license
-		${CMAKE_SOURCE_DIR}/LICENSE
-		-a)
+		${CMAKE_SOURCE_DIR}/LICENSE)
 add_dependencies(check-license check_license)
 
 add_custom_target(check-whitespace-main
