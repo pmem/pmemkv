@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2016-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -48,6 +48,8 @@
 #
 
 set -e
+
+source $(dirname $0)/set-vars.sh
 
 function get_commit_range_from_last_merge {
 	# get commit id of the last merge
@@ -164,15 +166,9 @@ for file in $files; do
 			&& $PUSH_IMAGE == "1" ]]
 		then
 			echo "The image will be pushed to Docker Hub"
-			touch push_image_to_repo_flag
+			touch $CI_FILE_PUSH_IMAGE_TO_REPO
 		else
 			echo "Skip pushing the image to Docker Hub"
-		fi
-
-		if [[ $PUSH_IMAGE == "1" ]]
-		then
-			echo "Skip build package check if image has to be pushed"
-			touch skip_build_package_check
 		fi
 		exit 0
 	fi
