@@ -417,7 +417,7 @@ public:
 	}
 
 	/**
-	 * Return begin iterator on an array of correct indexs.
+	 * Return begin iterator on an array of correct indices.
 	 */
 	iterator begin()
 	{
@@ -433,7 +433,7 @@ public:
 	}
 
 	/**
-	 * Return end iterator on an array of indexs.
+	 * Return end iterator on an array of indices.
 	 */
 	iterator end()
 	{
@@ -788,7 +788,7 @@ public:
 	}
 
 	/**
-	 * Update splitted node with pair of new nodes
+	 * Update split node with pair of new nodes
 	 */
 	void update_splitted_child(pool_base &pop, const_reference entry,
 				   persistent_ptr<node_t> &lnode,
@@ -1196,7 +1196,7 @@ private:
 		leaf_node_persistent_ptr found_node = find_leaf_to_insert(key, path);
 		assert(path[0] == root);
 
-		if (split_node == found_node) { // Split not completted
+		if (split_node == found_node) { // Split not completed
 			const leaf_node_type *split_leaf = cast_leaf(split_node).get();
 			leaf_node_type *lnode = cast_leaf(left_child).get();
 			leaf_node_type *rnode = cast_leaf(right_child).get();
@@ -1205,7 +1205,7 @@ private:
 				if (right_child &&
 				    is_right_node(
 					    split_leaf,
-					    rnode)) { // Both children were allcoated
+					    rnode)) { // Both children were allocated
 						      // during split before crash
 					inner_node_type *parent_node = path.empty()
 						? nullptr
@@ -1255,7 +1255,7 @@ private:
 		assert(split_level <= root_level);
 
 		if (split_node ==
-		    path[root_level - split_level]) { // Split not completted
+		    path[root_level - split_level]) { // Split not completed
 			// we could simply roll back
 			const inner_node_type *inner = cast_inner(split_node).get();
 			typename inner_node_type::const_iterator middle =
