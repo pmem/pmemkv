@@ -1,5 +1,5 @@
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -52,7 +52,7 @@ file(MAKE_DIRECTORY ${DEFAULT_TEST_DIR})
 #
 # Arguments:
 #	cmake_file  - cmake file to run the test
-#	test_name   - name of a test to be printed out by ctest (must be uniqe)
+#	test_name   - name of a test to be printed out by ctest (must be unique)
 #	test_filter - name of a test in the gtest binary (used as a gtest filter)
 #	tracer      - Valgrind tool (memcheck/helgrind/drd/pmemcheck)
 #	              or pmreorder used to trace the test
