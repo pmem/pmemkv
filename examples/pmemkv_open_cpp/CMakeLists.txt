@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # Copyright 2019, Intel Corporation
 #
@@ -30,28 +29,17 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#
-# install-pmdk.sh <package_type> - installs PMDK (stable) packages
-#
+cmake_minimum_required(VERSION 3.5)
+project(pmemkv_open_cpp CXX)
 
-set -e
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+	pkg_check_modules(LIBPMEMKV REQUIRED libpmemkv)
+else()
+	message(FATAL_ERROR "pkg-config not found")
+endif()
 
-git clone https://github.com/pmem/pmdk --shallow-since=2019-09-26
-cd pmdk
-git checkout 1.7
-
-make -j$(nproc) BUILD_PACKAGE_CHECK=n $1
-if [ "$1" = "dpkg" ]; then
-      sudo dpkg -i dpkg/libpmem_*.deb dpkg/libpmem-dev_*.deb
-      sudo dpkg -i dpkg/libpmemobj_*.deb dpkg/libpmemobj-dev_*.deb
-      sudo dpkg -i dpkg/pmreorder_*.deb
-      sudo dpkg -i dpkg/libpmemblk_*.deb dpkg/libpmemlog_*.deb dpkg/libpmempool_*.deb dpkg/pmempool_*.deb
-elif [ "$1" = "rpm" ]; then
-      sudo rpm -i rpm/*/pmdk-debuginfo-*.rpm
-      sudo rpm -i rpm/*/libpmem*-*.rpm
-      sudo rpm -i rpm/*/pmreorder-*.rpm
-      sudo rpm -i rpm/*/pmempool-*.rpm
-fi
-
-cd ..
-rm -r pmdk
+include_directories(${LIBPMEMKV_INCLUDE_DIRS})
+link_directories(${LIBPMEMKV_LIBRARY_DIRS})
+add_executable(pmemkv_open_cpp pmemkv_open.cpp)
+target_link_libraries(pmemkv_open_cpp ${LIBPMEMKV_LIBRARIES})
