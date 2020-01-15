@@ -1,5 +1,5 @@
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -43,6 +43,9 @@ add_check_whitespace(examples-pmemkv_pmemobj_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pme
 add_cppstyle(examples-pmemkv_config_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.c)
 add_check_whitespace(examples-pmemkv_config_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.c)
 
+add_cppstyle(examples-pmemkv_open_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.cpp)
+add_check_whitespace(examples-pmemkv_open_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.cpp)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
 function(add_example name)
@@ -58,11 +61,16 @@ add_example(pmemkv_basic_c pmemkv_basic_c/pmemkv_basic.c)
 target_link_libraries(example-pmemkv_basic_c pmemkv)
 
 if(ENGINE_CMAP)
-	add_example(pmemkv_pmemobj_basic_cpp pmemkv_pmemobj_cpp/pmemkv_pmemobj_basic.cpp)
-	target_link_libraries(example-pmemkv_pmemobj_basic_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
+	add_example(pmemkv_pmemobj_cpp pmemkv_pmemobj_cpp/pmemkv_pmemobj.cpp)
+	target_link_libraries(example-pmemkv_pmemobj_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
 endif()
 
 if(BUILD_JSON_CONFIG)
 	add_example(pmemkv_config_c pmemkv_config_c/pmemkv_config.c)
 	target_link_libraries(example-pmemkv_config_c pmemkv pmemkv_json_config)
+endif()
+
+if(ENGINE_CMAP)
+	add_example(pmemkv_open_cpp pmemkv_open_cpp/pmemkv_open.cpp)
+	target_link_libraries(example-pmemkv_open_cpp pmemkv)
 endif()
