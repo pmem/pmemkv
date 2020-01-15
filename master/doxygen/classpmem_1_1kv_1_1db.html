@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.0.1-git58.gd1a3a98</span>
+   &#160;<span id="projectnumber">1.0.1-git89.g47c409e</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -1291,7 +1291,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than or equal to the given <em>key</em>. </p>
-<p>Callback can stop iteration by returning non-zero value. In that case <em><a class="el" href="classpmem_1_1kv_1_1db.html#a564e74f87cd0c460e99108c5ca0520cf" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are greater t...">get_equal_above()</a></em> returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
+<p>Callback can stop iteration by returning non-zero value. In that case <a class="el" href="classpmem_1_1kv_1_1db.html#a564e74f87cd0c460e99108c5ca0520cf" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are greater t...">get_equal_above()</a>* returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
 <p>Keys are sorted in lexicographical order (see std::lexicographical_compare).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
