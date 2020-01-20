@@ -83,6 +83,8 @@ int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb
 
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
 
+int pmemkv_defrag(pmemkv_db *db, double start_percent, double amount_percent);
+
 const char *pmemkv_errormsg(void);
 ```
 
@@ -197,6 +199,12 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 
 :	Removes record with key `k` of length `kb`.
 	This function is guaranteed to be implemented by all engines.
+
+`int pmemkv_defrag(pmemkv_db *db, double start_percent, double amount_percent);`
+
+:	Defragment the given (by 'start_percent' and 'amount_percent') part
+	of buckets of the hash map.
+	This function implemented only by the 'cmap' engine.
 
 `const char *pmemkv_errormsg(void);`
 

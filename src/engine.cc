@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -218,6 +218,11 @@ status engine_base::get_between(string_view key1, string_view key2,
 }
 
 status engine_base::exists(string_view key)
+{
+	return status::NOT_SUPPORTED;
+}
+
+status engine_base::defrag(double start_percent, double amount_percent)
 {
 	return status::NOT_SUPPORTED;
 }

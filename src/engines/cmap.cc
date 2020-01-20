@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -130,6 +130,17 @@ status cmap::remove(string_view key)
 
 	bool erased = container->erase(key);
 	return erased ? status::OK : status::NOT_FOUND;
+}
+
+status cmap::defrag(double start_percent, double amount_percent)
+{
+	LOG("defrag: start_percent = " << start_percent
+				       << " amount_percent = " << amount_percent);
+	check_outside_tx();
+
+	/* container->defrag(start_percent, amount_percent); */
+
+	return status::OK;
 }
 
 void cmap::Recover()

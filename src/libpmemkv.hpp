@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -278,6 +278,7 @@ public:
 
 	status put(string_view key, string_view value) noexcept;
 	status remove(string_view key) noexcept;
+	status defrag(double start_percent = 0, double amount_percent = 100);
 
 private:
 	pmemkv_db *_db;
@@ -1208,6 +1209,29 @@ inline status db::put(string_view key, string_view value) noexcept
 inline status db::remove(string_view key) noexcept
 {
 	return static_cast<status>(pmemkv_remove(this->_db, key.data(), key.size()));
+}
+
+/**
+ * Defragments the given (by 'start_percent' and 'amount_percent') part
+ * of buckets of the hash map. The algorithm is 'opportunistic' -
+ * if it is not able to lock a bucket it will just skip it.
+ *
+ * This function implemented only by the 'cmap' engine.
+ *
+ * @throws std::range_error if the range:
+ * [start_percent, start_percent + amount_percent]
+ * is incorrect.
+ *
+ * @param[in] start_percent starting percent of buckets to defragment from
+ * @param[in] amount_percent amount percent of buckets to defragment
+ *
+ * @return pmem::kv::status
+ */
+inline status db::defrag(double start_percent, double amount_percent)
+
+{
+	return static_cast<status>(
+		pmemkv_defrag(this->_db, start_percent, amount_percent));
 }
 
 /**

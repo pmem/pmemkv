@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -111,6 +111,8 @@ public:
 	status put(string_view key, string_view value) final;
 
 	status remove(string_view key) final;
+
+	status defrag(double start_percent, double amount_percent) final;
 
 private:
 	void Recover();
