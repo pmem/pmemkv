@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -90,13 +90,15 @@ function compile_example_standalone() {
 function run_example_standalone() {
 	cd $EXAMPLE_TEST_DIR
 
-	rm -f pool
-	./$1 pool
+	./$1 $2
+
 	# exit on error
 	if [[ $? != 0 ]]; then
 		cd -
 		return 1
 	fi
+
+	rm -f $2
 
 	cd -
 }
@@ -137,13 +139,23 @@ fi
 
 # Verify installed libraries
 compile_example_standalone pmemkv_basic_c
-run_example_standalone pmemkv_basic_c
+run_example_standalone pmemkv_basic_c pool
 compile_example_standalone pmemkv_basic_cpp
-run_example_standalone pmemkv_basic_cpp
+run_example_standalone pmemkv_basic_cpp pool
 if [ "$BUILD_JSON_CONFIG" == "ON" ]; then
 	compile_example_standalone pmemkv_config_c
-	run_example_standalone pmemkv_config_c
+	run_example_standalone pmemkv_config_c pool
 fi
+compile_example_standalone pmemkv_pmemobj_cpp
+run_example_standalone pmemkv_pmemobj_cpp pool
+
+# Poolset example
+compile_example_standalone pmemkv_open_cpp
+pmempool create -l "pmemkv" obj $WORKDIR/examples/example.poolset
+run_example_standalone pmemkv_open_cpp $WORKDIR/examples/example.poolset
+
+# Expect failure - non-existsing path is passed
+run_example_standalone pmemkv_open_cpp /non-existing/path && exit 1
 
 # Uninstall libraries
 cd $WORKDIR/build
