@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 	std::string app_name = get_filename(std::string(argv[0]));
 
 	if (tool_options.find(app_name) == tool_options.end()) {
-		std::cout << "Invalid aplication name. Use: ";
+		std::cout << "Invalid application name. Use: ";
 		for (auto &i : tool_options)
 			std::cout << i.first << " ";
 		std::cout << std::endl;
