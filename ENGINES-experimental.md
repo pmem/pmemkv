@@ -37,7 +37,7 @@ DRAM except for a final read from persistent memory.
 Leaf nodes in `tree3` contain multiple key-value pairs, indexed using 1-byte fingerprints
 ([Pearson hashes](https://en.wikipedia.org/wiki/Pearson_hashing)) that speed locating
 a given key. Leaf modifications are accelerated using
-[zero-copy updates](http://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html).
+[zero-copy updates](https://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html).
 
 ### Prerequisites
 

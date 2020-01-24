@@ -29,7 +29,7 @@ are logged as GitHub issues.*
 * Used only for development & testing:
 	* [GoogleTest](https://github.com/google/googletest) - test framework, version >= 1.8
 	* [valgrind](https://github.com/pmem/valgrind) - tool for profiling and memory leak detection. *pmem* forked version with *pmemcheck*
-		tool is recommended, but upstream/original [valgrind](http://valgrind.org/) is also compatible (package valgrind-devel is required).
+		tool is recommended, but upstream/original [valgrind](https://valgrind.org/) is also compatible (package valgrind-devel is required).
 	* [pandoc](https://pandoc.org/) - markup converter to generate manpages
 	* [doxygen](http://www.doxygen.nl/) - tool for generating documentation from annotated C++ sources
 	* [graphviz](https://www.graphviz.org/) - graph visualization software required by _doxygen_
