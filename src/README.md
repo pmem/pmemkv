@@ -4,7 +4,7 @@ pmemkv	{#mainpage}
 Key/Value Datastore for Persistent Memory
 
 All general information about (lib)pmemkv can be found on webstie:
-http://pmem.io/pmemkv
+https://pmem.io/pmemkv
 
 Here user can found description of C++ API.
 

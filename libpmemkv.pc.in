@@ -6,7 +6,7 @@ includedir=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_INCLUDEDIR@
 Name: libpmemkv
 Description: libpmemkv - Key/Value Datastore for Persistent Memory
 Version: ${version}
-URL: http://github.com/pmem/pmemkv
+URL: https://github.com/pmem/pmemkv
 Requires.private: @PKG_CONFIG_REQUIRES@
 Libs: -L${libdir} -lpmemkv
 Cflags: -I${includedir}

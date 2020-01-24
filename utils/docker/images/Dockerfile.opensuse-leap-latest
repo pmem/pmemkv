@@ -91,7 +91,7 @@ RUN zypper install -y \
 	glibc-debuginfo
 
 # Install a newer version of TBB from the Education repository
-RUN zypper addrepo http://download.opensuse.org/repositories/Education/openSUSE_Leap_15.1/ education
+RUN zypper addrepo https://download.opensuse.org/repositories/Education/openSUSE_Leap_15.1/ education
 RUN zypper --gpg-auto-import-keys install -y \
 	tbb-devel
 
