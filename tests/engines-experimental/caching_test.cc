@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -91,6 +91,7 @@ TEST_F(CachingTest, PutKeyValue)
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
 	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_TRUE(kv->defrag() == status::NOT_SUPPORTED);
 }
 
 TEST_F(CachingTest, PutUpdateValue)
