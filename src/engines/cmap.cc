@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -138,12 +138,14 @@ void cmap::Recover()
 		container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(*root_oid);
 		container->runtime_initialize();
 	} else {
-		pmem::obj::transaction::manual tx(pmpool);
-		pmem::obj::transaction::snapshot(root_oid);
-		*root_oid = pmem::obj::make_persistent<internal::cmap::map_t>().raw();
-		pmem::obj::transaction::commit();
-		container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(*root_oid);
-		container->runtime_initialize(true);
+		pmem::obj::transaction::run(pmpool, [&] {
+			pmem::obj::transaction::snapshot(root_oid);
+			*root_oid =
+				pmem::obj::make_persistent<internal::cmap::map_t>().raw();
+			container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(
+				*root_oid);
+			container->runtime_initialize();
+		});
 	}
 }
 
