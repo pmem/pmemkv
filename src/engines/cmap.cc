@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -143,7 +143,7 @@ void cmap::Recover()
 		*root_oid = pmem::obj::make_persistent<internal::cmap::map_t>().raw();
 		pmem::obj::transaction::commit();
 		container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(*root_oid);
-		container->runtime_initialize(true);
+		container->runtime_initialize();
 	}
 }
 
