@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -121,7 +121,7 @@ function run_test_check_support_cpp20_gcc() {
 
 	make -j$(nproc)
 	# Run basic tests
-	ctest -R "SimpleTest"
+	ctest -R "SimpleTest" --output-on-failure
 
 	cd $CWD
 	rm -rf $WORKDIR/build
@@ -146,7 +146,7 @@ function run_test_check_support_cpp20_clang() {
 
 	make -j$(nproc)
 	# Run basic tests
-	ctest -R "SimpleTest"
+	ctest -R "SimpleTest" --output-on-failure
 
 	cd $CWD
 	rm -rf $WORKDIR/build
