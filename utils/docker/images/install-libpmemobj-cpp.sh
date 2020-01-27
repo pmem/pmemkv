@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -47,8 +47,8 @@ PACKAGE_MANAGER=$1
 git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
 cd libpmemobj-cpp
 
-# Merge pull request #517 from ldorau/Adjust-install-libndctl.sh-script-to-Arch-Linux, 12.11.2019
-git checkout 93a5f5ff48c7047cc8d764aa672fc5095a7138bc
+# Merge pull request #548 from ldorau/Add-defrag-to-concurrent-hash-map, 27.01.2020
+git checkout 93dd32ff2ca00dc4d958d7f97ea040bfe563e1b3
 
 mkdir build
 cd build
