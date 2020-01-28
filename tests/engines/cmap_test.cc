@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -137,6 +137,8 @@ TEST_F(CMapTest, SimpleTest_TRACERS_MPHD)
 	value = "";
 	kv->get("key1", [&](string_view v) { value.append(v.data(), v.size()); });
 	ASSERT_TRUE(value == "value1");
+	ASSERT_TRUE(kv->defragment() == status::OK);
+	/* ASSERT_TRUE(kv->defragment(50, 100) == status::UNKNOWN_ERROR); */
 }
 
 TEST_F(CMapTest, BinaryKeyTest_TRACERS_MPHD)
@@ -173,6 +175,7 @@ TEST_F(CMapTest, BinaryKeyTest_TRACERS_MPHD)
 	std::string value3;
 	ASSERT_TRUE(kv->get(key1, &value3) == status::NOT_FOUND);
 	ASSERT_TRUE(kv->get("a", &value3) == status::OK && value3 == "should_not_change");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, BinaryValueTest_TRACERS_MPHD)
@@ -182,6 +185,7 @@ TEST_F(CMapTest, BinaryValueTest_TRACERS_MPHD)
 	std::string value_out;
 	ASSERT_TRUE(kv->get("key1", &value_out) == status::OK &&
 		    (value_out.length() == 6) && (value_out == value));
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, EmptyKeyTest_TRACERS_MPHD)
@@ -210,6 +214,7 @@ TEST_F(CMapTest, EmptyKeyTest_TRACERS_MPHD)
 	ASSERT_TRUE(kv->get(" ", &value2) == status::OK && value2 == "single-space");
 	ASSERT_TRUE(status::OK == kv->exists("\t\t"));
 	ASSERT_TRUE(kv->get("\t\t", &value3) == status::OK && value3 == "two-tab");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, EmptyValueTest_TRACERS_MPHD)
@@ -235,6 +240,7 @@ TEST_F(CMapTest, EmptyValueTest_TRACERS_MPHD)
 	ASSERT_TRUE(kv->get("empty", &value1) == status::OK && value1 == "");
 	ASSERT_TRUE(kv->get("single-space", &value2) == status::OK && value2 == " ");
 	ASSERT_TRUE(kv->get("two-tab", &value3) == status::OK && value3 == "\t\t");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, GetClearExternalValueTest_TRACERS_MPHD)
@@ -246,6 +252,7 @@ TEST_F(CMapTest, GetClearExternalValueTest_TRACERS_MPHD)
 	value = "super";
 	ASSERT_TRUE(kv->get("non_existent_key", &value) == status::NOT_FOUND &&
 		    value == "super");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, GetHeadlessTest_TRACERS_MPHD)
@@ -253,6 +260,7 @@ TEST_F(CMapTest, GetHeadlessTest_TRACERS_MPHD)
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("waldo"));
 	std::string value;
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, GetMultipleTest_TRACERS_MPHD)
@@ -280,6 +288,7 @@ TEST_F(CMapTest, GetMultipleTest_TRACERS_MPHD)
 	ASSERT_TRUE(status::OK == kv->exists("mno"));
 	std::string value5;
 	ASSERT_TRUE(kv->get("mno", &value5) == status::OK && value5 == "E5");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, GetMultiple2Test_TRACERS_MPHD)
@@ -298,6 +307,7 @@ TEST_F(CMapTest, GetMultiple2Test_TRACERS_MPHD)
 	ASSERT_TRUE(kv->get("key2", &value2) == status::NOT_FOUND);
 	std::string value3;
 	ASSERT_TRUE(kv->get("key3", &value3) == status::OK && value3 == "VALUE3");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, GetNonexistentTest_TRACERS_MPHD)
@@ -306,6 +316,7 @@ TEST_F(CMapTest, GetNonexistentTest_TRACERS_MPHD)
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("waldo"));
 	std::string value;
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, PutTest_TRACERS_MPHD)
@@ -343,6 +354,7 @@ TEST_F(CMapTest, PutTest_TRACERS_MPHD)
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("key1", &new_value3) == status::OK && new_value3 == "?");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, PutKeysOfDifferentSizesTest_TRACERS_MPHD)
@@ -382,6 +394,7 @@ TEST_F(CMapTest, PutKeysOfDifferentSizesTest_TRACERS_MPHD)
 	ASSERT_TRUE(cnt == 5);
 	ASSERT_TRUE(kv->get("123456789ABCDEFGHI", &value5) == status::OK &&
 		    value5 == "E");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, PutValuesOfDifferentSizesTest_TRACERS_MPHD)
@@ -421,6 +434,7 @@ TEST_F(CMapTest, PutValuesOfDifferentSizesTest_TRACERS_MPHD)
 	ASSERT_TRUE(cnt == 5);
 	ASSERT_TRUE(kv->get("E", &value5) == status::OK &&
 		    value5 == "123456789ABCDEFGHI");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, RemoveAllTest_TRACERS_MPHD)
@@ -439,6 +453,7 @@ TEST_F(CMapTest, RemoveAllTest_TRACERS_MPHD)
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey"));
 	std::string value;
 	ASSERT_TRUE(kv->get("tmpkey", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, RemoveAndInsertTest_TRACERS_MPHD)
@@ -469,6 +484,7 @@ TEST_F(CMapTest, RemoveAndInsertTest_TRACERS_MPHD)
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey1"));
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, RemoveExistingTest_TRACERS_MPHD)
@@ -497,11 +513,13 @@ TEST_F(CMapTest, RemoveExistingTest_TRACERS_MPHD)
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(status::OK == kv->exists("tmpkey2"));
 	ASSERT_TRUE(kv->get("tmpkey2", &value) == status::OK && value == "tmpvalue2");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, RemoveHeadlessTest_TRACERS_MPHD)
 {
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, RemoveNonexistentTest_TRACERS_MPHD)
@@ -509,6 +527,7 @@ TEST_F(CMapTest, RemoveNonexistentTest_TRACERS_MPHD)
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, UsesGetAllTest_TRACERS_MPHD)
@@ -536,6 +555,7 @@ TEST_F(CMapTest, UsesGetAllTest_TRACERS_MPHD)
 		},
 		&result);
 	ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, SimpleMultithreadedTest_TRACERS_MPHD)
@@ -563,6 +583,7 @@ TEST_F(CMapTest, SimpleMultithreadedTest_TRACERS_MPHD)
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == threads_number * thread_items);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 // =============================================================================================
@@ -574,6 +595,7 @@ TEST_F(CMapTest, GetHeadlessAfterRecoveryTest_TRACERS_MPHD)
 	Restart();
 	std::string value;
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, GetMultipleAfterRecoveryTest_TRACERS_MPHD)
@@ -594,6 +616,7 @@ TEST_F(CMapTest, GetMultipleAfterRecoveryTest_TRACERS_MPHD)
 	ASSERT_TRUE(kv->get("jkl", &value4) == status::OK && value4 == "D4");
 	std::string value5;
 	ASSERT_TRUE(kv->get("mno", &value5) == status::OK && value5 == "E5");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, GetMultiple2AfterRecoveryTest_TRACERS_MPHD)
@@ -610,6 +633,7 @@ TEST_F(CMapTest, GetMultiple2AfterRecoveryTest_TRACERS_MPHD)
 	ASSERT_TRUE(kv->get("key2", &value2) == status::NOT_FOUND);
 	std::string value3;
 	ASSERT_TRUE(kv->get("key3", &value3) == status::OK && value3 == "VALUE3");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, GetNonexistentAfterRecoveryTest_TRACERS_MPHD)
@@ -618,6 +642,7 @@ TEST_F(CMapTest, GetNonexistentAfterRecoveryTest_TRACERS_MPHD)
 	Restart();
 	std::string value;
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, PutAfterRecoveryTest_TRACERS_MPHD)
@@ -640,6 +665,8 @@ TEST_F(CMapTest, PutAfterRecoveryTest_TRACERS_MPHD)
 	std::string new_value3;
 	ASSERT_TRUE(kv->put("key1", "?") == status::OK) << errormsg(); // shorter size
 	ASSERT_TRUE(kv->get("key1", &new_value3) == status::OK && new_value3 == "?");
+
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, RemoveAllAfterRecoveryTest_TRACERS_MPHD)
@@ -649,6 +676,7 @@ TEST_F(CMapTest, RemoveAllAfterRecoveryTest_TRACERS_MPHD)
 	ASSERT_TRUE(kv->remove("tmpkey") == status::OK);
 	std::string value;
 	ASSERT_TRUE(kv->get("tmpkey", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, RemoveAndInsertAfterRecoveryTest_TRACERS_MPHD)
@@ -662,6 +690,7 @@ TEST_F(CMapTest, RemoveAndInsertAfterRecoveryTest_TRACERS_MPHD)
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::OK && value == "tmpvalue1");
 	ASSERT_TRUE(kv->remove("tmpkey1") == status::OK);
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, RemoveExistingAfterRecoveryTest_TRACERS_MPHD)
@@ -674,12 +703,14 @@ TEST_F(CMapTest, RemoveExistingAfterRecoveryTest_TRACERS_MPHD)
 	std::string value;
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv->get("tmpkey2", &value) == status::OK && value == "tmpvalue2");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, RemoveHeadlessAfterRecoveryTest_TRACERS_MPHD)
 {
 	Restart();
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapTest, RemoveNonexistentAfterRecoveryTest_TRACERS_MPHD)
@@ -687,6 +718,7 @@ TEST_F(CMapTest, RemoveNonexistentAfterRecoveryTest_TRACERS_MPHD)
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
 	Restart();
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 // =============================================================================================
@@ -711,6 +743,7 @@ TEST_F(CMapLargeTest, LargeAscendingTest)
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == LARGE_LIMIT);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapLargeTest, LargeAscendingAfterRecoveryTest)
@@ -730,6 +763,7 @@ TEST_F(CMapLargeTest, LargeAscendingAfterRecoveryTest)
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == LARGE_LIMIT);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapLargeTest, LargeDescendingTest)
@@ -750,6 +784,7 @@ TEST_F(CMapLargeTest, LargeDescendingTest)
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == LARGE_LIMIT);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapLargeTest, LargeDescendingAfterRecoveryTest)
@@ -771,6 +806,7 @@ TEST_F(CMapLargeTest, LargeDescendingAfterRecoveryTest)
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == LARGE_LIMIT);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 /* XXX port it to other engines */

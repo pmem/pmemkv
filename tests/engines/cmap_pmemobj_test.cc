@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -122,6 +122,7 @@ TEST_F(CMapPmemobjTest, SimpleTest)
 	value = "";
 	kv->get("key1", [&](string_view v) { value.append(v.data(), v.size()); });
 	ASSERT_TRUE(value == "value1");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, BinaryKeyTest)
@@ -158,6 +159,7 @@ TEST_F(CMapPmemobjTest, BinaryKeyTest)
 	std::string value3;
 	ASSERT_TRUE(kv->get(key1, &value3) == status::NOT_FOUND);
 	ASSERT_TRUE(kv->get("a", &value3) == status::OK && value3 == "should_not_change");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, BinaryValueTest)
@@ -167,6 +169,7 @@ TEST_F(CMapPmemobjTest, BinaryValueTest)
 	std::string value_out;
 	ASSERT_TRUE(kv->get("key1", &value_out) == status::OK &&
 		    (value_out.length() == 6) && (value_out == value));
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, EmptyKeyTest)
@@ -195,6 +198,7 @@ TEST_F(CMapPmemobjTest, EmptyKeyTest)
 	ASSERT_TRUE(kv->get(" ", &value2) == status::OK && value2 == "single-space");
 	ASSERT_TRUE(status::OK == kv->exists("\t\t"));
 	ASSERT_TRUE(kv->get("\t\t", &value3) == status::OK && value3 == "two-tab");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, EmptyValueTest)
@@ -220,6 +224,7 @@ TEST_F(CMapPmemobjTest, EmptyValueTest)
 	ASSERT_TRUE(kv->get("empty", &value1) == status::OK && value1 == "");
 	ASSERT_TRUE(kv->get("single-space", &value2) == status::OK && value2 == " ");
 	ASSERT_TRUE(kv->get("two-tab", &value3) == status::OK && value3 == "\t\t");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, GetClearExternalValueTest)
@@ -231,6 +236,7 @@ TEST_F(CMapPmemobjTest, GetClearExternalValueTest)
 	value = "super";
 	ASSERT_TRUE(kv->get("non_existent_key", &value) == status::NOT_FOUND &&
 		    value == "super");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, GetHeadlessTest)
@@ -238,6 +244,7 @@ TEST_F(CMapPmemobjTest, GetHeadlessTest)
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("waldo"));
 	std::string value;
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, GetMultipleTest)
@@ -265,6 +272,7 @@ TEST_F(CMapPmemobjTest, GetMultipleTest)
 	ASSERT_TRUE(status::OK == kv->exists("mno"));
 	std::string value5;
 	ASSERT_TRUE(kv->get("mno", &value5) == status::OK && value5 == "E5");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, GetMultiple2Test)
@@ -283,6 +291,7 @@ TEST_F(CMapPmemobjTest, GetMultiple2Test)
 	ASSERT_TRUE(kv->get("key2", &value2) == status::NOT_FOUND);
 	std::string value3;
 	ASSERT_TRUE(kv->get("key3", &value3) == status::OK && value3 == "VALUE3");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, GetNonexistentTest)
@@ -291,6 +300,7 @@ TEST_F(CMapPmemobjTest, GetNonexistentTest)
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("waldo"));
 	std::string value;
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, PutTest)
@@ -328,6 +338,7 @@ TEST_F(CMapPmemobjTest, PutTest)
 	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(kv->get("key1", &new_value3) == status::OK && new_value3 == "?");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, PutKeysOfDifferentSizesTest)
@@ -367,6 +378,7 @@ TEST_F(CMapPmemobjTest, PutKeysOfDifferentSizesTest)
 	ASSERT_TRUE(cnt == 5);
 	ASSERT_TRUE(kv->get("123456789ABCDEFGHI", &value5) == status::OK &&
 		    value5 == "E");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, PutValuesOfDifferentSizesTest)
@@ -406,6 +418,7 @@ TEST_F(CMapPmemobjTest, PutValuesOfDifferentSizesTest)
 	ASSERT_TRUE(cnt == 5);
 	ASSERT_TRUE(kv->get("E", &value5) == status::OK &&
 		    value5 == "123456789ABCDEFGHI");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, RemoveAllTest)
@@ -424,6 +437,7 @@ TEST_F(CMapPmemobjTest, RemoveAllTest)
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey"));
 	std::string value;
 	ASSERT_TRUE(kv->get("tmpkey", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, RemoveAndInsertTest)
@@ -454,6 +468,7 @@ TEST_F(CMapPmemobjTest, RemoveAndInsertTest)
 	ASSERT_TRUE(cnt == 0);
 	ASSERT_TRUE(status::NOT_FOUND == kv->exists("tmpkey1"));
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, RemoveExistingTest)
@@ -482,11 +497,13 @@ TEST_F(CMapPmemobjTest, RemoveExistingTest)
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(status::OK == kv->exists("tmpkey2"));
 	ASSERT_TRUE(kv->get("tmpkey2", &value) == status::OK && value == "tmpvalue2");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, RemoveHeadlessTest)
 {
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, RemoveNonexistentTest)
@@ -494,6 +511,7 @@ TEST_F(CMapPmemobjTest, RemoveNonexistentTest)
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, UsesGetAllTest)
@@ -521,6 +539,7 @@ TEST_F(CMapPmemobjTest, UsesGetAllTest)
 		},
 		&result);
 	ASSERT_TRUE(result == "<1>,<2>|<RR>,<记!>|");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 // =============================================================================================
@@ -532,6 +551,7 @@ TEST_F(CMapPmemobjTest, GetHeadlessAfterRecoveryTest)
 	Restart();
 	std::string value;
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, GetMultipleAfterRecoveryTest)
@@ -552,6 +572,7 @@ TEST_F(CMapPmemobjTest, GetMultipleAfterRecoveryTest)
 	ASSERT_TRUE(kv->get("jkl", &value4) == status::OK && value4 == "D4");
 	std::string value5;
 	ASSERT_TRUE(kv->get("mno", &value5) == status::OK && value5 == "E5");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, GetMultiple2AfterRecoveryTest)
@@ -568,6 +589,7 @@ TEST_F(CMapPmemobjTest, GetMultiple2AfterRecoveryTest)
 	ASSERT_TRUE(kv->get("key2", &value2) == status::NOT_FOUND);
 	std::string value3;
 	ASSERT_TRUE(kv->get("key3", &value3) == status::OK && value3 == "VALUE3");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, GetNonexistentAfterRecoveryTest)
@@ -576,6 +598,7 @@ TEST_F(CMapPmemobjTest, GetNonexistentAfterRecoveryTest)
 	Restart();
 	std::string value;
 	ASSERT_TRUE(kv->get("waldo", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, PutAfterRecoveryTest)
@@ -598,6 +621,7 @@ TEST_F(CMapPmemobjTest, PutAfterRecoveryTest)
 	std::string new_value3;
 	ASSERT_TRUE(kv->put("key1", "?") == status::OK) << errormsg(); // shorter size
 	ASSERT_TRUE(kv->get("key1", &new_value3) == status::OK && new_value3 == "?");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, RemoveAllAfterRecoveryTest)
@@ -607,6 +631,7 @@ TEST_F(CMapPmemobjTest, RemoveAllAfterRecoveryTest)
 	ASSERT_TRUE(kv->remove("tmpkey") == status::OK);
 	std::string value;
 	ASSERT_TRUE(kv->get("tmpkey", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, RemoveAndInsertAfterRecoveryTest)
@@ -620,6 +645,7 @@ TEST_F(CMapPmemobjTest, RemoveAndInsertAfterRecoveryTest)
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::OK && value == "tmpvalue1");
 	ASSERT_TRUE(kv->remove("tmpkey1") == status::OK);
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, RemoveExistingAfterRecoveryTest)
@@ -632,12 +658,14 @@ TEST_F(CMapPmemobjTest, RemoveExistingAfterRecoveryTest)
 	std::string value;
 	ASSERT_TRUE(kv->get("tmpkey1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv->get("tmpkey2", &value) == status::OK && value == "tmpvalue2");
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, RemoveHeadlessAfterRecoveryTest)
 {
 	Restart();
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, RemoveNonexistentAfterRecoveryTest)
@@ -645,6 +673,7 @@ TEST_F(CMapPmemobjTest, RemoveNonexistentAfterRecoveryTest)
 	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
 	Restart();
 	ASSERT_TRUE(kv->remove("nada") == status::NOT_FOUND);
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }
 
 TEST_F(CMapPmemobjTest, TransactionTest)
@@ -674,4 +703,5 @@ TEST_F(CMapPmemobjTest, TransactionTest)
 	});
 
 	ASSERT_TRUE(kv->remove("key1") == status::OK) << errormsg();
+	ASSERT_TRUE(kv->defragment() == status::OK);
 }

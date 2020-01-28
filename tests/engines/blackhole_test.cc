@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -69,6 +69,7 @@ TEST_F(BlackholeTest, SimpleTest_TRACERS_MP)
 	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
 	ASSERT_TRUE(kv.remove("key1") == status::OK);
 	ASSERT_TRUE(kv.get("key1", &value) == status::NOT_FOUND);
+	ASSERT_TRUE(kv.defragment() == status::NOT_SUPPORTED);
 }
 
 TEST_F(BlackholeTest, GetRangeTest_TRACERS_MP)
