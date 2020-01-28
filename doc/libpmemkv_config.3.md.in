@@ -174,4 +174,4 @@ The following example is taken from `examples/pmemkv_config_c/pmemkv_config.c`.
 
 # SEE ALSO #
 
-**libpmemkv**(7), **libpmemkv**(3) , **libpmemkv_json_config**(3) and **<http://pmem.io>**
+**libpmemkv**(7), **libpmemkv**(3) , **libpmemkv_json_config**(3) and **<https://pmem.io>**

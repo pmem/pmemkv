@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -55,7 +55,7 @@
 	\brief Persistent memory namespace.
 
 	It is a common namespace for all persistent memory C++ libraries
-	For more information about pmem goto: http://pmem.io
+	For more information about pmem goto: https://pmem.io
 */
 namespace pmem
 {
