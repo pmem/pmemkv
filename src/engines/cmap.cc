@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -132,6 +132,22 @@ status cmap::remove(string_view key)
 	return erased ? status::OK : status::NOT_FOUND;
 }
 
+status cmap::defragment(double start_percent, double amount_percent)
+{
+	LOG("defrag: start_percent = " << start_percent
+				       << " amount_percent = " << amount_percent);
+	check_outside_tx();
+
+	try {
+		/* container->defragment(start_percent, amount_percent); */
+	} catch (std::range_error &e) {
+		out_err_stream("defrag") << e.what();
+		return status::INVALID_ARGUMENT;
+	}
+
+	return status::OK;
+}
+
 void cmap::Recover()
 {
 	if (!OID_IS_NULL(*root_oid)) {
@@ -143,7 +159,7 @@ void cmap::Recover()
 		*root_oid = pmem::obj::make_persistent<internal::cmap::map_t>().raw();
 		pmem::obj::transaction::commit();
 		container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(*root_oid);
-		container->runtime_initialize(true);
+		container->runtime_initialize();
 	}
 }
 

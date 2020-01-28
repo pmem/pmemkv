@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -112,6 +112,7 @@ TEST_F(STreePmemobjTest, SimpleTest)
 	ASSERT_TRUE(cnt == 1);
 	ASSERT_TRUE(status::OK == kv->exists("key1"));
 	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
+	ASSERT_TRUE(kv->defragment() == status::NOT_SUPPORTED);
 }
 
 TEST_F(STreePmemobjTest, BinaryKeyTest)

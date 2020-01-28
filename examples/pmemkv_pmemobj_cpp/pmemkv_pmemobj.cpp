@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -121,6 +121,14 @@ int main(int argc, char *argv[])
 		value.clear();
 		s = kv_2->get("key_2", &value);
 		assert(s == status::OK && value == "value_2");
+
+		LOG("Defragmenting the first cmap");
+		s = kv_1->defragment(0, 100);
+		assert(s == status::OK);
+
+		LOG("Defragmenting the second cmap");
+		s = kv_2->defragment(0, 100);
+		assert(s == status::OK);
 
 		LOG("Stopping first cmap engine");
 		delete kv_1;

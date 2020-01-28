@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -487,6 +487,16 @@ int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb)
 
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->remove(pmem::kv::string_view(k, kb));
+	});
+}
+
+int pmemkv_defragment(pmemkv_db *db, double start_percent, double amount_percent)
+{
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->defragment(start_percent, amount_percent);
 	});
 }
 

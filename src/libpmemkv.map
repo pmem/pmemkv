@@ -1,5 +1,5 @@
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -53,6 +53,7 @@ LIBPMEMKV_1.0 {
 		pmemkv_count_between;
 		pmemkv_count_equal_above;
 		pmemkv_count_equal_below;
+		pmemkv_defragment;
 		pmemkv_errormsg;
 		pmemkv_exists;
 		pmemkv_get;
