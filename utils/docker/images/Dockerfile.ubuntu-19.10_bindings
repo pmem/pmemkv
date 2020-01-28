@@ -39,6 +39,14 @@
 FROM ubuntu:19.10
 MAINTAINER szymon.romik@intel.com
 
+# Set required environment variables
+ENV OS ubuntu
+ENV OS_VER 19.10_bindings
+ENV PACKAGE_MANAGER deb
+ENV NOTTY 1
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+ENV JAVA_TOOL_OPTIONS -Dfile.encoding=UTF-8
+
 # Additional parameters to build docker without building components
 ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
@@ -74,7 +82,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	maven \
 	npm \
 	numactl \
-	openjdk-8-jdk \
+	openjdk-11-jdk \
 	pandoc \
 	pkg-config \
 	python3-dev \
@@ -85,10 +93,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	wget \
 	whois \
  && rm -rf /var/lib/apt/lists/*
-
-# Install Googletest
-COPY install-googletest.sh install-googletest.sh
-RUN ./install-googletest.sh
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -111,9 +115,3 @@ ENV USER user
 ENV USERPASS pass
 RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
 USER $USER
-
-# Set required environment variables
-ENV OS ubuntu
-ENV OS_VER 19.10
-ENV PACKAGE_MANAGER deb
-ENV NOTTY 1

@@ -31,7 +31,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# install-pmdk.sh <package_type> - installs PMDK (stable) packages
+# install-pmdk.sh <package_type> - installs PMDK
 #
 
 set -e
@@ -41,7 +41,8 @@ if [ "${SKIP_PMDK_BUILD}" ]; then
 	exit
 fi
 
-PACKAGE_MANAGER=$1
+PACKAGE_TYPE=$1
+PREFIX=${2:-/usr}
 
 # devel-1.8: Merge pull request #4497 from marcinslusarz/build, 23.01.2020
 PMDK_VERSION="1947982d15ebb3d107e781cdc1484ef4ce81cc41"
@@ -50,22 +51,21 @@ git clone https://github.com/pmem/pmdk
 cd pmdk
 git checkout $PMDK_VERSION
 
-if [ "$PACKAGE_MANAGER" = "" ]; then
-	make -j$(nproc) install prefix=/usr
+if [ "$PACKAGE_TYPE" = "" ]; then
+	make -j$(nproc) install prefix=$PREFIX
 else
-	make -j$(nproc) BUILD_PACKAGE_CHECK=n $PACKAGE_MANAGER
-fi
-
-if [ "$PACKAGE_MANAGER" = "dpkg" ]; then
-      sudo dpkg -i dpkg/libpmem_*.deb dpkg/libpmem-dev_*.deb
-      sudo dpkg -i dpkg/libpmemobj_*.deb dpkg/libpmemobj-dev_*.deb
-      sudo dpkg -i dpkg/pmreorder_*.deb
-      sudo dpkg -i dpkg/libpmemblk_*.deb dpkg/libpmemlog_*.deb dpkg/libpmempool_*.deb dpkg/pmempool_*.deb
-elif [ "$PACKAGE_MANAGER" = "rpm" ]; then
-      sudo rpm -i rpm/*/pmdk-debuginfo-*.rpm
-      sudo rpm -i rpm/*/libpmem*-*.rpm
-      sudo rpm -i rpm/*/pmreorder-*.rpm
-      sudo rpm -i rpm/*/pmempool-*.rpm
+	make -j$(nproc) BUILD_PACKAGE_CHECK=n $PACKAGE_TYPE
+	if [ "$PACKAGE_TYPE" = "dpkg" ]; then
+		sudo dpkg -i dpkg/libpmem_*.deb dpkg/libpmem-dev_*.deb
+		sudo dpkg -i dpkg/libpmemobj_*.deb dpkg/libpmemobj-dev_*.deb
+		sudo dpkg -i dpkg/pmreorder_*.deb
+		sudo dpkg -i dpkg/libpmemblk_*.deb dpkg/libpmemlog_*.deb dpkg/libpmempool_*.deb dpkg/pmempool_*.deb
+	elif [ "$PACKAGE_TYPE" = "rpm" ]; then
+		sudo rpm -i rpm/*/pmdk-debuginfo-*.rpm
+		sudo rpm -i rpm/*/libpmem*-*.rpm
+		sudo rpm -i rpm/*/pmreorder-*.rpm
+		sudo rpm -i rpm/*/pmempool-*.rpm
+	fi
 fi
 
 cd ..

@@ -30,13 +30,18 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of environment
-#              prepared for running libpmemobj-cpp tests.
+# Dockerfile - a 'recipe' for Docker to build an image of archlinux-based
+#              environment prepared for running pmemkv tests.
 #
 
 # Pull base image
 FROM archlinux/base:latest
 MAINTAINER szymon.romik@intel.com
+
+# Set required environment variables
+ENV OS archlinux-base
+ENV OS_VER latest
+ENV NOTTY 1
 
 # Additional parameters to build docker without building components
 ARG SKIP_VALGRIND_BUILD
@@ -111,8 +116,3 @@ USER $USER
 
 # Clean the cache of packages
 RUN rm -rf /var/cache/pacman/pkg/*
-
-# Set required environment variables
-ENV OS archlinux-base
-ENV OS_VER latest
-ENV NOTTY 1

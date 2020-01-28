@@ -32,25 +32,26 @@
 
 #
 # install-bindings-dependencies.sh - installs dependencies for bindings
-# that they can be built offline
+#		so they can be built offline. This step is optional while
+#		setting up local environment.
 #
 
 set -e
 
-# 03.10.2019; contains libpmemobj new (non-experimental) namespace for containers
-PMEMKV_VERSION=7bb72710c3a24e17b52e49bac64abfbaf15d138c
+# master: Merge pull request #531 from lukaszstolarczuk/add-skip-build-flags-to-dockerimages, 20.11.2019
+PMEMKV_VERSION="6ad5c453f79cb2ddd1ee9ba2a9dff294c6cb7b71"
 
-# Merge pull request #36 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
-RUBY_VERSION=99d1bfc05d116d35d0e96541ece9b9df831d95a0
+# master: Merge pull request #44 from lukaszstolarczuk/update-travis-files, 21.11.2019
+RUBY_VERSION="3741e3df698245fc8a15822a1aa85b5c211fd332"
 
-# Merge pull request #29 from ldorau/Replace-PMEMKV_STATUS_FAILED-with-PMEMKV_STATUS_UNKNOWN_ERROR, 18.09.2019
-JNI_VERSION=78b81de8266ec690fb41b5f4e62948e200640cbe
+# master: Merge pull request #33 from lukaszstolarczuk/update-travis-files, 21.11.2019
+JNI_VERSION="5239d6bb3214c56bc45b3296872be50b38bfbab3"
 
-# Merge pull request #26 from ldorau/Update-gitignore, 16.09.2019
-JAVA_VERSION=30c2a897574aa2552bd3e651e4e57f2469da5767
+# master: Merge pull request #34 from lukaszstolarczuk/update-offline-de..., 5.12.2019
+JAVA_VERSION="47f02b6b52c56ca53fd3dafdff52167719f1e7dd"
 
-# Merge pull request #38 from lukaszstolarczuk/replace-json-config, 01.10.2019
-NODEJS_VERSION=9e3f0edd8f10d0d6f011fd22354ce1b4efe36f84
+# master: Merge pull request #48 from lukaszstolarczuk/update-travis-files, 21.11.2019
+NODEJS_VERSION="d19b026207e8a78ebffdccaffb27181a9bdbe51d"
 
 PREFIX=/usr
 rm -rf /opt/bindings
@@ -63,7 +64,6 @@ WORKDIR=$(pwd)
 git clone https://github.com/pmem/pmemkv.git
 cd pmemkv
 git checkout $PMEMKV_VERSION
-cp /opt/googletest/googletest-*.zip .
 mkdir build
 cd build
 # only VSMAP engine is enabled, because Java tests need it
@@ -102,7 +102,6 @@ cd $WORKDIR
 git clone https://github.com/pmem/pmemkv-jni.git
 cd pmemkv-jni
 git checkout $JNI_VERSION
-cp /opt/googletest/googletest-*.zip .
 make test
 make install prefix=$PREFIX
 
@@ -112,8 +111,6 @@ make install prefix=$PREFIX
 #                        in the /opt/bindings/java directory
 cd $WORKDIR
 mkdir -p /opt/bindings/java/
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
 
 git clone https://github.com/pmem/pmemkv-java.git
 cd pmemkv-java
