@@ -64,6 +64,7 @@ RUN pacman -S --noconfirm \
 	llvm \
 	make \
 	numactl \
+	pandoc \
 	perl-text-diff \
 	pkg-config \
 	rapidjson \
