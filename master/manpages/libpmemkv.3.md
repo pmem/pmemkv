@@ -4,7 +4,7 @@ Content-Style: 'text/css'
 title: PMEMKV
 collection: libpmemkv
 header: PMEMKV
-date: pmemkv version 1.0.1
+secondary_title: pmemkv
 ...
 
 [comment]: <> (Copyright 2019, Intel Corporation)
@@ -170,7 +170,7 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 `int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c, void *arg);`
 
 :	Executes function `c` on record with key `k` (of length `kb`).
-	If record is present and no error occured the function returns PMEMKV\_STATUS\_OK.
+	If record is present and no error occurred the function returns PMEMKV\_STATUS\_OK.
 	If record does not exist PMEMKV\_STATUS\_NOT\_FOUND is returned.
 	Other possible return values are described in the *ERRORS* section.
 	Function `c` is called with the following parameters: pointer to a value, size of the value and `arg` specified by the user.
