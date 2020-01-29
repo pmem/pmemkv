@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,6 +42,10 @@ namespace kv
 
 cmap::cmap(std::unique_ptr<internal::config> cfg) : pmemobj_engine_base(cfg)
 {
+	static_assert(
+		sizeof(internal::cmap::string_t) == 40,
+		"Wrong size of cmap value and key. This probably means that std::string has size > 32");
+
 	LOG("Started ok");
 	Recover();
 }
