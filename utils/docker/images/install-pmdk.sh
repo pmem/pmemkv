@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,7 +31,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# install-pmdk.sh <package_type> - installs PMDK (stable) packages
+# install-pmdk.sh <package_type> - installs PMDK (stable) packages.
 #
 
 set -e
