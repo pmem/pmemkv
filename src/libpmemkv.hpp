@@ -152,6 +152,8 @@ enum class status {
 	TRANSACTION_SCOPE_ERROR =
 		PMEMKV_STATUS_TRANSACTION_SCOPE_ERROR, /**< an error with the scope of the
 							libpmemobj transaction */
+	DEFRAG_ERROR = PMEMKV_STATUS_DEFRAG_ERROR, /**< the defragmentation process failed
+						      (possibly in the middle of a run) */
 };
 
 /*! \class config
@@ -278,6 +280,7 @@ public:
 
 	status put(string_view key, string_view value) noexcept;
 	status remove(string_view key) noexcept;
+	status defrag(double start_percent = 0, double amount_percent = 100);
 
 private:
 	pmemkv_db *_db;
@@ -1208,6 +1211,25 @@ inline status db::put(string_view key, string_view value) noexcept
 inline status db::remove(string_view key) noexcept
 {
 	return static_cast<status>(pmemkv_remove(this->_db, key.data(), key.size()));
+}
+
+/**
+ * Defragments the given (by 'start_percent' and 'amount_percent') part
+ * of buckets of the hash map. The algorithm is 'opportunistic' -
+ * if it is not able to lock a bucket it will just skip it.
+ *
+ * This function implemented only by the 'cmap' engine.
+ *
+ * @param[in] start_percent starting percent of buckets to defragment from
+ * @param[in] amount_percent amount percent of buckets to defragment
+ *
+ * @return pmem::kv::status
+ */
+inline status db::defrag(double start_percent, double amount_percent)
+
+{
+	return static_cast<status>(
+		pmemkv_defrag(this->_db, start_percent, amount_percent));
 }
 
 /**

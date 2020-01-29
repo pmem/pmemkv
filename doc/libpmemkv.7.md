@@ -7,7 +7,7 @@ header: PMEMKV
 secondary_title: pmemkv
 ...
 
-[comment]: <> (Copyright 2019, Intel Corporation)
+[comment]: <> (Copyright 2019-2020, Intel Corporation)
 
 [comment]: <> (Redistribution and use in source and binary forms, with or without)
 [comment]: <> (modification, are permitted provided that the following conditions)
@@ -108,6 +108,8 @@ The following table shows three possible combinations of parameters (where '-' m
 
 A database file or a poolset file can also be created using **pmempool** utility (see **pmempool-create**(1)).
 When using **pmempool create**, "pmemkv" should be passed as layout. Only PMEMOBJ pools are supported.
+
+The 'cmap' engine is the only one that implements the pmemkv_defrag() function.
 
 ## vcmap
 
