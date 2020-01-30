@@ -75,6 +75,9 @@ if [[ "$command" == "" ]]; then
 		normal)
 			command="./run-build.sh";
 			;;
+		compatibility)
+			command="./run-compatibility.sh";
+			;;
 		building)
 			command="./run-test-building.sh";
 			;;
