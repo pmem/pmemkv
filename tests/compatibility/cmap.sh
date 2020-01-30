@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,14 +30,30 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-include(${SRC_DIR}/../helpers.cmake)
+#
+# cmap.sh -- runs cmap compatibility test
+#
 
-setup()
+set -e
 
-set(ENV{LD_LIBRARY_PATH} ${LIB_CREATE})
-execute(${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME} ${DIR}/pool_${TEST_NAME} create_ungraceful)
-set(ENV{LD_LIBRARY_PATH} ${LIB_OPEN})
-execute(${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME} ${DIR}/pool_${TEST_NAME} open)
-unset(ENV{LD_LIBRARY_PATH})
+binary1=$1
+binary2=$2
+testfile=$3
 
-cleanup()
+rm -f $testfile
+$binary1 $testfile create
+$binary2 $testfile open
+
+rm -f $testfile
+$binary1 $testfile create_ungraceful
+$binary2 $testfile open
+
+rm -f $testfile
+$binary2 $testfile create
+$binary1 $testfile open
+
+rm -f $testfile
+$binary2 $testfile create_ungraceful
+$binary1 $testfile open
+
+rm -f $testfile
