@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['ok',['OK',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231ae0aa021e21dddbd6d8cecec71e9cf564',1,'pmem::kv']]],
-  ['out_5fof_5fmemory',['OUT_OF_MEMORY',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231ac56ddb8056b120c9d5fee05981f219c6',1,'pmem::kv']]]
+  ['not_5ffound',['NOT_FOUND',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a8c02547a8a3b02382bac3557bcb2280d',1,'pmem::kv']]],
+  ['not_5fsupported',['NOT_SUPPORTED',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a5343bcd21aad65124478a61831f6949e',1,'pmem::kv']]]
 ];
