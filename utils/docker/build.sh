@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2017-2019, Intel Corporation
+# Copyright 2017-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -74,6 +74,9 @@ if [[ "$command" == "" ]]; then
 	case $TYPE in
 		normal)
 			command="./run-build.sh";
+			;;
+		compatibility)
+			command="./run-compatibility.sh";
 			;;
 		building)
 			command="./run-test-building.sh";

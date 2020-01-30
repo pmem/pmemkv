@@ -30,6 +30,7 @@ jobs:
                  "TYPE=building OS=fedora OS_VER=31 COVERAGE=1 PUSH_IMAGE=1 XXX_DISABLE_AUTO_DOC_UPDATE=1",
                  "TYPE=building OS=ubuntu OS_VER=19.10 COVERAGE=1 PUSH_IMAGE=1",
                  "TYPE=bindings OS=ubuntu OS_VER=19.10_bindings PUSH_IMAGE=1",
+                 "TYPE=compatibility OS=fedora OS_VER=31",
                  "TYPE=coverity OS=ubuntu OS_VER=19.10"]
     steps:
        - name: Clone the git repo
