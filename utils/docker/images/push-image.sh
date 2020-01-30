@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2016-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -45,7 +45,7 @@ function usage {
 	echo "Usage:"
 	echo "    push-image.sh <OS-VER>"
 	echo "where <OS-VER>, for example, can be 'fedora-30', provided " \
-		"a Docker image tagged with ${DOCKERHUB_REPO}:fedora-30 exists " \
+		"a Docker image tagged with ${DOCKERHUB_REPO}:1.0-fedora-30 exists " \
 		"locally."
 }
 
@@ -55,8 +55,8 @@ if [[ -z "$1" ]]; then
 	exit 1
 fi
 
-# Check if the image tagged with ${DOCKERHUB_REPO}:OS-VER exists locally
-if [[ ! $(docker images -a | awk -v pattern="^${DOCKERHUB_REPO}:$1\$" \
+# Check if the image tagged with ${DOCKERHUB_REPO}:1.0-OS-VER exists locally
+if [[ ! $(docker images -a | awk -v pattern="^${DOCKERHUB_REPO}:1.0-$1\$" \
 	'$1":"$2 ~ pattern') ]]
 then
 	echo "ERROR: wrong argument."
@@ -68,4 +68,4 @@ fi
 docker login -u="$DOCKERHUB_USER" -p="$DOCKERHUB_PASSWORD"
 
 # Push the image to the repository
-docker push ${DOCKERHUB_REPO}:$1
+docker push ${DOCKERHUB_REPO}:1.0-$1
