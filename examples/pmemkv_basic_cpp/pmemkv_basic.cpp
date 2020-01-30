@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -89,6 +89,10 @@ int main(int argc, char *argv[])
 		LOG("  visited: " << k.data());
 		return 0;
 	});
+
+	LOG("Defragmenting the database");
+	s = kv->defrag(0, 100);
+	assert(s == status::OK);
 
 	LOG("Removing existing key");
 	s = kv->remove("key1");

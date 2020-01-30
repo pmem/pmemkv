@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -108,6 +108,10 @@ int main(int argc, char *argv[])
 	s = pmemkv_remove(db, key1, strlen(key1));
 	assert(s == PMEMKV_STATUS_OK);
 	assert(pmemkv_exists(db, key1, strlen(key1)) == PMEMKV_STATUS_NOT_FOUND);
+
+	LOG("Defragmenting the database");
+	s = pmemkv_defrag(db, 0, 100);
+	assert(s == PMEMKV_STATUS_OK);
 
 	LOG("Closing database");
 	pmemkv_close(db);
