@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -88,7 +88,7 @@ private:
 	using key_type = storage_type;
 	using mapped_type = storage_type;
 	using map_allocator_type =
-		memkind_ns::allocator<std::pair<key_type, mapped_type>>;
+		memkind_ns::allocator<std::pair<const key_type, mapped_type>>;
 	using map_type = std::map<key_type, mapped_type, std::less<key_type>,
 				  std::scoped_allocator_adaptor<map_allocator_type>>;
 

@@ -42,6 +42,10 @@ namespace kv
 
 cmap::cmap(std::unique_ptr<internal::config> cfg) : pmemobj_engine_base(cfg)
 {
+	static_assert(
+		sizeof(internal::cmap::string_t) == 40,
+		"Wrong size of cmap value and key. This probably means that std::string has size > 32");
+
 	LOG("Started ok");
 	Recover();
 }
