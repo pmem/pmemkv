@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -81,6 +81,7 @@ public:
 	virtual status get(string_view key, get_v_callback *callback, void *arg) = 0;
 	virtual status put(string_view key, string_view value) = 0;
 	virtual status remove(string_view key) = 0;
+	virtual status defrag(double start_percent, double amount_percent);
 
 private:
 	static void check_config_null(const std::string &engine_name,

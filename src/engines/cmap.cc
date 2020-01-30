@@ -122,6 +122,25 @@ status cmap::remove(string_view key)
 	return erased ? status::OK : status::NOT_FOUND;
 }
 
+status cmap::defrag(double start_percent, double amount_percent)
+{
+	LOG("defrag: start_percent = " << start_percent
+				       << " amount_percent = " << amount_percent);
+	check_outside_tx();
+
+	try {
+		container->defragment(start_percent, amount_percent);
+	} catch (std::range_error &e) {
+		out_err_stream("defrag") << e.what();
+		return status::INVALID_ARGUMENT;
+	} catch (pmem::defrag_error &e) {
+		out_err_stream("defrag") << e.what();
+		return status::DEFRAG_ERROR;
+	}
+
+	return status::OK;
+}
+
 void cmap::Recover()
 {
 	if (!OID_IS_NULL(*root_oid)) {

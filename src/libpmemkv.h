@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -51,6 +51,7 @@ extern "C" {
 #define PMEMKV_STATUS_OUT_OF_MEMORY 8
 #define PMEMKV_STATUS_WRONG_ENGINE_NAME 9
 #define PMEMKV_STATUS_TRANSACTION_SCOPE_ERROR 10
+#define PMEMKV_STATUS_DEFRAG_ERROR 11
 
 typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;
@@ -107,6 +108,8 @@ int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
 int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb);
 
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
+
+int pmemkv_defrag(pmemkv_db *db, double start_percent, double amount_percent);
 
 const char *pmemkv_errormsg(void);
 
