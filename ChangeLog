@@ -1,3 +1,17 @@
+Thu Jan 30 2019 Szymon Romik <szymon.romik@intel.com>
+
+	* Version 1.1-rc1
+
+	This release introduces a defragmentation feature and a cmap engine
+	optimizations.
+
+	Features:
+	- API extension for defragmentation (currently supported only by cmap engine)
+
+	Optimizations:
+	- faster restart time of cmap engine
+	- faster put method execution for cmap engine
+
 Mon Oct 28 2019 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.0.1
