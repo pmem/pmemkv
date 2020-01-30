@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -120,6 +120,7 @@ TEST_F(TreePmemobjTest, SimpleTest)
 	value = "";
 	kv->get("key1", [&](string_view v) { value.append(v.data(), v.size()); });
 	ASSERT_TRUE(value == "value1");
+	ASSERT_TRUE(kv->defrag() == status::NOT_SUPPORTED);
 }
 
 TEST_F(TreePmemobjTest, BinaryKeyTest)
