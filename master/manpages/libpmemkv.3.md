@@ -311,4 +311,4 @@ int main(int argc, char *argv[])
 
 # SEE ALSO #
 
-**libpmemkv**(7), **libpmemkv_config**(3) and **<http://pmem.io>**
+**libpmemkv**(7), **libpmemkv_config**(3) and **<https://pmem.io>**
