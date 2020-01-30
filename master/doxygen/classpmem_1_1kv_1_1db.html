@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.0.1-git121.g4a4c9a0</span>
+   &#160;<span id="projectnumber">1.0.1-git129.g55f8d11</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -180,6 +180,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a31167b93a66c88559ff11010e1e130c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a31167b93a66c88559ff11010e1e130c1">remove</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key) noexcept</td></tr>
 <tr class="memdesc:a31167b93a66c88559ff11010e1e130c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes from database record with given <em>key</em>.  <a href="#a31167b93a66c88559ff11010e1e130c1">More...</a><br /></td></tr>
 <tr class="separator:a31167b93a66c88559ff11010e1e130c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a247061eab0155ce92b24885be6afd207"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a247061eab0155ce92b24885be6afd207">defrag</a> (double start_percent=0, double amount_percent=100)</td></tr>
+<tr class="memdesc:a247061eab0155ce92b24885be6afd207"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defragments approximately 'amount_percent' percent of elements in the database starting from 'start_percent' percent of elements.  <a href="#a247061eab0155ce92b24885be6afd207">More...</a><br /></td></tr>
+<tr class="separator:a247061eab0155ce92b24885be6afd207"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -604,6 +607,52 @@ Private Attributes</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the lower bound of counting </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">cnt</td><td>number of records in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a> matching query</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+
+</div>
+</div>
+<a id="a247061eab0155ce92b24885be6afd207"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a247061eab0155ce92b24885be6afd207">&#9670;&nbsp;</a></span>defrag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::defrag </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>start_percent</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>amount_percent</em> = <code>100</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Defragments approximately 'amount_percent' percent of elements in the database starting from 'start_percent' percent of elements. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">start_percent</td><td>starting percent of elements to defragment from </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">amount_percent</td><td>amount percent of elements to defragment</td></tr>
   </table>
   </dd>
 </dl>
