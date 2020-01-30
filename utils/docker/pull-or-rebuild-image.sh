@@ -160,8 +160,8 @@ for file in $files; do
 		# repository's master branch, and the Travis build is not
 		# of the "pull_request" type). In that case, create the empty
 		# file.
-		if [[ $TRAVIS_REPO_SLUG == "${GITHUB_REPO}" \
-			&& $TRAVIS_BRANCH == "master" \
+		if [[ "${TRAVIS_REPO_SLUG}" == "${GITHUB_REPO}" \
+			&& ($TRAVIS_BRANCH == stable-* || $TRAVIS_BRANCH == master) \
 			&& $TRAVIS_EVENT_TYPE != "pull_request"
 			&& $PUSH_IMAGE == "1" ]]
 		then
@@ -176,4 +176,4 @@ done
 
 # Getting here means rebuilding the Docker image is not required.
 # Pull the image from Docker Hub.
-docker pull ${DOCKERHUB_REPO}:${OS}-${OS_VER}
+docker pull ${DOCKERHUB_REPO}:1.1-${OS}-${OS_VER}

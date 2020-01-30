@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2017-2019, Intel Corporation
+# Copyright 2017-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -67,7 +67,7 @@ else
 	fi
 fi
 
-imageName=${DOCKERHUB_REPO}:${OS}-${OS_VER}
+imageName=${DOCKERHUB_REPO}:1.1-${OS}-${OS_VER}
 containerName=pmemkv-${OS}-${OS_VER}
 
 if [[ "$command" == "" ]]; then
