@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 
 #include <cstdio>
+#include <memory>
 
 using namespace pmem::kv;
 
@@ -48,7 +49,7 @@ private:
 	std::string PATH = test_path + "/vsmap_test";
 
 public:
-	db *kv;
+	std::unique_ptr<db> kv = nullptr;
 
 	VSMapBaseTest()
 	{
@@ -65,7 +66,7 @@ public:
 		if (cfg_s != status::OK)
 			throw std::runtime_error("putting 'size' to config failed");
 
-		kv = new db;
+		kv.reset(new db);
 		auto s = kv->open("vsmap", std::move(cfg));
 		if (s != status::OK)
 			throw std::runtime_error(errormsg());
@@ -74,7 +75,6 @@ public:
 	~VSMapBaseTest()
 	{
 		kv->close();
-		delete kv;
 		std::remove(PATH.c_str());
 	}
 };

@@ -33,6 +33,7 @@
 #include "../../src/libpmemkv.hpp"
 #include "gtest/gtest.h"
 #include <cstdio>
+#include <memory>
 #include <string>
 #include <thread>
 #include <vector>
@@ -64,7 +65,7 @@ private:
 	std::string PATH = test_path + "/cmap_test";
 
 public:
-	db *kv;
+	std::unique_ptr<db> kv = nullptr;
 
 	CMapBaseTest()
 	{
@@ -75,13 +76,12 @@ public:
 	~CMapBaseTest()
 	{
 		kv->close();
-		delete kv;
 		std::remove(PATH.c_str());
 	}
 	void Restart()
 	{
 		kv->close();
-		delete kv;
+		kv.reset(nullptr);
 		Start(false);
 	}
 
@@ -106,7 +106,7 @@ protected:
 					"putting 'size' to config failed");
 		}
 
-		kv = new db;
+		kv.reset(new db);
 		auto s = kv->open("cmap", std::move(cfg));
 		if (s != status::OK)
 			throw std::runtime_error(errormsg());
