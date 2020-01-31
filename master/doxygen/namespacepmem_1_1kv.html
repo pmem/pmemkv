@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.0.1-git121.g4a4c9a0</span>
+   &#160;<span id="projectnumber">1.1-rc1.git9.g5ea4325</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -121,7 +121,8 @@ Enumerations</h2></td></tr>
 <br />
 &#160;&#160;<a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231ac56ddb8056b120c9d5fee05981f219c6">status::OUT_OF_MEMORY</a>, 
 <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a1b216524ee497e527dfea31344c137e2">status::WRONG_ENGINE_NAME</a>, 
-<a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a563d1c46f9b9ece2ee9fc95e85ce2cfe">status::TRANSACTION_SCOPE_ERROR</a>
+<a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a563d1c46f9b9ece2ee9fc95e85ce2cfe">status::TRANSACTION_SCOPE_ERROR</a>, 
+<a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a0f3ff38a7ae1da8aab727eeabca0905a">status::DEFRAG_ERROR</a> = PMEMKV_STATUS_DEFRAG_ERROR
 <br />
  }</td></tr>
 <tr class="memdesc:a966ec5140bba4b6f4cc4e9aa15979231"><td class="mdescLeft">&#160;</td><td class="mdescRight">Status returned by pmemkv functions.  <a href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">More...</a><br /></td></tr>
@@ -254,6 +255,8 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="a966ec5140bba4b6f4cc4e9aa15979231a1b216524ee497e527dfea31344c137e2"></a>WRONG_ENGINE_NAME&#160;</td><td class="fielddoc"><p>engine name does not match any available engine </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a966ec5140bba4b6f4cc4e9aa15979231a563d1c46f9b9ece2ee9fc95e85ce2cfe"></a>TRANSACTION_SCOPE_ERROR&#160;</td><td class="fielddoc"><p>an error with the scope of the libpmemobj transaction </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a966ec5140bba4b6f4cc4e9aa15979231a0f3ff38a7ae1da8aab727eeabca0905a"></a>DEFRAG_ERROR&#160;</td><td class="fielddoc"><p>the defragmentation process failed (possibly in the middle of a run) </p>
 </td></tr>
 </table>
 
