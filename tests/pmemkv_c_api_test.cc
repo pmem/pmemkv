@@ -72,8 +72,7 @@ public:
 	void TearDown()
 	{
 		pmemkv_close(db);
-		if (params.force_create == 1)
-			std::remove(path.c_str());
+		std::remove(path.c_str());
 	}
 };
 
