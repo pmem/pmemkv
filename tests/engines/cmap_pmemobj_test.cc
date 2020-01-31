@@ -36,6 +36,7 @@
 #include <cstdio>
 #include <libpmemobj++/persistent_ptr.hpp>
 #include <libpmemobj++/transaction.hpp>
+#include <memory>
 
 using namespace pmem::kv;
 
@@ -47,7 +48,7 @@ private:
 	std::string PATH = test_path + "/cmap_pmemobj_test";
 
 public:
-	db *kv;
+	std::unique_ptr<db> kv = nullptr;
 
 	CMapPmemobjTest()
 	{
@@ -57,14 +58,13 @@ public:
 
 	~CMapPmemobjTest()
 	{
-		delete kv;
 		pmpool.close();
 
 		std::remove(PATH.c_str());
 	}
 	void Restart()
 	{
-		delete kv;
+		kv.reset(nullptr);
 		pmpool.close();
 		Start(false);
 	}
@@ -88,7 +88,7 @@ protected:
 		if (cfg_o != status::OK)
 			throw std::runtime_error("putting 'oid' to config failed");
 
-		kv = new db;
+		kv.reset(new db);
 		auto s = kv->open("cmap", std::move(cfg));
 		if (s != status::OK)
 			throw std::runtime_error(errormsg());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +33,7 @@
 #include "../../src/libpmemkv.hpp"
 #include "gtest/gtest.h"
 #include <cstdio>
+#include <memory>
 #include <sys/stat.h>
 
 using namespace pmem::kv;
@@ -47,7 +48,7 @@ private:
 	std::string PATH = test_path + "/vcmap_test";
 
 public:
-	db *kv;
+	std::unique_ptr<db> kv = nullptr;
 
 	VCMapBaseTest()
 	{
@@ -64,7 +65,7 @@ public:
 		if (cfg_s != status::OK)
 			throw std::runtime_error("putting 'size' to config failed");
 
-		kv = new db;
+		kv.reset(new db);
 		auto s = kv->open("vcmap", std::move(cfg));
 		if (s != status::OK)
 			throw std::runtime_error(errormsg());
@@ -73,7 +74,6 @@ public:
 	~VCMapBaseTest()
 	{
 		kv->close();
-		delete kv;
 		std::remove(PATH.c_str());
 	}
 };
