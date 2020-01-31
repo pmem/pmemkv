@@ -50,6 +50,8 @@ public:
 	void SetUp()
 	{
 		path = params.get_path();
+		std::remove(path.c_str());
+
 		if (!params.use_file)
 			mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
@@ -72,8 +74,7 @@ public:
 	void TearDown()
 	{
 		pmemkv_close(db);
-		if (params.force_create == 1)
-			std::remove(path.c_str());
+		std::remove(path.c_str());
 	}
 };
 
