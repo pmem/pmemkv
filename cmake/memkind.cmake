@@ -1,4 +1,4 @@
-# Copyright 2017-2019, Intel Corporation
+# Copyright 2017-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -55,7 +55,10 @@ endif()
 link_directories(${MEMKIND_LIBRARY_DIRS})
 include_directories(${MEMKIND_INCLUDE_DIRS})
 
-# XXX temporary solution for https://github.com/pmem/pmemkv/issues/429
+# XXX To be removed when memkind updated to ver. >= 1.10
+# Check if libmemkind namespace is available, if not
+# the old namespace will be used for 'pmem::allocator'.
+# ref: https://github.com/pmem/pmemkv/issues/429
 set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
 set(CMAKE_REQUIRED_INCLUDES ${MEMKIND_INCLUDE_DIRS})
 CHECK_CXX_SOURCE_COMPILES(
@@ -69,8 +72,4 @@ set(CMAKE_REQUIRED_INCLUDES ${SAVED_CMAKE_REQUIRED_INCLUDES})
 
 if(LIBMEMKIND_NAMESPACE_PRESENT)
 	add_definitions(-DUSE_LIBMEMKIND_NAMESPACE)
-else()
-	message(STATUS "libmemkind namespace not found (available in memkind >= 1.10; "
-		"not yet released at this time; you want at least commit 3f321feb). "
-		"Old namespace will be used for 'pmem::allocator'.")
 endif()
