@@ -32,7 +32,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(pmemkv_pmemobj CXX)
 
-set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.8)
+set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.9)
 
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)

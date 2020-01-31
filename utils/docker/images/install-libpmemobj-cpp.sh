@@ -45,8 +45,8 @@ fi
 PREFIX=/usr
 PACKAGE_TYPE=$1
 
-# 1.9-rc1; 27.01.2020
-LIBPMEMOBJ_CPP_VERSION=132f0d8339175496e3776e13f34f5b9f9bbe0b4b
+# v1.9; 31.01.2020
+LIBPMEMOBJ_CPP_VERSION="1.9"
 
 git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
 cd libpmemobj-cpp
