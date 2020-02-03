@@ -67,7 +67,7 @@ else
 	fi
 fi
 
-imageName=${DOCKERHUB_REPO}:1.1-${OS}-${OS_VER}
+imageName=${DOCKERHUB_REPO}:1.2-${OS}-${OS_VER}
 containerName=pmemkv-${OS}-${OS_VER}
 
 if [[ "$command" == "" ]]; then
