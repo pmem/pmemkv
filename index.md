@@ -9,7 +9,7 @@ layout: pmdk
 Rather than being tied to a single language or backing implementation,
 **pmemkv** provides different options for language bindings and storage engines.
 
-The C API of pmemkv is documented in the following manuals:
+The **C API** of pmemkv is documented in the following manuals:
 
 for the current **master**:
 
@@ -18,16 +18,24 @@ for the current **master**:
 * [libpmemkv_config.3](./master/manpages/libpmemkv_config.3.html)
 * [libpmemkv_json_config.3](./master/manpages/libpmemkv_json_config.3.html)
 
-for **v1.0**:
+for version **1.1**:
+
+* [libpmemkv.3](./v1.1/manpages/libpmemkv.3.html)
+* [libpmemkv.7](./v1.1/manpages/libpmemkv.7.html)
+* [libpmemkv_config.3](./v1.1/manpages/libpmemkv_config.3.html)
+* [libpmemkv_json_config.3](./v1.1/manpages/libpmemkv_json_config.3.html)
+
+for version **1.0**:
 
 * [libpmemkv.3](./v1.0/manpages/libpmemkv.3.html)
 * [libpmemkv.7](./v1.0/manpages/libpmemkv.7.html)
 * [libpmemkv_config.3](./v1.0/manpages/libpmemkv_config.3.html)
 * [libpmemkv_json_config.3](./v1.0/manpages/libpmemkv_json_config.3.html)
 
-The C++ API of pmemkv is documented in the Doxygen documentation listed below:
+The **C++ API** of pmemkv is documented in the Doxygen documentation listed below:
 
 * [master](./master/doxygen/index.html)
+* [v1.1](./v1.1/doxygen/index.html)
 * [v1.0](./v1.0/doxygen/index.html)
 
 # Blog entries
