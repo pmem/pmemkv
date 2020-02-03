@@ -59,7 +59,8 @@ include_directories(${MEMKIND_INCLUDE_DIRS})
 set(SAVED_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
 set(CMAKE_REQUIRED_INCLUDES ${MEMKIND_INCLUDE_DIRS})
 CHECK_CXX_SOURCE_COMPILES(
-		"#include \"pmem_allocator.h\"
+		"#include <stdexcept>
+		#include \"pmem_allocator.h\"
 		int main(void) {
 		libmemkind::pmem::allocator<int> *alc = nullptr;
 		(void)alc;
