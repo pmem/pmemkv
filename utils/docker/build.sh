@@ -97,8 +97,8 @@ fi
 if [ -n "$DNS_SERVER" ]; then DNS_SETTING=" --dns=$DNS_SERVER "; fi
 
 
-# Only run doc update on pmem/pmemkv master branch
-if [[ "$TRAVIS_BRANCH" != "master" || "$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_REPO_SLUG" != "${GITHUB_REPO}" ]]; then
+# Only run doc update on $GITHUB_REPO master or stable branch
+if [[ "$TRAVIS_BRANCH" != "master" || -z "${TARGET_BRANCHES[${TRAVIS_BRANCH}]}" || "$TRAVIS_PULL_REQUEST" != "false" || "$TRAVIS_REPO_SLUG" != "${GITHUB_REPO}" ]]; then
 	AUTO_DOC_UPDATE=0
 fi
 
