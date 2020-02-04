@@ -111,7 +111,7 @@ function run_test_check_support_cpp20_gcc() {
 	mkdir $WORKDIR/build
 	cd $WORKDIR/build
 
-	CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
+	CC=gcc CXX=g++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 		-DTEST_DIR=$TEST_DIR \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX \
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
@@ -136,7 +136,7 @@ function run_test_check_support_cpp20_clang() {
 	mkdir $WORKDIR/build
 	cd $WORKDIR/build
 
-	CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
+	CC=clang CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
 		-DTEST_DIR=$TEST_DIR \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX \
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
