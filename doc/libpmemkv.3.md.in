@@ -237,6 +237,27 @@ is to compare status with PMEMKV_STATUS_OK.
 @C_EXAMPLE@
 ```
 
+## Common usage mistake ##
+
+Common mistake in pmemkv API usage is to dereference pointer to data stored in pmemkv outside of callback function scope.
+
+```c
+std::string value;
+const char* ptr;
+size_t sz;
+kv->get("key1", [&](string_view v) {
+	/* Save pointer to data to use it later outside of callback scope */
+	ptr = v.data();
+	sz = v.size();
+});
+kv->remove("key");
+/* ERROR!
+ * Using this pointer outside of a callback function may cause access to some random data
+ * or a segmentation fault. At that point, ptr should be considered as invalid.
+ */
+value.append(ptr, sz);
+```
+
 # SEE ALSO #
 
 **libpmemkv**(7), **libpmemkv_config**(3) and **<https://pmem.io>**
