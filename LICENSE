@@ -37,7 +37,7 @@ with the following exceptions:
   * v1.0/doxygen/jquery.js
   * v1.1/doxygen/jquery.js
   are dual licensed under the MIT or GPL Version 2 license
-  (see: http://jquery.org/license).
+  (see: https://jquery.org/license).
 
 * These files:
   * sizzle.js (included in master/doxygen/jquery.js)
