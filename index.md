@@ -1,6 +1,6 @@
 ---
 title: pmemkv
-layout: pmdk
+layout: main
 ---
 
 # pmemkv
