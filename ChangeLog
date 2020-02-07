@@ -1,6 +1,6 @@
-Wed Feb 05 2020 Igor Chorążewicz <igor.chorazewicz@intel.com>
+Fri Feb 07 2020 Igor Chorążewicz <igor.chorazewicz@intel.com>
 
-	* Version 1.0.2-rc1
+	* Version 1.0.2
 
 	This is a bugfix release for pmemkv 1.0
 
