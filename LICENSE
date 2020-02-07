@@ -44,7 +44,7 @@ with the following exceptions:
   * sizzle.js (included in v1.0/doxygen/jquery.js)
   * sizzle.js (included in v1.1/doxygen/jquery.js)
   are released under the MIT, BSD and GPL licenses
-  (see: http://sizzle.com).
+  (see: https://github.com/jquery/sizzle/blob/master/LICENSE.txt).
 
 * These files:
   * master/doxygen/search/search.js
