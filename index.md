@@ -1,6 +1,6 @@
 ---
 title: pmemkv
-layout: pmdk
+layout: main
 ---
 
 # pmemkv
@@ -42,6 +42,6 @@ The **C++ API** of pmemkv is documented in the Doxygen documentation listed belo
 
 The following series of blog articles provides an introduction to **pmemkv**:
 
-* [Introduction](http://pmem.io/2017/02/21/pmemkv-intro.html)
-* [Zero-copy leaf splits in pmemkv](http://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html)
-* [Benchmarking with different storage engines using pmemkv](http://pmem.io/2017/12/27/pmemkv-benchmarking-engines.html)
+* [Introduction](https://pmem.io/2017/02/21/pmemkv-intro.html)
+* [Zero-copy leaf splits in pmemkv](https://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html)
+* [Benchmarking with different storage engines using pmemkv](https://pmem.io/2017/12/27/pmemkv-benchmarking-engines.html)
