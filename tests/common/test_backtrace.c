@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019, Intel Corporation
+ * Copyright 2015-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -55,8 +55,7 @@
 /*
  * test_dump_backtrace -- dump stacktrace to error log using libunwind
  */
-void
-test_dump_backtrace(void)
+void test_dump_backtrace(void)
 {
 	unw_context_t context;
 	unw_proc_info_t pip;
@@ -64,16 +63,14 @@ test_dump_backtrace(void)
 	pip.unwind_info = NULL;
 	int ret = unw_getcontext(&context);
 	if (ret) {
-		fprintf(stderr, "unw_getcontext: %s [%d]\n", unw_strerror(ret),
-			ret);
+		fprintf(stderr, "unw_getcontext: %s [%d]\n", unw_strerror(ret), ret);
 		return;
 	}
 
 	unw_cursor_t cursor;
 	ret = unw_init_local(&cursor, &context);
 	if (ret) {
-		fprintf(stderr, "unw_init_local: %s [%d]\n", unw_strerror(ret),
-			ret);
+		fprintf(stderr, "unw_init_local: %s [%d]\n", unw_strerror(ret), ret);
 		return;
 	}
 
@@ -94,8 +91,7 @@ test_dump_backtrace(void)
 		ret = unw_get_proc_name(&cursor, procname, PROCNAMELEN, &off);
 		if (ret && ret != -UNW_ENOMEM) {
 			if (ret != -UNW_EUNSPEC) {
-				fprintf(stderr,
-					"[%u] unw_get_proc_name: %s [%d]\n", i,
+				fprintf(stderr, "[%u] unw_get_proc_name: %s [%d]\n", i,
 					unw_strerror(ret), ret);
 			}
 
@@ -106,8 +102,7 @@ test_dump_backtrace(void)
 		Dl_info dlinfo;
 		const char *fname = "?";
 
-		if (dladdr(ptr, &dlinfo) && dlinfo.dli_fname &&
-		    *dlinfo.dli_fname)
+		if (dladdr(ptr, &dlinfo) && dlinfo.dli_fname && *dlinfo.dli_fname)
 			fname = dlinfo.dli_fname;
 
 		printf("%u: %s (%s%s+0x%lx) [%p]\n", i++, fname, procname,
@@ -115,8 +110,7 @@ test_dump_backtrace(void)
 
 		ret = unw_step(&cursor);
 		if (ret < 0)
-			fprintf(stderr, "unw_step: %s [%d]\n",
-				unw_strerror(ret), ret);
+			fprintf(stderr, "unw_step: %s [%d]\n", unw_strerror(ret), ret);
 	}
 }
 #else /* USE_LIBUNWIND */
@@ -130,8 +124,7 @@ test_dump_backtrace(void)
 /*
  * test_dump_backtrace -- dump stacktrace to error log using libc's backtrace
  */
-void
-test_dump_backtrace(void)
+void test_dump_backtrace(void)
 {
 	int j, nptrs;
 	void *buffer[BSIZE];
@@ -162,8 +155,7 @@ test_dump_backtrace(void)
 /*
  * test_dump_backtrace -- dump stacktrace to error log
  */
-void
-test_dump_backtrace(void)
+void test_dump_backtrace(void)
 {
 	void *buffer[BSIZE];
 	unsigned nptrs;
@@ -179,8 +171,7 @@ test_dump_backtrace(void)
 
 	for (unsigned i = 0; i < nptrs; i++) {
 		if (SymFromAddr(proc_hndl, (DWORD64)buffer[i], 0, symbol)) {
-			printf("%u: %s [%p]\n", nptrs - i - 1, symbol->Name,
-			       buffer[i]);
+			printf("%u: %s [%p]\n", nptrs - i - 1, symbol->Name, buffer[i]);
 		} else {
 			printf("%u: [%p]\n", nptrs - i - 1, buffer[i]);
 		}
@@ -196,8 +187,7 @@ test_dump_backtrace(void)
 /*
  * test_sighandler -- fatal signal handler
  */
-void
-test_sighandler(int sig)
+void test_sighandler(int sig)
 {
 	printf("\nSignal %d, backtrace:\n", sig);
 	test_dump_backtrace();
@@ -209,8 +199,7 @@ test_sighandler(int sig)
  * test_register_sighandlers -- register signal handlers for various fatal
  * signals
  */
-void
-test_register_sighandlers(void)
+void test_register_sighandlers(void)
 {
 	signal(SIGSEGV, test_sighandler);
 	signal(SIGABRT, test_sighandler);
