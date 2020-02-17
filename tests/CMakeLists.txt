@@ -1,5 +1,5 @@
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -32,18 +32,33 @@
 include(ctest_helpers.cmake)
 
 add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/*.h
+		${CMAKE_CURRENT_SOURCE_DIR}/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/common/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/common/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/config/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.cc)
 
-add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/*.h
-		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.cc)
+add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/common/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/config/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.*)
+
+add_custom_target(tests)
+
+add_library(test_backtrace STATIC common/test_backtrace.c)
+if(LIBUNWIND_FOUND)
+	target_compile_definitions(test_backtrace PUBLIC USE_LIBUNWIND=1)
+endif()
+
+find_pmreorder()
 
 if (COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
@@ -231,30 +246,19 @@ if(ENGINE_TREE3)
 	target_link_libraries(pmemkv_test ${LIBPMEMOBJ++_LIBRARIES})
 endif()
 
-# save lists of source files and all tests in files to check them in the first test
-set(FILE_TEST_FILES ${CMAKE_CURRENT_BINARY_DIR}/test_files.txt)
-set(FILE_ALL_TESTS ${CMAKE_CURRENT_BINARY_DIR}/list_all_tests.txt)
-file(WRITE ${FILE_TEST_FILES} "${TEST_FILES}")
-file(WRITE ${FILE_ALL_TESTS} "${list_all_tests}")
-
 build_wrong_engine_name_test()
-
-test("run-binary" wrong_engine_name_test wrong_engine_name_test none)
+add_test_generic(NAME wrong_engine_name_test TRACERS none)
 
 if(BUILD_EXAMPLES AND ENGINE_CMAP)
 	build_example_pmemkv_basic_c()
 	build_example_pmemkv_basic_cpp()
 	build_example_pmemkv_pmemobj_cpp()
-	test("run-binary" ex_pmemkv_basic_c ex_pmemkv_basic_c none)
-	test("run-binary" ex_pmemkv_basic_cpp ex_pmemkv_basic_cpp none)
-	test("run-binary" ex_pmemkv_pmemobj_cpp ex_pmemkv_pmemobj_cpp none)
+
+	add_test_generic(NAME ex_pmemkv_basic_c TRACERS none)
+	add_test_generic(NAME ex_pmemkv_basic_cpp TRACERS none)
+	add_test_generic(NAME ex_pmemkv_pmemobj_cpp TRACERS none)
 elseif(BUILD_EXAMPLES AND NOT ENGINE_CMAP)
 	message(WARNING
 		"Examples use cmap engine, which is disabled, hence their execution "
 		"is also disabled. If you want to run them use -DENGINE_CMAP=ON option.")
-endif()
-
-# test pmreorder framework
-if(PMREORDER_SUPPORTED)
-	test("run-pmreorder-test" wrong_engine_name_test-pmreorder wrong_engine_name_test pmreorder)
 endif()

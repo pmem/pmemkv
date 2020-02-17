@@ -37,7 +37,6 @@ set(TEST_ROOT_DIR ${PROJECT_SOURCE_DIR}/tests)
 
 set(GLOBAL_TEST_ARGS
 	-DPERL_EXECUTABLE=${PERL_EXECUTABLE}
-	-DMATCH_SCRIPT=${PROJECT_SOURCE_DIR}/tests/match
 	-DPARENT_DIR=${TEST_DIR}
 	-DTESTS_USE_FORCED_PMEM=${TESTS_USE_FORCED_PMEM}
 	-DTEST_ROOT_DIR=${TEST_ROOT_DIR})
@@ -46,8 +45,8 @@ if(TRACE_TESTS)
 	set(GLOBAL_TEST_ARGS ${GLOBAL_TEST_ARGS} --trace-expand)
 endif()
 
-set(INCLUDE_DIRS ${LIBPMEMOBJ_INCLUDE_DIRS} ${LIBPMEM_INCLUDE_DIRS} common/ .. .)
-set(LIBS_DIRS ${LIBPMEMOBJ_LIBRARY_DIRS} ${LIBPMEM_LIBRARY_DIRS})
+set(INCLUDE_DIRS ${LIBPMEMOBJ++_INCLUDE_DIRS} common/ ../src .)
+set(LIBS_DIRS ${LIBPMEMOBJ++_LIBRARY_DIRS})
 
 include_directories(${INCLUDE_DIRS})
 link_directories(${LIBS_DIRS})
@@ -65,40 +64,7 @@ function(find_gdb)
 	endif()
 endfunction()
 
-function(find_pmemcheck)
-	set(ENV{PATH} ${VALGRIND_PREFIX}/bin:$ENV{PATH})
-	execute_process(COMMAND valgrind --tool=pmemcheck --help
-			RESULT_VARIABLE VALGRIND_PMEMCHECK_RET
-			OUTPUT_QUIET
-			ERROR_QUIET)
-	if(VALGRIND_PMEMCHECK_RET)
-		set(VALGRIND_PMEMCHECK_FOUND 0 CACHE INTERNAL "")
-	else()
-		set(VALGRIND_PMEMCHECK_FOUND 1 CACHE INTERNAL "")
-	endif()
-
-	if(VALGRIND_PMEMCHECK_FOUND)
-		execute_process(COMMAND valgrind --tool=pmemcheck true
-				ERROR_VARIABLE PMEMCHECK_OUT
-				OUTPUT_QUIET)
-
-		string(REGEX MATCH ".*pmemcheck-([0-9.]*),.*" PMEMCHECK_OUT "${PMEMCHECK_OUT}")
-		set(PMEMCHECK_VERSION ${CMAKE_MATCH_1} CACHE INTERNAL "")
-	else()
-		message(WARNING "Valgrind pmemcheck NOT found. Pmemcheck tests will not be performed.")
-	endif()
-endfunction()
-
-function(find_packages)
-	if(PKG_CONFIG_FOUND)
-		pkg_check_modules(CURSES QUIET ncurses)
-	else()
-		# Specifies that we want FindCurses to find ncurses and not just any
-		# curses library
-		set(CURSES_NEED_NCURSES TRUE)
-		find_package(Curses QUIET)
-	endif()
-
+function(find_pmreorder)
 	if(PKG_CONFIG_FOUND)
 		pkg_check_modules(LIBUNWIND QUIET libunwind)
 	else()
@@ -113,8 +79,7 @@ function(find_packages)
 			if ((NOT(PMEMCHECK_VERSION LESS 1.0)) AND PMEMCHECK_VERSION LESS 2.0)
 				find_program(PMREORDER names pmreorder HINTS ${LIBPMEMOBJ_PREFIX}/bin)
 
-				# copy_on_write support since libpmemobj 1.6
-				if(PMREORDER AND NOT (LIBPMEMOBJ_VERSION_MINOR LESS 6))
+				if(PMREORDER)
 					set(ENV{PATH} ${LIBPMEMOBJ_PREFIX}/bin:$ENV{PATH})
 					set(PMREORDER_SUPPORTED true CACHE INTERNAL "pmreorder support")
 				endif()
@@ -122,7 +87,7 @@ function(find_packages)
 				message(STATUS "Pmreorder will not be used. Pmemcheck must be installed in version 1.X")
 			endif()
 		elseif(TESTS_USE_VALGRIND)
-			message(WARNING "Valgrind not found. Valgrind tests will not be performed.")
+			message(WARNING "Valgrind not foulibpmemobj-cpp/pullsnd. Valgrind tests will not be performed.")
 		endif()
 	endif()
 endfunction()
@@ -147,45 +112,16 @@ function(build_test name)
 	set(srcs ${ARGN})
 	prepend(srcs ${CMAKE_CURRENT_SOURCE_DIR} ${srcs})
 
-	add_cppstyle(tests-${name} ${srcs})
-	add_check_whitespace(tests-${name} ${srcs})
-
 	add_executable(${name} ${srcs})
-	target_link_libraries(${name} ${LIBPMEMOBJ_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} test_backtrace valgrind_internal)
+	target_link_libraries(${name} ${LIBPMEMOBJ_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} pmemkv test_backtrace)
 	if(LIBUNWIND_FOUND)
 		target_link_libraries(${name} ${LIBUNWIND_LIBRARIES} ${CMAKE_DL_LIBS})
 	endif()
 	if(WIN32)
 		target_link_libraries(${name} dbghelp)
 	endif()
-	target_compile_definitions(${name} PRIVATE TESTS_LIBPMEMOBJ_VERSION=0x${LIBPMEMOBJ_VERSION_NUM})
 
 	add_dependencies(tests ${name})
-endfunction()
-
-# Function to build a test with mocked pmemobj_defrag() function
-function(build_test_defrag name)
-	build_test(${name} ${ARGN})
-	if (NOT WIN32)
-		# target_link_options() should be used below,
-		# but it is available since CMake v3.13
-		target_link_libraries(${name} "-Wl,--wrap=pmemobj_defrag")
-	endif()
-endfunction()
-
-function(build_test_tbb name)
-	build_test(${name} ${ARGN})
-	target_link_libraries(${name} ${TBB_LIBRARIES})
-endfunction()
-
-# Function to build a TBB test with mocked pmemobj_defrag() function
-function(build_test_tbb_defrag name)
-	build_test_tbb(${name} ${ARGN})
-	if (NOT WIN32)
-		# target_link_options() should be used below,
-		# but it is available since CMake v3.13
-		target_link_libraries(${name} "-Wl,--wrap=pmemobj_defrag")
-	endif()
 endfunction()
 
 set(vg_tracers memcheck helgrind drd pmemcheck)
@@ -234,7 +170,7 @@ function(skip_test name message)
 	set_tests_properties(${name}_${message} PROPERTIES COST 0)
 endfunction()
 
-# adds testcase with name, tracer, and cmake_script responsible for running it
+# adds testcase only if tracer is found and target is build, skips adding test otherwise
 function(add_test_common name tracer testcase cmake_script)
 	if(${tracer} STREQUAL "")
 	    set(tracer none)
@@ -266,7 +202,7 @@ function(add_test_common name tracer testcase cmake_script)
 		return()
 	endif()
 
-	# skip all tests with pmemcheck/memcheck/drd on windows
+	# skip all valgrind tests on windows
 	if ((NOT ${tracer} STREQUAL none) AND WIN32)
 		return()
 	endif()
@@ -274,6 +210,7 @@ function(add_test_common name tracer testcase cmake_script)
 	add_testcase(${name} ${tracer} ${testcase} ${cmake_script})
 endfunction()
 
+# adds testscase with optional TRACERS and SCRIPT parameters
 function(add_test_generic)
 	set(oneValueArgs NAME CASE SCRIPT)
 	set(multiValueArgs TRACERS)
