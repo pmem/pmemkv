@@ -102,9 +102,7 @@ function(build_example_pmemkv_pmemobj_cpp)
 endfunction()
 
 function(build_wrong_engine_name_test)
-	add_executable(wrong_engine_name_test wrong_engine_name_test.cc)
-	target_include_directories(wrong_engine_name_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
-	target_link_libraries(wrong_engine_name_test pmemkv)
+	build_test(wrong_engine_name_test wrong_engine_name_test.cc)
 
 	if(ENGINE_VSMAP)
 		target_compile_definitions(wrong_engine_name_test PRIVATE -DENGINE_VSMAP)
@@ -131,13 +129,7 @@ set(TEST_FILES
 	pmemkv_c_api_test.cc
 	mock_tx_alloc.cc
 	engines/blackhole_test.cc
-	config/config_c.cc
-	config/config_cpp.cc
 )
-
-if(BUILD_JSON_CONFIG)
-	list(APPEND TEST_FILES config/json_to_config.cc)
-endif()
 
 # add each engine's tests source files separately
 if(ENGINE_VSMAP)
@@ -261,4 +253,17 @@ elseif(BUILD_EXAMPLES AND NOT ENGINE_CMAP)
 	message(WARNING
 		"Examples use cmap engine, which is disabled, hence their execution "
 		"is also disabled. If you want to run them use -DENGINE_CMAP=ON option.")
+endif()
+
+build_test(config_c config/config_c.c)
+add_test_generic(NAME config_c TRACERS none memcheck)
+
+build_test(config_cpp config/config_cpp.cc)
+add_test_generic(NAME config_cpp TRACERS none memcheck)
+
+if(BUILD_JSON_CONFIG)
+	build_test(json_to_config config/json_to_config.cc)
+	target_link_libraries(json_to_config pmemkv_json_config)
+
+	add_test_generic(NAME json_to_config TRACERS none memcheck)
 endif()
