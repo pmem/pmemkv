@@ -46,7 +46,7 @@ if(TRACE_TESTS)
 	set(GLOBAL_TEST_ARGS ${GLOBAL_TEST_ARGS} --trace-expand)
 endif()
 
-set(INCLUDE_DIRS ${LIBPMEMOBJ_INCLUDE_DIRS} ${LIBPMEM_INCLUDE_DIRS} common/ .. .)
+set(INCLUDE_DIRS ${LIBPMEMOBJ_INCLUDE_DIRS} ${LIBPMEM_INCLUDE_DIRS} ${LIBPMEMOBJ++_INCLUDE_DIRS} common/ ../src .)
 set(LIBS_DIRS ${LIBPMEMOBJ_LIBRARY_DIRS} ${LIBPMEM_LIBRARY_DIRS})
 
 include_directories(${INCLUDE_DIRS})
@@ -89,16 +89,7 @@ function(find_pmemcheck)
 	endif()
 endfunction()
 
-function(find_packages)
-	if(PKG_CONFIG_FOUND)
-		pkg_check_modules(CURSES QUIET ncurses)
-	else()
-		# Specifies that we want FindCurses to find ncurses and not just any
-		# curses library
-		set(CURSES_NEED_NCURSES TRUE)
-		find_package(Curses QUIET)
-	endif()
-
+function(find_valgrind_and_pmreorder)
 	if(PKG_CONFIG_FOUND)
 		pkg_check_modules(LIBUNWIND QUIET libunwind)
 	else()
@@ -113,8 +104,7 @@ function(find_packages)
 			if ((NOT(PMEMCHECK_VERSION LESS 1.0)) AND PMEMCHECK_VERSION LESS 2.0)
 				find_program(PMREORDER names pmreorder HINTS ${LIBPMEMOBJ_PREFIX}/bin)
 
-				# copy_on_write support since libpmemobj 1.6
-				if(PMREORDER AND NOT (LIBPMEMOBJ_VERSION_MINOR LESS 6))
+				if(PMREORDER)
 					set(ENV{PATH} ${LIBPMEMOBJ_PREFIX}/bin:$ENV{PATH})
 					set(PMREORDER_SUPPORTED true CACHE INTERNAL "pmreorder support")
 				endif()
@@ -147,45 +137,16 @@ function(build_test name)
 	set(srcs ${ARGN})
 	prepend(srcs ${CMAKE_CURRENT_SOURCE_DIR} ${srcs})
 
-	add_cppstyle(tests-${name} ${srcs})
-	add_check_whitespace(tests-${name} ${srcs})
-
 	add_executable(${name} ${srcs})
-	target_link_libraries(${name} ${LIBPMEMOBJ_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} test_backtrace valgrind_internal)
+	target_link_libraries(${name} ${LIBPMEMOBJ_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} pmemkv test_backtrace)
 	if(LIBUNWIND_FOUND)
 		target_link_libraries(${name} ${LIBUNWIND_LIBRARIES} ${CMAKE_DL_LIBS})
 	endif()
 	if(WIN32)
 		target_link_libraries(${name} dbghelp)
 	endif()
-	target_compile_definitions(${name} PRIVATE TESTS_LIBPMEMOBJ_VERSION=0x${LIBPMEMOBJ_VERSION_NUM})
 
 	add_dependencies(tests ${name})
-endfunction()
-
-# Function to build a test with mocked pmemobj_defrag() function
-function(build_test_defrag name)
-	build_test(${name} ${ARGN})
-	if (NOT WIN32)
-		# target_link_options() should be used below,
-		# but it is available since CMake v3.13
-		target_link_libraries(${name} "-Wl,--wrap=pmemobj_defrag")
-	endif()
-endfunction()
-
-function(build_test_tbb name)
-	build_test(${name} ${ARGN})
-	target_link_libraries(${name} ${TBB_LIBRARIES})
-endfunction()
-
-# Function to build a TBB test with mocked pmemobj_defrag() function
-function(build_test_tbb_defrag name)
-	build_test_tbb(${name} ${ARGN})
-	if (NOT WIN32)
-		# target_link_options() should be used below,
-		# but it is available since CMake v3.13
-		target_link_libraries(${name} "-Wl,--wrap=pmemobj_defrag")
-	endif()
 endfunction()
 
 set(vg_tracers memcheck helgrind drd pmemcheck)
