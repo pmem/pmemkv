@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,8 +30,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../src/libpmemkv.hpp"
-#include <cassert>
+#include <libpmemkv.hpp>
+
+#include "unittest.hpp"
 
 bool test_wrong_engine_name(std::string name)
 {
@@ -41,30 +42,30 @@ bool test_wrong_engine_name(std::string name)
 
 int main()
 {
-	assert(test_wrong_engine_name("non_existent_name"));
+	UT_ASSERT(test_wrong_engine_name("non_existent_name"));
 
 #ifndef ENGINE_CMAP
-	assert(test_wrong_engine_name("cmap"));
+	UT_ASSERT(test_wrong_engine_name("cmap"));
 #endif
 
 #ifndef ENGINE_VSMAP
-	assert(test_wrong_engine_name("vsmap"));
+	UT_ASSERT(test_wrong_engine_name("vsmap"));
 #endif
 
 #ifndef ENGINE_VCMAP
-	assert(test_wrong_engine_name("vcmap"));
+	UT_ASSERT(test_wrong_engine_name("vcmap"));
 #endif
 
 #ifndef ENGINE_TREE3
-	assert(test_wrong_engine_name("tree3"));
+	UT_ASSERT(test_wrong_engine_name("tree3"));
 #endif
 
 #ifndef ENGINE_STREE
-	assert(test_wrong_engine_name("stree"));
+	UT_ASSERT(test_wrong_engine_name("stree"));
 #endif
 
 #ifndef ENGINE_CACHING
-	assert(test_wrong_engine_name("caching"));
+	UT_ASSERT(test_wrong_engine_name("caching"));
 #endif
 
 	return 0;

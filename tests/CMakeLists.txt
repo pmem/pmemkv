@@ -33,23 +33,24 @@ include(ctest_helpers.cmake)
 
 add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/common/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/config/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/common/*.c
+		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.cc)
+		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.c*)
 
 add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/cmake/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/config/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/config/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.*)
+		${CMAKE_CURRENT_SOURCE_DIR}/generic/*.*)
 
 add_custom_target(tests)
 
@@ -102,7 +103,7 @@ function(build_example_pmemkv_pmemobj_cpp)
 endfunction()
 
 function(build_wrong_engine_name_test)
-	build_test(wrong_engine_name_test wrong_engine_name_test.cc)
+	build_test(wrong_engine_name_test generic/wrong_engine_name_test.cc)
 
 	if(ENGINE_VSMAP)
 		target_compile_definitions(wrong_engine_name_test PRIVATE -DENGINE_VSMAP)
@@ -254,6 +255,9 @@ elseif(BUILD_EXAMPLES AND NOT ENGINE_CMAP)
 		"Examples use cmap engine, which is disabled, hence their execution "
 		"is also disabled. If you want to run them use -DENGINE_CMAP=ON option.")
 endif()
+
+build_test(c_api c_api/c_api_test.c)
+add_test_generic(NAME c_api TRACERS none memcheck)
 
 build_test(config_c config/config_c.c)
 add_test_generic(NAME config_c TRACERS none memcheck)
