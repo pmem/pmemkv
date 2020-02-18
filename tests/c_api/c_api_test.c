@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,42 +30,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../src/libpmemkv.hpp"
-#include <cassert>
+#include "c_api_test.h"
 
-bool test_wrong_engine_name(std::string name)
+static const char *engines[] = {"blackhole",
+#ifdef ENGINE_CMAP
+				"cmap",
+#endif
+#ifdef ENGINE_VCMAP
+				"vcmap",
+#endif
+#ifdef ENGINE_VSMAP
+				"vsmap",
+#endif
+#ifdef ENGINE_STREE
+				"stree",
+#endif
+#ifdef ENGINE_TREE3
+				"tree3"
+#endif
+};
+
+int main(int argc, char *argv[])
 {
-	pmem::kv::db db;
-	return db.open(name) == pmem::kv::status::WRONG_ENGINE_NAME;
-}
+	START();
 
-int main()
-{
-	assert(test_wrong_engine_name("non_existent_name"));
+	check_null_db_test();
 
-#ifndef ENGINE_CMAP
-	assert(test_wrong_engine_name("cmap"));
-#endif
-
-#ifndef ENGINE_VSMAP
-	assert(test_wrong_engine_name("vsmap"));
-#endif
-
-#ifndef ENGINE_VCMAP
-	assert(test_wrong_engine_name("vcmap"));
-#endif
-
-#ifndef ENGINE_TREE3
-	assert(test_wrong_engine_name("tree3"));
-#endif
-
-#ifndef ENGINE_STREE
-	assert(test_wrong_engine_name("stree"));
-#endif
-
-#ifndef ENGINE_CACHING
-	assert(test_wrong_engine_name("caching"));
-#endif
+	unsigned long i;
+	for (i = 0; i < sizeof(engines) / sizeof(char *); i++) {
+		null_config_test(engines[i]);
+	}
 
 	return 0;
 }
