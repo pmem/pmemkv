@@ -1038,115 +1038,119 @@ if(ENGINE_STREE)
 
 	add_engine_test(ENGINE stree
 			BINARY c_api_null_db_config
-			TRACERS none #memcheck
+			TRACERS none memcheck
 			SCRIPT pmemobj_based/default.cmake)
 
-	# XXX - add comparator support to stree
-	# add_engine_test(ENGINE stree
-	# BINARY c_api_comparator
-	# TRACERS none memcheck
-	# SCRIPT pmemobj_based/default.cmake)
+	add_engine_test(ENGINE stree
+			BINARY c_api_comparator
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_remove
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
-	# XXX - timeouts
-	# add_engine_test(ENGINE stree
-	#		BINARY put_get_remove_charset_params
-	#		TRACERS none #memcheck pmemcheck
-	#		SCRIPT pmemobj_based/default.cmake
-	#		PARAMS 16 8)
+	add_engine_test(ENGINE stree
+			BINARY put_get_remove_charset_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 16 8)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_remove_long_key
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE stree
-			BINARY put_get_remove_params
-			TRACERS none #memcheck
-			SCRIPT pmemobj_based/default.cmake
-			DB_SIZE 4G PARAMS 400000)
+				BINARY put_get_remove_params
+				TRACERS none memcheck pmemcheck
+				SCRIPT pmemobj_based/default.cmake
+				DB_SIZE 4G PARAMS 40000)
+
+	if (TESTS_LONG)
+		add_engine_test(ENGINE stree
+				BINARY put_get_remove_params
+				TRACERS none memcheck pmemcheck
+				SCRIPT pmemobj_based/default.cmake
+				DB_SIZE 4G PARAMS 400000)
+	endif()
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_std_map
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 1000 20 200)
 
-	# XXX - oom test requires support for strings longer than stree max size
-	# add_engine_test(ENGINE stree
-	# BINARY error_handling_oom
-	# TRACERS none memcheck
-	# SCRIPT pmemobj_based/default.cmake
-	# DB_SIZE 20M)
+	add_engine_test(ENGINE stree
+			BINARY error_handling_oom
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake
+			DB_SIZE 20M)
 
 	add_engine_test(ENGINE stree
 			BINARY iterate
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_get_std_map_multiple_reopen
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 1000 20 200)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_not_found_verify
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_overwrite_verify
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_remove_verify
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_verify
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_verify_asc_params
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake
 			DB_SIZE 1G PARAMS 6000)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_verify_asc_params
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake
 			DB_SIZE 1G PARAMS 3906) # 3906 is limit for one inner node
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_verify_desc_params
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake
 			DB_SIZE 1G PARAMS 6000)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_verify_desc_params
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake
 			DB_SIZE 1G PARAMS 3906) # 3906 is limit for one inner node
 
-	# XXX: it uses atomic allocations, enable when make_peristent will be used
-	# add_engine_test(ENGINE stree
-	# BINARY pmemobj_error_handling_oom
-	# TRACERS none memcheck pmemcheck
-	# SCRIPT pmemobj_based/default.cmake)
+	add_engine_test(ENGINE stree
+			BINARY pmemobj_error_handling_oom
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY pmemobj_error_handling_create
-			TRACERS none #memcheck
+			TRACERS none memcheck
 			SCRIPT pmemobj_based/pmemobj/error_handling_create.cmake)
 
 	# XXX - defrag not supported
@@ -1176,62 +1180,62 @@ if(ENGINE_STREE)
 
 	add_engine_test(ENGINE stree
 			BINARY pmemobj_put_get_std_map_oid
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_oid.cmake
 			PARAMS 1000 20 200)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_std_map
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
 			PARAMS 1000 20 200)
 
 	add_engine_test(ENGINE stree
 			BINARY sorted_iterate
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
-	# XXX - timeouts
-	# add_engine_test(ENGINE stree
-	# BINARY sorted_get_all_gen_params
-	# TRACERS none #memcheck pmemcheck
-	# SCRIPT pmemobj_based/default.cmake
-	# PARAMS 8 8)
+	add_engine_test(ENGINE stree
+			BINARY sorted_get_all_gen_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 8)
 
-	# XXX - to be tested
-	# add_engine_test(ENGINE stree
-	# BINARY sorted_get_above_gen_params
-	# TRACERS none #memcheck pmemcheck
-	# SCRIPT pmemobj_based/default.cmake
-	# PARAMS 8 8)
+	add_engine_test(ENGINE stree
+			BINARY sorted_get_above_gen_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS default 32 8)
 
-	# XXX - to be tested
-	# add_engine_test(ENGINE stree
-	# BINARY sorted_get_equal_above_gen_params
-	# TRACERS none #memcheck pmemcheck
-	# SCRIPT pmemobj_based/default.cmake
-	# PARAMS 8 8)
+	add_engine_test(ENGINE stree
+			BINARY sorted_get_above_gen_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS reverse 32 8)
 
-	# XXX - to be tested
-	# add_engine_test(ENGINE stree
-	# BINARY sorted_get_below_gen_params
-	# TRACERS none #memcheck pmemcheck
-	# SCRIPT pmemobj_based/default.cmake
-	# PARAMS 8 8)
+	add_engine_test(ENGINE stree
+			BINARY sorted_get_equal_above_gen_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 8)
 
-	# XXX - to be tested
-	# add_engine_test(ENGINE stree
-	# BINARY sorted_get_equal_below_gen_params
-	# TRACERS none #memcheck pmemcheck
-	# SCRIPT pmemobj_based/default.cmake
-	# PARAMS 8 8)
+	add_engine_test(ENGINE stree
+			BINARY sorted_get_below_gen_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 8)
 
-	# XXX - to be tested
-	# add_engine_test(ENGINE stree
-	# BINARY sorted_get_between_gen_params
-	# TRACERS none #memcheck pmemcheck
-	# SCRIPT pmemobj_based/default.cmake
-	# PARAMS 8 8)
+	add_engine_test(ENGINE stree
+			BINARY sorted_get_equal_below_gen_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 8)
+
+	add_engine_test(ENGINE stree
+			BINARY sorted_get_between_gen_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 8)
 endif(ENGINE_STREE)
 ################################################################################
 ###################################### CACHING #################################
