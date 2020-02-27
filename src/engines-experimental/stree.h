@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2020, Intel Corporation */
 
 #pragma once
 
+#include <libpmemobj++/container/string.hpp>
+#include <libpmemobj++/make_persistent.hpp>
+#include <libpmemobj++/persistent_ptr.hpp>
+
+#include "../comparator/pmemobj_comparator.h"
 #include "../pmemobj_engine.h"
 #include "stree/persistent_b_tree.h"
-#include "stree/pstring.h"
 
 using pmem::obj::persistent_ptr;
 using pmem::obj::pool;
@@ -19,17 +23,41 @@ namespace internal
 namespace stree
 {
 
-const size_t DEGREE = 64;
-const size_t MAX_KEY_SIZE = 20;
-const size_t MAX_VALUE_SIZE = 200;
+/**
+ * Indicates the maximum number of descendants a single node can have.
+ * DEGREE - 1 is the maximum number of entries a node can have.
+ */
+const size_t DEGREE = 32;
 
-typedef persistent::b_tree<pstring<MAX_KEY_SIZE>, pstring<MAX_VALUE_SIZE>, DEGREE>
-	btree_type;
+struct string_t : public pmem::obj::string {
+	string_t() = default;
+	string_t(const string_t &) = default;
+	string_t(string_t &&) = default;
+	string_t(string_view str) : pmem::obj::string(str.data(), str.size())
+	{
+	}
+	pmem::obj::string &operator=(const string_view &other)
+	{
+		return pmem::obj::string::assign(other.data(), other.size());
+	}
+	pmem::obj::string &operator=(const string_t &other)
+	{
+		return pmem::obj::string::assign(other.data(), other.size());
+	}
+};
+
+using key_type = string_t;
+using value_type = string_t;
+using btree_type = b_tree<key_type, value_type, internal::pmemobj_compare, DEGREE>;
 
 } /* namespace stree */
 } /* namespace internal */
 
 class stree : public pmemobj_engine_base<internal::stree::btree_type> {
+private:
+	using container_type = internal::stree::btree_type;
+	using iterator = typename container_type::iterator;
+
 public:
 	stree(std::unique_ptr<internal::config> cfg);
 	~stree();
@@ -52,20 +80,20 @@ public:
 	status get_below(string_view key, get_kv_callback *callback, void *arg) final;
 	status get_between(string_view key1, string_view key2, get_kv_callback *callback,
 			   void *arg) final;
-
 	status exists(string_view key) final;
-
 	status get(string_view key, get_v_callback *callback, void *arg) final;
-
 	status put(string_view key, string_view value) final;
-
 	status remove(string_view key) final;
 
 private:
 	stree(const stree &);
 	void operator=(const stree &);
+	status iterate(iterator first, iterator last, get_kv_callback *callback,
+		       void *arg);
 	void Recover();
+
 	internal::stree::btree_type *my_btree;
+	std::unique_ptr<internal::config> config;
 };
 
 } /* namespace kv */
