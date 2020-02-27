@@ -48,14 +48,13 @@ status stree::count_all(std::size_t &cnt)
 	return status::OK;
 }
 
-// above key, key exclusive
+/* above key, key exclusive */
 status stree::count_above(string_view key, std::size_t &cnt)
 {
 	LOG("count_above key>=" << std::string(key.data(), key.size()));
 	check_outside_tx();
 
-	internal::stree::btree_type::iterator it = my_btree->upper_bound(
-		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
+	internal::stree::btree_type::iterator it = my_btree->upper_bound(key);
 	auto result = std::distance(it, my_btree->end());
 	assert(result >= 0);
 
@@ -64,14 +63,13 @@ status stree::count_above(string_view key, std::size_t &cnt)
 	return status::OK;
 }
 
-// above or equal to key, key inclusive
+/* above or equal to key, key inclusive */
 status stree::count_equal_above(string_view key, std::size_t &cnt)
 {
-	LOG("count_above key>=" << std::string(key.data(), key.size()));
+	LOG("count_equal_above key>=" << std::string(key.data(), key.size()));
 	check_outside_tx();
 
-	internal::stree::btree_type::iterator it = my_btree->lower_bound(
-		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
+	internal::stree::btree_type::iterator it = my_btree->lower_bound(key);
 	auto result = std::distance(it, my_btree->end());
 	assert(result >= 0);
 
@@ -80,14 +78,13 @@ status stree::count_equal_above(string_view key, std::size_t &cnt)
 	return status::OK;
 }
 
-// below key, key exclusive
+/* below key, key exclusive */
 status stree::count_below(string_view key, std::size_t &cnt)
 {
 	LOG("count_below key<" << std::string(key.data(), key.size()));
 	check_outside_tx();
 
-	internal::stree::btree_type::iterator it = my_btree->lower_bound(
-		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
+	internal::stree::btree_type::iterator it = my_btree->lower_bound(key);
 	auto result = std::distance(my_btree->begin(), it);
 	assert(result >= 0);
 
@@ -96,14 +93,13 @@ status stree::count_below(string_view key, std::size_t &cnt)
 	return status::OK;
 }
 
-// below or equal to key, key inclusive
+/* below or equal to key, key inclusive */
 status stree::count_equal_below(string_view key, std::size_t &cnt)
 {
-	LOG("count_above key>=" << std::string(key.data(), key.size()));
+	LOG("count_equal_below key>=" << std::string(key.data(), key.size()));
 	check_outside_tx();
 
-	internal::stree::btree_type::iterator it = my_btree->upper_bound(
-		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
+	internal::stree::btree_type::iterator it = my_btree->upper_bound(key);
 	auto result = std::distance(my_btree->begin(), it);
 	assert(result >= 0);
 
@@ -118,10 +114,8 @@ status stree::count_between(string_view key1, string_view key2, std::size_t &cnt
 					<< std::string(key2.data(), key2.size()) << ")");
 	check_outside_tx();
 
-	internal::stree::btree_type::iterator it1 = my_btree->upper_bound(
-		pstring<internal::stree::MAX_KEY_SIZE>(key1.data(), key1.size()));
-	internal::stree::btree_type::iterator it2 = my_btree->lower_bound(
-		pstring<internal::stree::MAX_KEY_SIZE>(key2.data(), key2.size()));
+	internal::stree::btree_type::iterator it1 = my_btree->upper_bound(key1);
+	internal::stree::btree_type::iterator it2 = my_btree->lower_bound(key2);
 
 	if (key1.compare(key2) < 0) {
 		auto result = std::distance(it1, it2);
@@ -149,13 +143,13 @@ status stree::get_all(get_kv_callback *callback, void *arg)
 	return status::OK;
 }
 
-// (key, end), above key
+/* (key, end), above key */
 status stree::get_above(string_view key, get_kv_callback *callback, void *arg)
 {
 	LOG("get_above start key>=" << std::string(key.data(), key.size()));
 	check_outside_tx();
-	internal::stree::btree_type::iterator it = my_btree->upper_bound(
-		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
+
+	internal::stree::btree_type::iterator it = my_btree->upper_bound(key);
 	while (it != my_btree->end()) {
 		auto ret = callback((*it).first.c_str(), (*it).first.size(),
 				    (*it).second.c_str(), (*it).second.size(), arg);
@@ -167,13 +161,13 @@ status stree::get_above(string_view key, get_kv_callback *callback, void *arg)
 	return status::OK;
 }
 
-// [key, end), above or equal to key
+/* [key, end), above or equal to key */
 status stree::get_equal_above(string_view key, get_kv_callback *callback, void *arg)
 {
 	LOG("get_equal_above start key>=" << std::string(key.data(), key.size()));
 	check_outside_tx();
-	internal::stree::btree_type::iterator it = my_btree->lower_bound(
-		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
+
+	internal::stree::btree_type::iterator it = my_btree->lower_bound(key);
 	while (it != my_btree->end()) {
 		auto ret = callback((*it).first.c_str(), (*it).first.size(),
 				    (*it).second.c_str(), (*it).second.size(), arg);
@@ -185,14 +179,14 @@ status stree::get_equal_above(string_view key, get_kv_callback *callback, void *
 	return status::OK;
 }
 
-// [start, key], below or equal to key
+/* [start, key], below or equal to key */
 status stree::get_equal_below(string_view key, get_kv_callback *callback, void *arg)
 {
-	LOG("get_equal_above start key>=" << std::string(key.data(), key.size()));
+	LOG("get_equal_below start key>=" << std::string(key.data(), key.size()));
 	check_outside_tx();
+
 	internal::stree::btree_type::iterator it = my_btree->begin();
-	auto pskey = pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size());
-	while (it != my_btree->end() && !((*it).first > pskey)) {
+	while (it != my_btree->end() && !((*it).first > key)) {
 		auto ret = callback((*it).first.c_str(), (*it).first.size(),
 				    (*it).second.c_str(), (*it).second.size(), arg);
 		if (ret != 0)
@@ -203,14 +197,14 @@ status stree::get_equal_below(string_view key, get_kv_callback *callback, void *
 	return status::OK;
 }
 
-// [start, key), less than key, key exclusive
+/* [start, key), less than key, key exclusive */
 status stree::get_below(string_view key, get_kv_callback *callback, void *arg)
 {
 	LOG("get_below key<" << std::string(key.data(), key.size()));
 	check_outside_tx();
-	auto pskey = pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size());
+
 	internal::stree::btree_type::iterator it = my_btree->begin();
-	while (it != my_btree->end() && (*it).first < pskey) {
+	while (it != my_btree->end() && (*it).first < key) {
 		auto ret = callback((*it).first.c_str(), (*it).first.size(),
 				    (*it).second.c_str(), (*it).second.size(), arg);
 		if (ret != 0)
@@ -221,17 +215,16 @@ status stree::get_below(string_view key, get_kv_callback *callback, void *arg)
 	return status::OK;
 }
 
-// get between (key1, key2), key1 exclusive, key2 exclusive
+/* get between (key1, key2), key1 exclusive, key2 exclusive */
 status stree::get_between(string_view key1, string_view key2, get_kv_callback *callback,
 			  void *arg)
 {
 	LOG("get_between key range=[" << std::string(key1.data(), key1.size()) << ","
 				      << std::string(key2.data(), key2.size()) << ")");
 	check_outside_tx();
-	auto pskey1 = pstring<internal::stree::MAX_KEY_SIZE>(key1.data(), key1.size());
-	auto pskey2 = pstring<internal::stree::MAX_KEY_SIZE>(key2.data(), key2.size());
-	internal::stree::btree_type::iterator it = my_btree->upper_bound(pskey1);
-	while (it != my_btree->end() && (*it).first < pskey2) {
+
+	internal::stree::btree_type::iterator it = my_btree->upper_bound(key1);
+	while (it != my_btree->end() && (*it).first < key2) {
 		auto ret = callback((*it).first.c_str(), (*it).first.size(),
 				    (*it).second.c_str(), (*it).second.size(), arg);
 		if (ret != 0)
@@ -246,8 +239,8 @@ status stree::exists(string_view key)
 {
 	LOG("exists for key=" << std::string(key.data(), key.size()));
 	check_outside_tx();
-	internal::stree::btree_type::iterator it = my_btree->find(
-		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
+
+	internal::stree::btree_type::iterator it = my_btree->find(key);
 	if (it == my_btree->end()) {
 		LOG("  key not found");
 		return status::NOT_FOUND;
@@ -259,8 +252,8 @@ status stree::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("get using callback for key=" << std::string(key.data(), key.size()));
 	check_outside_tx();
-	internal::stree::btree_type::iterator it = my_btree->find(
-		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()));
+
+	internal::stree::btree_type::iterator it = my_btree->find(key);
 	if (it == my_btree->end()) {
 		LOG("  key not found");
 		return status::NOT_FOUND;
@@ -276,14 +269,11 @@ status stree::put(string_view key, string_view value)
 		       << ", value.size=" << std::to_string(value.size()));
 	check_outside_tx();
 
-	auto result = my_btree->insert(std::make_pair(
-		pstring<internal::stree::MAX_KEY_SIZE>(key.data(), key.size()),
-		pstring<internal::stree::MAX_VALUE_SIZE>(value.data(), value.size())));
+	auto result = my_btree->try_emplace(key, value);
 	if (!result.second) { // key already exists, so update
 		typename internal::stree::btree_type::value_type &entry = *result.first;
 		transaction::manual tx(pmpool);
-		conditional_add_to_tx(&(entry.second));
-		entry.second = std::string(value.data(), value.size());
+		entry.second = value;
 		transaction::commit();
 	}
 	return status::OK;
@@ -294,7 +284,7 @@ status stree::remove(string_view key)
 	LOG("remove key=" << std::string(key.data(), key.size()));
 	check_outside_tx();
 
-	auto result = my_btree->erase(std::string(key.data(), key.size()));
+	auto result = my_btree->erase(key);
 	return (result == 1) ? status::OK : status::NOT_FOUND;
 }
 

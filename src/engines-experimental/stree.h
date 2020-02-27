@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2020, Intel Corporation */
 
 #pragma once
+
+#include <libpmemobj++/container/string.hpp>
+#include <libpmemobj++/make_persistent.hpp>
+#include <libpmemobj++/persistent_ptr.hpp>
 
 #include "../pmemobj_engine.h"
 #include "stree/persistent_b_tree.h"
@@ -19,12 +23,65 @@ namespace internal
 namespace stree
 {
 
-const size_t DEGREE = 64;
-const size_t MAX_KEY_SIZE = 20;
-const size_t MAX_VALUE_SIZE = 200;
+const size_t DEGREE = 32;
 
-typedef persistent::b_tree<pstring<MAX_KEY_SIZE>, pstring<MAX_VALUE_SIZE>, DEGREE>
-	btree_type;
+struct string_t : public pmem::obj::string {
+	string_t() = default;
+	string_t(const string_t &) = default;
+	string_t(string_t &&) = default;
+	string_t(string_view &str) : pmem::obj::string(str.data(), str.size())
+	{
+	}
+	pmem::obj::string &operator=(const string_view &other)
+	{
+		return pmem::obj::string::assign(other.data(), other.size());
+	}
+	pmem::obj::string &operator=(const string_t &other)
+	{
+		return pmem::obj::string::assign(other.data(), other.size());
+	}
+	void assign(const char *s, size_t count)
+	{
+		pmem::obj::string::assign(s, count);
+	}
+};
+
+inline bool operator<(const string_t &lhs, const string_view &rhs)
+{
+	return lhs.compare(0, lhs.size(), rhs.data(), rhs.size()) < 0;
+}
+
+inline bool operator<(const string_view &lhs, const string_t &rhs)
+{
+	return rhs.compare(0, rhs.size(), lhs.data(), lhs.size()) > 0;
+}
+
+inline bool operator>(const string_t &lhs, const string_view &rhs)
+{
+	return lhs.compare(0, lhs.size(), rhs.data(), rhs.size()) > 0;
+}
+
+inline bool operator==(const string_t &lhs, const string_view &rhs)
+{
+	return lhs.compare(0, lhs.size(), rhs.data(), rhs.size()) == 0;
+}
+
+inline bool operator==(const string_view &lhs, const string_t &rhs)
+{
+	return rhs.compare(0, rhs.size(), lhs.data(), lhs.size()) == 0;
+}
+
+using key_type = string_t;
+using value_type = string_t;
+struct hetero_less {
+	using is_transparent = void;
+	template <typename T1, typename T2>
+	bool operator()(const T1 &lhs, const T2 &rhs) const
+	{
+		return lhs < rhs;
+	}
+};
+using btree_type = persistent::b_tree<key_type, value_type, hetero_less, DEGREE>;
 
 } /* namespace stree */
 } /* namespace internal */
@@ -65,6 +122,7 @@ private:
 	stree(const stree &);
 	void operator=(const stree &);
 	void Recover();
+
 	internal::stree::btree_type *my_btree;
 };
 
