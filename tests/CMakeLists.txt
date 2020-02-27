@@ -61,6 +61,7 @@ if(LIBUNWIND_FOUND)
 endif()
 
 find_pmreorder()
+find_pmempool()
 
 if (COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
