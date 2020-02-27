@@ -7,7 +7,7 @@ header: PMEMKV_CONFIG
 secondary_title: pmemkv
 ...
 
-[comment]: <> (Copyright 2019, Intel Corporation)
+[comment]: <> (Copyright 2019-2020, Intel Corporation)
 
 [comment]: <> (Redistribution and use in source and binary forms, with or without)
 [comment]: <> (modification, are permitted provided that the following conditions)
@@ -40,6 +40,7 @@ secondary_title: pmemkv
 [SYNOPSIS](#synopsis)<br />
 [DESCRIPTION](#description)<br />
 [EXAMPLE](#example)<br />
+[ERRORS](#errors)<br />
 [SEE ALSO](#see-also)<br />
 
 
