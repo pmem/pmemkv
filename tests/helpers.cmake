@@ -323,6 +323,14 @@ function(pmreorder_execute expect_success engine conf_file name)
     unset(ENV{PMEMOBJ_CONF})
 endfunction()
 
+function(pmempool_execute)
+    set(ENV{LD_LIBRARY_PATH} ${LIBPMEMOBJ++_LIBRARY_DIRS})
+
+    execute_common(true ${TRACER}_${TESTCASE} pmempool ${ARGN})
+
+    unset(ENV{LD_LIBRARY_PATH})
+endfunction()
+
 # Executes test command ${name} under GDB.
 # First argument of the command is a gdb batch file.
 # Second argument of the command is the test command.

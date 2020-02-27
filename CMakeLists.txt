@@ -331,6 +331,12 @@ if(BUILD_TESTS)
 		find_pmemcheck()
 	endif()
 
+	if(PKG_CONFIG_FOUND)
+		pkg_check_modules(LIBPMEMOBJ REQUIRED libpmemobj>=${LIBPMEMOBJ_REQUIRED_VERSION})
+	else()
+		find_package(LIBPMEMOBJ REQUIRED ${LIBPMEMOBJ_REQUIRED_VERSION})
+	endif()
+
 	enable_testing()
 	add_subdirectory(tests)
 endif()

@@ -36,6 +36,7 @@
 set(TEST_ROOT_DIR ${PROJECT_SOURCE_DIR}/tests)
 
 set(GLOBAL_TEST_ARGS
+	-DLIBPMEMOBJ++_LIBRARY_DIRS=${LIBPMEMOBJ++_LIBRARY_DIRS}
 	-DPERL_EXECUTABLE=${PERL_EXECUTABLE}
 	-DMATCH_SCRIPT=${PROJECT_SOURCE_DIR}/tests/match
 	-DPARENT_DIR=${TEST_DIR}
@@ -90,6 +91,15 @@ function(find_pmreorder)
 		elseif(TESTS_USE_VALGRIND)
 			message(WARNING "Valgrind not found. Valgrind tests will not be performed.")
 		endif()
+	endif()
+endfunction()
+
+function(find_pmempool)
+	find_program(PMEMPOOL names pmempool HINTS ${LIBPMEMOBJ_PREFIX}/bin)
+	if(PMEMPOOL)
+		set(ENV{PATH} ${LIBPMEMOBJ_PREFIX}/bin:$ENV{PATH})
+	else()
+		message(FATAL_ERRROR "Pmempool not found.")
 	endif()
 endfunction()
 
