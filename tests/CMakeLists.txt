@@ -1038,7 +1038,7 @@ if(ENGINE_STREE)
 
 	add_engine_test(ENGINE stree
 			BINARY c_api_null_db_config
-			TRACERS none #memcheck
+			TRACERS none memcheck
 			SCRIPT pmemobj_based/default.cmake)
 
 	# XXX - add comparator support to stree
@@ -1049,30 +1049,30 @@ if(ENGINE_STREE)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_remove
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
 	# XXX - timeouts
 	# add_engine_test(ENGINE stree
 	#		BINARY put_get_remove_charset_params
-	#		TRACERS none #memcheck pmemcheck
+	#		TRACERS none memcheck pmemcheck
 	#		SCRIPT pmemobj_based/default.cmake
 	#		PARAMS 16 8)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_remove_long_key
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_remove_params
-			TRACERS none #memcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
-			DB_SIZE 4G PARAMS 400000)
+			DB_SIZE 4G PARAMS 40000) # 400000 elements test runs > 10 minutes (travis restriction)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_std_map
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 1000 20 200)
 
@@ -1085,56 +1085,56 @@ if(ENGINE_STREE)
 
 	add_engine_test(ENGINE stree
 			BINARY iterate
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_get_std_map_multiple_reopen
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 1000 20 200)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_not_found_verify
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_overwrite_verify
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_remove_verify
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_verify
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_verify_asc_params
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake
 			DB_SIZE 1G PARAMS 6000)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_verify_asc_params
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake
 			DB_SIZE 1G PARAMS 3906) # 3906 is limit for one inner node
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_verify_desc_params
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake
 			DB_SIZE 1G PARAMS 6000)
 
 	add_engine_test(ENGINE stree
 			BINARY persistent_put_verify_desc_params
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake
 			DB_SIZE 1G PARAMS 3906) # 3906 is limit for one inner node
 
@@ -1146,7 +1146,7 @@ if(ENGINE_STREE)
 
 	add_engine_test(ENGINE stree
 			BINARY pmemobj_error_handling_create
-			TRACERS none #memcheck
+			TRACERS none memcheck
 			SCRIPT pmemobj_based/pmemobj/error_handling_create.cmake)
 
 	# XXX - defrag not supported
@@ -1176,19 +1176,19 @@ if(ENGINE_STREE)
 
 	add_engine_test(ENGINE stree
 			BINARY pmemobj_put_get_std_map_oid
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_oid.cmake
 			PARAMS 1000 20 200)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_std_map
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck #pmemcheck
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
 			PARAMS 1000 20 200)
 
 	add_engine_test(ENGINE stree
 			BINARY sorted_iterate
-			TRACERS none #memcheck pmemcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
 	# XXX - timeouts
