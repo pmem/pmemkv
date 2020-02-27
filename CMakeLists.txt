@@ -30,7 +30,7 @@ option(ENGINE_VCMAP "enable vcmap engine" ON)
 option(ENGINE_VSMAP "enable vsmap engine" ON)
 option(ENGINE_CSMAP "enable experimental csmap engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
 option(ENGINE_CACHING "enable experimental caching engine" OFF)
-option(ENGINE_STREE "enable experimental stree engine" OFF)
+option(ENGINE_STREE "enable experimental stree engine" ON)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 
 ## Set required and useful variables
