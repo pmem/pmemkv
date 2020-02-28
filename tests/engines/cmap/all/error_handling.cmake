@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,76 +29,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#
-# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#              environment prepared for running pmemkv build and tests.
-#
+include(${SRC_DIR}/../helpers.cmake)
 
-# Pull base image
-FROM ubuntu:rolling
-MAINTAINER szymon.romik@intel.com
+setup()
 
-# Set required environment variables
-ENV OS ubuntu
-ENV OS_VER rolling
-ENV PACKAGE_MANAGER deb
-ENV NOTTY 1
+execute(${TEST_EXECUTABLE} ${ENGINE})
 
-# Additional parameters to build docker without building components
-ARG SKIP_VALGRIND_BUILD
-ARG SKIP_PMDK_BUILD
-ARG SKIP_LIBPMEMOBJCPP_BUILD
-
-# Update the Apt cache and install basic tools
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-	autoconf \
-	automake \
-	build-essential \
-	clang \
-	clang-format \
-	cmake \
-	curl \
-	debhelper \
-	devscripts \
-	doxygen \
-	fakeroot \
-	git \
-	graphviz \
-	libc6-dbg \
-	libdaxctl-dev \
-	libndctl-dev \
-	libmemkind-dev \
-	libnode-dev \
-	libnuma-dev \
-	libtbb-dev \
-	libtext-diff-perl \
-	libtool \
-	libunwind8-dev \
-	numactl \
-	pandoc \
-	pkg-config \
-	rapidjson-dev \
-	ruby \
-	sudo \
-	wget \
-	whois \
- && rm -rf /var/lib/apt/lists/*
-
-# Install valgrind
-COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
-
-# Install pmdk
-COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh dpkg
-
-# Install pmdk c++ bindings
-COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh DEB
-
-# Add user
-ENV USER user
-ENV USERPASS pass
-RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
-USER $USER
+finish()

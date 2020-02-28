@@ -69,7 +69,7 @@ static inline void UT_FATAL(const char *format, ...)
 /* assert a condition is true at runtime */
 #define UT_ASSERT(cnd)                                                                   \
 	((void)((cnd) ||                                                                 \
-		(UT_FATAL("%s:%d %s - assertion failure: %s, errormsg: ", __FILE__,      \
+		(UT_FATAL("%s:%d %s - assertion failure: %s, errormsg: %s", __FILE__,    \
 			  __LINE__, __func__, #cnd, pmemkv_errormsg()),                  \
 		 0)))
 

@@ -255,6 +255,11 @@ function(execute name)
     execute_common(true ${TRACER}_${TESTCASE} ${name} ${ARGN})
 endfunction()
 
+function(make_config)
+    string(REPLACE " " "" config ${ARGN})
+    set(CONFIG "${config}" CACHE INTERNAL "")
+endfunction()
+
 # Executes command ${name} and creates a storelog.
 # First argument is pool file.
 # Second argument is test executable.
@@ -326,7 +331,7 @@ endfunction()
 function(pmempool_execute)
     set(ENV{LD_LIBRARY_PATH} ${LIBPMEMOBJ++_LIBRARY_DIRS})
 
-    execute_common(true ${TRACER}_${TESTCASE} pmempool ${ARGN})
+    execute_process(COMMAND pmempool ${ARGN})
 
     unset(ENV{LD_LIBRARY_PATH})
 endfunction()

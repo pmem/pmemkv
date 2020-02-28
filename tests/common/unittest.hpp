@@ -35,6 +35,10 @@
 
 #include "unittest.h"
 
+#include <libpmemkv.h>
+#include <libpmemkv.hpp>
+#include <libpmemkv_json_config.h>
+
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -42,7 +46,9 @@
 #include <functional>
 #include <iostream>
 #include <string>
+#include <thread>
 #include <type_traits>
+#include <vector>
 
 static inline void UT_EXCEPTION(std::exception &e)
 {
@@ -114,6 +120,76 @@ static inline int run_test(std::function<void()> test)
 
 	try {
 		test();
+	} catch (std::exception &e) {
+		UT_FATALexc(e);
+	} catch (...) {
+		UT_FATAL("catch(...){}");
+	}
+
+	return 0;
+}
+
+template <typename Function>
+void parallel_exec(size_t threads_number, Function f)
+{
+	std::vector<std::thread> threads;
+	threads.reserve(threads_number);
+
+	for (size_t i = 0; i < threads_number; ++i) {
+		threads.emplace_back(f, i);
+	}
+
+	for (auto &t : threads) {
+		t.join();
+	}
+}
+
+pmem::kv::config CONFIG_FROM_JSON(std::string json)
+{
+	pmemkv_config *cfg = pmemkv_config_new();
+	UT_ASSERTne(cfg, NULL);
+
+	auto s = pmemkv_config_from_json(cfg, json.c_str());
+	if (s != PMEMKV_STATUS_OK) {
+		UT_FATAL(pmemkv_config_from_json_errormsg());
+	}
+
+	return pmem::kv::config(cfg);
+}
+
+pmem::kv::db INITIALIZE_KV(std::string engine, pmem::kv::config &&config)
+{
+	pmem::kv::db kv;
+	auto s = kv.open(engine, std::move(config));
+	UT_ASSERTeq(s, pmem::kv::status::OK);
+
+	return kv;
+}
+
+void CLEAR_KV(pmem::kv::db &kv)
+{
+	std::vector<std::string> keys;
+	kv.get_all([&](pmem::kv::string_view key, pmem::kv::string_view value) {
+		keys.emplace_back(key.data(), key.size());
+		return 0;
+	});
+
+	for (auto &k : keys)
+		kv.remove(k);
+}
+
+static inline int run_engine_tests(std::string engine, std::string json,
+				   std::vector<std::function<void(pmem::kv::db &)>> tests)
+{
+	test_register_sighandlers();
+
+	try {
+		auto kv = INITIALIZE_KV(engine, CONFIG_FROM_JSON(json));
+
+		for (auto &test : tests) {
+			test(kv);
+			CLEAR_KV(kv);
+		}
 	} catch (std::exception &e) {
 		UT_FATALexc(e);
 	} catch (...) {
