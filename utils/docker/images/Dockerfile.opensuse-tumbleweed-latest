@@ -73,7 +73,6 @@ RUN zypper install -y \
 	glibc-debuginfo \
 	git \
 	graphviz \
-	gtest \
 	hub \
 	keyutils-devel \
 	libtool \
