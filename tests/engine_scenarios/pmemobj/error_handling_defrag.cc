@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020, Intel Corporation
+ * Copyright 2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,51 +30,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_SUITE_H
-#define TEST_SUITE_H
+#include "unittest.hpp"
 
-#include <string>
-
-struct Basic {
-	/* path parameter passed to engine config */
-	std::string *path;
-	/* size parameter passed to engine config */
-	uint64_t size;
-	/* force_create parameter passed to engine config */
-	uint64_t force_create;
-	/* engine name */
-	const char *engine;
-	/* key length */
-	size_t key_length;
-	/* max size of data  */
-	size_t value_length;
-	/* size of actually inserted data */
-	size_t test_value_length;
-	/* test name */
-	std::string name;
-	/* markers for build system, which tracers should be used:
-	 * M - memcheck
-	 * P - pmemcheck
-	 * H - helgrind
-	 * D - drd  */
-	std::string tracers;
-	/* it specifies if engine should treat path as file or
-	 * directory */
-	bool use_file;
-
-	std::string get_path()
-	{
-		std::string abs_path(*path);
-		abs_path.append("/" + name);
-
-		return abs_path;
-	}
-};
-
-std::ostream &operator<<(std::ostream &stream, const Basic &val)
+static void DefragInvalidArgument(pmem::kv::db &kv)
 {
-	stream << val.name;
-	return stream;
+	UT_ASSERT(kv.defrag(50, 100) == pmem::kv::status::INVALID_ARGUMENT);
+	UT_ASSERT(kv.defrag(0, 101) == pmem::kv::status::INVALID_ARGUMENT);
+	UT_ASSERT(kv.defrag(101, 0) == pmem::kv::status::INVALID_ARGUMENT);
 }
 
-#endif // TEST_SUITE_H
+static void test(int argc, char *argv[])
+{
+	if (argc < 3)
+		UT_FATAL("usage: %s engine json_config", argv[0]);
+
+	auto kv = INITIALIZE_KV(argv[1], CONFIG_FROM_JSON(argv[2]));
+
+	DefragInvalidArgument(kv);
+}
+
+int main(int argc, char *argv[])
+{
+	return run_test([&] { test(argc, argv); });
+}

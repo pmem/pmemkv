@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,11 +30,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_PATH_H
-#define TEST_PATH_H
+#include "put_get_std_map.hpp"
 
-#include <string>
+static void test(int argc, char *argv[])
+{
+	using namespace std::placeholders;
 
-extern std::string test_path;
+	if (argc < 6)
+		UT_FATAL("usage: %s engine json_config n_inserts key_length value_length",
+			 argv[0]);
 
-#endif // TEST_PATH_H
+	auto n_inserts = std::stoull(argv[3]);
+	auto key_length = std::stoull(argv[4]);
+	auto value_length = std::stoull(argv[5]);
+
+	auto kv = INITIALIZE_KV(argv[1], CONFIG_FROM_JSON(argv[2]));
+
+	auto proto = PutToMapTest(n_inserts, key_length, value_length, kv);
+	VerifyKv(proto, kv);
+
+	kv.close();
+}
+
+int main(int argc, char *argv[])
+{
+	return run_test([&] { test(argc, argv); });
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020, Intel Corporation
+ * Copyright 2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,43 +30,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <libpmemkv.hpp>
-
 #include "unittest.hpp"
 
-bool test_wrong_engine_name(std::string name)
+static void OOM(pmem::kv::db &kv)
 {
-	pmem::kv::db db;
-	return db.open(name) == pmem::kv::status::WRONG_ENGINE_NAME;
+	size_t cnt = 0;
+	while (1) {
+		auto s = kv.put(std::to_string(cnt), std::string(cnt + 1, 'a'));
+		if (s == pmem::kv::status::OUT_OF_MEMORY)
+			break;
+
+		UT_ASSERTeq(s, pmem::kv::status::OK);
+
+		cnt++;
+	}
+
+	/* At least one iteration */
+	UT_ASSERT(cnt > 0);
+
+	/* Start freeing elements from the smallest one */
+	for (size_t i = 0; i < cnt; i++) {
+		auto s = kv.remove(std::to_string(i));
+		UT_ASSERTeq(s, pmem::kv::status::OK);
+	}
+
+	size_t count = std::numeric_limits<size_t>::max();
+	auto s = kv.count_all(count);
+	UT_ASSERTeq(s, pmem::kv::status::OK);
+	UT_ASSERTeq(count, 0);
 }
 
-int main()
+static void test(int argc, char *argv[])
 {
-	UT_ASSERT(test_wrong_engine_name("non_existent_name"));
+	if (argc < 2)
+		UT_FATAL("usage: %s engine json_config", argv[0]);
 
-#ifndef ENGINE_CMAP
-	UT_ASSERT(test_wrong_engine_name("cmap"));
-#endif
+	run_engine_tests(argv[1], argv[2], {OOM});
+}
 
-#ifndef ENGINE_VSMAP
-	UT_ASSERT(test_wrong_engine_name("vsmap"));
-#endif
-
-#ifndef ENGINE_VCMAP
-	UT_ASSERT(test_wrong_engine_name("vcmap"));
-#endif
-
-#ifndef ENGINE_TREE3
-	UT_ASSERT(test_wrong_engine_name("tree3"));
-#endif
-
-#ifndef ENGINE_STREE
-	UT_ASSERT(test_wrong_engine_name("stree"));
-#endif
-
-#ifndef ENGINE_CACHING
-	UT_ASSERT(test_wrong_engine_name("caching"));
-#endif
-
-	return 0;
+int main(int argc, char *argv[])
+{
+	return run_test([&] { test(argc, argv); });
 }

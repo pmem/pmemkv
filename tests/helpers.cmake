@@ -31,6 +31,8 @@
 
 set(DIR ${PARENT_DIR}/${TEST_NAME})
 
+string(REPLACE "|PARAM|" ";" PARAMS "${RAW_PARAMS}")
+
 function(setup)
     execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${PARENT_DIR}/${TEST_NAME})
     execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${PARENT_DIR}/${TEST_NAME})
@@ -255,6 +257,11 @@ function(execute name)
     execute_common(true ${TRACER}_${TESTCASE} ${name} ${ARGN})
 endfunction()
 
+function(make_config)
+    string(REPLACE " " "" config ${ARGN})
+    set(CONFIG "${config}" CACHE INTERNAL "")
+endfunction()
+
 # Executes command ${name} and creates a storelog.
 # First argument is pool file.
 # Second argument is test executable.
@@ -326,7 +333,7 @@ endfunction()
 function(pmempool_execute)
     set(ENV{LD_LIBRARY_PATH} ${LIBPMEMOBJ++_LIBRARY_DIRS})
 
-    execute_common(true ${TRACER}_${TESTCASE} pmempool ${ARGN})
+    execute_process(COMMAND pmempool ${ARGN})
 
     unset(ENV{LD_LIBRARY_PATH})
 endfunction()

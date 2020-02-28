@@ -69,7 +69,6 @@ RUN zypper install -y \
 	gdb \
 	git \
 	graphviz \
-	gtest \
 	hub \
 	keyutils-devel \
 	libtool \

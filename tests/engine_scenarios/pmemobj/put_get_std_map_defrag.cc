@@ -30,39 +30,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "c_api_test.h"
+#include "../all/put_get_std_map.hpp"
 
-static const char *engines[] = {"blackhole",
-#ifdef ENGINE_CMAP
-				"cmap",
-#endif
-#ifdef ENGINE_VCMAP
-				"vcmap",
-#endif
-#ifdef ENGINE_VSMAP
-				"vsmap",
-#endif
-#ifdef ENGINE_STREE
-				"stree",
-#endif
-#ifdef ENGINE_TREE3
-				"tree3",
-#endif
-#ifdef ENGINE_CACHING
-				"caching"
-#endif
-};
+static void test(int argc, char *argv[])
+{
+	using namespace std::placeholders;
+
+	if (argc < 6)
+		UT_FATAL("usage: %s engine json_config n_inserts key_length value_length",
+			 argv[0]);
+
+	auto n_inserts = std::stoull(argv[3]);
+	auto key_length = std::stoull(argv[4]);
+	auto value_length = std::stoull(argv[5]);
+
+	auto kv = INITIALIZE_KV(argv[1], CONFIG_FROM_JSON(argv[2]));
+
+	auto proto = PutToMapTest(n_inserts, key_length, value_length, kv);
+
+	kv.defrag(0, 100);
+
+	VerifyKv(proto, kv);
+
+	kv.close();
+}
 
 int main(int argc, char *argv[])
 {
-	START();
-
-	check_null_db_test();
-
-	unsigned long i;
-	for (i = 0; i < sizeof(engines) / sizeof(char *); i++) {
-		null_config_test(engines[i]);
-	}
-
-	return 0;
+	return run_test([&] { test(argc, argv); });
 }
