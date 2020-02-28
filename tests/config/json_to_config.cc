@@ -35,7 +35,7 @@
 
 #include "unittest.hpp"
 
-void simple_test()
+static void simple_test()
 {
 	auto config = pmemkv_config_new();
 	UT_ASSERT(config != nullptr);
@@ -66,7 +66,7 @@ void simple_test()
 	pmemkv_config_delete(config);
 }
 
-void double_test()
+static void double_test()
 {
 	auto config = pmemkv_config_new();
 	UT_ASSERT(config != nullptr);
@@ -80,7 +80,7 @@ void double_test()
 	pmemkv_config_delete(config);
 }
 
-void malformed_input_test()
+static void malformed_input_test()
 {
 	auto config = pmemkv_config_new();
 	UT_ASSERT(config != nullptr);
@@ -93,7 +93,7 @@ void malformed_input_test()
 	pmemkv_config_delete(config);
 }
 
-void test(int argc, char *argv[])
+static void test(int argc, char *argv[])
 {
 	simple_test();
 	double_test();

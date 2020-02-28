@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020, Intel Corporation
+ * Copyright 2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,43 +30,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <libpmemkv.hpp>
+#include "put_get_std_map.hpp"
 
-#include "unittest.hpp"
-
-bool test_wrong_engine_name(std::string name)
+static void test(int argc, char *argv[])
 {
-	pmem::kv::db db;
-	return db.open(name) == pmem::kv::status::WRONG_ENGINE_NAME;
+	using namespace std::placeholders;
+
+	if (argc < 6)
+		UT_FATAL("usage: %s engine json_config n_inserts key_length value_length",
+			 argv[0]);
+
+	auto n_inserts = std::stoull(argv[3]);
+	auto key_length = std::stoull(argv[4]);
+	auto value_length = std::stoull(argv[5]);
+
+	auto kv = INITIALIZE_KV(argv[1], CONFIG_FROM_JSON(argv[2]));
+
+	auto proto = PutToMapTest(n_inserts, key_length, value_length, kv);
+	VerifyKv(proto, kv);
+
+	kv.close();
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-	UT_ASSERT(test_wrong_engine_name("non_existent_name"));
-
-#ifndef ENGINE_CMAP
-	UT_ASSERT(test_wrong_engine_name("cmap"));
-#endif
-
-#ifndef ENGINE_VSMAP
-	UT_ASSERT(test_wrong_engine_name("vsmap"));
-#endif
-
-#ifndef ENGINE_VCMAP
-	UT_ASSERT(test_wrong_engine_name("vcmap"));
-#endif
-
-#ifndef ENGINE_TREE3
-	UT_ASSERT(test_wrong_engine_name("tree3"));
-#endif
-
-#ifndef ENGINE_STREE
-	UT_ASSERT(test_wrong_engine_name("stree"));
-#endif
-
-#ifndef ENGINE_CACHING
-	UT_ASSERT(test_wrong_engine_name("caching"));
-#endif
-
-	return 0;
+	return run_test([&] { test(argc, argv); });
 }

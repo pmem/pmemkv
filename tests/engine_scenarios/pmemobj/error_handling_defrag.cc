@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,11 +30,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_PATH_H
-#define TEST_PATH_H
+#include "unittest.hpp"
 
-#include <string>
+static void DefragInvalidArgument(pmem::kv::db &kv)
+{
+	UT_ASSERT(kv.defrag(50, 100) == pmem::kv::status::INVALID_ARGUMENT);
+	UT_ASSERT(kv.defrag(0, 101) == pmem::kv::status::INVALID_ARGUMENT);
+	UT_ASSERT(kv.defrag(101, 0) == pmem::kv::status::INVALID_ARGUMENT);
+}
 
-extern std::string test_path;
+static void test(int argc, char *argv[])
+{
+	if (argc < 3)
+		UT_FATAL("usage: %s engine json_config", argv[0]);
 
-#endif // TEST_PATH_H
+	auto kv = INITIALIZE_KV(argv[1], CONFIG_FROM_JSON(argv[2]));
+
+	DefragInvalidArgument(kv);
+}
+
+int main(int argc, char *argv[])
+{
+	return run_test([&] { test(argc, argv); });
+}

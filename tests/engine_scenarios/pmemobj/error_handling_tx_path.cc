@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,46 +30,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test_path.h"
-#include "gtest/gtest.h"
-#include <algorithm>
-#include <iostream>
-#include <iterator>
-#include <string>
-#include <vector>
+#include "error_handling_tx.hpp"
 
-std::string test_path;
-
-void print_option(std::string option, std::string description, std::string params = "")
+static void test(int argc, char *argv[])
 {
-	std::cout << "\033[32m  " << option << "\033[0m " << params << std::endl
-		  << "      " << description << std::endl;
+	using namespace std::placeholders;
+
+	if (argc < 4)
+		UT_FATAL("usage: %s engine json_config obj_path", argv[0]);
+
+	auto pmemobj_pool_path = std::string(argv[3]);
+	pmem::obj::pool_base pmemobj_pool;
+
+	try {
+		pmemobj_pool = pmem::obj::pool_base::open(pmemobj_pool_path, "pmemkv");
+	} catch (std::exception &e) {
+		UT_FATALexc(e);
+	}
+
+	auto kv = INITIALIZE_KV(argv[1], CONFIG_FROM_JSON(argv[2]));
+
+	TransactionTest(pmemobj_pool, kv);
+
+	pmemobj_pool.close();
 }
 
 int main(int argc, char *argv[])
 {
-	std::vector<std::string> args(argv + 1, argv + argc);
-	auto help = std::find(args.begin(), args.end(), "--help");
-	if (help != args.end()) {
-		print_option("--test_dir", "Path passed to engines config.", "PATH");
-		std::cout << std::endl;
-	}
-	auto test_dir_param = std::find(args.begin(), args.end(), "--test_dir");
-	if (test_dir_param != args.end()) {
-		auto test_dir = std::next(test_dir_param, 1);
-		if (test_dir != args.end()) {
-			test_path.assign(*test_dir);
-		}
-	}
-	bool gtest_list_tests =
-		(std::find(args.begin(), args.end(), "--gtest_list_tests") != args.end());
-	if (!gtest_list_tests && test_path.empty()) {
-		std::cerr << "Test path not specified" << std::endl;
-		exit(1);
-	}
-
-	/* gtest is friendly creature, not at all evil,
-	 * so is ignoring non-gtest parameters */
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	return run_test([&] { test(argc, argv); });
 }

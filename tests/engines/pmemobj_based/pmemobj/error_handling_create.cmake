@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,78 +29,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#
-# Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
-#              environment prepared for running pmemkv build and tests.
-#
+include(${SRC_DIR}/../helpers.cmake)
 
-# Pull base image
-FROM fedora:31
-MAINTAINER szymon.romik@intel.com
+setup()
 
-# Set required environment variables
-ENV OS fedora
-ENV OS_VER 31
-ENV PACKAGE_MANAGER rpm
-ENV NOTTY 1
+execute(${TEST_EXECUTABLE} ${ENGINE} ${DIR}/testfile ${DIR}/nope/nope)
 
-# Additional parameters to build docker without building components
-ARG SKIP_VALGRIND_BUILD
-ARG SKIP_PMDK_BUILD
-ARG SKIP_LIBPMEMOBJCPP_BUILD
-
-# Install basic tools
-RUN dnf update -y \
- && dnf install -y \
-	autoconf \
-	automake \
-	clang \
-	cmake \
-	daxctl-devel \
-	doxygen \
-	gcc \
-	gcc-c++ \
-	gdb \
-	git \
-	graphviz \
-	hub \
-	libtool \
-	make \
-	man \
-	memkind-devel \
-	ndctl-devel \
-	numactl-devel \
-	pandoc \
-	passwd \
-	perl-Text-Diff \
-	rapidjson-devel \
-	rpm-build \
-	sudo \
-	tbb-devel \
-	unzip \
-	wget \
-	which \
-&& dnf clean all
-
-# Install glibc-debuginfo
-RUN dnf debuginfo-install -y glibc
-
-# Install valgrind
-COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
-
-# Install pmdk
-COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh rpm
-
-# Install pmdk c++ bindings
-COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh RPM
-
-# Add user
-ENV USER user
-ENV USERPASS pass
-RUN useradd -m $USER
-RUN echo "$USER:$USERPASS" | chpasswd
-RUN gpasswd wheel -a $USER
-USER $USER
+finish()
