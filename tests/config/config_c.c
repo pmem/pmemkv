@@ -48,9 +48,9 @@ static void deleter(struct custom_type *ct_ptr)
 	ct_ptr->b = '0';
 }
 
-void simple_test()
+static void simple_test()
 {
-	pmemkv_config* config = pmemkv_config_new();
+	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
 	int ret = pmemkv_config_put_string(config, "string", "abc");
@@ -122,9 +122,9 @@ void simple_test()
 	free(ptr_deleter);
 }
 
-void integral_conversion_test()
+static void integral_conversion_test()
 {
-	pmemkv_config* config = pmemkv_config_new();
+	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
 	int ret = pmemkv_config_put_int64(config, "int", 123);
@@ -136,8 +136,7 @@ void integral_conversion_test()
 	ret = pmemkv_config_put_int64(config, "negative-int", -123);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 
-	ret = pmemkv_config_put_uint64(config, "uint-max",
-				       (uint64_t) -1);
+	ret = pmemkv_config_put_uint64(config, "uint-max", (uint64_t)-1);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 
 	int64_t int_s;
@@ -176,14 +175,14 @@ void integral_conversion_test()
 	size_t uint_max_us;
 	ret = pmemkv_config_get_uint64(config, "uint-max", &uint_max_us);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
-	UT_ASSERTeq(uint_max_us, ((uint64_t) -1));
+	UT_ASSERTeq(uint_max_us, ((uint64_t)-1));
 
 	pmemkv_config_delete(config);
 }
 
-void not_found_test()
+static void not_found_test()
 {
-	pmemkv_config* config = pmemkv_config_new();
+	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
 	/* all gets should return NotFound when looking for non-existing key */
@@ -214,9 +213,9 @@ void not_found_test()
 }
 
 /* Test if null can be passed as config to pmemkv_config_* functions */
-void null_config_test()
+static void null_config_test()
 {
-	pmemkv_config* config = pmemkv_config_new();
+	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
 	int ret = pmemkv_config_put_string(NULL, "string", "abc");
