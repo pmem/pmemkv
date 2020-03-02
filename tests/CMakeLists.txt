@@ -1,5 +1,5 @@
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -32,18 +32,35 @@
 include(ctest_helpers.cmake)
 
 add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/*.h
-		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.c
+		${CMAKE_CURRENT_SOURCE_DIR}/common/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/common/*.c
+		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.cc)
+		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.c*)
 
-add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/*.h
-		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.cc)
+add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/cmake/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/common/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/config/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/engines/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/generic/*.*)
+
+add_custom_target(tests)
+
+add_library(test_backtrace STATIC common/test_backtrace.c)
+if(LIBUNWIND_FOUND)
+	target_compile_definitions(test_backtrace PUBLIC USE_LIBUNWIND=1)
+endif()
+
+find_pmreorder()
+find_pmempool()
 
 if (COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
@@ -87,9 +104,7 @@ function(build_example_pmemkv_pmemobj_cpp)
 endfunction()
 
 function(build_wrong_engine_name_test)
-	add_executable(wrong_engine_name_test wrong_engine_name_test.cc)
-	target_include_directories(wrong_engine_name_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
-	target_link_libraries(wrong_engine_name_test pmemkv)
+	build_test(wrong_engine_name_test generic/wrong_engine_name_test.cc)
 
 	if(ENGINE_VSMAP)
 		target_compile_definitions(wrong_engine_name_test PRIVATE -DENGINE_VSMAP)
@@ -116,13 +131,7 @@ set(TEST_FILES
 	pmemkv_c_api_test.cc
 	mock_tx_alloc.cc
 	engines/blackhole_test.cc
-	config/config_c.cc
-	config/config_cpp.cc
 )
-
-if(BUILD_JSON_CONFIG)
-	list(APPEND TEST_FILES config/json_to_config.cc)
-endif()
 
 # add each engine's tests source files separately
 if(ENGINE_VSMAP)
@@ -231,30 +240,35 @@ if(ENGINE_TREE3)
 	target_link_libraries(pmemkv_test ${LIBPMEMOBJ++_LIBRARIES})
 endif()
 
-# save lists of source files and all tests in files to check them in the first test
-set(FILE_TEST_FILES ${CMAKE_CURRENT_BINARY_DIR}/test_files.txt)
-set(FILE_ALL_TESTS ${CMAKE_CURRENT_BINARY_DIR}/list_all_tests.txt)
-file(WRITE ${FILE_TEST_FILES} "${TEST_FILES}")
-file(WRITE ${FILE_ALL_TESTS} "${list_all_tests}")
-
 build_wrong_engine_name_test()
-
-test("run-binary" wrong_engine_name_test wrong_engine_name_test none)
+add_test_generic(NAME wrong_engine_name_test TRACERS none)
 
 if(BUILD_EXAMPLES AND ENGINE_CMAP)
 	build_example_pmemkv_basic_c()
 	build_example_pmemkv_basic_cpp()
 	build_example_pmemkv_pmemobj_cpp()
-	test("run-binary" ex_pmemkv_basic_c ex_pmemkv_basic_c none)
-	test("run-binary" ex_pmemkv_basic_cpp ex_pmemkv_basic_cpp none)
-	test("run-binary" ex_pmemkv_pmemobj_cpp ex_pmemkv_pmemobj_cpp none)
+
+	add_test_generic(NAME ex_pmemkv_basic_c TRACERS none)
+	add_test_generic(NAME ex_pmemkv_basic_cpp TRACERS none)
+	add_test_generic(NAME ex_pmemkv_pmemobj_cpp TRACERS none)
 elseif(BUILD_EXAMPLES AND NOT ENGINE_CMAP)
 	message(WARNING
 		"Examples use cmap engine, which is disabled, hence their execution "
 		"is also disabled. If you want to run them use -DENGINE_CMAP=ON option.")
 endif()
 
-# test pmreorder framework
-if(PMREORDER_SUPPORTED)
-	test("run-pmreorder-test" wrong_engine_name_test-pmreorder wrong_engine_name_test pmreorder)
+build_test(c_api c_api/c_api_test.c)
+add_test_generic(NAME c_api TRACERS none memcheck)
+
+build_test(config_c config/config_c.c)
+add_test_generic(NAME config_c TRACERS none memcheck)
+
+build_test(config_cpp config/config_cpp.cc)
+add_test_generic(NAME config_cpp TRACERS none memcheck)
+
+if(BUILD_JSON_CONFIG)
+	build_test(json_to_config config/json_to_config.cc)
+	target_link_libraries(json_to_config pmemkv_json_config)
+
+	add_test_generic(NAME json_to_config TRACERS none memcheck)
 endif()

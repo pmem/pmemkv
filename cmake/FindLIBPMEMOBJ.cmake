@@ -1,5 +1,5 @@
 #
-# Copyright 2019, Intel Corporation
+# Copyright 2018-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,12 +29,19 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-include(${SRC_DIR}/helpers.cmake)
+find_path(LIBPMEMOBJ_INCLUDE_DIR libpmemobj.h)
+find_library(LIBPMEMOBJ_LIBRARY NAMES pmemobj libpmemobj)
 
-setup()
+set(LIBPMEMOBJ_LIBRARIES ${LIBPMEMOBJ_LIBRARY})
+set(LIBPMEMOBJ_INCLUDE_DIRS ${LIBPMEMOBJ_INCLUDE_DIR})
 
-execute_process(COMMAND ${CMAKE_COMMAND} -E remove pool_${TEST_NAME})
+set(MSG_NOT_FOUND "libpmemobj NOT found (set CMAKE_PREFIX_PATH to point the location)")
+if(NOT (LIBPMEMOBJ_INCLUDE_DIR AND LIBPMEMOBJ_LIBRARY))
+	if(LIBPMEMOBJ_FIND_REQUIRED)
+		message(FATAL_ERROR ${MSG_NOT_FOUND})
+	else()
+		message(WARNING ${MSG_NOT_FOUND})
+	endif()
+endif()
 
-execute(${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME} pool_${TEST_NAME})
-
-cleanup()
+mark_as_advanced(LIBPMEMOBJ_LIBRARY LIBPMEMOBJ_INCLUDE_DIR)
