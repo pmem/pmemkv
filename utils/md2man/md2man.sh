@@ -56,6 +56,7 @@ section=`sed -n 's/^title:.*\([0-9]\))$/\1/p' $filename`
 secondary_title=`sed -n 's/^secondary_title:\ *\(.*\)$/\1/p' $filename`
 
 dt="$(date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%F)"
+year="$(date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y)"
 # since genereted docs are not kept in the repo the output dir may not exist
 out_dir=`echo $outfile | sed 's/\(.*\)\/.*/\1/'`
 mkdir -p $out_dir
@@ -64,7 +65,7 @@ cat $filename | sed -n -e '/# NAME #/,$p' |\
 	pandoc -s -t man -o $outfile --template=$template \
 	-V title=$title -V section=$section \
 	-V date="$dt" -V version="$version" \
-	-V year=$(date +"%Y") -V secondary_title="$secondary_title" |
+	-V year="$year" -V secondary_title="$secondary_title" |
 sed '/^\.IP/{
 N
 /\n\.nf/{
