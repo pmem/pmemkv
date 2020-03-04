@@ -53,7 +53,6 @@ RUN dnf update -y \
 	git \
 	graphviz \
 	gtest-devel \
-	hub \
 	libtool \
 	make \
 	man \
