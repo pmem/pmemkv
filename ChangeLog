@@ -1,3 +1,14 @@
+Fri Feb 07 2020 Igor Chorążewicz <igor.chorazewicz@intel.com>
+
+	* Version 1.0.2
+
+	This is a bugfix release for pmemkv 1.0
+
+	This release:
+	- fixes misleading information in manpages
+	- fixes compilation of vsmap engine on newer compilers
+	- introduces requirement on size of std::string to be less than or equal to 32
+
 Fri Jan 31 2019 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.1
