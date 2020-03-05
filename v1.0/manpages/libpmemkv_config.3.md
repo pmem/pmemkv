@@ -1,13 +1,13 @@
 ---
 layout: manual
 Content-Style: 'text/css'
-title: _MP(PMEMKV_CONFIG, 3)
+title: PMEMKV_CONFIG
 collection: libpmemkv
 header: PMEMKV_CONFIG
-date: pmemkv version 1.0.1
+secondary_title: pmemkv
 ...
 
-[comment]: <> (Copyright 2019, Intel Corporation)
+[comment]: <> (Copyright 2019-2020, Intel Corporation)
 
 [comment]: <> (Redistribution and use in source and binary forms, with or without)
 [comment]: <> (modification, are permitted provided that the following conditions)
@@ -40,6 +40,7 @@ date: pmemkv version 1.0.1
 [SYNOPSIS](#synopsis)<br />
 [DESCRIPTION](#description)<br />
 [EXAMPLE](#example)<br />
+[ERRORS](#errors)<br />
 [SEE ALSO](#see-also)<br />
 
 
@@ -261,4 +262,4 @@ int main()
 
 # SEE ALSO #
 
-**libpmemkv**(7), **libpmemkv**(3) , **libpmemkv_json_config**(3) and **<https://pmem.io>**
+**libpmemkv**(7), **libpmemkv**(3) , **libpmemkv_json_config**(3) and **<http://pmem.io>**
