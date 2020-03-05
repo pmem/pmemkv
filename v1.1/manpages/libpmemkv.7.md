@@ -1,7 +1,7 @@
 ---
 layout: manual
 Content-Style: 'text/css'
-title: _MP(PMEMKV, 7)
+title: PMEMKV
 collection: libpmemkv
 header: PMEMKV
 secondary_title: pmemkv
