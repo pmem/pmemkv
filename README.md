@@ -91,3 +91,12 @@ Benchmarks' scripts and other helpful utilities are available here:
 
 https://github.com/pmem/pmemkv-tools
 
+## Releases' support status
+
+Currently all branches/releases are fully supported. Latest releases can be
+seen on the ["releases" tab](https://github.com/pmem/pmemkv/releases).
+
+| Version | Release date | Last minor rel. | Bug fixing | Maintenance |
+| ------- | ------------ | --------------- | ---------- | ----------- |
+| 1.1 | Jan 31, 2020 | - | All | Full |
+| 1.0 | Oct 4, 2019 | 1.0.2 (Feb 7, 2020) | All | Full |
