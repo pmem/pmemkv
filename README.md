@@ -16,6 +16,9 @@ Rather than being tied to a single language or backing implementation, `pmemkv`
 provides different options for language bindings and storage engines.
 For more information, see https://pmem.io/pmemkv.
 
+Latest releases can be found on the ["releases" tab](https://github.com/pmem/pmemkv/releases).
+Up-to-date support/maintenance status of branches/releases is available on [pmem.io](https://pmem.io/pmemkv).
+
 The C++ API of pmemkv is documented in the Doxygen documentation listed below:
 
 - [master](https://pmem.io/pmemkv/master/doxygen/index.html)
@@ -90,4 +93,3 @@ and the experimental engines are described in the [ENGINES-experimental.md](ENGI
 Benchmarks' scripts and other helpful utilities are available here:
 
 https://github.com/pmem/pmemkv-tools
-
