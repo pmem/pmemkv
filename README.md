@@ -5,6 +5,7 @@
 [![PMEMKV version](https://img.shields.io/github/tag/pmem/pmemkv.svg)](https://github.com/pmem/pmemkv/releases/latest)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/18408/badge.svg)](https://scan.coverity.com/projects/pmem-pmemkv)
 [![Coverage Status](https://codecov.io/github/pmem/pmemkv/coverage.svg?branch=master)](https://codecov.io/gh/pmem/pmemkv/branch/master)
+[![Packaging status](https://repology.org/badge/tiny-repos/pmemkv.svg)](https://repology.org/project/pmemkv/versions)
 
 Key/Value Datastore for Persistent Memory
 
