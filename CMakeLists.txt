@@ -42,6 +42,7 @@ option(ENGINE_VSMAP "enable vsmap engine" ON)
 option(ENGINE_CACHING "enable experimental caching engine" OFF)
 option(ENGINE_STREE "enable experimental stree engine" OFF)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
+option(ENGINE_RADIX "enable experimental radix engine" OFF)
 
 option(DEVELOPER_MODE "enable developer's checks" OFF)
 option(CHECK_CPP_STYLE "check code style of C++ sources" OFF)
@@ -85,6 +86,12 @@ if(ENGINE_TREE3)
 	message(STATUS "TREE3 engine is ON")
 else()
 	message(STATUS "TREE3 engine is OFF")
+endif()
+if(ENGINE_RADIX)
+	add_definitions(-DENGINE_RADIX)
+	message(STATUS "RADIX engine is ON")
+else()
+	message(STATUS "RADIX engine is OFF")
 endif()
 
 set(SOURCE_FILES
@@ -135,6 +142,12 @@ if(ENGINE_TREE3)
 		src/engines-experimental/tree3.cc
 	)
 endif()
+if(ENGINE_RADIX)
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/radix.h
+		src/engines-experimental/radix.cc
+	)
+endif()
 
 
 set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
@@ -177,7 +190,7 @@ set(PKG_CONFIG_REQUIRES)
 set(DEB_DEPENDS)
 set(RPM_DEPENDS)
 
-if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3)
+if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3 OR ENGINE_RADIX)
 	include(libpmemobj++)
 	list(APPEND PKG_CONFIG_REQUIRES "libpmemobj++ >= ${LIBPMEMOBJ_CPP_REQUIRED_VERSION}")
 	list(APPEND RPM_DEPENDS "libpmemobj >= ${LIBPMEMOBJ_REQUIRED_VERSION}")
@@ -265,7 +278,7 @@ set_target_properties(pmemkv PROPERTIES SOVERSION 1)
 target_link_libraries(pmemkv PRIVATE
 	-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv.map)
 
-if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3)
+if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_STREE OR ENGINE_TREE3 OR ENGINE_RADIX)
 	target_link_libraries(pmemkv PRIVATE ${LIBPMEMOBJ++_LIBRARIES})
 endif()
 if(ENGINE_VSMAP OR ENGINE_VCMAP)
