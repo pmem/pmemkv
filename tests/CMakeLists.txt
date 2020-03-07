@@ -745,3 +745,146 @@ if(ENGINE_STREE)
 			SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_STREE)
 ################################################################################
+###################################### RADIX ###################################
+	add_engine_test(ENGINE radix
+			BINARY c_api_null_db_config
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE radix
+			BINARY put_get_remove
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	# Expects no limit for key length
+	# add_engine_test(ENGINE radix
+	# 		BINARY put_get_remove_params
+	# 		TRACERS none #memcheck
+	# 		SCRIPT pmemobj_based/default.cmake
+	# 		DB_SIZE 4G PARAMS 400000)
+
+	add_engine_test(ENGINE radix
+			BINARY put_get_std_map
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 1000 8 200)
+
+	# XXX - oom test requires support for strings longer than 8 bytes
+	# add_engine_test(ENGINE stree
+	# BINARY error_handling_oom
+	# TRACERS none memcheck
+	# SCRIPT pmemobj_based/default.cmake
+	# DB_SIZE 20M)
+
+	# add_engine_test(ENGINE radix
+	# 		BINARY iterate
+	# 		TRACERS none #memcheck pmemcheck
+	# 		SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE radix
+			BINARY persistent_put_get_std_map_multiple_reopen
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 1000 8 200)
+
+	add_engine_test(ENGINE radix
+			BINARY persistent_not_found_verify
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE radix
+			BINARY persistent_overwrite_verify
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE radix
+			BINARY persistent_put_remove_verify
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE radix
+			BINARY persistent_put_verify
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	# add_engine_test(ENGINE radix
+	# 		BINARY persistent_put_verify_asc_params
+	# 		TRACERS none #memcheck pmemcheck
+	# 		SCRIPT pmemobj_based/persistent/insert_check.cmake
+	# 		DB_SIZE 1G PARAMS 6000)
+
+	# add_engine_test(ENGINE radix
+	# 		BINARY persistent_put_verify_asc_params
+	# 		TRACERS none #memcheck pmemcheck
+	# 		SCRIPT pmemobj_based/persistent/insert_check.cmake
+	# 		DB_SIZE 1G PARAMS 3906) # 3906 is limit for one inner node
+
+	# add_engine_test(ENGINE radix
+	# 		BINARY persistent_put_verify_desc_params
+	# 		TRACERS none #memcheck pmemcheck
+	# 		SCRIPT pmemobj_based/persistent/insert_check.cmake
+	# 		DB_SIZE 1G PARAMS 6000)
+
+	# add_engine_test(ENGINE radix
+	# 		BINARY persistent_put_verify_desc_params
+	# 		TRACERS none #memcheck pmemcheck
+	# 		SCRIPT pmemobj_based/persistent/insert_check.cmake
+	# 		DB_SIZE 1G PARAMS 3906) # 3906 is limit for one inner node
+
+	add_engine_test(ENGINE radix
+		BINARY pmemobj_error_handling_oom
+		TRACERS none memcheck pmemcheck
+		SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE radix
+			BINARY pmemobj_error_handling_create
+			TRACERS none #memcheck
+			SCRIPT pmemobj_based/pmemobj/error_handling_create.cmake)
+
+			add_engine_test(ENGINE radix
+			BINARY concurrent_put_get_remove
+			TRACERS none #memcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	# # XXX - defrag not supported
+	# # add_engine_test(ENGINE stree
+	# # BINARY pmemobj_error_handling_tx_oid
+	# # TRACERS none memcheck
+	# # SCRIPT pmemobj_based/pmemobj/error_handling_tx_oid.cmake)
+
+	# # XXX - defrag not supported
+	# # add_engine_test(ENGINE stree
+	# # BINARY pmemobj_error_handling_tx_path
+	# # TRACERS none memcheck
+	# # SCRIPT pmemobj_based/pmemobj/error_handling_tx_path.cmake)
+
+	# # XXX - defrag not supported
+	# # add_engine_test(ENGINE stree
+	# # BINARY pmemobj_error_handling_defrag
+	# # TRACERS none memcheck
+	# # SCRIPT pmemobj_based/default.cmake)
+
+	# # XXX - defrag not supported
+	# # add_engine_test(ENGINE stree
+	# # BINARY pmemobj_put_get_std_map_defrag
+	# # TRACERS none memcheck pmemcheck
+	# # SCRIPT pmemobj_based/default.cmake
+	# # PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE radix
+			BINARY pmemobj_put_get_std_map_oid
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_oid.cmake
+			PARAMS 1000 8 200)
+
+	add_engine_test(ENGINE radix
+			BINARY put_get_std_map
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			PARAMS 1000 8 200)
+
+	# add_engine_test(ENGINE radix
+	# 		BINARY sorted_iterate
+	# 		TRACERS none #memcheck pmemcheck
+	# 		SCRIPT pmemobj_based/default.cmake)
+################################################################################
