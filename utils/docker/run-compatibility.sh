@@ -70,6 +70,7 @@ mkdir build
 cd build
 
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+	-DBUILD_TESTS=OFF \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX_1_0_1
 make -j$(nproc)
 sudo_password -S make -j$(nproc) install
