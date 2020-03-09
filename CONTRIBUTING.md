@@ -117,9 +117,9 @@ Next we'll walk you through the steps of creating a new engine.
 
 ### Providing Unit Test
 
-* Create `tests/engines/mytree_test.cc` for unit tests
-* For new engines, use `blackhole_test.cc` as a template
-* For stable engines, just copy existing tests (eventually replace the original)
+* Select testcases (based on your engine's capabilites) you whish to use from `src/tests/engine_scenarios` (optionally create your own).
+* Write `.cmake` scripts for running selected testcases (if engine is based on pmemobj or memkind you can reuse scripts from `src\tests\engines\pmemobj_based` or `src\tests\engines\memkind_based`)
+* Add selected testcases to `src\tests\CMakeLists.txt` by using `add_engine_test` function
 
 ### Updating Build System
 
