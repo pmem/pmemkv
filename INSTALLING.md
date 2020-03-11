@@ -27,9 +27,9 @@ are logged as GitHub issues.*
 * [TBB](https://github.com/01org/tbb) - Thread Building Blocks (required by vcmap engine)
 * [RapidJSON](https://github.com/tencent/rapidjson) - JSON parser (required by `libpmemkv_json_config` helper library)
 * Used only for development & testing:
-	* [GoogleTest](https://github.com/google/googletest) - test framework, version >= 1.8
 	* [valgrind](https://github.com/pmem/valgrind) - tool for profiling and memory leak detection. *pmem* forked version with *pmemcheck*
 		tool is recommended, but upstream/original [valgrind](https://valgrind.org/) is also compatible (package valgrind-devel is required).
+	* [libpmem](https://github.com/pmem/pmdk) - to check whether TEST_DIR is on PMEM
 	* [pandoc](https://pandoc.org/) - markup converter to generate manpages
 	* [doxygen](http://www.doxygen.nl/) - tool for generating documentation from annotated C++ sources
 	* [graphviz](https://www.graphviz.org/) - graph visualization software required by _doxygen_

@@ -367,3 +367,16 @@ function(check_is_pmem filename)
         message(FATAL_ERROR "${TEST_NAME} can only be run on PMEM.")
     endif()
 endfunction()
+
+# Checks whether specified filename is located on persistent memory and emits
+# FATAL_ERROR in case it's not.
+function(check_is_pmem filename)
+    execute_process(COMMAND ${BIN_DIR}/../check_is_pmem ${filename} RESULT_VARIABLE is_pmem)
+
+    if (${is_pmem} EQUAL 2)
+        message(FATAL_ERROR "check_is_pmem failed.")
+    elseif ((${is_pmem} EQUAL 1) AND (NOT TESTS_USE_FORCED_PMEM))
+        # Return value 1 means that path points to non-pmem
+        message(FATAL_ERROR "${TEST_NAME} can only be run on PMEM.")
+    endif()
+endfunction()
