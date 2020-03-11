@@ -219,6 +219,10 @@ function(add_test_common executable test_name tracer testcase cmake_script)
 		return()
 	endif()
 
+	if (COVERAGE AND ${tracer} IN_LIST vg_tracers)
+		return()
+	endif()
+
 	add_testcase(${executable} ${test_name} ${tracer} ${testcase} ${cmake_script} ${ARGN})
 endfunction()
 
