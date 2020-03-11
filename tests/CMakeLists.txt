@@ -63,6 +63,9 @@ endif()
 find_pmreorder()
 find_pmempool()
 
+add_executable(check_is_pmem common/check_is_pmem.cpp)
+target_link_libraries(check_is_pmem ${LIBPMEM_LIBRARIES})
+
 if (COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
 endif()
@@ -260,8 +263,15 @@ if(ENGINE_CMAP)
 
 	add_engine_test(ENGINE cmap
 			BINARY concurrent_put_get_remove
-			TRACERS none memcheck drd helgrind
+			TRACERS none memcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+		add_engine_test(ENGINE cmap
+				BINARY concurrent_put_get_remove
+				TRACERS drd helgrind
+				SCRIPT pmemobj_based/default.cmake)
+	endif()
 
 	add_engine_test(ENGINE cmap
 			BINARY persistent_put_get_std_map_multiple_reopen

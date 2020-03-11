@@ -1,5 +1,5 @@
 #
-# Copyright 2020, Intel Corporation
+# Copyright 2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,18 +29,19 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-include(${SRC_DIR}/../helpers.cmake)
+find_path(LIBPMEM_INCLUDE_DIR libpmem.h)
+find_library(LIBPMEM_LIBRARY NAMES pmem libpmem)
 
-setup()
+set(LIBPMEM_LIBRARIES ${LIBPMEM_LIBRARY})
+set(LIBPMEM_INCLUDE_DIRS ${LIBPMEM_INCLUDE_DIR})
 
-if ((${TRACER} STREQUAL "drd") OR (${TRACER} STREQUAL "helgrind"))
-    check_is_pmem(${DIR}/testfile)
+set(MSG_NOT_FOUND "libpmem NOT found (set CMAKE_PREFIX_PATH to point the location)")
+if(NOT (LIBPMEM_INCLUDE_DIR AND LIBPMEM_LIBRARY))
+	if(LIBPMEM_FIND_REQUIRED)
+		message(FATAL_ERROR ${MSG_NOT_FOUND})
+	else()
+		message(WARNING ${MSG_NOT_FOUND})
+	endif()
 endif()
 
-pmempool_execute(create -l "pmemkv" -s ${DB_SIZE} obj ${DIR}/testfile)
-
-make_config({"path":"${DIR}/testfile"})
-execute(${TEST_EXECUTABLE} ${ENGINE} ${CONFIG} insert ${PARAMS})
-execute(${TEST_EXECUTABLE} ${ENGINE} ${CONFIG} check ${PARAMS})
-
-finish()
+mark_as_advanced(LIBPMEM_LIBRARY LIBPMEM_INCLUDE_DIR)
