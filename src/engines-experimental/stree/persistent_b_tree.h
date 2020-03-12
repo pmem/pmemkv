@@ -1479,8 +1479,8 @@ public:
 
 	/**
 	 * Returns an iterator pointing to the least element which is larger than or equal
-	 * to the given key. Keys are sorted in lexicographical order (see
-	 * std::lexicographical_compare).
+	 * to the given key. Keys are sorted in binary order (see
+	 * std::string::compare).
 	 *
 	 * @param[in] key sets the lower bound (inclusive)
 	 *
@@ -1501,8 +1501,8 @@ public:
 
 	/**
 	 * Returns a const iterator pointing to the least element which is larger than or
-	 * equal to the given key. Keys are sorted in lexicographical order (see
-	 * std::lexicographical_compare).
+	 * equal to the given key. Keys are sorted in binary order (see
+	 * std::string::compare).
 	 *
 	 * @param[in] key sets the lower bound (inclusive)
 	 *
@@ -1523,8 +1523,8 @@ public:
 
 	/**
 	 * Returns an iterator pointing to the least element which is larger than the
-	 * given key. Keys are sorted in lexicographical order (see
-	 * std::lexicographical_compare).
+	 * given key. Keys are sorted in binary order (see
+	 * std::string::compare).
 	 *
 	 * @param[in] key sets the lower bound (exclusive)
 	 *
@@ -1545,8 +1545,8 @@ public:
 
 	/**
 	 * Returns a const iterator pointing to the least element which is larger than the
-	 * given key. Keys are sorted in lexicographical order (see
-	 * std::lexicographical_compare).
+	 * given key. Keys are sorted in binary order (see
+	 * std::string::compare).
 	 *
 	 * @param[in] key sets the lower bound (exclusive)
 	 *
