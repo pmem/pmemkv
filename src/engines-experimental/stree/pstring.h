@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -98,6 +98,23 @@ public:
 		return str + _size;
 	}
 
+	int compare(const pstring &rhs) const
+	{
+		auto m_l = std::min(size(), rhs.size());
+
+		auto r = memcmp(begin(), rhs.begin(), m_l);
+		if (r == 0) {
+			if (size() < rhs.size())
+				return -1;
+			else if (size() > rhs.size())
+				return 1;
+			else
+				return 0;
+		}
+
+		return r;
+	}
+
 private:
 	void init(const char *src, size_t size)
 	{
@@ -115,22 +132,19 @@ private:
 template <size_t size>
 inline bool operator<(const pstring<size> &lhs, const pstring<size> &rhs)
 {
-	return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
-					    rhs.end());
+	return lhs.compare(rhs) < 0;
 }
 
 template <size_t size>
 inline bool operator>(const pstring<size> &lhs, const pstring<size> &rhs)
 {
-	return std::lexicographical_compare(rhs.begin(), rhs.end(), lhs.begin(),
-					    lhs.end());
+	return lhs.compare(rhs) > 0;
 }
 
 template <size_t size>
 inline bool operator==(const pstring<size> &lhs, const pstring<size> &rhs)
 {
-	return lhs.size() == rhs.size() &&
-		std::equal(lhs.begin(), lhs.end(), rhs.begin());
+	return lhs.compare(rhs) == 0;
 }
 
 template <size_t size>
