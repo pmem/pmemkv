@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -303,9 +303,16 @@ status vsmap::put(string_view key, string_view value)
 {
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
-	// XXX - do not create temporary string
-	pmem_kv_container[key_type(key.data(), key.size(), kv_allocator)] =
-		mapped_type(value.data(), value.size(), kv_allocator);
+	// XXX - starting from C++17 std::map has try_emplace method wich could be more
+	// efficient
+	auto res = pmem_kv_container.emplace(
+		std::piecewise_construct, std::forward_as_tuple(key.data(), key.size()),
+		std::forward_as_tuple(value.data(), value.size()));
+	if (!res.second) {
+		auto it = res.first;
+		it->second.assign(value.data(), value.size());
+	}
+
 	return status::OK;
 }
 
