@@ -57,17 +57,18 @@ Possible statuses:
 2. Limited scope:
 	* Only critical bugs (security, data integrity, etc.) will be backported,
 	* Patch versions will be released when needed (based on severity of found issues),
-	* Branch will remain in "limited maintenance" status based on original release availability in popular distros,
-	* Announcement about transition to EOL at least a half year before.
+	* Branch will remain in "limited maintanance" status based on original release availability in popular distros,
+	* Annoucement about transition to EOL at least a half year before.
 3. EOL:
 	* No support,
 	* No bug fixes,
 	* No official releases.
 
-# Blog entries
+## Blog entries
 
 The following series of blog articles provides an introduction to **pmemkv**:
 
 * [Introduction](https://pmem.io/2017/02/21/pmemkv-intro.html)
 * [Zero-copy leaf splits in pmemkv](https://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html)
 * [Benchmarking with different storage engines using pmemkv](https://pmem.io/2017/12/27/pmemkv-benchmarking-engines.html)
+* [Language bindings for pmemkv](https://pmem.io/2020/03/04/pmemkv-bindings.html)
