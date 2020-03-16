@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -151,10 +151,15 @@ status stree::count_between(string_view key1, string_view key2, std::size_t &cnt
 		pstring<internal::stree::MAX_KEY_SIZE>(key1.data(), key1.size()));
 	internal::stree::btree_type::iterator it2 = my_btree->lower_bound(
 		pstring<internal::stree::MAX_KEY_SIZE>(key2.data(), key2.size()));
-	auto result = std::distance(it1, it2);
-	assert(result >= 0);
 
-	cnt = static_cast<std::size_t>(result);
+	if (key1.compare(key2) < 0) {
+		auto result = std::distance(it1, it2);
+		assert(result >= 0);
+
+		cnt = static_cast<std::size_t>(result);
+	} else {
+		cnt = 0;
+	}
 
 	return status::OK;
 }
