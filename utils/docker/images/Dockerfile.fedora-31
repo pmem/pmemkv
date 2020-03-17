@@ -63,7 +63,6 @@ RUN dnf update -y \
 	gdb \
 	git \
 	graphviz \
-	gtest-devel \
 	hub \
 	libtool \
 	make \

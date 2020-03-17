@@ -30,8 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PMEMKV_UT_ASSERT_HPP
-#define PMEMKV_UT_ASSERT_HPP
+#ifndef PMEMKV_UNITTEST_H
+#define PMEMKV_UNITTEST_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,7 +69,7 @@ static inline void UT_FATAL(const char *format, ...)
 /* assert a condition is true at runtime */
 #define UT_ASSERT(cnd)                                                                   \
 	((void)((cnd) ||                                                                 \
-		(UT_FATAL("%s:%d %s - assertion failure: %s, errormsg: ", __FILE__,      \
+		(UT_FATAL("%s:%d %s - assertion failure: %s, errormsg: %s", __FILE__,    \
 			  __LINE__, __func__, #cnd, pmemkv_errormsg()),                  \
 		 0)))
 
@@ -103,4 +103,4 @@ static inline void UT_FATAL(const char *format, ...)
 }
 #endif
 
-#endif /* PMEMKV_UT_ASSERT_HPP */
+#endif /* PMEMKV_UNITTEST_H */

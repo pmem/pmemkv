@@ -55,6 +55,7 @@ option(BUILD_JSON_CONFIG "build the 'libpmemkv_json_config' library" ON)
 
 option(TESTS_USE_FORCED_PMEM "run tests with PMEM_IS_PMEM_FORCE=1" OFF)
 option(TESTS_USE_VALGRIND "enable tests with valgrind (if found)" ON)
+option(TESTS_PMEMOBJ_DRD_HELGRIND "enable test of pmemobj engines under drd and helgrind (they should only be run on PMEM)")
 
 option(COVERAGE "run coverage test" OFF)
 if(COVERAGE)
@@ -172,6 +173,7 @@ set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.9)
 set(LIBPMEMOBJ_REQUIRED_VERSION 1.8)
+set(LIBPMEM_REQUIRED_VERSION 1.7)
 set(MEMKIND_REQUIRED_VERSION 1.8.0)
 
 if(DEVELOPER_MODE)
@@ -333,8 +335,10 @@ if(BUILD_TESTS)
 
 	if(PKG_CONFIG_FOUND)
 		pkg_check_modules(LIBPMEMOBJ REQUIRED libpmemobj>=${LIBPMEMOBJ_REQUIRED_VERSION})
+		pkg_check_modules(LIBPMEM REQUIRED libpmem>=${LIBPMEM_REQUIRED_VERSION})
 	else()
 		find_package(LIBPMEMOBJ REQUIRED ${LIBPMEMOBJ_REQUIRED_VERSION})
+		find_package(LIBPMEM REQUIRED ${LIBPMEM_REQUIRED_VERSION})
 	endif()
 
 	enable_testing()

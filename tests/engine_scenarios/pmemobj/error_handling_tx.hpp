@@ -30,39 +30,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "c_api_test.h"
+#include "unittest.hpp"
 
-static const char *engines[] = {"blackhole",
-#ifdef ENGINE_CMAP
-				"cmap",
-#endif
-#ifdef ENGINE_VCMAP
-				"vcmap",
-#endif
-#ifdef ENGINE_VSMAP
-				"vsmap",
-#endif
-#ifdef ENGINE_STREE
-				"stree",
-#endif
-#ifdef ENGINE_TREE3
-				"tree3",
-#endif
-#ifdef ENGINE_CACHING
-				"caching"
-#endif
-};
+#include <libpmemobj++/transaction.hpp>
 
-int main(int argc, char *argv[])
+using namespace pmem::kv;
+
+static void TransactionTest(pmem::obj::pool_base &pmemobj_pool, pmem::kv::db &kv)
 {
-	START();
 
-	check_null_db_test();
+	std::string value;
+	UT_ASSERT(kv.get("key1", &value) == status::NOT_FOUND);
 
-	unsigned long i;
-	for (i = 0; i < sizeof(engines) / sizeof(char *); i++) {
-		null_config_test(engines[i]);
-	}
+	pmem::obj::transaction::run(pmemobj_pool, [&] {
+		UT_ASSERT(kv.put("key1", "value1") == status::TRANSACTION_SCOPE_ERROR);
+	});
 
-	return 0;
+	pmem::obj::transaction::run(pmemobj_pool, [&] {
+		UT_ASSERT(kv.get("key1", &value) == status::TRANSACTION_SCOPE_ERROR);
+	});
+
+	pmem::obj::transaction::run(pmemobj_pool, [&] {
+		UT_ASSERT(kv.remove("key1") == status::TRANSACTION_SCOPE_ERROR);
+	});
+
+	pmem::obj::transaction::run(pmemobj_pool, [&] {
+		UT_ASSERT(kv.defrag() == status::TRANSACTION_SCOPE_ERROR);
+	});
+
+	pmem::obj::transaction::run(pmemobj_pool, [&] {
+		UT_ASSERT(kv.exists("key1") == status::TRANSACTION_SCOPE_ERROR);
+	});
+
+	pmem::obj::transaction::run(pmemobj_pool, [&] {
+		UT_ASSERT(kv.get_all([&](pmem::kv::string_view key,
+					 pmem::kv::string_view value) { return 0; }) ==
+			  status::TRANSACTION_SCOPE_ERROR);
+	});
+
+	pmem::obj::transaction::run(pmemobj_pool, [&] {
+		size_t cnt;
+		UT_ASSERT(kv.count_all(cnt) == status::TRANSACTION_SCOPE_ERROR);
+	});
 }

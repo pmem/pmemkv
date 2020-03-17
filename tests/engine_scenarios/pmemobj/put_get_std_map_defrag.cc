@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020, Intel Corporation
+ * Copyright 2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,51 +30,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_SUITE_H
-#define TEST_SUITE_H
+#include "../all/put_get_std_map.hpp"
 
-#include <string>
-
-struct Basic {
-	/* path parameter passed to engine config */
-	std::string *path;
-	/* size parameter passed to engine config */
-	uint64_t size;
-	/* force_create parameter passed to engine config */
-	uint64_t force_create;
-	/* engine name */
-	const char *engine;
-	/* key length */
-	size_t key_length;
-	/* max size of data  */
-	size_t value_length;
-	/* size of actually inserted data */
-	size_t test_value_length;
-	/* test name */
-	std::string name;
-	/* markers for build system, which tracers should be used:
-	 * M - memcheck
-	 * P - pmemcheck
-	 * H - helgrind
-	 * D - drd  */
-	std::string tracers;
-	/* it specifies if engine should treat path as file or
-	 * directory */
-	bool use_file;
-
-	std::string get_path()
-	{
-		std::string abs_path(*path);
-		abs_path.append("/" + name);
-
-		return abs_path;
-	}
-};
-
-std::ostream &operator<<(std::ostream &stream, const Basic &val)
+static void test(int argc, char *argv[])
 {
-	stream << val.name;
-	return stream;
+	using namespace std::placeholders;
+
+	if (argc < 6)
+		UT_FATAL("usage: %s engine json_config n_inserts key_length value_length",
+			 argv[0]);
+
+	auto n_inserts = std::stoull(argv[3]);
+	auto key_length = std::stoull(argv[4]);
+	auto value_length = std::stoull(argv[5]);
+
+	auto kv = INITIALIZE_KV(argv[1], CONFIG_FROM_JSON(argv[2]));
+
+	auto proto = PutToMapTest(n_inserts, key_length, value_length, kv);
+
+	kv.defrag(0, 100);
+
+	VerifyKv(proto, kv);
+
+	kv.close();
 }
 
-#endif // TEST_SUITE_H
+int main(int argc, char *argv[])
+{
+	return run_test([&] { test(argc, argv); });
+}

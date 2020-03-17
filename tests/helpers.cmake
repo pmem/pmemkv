@@ -31,6 +31,8 @@
 
 set(DIR ${PARENT_DIR}/${TEST_NAME})
 
+string(REPLACE "|PARAM|" ";" PARAMS "${RAW_PARAMS}")
+
 function(setup)
     execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${PARENT_DIR}/${TEST_NAME})
     execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${PARENT_DIR}/${TEST_NAME})
@@ -255,6 +257,11 @@ function(execute name)
     execute_common(true ${TRACER}_${TESTCASE} ${name} ${ARGN})
 endfunction()
 
+function(make_config)
+    string(REPLACE " " "" config ${ARGN})
+    set(CONFIG "${config}" CACHE INTERNAL "")
+endfunction()
+
 # Executes command ${name} and creates a storelog.
 # First argument is pool file.
 # Second argument is test executable.
@@ -326,7 +333,7 @@ endfunction()
 function(pmempool_execute)
     set(ENV{LD_LIBRARY_PATH} ${LIBPMEMOBJ++_LIBRARY_DIRS})
 
-    execute_common(true ${TRACER}_${TESTCASE} pmempool ${ARGN})
+    execute_process(COMMAND pmempool ${ARGN})
 
     unset(ENV{LD_LIBRARY_PATH})
 endfunction()
@@ -346,6 +353,19 @@ function(crash_with_gdb gdb_batch_file name)
     execute_common(true ${TRACER}_${TESTCASE} ${name} ${ARGN})
 
     set(TRACER ${PREV_TRACER})
+endfunction()
+
+# Checks whether specified filename is located on persistent memory and emits
+# FATAL_ERROR in case it's not.
+function(check_is_pmem filename)
+    execute_process(COMMAND ${BIN_DIR}/../check_is_pmem ${filename} RESULT_VARIABLE is_pmem)
+
+    if (${is_pmem} EQUAL 2)
+        message(FATAL_ERROR "check_is_pmem failed.")
+    elseif ((${is_pmem} EQUAL 1) AND (NOT TESTS_USE_FORCED_PMEM))
+        # Return value 1 means that path points to non-pmem
+        message(FATAL_ERROR "${TEST_NAME} can only be run on PMEM.")
+    endif()
 endfunction()
 
 # Checks whether specified filename is located on persistent memory and emits

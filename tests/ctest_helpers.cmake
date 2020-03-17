@@ -124,7 +124,7 @@ function(build_test name)
 	prepend(srcs ${CMAKE_CURRENT_SOURCE_DIR} ${srcs})
 
 	add_executable(${name} ${srcs})
-	target_link_libraries(${name} ${LIBPMEMOBJ_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} pmemkv test_backtrace)
+	target_link_libraries(${name} ${LIBPMEMOBJ_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} pmemkv pmemkv_json_config test_backtrace)
 	if(LIBUNWIND_FOUND)
 		target_link_libraries(${name} ${LIBUNWIND_LIBRARIES} ${CMAKE_DL_LIBS})
 	endif()
@@ -138,38 +138,38 @@ endfunction()
 set(vg_tracers memcheck helgrind drd pmemcheck)
 
 # Configures testcase ${name} ${testcase} using tracer ${tracer}, cmake_script is used to run test
-function(add_testcase name tracer testcase cmake_script)
-	set(executable ${name})
-	add_test(NAME ${executable}_${testcase}_${tracer}
+function(add_testcase executable test_name tracer testcase cmake_script)
+	add_test(NAME ${test_name}_${testcase}_${tracer}
 			COMMAND ${CMAKE_COMMAND}
 			${GLOBAL_TEST_ARGS}
-			-DTEST_NAME=${executable}_${testcase}_${tracer}
+			-DTEST_NAME=${test_name}_${testcase}_${tracer}
 			-DTESTCASE=${testcase}
-			-DSRC_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${name}
-			-DBIN_DIR=${CMAKE_CURRENT_BINARY_DIR}/${executable}_${testcase}_${tracer}
+			-DSRC_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${test_name}
+			-DBIN_DIR=${CMAKE_CURRENT_BINARY_DIR}/${test_name}_${testcase}_${tracer}
 			-DTEST_EXECUTABLE=$<TARGET_FILE:${executable}>
 			-DTRACER=${tracer}
 			-DLONG_TESTS=${LONG_TESTS}
+			${ARGN}
 			-P ${cmake_script})
 
-	set_tests_properties(${name}_${testcase}_${tracer} PROPERTIES
+	set_tests_properties(${test_name}_${testcase}_${tracer} PROPERTIES
 			ENVIRONMENT "LC_ALL=C;PATH=$ENV{PATH};"
 			FAIL_REGULAR_EXPRESSION Sanitizer)
 
 	if (${tracer} STREQUAL pmemcheck)
 		# XXX: if we use FATAL_ERROR in test.cmake - pmemcheck passes anyway
-		set_tests_properties(${name}_${testcase}_${tracer} PROPERTIES
+		set_tests_properties(${test_name}_${testcase}_${tracer} PROPERTIES
 				FAIL_REGULAR_EXPRESSION "CMake Error")
 	endif()
 
 	if (${tracer} STREQUAL pmemcheck)
-		set_tests_properties(${name}_${testcase}_${tracer} PROPERTIES
+		set_tests_properties(${test_name}_${testcase}_${tracer} PROPERTIES
 				COST 100)
 	elseif(${tracer} IN_LIST vg_tracers)
-		set_tests_properties(${name}_${testcase}_${tracer} PROPERTIES
+		set_tests_properties(${test_name}_${testcase}_${tracer} PROPERTIES
 				COST 50)
 	else()
-		set_tests_properties(${name}_${testcase}_${tracer} PROPERTIES
+		set_tests_properties(${test_name}_${testcase}_${tracer} PROPERTIES
 				COST 10)
 	endif()
 endfunction()
@@ -182,7 +182,7 @@ function(skip_test name message)
 endfunction()
 
 # adds testcase only if tracer is found and target is build, skips adding test otherwise
-function(add_test_common name tracer testcase cmake_script)
+function(add_test_common executable test_name tracer testcase cmake_script)
 	if(${tracer} STREQUAL "")
 	    set(tracer none)
 	endif()
@@ -190,7 +190,7 @@ function(add_test_common name tracer testcase cmake_script)
 	if (NOT WIN32 AND ((NOT VALGRIND_FOUND) OR (NOT TESTS_USE_VALGRIND)) AND ${tracer} IN_LIST vg_tracers)
 		# Only print "SKIPPED_*" message when option is enabled
 		if (TESTS_USE_VALGRIND)
-			skip_test(${name}_${testcase}_${tracer} "SKIPPED_BECAUSE_OF_MISSING_VALGRIND")
+			skip_test(${test_name}_${testcase}_${tracer} "SKIPPED_BECAUSE_OF_MISSING_VALGRIND")
 		endif()
 		return()
 	endif()
@@ -198,18 +198,19 @@ function(add_test_common name tracer testcase cmake_script)
 	if (NOT WIN32 AND ((NOT VALGRIND_PMEMCHECK_FOUND) OR (NOT TESTS_USE_VALGRIND)) AND ${tracer} STREQUAL "pmemcheck")
 		# Only print "SKIPPED_*" message when option is enabled
 		if (TESTS_USE_VALGRIND)
-			skip_test(${name}_${testcase}_${tracer} "SKIPPED_BECAUSE_OF_MISSING_PMEMCHECK")
+			skip_test(${test_name}_${testcase}_${tracer} "SKIPPED_BECAUSE_OF_MISSING_PMEMCHECK")
 		endif()
 		return()
 	endif()
 
 	if (NOT WIN32 AND (USE_ASAN OR USE_UBSAN) AND ${tracer} IN_LIST vg_tracers)
-		skip_test(${name}_${testcase}_${tracer} "SKIPPED_BECAUSE_SANITIZER_USED")
+		skip_test(${test_name}_${testcase}_${tracer} "SKIPPED_BECAUSE_SANITIZER_USED")
 		return()
 	endif()
 
 	# if test was not build
-	if (NOT TARGET ${name})
+	if (NOT TARGET ${executable})
+		message(WARNING "${executable} not build. Skipping.")
 		return()
 	endif()
 
@@ -218,7 +219,11 @@ function(add_test_common name tracer testcase cmake_script)
 		return()
 	endif()
 
-	add_testcase(${name} ${tracer} ${testcase} ${cmake_script})
+	if (COVERAGE AND ${tracer} IN_LIST vg_tracers)
+		return()
+	endif()
+
+	add_testcase(${executable} ${test_name} ${tracer} ${testcase} ${cmake_script} ${ARGN})
 endfunction()
 
 # adds testscase with optional TRACERS and SCRIPT parameters
@@ -242,6 +247,46 @@ function(add_test_generic)
 	endif()
 
 	foreach(tracer ${TEST_TRACERS})
-		add_test_common(${TEST_NAME} ${tracer} ${TEST_CASE} ${cmake_script})
+		add_test_common(${TEST_NAME} ${TEST_NAME} ${tracer} ${TEST_CASE} ${cmake_script})
+	endforeach()
+endfunction()
+
+function(add_engine_test)
+	set(oneValueArgs BINARY ENGINE SCRIPT DB_SIZE)
+	set(multiValueArgs TRACERS PARAMS)
+	cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+	set(cmake_script ${CMAKE_CURRENT_SOURCE_DIR}/engines/${TEST_SCRIPT})
+
+	if("${TEST_DB_SIZE}" STREQUAL "")
+		set(TEST_DB_SIZE 104857600) # 100MB
+	endif()
+
+	get_filename_component(script_name ${cmake_script} NAME)
+	set(parsed_script_name ${script_name})
+	string(REGEX REPLACE ".cmake" "" parsed_script_name ${parsed_script_name})
+
+	set(TEST_NAME "${TEST_ENGINE}__${TEST_BINARY}__${parsed_script_name}")
+	if(NOT "${TEST_PARAMS}" STREQUAL "")
+		string(REPLACE ";" "_" parsed_params "${TEST_PARAMS}")
+		set(TEST_NAME "${TEST_NAME}_${parsed_params}")
+	endif()
+
+	if(${TEST_ENGINE} STREQUAL "caching")
+		# caching tests require lib_acl and memcached included, so we need to link
+		# them to test binary itself
+		target_link_libraries(${TEST_BINARY} memcached)
+		target_link_libraries(${TEST_BINARY} acl_cpp protocol acl)
+	endif()
+
+	# Use "|PARAM|" as list separator so that CMake does not expand it
+	# when passing to test script
+	string(REPLACE ";" "|PARAM|" raw_params "${TEST_PARAMS}")
+
+	foreach(tracer ${TEST_TRACERS})
+		add_test_common(${TEST_BINARY} ${TEST_NAME} ${tracer} 0 ${cmake_script}
+			-DENGINE=${TEST_ENGINE}
+			-DDB_SIZE=${TEST_DB_SIZE}
+			-DRAW_PARAMS=${raw_params})
 	endforeach()
 endfunction()

@@ -90,12 +90,21 @@ void check_null_db_test()
 
 void null_config_test(const char *engine)
 {
-	/* XXX solve it generically, for all tests */
-	if (strcmp(engine, "blackhole") == 0)
-		return;
-
 	pmemkv_config *empty_cfg = NULL;
 	pmemkv_db *db = NULL;
 	int s = pmemkv_open(engine, empty_cfg, &db);
 	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+}
+
+int main(int argc, char *argv[])
+{
+	START();
+
+	if (argc < 2)
+		UT_FATAL("usage %s: engine", argv[0]);
+
+	check_null_db_test();
+	null_config_test(argv[1]);
+
+	return 0;
 }

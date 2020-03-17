@@ -67,7 +67,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	graphviz \
 	libc6-dbg \
 	libdaxctl-dev \
-	libgtest-dev \
 	libndctl-dev \
 	libmemkind-dev \
 	libnode-dev \

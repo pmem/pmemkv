@@ -49,7 +49,7 @@ static void deleter(custom_type *ct_ptr)
 	ct_ptr->b = '0';
 }
 
-void simple_test()
+static void simple_test()
 {
 	auto cfg = new config;
 	UT_ASSERT(cfg != nullptr);
@@ -133,7 +133,7 @@ void simple_test()
 	delete ptr_deleter;
 }
 
-void integral_conversion_test()
+static void integral_conversion_test()
 {
 	auto cfg = new config;
 	UT_ASSERT(cfg != nullptr);
@@ -191,7 +191,7 @@ void integral_conversion_test()
 	delete cfg;
 }
 
-void constructors_test()
+static void constructors_test()
 {
 	auto cfg = new config;
 	UT_ASSERT(cfg != nullptr);
@@ -229,7 +229,7 @@ void constructors_test()
 	delete cfg;
 }
 
-void not_found_test()
+static void not_found_test()
 {
 	auto cfg = new config;
 	UT_ASSERT(cfg != nullptr);
@@ -264,7 +264,7 @@ void not_found_test()
 	delete cfg;
 }
 
-void test(int argc, char *argv[])
+static void test(int argc, char *argv[])
 {
 	simple_test();
 	integral_conversion_test();
