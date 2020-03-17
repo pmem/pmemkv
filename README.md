@@ -5,6 +5,7 @@
 [![PMEMKV version](https://img.shields.io/github/tag/pmem/pmemkv.svg)](https://github.com/pmem/pmemkv/releases/latest)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/18408/badge.svg)](https://scan.coverity.com/projects/pmem-pmemkv)
 [![Coverage Status](https://codecov.io/github/pmem/pmemkv/coverage.svg?branch=master)](https://codecov.io/gh/pmem/pmemkv/branch/master)
+[![Packaging status](https://repology.org/badge/tiny-repos/pmemkv.svg)](https://repology.org/project/pmemkv/versions)
 
 Key/Value Datastore for Persistent Memory
 
@@ -14,6 +15,9 @@ Key/Value Datastore for Persistent Memory
 Rather than being tied to a single language or backing implementation, `pmemkv`
 provides different options for language bindings and storage engines.
 For more information, see https://pmem.io/pmemkv.
+
+Latest releases can be found on the ["releases" tab](https://github.com/pmem/pmemkv/releases).
+Up-to-date support/maintenance status of branches/releases is available on [pmem.io](https://pmem.io/pmemkv).
 
 The C++ API of pmemkv is documented in the Doxygen documentation listed below:
 
@@ -89,4 +93,3 @@ and the experimental engines are described in the [ENGINES-experimental.md](ENGI
 Benchmarks' scripts and other helpful utilities are available here:
 
 https://github.com/pmem/pmemkv-tools
-
