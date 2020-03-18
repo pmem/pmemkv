@@ -28,6 +28,7 @@ option(BUILD_JSON_CONFIG "build the 'libpmemkv_json_config' library" ON)
 option(TESTS_USE_FORCED_PMEM "run tests with PMEM_IS_PMEM_FORCE=1" OFF)
 option(TESTS_USE_VALGRIND "enable tests with valgrind (if found)" ON)
 option(TESTS_PMEMOBJ_DRD_HELGRIND "enable test of pmemobj engines under drd and helgrind (they should only be run on PMEM)")
+option(TESTS_JSON "enable tests which require libpmemkv_json_config library (BUILD_JSON_CONFIG have to be ON)" ON)
 
 option(COVERAGE "run coverage test" OFF)
 if(COVERAGE)
