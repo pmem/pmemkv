@@ -86,6 +86,17 @@ function(build_test_ext)
 	target_compile_definitions(${TEST_NAME} PRIVATE ${TEST_BUILD_OPTIONS})
 endfunction()
 
+# Function to build test and link it with pmemkv_json_config library;
+# It's required to set CMake flag BUILD_JSON_CONFIG=ON, to build that library.
+function(build_test_json name)
+	if(NOT BUILD_JSON_CONFIG)
+		return()
+	endif()
+
+	build_test(${name} ${ARGN})
+	target_link_libraries(${name} pmemkv_json_config)
+endfunction()
+
 function(build_test name)
 	# skip posix tests
 	if(${name} MATCHES "posix$" AND WIN32)
@@ -96,7 +107,7 @@ function(build_test name)
 	prepend(srcs ${CMAKE_CURRENT_SOURCE_DIR} ${srcs})
 
 	add_executable(${name} ${srcs})
-	target_link_libraries(${name} ${LIBPMEMOBJ_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} pmemkv pmemkv_json_config test_backtrace)
+	target_link_libraries(${name} ${LIBPMEMOBJ_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} pmemkv test_backtrace)
 	if(LIBUNWIND_FOUND)
 		target_link_libraries(${name} ${LIBUNWIND_LIBRARIES} ${CMAKE_DL_LIBS})
 	endif()
