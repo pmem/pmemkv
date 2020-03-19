@@ -273,6 +273,10 @@ function(pmreorder_create_store_log pool name)
 
     execute_common(true ${TRACER}_${TESTCASE} ${cmd})
 
+    file(READ ${BIN_DIR}/${TEST_NAME}.storelog STORELOG)
+    string(REPLACE "operator|=" "operator_OR" FIXED_STORELOG "${STORELOG}")
+    file(WRITE ${BIN_DIR}/${TEST_NAME}.storelog "${FIXED_STORELOG}")
+
     unset(ENV{PMREORDER_EMIT_LOG})
 
     file(REMOVE ${pool})
