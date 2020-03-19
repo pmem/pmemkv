@@ -9,3 +9,4 @@
 /build/
 cmake-build-debug/
 /googletest-*.zip
+*~
