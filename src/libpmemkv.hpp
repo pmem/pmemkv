@@ -267,6 +267,8 @@ public:
 	status put(string_view key, string_view value) noexcept;
 	status remove(string_view key) noexcept;
 
+	std::string errormsg();
+
 private:
 	pmemkv_db *_db;
 };
@@ -1072,6 +1074,16 @@ inline status db::put(string_view key, string_view value) noexcept
 inline status db::remove(string_view key) noexcept
 {
 	return static_cast<status>(pmemkv_remove(this->_db, key.data(), key.size()));
+}
+
+/**
+ * Returns a human readable string describing the last error.
+ * Even if this is a method from db class, it can return the last error from
+ * config object.
+ */
+inline std::string db::errormsg()
+{
+	return errormsg();
 }
 
 /**
