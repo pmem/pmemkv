@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -266,6 +266,8 @@ public:
 
 	status put(string_view key, string_view value) noexcept;
 	status remove(string_view key) noexcept;
+
+	std::string errormsg();
 
 private:
 	pmemkv_db *_db;
@@ -1076,6 +1078,20 @@ inline status db::remove(string_view key) noexcept
 
 /**
  * Returns a human readable string describing the last error.
+ * Even if this is a method from the db class, it can return the last error from
+ * the other class.
+ *
+ * @return std::string with a description of the last error
+ */
+inline std::string db::errormsg()
+{
+	return std::string(pmemkv_errormsg());
+}
+
+/**
+ * Returns a human readable string describing the last error.
+ *
+ * @return std::string with a description of the last error
  */
 static inline std::string errormsg()
 {
