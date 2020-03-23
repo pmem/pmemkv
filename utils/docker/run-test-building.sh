@@ -117,6 +117,24 @@ function verify_building_of_packages() {
 	rm -rf $WORKDIR/build
 }
 
+function build_with_flags() {
+	CMAKE_FLAGS_AND_SETTINGS=$@
+	echo
+	echo "##############################################################"
+	echo "### Verifying building with flag: ${CMAKE_FLAGS_AND_SETTINGS}"
+	echo "##############################################################"
+	mkdir $WORKDIR/build
+	cd $WORKDIR/build
+
+	cmake .. ${CMAKE_FLAGS_AND_SETTINGS}
+	make -j$(nproc)
+	# list all tests in this build
+	ctest -N
+
+	cd $WORKDIR
+	rm -rf $WORKDIR/build
+}
+
 cd $WORKDIR
 
 CMAKE_VERSION=$(cmake --version | head -n1 | grep -oE '[0-9].[0-9]*')
@@ -193,6 +211,9 @@ ctest -N
 
 cd $WORKDIR
 rm -rf $WORKDIR/build
+
+# test build with specific CMake flags set
+build_with_flags -DBUILD_JSON_CONFIG=OFF -DTESTS_JSON=OFF
 
 # building of packages should be verified only if PACKAGE_MANAGER equals 'rpm' or 'deb'
 case $PACKAGE_MANAGER in
