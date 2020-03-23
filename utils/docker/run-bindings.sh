@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 
 #
 # run-bindings.sh - checks bindings' building and installation
@@ -8,7 +8,7 @@
 
 set -e
 
-PREFIX=/usr
+source `dirname $0`/prepare-for-build.sh
 
 # master: Merge pull request #44 from lukaszstolarczuk/update-travis-files, 21.11.2019
 RUBY_VERSION="3741e3df698245fc8a15822a1aa85b5c211fd332"
@@ -24,12 +24,6 @@ NODEJS_VERSION="d19b026207e8a78ebffdccaffb27181a9bdbe51d"
 
 # master: Merge pull request #16 from lukaszstolarczuk/update-travis-files, 21.11.2019
 PYTHON_VERSION="4483f6561a94255546d26f0e9ac4cdcfe209feae"
-
-./prepare-for-build.sh
-
-function sudo_password() {
-	echo $USERPASS | sudo -Sk $*
-}
 
 # build and install pmemkv
 cd $WORKDIR

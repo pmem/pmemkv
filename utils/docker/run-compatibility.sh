@@ -3,7 +3,7 @@
 # Copyright 2020, Intel Corporation
 
 #
-# run-compatibility.sh - verify compatibility
+# run-compatibility.sh - verify compatibility between versions
 #
 
 set -e
@@ -13,11 +13,7 @@ TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
 PREFIX_HEAD=/opt/pmemkv-head
 PREFIX_1_0_1=/opt/pmemkv-1.0.1
 
-function sudo_password() {
-	echo $USERPASS | sudo -Sk $*
-}
-
-./prepare-for-build.sh
+source `dirname $0`/prepare-for-build.sh
 
 # build and install pmemkv head
 mkdir $WORKDIR/build

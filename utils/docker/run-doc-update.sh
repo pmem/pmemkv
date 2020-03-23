@@ -2,6 +2,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright 2018-2020, Intel Corporation
 
+#
+# run-doc-update.sh - is called inside a Docker container,
+#                     build docs and automatically update manpages
+#                     and doxygen files on gh-pages
+#
+
 set -e
 
 source `dirname $0`/valid-branches.sh
