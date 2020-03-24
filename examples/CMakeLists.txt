@@ -3,20 +3,20 @@
 
 add_common_flag(-Wno-unused-but-set-variable)
 
-add_cppstyle(examples-pmemkv_basic_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c)
-add_check_whitespace(examples-pmemkv_basic_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c)
+add_cppstyle(examples ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_cpp/*.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.c
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.cpp)
 
-add_cppstyle(examples-pmemkv_basic_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_cpp/*.cpp)
-add_check_whitespace(examples-pmemkv_basic_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_cpp/*.cpp)
+add_check_whitespace(examples ${CMAKE_CURRENT_SOURCE_DIR}/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_cpp/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.*)
 
-add_cppstyle(examples-pmemkv_pmemobj_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.cpp)
-add_check_whitespace(examples-pmemkv_pmemobj_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.cpp)
-
-add_cppstyle(examples-pmemkv_config_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.c)
-add_check_whitespace(examples-pmemkv_config_c ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.c)
-
-add_cppstyle(examples-pmemkv_open_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.cpp)
-add_check_whitespace(examples-pmemkv_open_cpp ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.cpp)
+add_custom_target(examples)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
@@ -24,6 +24,7 @@ function(add_example name)
 	set(srcs ${ARGN})
 	prepend(srcs ${CMAKE_CURRENT_SOURCE_DIR} ${srcs})
 	add_executable(example-${name} ${srcs})
+	add_dependencies(examples example-${name})
 endfunction()
 
 add_example(pmemkv_basic_cpp pmemkv_basic_cpp/pmemkv_basic.cpp)
