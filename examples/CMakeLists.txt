@@ -17,8 +17,7 @@ add_check_whitespace(examples ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.*)
 
 add_custom_target(examples)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
+add_dependencies(examples pmemkv)
 
 function(add_example name)
 	set(srcs ${ARGN})
@@ -33,6 +32,8 @@ target_link_libraries(example-pmemkv_basic_cpp pmemkv)
 add_example(pmemkv_basic_c pmemkv_basic_c/pmemkv_basic.c)
 target_link_libraries(example-pmemkv_basic_c pmemkv)
 
+# Even though all examples require cmap engine to run, this one needs it
+# (or rather libpmemobj++) to compile.
 if(ENGINE_CMAP)
 	add_example(pmemkv_pmemobj_cpp pmemkv_pmemobj_cpp/pmemkv_pmemobj.cpp)
 	target_link_libraries(example-pmemkv_pmemobj_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
@@ -43,7 +44,5 @@ if(BUILD_JSON_CONFIG)
 	target_link_libraries(example-pmemkv_config_c pmemkv pmemkv_json_config)
 endif()
 
-if(ENGINE_CMAP)
-	add_example(pmemkv_open_cpp pmemkv_open_cpp/pmemkv_open.cpp)
-	target_link_libraries(example-pmemkv_open_cpp pmemkv)
-endif()
+add_example(pmemkv_open_cpp pmemkv_open_cpp/pmemkv_open.cpp)
+target_link_libraries(example-pmemkv_open_cpp pmemkv)
