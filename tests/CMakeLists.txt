@@ -62,6 +62,11 @@ if(BUILD_EXAMPLES AND ENGINE_CMAP)
 	add_test_generic(NAME example-pmemkv_basic_c TRACERS none)
 	add_test_generic(NAME example-pmemkv_basic_cpp TRACERS none)
 	add_test_generic(NAME example-pmemkv_pmemobj_cpp TRACERS none)
+
+	if(BUILD_JSON_CONFIG)
+		add_dependencies(tests example-pmemkv_config_c)
+		add_test_generic(NAME example-pmemkv_config_c TRACERS none)
+	endif()
 elseif(BUILD_EXAMPLES AND NOT ENGINE_CMAP)
 	message(WARNING
 		"Examples use cmap engine, which is disabled, hence their execution "
