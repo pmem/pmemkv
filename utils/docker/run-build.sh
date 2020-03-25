@@ -9,71 +9,11 @@
 
 set -e
 
-./prepare-for-build.sh
+source `dirname $0`/prepare-for-build.sh
 
-EXAMPLE_TEST_DIR="/tmp/build_example"
-PREFIX=/usr
 TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
 BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
 CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-ON}
-
-function sudo_password() {
-	echo $USERPASS | sudo -Sk $*
-}
-
-function cleanup() {
-	find . -name ".coverage" -exec rm {} \;
-	find . -name "coverage.xml" -exec rm {} \;
-	find . -name "*.gcov" -exec rm {} \;
-	find . -name "*.gcda" -exec rm {} \;
-}
-
-function upload_codecov() {
-	clang_used=$(cmake -LA -N . | grep CMAKE_CXX_COMPILER | grep clang | wc -c)
-
-	if [[ $clang_used > 0 ]]; then
-		gcovexe="llvm-cov gcov"
-	else
-		gcovexe="gcov"
-	fi
-
-	# the output is redundant in this case, i.e. we rely on parsed report from codecov on github
-	bash <(curl -s https://codecov.io/bash) -c -F $1 -x "$gcovexe"
-	cleanup
-}
-
-function compile_example_standalone() {
-	rm -rf $EXAMPLE_TEST_DIR
-	mkdir $EXAMPLE_TEST_DIR
-	cd $EXAMPLE_TEST_DIR
-
-	cmake $WORKDIR/examples/$1
-
-	# exit on error
-	if [[ $? != 0 ]]; then
-		cd -
-		return 1
-	fi
-
-	make -j$(nproc)
-	cd -
-}
-
-function run_example_standalone() {
-	cd $EXAMPLE_TEST_DIR
-
-	./$1 $2
-
-	# exit on error
-	if [[ $? != 0 ]]; then
-		cd -
-		return 1
-	fi
-
-	rm -f $2
-
-	cd -
-}
 
 cd $WORKDIR
 
@@ -128,7 +68,7 @@ compile_example_standalone pmemkv_open_cpp
 pmempool create -l "pmemkv" obj $WORKDIR/examples/example.poolset
 run_example_standalone pmemkv_open_cpp $WORKDIR/examples/example.poolset
 
-# Expect failure - non-existsing path is passed
+# Expect failure - non-existing path is passed
 run_example_standalone pmemkv_open_cpp /non-existing/path && exit 1
 
 # Uninstall libraries

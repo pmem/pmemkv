@@ -10,69 +10,11 @@
 
 set -e
 
-./prepare-for-build.sh
+source `dirname $0`/prepare-for-build.sh
 
-EXAMPLE_TEST_DIR="/tmp/build_example"
-PREFIX=/usr
 TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
 TEST_PACKAGES=${TEST_PACKAGES:-ON}
 BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
-
-function sudo_password() {
-	echo $USERPASS | sudo -Sk $*
-}
-
-function cleanup() {
-	find . -name ".coverage" -exec rm {} \;
-	find . -name "coverage.xml" -exec rm {} \;
-	find . -name "*.gcov" -exec rm {} \;
-	find . -name "*.gcda" -exec rm {} \;
-}
-
-function upload_codecov() {
-	clang_used=$(cmake -LA -N . | grep CMAKE_CXX_COMPILER | grep clang | wc -c)
-
-	if [[ $clang_used > 0 ]]; then
-		gcovexe="llvm-cov gcov"
-	else
-		gcovexe="gcov"
-	fi
-
-	# the output is redundant in this case, i.e. we rely on parsed report from codecov on github
-	bash <(curl -s https://codecov.io/bash) -c -F $1 -x "$gcovexe"
-	cleanup
-}
-
-function compile_example_standalone() {
-	rm -rf $EXAMPLE_TEST_DIR
-	mkdir $EXAMPLE_TEST_DIR
-	cd $EXAMPLE_TEST_DIR
-
-	cmake $WORKDIR/examples/$1
-
-	# exit on error
-	if [[ $? != 0 ]]; then
-		cd -
-		return 1
-	fi
-
-	make -j$(nproc)
-	cd -
-}
-
-function run_example_standalone() {
-	cd $EXAMPLE_TEST_DIR
-
-	rm -f pool
-	./$1 pool
-	# exit on error
-	if [[ $? != 0 ]]; then
-		cd -
-		return 1
-	fi
-
-	cd -
-}
 
 function run_test_check_support_cpp20_gcc() {
 	CWD=$(pwd)
@@ -160,9 +102,9 @@ function verify_building_of_packages() {
 
 	# Verify installed packages
 	compile_example_standalone pmemkv_basic_c
-	run_example_standalone pmemkv_basic_c
+	run_example_standalone pmemkv_basic_c pool
 	compile_example_standalone pmemkv_basic_cpp
-	run_example_standalone pmemkv_basic_cpp
+	run_example_standalone pmemkv_basic_cpp pool
 
 	# Clean after installation
 	if [ $PACKAGE_MANAGER = "deb" ]; then
