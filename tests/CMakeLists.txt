@@ -71,10 +71,12 @@ add_test_generic(NAME wrong_engine_name_test TRACERS none)
 if(BUILD_EXAMPLES AND ENGINE_CMAP)
 	add_dependencies(tests example-pmemkv_basic_c
 		example-pmemkv_basic_cpp
-		example-pmemkv_pmemobj_cpp)
+		example-pmemkv_pmemobj_cpp
+		example-pmemkv_config_c)
 	add_test_generic(NAME example-pmemkv_basic_c TRACERS none)
 	add_test_generic(NAME example-pmemkv_basic_cpp TRACERS none)
 	add_test_generic(NAME example-pmemkv_pmemobj_cpp TRACERS none)
+	add_test_generic(NAME example-pmemkv_config_c TRACERS none)
 elseif(BUILD_EXAMPLES AND NOT ENGINE_CMAP)
 	message(WARNING
 		"Examples use cmap engine, which is disabled, hence their execution "
