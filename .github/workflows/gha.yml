@@ -20,6 +20,9 @@ jobs:
     name: pmemkv
     runs-on: ubuntu-latest
     env:
+      DOCKERHUB_USER:          ${{ secrets.DOCKERHUB_USER }}
+      DOCKERHUB_PASSWORD:      ${{ secrets.DOCKERHUB_PASSWORD }}
+      DOC_UPDATE_GITHUB_TOKEN: ${{ secrets.DOC_UPDATE_GITHUB_TOKEN }}
       HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
       WORKDIR:        utils/docker
     strategy:
@@ -35,9 +38,6 @@ jobs:
     steps:
        - name: Clone the git repo
          uses: actions/checkout@v2
-
-       - name: Change ownership of the repo
-         run: sudo chown -R 1000.1000 $HOST_WORKDIR
 
        - name: Pull or rebuild the image
          run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh
