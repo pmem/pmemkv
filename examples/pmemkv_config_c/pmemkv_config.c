@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2020, Intel Corporation */
 
 /*
  * pmemkv_config.c -- example usage of pmemkv config API
  */
 
+#include "../../src/libpmemkv.h"
+#include "../../src/libpmemkv_json_config.h"
+
 #include <assert.h>
-#include <libpmemkv.h>
-#include <libpmemkv_json_config.h>
 #include <stdlib.h>
 #include <string.h>
 

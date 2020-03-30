@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2020, Intel Corporation */
 
 /*
  * pmemkv_open.cpp -- example usage of pmemkv with already existing pools.
  */
 
+#include "../../src/libpmemkv.hpp"
+
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
-#include <libpmemkv.hpp>
 
 #define LOG(msg) std::cout << msg << std::endl
 

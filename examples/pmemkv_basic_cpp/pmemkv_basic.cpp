@@ -5,10 +5,11 @@
  * pmemkv_basic.cpp -- example usage of pmemkv.
  */
 
+#include "../../src/libpmemkv.hpp"
+
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
-#include <libpmemkv.hpp>
 
 #define LOG(msg) std::cout << msg << std::endl
 

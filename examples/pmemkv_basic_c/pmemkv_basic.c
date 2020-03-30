@@ -5,8 +5,9 @@
  * pmemkv_basic.c -- example usage of pmemkv.
  */
 
+#include "../../src/libpmemkv.h"
+
 #include <assert.h>
-#include <libpmemkv.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

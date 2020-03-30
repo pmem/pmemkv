@@ -6,11 +6,12 @@
  * engines.
  */
 
+#include "../../src/libpmemkv.hpp"
 #include "../../src/pmemobj_engine.h"
+
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
-#include <libpmemkv.hpp>
 #include <libpmemobj++/container/string.hpp>
 #include <libpmemobj++/container/vector.hpp>
 #include <libpmemobj++/make_persistent.hpp>
