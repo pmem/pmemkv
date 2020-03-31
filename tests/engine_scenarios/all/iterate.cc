@@ -22,33 +22,18 @@ static test_kv_list sort(test_kv_list list)
 
 static void UsesGetAllTest(pmem::kv::db &kv)
 {
-	UT_ASSERT(kv.put("1", "2") == status::OK);
+	UT_ASSERT(kv.put("1", "one") == status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	UT_ASSERT(kv.count_all(cnt) == status::OK);
 	UT_ASSERT(cnt == 1);
-	UT_ASSERT(kv.put("RR", "记!") == status::OK);
+	UT_ASSERT(kv.put("2", "two") == status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
 	UT_ASSERT(kv.count_all(cnt) == status::OK);
 	UT_ASSERT(cnt == 2);
-
-	test_kv_list result;
-	kv.get_all(
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((test_kv_list *)arg);
-			c->emplace_back(std::string(k, kb), std::string(v, vb));
-			return 0;
-		},
-		&result);
-
-	auto expected = test_kv_list{{"1", "2"}, {"RR", "记!"}};
-	UT_ASSERT((sort(result) == sort(expected)));
-}
-
-static void UsesGetAllTest2(pmem::kv::db &kv)
-{
-	UT_ASSERT(kv.put("1", "one") == status::OK);
-	UT_ASSERT(kv.put("2", "two") == status::OK);
 	UT_ASSERT(kv.put("记!", "RR") == status::OK);
+	cnt = std::numeric_limits<std::size_t>::max();
+	UT_ASSERT(kv.count_all(cnt) == status::OK);
+	UT_ASSERT(cnt == 3);
 
 	test_kv_list result;
 	kv.get_all([&](string_view k, string_view v) {
@@ -78,7 +63,7 @@ static void test(int argc, char *argv[])
 	if (argc < 3)
 		UT_FATAL("usage: %s engine json_config", argv[0]);
 
-	run_engine_tests(argv[1], argv[2], {UsesGetAllTest, UsesGetAllTest2});
+	run_engine_tests(argv[1], argv[2], {UsesGetAllTest});
 }
 
 int main(int argc, char *argv[])
