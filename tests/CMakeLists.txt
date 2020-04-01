@@ -186,19 +186,9 @@ build_test_libs(NAME pmemobj_error_handling_create SRC_FILES engine_scenarios/pm
 build_test_libs(NAME pmemobj_error_handling_defrag SRC_FILES engine_scenarios/pmemobj/error_handling_defrag.cc LIBS json)
 build_test_libs(NAME pmemobj_error_handling_tx_path SRC_FILES engine_scenarios/pmemobj/error_handling_tx_path.cc LIBS json)
 build_test_libs(NAME pmemobj_put_get_std_map_defrag SRC_FILES engine_scenarios/pmemobj/put_get_std_map_defrag.cc LIBS json)
-
-if(BUILD_JSON_CONFIG)
-	build_test_libs(NAME pmemobj_error_handling_tx_oom SRC_FILES engine_scenarios/pmemobj/error_handling_tx_oom.cc engine_scenarios/pmemobj/mock_tx_alloc.cc LIBS json)
-	target_link_libraries(pmemobj_error_handling_tx_oom ${CMAKE_DL_LIBS}) # Needed for dlsym
-
-	if(NOT("${LIBPMEMOBJ++_LIBRARIES}" STREQUAL ""))
-		build_test_libs(NAME pmemobj_error_handling_tx_oid SRC_FILES engine_scenarios/pmemobj/error_handling_tx_oid.cc LIBS json)
-		target_link_libraries(pmemobj_error_handling_tx_oid ${LIBPMEMOBJ++_LIBRARIES})
-
-		build_test_libs(NAME pmemobj_put_get_std_map_oid SRC_FILES engine_scenarios/pmemobj/put_get_std_map_oid.cc LIBS json)
-		target_link_libraries(pmemobj_put_get_std_map_oid ${LIBPMEMOBJ++_LIBRARIES})
-	endif()
-endif()
+build_test_libs(NAME pmemobj_error_handling_tx_oom SRC_FILES engine_scenarios/pmemobj/error_handling_tx_oom.cc engine_scenarios/pmemobj/mock_tx_alloc.cc LIBS json dl_libs)
+build_test_libs(NAME pmemobj_error_handling_tx_oid SRC_FILES engine_scenarios/pmemobj/error_handling_tx_oid.cc LIBS json libpmemobj_cpp)
+build_test_libs(NAME pmemobj_put_get_std_map_oid SRC_FILES engine_scenarios/pmemobj/put_get_std_map_oid.cc LIBS json libpmemobj_cpp)
 
 # Tests for memkind engines
 build_test_libs(NAME memkind_error_handling SRC_FILES engine_scenarios/memkind/error_handling.cc LIBS json)
