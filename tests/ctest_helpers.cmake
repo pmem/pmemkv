@@ -71,7 +71,7 @@ function(find_pmempool)
 	if(PMEMPOOL)
 		set(ENV{PATH} ${LIBPMEMOBJ_PREFIX}/bin:$ENV{PATH})
 	else()
-		message(FATAL_ERRROR "Pmempool not found.")
+		message(FATAL_ERROR "Pmempool not found.")
 	endif()
 endfunction()
 
