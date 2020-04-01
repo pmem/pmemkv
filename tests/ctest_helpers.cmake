@@ -87,7 +87,7 @@ function(build_test_ext)
 endfunction()
 
 # Function to build test and link it with custom library/-ies.
-# Supports json
+# Supports json, libpmemobj_cpp and dl_libs
 function(build_test_libs)
 	set(oneValueArgs NAME)
 	set(multiValueArgs SRC_FILES LIBS)
@@ -101,6 +101,14 @@ function(build_test_libs)
 			else()
 				list(APPEND LIBS_TO_LINK pmemkv_json_config)
 			endif()
+		elseif("${lib}" STREQUAL "libpmemobj_cpp")
+			if("${LIBPMEMOBJ++_LIBRARIES}" STREQUAL "")
+				return()
+			else()
+				list(APPEND LIBS_TO_LINK ${LIBPMEMOBJ++_LIBRARIES})
+			endif()
+		elseif("${lib}" STREQUAL "dl_libs")
+			list(APPEND LIBS_TO_LINK ${CMAKE_DL_LIBS})
 		endif()
 	endforeach()
 
