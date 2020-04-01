@@ -151,6 +151,7 @@ endif()
 
 # Tests for all engines
 build_test(put_get_remove engine_scenarios/all/put_get_remove.cc)
+build_test(put_get_remove_long_key engine_scenarios/all/put_get_remove_long_key.cc)
 build_test(put_get_remove_params engine_scenarios/all/put_get_remove_params.cc)
 build_test(put_get_std_map engine_scenarios/all/put_get_std_map.cc)
 build_test(iterate engine_scenarios/all/iterate.cc)
@@ -201,6 +202,11 @@ if(ENGINE_CMAP)
 
 	add_engine_test(ENGINE cmap
 			BINARY put_get_remove
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE cmap
+			BINARY put_get_remove_long_key
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
@@ -341,6 +347,11 @@ if(ENGINE_VCMAP)
 			SCRIPT memkind_based/default.cmake)
 
 	add_engine_test(ENGINE vcmap
+			BINARY put_get_remove_long_key
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vcmap
 			BINARY put_get_remove_params
 			TRACERS none
 			SCRIPT memkind_based/default.cmake
@@ -390,6 +401,11 @@ if(ENGINE_VSMAP)
 
 	add_engine_test(ENGINE vsmap
 			BINARY put_get_remove
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vsmap
+			BINARY put_get_remove_long_key
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake)
 
@@ -445,6 +461,11 @@ if(ENGINE_TREE3)
 
 	add_engine_test(ENGINE tree3
 			BINARY put_get_remove
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE tree3
+			BINARY put_get_remove_long_key
 			TRACERS none #memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
@@ -588,6 +609,11 @@ if(ENGINE_STREE)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_remove
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE stree
+			BINARY put_get_remove_long_key
 			TRACERS none #memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
