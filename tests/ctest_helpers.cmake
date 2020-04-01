@@ -76,18 +76,20 @@ function(find_pmempool)
 endfunction()
 
 # Function to build test with custom build options (e.g. passing defines)
+#	and custom libraries. Executes 'build_test_libs' function.
 # Example: build_test_ext(NAME ... SRC_FILES ....cpp BUILD_OPTIONS -D...)
 function(build_test_ext)
 	set(oneValueArgs NAME)
-	set(multiValueArgs SRC_FILES BUILD_OPTIONS)
+	set(multiValueArgs SRC_FILES LIBS BUILD_OPTIONS)
 	cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-	build_test(${TEST_NAME} ${TEST_SRC_FILES})
+	build_test_libs(NAME ${TEST_NAME} SRC_FILES ${TEST_SRC_FILES} LIBS ${TEST_LIBS})
 	target_compile_definitions(${TEST_NAME} PRIVATE ${TEST_BUILD_OPTIONS})
 endfunction()
 
 # Function to build test and link it with custom library/-ies.
-# Supports json, libpmemobj_cpp and dl_libs
+# Supports json, libpmemobj_cpp and dl_libs.
+# Executes the 'build_test' function.
 function(build_test_libs)
 	set(oneValueArgs NAME)
 	set(multiValueArgs SRC_FILES LIBS)
