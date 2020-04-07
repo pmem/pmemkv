@@ -89,7 +89,7 @@ function(build_example_pmemkv_pmemobj_cpp)
 	endif()
 endfunction()
 
-build_test_libs(NAME wrong_engine_name_test SRC_FILES wrong_engine_name_test.cc LIBS json)
+build_test_ext(NAME wrong_engine_name_test SRC_FILES wrong_engine_name_test.cc LIBS json)
 add_test_generic(NAME wrong_engine_name_test TRACERS none)
 
 if(BUILD_EXAMPLES AND ENGINE_CMAP)
@@ -109,13 +109,13 @@ endif()
 build_test(config_c config/config_c.c)
 add_test_generic(NAME config_c TRACERS none memcheck)
 
-build_test_libs(NAME config_cpp SRC_FILES config/config_cpp.cc LIBS json)
+build_test_ext(NAME config_cpp SRC_FILES config/config_cpp.cc LIBS json)
 add_test_generic(NAME config_cpp TRACERS none memcheck)
 
-build_test_libs(NAME blackhole_test SRC_FILES engines/blackhole/blackhole_test.cc LIBS json)
+build_test_ext(NAME blackhole_test SRC_FILES engines/blackhole/blackhole_test.cc LIBS json)
 add_test_generic(NAME blackhole_test TRACERS none memcheck)
 
-build_test_libs(NAME json_to_config SRC_FILES config/json_to_config.cc LIBS json)
+build_test_ext(NAME json_to_config SRC_FILES config/json_to_config.cc LIBS json)
 add_test_generic(NAME json_to_config TRACERS none memcheck)
 
 if(ENGINE_CACHING)
@@ -133,39 +133,39 @@ if(ENGINE_CACHING)
 endif()
 
 # Tests for all engines
-build_test_libs(NAME put_get_remove SRC_FILES engine_scenarios/all/put_get_remove.cc LIBS json)
-build_test_libs(NAME put_get_remove_long_key SRC_FILES engine_scenarios/all/put_get_remove_long_key.cc LIBS json)
-build_test_libs(NAME put_get_remove_params SRC_FILES engine_scenarios/all/put_get_remove_params.cc LIBS json)
-build_test_libs(NAME put_get_std_map SRC_FILES engine_scenarios/all/put_get_std_map.cc LIBS json)
-build_test_libs(NAME iterate SRC_FILES engine_scenarios/all/iterate.cc LIBS json)
-build_test_libs(NAME error_handling_oom SRC_FILES engine_scenarios/all/error_handling_oom.cc LIBS json)
+build_test_ext(NAME put_get_remove SRC_FILES engine_scenarios/all/put_get_remove.cc LIBS json)
+build_test_ext(NAME put_get_remove_long_key SRC_FILES engine_scenarios/all/put_get_remove_long_key.cc LIBS json)
+build_test_ext(NAME put_get_remove_params SRC_FILES engine_scenarios/all/put_get_remove_params.cc LIBS json)
+build_test_ext(NAME put_get_std_map SRC_FILES engine_scenarios/all/put_get_std_map.cc LIBS json)
+build_test_ext(NAME iterate SRC_FILES engine_scenarios/all/iterate.cc LIBS json)
+build_test_ext(NAME error_handling_oom SRC_FILES engine_scenarios/all/error_handling_oom.cc LIBS json)
 
 # Tests for concurrent engines
-build_test_libs(NAME concurrent_put_get_remove SRC_FILES engine_scenarios/concurrent/put_get_remove.cc LIBS json)
+build_test_ext(NAME concurrent_put_get_remove SRC_FILES engine_scenarios/concurrent/put_get_remove.cc LIBS json)
 
 # Tests for peristent engines
-build_test_libs(NAME persistent_not_found_verify SRC_FILES engine_scenarios/persistent/not_found_verify.cc LIBS json)
-build_test_libs(NAME persistent_overwrite_verify SRC_FILES engine_scenarios/persistent/overwrite_verify.cc LIBS json)
-build_test_libs(NAME persistent_put_remove_verify SRC_FILES engine_scenarios/persistent/put_remove_verify.cc LIBS json)
-build_test_libs(NAME persistent_put_verify_asc_params SRC_FILES engine_scenarios/persistent/put_verify_asc_params.cc LIBS json)
-build_test_libs(NAME persistent_put_verify_desc_params SRC_FILES engine_scenarios/persistent/put_verify_desc_params.cc LIBS json)
-build_test_libs(NAME persistent_put_verify SRC_FILES engine_scenarios/persistent/put_verify.cc LIBS json)
-build_test_libs(NAME persistent_put_get_std_map_multiple_reopen SRC_FILES engine_scenarios/persistent/put_get_std_map_multiple_reopen.cc LIBS json)
+build_test_ext(NAME persistent_not_found_verify SRC_FILES engine_scenarios/persistent/not_found_verify.cc LIBS json)
+build_test_ext(NAME persistent_overwrite_verify SRC_FILES engine_scenarios/persistent/overwrite_verify.cc LIBS json)
+build_test_ext(NAME persistent_put_remove_verify SRC_FILES engine_scenarios/persistent/put_remove_verify.cc LIBS json)
+build_test_ext(NAME persistent_put_verify_asc_params SRC_FILES engine_scenarios/persistent/put_verify_asc_params.cc LIBS json)
+build_test_ext(NAME persistent_put_verify_desc_params SRC_FILES engine_scenarios/persistent/put_verify_desc_params.cc LIBS json)
+build_test_ext(NAME persistent_put_verify SRC_FILES engine_scenarios/persistent/put_verify.cc LIBS json)
+build_test_ext(NAME persistent_put_get_std_map_multiple_reopen SRC_FILES engine_scenarios/persistent/put_get_std_map_multiple_reopen.cc LIBS json)
 
 # Tests for sorted engines
-build_test_libs(NAME sorted_iterate SRC_FILES engine_scenarios/sorted/iterate.cc LIBS json)
+build_test_ext(NAME sorted_iterate SRC_FILES engine_scenarios/sorted/iterate.cc LIBS json)
 
 # Tests for pmemobj engines
-build_test_libs(NAME pmemobj_error_handling_create SRC_FILES engine_scenarios/pmemobj/error_handling_create.cc LIBS json)
-build_test_libs(NAME pmemobj_error_handling_defrag SRC_FILES engine_scenarios/pmemobj/error_handling_defrag.cc LIBS json)
-build_test_libs(NAME pmemobj_error_handling_tx_path SRC_FILES engine_scenarios/pmemobj/error_handling_tx_path.cc LIBS json)
-build_test_libs(NAME pmemobj_put_get_std_map_defrag SRC_FILES engine_scenarios/pmemobj/put_get_std_map_defrag.cc LIBS json)
-build_test_libs(NAME pmemobj_error_handling_tx_oom SRC_FILES engine_scenarios/pmemobj/error_handling_tx_oom.cc engine_scenarios/pmemobj/mock_tx_alloc.cc LIBS json dl_libs)
-build_test_libs(NAME pmemobj_error_handling_tx_oid SRC_FILES engine_scenarios/pmemobj/error_handling_tx_oid.cc LIBS json libpmemobj_cpp)
-build_test_libs(NAME pmemobj_put_get_std_map_oid SRC_FILES engine_scenarios/pmemobj/put_get_std_map_oid.cc LIBS json libpmemobj_cpp)
+build_test_ext(NAME pmemobj_error_handling_create SRC_FILES engine_scenarios/pmemobj/error_handling_create.cc LIBS json)
+build_test_ext(NAME pmemobj_error_handling_defrag SRC_FILES engine_scenarios/pmemobj/error_handling_defrag.cc LIBS json)
+build_test_ext(NAME pmemobj_error_handling_tx_path SRC_FILES engine_scenarios/pmemobj/error_handling_tx_path.cc LIBS json)
+build_test_ext(NAME pmemobj_put_get_std_map_defrag SRC_FILES engine_scenarios/pmemobj/put_get_std_map_defrag.cc LIBS json)
+build_test_ext(NAME pmemobj_error_handling_tx_oom SRC_FILES engine_scenarios/pmemobj/error_handling_tx_oom.cc engine_scenarios/pmemobj/mock_tx_alloc.cc LIBS json dl_libs)
+build_test_ext(NAME pmemobj_error_handling_tx_oid SRC_FILES engine_scenarios/pmemobj/error_handling_tx_oid.cc LIBS json libpmemobj_cpp)
+build_test_ext(NAME pmemobj_put_get_std_map_oid SRC_FILES engine_scenarios/pmemobj/put_get_std_map_oid.cc LIBS json libpmemobj_cpp)
 
 # Tests for memkind engines
-build_test_libs(NAME memkind_error_handling SRC_FILES engine_scenarios/memkind/error_handling.cc LIBS json)
+build_test_ext(NAME memkind_error_handling SRC_FILES engine_scenarios/memkind/error_handling.cc LIBS json)
 
 # Tests for C API
 build_test(c_api_null_db_config c_api/null_db_config.c)
