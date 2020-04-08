@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 
 #
 # install-bindings-dependencies.sh - installs dependencies for bindings
@@ -10,20 +10,20 @@
 
 set -e
 
-# master: Merge pull request #531 from lukaszstolarczuk/add-skip-build-flags-to-dockerimages, 20.11.2019
-PMEMKV_VERSION="6ad5c453f79cb2ddd1ee9ba2a9dff294c6cb7b71"
+# master: Merge pull request #624 from igchor/catch_std_exception, 17.03.2020
+PMEMKV_VERSION="a2a70b994d57dd3fa9edbf0c7c9bbebb01dc2f5f"
 
-# master: Merge pull request #44 from lukaszstolarczuk/update-travis-files, 21.11.2019
+# master: Merge pull request #44 from lukaszstolarczuk/update-tra..., 21.11.2019
 RUBY_VERSION="3741e3df698245fc8a15822a1aa85b5c211fd332"
 
-# master: Merge pull request #33 from lukaszstolarczuk/update-travis-files, 21.11.2019
-JNI_VERSION="5239d6bb3214c56bc45b3296872be50b38bfbab3"
+# master: Merge pull request #34 from igchor/add_pmemkv_errormsg, 06.12.2020
+JNI_VERSION="fcc8370b230ab3236d062a121e22dcebf37b90ec"
 
-# master: Merge pull request #34 from lukaszstolarczuk/update-offline-de..., 5.12.2019
-JAVA_VERSION="47f02b6b52c56ca53fd3dafdff52167719f1e7dd"
+# master: Merge pull request #38 from lukaszstolarczuk/update-tra..., 17.03.2020
+JAVA_VERSION="ab8747c3baf4af8cd2ce1985986d7fcc241ccd65"
 
-# master: Merge pull request #48 from lukaszstolarczuk/update-travis-files, 21.11.2019
-NODEJS_VERSION="d19b026207e8a78ebffdccaffb27181a9bdbe51d"
+# master: Merge pull request #49 from how759/buffer-arguments, 02.03.2020
+NODEJS_VERSION="12ecc0a9c3205425bf0aa1767eada53834535045"
 
 PREFIX=/usr
 rm -rf /opt/bindings
