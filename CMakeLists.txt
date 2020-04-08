@@ -138,7 +138,7 @@ if(ENGINE_TREE3)
 endif()
 
 
-set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
+set(CXX_STANDARD 14 CACHE STRING "C++ language standard")
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
