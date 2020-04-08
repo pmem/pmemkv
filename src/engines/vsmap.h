@@ -7,6 +7,7 @@
 #include "pmem_allocator.h"
 #include <map>
 #include <scoped_allocator>
+#include <shared_mutex>
 #include <string>
 
 #ifdef USE_LIBMEMKIND_NAMESPACE
@@ -53,6 +54,7 @@ public:
 	status remove(string_view key) final;
 
 private:
+	using mutex_type = std::shared_timed_mutex;
 	using storage_type = std::basic_string<char, std::char_traits<char>,
 					       memkind_ns::allocator<char>>;
 
@@ -65,6 +67,7 @@ private:
 
 	map_allocator_type kv_allocator;
 	map_type pmem_kv_container;
+	mutex_type mtx;
 };
 
 } /* namespace kv */
