@@ -8,7 +8,9 @@
 
 #include <libpmemkv.h>
 #include <libpmemkv.hpp>
+#ifdef JSON_TESTS_SUPPORT
 #include <libpmemkv_json_config.h>
+#endif
 
 #include <cstdarg>
 #include <cstdio>
@@ -115,6 +117,7 @@ void parallel_exec(size_t threads_number, Function f)
 	}
 }
 
+#ifdef JSON_TESTS_SUPPORT
 pmem::kv::config CONFIG_FROM_JSON(std::string json)
 {
 	pmemkv_config *cfg = pmemkv_config_new();
@@ -127,6 +130,7 @@ pmem::kv::config CONFIG_FROM_JSON(std::string json)
 
 	return pmem::kv::config(cfg);
 }
+#endif /* JSON_TESTS_SUPPORT */
 
 pmem::kv::db INITIALIZE_KV(std::string engine, pmem::kv::config &&config)
 {
@@ -150,6 +154,7 @@ void CLEAR_KV(pmem::kv::db &kv)
 		kv.remove(k);
 }
 
+#ifdef JSON_TESTS_SUPPORT
 static inline int run_engine_tests(std::string engine, std::string json,
 				   std::vector<std::function<void(pmem::kv::db &)>> tests)
 {
@@ -170,5 +175,6 @@ static inline int run_engine_tests(std::string engine, std::string json,
 
 	return 0;
 }
+#endif /* JSON_TESTS_SUPPORT */
 
 #endif /* PMEMKV_UNITTEST_HPP */

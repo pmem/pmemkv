@@ -89,7 +89,7 @@ function(build_example_pmemkv_pmemobj_cpp)
 	endif()
 endfunction()
 
-build_test_ext(NAME wrong_engine_name_test SRC_FILES wrong_engine_name_test.cc LIBS json)
+build_test(wrong_engine_name_test wrong_engine_name_test.cc)
 add_test_generic(NAME wrong_engine_name_test TRACERS none)
 
 if(BUILD_EXAMPLES AND ENGINE_CMAP)
@@ -109,10 +109,10 @@ endif()
 build_test(config_c config/config_c.c)
 add_test_generic(NAME config_c TRACERS none memcheck)
 
-build_test_ext(NAME config_cpp SRC_FILES config/config_cpp.cc LIBS json)
+build_test(config_cpp config/config_cpp.cc)
 add_test_generic(NAME config_cpp TRACERS none memcheck)
 
-build_test_ext(NAME blackhole_test SRC_FILES engines/blackhole/blackhole_test.cc LIBS json)
+build_test(blackhole_test engines/blackhole/blackhole_test.cc)
 add_test_generic(NAME blackhole_test TRACERS none memcheck)
 
 build_test_ext(NAME json_to_config SRC_FILES config/json_to_config.cc LIBS json)
