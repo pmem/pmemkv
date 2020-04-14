@@ -28,6 +28,7 @@ option(BUILD_JSON_CONFIG "build the 'libpmemkv_json_config' library" ON)
 option(TESTS_USE_FORCED_PMEM "run tests with PMEM_IS_PMEM_FORCE=1" OFF)
 option(TESTS_USE_VALGRIND "enable tests with valgrind (if found)" ON)
 option(TESTS_PMEMOBJ_DRD_HELGRIND "enable test of pmemobj engines under drd and helgrind (they should only be run on PMEM)")
+option(TESTS_JSON "enable tests which require libpmemkv_json_config library (BUILD_JSON_CONFIG have to be ON)" ON)
 
 option(COVERAGE "run coverage test" OFF)
 if(COVERAGE)
@@ -279,6 +280,35 @@ if(ENGINE_CACHING)
 	target_link_libraries(pmemkv PRIVATE acl_cpp protocol acl)
 endif()
 
+if(BUILD_JSON_CONFIG)
+	include(rapidjson)
+	add_definitions(-DBUILD_JSON_CONFIG)
+
+	set(SOURCE_FILES_JSON_CONFIG
+		src/libpmemkv_json_config.cc
+		src/libpmemkv_json_config.h
+		src/out.cc
+		src/out.h
+	)
+
+	add_library(pmemkv_json_config SHARED ${SOURCE_FILES_JSON_CONFIG})
+	set_target_properties(pmemkv_json_config  PROPERTIES SOVERSION 1)
+	target_link_libraries(pmemkv_json_config PRIVATE pmemkv ${RapidJSON_LIBRARIES}
+		-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv_json_config.map)
+	set_target_properties(pmemkv_json_config
+		PROPERTIES PUBLIC_HEADER "src/libpmemkv_json_config.h")
+
+	configure_file(libpmemkv_json_config.pc.in libpmemkv_json_config.pc @ONLY)
+
+	install(FILES ${CMAKE_BINARY_DIR}/libpmemkv_json_config.pc
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
+	install(TARGETS pmemkv_json_config
+		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
+
 target_include_directories(pmemkv PRIVATE src/valgrind)
 # Enable libpmemobj-cpp valgrind annotations
 target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_ENABLED=1)
@@ -327,35 +357,6 @@ install(TARGETS pmemkv
 		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-if(BUILD_JSON_CONFIG)
-	include(rapidjson)
-	add_definitions(-DBUILD_JSON_CONFIG)
-
-	set(SOURCE_FILES_JSON_CONFIG
-		src/libpmemkv_json_config.cc
-		src/libpmemkv_json_config.h
-		src/out.cc
-		src/out.h
-	)
-
-	add_library(pmemkv_json_config SHARED ${SOURCE_FILES_JSON_CONFIG})
-	set_target_properties(pmemkv_json_config  PROPERTIES SOVERSION 1)
-	target_link_libraries(pmemkv_json_config PRIVATE pmemkv ${RapidJSON_LIBRARIES}
-		-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv_json_config.map)
-	set_target_properties(pmemkv_json_config
-		PROPERTIES PUBLIC_HEADER "src/libpmemkv_json_config.h")
-
-	configure_file(libpmemkv_json_config.pc.in libpmemkv_json_config.pc @ONLY)
-
-	install(FILES ${CMAKE_BINARY_DIR}/libpmemkv_json_config.pc
-		DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-
-	install(TARGETS pmemkv_json_config
-		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
 
 configure_file(
 	"${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
