@@ -6,7 +6,6 @@
  * engines.
  */
 
-#include "../../src/pmemobj_engine.h"
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
