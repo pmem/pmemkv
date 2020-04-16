@@ -26,7 +26,7 @@ RUN dnf update -y \
  && dnf install -y \
 	autoconf \
 	automake \
-	clang \
+	clang9.0-devel \
 	cmake \
 	daxctl-devel \
 	doxygen \
