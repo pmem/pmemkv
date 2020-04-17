@@ -15,8 +15,7 @@
  * - 1 when path points to non-pmem
  * - 2 when error occurred
  */
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	if (argc != 2) {
 		std::cerr << "usage: " << argv[0] << " filepath\n";
