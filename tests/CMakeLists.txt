@@ -8,26 +8,34 @@ add_custom_target(tests)
 
 # Checks for when DEVELOPER_MODE is ON
 add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/common/*.c
-		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/common/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/config/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/all/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/all/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/concurrent/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/memkind/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/persistent/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.c*)
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.c*)
 
 add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/cmake/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/config/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/all/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/concurrent/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/memkind/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/persistent/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*)
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.*)
 
 if(TESTS_JSON AND NOT BUILD_JSON_CONFIG)
 	message(FATAL_ERROR "Tests requiring 'libpmemkv_json_config' library "
