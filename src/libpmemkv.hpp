@@ -253,6 +253,8 @@ public:
 	status remove(string_view key) noexcept;
 	status defrag(double start_percent = 0, double amount_percent = 100);
 
+	std::string errormsg();
+
 private:
 	pmemkv_db *_db;
 };
@@ -1202,6 +1204,20 @@ inline status db::defrag(double start_percent, double amount_percent)
 
 /**
  * Returns a human readable string describing the last error.
+ * Even if this is a method from the db class, it can return the last error from
+ * some other class.
+ *
+ * @return std::string with a description of the last error
+ */
+inline std::string db::errormsg()
+{
+	return std::string(pmemkv_errormsg());
+}
+
+/**
+ * Returns a human readable string describing the last error.
+ *
+ * @return std::string with a description of the last error
  */
 static inline std::string errormsg()
 {
