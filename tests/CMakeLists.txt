@@ -107,7 +107,8 @@ build_test_ext(NAME iterate SRC_FILES engine_scenarios/all/iterate.cc LIBS json)
 build_test_ext(NAME error_handling_oom SRC_FILES engine_scenarios/all/error_handling_oom.cc LIBS json)
 
 # Tests for concurrent engines
-build_test_ext(NAME concurrent_put_get_remove SRC_FILES engine_scenarios/concurrent/put_get_remove.cc LIBS json)
+build_test_ext(NAME concurrent_put_get_remove_params SRC_FILES engine_scenarios/concurrent/put_get_remove_params.cc LIBS json)
+build_test_ext(NAME concurrent_put_get_remove_gen_params SRC_FILES engine_scenarios/concurrent/put_get_remove_gen_params.cc LIBS json)
 
 # Tests for peristent engines
 build_test_ext(NAME persistent_not_found_verify SRC_FILES engine_scenarios/persistent/not_found_verify.cc LIBS json)
@@ -183,15 +184,31 @@ if(ENGINE_CMAP)
 			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE cmap
-			BINARY concurrent_put_get_remove
+			BINARY concurrent_put_get_remove_params
 			TRACERS none memcheck
-			SCRIPT pmemobj_based/default.cmake)
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50)
 
 	if (TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE cmap
-				BINARY concurrent_put_get_remove
+				BINARY concurrent_put_get_remove_params
 				TRACERS drd helgrind
-				SCRIPT pmemobj_based/default.cmake)
+				SCRIPT pmemobj_based/default.cmake
+				PARAMS 8 50)
+	endif()
+
+	add_engine_test(ENGINE cmap
+			BINARY concurrent_put_get_remove_gen_params
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50 100)
+
+	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+		add_engine_test(ENGINE cmap
+				BINARY concurrent_put_get_remove_gen_params
+				TRACERS drd helgrind
+				SCRIPT pmemobj_based/default.cmake
+				PARAMS 8 50 100)
 	endif()
 
 	add_engine_test(ENGINE cmap
@@ -325,9 +342,16 @@ if(ENGINE_VCMAP)
 			SCRIPT memkind_based/default.cmake)
 
 	add_engine_test(ENGINE vcmap
-			BINARY concurrent_put_get_remove
+			BINARY concurrent_put_get_remove_params
 			TRACERS none memcheck # XXX - tbb lock does not work well with drd or helgrind
-			SCRIPT memkind_based/default.cmake)
+			SCRIPT memkind_based/default.cmake
+			PARAMS 8 50)
+
+	add_engine_test(ENGINE vcmap
+			BINARY concurrent_put_get_remove_gen_params
+			TRACERS none memcheck # XXX - tbb lock does not work well with drd or helgrind
+			SCRIPT memkind_based/default.cmake
+			PARAMS 8 50 100)
 
 	add_engine_test(ENGINE vcmap
 			BINARY memkind_error_handling
