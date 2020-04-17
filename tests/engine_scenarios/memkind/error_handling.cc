@@ -3,7 +3,8 @@
 
 #include "unittest.hpp"
 
-static void FailsToOpenInstanceWithInvalidPath(std::string engine, std::string non_existent_path)
+static void FailsToOpenInstanceWithInvalidPath(std::string engine,
+					       std::string non_existent_path)
 {
 	pmem::kv::config cfg;
 	auto s = cfg.put_string("path", non_existent_path);
