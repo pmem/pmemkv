@@ -3,6 +3,10 @@
 
 include(ctest_helpers.cmake)
 
+## Setup
+add_custom_target(tests)
+
+# Checks for when DEVELOPER_MODE is ON
 add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.c
@@ -25,8 +29,6 @@ add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*)
 
-add_custom_target(tests)
-
 if(TESTS_JSON AND NOT BUILD_JSON_CONFIG)
 	message(FATAL_ERROR "Tests requiring 'libpmemkv_json_config' library "
 		"are enabled (with TESTS_JSON option), but the library is not built. "
@@ -48,10 +50,12 @@ find_pmempool()
 add_executable(check_is_pmem common/check_is_pmem.cpp)
 target_link_libraries(check_is_pmem ${LIBPMEM_LIBRARIES})
 
-if (COVERAGE AND VALGRIND_FOUND)
+if(COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
 endif()
 
+
+## Common tests
 build_test(wrong_engine_name_test wrong_engine_name_test.cc)
 add_test_generic(NAME wrong_engine_name_test TRACERS none)
 
@@ -85,20 +89,7 @@ add_test_generic(NAME blackhole_test TRACERS none memcheck)
 build_test_ext(NAME json_to_config SRC_FILES config/json_to_config.cc LIBS json)
 add_test_generic(NAME json_to_config TRACERS none memcheck)
 
-if(ENGINE_CACHING)
-	if(ENGINE_TREE3 AND BUILD_JSON_CONFIG)
-		build_test(caching_test engines/experimental/caching_test.cc)
-	elseif(NOT BUILD_JSON_CONFIG)
-		message(WARNING
-			"Caching tests require the 'libpmemkv_json_config' library, which is not built, "
-			"hence they are disabled. If you want to run them use -DBUILD_JSON_CONFIG=ON option.")
-	else()
-		message(WARNING
-			"Caching tests are set to work with TREE3 engine, which is disabled, hence "
-			"they are also disabled. If you want to run them use -DENGINE_TREE3=ON option.")
-	endif()
-endif()
-
+## Test scenarios (parametrized at least with engine name)
 # Tests for all engines
 build_test_ext(NAME put_get_remove SRC_FILES engine_scenarios/all/put_get_remove.cc LIBS json)
 build_test_ext(NAME put_get_remove_long_key SRC_FILES engine_scenarios/all/put_get_remove_long_key.cc LIBS json)
@@ -688,4 +679,20 @@ if(ENGINE_STREE)
 			TRACERS none #memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_STREE)
+################################################################################
+###################################### CACHING #################################
+if(ENGINE_CACHING)
+	# Test scenarios are not ported for caching engine
+	if(ENGINE_TREE3 AND BUILD_JSON_CONFIG)
+		build_test(caching_test engines/experimental/caching_test.cc)
+	elseif(NOT BUILD_JSON_CONFIG)
+		message(WARNING
+			"Caching tests require the 'libpmemkv_json_config' library, which is not built, "
+			"hence they are disabled. If you want to run them use -DBUILD_JSON_CONFIG=ON option.")
+	else()
+		message(WARNING
+			"Caching tests are set to work with TREE3 engine, which is disabled, hence "
+			"they are also disabled. If you want to run them use -DENGINE_TREE3=ON option.")
+	endif()
+endif()
 ################################################################################
