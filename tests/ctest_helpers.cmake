@@ -14,13 +14,15 @@ set(GLOBAL_TEST_ARGS
 	-DPARENT_DIR=${TEST_DIR}
 	-DTESTS_USE_FORCED_PMEM=${TESTS_USE_FORCED_PMEM}
 	-DTEST_ROOT_DIR=${TEST_ROOT_DIR})
-
 if(TRACE_TESTS)
 	set(GLOBAL_TEST_ARGS ${GLOBAL_TEST_ARGS} --trace-expand)
 endif()
 
 set(INCLUDE_DIRS ${LIBPMEMOBJ++_INCLUDE_DIRS} common/ ../src .)
 set(LIBS_DIRS ${LIBPMEMOBJ++_LIBRARY_DIRS})
+
+# List of supported Valgrind tracers
+set(vg_tracers memcheck helgrind drd pmemcheck)
 
 include_directories(${INCLUDE_DIRS})
 link_directories(${LIBS_DIRS})
@@ -111,6 +113,7 @@ endfunction()
 
 function(build_test name)
 	# skip posix tests
+	# XXX: a WIN32 test will break if used with build_test_ext() func.
 	if(${name} MATCHES "posix$" AND WIN32)
 		return()
 	endif()
@@ -129,8 +132,6 @@ function(build_test name)
 
 	add_dependencies(tests ${name})
 endfunction()
-
-set(vg_tracers memcheck helgrind drd pmemcheck)
 
 # Configures testcase ${name} ${testcase} using tracer ${tracer}, cmake_script is used to run test
 function(add_testcase executable test_name tracer testcase cmake_script)
