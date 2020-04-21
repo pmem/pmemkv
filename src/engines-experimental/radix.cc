@@ -244,16 +244,13 @@ restart: {
 		n = parent->load();
 	}
 
-	if (!n)
-		return false;
-
 	auto &mtx = parent == &root ? root_mtx : prev.get_node(pool_id)->mtx;
 	std::shared_lock<obj::shared_mutex> lock(mtx);
 
 	if (n != parent->load())
 		goto restart;
 
-	if (n.get_leaf(pool_id)->key != key)
+	if (!n || n.get_leaf(pool_id)->key != key)
 		return false;
 
 	cb(n.get_leaf(pool_id)->cdata(), n.get_leaf(pool_id)->value_size, arg);
@@ -298,7 +295,7 @@ restart: {
 	auto kn = n;
 	auto prev = kn;
 
-	while (!kn.is_leaf()) {
+	while (kn && !kn.is_leaf()) {
 		prev = n;
 
 		n_parent = k_parent;
@@ -308,9 +305,6 @@ restart: {
 			&kn.get_node(pool_id)
 				 ->child[slice_index(key, kn.get_node(pool_id)->shift)];
 		kn = k_parent->load();
-
-		if (!kn)
-			return false;
 	}
 
 	auto mtx_parent = n_parent == &root ? &root_mtx : &prev.get_node(pool_id)->mtx;
@@ -324,8 +318,8 @@ restart: {
 	if (n != n_parent->load() || kn != k_parent->load())
 		goto restart;
 
-	if (kn.get_leaf(pool_id)->key != key)
-		return false;
+	if (!kn || kn.get_leaf(pool_id)->key != key)
+	 	return false;
 
 	acts.free(kn.load_offset());
 
@@ -349,7 +343,7 @@ restart: {
 	/* Remove the node if there's only one remaining child. */
 	if (only_child != -1) {
 		acts.set((uint64_t*)n_parent, n.get_node(pool_id)->child[only_child].load_offset());
-		// acts.free(n.load_offset()); // XXX - add to memory pool
+		acts.free(n.load_offset()); // XXX - add to memory pool
 	}
 
 	// XXX - move size to TLS

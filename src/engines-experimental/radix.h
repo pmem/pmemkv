@@ -161,7 +161,7 @@ private:
 
 	obj::shared_mutex root_mtx;
 	tagged_node_ptr root;
-	obj::p<uint64_t> size_;
+	std::atomic<uint64_t> size_;
 	uint64_t pool_id = 0;
 
 	/*
