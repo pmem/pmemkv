@@ -117,9 +117,19 @@ Next we'll walk you through the steps of creating a new engine.
 
 ### Providing Unit Test
 
-* Select testcases (based on your engine's capabilities) you whish to use from `src/tests/engine_scenarios` (optionally create your own).
-* Write `.cmake` scripts for running selected testcases (if engine is based on pmemobj or memkind you can reuse scripts from `src\tests\engines\pmemobj_based` or `src\tests\engines\memkind_based`)
-* Add selected testcases to `src\tests\CMakeLists.txt` using `add_engine_test` function
+* Select testcases (based on your engine's capabilities) you wish to use
+ from `tests/engine_scenarios` (or, optionally, create your own)
+* Write `.cmake` scripts for running selected testcases and put them in `tests/engines` directory.
+ If engine is based on pmemobj or memkind you can just use scripts
+ from `tests/engines/pmemobj_based` or `tests/engines/memkind_based`
+* If extraordinary tests are required, consider adding them in `tests/engines`
+* Update `tests/wrong_engine_name_test.cc` test with the new engine
+* In `tests/CMakeLists.txt`:
+	* Check if all new files are covered by patterns for cppstyle and whitespace checks
+	* Add selected testcases to `tests/CMakeLists.txt` using `add_engine_test` function
+	(see for comparison, current sections for testcases of existing engines)
+	* If engine-specific tests were written, build and add them separately
+	(e.g. using `build_test` and `add_test_generic` functions defined in `tests/ctest_helpers.cmake`)
 
 ### Updating Build System
 
@@ -127,7 +137,7 @@ Next we'll walk you through the steps of creating a new engine.
     * Add a build option for a new engine with a name like `ENGINE_MYTREE`
     and use it to ifdef all includes, dependencies and linking you may add
     * Add definition of the new option, like `-DENGINE_MYTREE`, so it can
-    be used to ifdef engine-specific code (e.g. in `libpmemkv.cc`), like:
+    be used to ifdef engine-specific code in common sources (e.g. in `src/engine.cc`), like:
     ```
     #ifdef ENGINE_MYTREE
     ...
@@ -135,8 +145,6 @@ Next we'll walk you through the steps of creating a new engine.
     ```
     * Add `src/engines/mytree.h` and `src/engines/mytree.cc` to `SOURCE_FILES`
     * Use `pkg_check_modules` and/or `find_package` for upstream libraries
-* In `tests/CMakeLists.txt`:
-    * Add `engines/mytree_test.cc` to `TEST_FILES`
 * CMake build and `make test` should complete without any errors now
 
 ### Updating Common Source
