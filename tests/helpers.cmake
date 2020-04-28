@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright 2018-2020, Intel Corporation
 
+#
+# helpers.cmake - helper functions for tests' (cmake) scripts
+#
+
 set(DIR ${PARENT_DIR}/${TEST_NAME})
 
 string(REPLACE "|PARAM|" ";" PARAMS "${RAW_PARAMS}")
@@ -325,19 +329,6 @@ function(crash_with_gdb gdb_batch_file name)
     execute_common(true ${TRACER}_${TESTCASE} ${name} ${ARGN})
 
     set(TRACER ${PREV_TRACER})
-endfunction()
-
-# Checks whether specified filename is located on persistent memory and emits
-# FATAL_ERROR in case it's not.
-function(check_is_pmem filename)
-    execute_process(COMMAND ${BIN_DIR}/../check_is_pmem ${filename} RESULT_VARIABLE is_pmem)
-
-    if (${is_pmem} EQUAL 2)
-        message(FATAL_ERROR "check_is_pmem failed.")
-    elseif ((${is_pmem} EQUAL 1) AND (NOT TESTS_USE_FORCED_PMEM))
-        # Return value 1 means that path points to non-pmem
-        message(FATAL_ERROR "${TEST_NAME} can only be run on PMEM.")
-    endif()
 endfunction()
 
 # Checks whether specified filename is located on persistent memory and emits

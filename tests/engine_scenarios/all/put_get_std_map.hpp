@@ -8,8 +8,8 @@
 
 using namespace pmem::kv;
 
-std::map<std::string, std::string> PutToMapTest(size_t n_inserts, size_t key_length, size_t value_length,
-				pmem::kv::db &kv)
+std::map<std::string, std::string> PutToMapTest(size_t n_inserts, size_t key_length,
+						size_t value_length, pmem::kv::db &kv)
 {
 	/**
 	 * Test: Put data into db and get it back

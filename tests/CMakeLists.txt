@@ -3,29 +3,39 @@
 
 include(ctest_helpers.cmake)
 
+## Setup
+add_custom_target(tests)
+
+# Checks for when DEVELOPER_MODE is ON
 add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/common/*.c
-		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.cc
-		${CMAKE_CURRENT_SOURCE_DIR}/config/*.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/common/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/config/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/all/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/all/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/concurrent/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/memkind/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/persistent/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.c*)
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.c*)
 
 add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/cmake/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/config/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/all/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/concurrent/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/memkind/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/persistent/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*)
-
-add_custom_target(tests)
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.*)
 
 if(TESTS_JSON AND NOT BUILD_JSON_CONFIG)
 	message(FATAL_ERROR "Tests requiring 'libpmemkv_json_config' library "
@@ -48,10 +58,12 @@ find_pmempool()
 add_executable(check_is_pmem common/check_is_pmem.cpp)
 target_link_libraries(check_is_pmem ${LIBPMEM_LIBRARIES})
 
-if (COVERAGE AND VALGRIND_FOUND)
+if(COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
 endif()
 
+
+## Common tests
 build_test(wrong_engine_name_test wrong_engine_name_test.cc)
 add_test_generic(NAME wrong_engine_name_test TRACERS none)
 
@@ -85,20 +97,7 @@ add_test_generic(NAME blackhole_test TRACERS none memcheck)
 build_test_ext(NAME json_to_config SRC_FILES config/json_to_config.cc LIBS json)
 add_test_generic(NAME json_to_config TRACERS none memcheck)
 
-if(ENGINE_CACHING)
-	if(ENGINE_TREE3 AND BUILD_JSON_CONFIG)
-		build_test(caching_test engines/experimental/caching_test.cc)
-	elseif(NOT BUILD_JSON_CONFIG)
-		message(WARNING
-			"Caching tests require the 'libpmemkv_json_config' library, which is not built, "
-			"hence they are disabled. If you want to run them use -DBUILD_JSON_CONFIG=ON option.")
-	else()
-		message(WARNING
-			"Caching tests are set to work with TREE3 engine, which is disabled, hence "
-			"they are also disabled. If you want to run them use -DENGINE_TREE3=ON option.")
-	endif()
-endif()
-
+## Test scenarios (parametrized at least with engine name)
 # Tests for all engines
 build_test_ext(NAME put_get_remove SRC_FILES engine_scenarios/all/put_get_remove.cc LIBS json)
 build_test_ext(NAME put_get_remove_long_key SRC_FILES engine_scenarios/all/put_get_remove_long_key.cc LIBS json)
@@ -108,7 +107,8 @@ build_test_ext(NAME iterate SRC_FILES engine_scenarios/all/iterate.cc LIBS json)
 build_test_ext(NAME error_handling_oom SRC_FILES engine_scenarios/all/error_handling_oom.cc LIBS json)
 
 # Tests for concurrent engines
-build_test_ext(NAME concurrent_put_get_remove SRC_FILES engine_scenarios/concurrent/put_get_remove.cc LIBS json)
+build_test_ext(NAME concurrent_put_get_remove_params SRC_FILES engine_scenarios/concurrent/put_get_remove_params.cc LIBS json)
+build_test_ext(NAME concurrent_put_get_remove_gen_params SRC_FILES engine_scenarios/concurrent/put_get_remove_gen_params.cc LIBS json)
 
 # Tests for peristent engines
 build_test_ext(NAME persistent_not_found_verify SRC_FILES engine_scenarios/persistent/not_found_verify.cc LIBS json)
@@ -184,15 +184,31 @@ if(ENGINE_CMAP)
 			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE cmap
-			BINARY concurrent_put_get_remove
+			BINARY concurrent_put_get_remove_params
 			TRACERS none memcheck
-			SCRIPT pmemobj_based/default.cmake)
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50)
 
 	if (TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE cmap
-				BINARY concurrent_put_get_remove
+				BINARY concurrent_put_get_remove_params
 				TRACERS drd helgrind
-				SCRIPT pmemobj_based/default.cmake)
+				SCRIPT pmemobj_based/default.cmake
+				PARAMS 8 50)
+	endif()
+
+	add_engine_test(ENGINE cmap
+			BINARY concurrent_put_get_remove_gen_params
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50 100)
+
+	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+		add_engine_test(ENGINE cmap
+				BINARY concurrent_put_get_remove_gen_params
+				TRACERS drd helgrind
+				SCRIPT pmemobj_based/default.cmake
+				PARAMS 8 50 100)
 	endif()
 
 	add_engine_test(ENGINE cmap
@@ -326,9 +342,16 @@ if(ENGINE_VCMAP)
 			SCRIPT memkind_based/default.cmake)
 
 	add_engine_test(ENGINE vcmap
-			BINARY concurrent_put_get_remove
+			BINARY concurrent_put_get_remove_params
 			TRACERS none memcheck # XXX - tbb lock does not work well with drd or helgrind
-			SCRIPT memkind_based/default.cmake)
+			SCRIPT memkind_based/default.cmake
+			PARAMS 8 50)
+
+	add_engine_test(ENGINE vcmap
+			BINARY concurrent_put_get_remove_gen_params
+			TRACERS none memcheck # XXX - tbb lock does not work well with drd or helgrind
+			SCRIPT memkind_based/default.cmake
+			PARAMS 8 50 100)
 
 	add_engine_test(ENGINE vcmap
 			BINARY memkind_error_handling
@@ -688,4 +711,20 @@ if(ENGINE_STREE)
 			TRACERS none #memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_STREE)
+################################################################################
+###################################### CACHING #################################
+if(ENGINE_CACHING)
+	# Test scenarios are not ported for caching engine
+	if(ENGINE_TREE3 AND BUILD_JSON_CONFIG)
+		build_test(caching_test engines/experimental/caching_test.cc)
+	elseif(NOT BUILD_JSON_CONFIG)
+		message(WARNING
+			"Caching tests require the 'libpmemkv_json_config' library, which is not built, "
+			"hence they are disabled. If you want to run them use -DBUILD_JSON_CONFIG=ON option.")
+	else()
+		message(WARNING
+			"Caching tests are set to work with TREE3 engine, which is disabled, hence "
+			"they are also disabled. If you want to run them use -DENGINE_TREE3=ON option.")
+	endif()
+endif()
 ################################################################################
