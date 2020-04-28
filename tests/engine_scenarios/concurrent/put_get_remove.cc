@@ -3,6 +3,8 @@
 
 #include "unittest.hpp"
 
+#include <numeric>
+
 using namespace pmem::kv;
 
 static void SimpleMultithreadedTest(pmem::kv::db &kv)
@@ -32,15 +34,90 @@ static void SimpleMultithreadedTest(pmem::kv::db &kv)
 	UT_ASSERT(cnt == threads_number * thread_items);
 }
 
+static void MultithreadedGetAndRemove(pmem::kv::db &kv)
+{
+	static constexpr uint64_t size = 1000;
+	size_t threads_number = size;
+
+	uint64_t keys[size] = {};
+	std::iota(keys, keys + size, 0);
+
+	auto uint64_to_key = [](uint64_t &key) {
+		return string_view((char *)&key, sizeof(uint64_t));
+	};
+
+	for (auto &k : keys)
+		UT_ASSERT(kv.put(uint64_to_key(k), uint64_to_key(k)) == status::OK);
+
+	/* test adding and removing data */
+	parallel_exec(threads_number, [&](size_t thread_id) {
+		if (thread_id % 2 == 1) {
+			auto s = kv.get(uint64_to_key(keys[thread_id]),
+					[&](string_view value) {
+						UT_ASSERT(value.compare(uint64_to_key(
+								  keys[thread_id])) == 0);
+					});
+			UT_ASSERTeq(s, status::OK);
+
+			s = kv.get(uint64_to_key(keys[thread_id - 1]),
+				   [&](string_view value) {
+					   UT_ASSERT(value.compare(uint64_to_key(
+							     keys[thread_id - 1])) == 0);
+				   });
+			UT_ASSERT(s == status::OK || s == status::NOT_FOUND);
+
+			if (thread_id == threads_number - 1)
+				return;
+
+			s = kv.get(uint64_to_key(keys[thread_id + 1]),
+				   [&](string_view value) {
+					   UT_ASSERT(value.compare(uint64_to_key(
+							     keys[thread_id + 1])) == 0);
+				   });
+			UT_ASSERT(s == status::OK || s == status::NOT_FOUND);
+		} else {
+			UT_ASSERTeq(kv.remove(uint64_to_key(keys[thread_id])),
+				    status::OK);
+		}
+	});
+}
+
+static void MultithreadedPutAndRemove(pmem::kv::db &kv)
+{
+	static constexpr uint64_t size = 1000;
+	size_t threads_number = size;
+
+	uint64_t keys[size] = {};
+	std::iota(keys, keys + size, 0);
+
+	auto uint64_to_key = [](uint64_t &key) {
+		return string_view((char *)&key, sizeof(uint64_t));
+	};
+
+	for (size_t i = 0; i < size; i += 2)
+		UT_ASSERT(kv.put(uint64_to_key(keys[i]), uint64_to_key(keys[i])) ==
+			  status::OK);
+
+	/* test adding and removing data */
+	parallel_exec(threads_number, [&](size_t thread_id) {
+		if (thread_id % 2 == 0) {
+			UT_ASSERTeq(kv.remove(uint64_to_key(keys[thread_id])),
+				    status::OK);
+		} else {
+			UT_ASSERT(kv.put(uint64_to_key(keys[thread_id]),
+					 uint64_to_key(keys[thread_id])) == status::OK);
+		}
+	});
+}
+
 static void test(int argc, char *argv[])
 {
 	if (argc < 3)
 		UT_FATAL("usage: %s engine json_config", argv[0]);
 
 	run_engine_tests(argv[1], argv[2],
-			 {
-				 SimpleMultithreadedTest,
-			 });
+			 {SimpleMultithreadedTest, MultithreadedGetAndRemove,
+			  MultithreadedPutAndRemove});
 }
 
 int main(int argc, char *argv[])
