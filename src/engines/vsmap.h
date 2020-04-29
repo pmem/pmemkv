@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include "../comparator/volatile_comparator.h"
 #include "../engine.h"
+
 #include "pmem_allocator.h"
 #include <map>
 #include <scoped_allocator>
@@ -60,11 +62,12 @@ private:
 	using mapped_type = storage_type;
 	using map_allocator_type =
 		memkind_ns::allocator<std::pair<const key_type, mapped_type>>;
-	using map_type = std::map<key_type, mapped_type, std::less<key_type>,
+	using map_type = std::map<key_type, mapped_type, internal::volatile_compare,
 				  std::scoped_allocator_adaptor<map_allocator_type>>;
 
 	map_allocator_type kv_allocator;
 	map_type pmem_kv_container;
+	std::unique_ptr<internal::config> config;
 };
 
 } /* namespace kv */

@@ -13,6 +13,9 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <libpmemkv.h>
+#include <libpmemkv_json_config.h>
+
 #define START() test_register_sighandlers()
 
 static inline void UT_OUT(const char *format, ...)
@@ -69,6 +72,21 @@ static inline void UT_FATAL(const char *format, ...)
 			  __FILE__, __LINE__, __func__, #lhs, (unsigned long long)(lhs), \
 			  #rhs, (unsigned long long)(rhs), pmemkv_errormsg()),           \
 		 0)))
+
+#ifdef JSON_TESTS_SUPPORT
+pmemkv_config *C_CONFIG_FROM_JSON(const char *json)
+{
+	pmemkv_config *cfg = pmemkv_config_new();
+	UT_ASSERTne(cfg, NULL);
+
+	int s = pmemkv_config_from_json(cfg, json);
+	if (s != PMEMKV_STATUS_OK) {
+		UT_FATAL(pmemkv_config_from_json_errormsg());
+	}
+
+	return cfg;
+}
+#endif /* JSON_TESTS_SUPPORT */
 
 #ifdef __cplusplus
 }
