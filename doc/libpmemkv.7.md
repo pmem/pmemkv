@@ -33,7 +33,7 @@ It has multiple storage engines, each optimized for a different use case. They d
 
 + concurrency - engines provide a varying degree of write scalability in multi-threaded workloads. Concurrent engines support non-blocking retrievals and, on average, highly scalable updates. For details see the description of individual engines.
 
-+ keys' ordering - "sorted" engines support querying above/below the given key
++ keys' ordering - "sorted" engines support querying above/below the given key. Most sorted engines also support passing a custom comparator object (see **libpmemkv_config**(3)). By default, pmemkv stores elements in binary order (comparison is done using a function equivalent to std::string::compare).
 
 Persistent engines usually use libpmemobj++ and PMDK to access NVDIMMs. They can work with files on DAX filesystem (fsdax) or DAX device.
 
@@ -114,6 +114,8 @@ This engine requires the following config parameters (see **libpmemkv_config**(3
 * **size** --  Specifies size of the database [in bytes]
 	+ type: uint64_t
 	+ min value: 8388608 (8MB)
+* **comparator** -- (optional) Specified comparator used by the engine
+	+ type: object
 
 ## blackhole
 

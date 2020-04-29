@@ -5,6 +5,7 @@
 
 #include <sys/stat.h>
 
+#include "comparator/comparator.h"
 #include "config.h"
 #include "engine.h"
 #include "exceptions.h"
@@ -27,6 +28,18 @@ static inline pmemkv_config *config_from_internal(pmem::kv::internal::config *co
 static inline pmem::kv::internal::config *config_to_internal(pmemkv_config *config)
 {
 	return reinterpret_cast<pmem::kv::internal::config *>(config);
+}
+
+static inline pmemkv_comparator *
+comparator_from_internal(pmem::kv::internal::comparator *comparator)
+{
+	return reinterpret_cast<pmemkv_comparator *>(comparator);
+}
+
+static inline pmem::kv::internal::comparator *
+comparator_to_internal(pmemkv_comparator *comparator)
+{
+	return reinterpret_cast<pmem::kv::internal::comparator *>(comparator);
 }
 
 static inline pmem::kv::engine_base *db_to_internal(pmemkv_db *db)
@@ -219,6 +232,37 @@ int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char 
 			? PMEMKV_STATUS_OK
 			: PMEMKV_STATUS_NOT_FOUND;
 	});
+}
+
+pmemkv_comparator *pmemkv_comparator_new(pmemkv_compare_function *fn, const char *name,
+					 void *arg)
+{
+	if (!fn || !name) {
+		ERR() << "comparison function and name must not be NULL";
+		return nullptr;
+	}
+
+	try {
+		return comparator_from_internal(
+			new pmem::kv::internal::comparator(fn, name, arg));
+	} catch (const std::exception &exc) {
+		ERR() << exc.what();
+		return nullptr;
+	} catch (...) {
+		ERR() << "Unspecified failure";
+		return nullptr;
+	}
+}
+
+void pmemkv_comparator_delete(pmemkv_comparator *comparator)
+{
+	try {
+		delete comparator_to_internal(comparator);
+	} catch (const std::exception &exc) {
+		ERR() << exc.what();
+	} catch (...) {
+		ERR() << "Unspecified failure";
+	}
 }
 
 int pmemkv_open(const char *engine_c_str, pmemkv_config *config, pmemkv_db **db)
