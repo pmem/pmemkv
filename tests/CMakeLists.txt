@@ -12,6 +12,7 @@ add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/comparator/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/config/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/all/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/all/*.h*
@@ -28,6 +29,7 @@ add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/cmake/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/comparator/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/config/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/all/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/concurrent/*.*
@@ -124,6 +126,7 @@ build_test_ext(NAME persistent_put_get_std_map_multiple_reopen SRC_FILES engine_
 
 # Tests for sorted engines
 build_test_ext(NAME sorted_iterate SRC_FILES engine_scenarios/sorted/iterate.cc LIBS json)
+build_test_ext(NAME sorted_iterate_custom_comparator SRC_FILES engine_scenarios/sorted/iterate_custom_comparator.cc LIBS json)
 
 # Tests for pmemobj engines
 build_test_ext(NAME pmemobj_error_handling_create SRC_FILES engine_scenarios/pmemobj/error_handling_create.cc LIBS json)
@@ -139,6 +142,14 @@ build_test_ext(NAME memkind_error_handling SRC_FILES engine_scenarios/memkind/er
 
 # Tests for C API
 build_test(c_api_null_db_config c_api/null_db_config.c)
+
+# Tests for comparator
+build_test_ext(NAME comparator_basic_c SRC_FILES comparator/basic.c LIBS json)
+build_test_ext(NAME comparator_basic_persistent_c SRC_FILES comparator/basic_persistent.c LIBS json)
+build_test_ext(NAME comparator_custom_reopen_c SRC_FILES comparator/custom_reopen.c LIBS json)
+build_test_ext(NAME comparator_default_reopen_c SRC_FILES comparator/default_reopen.c LIBS json)
+build_test_ext(NAME comparator_custom_reopen_cpp SRC_FILES comparator/custom_reopen.cc LIBS json)
+build_test_ext(NAME comparator_default_reopen_cpp SRC_FILES comparator/default_reopen.cc LIBS json)
 
 ###################################### CMAP ####################################
 if(ENGINE_CMAP)
@@ -602,6 +613,11 @@ if(ENGINE_VSMAP)
 			SCRIPT memkind_based/default.cmake)
 
 	add_engine_test(ENGINE vsmap
+			BINARY comparator_basic_c
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vsmap
 			BINARY put_get_remove
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake)
@@ -652,6 +668,11 @@ if(ENGINE_VSMAP)
 			SCRIPT memkind_based/default.cmake)
 
 	add_engine_test(ENGINE vsmap
+			BINARY sorted_iterate_custom_comparator
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vsmap
 			BINARY memkind_error_handling
 			TRACERS none memcheck
 			SCRIPT memkind_based/memkind/error_handling.cmake)
@@ -666,6 +687,12 @@ if(ENGINE_TREE3)
 			BINARY c_api_null_db_config
 			TRACERS none #memcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	# XXX - add comparator support to tree3
+	# add_engine_test(ENGINE tree3
+	# BINARY c_api_comparator
+	# TRACERS none memcheck
+	# SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE tree3
 			BINARY put_get_remove
@@ -820,6 +847,12 @@ if(ENGINE_STREE)
 			BINARY c_api_null_db_config
 			TRACERS none #memcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	# XXX - add comparator support to stree
+	# add_engine_test(ENGINE stree
+	# BINARY c_api_comparator
+	# TRACERS none memcheck
+	# SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_remove

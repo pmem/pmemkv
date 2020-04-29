@@ -85,6 +85,8 @@ typedef int get_kv_function(string_view key, string_view value);
  */
 typedef void get_v_function(string_view value);
 
+typedef int comparator_function(string_view key1, string_view key2);
+
 /**
  * Key-value pair callback, C-style.
  */
@@ -126,6 +128,31 @@ enum class status {
 							libpmemobj transaction */
 	DEFRAG_ERROR = PMEMKV_STATUS_DEFRAG_ERROR, /**< the defragmentation process failed
 						      (possibly in the middle of a run) */
+	COMPARATOR_MISMATCH =
+		PMEMKV_STATUS_COMPARATOR_MISMATCH, /**< db was created with a different
+						      comparator */
+};
+
+/*! \class comparator
+	\brief abstract base class of a comparator.
+
+	This class is meant to be subclassed by the user. Comparator
+	which implements both compare() and name() functions can
+	be passed to config::put_comparator in order to change database
+	ordering.
+
+	Name is used in persistent engines to check for comparator mismatches.
+	Database created with one comparator cannot be opened with a different one.
+
+	Comparator should be thread safe.
+*/
+class comparator {
+public:
+	virtual ~comparator()
+	{
+	}
+	virtual int compare(string_view key1, string_view key2) = 0;
+	virtual std::string name() = 0;
 };
 
 /*! \class config
@@ -159,6 +186,8 @@ public:
 
 	config &operator=(const config &other) = delete;
 	config &operator=(config &&other) noexcept;
+
+	status put_comparator(std::unique_ptr<comparator> ptr);
 
 	template <typename T>
 	status put_data(const std::string &key, const T *value,
@@ -292,6 +321,24 @@ struct unique_ptr_wrapper : public unique_ptr_wrapper_base {
 	std::unique_ptr<T, D> ptr;
 };
 
+struct comparator_wrapper : public unique_ptr_wrapper_base {
+	comparator_wrapper(
+		std::unique_ptr<comparator> ptr,
+		std::unique_ptr<pmemkv_comparator, decltype(pmemkv_comparator_delete) *>
+			cmp)
+	    : ptr(std::move(ptr)), cmp(std::move(cmp))
+	{
+	}
+
+	void *get() override
+	{
+		return cmp.get();
+	}
+
+	std::unique_ptr<comparator> ptr;
+	std::unique_ptr<pmemkv_comparator, decltype(pmemkv_comparator_delete) *> cmp;
+};
+
 /*
  * All functions which will be called by C code must be declared as extern "C"
  * to ensure they have C linkage. It is needed because it is possible that
@@ -308,6 +355,13 @@ static inline void *call_up_get(void *object)
 {
 	auto *ptr = static_cast<unique_ptr_wrapper_base *>(object);
 	return ptr->get();
+}
+
+static inline int call_comparator_function(const char *k1, size_t kb1, const char *k2,
+					   size_t kb2, void *arg)
+{
+	auto *cmp = static_cast<comparator *>(arg);
+	return cmp->compare(string_view(k1, kb1), string_view(k2, kb2));
 }
 } /* extern "C" */
 } /* namespace internal */
@@ -450,6 +504,47 @@ inline status config::put_object(const std::string &key,
 
 	return static_cast<status>(pmemkv_config_put_object_cb(
 		this->_config, key.data(), (void *)wrapper, internal::call_up_get,
+		internal::call_up_destructor));
+}
+
+/**
+ * Puts comparator object to a config. Comparator should be thread safe.
+ *
+ * @param[in] ptr unique_ptr to a comparator object. comparator should be
+ *			  a child class of pmem::kv::comparator.
+ *
+ * @return pmem::kv::status
+ */
+inline status config::put_comparator(std::unique_ptr<comparator> ptr)
+{
+	auto cmp =
+		std::unique_ptr<pmemkv_comparator, decltype(pmemkv_comparator_delete) *>(
+			pmemkv_comparator_new(ptr.get()), &pmemkv_comparator_delete);
+	if (cmp == nullptr)
+		return status::UNKNOWN_ERROR;
+
+	auto s = pmemkv_comparator_set_function(cmp.get(),
+						&internal::call_comparator_function);
+	if (s != PMEMKV_STATUS_OK)
+		return static_cast<status>(s);
+
+	s = pmemkv_comparator_set_name(cmp.get(), ptr->name().c_str());
+	if (s != PMEMKV_STATUS_OK)
+		return static_cast<status>(s);
+
+	internal::unique_ptr_wrapper_base *wrapper;
+
+	try {
+		wrapper =
+			new internal::comparator_wrapper(std::move(ptr), std::move(cmp));
+	} catch (std::bad_alloc &e) {
+		return status::OUT_OF_MEMORY;
+	} catch (...) {
+		return status::UNKNOWN_ERROR;
+	}
+
+	return static_cast<status>(pmemkv_config_put_object_cb(
+		this->_config, "comparator", (void *)wrapper, internal::call_up_get,
 		internal::call_up_destructor));
 }
 
@@ -837,7 +932,7 @@ inline status db::count_all(std::size_t &cnt) noexcept
 /**
  * It returns number of currently stored elements in pmem::kv::db, whose keys
  * are greater than the given *key*.
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the lower bound of counting
  * @param[out] cnt number of records in pmem::kv::db matching query
@@ -853,7 +948,7 @@ inline status db::count_above(string_view key, std::size_t &cnt) noexcept
 /**
  * It returns number of currently stored elements in pmem::kv::db, whose keys
  * are greater than or equal to the given *key*.
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the lower bound of counting
  * @param[out] cnt number of records in pmem::kv::db matching query
@@ -869,7 +964,7 @@ inline status db::count_equal_above(string_view key, std::size_t &cnt) noexcept
 /**
  * It returns number of currently stored elements in pmem::kv::db, whose keys
  * are lower than or equal to the given *key*.
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the lower bound of counting
  * @param[out] cnt number of records in pmem::kv::db matching query
@@ -885,7 +980,7 @@ inline status db::count_equal_below(string_view key, std::size_t &cnt) noexcept
 /**
  * It returns number of currently stored elements in pmem::kv::db, whose keys
  * are less than the given *key*.
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the upper bound of counting
  * @param[out] cnt number of records in pmem::kv::db matching query
@@ -901,7 +996,7 @@ inline status db::count_below(string_view key, std::size_t &cnt) noexcept
 /**
  * It returns number of currently stored elements in pmem::kv::db, whose keys
  * are greater than the *key1* and less than the *key2*.
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key1 sets the lower bound of counting
  * @param[in] key2 sets the upper bound of counting
@@ -956,7 +1051,7 @@ inline status db::get_all(std::function<get_kv_function> f) noexcept
  * Callback can stop iteration by returning non-zero value. In that case *get_above()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the lower bound for querying
  * @param[in] callback function to be called for each returned element
@@ -977,7 +1072,7 @@ inline status db::get_above(string_view key, get_kv_callback *callback,
  * Callback can stop iteration by returning non-zero value. In that case *get_above()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the lower bound for querying
  * @param[in] f function called for each returned element, it is called with params:
@@ -1000,7 +1095,7 @@ inline status db::get_above(string_view key, std::function<get_kv_function> f) n
  * *get_equal_above()* returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues
  * iteration.
  *
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the lower bound for querying
  * @param[in] callback function to be called for each returned element
@@ -1022,7 +1117,7 @@ inline status db::get_equal_above(string_view key, get_kv_callback *callback,
  **get_equal_above()* returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues
  *iteration.
  *
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the lower bound for querying
  * @param[in] f function called for each returned element, it is called with params:
@@ -1046,7 +1141,7 @@ inline status db::get_equal_above(string_view key,
  * *get_equal_below()* returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues
  * iteration.
  *
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the upper bound for querying
  * @param[in] callback function to be called for each returned element
@@ -1068,7 +1163,7 @@ inline status db::get_equal_below(string_view key, get_kv_callback *callback,
  **get_equal_below()* returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues
  *iteration.
  *
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the upper bound for querying
  * @param[in] f function called for each returned element, it is called with params:
@@ -1091,7 +1186,7 @@ inline status db::get_equal_below(string_view key,
  * Callback can stop iteration by returning non-zero value. In that case *get_below()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the upper bound for querying
  * @param[in] callback function to be called for each returned element
@@ -1112,7 +1207,7 @@ inline status db::get_below(string_view key, get_kv_callback *callback,
  * Callback can stop iteration by returning non-zero value. In that case *get_below()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key sets the upper bound for querying
  * @param[in] f function called for each returned element, it is called with params:
@@ -1134,7 +1229,7 @@ inline status db::get_below(string_view key, std::function<get_kv_function> f) n
  * Callback can stop iteration by returning non-zero value. In that case *get_between()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key1 sets the lower bound for querying
  * @param[in] key2 sets the upper bound for querying
@@ -1156,7 +1251,7 @@ inline status db::get_between(string_view key1, string_view key2,
  * Callback can stop iteration by returning non-zero value. In that case *get_between()*
  * returns pmem::kv::status::STOPPED_BY_CB. Returning 0 continues iteration.
  *
- * Keys are sorted in binary order (see std::string::compare).
+ * Keys are sorted in order specified by a comparator.
  *
  * @param[in] key1 sets the lower bound for querying
  * @param[in] key2 sets the upper bound for querying

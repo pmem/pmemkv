@@ -5,6 +5,7 @@
 
 #include <sys/stat.h>
 
+#include "comparator/comparator.h"
 #include "config.h"
 #include "engine.h"
 #include "exceptions.h"
@@ -27,6 +28,18 @@ static inline pmemkv_config *config_from_internal(pmem::kv::internal::config *co
 static inline pmem::kv::internal::config *config_to_internal(pmemkv_config *config)
 {
 	return reinterpret_cast<pmem::kv::internal::config *>(config);
+}
+
+static inline pmemkv_comparator *
+comparator_from_internal(pmem::kv::internal::comparator *comparator)
+{
+	return reinterpret_cast<pmemkv_comparator *>(comparator);
+}
+
+static inline pmem::kv::internal::comparator *
+comparator_to_internal(pmemkv_comparator *comparator)
+{
+	return reinterpret_cast<pmem::kv::internal::comparator *>(comparator);
 }
 
 static inline pmem::kv::engine_base *db_to_internal(pmemkv_db *db)
@@ -218,6 +231,53 @@ int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char 
 		return config_to_internal(config)->get_string(key, value)
 			? PMEMKV_STATUS_OK
 			: PMEMKV_STATUS_NOT_FOUND;
+	});
+}
+
+pmemkv_comparator *pmemkv_comparator_new(void *arg)
+{
+	try {
+		return comparator_from_internal(new pmem::kv::internal::comparator(arg));
+	} catch (const std::exception &exc) {
+		ERR() << exc.what();
+		return nullptr;
+	} catch (...) {
+		ERR() << "Unspecified failure";
+		return nullptr;
+	}
+}
+
+void pmemkv_comparator_delete(pmemkv_comparator *comparator)
+{
+	try {
+		delete comparator_to_internal(comparator);
+	} catch (const std::exception &exc) {
+		ERR() << exc.what();
+	} catch (...) {
+		ERR() << "Unspecified failure";
+	}
+}
+
+int pmemkv_comparator_set_function(pmemkv_comparator *comparator,
+				   pmemkv_compare_function *fn)
+{
+	if (!comparator || !fn)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		comparator_to_internal(comparator)->set_compare_function(fn);
+		return PMEMKV_STATUS_OK;
+	});
+}
+
+int pmemkv_comparator_set_name(pmemkv_comparator *comparator, const char *name)
+{
+	if (!comparator || !name)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		comparator_to_internal(comparator)->set_name(name);
+		return PMEMKV_STATUS_OK;
 	});
 }
 

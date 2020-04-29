@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2020, Intel Corporation */
 
 #ifndef LIBPMEMKV_EXCEPTIONS_H
 #define LIBPMEMKV_EXCEPTIONS_H
@@ -53,6 +53,13 @@ struct config_type_error : error {
 struct wrong_engine_name : error {
 	wrong_engine_name(const std::string &msg)
 	    : error(msg, PMEMKV_STATUS_WRONG_ENGINE_NAME)
+	{
+	}
+};
+
+struct comparator_mismatch : error {
+	comparator_mismatch(const std::string &msg)
+	    : error(msg, PMEMKV_STATUS_COMPARATOR_MISMATCH)
 	{
 	}
 };
