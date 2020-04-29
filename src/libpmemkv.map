@@ -20,6 +20,10 @@ LIBPMEMKV_1.0 {
 		pmemkv_config_put_object_cb;
 		pmemkv_config_put_string;
 		pmemkv_config_put_uint64;
+		pmemkv_comparator_new;
+		pmemkv_comparator_delete;
+		pmemkv_comparator_set_function;
+		pmemkv_comparator_set_name;
 		pmemkv_count_above;
 		pmemkv_count_all;
 		pmemkv_count_below;

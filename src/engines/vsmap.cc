@@ -2,7 +2,10 @@
 /* Copyright 2017-2020, Intel Corporation */
 
 #include "vsmap.h"
+#include "../comparator/comparator.h"
+#include "../comparator/volatile_comparator.h"
 #include "../out.h"
+
 #include <libpmemobj++/transaction.hpp>
 
 #include <iostream>
@@ -33,7 +36,11 @@ static uint64_t get_size(internal::config &cfg)
 }
 
 vsmap::vsmap(std::unique_ptr<internal::config> cfg)
-    : kv_allocator(get_path(*cfg), get_size(*cfg)), pmem_kv_container(kv_allocator)
+    : kv_allocator(get_path(*cfg), get_size(*cfg)),
+      pmem_kv_container(
+	      internal::volatile_less_compare(internal::extract_comparator(*cfg)),
+	      kv_allocator),
+      config(std::move(cfg))
 {
 	LOG("Started ok");
 }

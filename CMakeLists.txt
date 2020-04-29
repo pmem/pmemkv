@@ -385,6 +385,7 @@ add_custom_target(uninstall
 
 add_cppstyle(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/comparator/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
@@ -393,6 +394,7 @@ add_cppstyle(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 
 add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/comparator/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*

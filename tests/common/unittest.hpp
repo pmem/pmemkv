@@ -120,15 +120,7 @@ void parallel_exec(size_t threads_number, Function f)
 #ifdef JSON_TESTS_SUPPORT
 pmem::kv::config CONFIG_FROM_JSON(std::string json)
 {
-	pmemkv_config *cfg = pmemkv_config_new();
-	UT_ASSERTne(cfg, NULL);
-
-	auto s = pmemkv_config_from_json(cfg, json.c_str());
-	if (s != PMEMKV_STATUS_OK) {
-		UT_FATAL(pmemkv_config_from_json_errormsg());
-	}
-
-	return pmem::kv::config(cfg);
+	return pmem::kv::config(C_CONFIG_FROM_JSON(json.c_str()));
 }
 #endif /* JSON_TESTS_SUPPORT */
 

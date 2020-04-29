@@ -46,6 +46,12 @@ int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **valu
 int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value);
 int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value);
 int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);
+
+pmemkv_comparator *pmemkv_comparator_new(void *arg);
+void pmemkv_comparator_delete(pmemkv_comparator *comparator);
+int pmemkv_comparator_set_function(pmemkv_comparator *comparator,
+				   pmemkv_compare_function *fn);
+int pmemkv_comparator_set_name(pmemkv_comparator *comparator, const char *name);
 ```
 
 For general description of pmemkv and available engines see **libpmemkv**(7).
@@ -144,6 +150,44 @@ only using corresponding pmemkv_config_get_ function (for example, config items 
 can only be obtained using pmemkv_config_get_object). Exception from this rule
 are functions for uint64 and int64. If value put by pmemkv_config_put_int64 is in uint64_t range
 it can be obtained using pmemkv_config_get_uint64 and vice versa.
+
+`pmemkv_comparator *pmemkv_comparator_new(void *arg);`
+
+:	Creates instance of comparator object. `arg` is saved in comparator object and
+	passed to a comparison function on each invocation.
+
+	On failure, NULL is returned.
+
+`void pmemkv_comparator_delete(pmemkv_comparator *comparator);`
+
+:	Removes comparator object. Should be called ONLY for comparators which were not
+	put to config (as config takes ownership of the comparator).
+
+`int pmemkv_comparator_set_function(pmemkv_comparator *comparator, pmemkv_compare_function *fn);`
+
+:	Sets comparison function which defines element order in the database. This function accepts
+	two keys and an `arg` pointer which was passed to `pmemkv_comparator_new`. `fn` should
+	perform a three-way comparison. Return values:
+	* negative value if the first key is less than the second one
+	* zero if both keys are the same
+	* positive value if the first key is greater than the second one
+
+	The comparison function should be thread safe - it can be called from multiple threads.
+
+`int pmemkv_comparator_set_name(pmemkv_comparator *comparator, const char *name);`
+
+:	Sets name of the comparator. It is used in persistent engines to check for comparator mismatches.
+	Database created with one comparator cannot be opened with a different one.
+
+To set a comparator for the database `pmemkv_config_put_object` should be used:
+
+```c
+pmemkv_comparator *cmp = pmemkv_comparator_new(NULL);
+pmemkv_comparator_set_function(cmp, compare);
+pmemkv_comparator_set_name(cmp, "compare");
+
+pmemkv_config_put_object(config, "comparator", cmp);
+```
 
 ## ERRORS ##
 

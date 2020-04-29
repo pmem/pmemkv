@@ -57,6 +57,13 @@ struct wrong_engine_name : error {
 	}
 };
 
+struct comparator_mismatch : error {
+	comparator_mismatch(const std::string &msg)
+	    : error(msg, PMEMKV_STATUS_COMPARATOR_MISMATCH)
+	{
+	}
+};
+
 } /* namespace internal */
 } /* namespace kv */
 } /* namespace pmem */

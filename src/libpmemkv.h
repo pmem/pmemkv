@@ -23,13 +23,18 @@ extern "C" {
 #define PMEMKV_STATUS_WRONG_ENGINE_NAME 9
 #define PMEMKV_STATUS_TRANSACTION_SCOPE_ERROR 10
 #define PMEMKV_STATUS_DEFRAG_ERROR 11
+#define PMEMKV_STATUS_COMPARATOR_MISMATCH 12
 
 typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;
+typedef struct pmemkv_comparator pmemkv_comparator;
 
 typedef int pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
 				   size_t valuebytes, void *arg);
 typedef void pmemkv_get_v_callback(const char *value, size_t valuebytes, void *arg);
+
+typedef int pmemkv_compare_function(const char *key1, size_t keybytes1, const char *key2,
+				    size_t keybytes2, void *arg);
 
 pmemkv_config *pmemkv_config_new(void);
 void pmemkv_config_delete(pmemkv_config *config);
@@ -48,6 +53,12 @@ int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **valu
 int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value);
 int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value);
 int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);
+
+pmemkv_comparator *pmemkv_comparator_new(void *arg);
+void pmemkv_comparator_delete(pmemkv_comparator *comparator);
+int pmemkv_comparator_set_function(pmemkv_comparator *comparator,
+				   pmemkv_compare_function *fn);
+int pmemkv_comparator_set_name(pmemkv_comparator *comparator, const char *name);
 
 int pmemkv_open(const char *engine, pmemkv_config *config, pmemkv_db **db);
 void pmemkv_close(pmemkv_db *kv);

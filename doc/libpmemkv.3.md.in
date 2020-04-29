@@ -95,17 +95,17 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 `int pmemkv_count_above(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);`
 
 :	Stores in `*cnt` the number of records in `db` whose keys are greater than
-	the key `k` of length `kb`.
+	the key `k` of length `kb`. Order of elements is specified by a comparator (see **libpmemkv**(7)).
 
 `int pmemkv_count_below(pmemkv_db *db, const char *k, size_t kb, size_t *cnt);`
 
 :	Stores in `*cnt` the number of records in `db` whose keys are less than
-	the key `k` of length `kb`.
+	the key `k` of length `kb`. Order of elements is specified by a comparator (see **libpmemkv**(7)).
 
 `int pmemkv_count_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2, size_t kb2, size_t *cnt);`
 
 :	Stores in `*cnt` the number of records in `db` whose keys are greater than key `k1` (of length `kb1`)
-	and less than key `k2` (of length `kb2`).
+	and less than key `k2` (of length `kb2`). Order of elements is specified by a comparator (see **libpmemkv**(7)).
 
 `int pmemkv_get_all(pmemkv_db *db, pmemkv_get_kv_callback *c, void *arg);`
 
@@ -114,6 +114,7 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 	the value and `arg` specified by the user.
 	Function `c` can stop iteration by returning non-zero value. In that case *pmemkv_get_all()* returns
 	PMEMKV\_STATUS\_STOPPED\_BY\_CB. Returning 0 continues iteration.
+	Order of elements is specified by a comparator (see **libpmemkv**(7)).
 
 `int pmemkv_get_above(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c, void *arg);`
 
@@ -122,6 +123,7 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 	the value and `arg` specified by the user.
 	Function `c` can stop iteration by returning non-zero value. In that case *pmemkv_get_above()* returns
 	PMEMKV\_STATUS\_STOPPED\_BY\_CB. Returning 0 continues iteration.
+	Order of elements is specified by a comparator (see **libpmemkv**(7)).
 
 `int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c, oid *arg);`
 
@@ -130,6 +132,7 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 	the value and `arg` specified by the user.
 	Function `c` can stop iteration by returning non-zero value. In that case *pmemkv_get_below()* returns
 	PMEMKV\_STATUS\_STOPPED\_BY\_CB. Returning 0 continues iteration.
+	Order of elements is specified by a comparator (see **libpmemkv**(7)).
 
 `int pmemkv_get_between(pmemkv_db *db, const char *k1, size_t kb1, const char *k2, size_t kb2, pmemkv_get_kv_callback *c, void *arg);`
 
@@ -139,6 +142,7 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 	the value and `arg` specified by the user.
 	Function `c` can stop iteration by returning non-zero value. In that case *pmemkv_get_between()* returns
 	PMEMKV\_STATUS\_STOPPED\_BY\_CB. Returning 0 continues iteration.
+	Order of elements is specified by a comparator (see **libpmemkv**(7)).
 
 `int pmemkv_exists(pmemkv_db *db, const char *k, size_t kb);`
 
