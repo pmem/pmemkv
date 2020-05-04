@@ -17,6 +17,7 @@ LIBPMEMKV_1.0 {
 		pmemkv_config_put_data;
 		pmemkv_config_put_int64;
 		pmemkv_config_put_object;
+		pmemkv_config_put_object_cb;
 		pmemkv_config_put_string;
 		pmemkv_config_put_uint64;
 		pmemkv_count_above;

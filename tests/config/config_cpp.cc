@@ -102,13 +102,71 @@ static void simple_test()
 	UT_ASSERTeq(value_custom_ptr_deleter->a, DELETED_VAL);
 	UT_ASSERTeq(value_custom_ptr_deleter->b, DELETED_VAL);
 
-	/* delete was nullptr */
+	/* delete was not set */
 	UT_ASSERTeq(ptr, value_custom_ptr);
 	UT_ASSERTeq(value_custom_ptr->a, INIT_VAL);
 	UT_ASSERTeq(value_custom_ptr->b, INIT_VAL);
 
 	delete ptr;
 	delete ptr_deleter;
+}
+
+static void object_unique_ptr_default_deleter_test()
+{
+	auto cfg = new config;
+	UT_ASSERT(cfg != nullptr);
+
+	auto ptr_default = std::unique_ptr<custom_type>(new custom_type);
+	ptr_default->a = INIT_VAL;
+	ptr_default->b = INIT_VAL;
+	auto s = cfg->put_object("object_ptr", std::move(ptr_default));
+	UT_ASSERTeq(s, status::OK);
+
+	delete cfg;
+}
+
+static void object_unique_ptr_nullptr_test()
+{
+	auto cfg = new config;
+	UT_ASSERT(cfg != nullptr);
+
+	auto ptr = std::unique_ptr<custom_type>(nullptr);
+	auto s = cfg->put_object("object_ptr", std::move(ptr));
+	UT_ASSERTeq(s, status::OK);
+
+	custom_type *raw_ptr;
+	s = cfg->get_object("object_ptr", raw_ptr);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERTeq(raw_ptr, nullptr);
+
+	delete cfg;
+}
+
+static void object_unique_ptr_custom_deleter_test()
+{
+	auto cfg = new config;
+	UT_ASSERT(cfg != nullptr);
+
+	auto custom_deleter = [&](custom_type *ptr) {
+		ptr->a = DELETED_VAL;
+		ptr->b = DELETED_VAL;
+	};
+
+	auto ptr_custom = std::unique_ptr<custom_type, decltype(custom_deleter)>(
+		new custom_type, custom_deleter);
+	ptr_custom->a = INIT_VAL;
+	ptr_custom->b = INIT_VAL;
+
+	auto *raw_ptr = ptr_custom.get();
+
+	auto s = cfg->put_object("object_ptr", std::move(ptr_custom));
+	UT_ASSERTeq(s, status::OK);
+
+	delete cfg;
+
+	UT_ASSERTeq(raw_ptr->a, DELETED_VAL);
+	UT_ASSERTeq(raw_ptr->b, DELETED_VAL);
+	delete raw_ptr;
 }
 
 static void integral_conversion_test()
@@ -245,6 +303,9 @@ static void not_found_test()
 static void test(int argc, char *argv[])
 {
 	simple_test();
+	object_unique_ptr_nullptr_test();
+	object_unique_ptr_default_deleter_test();
+	object_unique_ptr_custom_deleter_test();
 	integral_conversion_test();
 	not_found_test();
 	constructors_test();

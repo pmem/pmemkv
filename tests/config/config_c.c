@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+static const int TEST_VAL = 0xABC;
 static const int INIT_VAL = 1;
 static const int DELETED_VAL = 2;
 
@@ -16,10 +17,28 @@ struct custom_type {
 	char b;
 };
 
+struct custom_type_wrapper {
+	struct custom_type value;
+	int additional_state;
+};
+
+static void *getter(void *arg)
+{
+	struct custom_type_wrapper *ct = (struct custom_type_wrapper *)(arg);
+	return &ct->value;
+}
+
 static void deleter(struct custom_type *ct_ptr)
 {
 	ct_ptr->a = DELETED_VAL;
 	ct_ptr->b = DELETED_VAL;
+}
+
+static void xdeleter(struct custom_type_wrapper *ct_ptr)
+{
+	ct_ptr->value.a = DELETED_VAL;
+	ct_ptr->value.b = DELETED_VAL;
+	ct_ptr->additional_state = DELETED_VAL;
 }
 
 static void simple_test()
@@ -91,13 +110,112 @@ static void simple_test()
 	UT_ASSERTeq(value_custom_ptr_deleter->a, DELETED_VAL);
 	UT_ASSERTeq(value_custom_ptr_deleter->b, DELETED_VAL);
 
-	/* deleter was nullptr */
+	/* deleter was not set */
 	UT_ASSERTeq(ptr, value_custom_ptr);
 	UT_ASSERTeq(value_custom_ptr->a, INIT_VAL);
 	UT_ASSERTeq(value_custom_ptr->b, INIT_VAL);
 
 	free(ptr);
 	free(ptr_deleter);
+}
+
+static void free_deleter_test()
+{
+	pmemkv_config *config = pmemkv_config_new();
+	UT_ASSERT(config != NULL);
+
+	struct custom_type *ptr = malloc(sizeof(struct custom_type));
+	ptr->a = INIT_VAL;
+	ptr->b = INIT_VAL;
+	int ret = pmemkv_config_put_object(config, "object_ptr", ptr, free);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	pmemkv_config_delete(config);
+}
+
+static void ex_put_object_test()
+{
+	pmemkv_config *config = pmemkv_config_new();
+	UT_ASSERT(config != NULL);
+
+	struct custom_type_wrapper *ptr = malloc(sizeof(struct custom_type_wrapper));
+	ptr->value.a = INIT_VAL;
+	ptr->value.b = INIT_VAL;
+	ptr->additional_state = TEST_VAL;
+	int ret = pmemkv_config_put_object_cb(config, "object_ptr", ptr,
+					      (void *(*)(void *))getter,
+					      (void (*)(void *))xdeleter);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	struct custom_type *ptr_from_get;
+	pmemkv_config_get_object(config, "object_ptr", (void **)&ptr_from_get);
+	UT_ASSERTeq(ptr_from_get->a, INIT_VAL);
+	UT_ASSERTeq(ptr_from_get->b, INIT_VAL);
+
+	pmemkv_config_delete(config);
+	config = NULL;
+
+	UT_ASSERTeq(ptr->value.a, DELETED_VAL);
+	UT_ASSERTeq(ptr->value.b, DELETED_VAL);
+	UT_ASSERTeq(ptr->additional_state, DELETED_VAL);
+
+	free(ptr);
+}
+
+static void ex_put_object_nullptr_del_test()
+{
+	pmemkv_config *config = pmemkv_config_new();
+	UT_ASSERT(config != NULL);
+
+	struct custom_type_wrapper *ptr = malloc(sizeof(struct custom_type_wrapper));
+	ptr->value.a = INIT_VAL;
+	ptr->value.b = INIT_VAL;
+	ptr->additional_state = TEST_VAL;
+	int ret = pmemkv_config_put_object_cb(config, "object_ptr", ptr,
+					      (void *(*)(void *))getter, NULL);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	pmemkv_config_delete(config);
+	config = NULL;
+
+	UT_ASSERTeq(ptr->value.a, INIT_VAL);
+	UT_ASSERTeq(ptr->value.b, INIT_VAL);
+	UT_ASSERTeq(ptr->additional_state, TEST_VAL);
+
+	free(ptr);
+}
+
+static void ex_put_object_nullptr_getter_test()
+{
+	pmemkv_config *config = pmemkv_config_new();
+	UT_ASSERT(config != NULL);
+
+	struct custom_type_wrapper *ptr = malloc(sizeof(struct custom_type_wrapper));
+	ptr->value.a = INIT_VAL;
+	ptr->value.b = INIT_VAL;
+	ptr->additional_state = TEST_VAL;
+	int ret = pmemkv_config_put_object_cb(config, "object_ptr", ptr, NULL, NULL);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	pmemkv_config_delete(config);
+	free(ptr);
+}
+
+static void ex_put_object_free_del_test()
+{
+	pmemkv_config *config = pmemkv_config_new();
+	UT_ASSERT(config != NULL);
+
+	struct custom_type_wrapper *ptr = malloc(sizeof(struct custom_type_wrapper));
+	ptr->value.a = INIT_VAL;
+	ptr->value.b = INIT_VAL;
+	ptr->additional_state = TEST_VAL;
+	int ret = pmemkv_config_put_object_cb(config, "object_ptr", ptr,
+					      (void *(*)(void *))getter, free);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	pmemkv_config_delete(config);
+	config = NULL;
 }
 
 static void integral_conversion_test()
@@ -239,6 +357,11 @@ int main(int argc, char *argv[])
 	START();
 
 	simple_test();
+	free_deleter_test();
+	ex_put_object_test();
+	ex_put_object_nullptr_del_test();
+	ex_put_object_free_del_test();
+	ex_put_object_nullptr_getter_test();
 	integral_conversion_test();
 	not_found_test();
 	null_config_test();

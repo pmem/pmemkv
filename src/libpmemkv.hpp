@@ -5,6 +5,7 @@
 #define LIBPMEMKV_HPP
 
 #include <functional>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -162,9 +163,12 @@ public:
 	template <typename T>
 	status put_data(const std::string &key, const T *value,
 			const std::size_t number = 1) noexcept;
+
 	template <typename T>
 	status put_object(const std::string &key, T *value,
 			  void (*deleter)(void *)) noexcept;
+	template <typename T, typename D>
+	status put_object(const std::string &key, std::unique_ptr<T, D> object) noexcept;
 	status put_uint64(const std::string &key, std::uint64_t value) noexcept;
 	status put_int64(const std::string &key, std::int64_t value) noexcept;
 	status put_string(const std::string &key, const std::string &value) noexcept;
@@ -257,6 +261,56 @@ public:
 private:
 	pmemkv_db *_db;
 };
+
+namespace internal
+{
+
+/*
+ * Abstracts unique_ptr - exposes only void *get() method and a destructor.
+ * This class is needed for C callbacks which cannot be templated
+ * (type of object and deleter must be abstracted away).
+ */
+struct unique_ptr_wrapper_base {
+	virtual ~unique_ptr_wrapper_base()
+	{
+	}
+
+	virtual void *get() = 0;
+};
+
+template <typename T, typename D>
+struct unique_ptr_wrapper : public unique_ptr_wrapper_base {
+	unique_ptr_wrapper(std::unique_ptr<T, D> ptr) : ptr(std::move(ptr))
+	{
+	}
+
+	void *get() override
+	{
+		return ptr.get();
+	}
+
+	std::unique_ptr<T, D> ptr;
+};
+
+/*
+ * All functions which will be called by C code must be declared as extern "C"
+ * to ensure they have C linkage. It is needed because it is possible that
+ * C and C++ functions use different calling conventions.
+ */
+extern "C" {
+static inline void call_up_destructor(void *object)
+{
+	auto *ptr = static_cast<unique_ptr_wrapper_base *>(object);
+	delete ptr;
+}
+
+static inline void *call_up_get(void *object)
+{
+	auto *ptr = static_cast<unique_ptr_wrapper_base *>(object);
+	return ptr->get();
+}
+} /* extern "C" */
+} /* namespace internal */
 
 /**
  * Default constructor with uninitialized config.
@@ -367,6 +421,36 @@ inline status config::put_object(const std::string &key, T *value,
 
 	return static_cast<status>(pmemkv_config_put_object(this->_config, key.data(),
 							    (void *)value, deleter));
+}
+
+/**
+ * Puts unique_ptr (to an object) to a config.
+ *
+ * @param[in] key The string representing config item's name.
+ * @param[in] object unique_ptr to an object.
+ *
+ * @return pmem::kv::status
+ */
+template <typename T, typename D>
+inline status config::put_object(const std::string &key,
+				 std::unique_ptr<T, D> object) noexcept
+{
+	if (init() != 0)
+		return status::UNKNOWN_ERROR;
+
+	internal::unique_ptr_wrapper_base *wrapper;
+
+	try {
+		wrapper = new internal::unique_ptr_wrapper<T, D>(std::move(object));
+	} catch (std::bad_alloc &e) {
+		return status::OUT_OF_MEMORY;
+	} catch (...) {
+		return status::UNKNOWN_ERROR;
+	}
+
+	return static_cast<status>(pmemkv_config_put_object_cb(
+		this->_config, key.data(), (void *)wrapper, internal::call_up_get,
+		internal::call_up_destructor));
 }
 
 /**
