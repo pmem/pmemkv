@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2020, Intel Corporation */
 
 #ifndef LIBPMEMKV_CONFIG_H
 #define LIBPMEMKV_CONFIG_H
@@ -31,9 +31,11 @@ public:
 		put(key, value, value_size);
 	}
 
-	void put_object(const char *key, void *value, void (*deleter)(void *))
+	void put_object(
+		const char *key, void *value, void (*deleter)(void *),
+		void *(*getter)(void *) = [](void *arg) { return arg; })
 	{
-		put(key, value, deleter);
+		put(key, value, deleter, getter);
 	}
 
 	void put_int64(const char *key, int64_t value)
@@ -81,7 +83,7 @@ public:
 		if (item->item_type != type::OBJECT)
 			throw_type_error(key, item->item_type);
 
-		*value = item->object.ptr;
+		*value = (*item->object.getter)(item->object.ptr);
 
 		return true;
 	}
@@ -198,8 +200,8 @@ private:
 		    : string_v(string_v), item_type(type::STRING)
 		{
 		}
-		variant(void *object, void (*deleter)(void *))
-		    : object{object, deleter}, item_type(type::OBJECT)
+		variant(void *object, void (*deleter)(void *), void *(*getter)(void *))
+		    : object{object, deleter, getter}, item_type(type::OBJECT)
 		{
 		}
 		variant(const void *data, std::size_t size)
@@ -227,6 +229,7 @@ private:
 			struct {
 				void *ptr;
 				void (*deleter)(void *);
+				void *(*getter)(void *);
 			} object;
 		};
 
