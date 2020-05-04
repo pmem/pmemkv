@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2020, Intel Corporation */
 
 #ifndef LIBPMEMKV_CONFIG_H
 #define LIBPMEMKV_CONFIG_H
@@ -31,7 +31,7 @@ public:
 		put(key, value, value_size);
 	}
 
-	void put_object(const char *key, void *value, void (*deleter)(void *))
+	void put_object(const char *key, void *value, std::function<void(void *)> deleter)
 	{
 		put(key, value, deleter);
 	}
@@ -198,7 +198,7 @@ private:
 		    : string_v(string_v), item_type(type::STRING)
 		{
 		}
-		variant(void *object, void (*deleter)(void *))
+		variant(void *object, std::function<void(void *)> deleter)
 		    : object{object, deleter}, item_type(type::OBJECT)
 		{
 		}
@@ -226,7 +226,7 @@ private:
 
 			struct {
 				void *ptr;
-				void (*deleter)(void *);
+				std::function<void(void *)> deleter;
 			} object;
 		};
 

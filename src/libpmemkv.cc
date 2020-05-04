@@ -115,6 +115,23 @@ int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value
 	});
 }
 
+int pmemkv_config_put_object_arg(pmemkv_config *config, const char *key, void *value,
+				 void (*deleter)(void *, void *), void *arg)
+{
+	if (!config)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		if (deleter == nullptr)
+			config_to_internal(config)->put_object(key, value, nullptr);
+		else
+			config_to_internal(config)->put_object(
+				key, value, [=](void *object) { deleter(object, arg); });
+
+		return PMEMKV_STATUS_OK;
+	});
+}
+
 int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value)
 {
 	if (!config)

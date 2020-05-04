@@ -37,6 +37,8 @@ int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *v
 			   size_t value_size);
 int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value,
 			     void (*deleter)(void *));
+int pmemkv_config_put_object_arg(pmemkv_config *config, const char *key, void *value,
+				 void (*deleter)(void *, void *), void *arg);
 int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value);
 int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value);
 int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value);

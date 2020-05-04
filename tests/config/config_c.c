@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int TEST_VAL = 0xABC;
+
 struct custom_type {
 	int a;
 	char b;
@@ -16,6 +18,12 @@ struct custom_type {
 static void deleter(struct custom_type *ct_ptr)
 {
 	ct_ptr->a = -1;
+	ct_ptr->b = '0';
+}
+
+static void xdeleter(struct custom_type *ct_ptr, void *arg)
+{
+	ct_ptr->a = *((int *)arg);
 	ct_ptr->b = '0';
 }
 
@@ -91,6 +99,59 @@ static void simple_test()
 	UT_ASSERTeq(value_custom_ptr_deleter->b, '0');
 
 	free(ptr_deleter);
+}
+
+static void default_deleter_test()
+{
+	pmemkv_config *config = pmemkv_config_new();
+	UT_ASSERT(config != NULL);
+
+	struct custom_type *ptr = malloc(sizeof(struct custom_type));
+	ptr->a = 10;
+	ptr->b = 'a';
+	int ret = pmemkv_config_put_object(config, "object_ptr", ptr, free);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	pmemkv_config_delete(config);
+}
+
+static void ex_put_object_test()
+{
+	pmemkv_config *config = pmemkv_config_new();
+	UT_ASSERT(config != NULL);
+
+	struct custom_type *ptr = malloc(sizeof(struct custom_type));
+	ptr->a = 10;
+	ptr->b = 'a';
+	int ret = pmemkv_config_put_object_arg(
+		config, "object_ptr", ptr, (void (*)(void *, void *))xdeleter, &TEST_VAL);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	pmemkv_config_delete(config);
+	config = NULL;
+
+	UT_ASSERTeq(ptr->a, TEST_VAL);
+	UT_ASSERTeq(ptr->b, '0');
+
+	free(ptr);
+}
+
+static void ex_put_object_nullptr_del_test()
+{
+	pmemkv_config *config = pmemkv_config_new();
+	UT_ASSERT(config != NULL);
+
+	struct custom_type *ptr = malloc(sizeof(struct custom_type));
+	ptr->a = 10;
+	ptr->b = 'a';
+	int ret =
+		pmemkv_config_put_object_arg(config, "object_ptr", ptr, NULL, &TEST_VAL);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	pmemkv_config_delete(config);
+	config = NULL;
+
+	free(ptr);
 }
 
 static void integral_conversion_test()
@@ -232,6 +293,9 @@ int main(int argc, char *argv[])
 	START();
 
 	simple_test();
+	default_deleter_test();
+	ex_put_object_test();
+	ex_put_object_nullptr_del_test();
 	integral_conversion_test();
 	not_found_test();
 	null_config_test();

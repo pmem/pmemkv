@@ -104,6 +104,66 @@ static void simple_test()
 	delete ptr_deleter;
 }
 
+static void object_unique_ptr_default_deleter_test()
+{
+	auto cfg = new config;
+	UT_ASSERT(cfg != nullptr);
+
+	auto ptr_default = std::unique_ptr<custom_type>(new custom_type);
+	ptr_default->a = 10;
+	ptr_default->b = 'a';
+	auto s = cfg->put_object("object_ptr", std::move(ptr_default));
+	UT_ASSERTeq(s, status::OK);
+
+	delete cfg;
+}
+
+static void object_unique_ptr_nullptr_test()
+{
+	auto cfg = new config;
+	UT_ASSERT(cfg != nullptr);
+
+	auto ptr = std::unique_ptr<custom_type>(nullptr);
+	auto s = cfg->put_object("object_ptr", std::move(ptr));
+	UT_ASSERTeq(s, status::OK);
+
+	custom_type *raw_ptr;
+	s = cfg->get_object("object_ptr", raw_ptr);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERTeq(raw_ptr, nullptr);
+
+	delete cfg;
+}
+
+static void object_unique_ptr_custom_deleter_test()
+{
+	auto cfg = new config;
+	UT_ASSERT(cfg != nullptr);
+
+	static const int TEST_VAL = 0xABC;
+
+	auto custom_deleter = [&](custom_type *ptr) {
+		ptr->a = TEST_VAL;
+		ptr->b = '0';
+	};
+
+	auto ptr_custom = std::unique_ptr<custom_type, decltype(custom_deleter)>(
+		new custom_type, custom_deleter);
+	ptr_custom->a = 10;
+	ptr_custom->b = 'a';
+
+	auto *raw_ptr = ptr_custom.get();
+
+	auto s = cfg->put_object("object_ptr", std::move(ptr_custom));
+	UT_ASSERTeq(s, status::OK);
+
+	delete cfg;
+
+	UT_ASSERTeq(raw_ptr->a, TEST_VAL);
+	UT_ASSERTeq(raw_ptr->b, '0');
+	delete raw_ptr;
+}
+
 static void integral_conversion_test()
 {
 	auto cfg = new config;
@@ -238,6 +298,9 @@ static void not_found_test()
 static void test(int argc, char *argv[])
 {
 	simple_test();
+	object_unique_ptr_nullptr_test();
+	object_unique_ptr_default_deleter_test();
+	object_unique_ptr_custom_deleter_test();
 	integral_conversion_test();
 	not_found_test();
 	constructors_test();
