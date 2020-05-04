@@ -16,7 +16,7 @@ Key/Value Datastore for Persistent Memory
 **Prerequisites**
 
 * 64-bit Linux (OSX and Windows are not yet supported)
-* [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.8
+* libpmem and libpmemobj, which are part of [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.8
 * [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings 1.9 for PMDK (required by all engines except blackhole and caching)
 * [memkind](https://github.com/memkind/memkind) - Volatile memory manager 1.8.0 (required by vsmap & vcmap engines)
 * [TBB](https://github.com/01org/tbb) - Thread Building Blocks (required by vcmap engine)
@@ -24,7 +24,6 @@ Key/Value Datastore for Persistent Memory
 * Used only for development & testing:
 	* [valgrind](https://github.com/pmem/valgrind) - tool for profiling and memory leak detection. *pmem* forked version with *pmemcheck*
 		tool is recommended, but upstream/original [valgrind](https://valgrind.org/) is also compatible (package valgrind-devel is required).
-	* [libpmem](https://github.com/pmem/pmdk) - to check whether TEST_DIR is on PMEM
 	* [pandoc](https://pandoc.org/) - markup converter to generate manpages
 	* [doxygen](http://www.doxygen.nl/) - tool for generating documentation from annotated C++ sources
 	* [graphviz](https://www.graphviz.org/) - graph visualization software required by _doxygen_
