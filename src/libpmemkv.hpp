@@ -163,9 +163,8 @@ public:
 	status put_data(const std::string &key, const T *value,
 			const std::size_t number = 1) noexcept;
 	template <typename T>
-	status put_object(
-		const std::string &key, T *value,
-		void (*deleter)(void *) = [](T *value) { delete value; }) noexcept;
+	status put_object(const std::string &key, T *value,
+			  void (*deleter)(void *)) noexcept;
 	status put_uint64(const std::string &key, std::uint64_t value) noexcept;
 	status put_int64(const std::string &key, std::int64_t value) noexcept;
 	status put_string(const std::string &key, const std::string &value) noexcept;
