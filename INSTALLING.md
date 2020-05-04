@@ -98,7 +98,8 @@ make test            # or 'ctest --output-on-failure'
 
 ## Installing on Fedora
 
-Install required packages:
+Install required packages (this list may be outdated, to see comprehensive list of packages
+used in our CI see a Fedora image in [utils directory](./utils/docker/images/)):
 
 ```sh
 su -c 'dnf install autoconf automake cmake daxctl-devel gcc gcc-c++ \
@@ -153,7 +154,8 @@ Finally [build and install pmemkv from sources](#building-from-sources).
 
 ## Installing on Ubuntu
 
-Install required packages:
+Install required packages (this list may be outdated. To see comprehensive list of packages
+used in our CI see an Ubuntu image in [utils directory](./utils/docker/images/)):
 
 ```sh
 sudo apt install autoconf automake build-essential cmake libdaxctl-dev \
