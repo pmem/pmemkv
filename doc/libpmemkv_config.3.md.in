@@ -35,6 +35,8 @@ int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *v
 			size_t value_size);
 int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value,
 			void (*deleter)(void *));
+int pmemkv_config_put_object_cb(pmemkv_config *config, const char *key, void *value,
+				void *(*getter)(void *), void (*deleter)(void *));
 int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value);
 int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value);
 int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value);
@@ -99,6 +101,19 @@ Every engine has documented all supported config parameters (please see **libpme
 :	Puts `value` to pmemkv_config. `value` can point to arbitrary object.
 	`deleter` parameter specifies function which will be called for `value`
 	when the config is destroyed (using pmemkv_config_delete).
+
+`int pmemkv_config_put_object_cb(pmemkv_config *config, const char *key, void *value, void *(*getter)(void *), void (*deleter)(void *));`
+
+:	Extended version of pmemkv_config_put_object. It accepts one additional argument -
+	a `getter` callback. This callback should accept `void*` pointer to `value` and
+	return `void*` a pointer to data expected by pmemkv. This callback will be used by
+	pmemkv_config_get_object to parse the `value`.
+
+	Calling pmemkv_config_put_object_cb with `getter` implemented as:
+	```
+	void *getter(void *arg) { return arg; }
+	```
+	is equivalent to calling pmemkv_config_put_object.
 
 `int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *value);`
 
