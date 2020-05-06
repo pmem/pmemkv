@@ -211,13 +211,12 @@ int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char 
 
 int pmemkv_open(const char *engine_c_str, pmemkv_config *config, pmemkv_db **db)
 {
+	std::unique_ptr<pmem::kv::internal::config> cfg(config_to_internal(config));
+
 	if (!db)
 		return PMEMKV_STATUS_INVALID_ARGUMENT;
 
 	return catch_and_return_status(__func__, [&] {
-		std::unique_ptr<pmem::kv::internal::config> cfg(
-			config_to_internal(config));
-
 		auto engine = pmem::kv::engine_base::create_engine(engine_c_str,
 								   std::move(cfg));
 
