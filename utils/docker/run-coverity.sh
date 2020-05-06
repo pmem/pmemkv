@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2018-2019, Intel Corporation
+# Copyright 2018-2020, Intel Corporation
 
 #
 # run-coverity.sh - runs the Coverity scan build
@@ -16,7 +16,7 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug
 
-export COVERITY_SCAN_PROJECT_NAME="$TRAVIS_REPO_SLUG"
+export COVERITY_SCAN_PROJECT_NAME="$CI_REPO_SLUG"
 [[ "$TRAVIS_EVENT_TYPE" == "cron" ]] \
 	&& export COVERITY_SCAN_BRANCH_PATTERN="master" \
 	|| export COVERITY_SCAN_BRANCH_PATTERN="coverity_scan"
