@@ -9,6 +9,9 @@
 
 using namespace pmem::kv;
 
+static const int INIT_VAL = 1;
+static const int DELETED_VAL = 2;
+
 struct custom_type {
 	int a;
 	char b;
@@ -16,8 +19,8 @@ struct custom_type {
 
 static void deleter(custom_type *ct_ptr)
 {
-	ct_ptr->a = -1;
-	ct_ptr->b = '0';
+	ct_ptr->a = DELETED_VAL;
+	ct_ptr->b = DELETED_VAL;
 }
 
 static void simple_test()
@@ -32,8 +35,8 @@ static void simple_test()
 	UT_ASSERTeq(s, status::OK);
 
 	custom_type *ptr = new custom_type;
-	ptr->a = 10;
-	ptr->b = 'a';
+	ptr->a = INIT_VAL;
+	ptr->b = INIT_VAL;
 	s = cfg->put_object("object_ptr", ptr, nullptr);
 	UT_ASSERTeq(s, status::OK);
 
@@ -45,8 +48,8 @@ static void simple_test()
 	UT_ASSERTeq(s, status::OK);
 
 	custom_type *ptr_deleter = new custom_type;
-	ptr_deleter->a = 11;
-	ptr_deleter->b = 'b';
+	ptr_deleter->a = INIT_VAL;
+	ptr_deleter->b = INIT_VAL;
 	s = cfg->put_object("object_ptr_with_deleter", ptr_deleter,
 			    (void (*)(void *)) & deleter);
 	UT_ASSERTeq(s, status::OK);
@@ -64,22 +67,22 @@ static void simple_test()
 	custom_type *value_custom_ptr;
 	s = cfg->get_object("object_ptr", value_custom_ptr);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERTeq(value_custom_ptr->a, 10);
-	UT_ASSERTeq(value_custom_ptr->b, 'a');
+	UT_ASSERTeq(value_custom_ptr->a, INIT_VAL);
+	UT_ASSERTeq(value_custom_ptr->b, INIT_VAL);
 
 	custom_type *value_custom_ptr_deleter;
 	s = cfg->get_object("object_ptr_with_deleter", value_custom_ptr_deleter);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERTeq(value_custom_ptr_deleter->a, 11);
-	UT_ASSERTeq(value_custom_ptr_deleter->b, 'b');
+	UT_ASSERTeq(value_custom_ptr_deleter->a, INIT_VAL);
+	UT_ASSERTeq(value_custom_ptr_deleter->b, INIT_VAL);
 
 	custom_type *value_custom;
 	size_t value_custom_count;
 	s = cfg->get_data("object", value_custom, value_custom_count);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERTeq(value_custom_count, 1U);
-	UT_ASSERTeq(value_custom->a, 10);
-	UT_ASSERTeq(value_custom->b, 'a');
+	UT_ASSERTeq(value_custom->a, INIT_VAL);
+	UT_ASSERTeq(value_custom->b, INIT_VAL);
 
 	int *value_array;
 	size_t value_array_count;
@@ -93,14 +96,18 @@ static void simple_test()
 	int64_t none;
 	UT_ASSERTeq(cfg->get_int64("non-existent", none), status::NOT_FOUND);
 
-	delete ptr;
-
 	delete cfg;
 	cfg = nullptr;
 
-	UT_ASSERTeq(value_custom_ptr_deleter->a, -1);
-	UT_ASSERTeq(value_custom_ptr_deleter->b, '0');
+	UT_ASSERTeq(value_custom_ptr_deleter->a, DELETED_VAL);
+	UT_ASSERTeq(value_custom_ptr_deleter->b, DELETED_VAL);
 
+	/* delete was nullptr */
+	UT_ASSERTeq(ptr, value_custom_ptr);
+	UT_ASSERTeq(value_custom_ptr->a, INIT_VAL);
+	UT_ASSERTeq(value_custom_ptr->b, INIT_VAL);
+
+	delete ptr;
 	delete ptr_deleter;
 }
 

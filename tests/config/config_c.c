@@ -8,6 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+static const int INIT_VAL = 1;
+static const int DELETED_VAL = 2;
+
 struct custom_type {
 	int a;
 	char b;
@@ -15,8 +18,8 @@ struct custom_type {
 
 static void deleter(struct custom_type *ct_ptr)
 {
-	ct_ptr->a = -1;
-	ct_ptr->b = '0';
+	ct_ptr->a = DELETED_VAL;
+	ct_ptr->b = DELETED_VAL;
 }
 
 static void simple_test()
@@ -31,8 +34,8 @@ static void simple_test()
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 
 	struct custom_type *ptr = malloc(sizeof(struct custom_type));
-	ptr->a = 10;
-	ptr->b = 'a';
+	ptr->a = INIT_VAL;
+	ptr->b = INIT_VAL;
 	ret = pmemkv_config_put_object(config, "object_ptr", ptr, NULL);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 
@@ -40,8 +43,8 @@ static void simple_test()
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 
 	struct custom_type *ptr_deleter = malloc(sizeof(struct custom_type));
-	ptr_deleter->a = 11;
-	ptr_deleter->b = 'b';
+	ptr_deleter->a = INIT_VAL;
+	ptr_deleter->b = INIT_VAL;
 	ret = pmemkv_config_put_object(config, "object_ptr_with_deleter", ptr_deleter,
 				       (void (*)(void *)) & deleter);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
@@ -59,15 +62,15 @@ static void simple_test()
 	struct custom_type *value_custom_ptr;
 	ret = pmemkv_config_get_object(config, "object_ptr", (void **)&value_custom_ptr);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
-	UT_ASSERTeq(value_custom_ptr->a, 10);
-	UT_ASSERTeq(value_custom_ptr->b, 'a');
+	UT_ASSERTeq(value_custom_ptr->a, INIT_VAL);
+	UT_ASSERTeq(value_custom_ptr->b, INIT_VAL);
 
 	struct custom_type *value_custom_ptr_deleter;
 	ret = pmemkv_config_get_object(config, "object_ptr_with_deleter",
 				       (void **)&value_custom_ptr_deleter);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
-	UT_ASSERTeq(value_custom_ptr_deleter->a, 11);
-	UT_ASSERTeq(value_custom_ptr_deleter->b, 'b');
+	UT_ASSERTeq(value_custom_ptr_deleter->a, INIT_VAL);
+	UT_ASSERTeq(value_custom_ptr_deleter->b, INIT_VAL);
 
 	struct custom_type *value_custom;
 	size_t value_custom_size;
@@ -75,21 +78,25 @@ static void simple_test()
 				     &value_custom_size);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 	UT_ASSERTeq(value_custom_size, sizeof(value_custom));
-	UT_ASSERTeq(value_custom->a, 10);
-	UT_ASSERTeq(value_custom->b, 'a');
+	UT_ASSERTeq(value_custom->a, INIT_VAL);
+	UT_ASSERTeq(value_custom->b, INIT_VAL);
 
 	int64_t none;
 	UT_ASSERTeq(pmemkv_config_get_int64(config, "non-existent", &none),
 		    PMEMKV_STATUS_NOT_FOUND);
 
-	free(ptr);
-
 	pmemkv_config_delete(config);
 	config = NULL;
 
-	UT_ASSERTeq(value_custom_ptr_deleter->a, -1);
-	UT_ASSERTeq(value_custom_ptr_deleter->b, '0');
+	UT_ASSERTeq(value_custom_ptr_deleter->a, DELETED_VAL);
+	UT_ASSERTeq(value_custom_ptr_deleter->b, DELETED_VAL);
 
+	/* deleter was nullptr */
+	UT_ASSERTeq(ptr, value_custom_ptr);
+	UT_ASSERTeq(value_custom_ptr->a, INIT_VAL);
+	UT_ASSERTeq(value_custom_ptr->b, INIT_VAL);
+
+	free(ptr);
 	free(ptr_deleter);
 }
 
@@ -196,8 +203,8 @@ static void null_config_test()
 	UT_ASSERTeq(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
 
 	struct custom_type *ptr = malloc(sizeof(struct custom_type));
-	ptr->a = 10;
-	ptr->b = 'a';
+	ptr->a = INIT_VAL;
+	ptr->b = INIT_VAL;
 	ret = pmemkv_config_put_object(NULL, "object_ptr", ptr, NULL);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
 
