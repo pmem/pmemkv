@@ -2,11 +2,6 @@
 
 Key/Value Datastore for Persistent Memory
 
-*This is experimental pre-release software and should not be used in
-production systems. APIs and file formats may change at any time without
-preserving backwards compatibility. All known issues and limitations
-are logged as GitHub issues.*
-
 ## Contents
 
 - [Building from Sources](#building-from-sources)
@@ -21,7 +16,7 @@ are logged as GitHub issues.*
 **Prerequisites**
 
 * 64-bit Linux (OSX and Windows are not yet supported)
-* [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.8
+* libpmem and libpmemobj, which are part of [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.8
 * [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings 1.9 for PMDK (required by all engines except blackhole and caching)
 * [memkind](https://github.com/memkind/memkind) - Volatile memory manager 1.8.0 (required by vsmap & vcmap engines)
 * [TBB](https://github.com/01org/tbb) - Thread Building Blocks (required by vcmap engine)
@@ -29,7 +24,6 @@ are logged as GitHub issues.*
 * Used only for development & testing:
 	* [valgrind](https://github.com/pmem/valgrind) - tool for profiling and memory leak detection. *pmem* forked version with *pmemcheck*
 		tool is recommended, but upstream/original [valgrind](https://valgrind.org/) is also compatible (package valgrind-devel is required).
-	* [libpmem](https://github.com/pmem/pmdk) - to check whether TEST_DIR is on PMEM
 	* [pandoc](https://pandoc.org/) - markup converter to generate manpages
 	* [doxygen](http://www.doxygen.nl/) - tool for generating documentation from annotated C++ sources
 	* [graphviz](https://www.graphviz.org/) - graph visualization software required by _doxygen_
@@ -104,7 +98,8 @@ make test            # or 'ctest --output-on-failure'
 
 ## Installing on Fedora
 
-Install required packages:
+Install required packages (this list may be outdated, to see comprehensive list of packages
+used in our CI see a Fedora image in [utils directory](./utils/docker/images/)):
 
 ```sh
 su -c 'dnf install autoconf automake cmake daxctl-devel gcc gcc-c++ \
@@ -159,7 +154,8 @@ Finally [build and install pmemkv from sources](#building-from-sources).
 
 ## Installing on Ubuntu
 
-Install required packages:
+Install required packages (this list may be outdated. To see comprehensive list of packages
+used in our CI see an Ubuntu image in [utils directory](./utils/docker/images/)):
 
 ```sh
 sudo apt install autoconf automake build-essential cmake libdaxctl-dev \
