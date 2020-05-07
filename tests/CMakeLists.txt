@@ -337,6 +337,36 @@ if(ENGINE_CSMAP)
 			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE csmap
+			BINARY comparator_basic_c
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY comparator_basic_peristent_c
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY comparator_custom_reopen_c
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY comparator_default_reopen_c
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY comparator_custom_reopen_cpp
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY comparator_default_reopen_cpp
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE csmap
 			BINARY put_get_remove
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
