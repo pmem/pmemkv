@@ -17,7 +17,7 @@ cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug
 
 export COVERITY_SCAN_PROJECT_NAME="$CI_REPO_SLUG"
-[[ "$TRAVIS_EVENT_TYPE" == "cron" ]] \
+[[ "$CI_EVENT_TYPE" == "cron" ]] \
 	&& export COVERITY_SCAN_BRANCH_PATTERN="master" \
 	|| export COVERITY_SCAN_BRANCH_PATTERN="coverity_scan"
 export COVERITY_SCAN_BUILD_COMMAND="make"
