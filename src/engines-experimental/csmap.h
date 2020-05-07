@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "../comparator/pmemobj_comparator.h"
 #include "../pmemobj_engine.h"
 
 #include <libpmemobj++/container/string.hpp>
@@ -21,32 +22,6 @@ namespace internal
 {
 namespace csmap
 {
-
-inline bool operator<(const pmem::obj::string &lhs, string_view rhs)
-{
-	return lhs.compare(0, lhs.size(), rhs.data(), rhs.size()) < 0;
-}
-
-inline bool operator<(string_view lhs, const pmem::obj::string &rhs)
-{
-	return rhs.compare(0, rhs.size(), lhs.data(), lhs.size()) > 0;
-}
-
-inline bool operator<(string_view lhs, string_view rhs)
-{
-	return rhs.compare(lhs) > 0;
-}
-
-class hetero_less {
-public:
-	using is_transparent = void;
-
-	template <typename M, typename U>
-	bool operator()(const M &lhs, const U &rhs) const
-	{
-		return lhs < rhs;
-	}
-};
 
 struct key_type : public pmem::obj::string {
 	key_type() = default;
@@ -84,8 +59,8 @@ struct mapped_type {
 
 static_assert(sizeof(mapped_type) == 96, "");
 
-using map_type =
-	pmem::obj::experimental::concurrent_map<key_type, mapped_type, hetero_less>;
+using map_type = pmem::obj::experimental::concurrent_map<key_type, mapped_type,
+							 internal::pmemobj_less_compare>;
 
 struct pmem_type {
 	pmem_type() : map()
@@ -157,6 +132,7 @@ private:
 	 */
 	global_mutex_type mtx;
 	container_type *container;
+	std::unique_ptr<internal::config> config;
 };
 
 } /* namespace kv */
