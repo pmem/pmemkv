@@ -208,8 +208,7 @@ function(add_test_common executable test_name tracer testcase cmake_script)
 
 	# if test was not build
 	if (NOT TARGET ${executable})
-		message(WARNING "${executable} not build. Skipping.")
-		return()
+		message(FATAL_ERROR "${executable} not build. Skipping.")
 	endif()
 
 	# skip all valgrind tests on windows
