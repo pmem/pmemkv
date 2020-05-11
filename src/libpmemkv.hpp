@@ -531,6 +531,9 @@ inline status config::put_object(const std::string &key,
  * @param[in] comparator forwarding reference to a comparator
  *
  * @return pmem::kv::status
+ *
+ * Example of custom comparator:
+ * @snippet examples/pmemkv_comparator_cpp/pmemkv_comparator.cpp Custom comparator
  */
 template <typename Comparator>
 inline status config::put_comparator(Comparator &&comparator)
