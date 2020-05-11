@@ -7,14 +7,18 @@ add_cppstyle(examples ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_cpp/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.c
-		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.cpp)
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_cpp/*.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_c/*.c)
 
 add_check_whitespace(examples ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_cpp/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.*)
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_cpp/*.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_c/*.c)
 
 if(NOT ENGINE_CMAP)
 	message(WARNING
@@ -50,3 +54,11 @@ endif()
 
 add_example(pmemkv_open_cpp pmemkv_open_cpp/pmemkv_open.cpp)
 target_link_libraries(example-pmemkv_open_cpp pmemkv)
+
+if (ENGINE_CSMAP)
+	add_example(pmemkv_comparator_cpp pmemkv_comparator_cpp/pmemkv_comparator.cpp)
+	target_link_libraries(example-pmemkv_comparator_cpp pmemkv)
+
+	add_example(pmemkv_comparator_c pmemkv_comparator_c/pmemkv_comparator.c)
+	target_link_libraries(example-pmemkv_comparator_c pmemkv)
+endif()
