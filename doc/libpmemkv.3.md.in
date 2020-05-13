@@ -143,7 +143,7 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 	Function `c` can stop iteration by returning non-zero value. In that case *pmemkv_get_above()* returns
 	PMEMKV\_STATUS\_STOPPED\_BY\_CB. Returning 0 continues iteration.
 
-`int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c, oid *arg);`
+`int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c, void *arg);`
 
 :	Executes function `c` for every record stored in `db` whose keys are less than
 	key `k` (of length `kb`). Arguments passed to `c` are: pointer to a key, size of the key, pointer to a value, size of
