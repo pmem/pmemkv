@@ -100,6 +100,7 @@ add_test_generic(NAME json_to_config TRACERS none memcheck)
 ## Test scenarios (parametrized at least with engine name)
 # Tests for all engines
 build_test_ext(NAME put_get_remove SRC_FILES engine_scenarios/all/put_get_remove.cc LIBS json)
+build_test_ext(NAME put_get_remove_charset SRC_FILES engine_scenarios/all/put_get_remove_charset.cc LIBS json)
 build_test_ext(NAME put_get_remove_long_key SRC_FILES engine_scenarios/all/put_get_remove_long_key.cc LIBS json)
 build_test_ext(NAME put_get_remove_params SRC_FILES engine_scenarios/all/put_get_remove_params.cc LIBS json)
 build_test_ext(NAME put_get_std_map SRC_FILES engine_scenarios/all/put_get_std_map.cc LIBS json)
@@ -147,6 +148,11 @@ if(ENGINE_CMAP)
 
 	add_engine_test(ENGINE cmap
 			BINARY put_get_remove
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE cmap
+			BINARY put_get_remove_charset
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
@@ -322,6 +328,11 @@ if(ENGINE_VCMAP)
 			SCRIPT memkind_based/default.cmake)
 
 	add_engine_test(ENGINE vcmap
+			BINARY put_get_remove_charset
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vcmap
 			BINARY put_get_remove_long_key
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake)
@@ -393,6 +404,11 @@ if(ENGINE_VSMAP)
 			SCRIPT memkind_based/default.cmake)
 
 	add_engine_test(ENGINE vsmap
+			BINARY put_get_remove_charset
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vsmap
 			BINARY put_get_remove_long_key
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake)
@@ -449,6 +465,11 @@ if(ENGINE_TREE3)
 
 	add_engine_test(ENGINE tree3
 			BINARY put_get_remove
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE tree3
+			BINARY put_get_remove_charset
 			TRACERS none #memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
@@ -597,6 +618,11 @@ if(ENGINE_STREE)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_remove
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE stree
+			BINARY put_get_remove_charset
 			TRACERS none #memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
