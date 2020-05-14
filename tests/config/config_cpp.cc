@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2019-2020, Intel Corporation */
 
+#include "unittest.hpp"
 #include <libpmemkv.hpp>
 
-#include "unittest.hpp"
-
 #include <limits>
+
+/**
+ * Tests all config methods using C++ API
+ */
 
 using namespace pmem::kv;
 
@@ -25,6 +28,9 @@ static void deleter(custom_type *ct_ptr)
 
 static void simple_test()
 {
+	/**
+	 * TEST: add and read data from config, using all available methods
+	 */
 	auto cfg = new config;
 	UT_ASSERT(cfg != nullptr);
 
@@ -171,6 +177,12 @@ static void object_unique_ptr_custom_deleter_test()
 
 static void integral_conversion_test()
 {
+	/**
+	 * TEST: when reading data from config it's allowed to read integers
+	 * into different type (then it was originally stored), as long as
+	 * the conversion is possible. CONFIG_TYPE_ERROR should be returned
+	 * when e.g. reading negative integral value into signed int type.
+	 */
 	auto cfg = new config;
 	UT_ASSERT(cfg != nullptr);
 
@@ -229,6 +241,9 @@ static void integral_conversion_test()
 
 static void constructors_test()
 {
+	/**
+	 * TEST: in C++ API there is more than one way to create config's object
+	 */
 	auto cfg = new config;
 	UT_ASSERT(cfg != nullptr);
 
@@ -267,6 +282,10 @@ static void constructors_test()
 
 static void not_found_test()
 {
+	/**
+	 * TEST: all config get_* methods should return status NOT_FOUND if item
+	 * does not exist
+	 */
 	auto cfg = new config;
 	UT_ASSERT(cfg != nullptr);
 
@@ -287,7 +306,7 @@ static void not_found_test()
 	/* initialize config with any put */
 	cfg->put_int64("init", 0);
 
-	/* all gets should return NotFound when looking for non-existing key */
+	/* all gets should return NOT_FOUND when looking for non-existing key */
 	UT_ASSERTeq(cfg->get_string("non-existent-string", my_string), status::NOT_FOUND);
 	UT_ASSERTeq(cfg->get_int64("non-existent-int", my_int), status::NOT_FOUND);
 	UT_ASSERTeq(cfg->get_uint64("non-existent-uint", my_uint), status::NOT_FOUND);
@@ -299,6 +318,8 @@ static void not_found_test()
 
 	delete cfg;
 }
+
+/* XXX: add tests for putting binary (and perhaps) random data into config */
 
 static void test(int argc, char *argv[])
 {

@@ -6,8 +6,16 @@
 
 #include "unittest.hpp"
 
+/**
+ * Tests pmemkv_config_from_json method in C API
+ */
+
 static void simple_test()
 {
+	/**
+	 * TEST: basic data types put into json, to be read using
+	 * pmemkv_config_from_json()
+	 */
 	auto config = pmemkv_config_new();
 	UT_ASSERT(config != nullptr);
 
@@ -39,6 +47,9 @@ static void simple_test()
 
 static void double_test()
 {
+	/**
+	 * TEST: floating point numbers are not supported
+	 */
 	auto config = pmemkv_config_new();
 	UT_ASSERT(config != nullptr);
 
@@ -53,6 +64,9 @@ static void double_test()
 
 static void malformed_input_test()
 {
+	/**
+	 * TEST: improperly formatted/malformed json string should return an error
+	 */
 	auto config = pmemkv_config_new();
 	UT_ASSERT(config != nullptr);
 

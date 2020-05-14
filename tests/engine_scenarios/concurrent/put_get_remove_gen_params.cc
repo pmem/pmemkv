@@ -5,6 +5,11 @@
 
 #include <ctime>
 
+/**
+ * Tests concurrency with parallel data read and removal. Data is generated with
+ * paramatrized thread count, database elements count and max key lenght.
+ */
+
 using namespace pmem::kv;
 
 void generate_keys(std::vector<std::string> &keys, const size_t max_key_len,
@@ -17,7 +22,7 @@ void generate_keys(std::vector<std::string> &keys, const size_t max_key_len,
 
 	for (size_t k = 0; k < cnt; k++) {
 		/* various lenght of key, min: 1 */
-		size_t key_len = 1 + ((size_t)rand() % (max_key_len - 1));
+		size_t key_len = 1 + ((size_t)rand() % max_key_len);
 		std::string gen_key;
 		gen_key.reserve(key_len);
 		for (size_t i = 0; i < key_len; i++) {
@@ -31,6 +36,9 @@ static void MultithreadedTestRemoveDataAside(const size_t threads_number,
 					     const size_t thread_items,
 					     const size_t max_key_len, pmem::kv::db &kv)
 {
+	/**
+	 * TEST: reads initial data in parallel while operating on other (generated) data.
+	 */
 	size_t initial_count = 128;
 	/* put initial data, which won't be modified */
 	for (size_t i = 0; i < initial_count; i++) {

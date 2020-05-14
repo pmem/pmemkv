@@ -5,14 +5,24 @@
 
 #include "unittest.hpp"
 
-static bool test_wrong_engine_name(std::string name)
+/**
+ * Tests if open() returns WRONG_ENGINE_NAME if wrong engine's name is passed.
+ */
+
+static bool wrong_engine_name_test(std::string name)
 {
+	/**
+	 * TEST: if engine is not switched on (in CMake) it should not open
+	 */
 	pmem::kv::db db;
 	return db.open(name) == pmem::kv::status::WRONG_ENGINE_NAME;
 }
 
 static void errormsg_test()
 {
+	/**
+	 * TEST: using WRONG_ENGINE_NAME status, we check if errormsg is properly set
+	 */
 	pmem::kv::db kv;
 	auto s = kv.open("non-existing name");
 	UT_ASSERT(s == pmem::kv::status::WRONG_ENGINE_NAME);
@@ -33,34 +43,34 @@ static void errormsg_test()
 
 int main()
 {
-	UT_ASSERT(test_wrong_engine_name("non_existent_name"));
+	UT_ASSERT(wrong_engine_name_test("non_existent_name"));
 
 #ifndef ENGINE_CMAP
-	UT_ASSERT(test_wrong_engine_name("cmap"));
+	UT_ASSERT(wrong_engine_name_test("cmap"));
 #endif
 
 #ifndef ENGINE_VSMAP
-	UT_ASSERT(test_wrong_engine_name("vsmap"));
+	UT_ASSERT(wrong_engine_name_test("vsmap"));
 #endif
 
 #ifndef ENGINE_VCMAP
-	UT_ASSERT(test_wrong_engine_name("vcmap"));
+	UT_ASSERT(wrong_engine_name_test("vcmap"));
 #endif
 
 #ifndef ENGINE_CSMAP
-	UT_ASSERT(test_wrong_engine_name("csmap"));
+	UT_ASSERT(wrong_engine_name_test("csmap"));
 #endif
 
 #ifndef ENGINE_TREE3
-	UT_ASSERT(test_wrong_engine_name("tree3"));
+	UT_ASSERT(wrong_engine_name_test("tree3"));
 #endif
 
 #ifndef ENGINE_STREE
-	UT_ASSERT(test_wrong_engine_name("stree"));
+	UT_ASSERT(wrong_engine_name_test("stree"));
 #endif
 
 #ifndef ENGINE_CACHING
-	UT_ASSERT(test_wrong_engine_name("caching"));
+	UT_ASSERT(wrong_engine_name_test("caching"));
 #endif
 
 	errormsg_test();
