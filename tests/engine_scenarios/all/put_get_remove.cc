@@ -24,51 +24,6 @@ static void SimpleTest(pmem::kv::db &kv)
 	UT_ASSERT(value == "value1");
 }
 
-static void BinaryKeyTest(pmem::kv::db &kv)
-{
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
-	UT_ASSERT(cnt == 0);
-	UT_ASSERT(status::NOT_FOUND == kv.exists("a"));
-	UT_ASSERT(kv.put("a", "should_not_change") == status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
-	UT_ASSERT(cnt == 1);
-	UT_ASSERT(status::OK == kv.exists("a"));
-	std::string key1 = std::string("a\0b", 3);
-	UT_ASSERT(status::NOT_FOUND == kv.exists(key1));
-	UT_ASSERT(kv.put(key1, "stuff") == status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
-	UT_ASSERT(cnt == 2);
-	UT_ASSERT(status::OK == kv.exists("a"));
-	UT_ASSERT(status::OK == kv.exists(key1));
-	std::string value;
-	UT_ASSERT(kv.get(key1, &value) == status::OK);
-	UT_ASSERT(value == "stuff");
-	std::string value2;
-	UT_ASSERT(kv.get("a", &value2) == status::OK);
-	UT_ASSERT(value2 == "should_not_change");
-	UT_ASSERT(kv.remove(key1) == status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
-	UT_ASSERT(cnt == 1);
-	UT_ASSERT(status::OK == kv.exists("a"));
-	UT_ASSERT(status::NOT_FOUND == kv.exists(key1));
-	std::string value3;
-	UT_ASSERT(kv.get(key1, &value3) == status::NOT_FOUND);
-	UT_ASSERT(kv.get("a", &value3) == status::OK && value3 == "should_not_change");
-}
-
-static void BinaryValueTest(pmem::kv::db &kv)
-{
-	std::string value("A\0B\0\0C", 6);
-	UT_ASSERT(kv.put("key1", value) == status::OK);
-	std::string value_out;
-	UT_ASSERT(kv.get("key1", &value_out) == status::OK && (value_out.length() == 6) &&
-		  (value_out == value));
-}
-
 static void EmptyKeyTest(pmem::kv::db &kv)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
@@ -361,8 +316,6 @@ static void test(int argc, char *argv[])
 	run_engine_tests(argv[1], argv[2],
 			 {
 				 SimpleTest,
-				 BinaryKeyTest,
-				 BinaryValueTest,
 				 EmptyKeyTest,
 				 EmptyValueTest,
 				 GetClearExternalValueTest,
