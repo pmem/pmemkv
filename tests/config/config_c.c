@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2019-2020, Intel Corporation */
 
-#include <libpmemkv.h>
-
 #include "unittest.h"
+#include <libpmemkv.h>
 
 #include <stdlib.h>
 #include <string.h>
+
+/**
+ * Tests all config methods using C API
+ */
 
 static const int TEST_VAL = 0xABC;
 static const int INIT_VAL = 1;
@@ -43,6 +46,9 @@ static void xdeleter(struct custom_type_wrapper *ct_ptr)
 
 static void simple_test()
 {
+	/**
+	 * TEST: add and read data from config, using all available methods
+	 */
 	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
@@ -121,6 +127,9 @@ static void simple_test()
 
 static void free_deleter_test()
 {
+	/**
+	 * TEST: checks if put_object will work with 'free' command as deleter
+	 */
 	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
@@ -135,6 +144,10 @@ static void free_deleter_test()
 
 static void ex_put_object_test()
 {
+	/**
+	 * TEST: checks if put_object_cb's deleter with additional state is working
+	 * properly
+	 */
 	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
@@ -164,6 +177,9 @@ static void ex_put_object_test()
 
 static void ex_put_object_nullptr_del_test()
 {
+	/**
+	 * TEST: checs if put_object_cb will work with nullptr deleter
+	 */
 	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
@@ -187,6 +203,9 @@ static void ex_put_object_nullptr_del_test()
 
 static void ex_put_object_nullptr_getter_test()
 {
+	/**
+	 * TEST: put_object_cb should not work with nullptr getter function
+	 */
 	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
@@ -203,6 +222,9 @@ static void ex_put_object_nullptr_getter_test()
 
 static void ex_put_object_free_del_test()
 {
+	/**
+	 * TEST: checks if put_object_cb will work with 'free' command as deleter
+	 */
 	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
@@ -220,6 +242,12 @@ static void ex_put_object_free_del_test()
 
 static void integral_conversion_test()
 {
+	/**
+	 * TEST: when reading data from config it's allowed to read integers
+	 * into different type (then it was originally stored), as long as
+	 * the conversion is possible. CONFIG_TYPE_ERROR should be returned
+	 * when e.g. reading negative integral value into signed int type.
+	 */
 	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
@@ -278,10 +306,13 @@ static void integral_conversion_test()
 
 static void not_found_test()
 {
+	/**
+	 * TEST: all config get_* methods should return status NOT_FOUND if item
+	 * does not exist
+	 */
 	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
 
-	/* all gets should return NotFound when looking for non-existing key */
 	const char *my_string;
 	int ret = pmemkv_config_get_string(config, "non-existent-string", &my_string);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_NOT_FOUND);
@@ -308,12 +339,11 @@ static void not_found_test()
 	pmemkv_config_delete(config);
 }
 
-/* Test if null can be passed as config to pmemkv_config_* functions */
 static void null_config_test()
 {
-	pmemkv_config *config = pmemkv_config_new();
-	UT_ASSERT(config != NULL);
-
+	/**
+	 * TEST: in C API all config methods require 'config' as param - it can't be null
+	 */
 	int ret = pmemkv_config_put_string(NULL, "string", "abc");
 	UT_ASSERTeq(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
 
@@ -348,8 +378,6 @@ static void null_config_test()
 	UT_ASSERTeq(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
 
 	free(ptr);
-
-	pmemkv_config_delete(config);
 }
 
 int main(int argc, char *argv[])

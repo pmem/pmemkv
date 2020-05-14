@@ -8,7 +8,6 @@
 #include <random>
 #include <set>
 #include <string>
-#include <vector>
 
 using namespace pmem::kv;
 
@@ -58,15 +57,15 @@ void verify_init_elements(const std::set<uint64_t> &init, pmem::kv::db &kv)
 {
 	std::set<uint64_t> keys;
 	auto s = kv.get_all([&](string_view k, string_view v) {
-		uint64_t *uv = (uint64_t *)k.data();
+		uint64_t *uk = (uint64_t *)k.data();
 
 		std::string value1 =
-			std::string(value_prefix_size, '0') + std::to_string(*uv);
+			std::string(value_prefix_size, '0') + std::to_string(*uk);
 		std::string value2 =
-			std::string(value_prefix_size, '1') + std::to_string(*uv);
+			std::string(value_prefix_size, '1') + std::to_string(*uk);
 		UT_ASSERT(v.compare(value1) == 0 || v.compare(value2) == 0);
 
-		keys.insert(*uv);
+		keys.insert(*uk);
 
 		return 0;
 	});
@@ -79,15 +78,15 @@ void verify_init_elements(const std::set<uint64_t> &init, pmem::kv::db &kv)
 	}
 }
 
-/**
- * This test prepares thread_number * thread_items elements in pmemkv.
- * Then, it concurrently inserts additional element and updates existing one.
- * At the same time some threads are iterating over pmemkv making sure
- * the inital data is still accessible.
- */
 static void ConcurrentIterationAndPutTest(const size_t threads_number,
 					  const size_t thread_items, pmem::kv::db &kv)
 {
+	/**
+	 * TEST: prepares thread_number * thread_items elements in pmemkv.
+	 * Then, it concurrently inserts additional element and updates existing one.
+	 * At the same time some threads are iterating over pmemkv making sure
+	 * the inital data is still accessible.
+	 */
 	std::set<uint64_t> set;
 	auto init_size = threads_number * thread_items;
 
@@ -133,14 +132,14 @@ static void ConcurrentIterationAndPutTest(const size_t threads_number,
 	verify_init_elements(set, kv);
 }
 
-/**
- * This test prepares 2 * thread_number * thread_items elements in pmemkv.
- * Then, it concurrently removes half of them, while making sure the other
- * half is still accessible.
- */
 static void ConcurrentIterationAndRemoveTest(const size_t threads_number,
 					     const size_t thread_items, pmem::kv::db &kv)
 {
+	/**
+	 * TEST: prepares 2 * thread_number * thread_items elements in pmemkv.
+	 * Then, it concurrently removes half of them, while making sure the other
+	 * half is still accessible.
+	 */
 	std::set<uint64_t> init_set;
 	std::set<uint64_t> to_remove_set;
 	auto init_size = threads_number * thread_items;
