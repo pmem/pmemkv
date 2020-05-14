@@ -3,6 +3,10 @@
 
 #include "unittest.hpp"
 
+/**
+ * Tests adding, reading and removing data; basic short, tests
+ */
+
 using namespace pmem::kv;
 
 static void SimpleTest(pmem::kv::db &kv)
@@ -20,7 +24,9 @@ static void SimpleTest(pmem::kv::db &kv)
 	UT_ASSERT(status::OK == kv.exists("key1"));
 	UT_ASSERT(kv.get("key1", &value) == status::OK && value == "value1");
 	value = "";
-	kv.get("key1", [&](string_view v) { value.append(v.data(), v.size()); });
+	UT_ASSERT(kv.get("key1", [&](string_view v) {
+		value.append(v.data(), v.size());
+	}) == status::OK);
 	UT_ASSERT(value == "value1");
 }
 
