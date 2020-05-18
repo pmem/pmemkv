@@ -82,7 +82,7 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 	The `engine` parameter specifies the engine name (see **libpmemkv**(7) for the list of available engines).
 	The `config` parameter specifies configuration (see **libpmemkv_config**(3) for details). Pmemkv takes
 	ownership of the config parameter - this means that pmemkv_config_delete() must NOT be called
-	after successful open.
+	after open (successful or failed).
 
 `void pmemkv_close(pmemkv_db *kv);`
 

@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.1-git109.g32f0eb2</span>
+   &#160;<span id="projectnumber">1.1-git131.g998af7f</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -107,10 +107,14 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af6c8419518a384cdce1f36cd2a1e4545"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#af6c8419518a384cdce1f36cd2a1e4545">put_data</a> (const std::string &amp;key, const T *value, const std::size_t number=1) noexcept</td></tr>
 <tr class="memdesc:af6c8419518a384cdce1f36cd2a1e4545"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts binary data pointed by value, of type T, with count of elements to a config.  <a href="#af6c8419518a384cdce1f36cd2a1e4545">More...</a><br /></td></tr>
 <tr class="separator:af6c8419518a384cdce1f36cd2a1e4545"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6623d29c14151c185cab4d8ea69251b4"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a6623d29c14151c185cab4d8ea69251b4"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#a6623d29c14151c185cab4d8ea69251b4">put_object</a> (const std::string &amp;key, T *value, void(*deleter)(void *)=[](T *value) { delete value;}) noexcept</td></tr>
-<tr class="memdesc:a6623d29c14151c185cab4d8ea69251b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts object pointed by value, of type T, with given destructor to a config.  <a href="#a6623d29c14151c185cab4d8ea69251b4">More...</a><br /></td></tr>
-<tr class="separator:a6623d29c14151c185cab4d8ea69251b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8dba893f7332490c7624a2802ebd931"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ab8dba893f7332490c7624a2802ebd931"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#ab8dba893f7332490c7624a2802ebd931">put_object</a> (const std::string &amp;key, T *value, void(*deleter)(void *)) noexcept</td></tr>
+<tr class="memdesc:ab8dba893f7332490c7624a2802ebd931"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts object pointed by value, of type T, with given destructor to a config.  <a href="#ab8dba893f7332490c7624a2802ebd931">More...</a><br /></td></tr>
+<tr class="separator:ab8dba893f7332490c7624a2802ebd931"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c0f1b1157e5922f2287f36be2d92015"><td class="memTemplParams" colspan="2">template&lt;typename T , typename D &gt; </td></tr>
+<tr class="memitem:a1c0f1b1157e5922f2287f36be2d92015"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#a1c0f1b1157e5922f2287f36be2d92015">put_object</a> (const std::string &amp;key, std::unique_ptr&lt; T, D &gt; object) noexcept</td></tr>
+<tr class="memdesc:a1c0f1b1157e5922f2287f36be2d92015"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts unique_ptr (to an object) to a config.  <a href="#a1c0f1b1157e5922f2287f36be2d92015">More...</a><br /></td></tr>
+<tr class="separator:a1c0f1b1157e5922f2287f36be2d92015"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b21e4344c87f542f6e2b6fc152e74a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#a3b21e4344c87f542f6e2b6fc152e74a9">put_uint64</a> (const std::string &amp;key, std::uint64_t value) noexcept</td></tr>
 <tr class="memdesc:a3b21e4344c87f542f6e2b6fc152e74a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts std::uint64_t value to a config.  <a href="#a3b21e4344c87f542f6e2b6fc152e74a9">More...</a><br /></td></tr>
 <tr class="separator:a3b21e4344c87f542f6e2b6fc152e74a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -725,8 +729,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a6623d29c14151c185cab4d8ea69251b4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6623d29c14151c185cab4d8ea69251b4">&#9670;&nbsp;</a></span>put_object()</h2>
+<a id="ab8dba893f7332490c7624a2802ebd931"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab8dba893f7332490c7624a2802ebd931">&#9670;&nbsp;</a></span>put_object() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -752,7 +756,7 @@ template&lt;typename T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void(*)(void *)&#160;</td>
-          <td class="paramname"><em>deleter</em> = <code>[](T&#160;*value)&#160;{&#160;delete&#160;value;&#160;}</code>&#160;</td>
+          <td class="paramname"><em>deleter</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -773,6 +777,54 @@ template&lt;typename T &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>The string representing config item's name. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>The pointer to object. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">deleter</td><td>The object's destructor function.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+
+</div>
+</div>
+<a id="a1c0f1b1157e5922f2287f36be2d92015"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c0f1b1157e5922f2287f36be2d92015">&#9670;&nbsp;</a></span>put_object() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename D &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::config::put_object </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::unique_ptr&lt; T, D &gt;&#160;</td>
+          <td class="paramname"><em>object</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Puts unique_ptr (to an object) to a config. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>The string representing config item's name. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">object</td><td>unique_ptr to an object.</td></tr>
   </table>
   </dd>
 </dl>
