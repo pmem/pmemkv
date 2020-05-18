@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2016-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -38,8 +38,12 @@
 FROM ubuntu:19.04
 MAINTAINER lukasz.stolarczuk@intel.com
 
+# Ubuntu 19.04 is EOL
+RUN sed -i -re 's/([a-z]{2}\.)?archive.ubuntu.com|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+
 # Update the Apt cache and install basic tools
 RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	autoconf \
 	automake \
