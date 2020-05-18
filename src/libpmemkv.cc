@@ -115,6 +115,18 @@ int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value
 	});
 }
 
+int pmemkv_config_put_object_cb(pmemkv_config *config, const char *key, void *value,
+				void *(*getter)(void *), void (*deleter)(void *))
+{
+	if (!config || !getter)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		config_to_internal(config)->put_object(key, value, deleter, getter);
+		return PMEMKV_STATUS_OK;
+	});
+}
+
 int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value)
 {
 	if (!config)
