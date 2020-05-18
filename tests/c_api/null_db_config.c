@@ -67,6 +67,17 @@ void null_config_test(const char *engine)
 	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
 }
 
+void null_db_test(const char *engine)
+{
+	pmemkv_config *cfg = pmemkv_config_new();
+	UT_ASSERTne(cfg, NULL);
+
+	int s = pmemkv_open(engine, cfg, NULL);
+	UT_ASSERTeq(s, PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	/* Config should be deleted by pmemkv */
+}
+
 int main(int argc, char *argv[])
 {
 	START();
@@ -76,6 +87,7 @@ int main(int argc, char *argv[])
 
 	check_null_db_test();
 	null_config_test(argv[1]);
+	null_db_test(argv[1]);
 
 	return 0;
 }
