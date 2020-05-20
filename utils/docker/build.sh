@@ -53,7 +53,10 @@ containerName=pmemkv-${OS}-${OS_VER}
 if [[ "$command" == "" ]]; then
 	case $TYPE in
 		normal)
-			command="./run-build.sh";
+			builds=(tests_gcc_debug_cpp11
+					tests_gcc_debug_cpp14
+					test_installation)
+			command="./run-build.sh ${builds[@]}";
 			;;
 		compatibility)
 			command="./run-compatibility.sh";
