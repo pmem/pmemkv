@@ -23,57 +23,113 @@ echo "---------------------------- Error expected! -----------------------------
 compile_example_standalone pmemkv_basic_cpp && exit 1
 echo "---------------------------------------------------------------------------"
 
-echo
-echo "##############################################################"
-echo "### Verify build and install (in dir: ${PREFIX})"
-echo "##############################################################"
+function tests_gcc_debug_cpp11() {
+	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
+	mkdir build
+	cd build
 
-mkdir $WORKDIR/build
-cd $WORKDIR/build
+	CC=gcc CXX=g++ \
+	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+		-DTEST_DIR=$TEST_DIR \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DCOVERAGE=$COVERAGE \
+		-DENGINE_STREE=1 \
+		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
+		-DCHECK_CPP_STYLE=${CHECK_CPP_STYLE} \
+		-DDEVELOPER_MODE=1 \
+		-DTESTS_USE_FORCED_PMEM=1 \
+		-DTESTS_PMEMOBJ_DRD_HELGRIND=1 \
+		-DCXX_STANDARD=11
 
-cmake .. -DCMAKE_BUILD_TYPE=Debug \
-	-DTEST_DIR=$TEST_DIR \
-	-DCMAKE_INSTALL_PREFIX=$PREFIX \
-	-DCOVERAGE=$COVERAGE \
-	-DENGINE_STREE=1 \
-	-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
-	-DCHECK_CPP_STYLE=${CHECK_CPP_STYLE} \
-	-DDEVELOPER_MODE=1 \
-	-DTESTS_USE_FORCED_PMEM=1 \
-	-DTESTS_PMEMOBJ_DRD_HELGRIND=1
+	make -j$(nproc)
+	make -j$(nproc) doc
+	ctest --output-on-failure
 
-make -j$(nproc)
-make -j$(nproc) doc
-ctest --output-on-failure
-sudo_password -S make -j$(nproc) install
+	if [ "$COVERAGE" == "1" ]; then
+		upload_codecov tests
+	fi
 
-if [ "$COVERAGE" == "1" ]; then
-	upload_codecov tests
-fi
+	cd ..
+	rm -r build
 
-# Verify installed libraries
-compile_example_standalone pmemkv_basic_c
-run_example_standalone pmemkv_basic_c pool
-compile_example_standalone pmemkv_basic_cpp
-run_example_standalone pmemkv_basic_cpp pool
-if [ "$BUILD_JSON_CONFIG" == "ON" ]; then
-	compile_example_standalone pmemkv_config_c
-	run_example_standalone pmemkv_config_c pool
-fi
-compile_example_standalone pmemkv_pmemobj_cpp
-run_example_standalone pmemkv_pmemobj_cpp pool
+	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
+}
 
-# Poolset example
-compile_example_standalone pmemkv_open_cpp
-pmempool create -l "pmemkv" obj $WORKDIR/examples/example.poolset
-run_example_standalone pmemkv_open_cpp $WORKDIR/examples/example.poolset
+function tests_gcc_debug_cpp14() {
+	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
+	mkdir build
+	cd build
 
-# Expect failure - non-existing path is passed
-run_example_standalone pmemkv_open_cpp /non-existing/path && exit 1
+	CC=gcc CXX=g++ \
+	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+		-DTEST_DIR=$TEST_DIR \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DCOVERAGE=$COVERAGE \
+		-DENGINE_CSMAP=1 \
+		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
+		-DDEVELOPER_MODE=1 \
+		-DTESTS_USE_FORCED_PMEM=1 \
+		-DTESTS_PMEMOBJ_DRD_HELGRIND=1 \
+		-DCXX_STANDARD=14
 
-# Uninstall libraries
-cd $WORKDIR/build
-sudo_password -S make uninstall
+	make -j$(nproc)
+	make -j$(nproc) doc
+	ctest --output-on-failure
 
-cd $WORKDIR
-rm -rf $WORKDIR/build
+	if [ "$COVERAGE" == "1" ]; then
+		upload_codecov tests
+	fi
+
+	cd ..
+	rm -r build
+
+	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
+}
+
+function test_installation() {
+	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
+	mkdir build
+	cd build
+
+	CC=gcc CXX=g++ \
+	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+		-DBUILD_TESTS=0 \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG}
+
+	make -j$(nproc)
+	sudo_password -S make -j$(nproc) install
+
+	# Verify installed libraries
+	compile_example_standalone pmemkv_basic_c
+	run_example_standalone pmemkv_basic_c pool
+	compile_example_standalone pmemkv_basic_cpp
+	run_example_standalone pmemkv_basic_cpp pool
+	if [ "$BUILD_JSON_CONFIG" == "ON" ]; then
+		compile_example_standalone pmemkv_config_c
+		run_example_standalone pmemkv_config_c pool
+	fi
+	compile_example_standalone pmemkv_pmemobj_cpp
+	run_example_standalone pmemkv_pmemobj_cpp pool
+
+	# Poolset example
+	compile_example_standalone pmemkv_open_cpp
+	pmempool create -l "pmemkv" obj $WORKDIR/examples/example.poolset
+	run_example_standalone pmemkv_open_cpp $WORKDIR/examples/example.poolset
+
+	# Expect failure - non-existing path is passed
+	run_example_standalone pmemkv_open_cpp /non-existing/path && exit 1
+
+	# Uninstall libraries
+	cd $WORKDIR/build
+	sudo_password -S make uninstall
+
+	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
+}
+
+#Run build steps passed as script arguments
+build_steps=$@
+for build in $build_steps
+do
+	$build
+done
