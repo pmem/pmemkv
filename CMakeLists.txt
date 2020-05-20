@@ -38,9 +38,9 @@ endif()
 # Each engine can be enabled separately.
 # By default all experimental engines are turned off.
 option(ENGINE_CMAP "enable cmap engine" ON)
-option(ENGINE_CSMAP "enable cmap engine" ON)
 option(ENGINE_VCMAP "enable vcmap engine" ON)
 option(ENGINE_VSMAP "enable vsmap engine" ON)
+option(ENGINE_CSMAP "enable experimental csmap engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
 option(ENGINE_CACHING "enable experimental caching engine" OFF)
 option(ENGINE_STREE "enable experimental stree engine" OFF)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
@@ -151,7 +151,7 @@ if(ENGINE_TREE3)
 endif()
 
 
-set(CXX_STANDARD 14 CACHE STRING "C++ language standard")
+set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
