@@ -18,9 +18,9 @@ PREFIX=/usr
 PACKAGE_TYPE=$1
 
 # v1.9; 31.01.2020
-LIBPMEMOBJ_CPP_VERSION="1.9"
+LIBPMEMOBJ_CPP_VERSION="concurrent_map"
 
-git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
+git clone https://github.com/igchor/libpmemobj-cpp
 cd libpmemobj-cpp
 git checkout $LIBPMEMOBJ_CPP_VERSION
 
