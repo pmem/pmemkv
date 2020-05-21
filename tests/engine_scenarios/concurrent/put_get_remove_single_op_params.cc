@@ -7,33 +7,28 @@
 
 using namespace pmem::kv;
 
-static string_view uint64_to_key(uint64_t &key)
-{
-	return string_view((char *)&key, sizeof(uint64_t));
-}
-
 static void MultithreadedGetAndRemove(const size_t threads_number, pmem::kv::db &kv)
 {
 	std::vector<uint64_t> keys(threads_number, 0);
 	std::iota(keys.begin(), keys.end(), 0);
 
 	for (auto &k : keys)
-		UT_ASSERT(kv.put(uint64_to_key(k), uint64_to_key(k)) == status::OK);
+		UT_ASSERT(kv.put(uint64_to_strv(k), uint64_to_strv(k)) == status::OK);
 
 	/* test reading and removing data */
 	parallel_exec(threads_number, [&](size_t thread_id) {
 		if (thread_id % 2 == 1) {
-			auto s = kv.get(uint64_to_key(keys[thread_id]),
+			auto s = kv.get(uint64_to_strv(keys[thread_id]),
 					[&](string_view value) {
-						UT_ASSERTeq(value.compare(uint64_to_key(
+						UT_ASSERTeq(value.compare(uint64_to_strv(
 								    keys[thread_id])),
 							    0);
 					});
 			UT_ASSERTeq(s, status::OK);
 
-			s = kv.get(uint64_to_key(keys[thread_id - 1]),
+			s = kv.get(uint64_to_strv(keys[thread_id - 1]),
 				   [&](string_view value) {
-					   UT_ASSERTeq(value.compare(uint64_to_key(
+					   UT_ASSERTeq(value.compare(uint64_to_strv(
 							       keys[thread_id - 1])),
 						       0);
 				   });
@@ -42,15 +37,15 @@ static void MultithreadedGetAndRemove(const size_t threads_number, pmem::kv::db 
 			if (thread_id == threads_number - 1)
 				return;
 
-			s = kv.get(uint64_to_key(keys[thread_id + 1]),
+			s = kv.get(uint64_to_strv(keys[thread_id + 1]),
 				   [&](string_view value) {
-					   UT_ASSERTeq(value.compare(uint64_to_key(
+					   UT_ASSERTeq(value.compare(uint64_to_strv(
 							       keys[thread_id + 1])),
 						       0);
 				   });
 			UT_ASSERT(s == status::OK || s == status::NOT_FOUND);
 		} else {
-			UT_ASSERTeq(kv.remove(uint64_to_key(keys[thread_id])),
+			UT_ASSERTeq(kv.remove(uint64_to_strv(keys[thread_id])),
 				    status::OK);
 		}
 	});
@@ -62,17 +57,17 @@ static void MultithreadedPutAndRemove(const size_t threads_number, pmem::kv::db 
 	std::iota(keys.begin(), keys.end(), 0);
 
 	for (size_t i = 0; i < threads_number; i += 2)
-		UT_ASSERTeq(kv.put(uint64_to_key(keys[i]), uint64_to_key(keys[i])),
+		UT_ASSERTeq(kv.put(uint64_to_strv(keys[i]), uint64_to_strv(keys[i])),
 			    status::OK);
 
 	/* test adding and removing data */
 	parallel_exec(threads_number, [&](size_t thread_id) {
 		if (thread_id % 2 == 0) {
-			UT_ASSERTeq(kv.remove(uint64_to_key(keys[thread_id])),
+			UT_ASSERTeq(kv.remove(uint64_to_strv(keys[thread_id])),
 				    status::OK);
 		} else {
-			UT_ASSERTeq(kv.put(uint64_to_key(keys[thread_id]),
-					   uint64_to_key(keys[thread_id])),
+			UT_ASSERTeq(kv.put(uint64_to_strv(keys[thread_id]),
+					   uint64_to_strv(keys[thread_id])),
 				    status::OK);
 		}
 	});

@@ -207,4 +207,9 @@ static inline int run_engine_tests(std::string engine, std::string json,
 }
 #endif /* JSON_TESTS_SUPPORT */
 
+static inline pmem::kv::string_view uint64_to_strv(uint64_t &key)
+{
+	return pmem::kv::string_view((char *)&key, sizeof(uint64_t));
+}
+
 #endif /* PMEMKV_UNITTEST_HPP */
