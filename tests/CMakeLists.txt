@@ -108,6 +108,7 @@ build_test_ext(NAME iterate SRC_FILES engine_scenarios/all/iterate.cc LIBS json)
 build_test_ext(NAME error_handling_oom SRC_FILES engine_scenarios/all/error_handling_oom.cc LIBS json)
 
 # Tests for concurrent engines
+build_test_ext(NAME concurrent_iterate_params SRC_FILES engine_scenarios/concurrent/iterate_params.cc LIBS json)
 build_test_ext(NAME concurrent_put_get_remove_params SRC_FILES engine_scenarios/concurrent/put_get_remove_params.cc LIBS json)
 build_test_ext(NAME concurrent_put_get_remove_gen_params SRC_FILES engine_scenarios/concurrent/put_get_remove_gen_params.cc LIBS json)
 build_test_ext(NAME concurrent_put_get_remove_single_op_params SRC_FILES engine_scenarios/concurrent/put_get_remove_single_op_params.cc LIBS json)
@@ -373,6 +374,20 @@ if(ENGINE_CSMAP)
 			BINARY sorted_iterate
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY concurrent_iterate_params
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 24 200)
+
+	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+		add_engine_test(ENGINE csmap
+				BINARY concurrent_iterate_params
+				TRACERS drd # helgrind XXX: skip list lock order error
+				SCRIPT pmemobj_based/default.cmake
+				PARAMS 4 50)
+	endif()
 
 	add_engine_test(ENGINE csmap
 			BINARY concurrent_put_get_remove_params
