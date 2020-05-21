@@ -43,7 +43,7 @@ function tests_gcc_debug_cpp11() {
 
 	make -j$(nproc)
 	make -j$(nproc) doc
-	ctest --output-on-failure
+	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
 		upload_codecov tests
@@ -74,7 +74,65 @@ function tests_gcc_debug_cpp14() {
 
 	make -j$(nproc)
 	make -j$(nproc) doc
-	ctest --output-on-failure
+	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
+
+	if [ "$COVERAGE" == "1" ]; then
+		upload_codecov tests
+	fi
+
+	cd ..
+	rm -r build
+
+	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
+}
+
+function tests_gcc_debug_cpp14_valgrind_other() {
+	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
+	mkdir build
+	cd build
+
+	CC=gcc CXX=g++ \
+	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+		-DTEST_DIR=$TEST_DIR \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DCOVERAGE=$COVERAGE \
+		-DENGINE_CSMAP=1 \
+		-DENGINE_STREE=1 \
+		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
+		-DTESTS_USE_FORCED_PMEM=1 \
+		-DCXX_STANDARD=14
+
+	make -j$(nproc)
+	ctest -E "_none|_memcheck|_drd" --timeout 590 --output-on-failure
+
+	if [ "$COVERAGE" == "1" ]; then
+		upload_codecov tests
+	fi
+
+	cd ..
+	rm -r build
+
+	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
+}
+
+function tests_gcc_debug_cpp14_valgrind_memcheck_drd() {
+	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
+	mkdir build
+	cd build
+
+	CC=gcc CXX=g++ \
+	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+		-DTEST_DIR=$TEST_DIR \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DCOVERAGE=$COVERAGE \
+		-DENGINE_CSMAP=1 \
+		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
+		-DTESTS_USE_FORCED_PMEM=1 \
+		-DTESTS_PMEMOBJ_DRD_HELGRIND=1 \
+		-DCXX_STANDARD=14
+
+	make -j$(nproc)
+	ctest -R "_memcheck|_drd" --timeout 590 --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
 		upload_codecov tests
