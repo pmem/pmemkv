@@ -1,34 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2020, Intel Corporation */
 
-#include "unittest.hpp"
+#include "iterate.hpp"
 
 /**
  * Basic tests for all count_* and get_* methods for sorted engines.
  */
-
-using namespace pmem::kv;
-
-inline void add_basic_keys(pmem::kv::db &kv)
-{
-	UT_ASSERTeq(kv.put("A", "1"), status::OK);
-	UT_ASSERTeq(kv.put("AB", "2"), status::OK);
-	UT_ASSERTeq(kv.put("AC", "3"), status::OK);
-	UT_ASSERTeq(kv.put("B", "4"), status::OK);
-	UT_ASSERTeq(kv.put("BB", "5"), status::OK);
-	UT_ASSERTeq(kv.put("BC", "6"), status::OK);
-}
-
-inline void add_ext_keys(pmem::kv::db &kv)
-{
-	UT_ASSERT(kv.put("aaa", "1") == status::OK);
-	UT_ASSERT(kv.put("bbb", "2") == status::OK);
-	UT_ASSERT(kv.put("ccc", "3") == status::OK);
-	UT_ASSERT(kv.put("rrr", "4") == status::OK);
-	UT_ASSERT(kv.put("sss", "5") == status::OK);
-	UT_ASSERT(kv.put("ttt", "6") == status::OK);
-	UT_ASSERT(kv.put("yyy", "记!") == status::OK);
-}
 
 static void CountTest(pmem::kv::db &kv)
 {
@@ -113,13 +90,7 @@ static void GetAboveTest(pmem::kv::db &kv)
 	add_basic_keys(kv);
 
 	std::string result;
-	auto s = kv.get_above("B", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	auto s = KV_GET_1KEY_CPP_CB(get_above, "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "BB,5|BC,6|");
 	result.clear();
@@ -127,46 +98,24 @@ static void GetAboveTest(pmem::kv::db &kv)
 	/* insert new key */
 	UT_ASSERTeq(kv.put("BD", "7"), status::OK);
 
-	s = kv.get_above("B", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_above, "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "BB,5|BC,6|BD,7|");
 	result.clear();
 
-	s = kv.get_above("", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_above, "", result);
+	;
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|BD,7|");
 	result.clear();
 
-	s = kv.get_above("ZZZ", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_above, "ZZZ", result);
+	;
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 	result.clear();
 
-	s = kv.get_above("B", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_above, "BA", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "BB,5|BC,6|BD,7|");
 	result.clear();
@@ -175,17 +124,7 @@ static void GetAboveTest(pmem::kv::db &kv)
 	UT_ASSERT(kv.put("记!", "RR") == status::OK);
 
 	/* testing C-like API */
-	s = kv.get_above(
-		"B",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append(std::string(k, kb))
-				.append(",")
-				.append(std::string(v, vb))
-				.append("|");
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_above, "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "BB,5|BC,6|BD,7|记!,RR|");
 }
@@ -201,78 +140,29 @@ static void GetAboveTest2(pmem::kv::db &kv)
 	std::size_t cnt;
 	std::string result;
 	UT_ASSERT(kv.count_above("ccc", cnt) == status::OK && cnt == 4);
-	auto s = kv.get_above(
-		"ccc",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	auto s = KV_GET_1KEY_C_CB(get_above, "ccc", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<rrr>,<4>|<sss>,<5>|<ttt>,<6>|<yyy>,<记!>|");
+	UT_ASSERT(result == "rrr,4|sss,5|ttt,6|yyy,记!|");
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_above("a", cnt) == status::OK && cnt == 7);
-	s = kv.get_above(
-		"a",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_above, "a", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(
-		result ==
-		"<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|<yyy>,<记!>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|rrr,4|sss,5|ttt,6|yyy,记!|");
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_above("ddd", cnt) == status::OK && cnt == 4);
-	s = kv.get_above(
-		"ddd",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_above, "ddd", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<rrr>,<4>|<sss>,<5>|<ttt>,<6>|<yyy>,<记!>|");
+	UT_ASSERT(result == "rrr,4|sss,5|ttt,6|yyy,记!|");
 	result.clear();
 	cnt = std::numeric_limits<std::size_t>::max();
 
 	UT_ASSERT(kv.count_above("z", cnt) == status::OK && cnt == 0);
-	s = kv.get_above(
-		"z",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_above, "z", result);
+	;
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 }
@@ -288,13 +178,7 @@ static void GetEqualAboveTest(pmem::kv::db &kv)
 	std::string result;
 	std::size_t cnt;
 	UT_ASSERT(kv.count_equal_above("B", cnt) == status::OK && cnt == 3);
-	auto s = kv.get_equal_above("B", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	auto s = KV_GET_1KEY_CPP_CB(get_equal_above, "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "B,4|BB,5|BC,6|");
 	result.clear();
@@ -304,52 +188,27 @@ static void GetEqualAboveTest(pmem::kv::db &kv)
 	UT_ASSERTeq(kv.put("BD", "7"), status::OK);
 
 	UT_ASSERT(kv.count_equal_above("B", cnt) == status::OK && cnt == 4);
-	s = kv.get_equal_above("B", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_equal_above, "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "B,4|BB,5|BC,6|BD,7|");
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_equal_above("", cnt) == status::OK && cnt == 7);
-	s = kv.get_equal_above("", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_equal_above, "", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AB,2|AC,3|B,4|BB,5|BC,6|BD,7|");
 	result.clear();
 	cnt = std::numeric_limits<std::size_t>::max();
 
 	UT_ASSERT(kv.count_equal_above("ZZZ", cnt) == status::OK && cnt == 0);
-	s = kv.get_equal_above("ZZZ", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_equal_above, "ZZZ", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
-	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_equal_above("AZ", cnt) == status::OK && cnt == 4);
-	s = kv.get_equal_above("AZ", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_equal_above, "AZ", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "B,4|BB,5|BC,6|BD,7|");
 	result.clear();
@@ -360,17 +219,7 @@ static void GetEqualAboveTest(pmem::kv::db &kv)
 
 	UT_ASSERT(kv.count_equal_above("B", cnt) == status::OK && cnt == 5);
 	/* testing C-like API */
-	s = kv.get_equal_above(
-		"B",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append(std::string(k, kb))
-				.append(",")
-				.append(std::string(v, vb))
-				.append("|");
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_above, "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "B,4|BB,5|BC,6|BD,7|记!,RR|");
 }
@@ -386,139 +235,49 @@ static void GetEqualAboveTest2(pmem::kv::db &kv)
 	std::string result;
 	std::size_t cnt;
 	UT_ASSERT(kv.count_equal_above("", cnt) == status::OK && cnt == 7);
-	auto s = kv.get_equal_above(
-		"",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	auto s = KV_GET_1KEY_C_CB(get_equal_above, "", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(
-		result ==
-		"<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|<yyy>,<记!>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|rrr,4|sss,5|ttt,6|yyy,记!|");
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_equal_above("ccc", cnt) == status::OK && cnt == 5);
-	s = kv.get_equal_above(
-		"ccc",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_above, "ccc", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|<yyy>,<记!>|");
+	UT_ASSERT(result == "ccc,3|rrr,4|sss,5|ttt,6|yyy,记!|");
 	result.clear();
 	cnt = 100;
 
 	UT_ASSERT(kv.count_equal_above("a", cnt) == status::OK && cnt == 7);
-	s = kv.get_equal_above(
-		"a",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_above, "a", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(
-		result ==
-		"<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|<yyy>,<记!>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|rrr,4|sss,5|ttt,6|yyy,记!|");
 	result.clear();
 	cnt = 0;
 
-	UT_ASSERT(kv.count_equal_above("ddd", cnt) == status::OK);
-	UT_ASSERTeq(4, cnt);
-
-	s = kv.get_equal_above(
-		"ddd",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	UT_ASSERT(kv.count_equal_above("ddd", cnt) == status::OK && cnt == 4);
+	s = KV_GET_1KEY_C_CB(get_equal_above, "ddd", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<rrr>,<4>|<sss>,<5>|<ttt>,<6>|<yyy>,<记!>|");
+	UT_ASSERT(result == "rrr,4|sss,5|ttt,6|yyy,记!|");
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_equal_above("x", cnt) == status::OK && cnt == 1);
-	s = kv.get_equal_above(
-		"x",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_above, "x", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<yyy>,<记!>|");
+	UT_ASSERT(result == "yyy,记!|");
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_equal_above("yyy", cnt) == status::OK && cnt == 1);
-	s = kv.get_equal_above(
-		"yyy",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_above, "yyy", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<yyy>,<记!>|");
+	UT_ASSERT(result == "yyy,记!|");
 	result.clear();
 	cnt = std::numeric_limits<std::size_t>::max();
 
 	UT_ASSERT(kv.count_equal_above("z", cnt) == status::OK && cnt == 0);
-	s = kv.get_equal_above(
-		"z",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_above, "z", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 }
@@ -534,13 +293,7 @@ static void GetEqualBelowTest(pmem::kv::db &kv)
 	std::string result;
 	std::size_t cnt;
 	UT_ASSERT(kv.count_equal_below("B", cnt) == status::OK && cnt == 4);
-	auto s = kv.get_equal_below("B", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	auto s = KV_GET_1KEY_CPP_CB(get_equal_below, "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AB,2|AC,3|B,4|");
 	result.clear();
@@ -550,52 +303,28 @@ static void GetEqualBelowTest(pmem::kv::db &kv)
 	UT_ASSERTeq(kv.put("AA", "7"), status::OK);
 
 	UT_ASSERT(kv.count_equal_below("B", cnt) == status::OK && cnt == 5);
-	s = kv.get_equal_below("B", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_equal_below, "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AA,7|AB,2|AC,3|B,4|");
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_equal_below("", cnt) == status::OK && cnt == 0);
-	s = kv.get_equal_below("", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_equal_below, "", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 	result.clear();
 	cnt = 1024;
 
 	UT_ASSERT(kv.count_equal_below("ZZZ", cnt) == status::OK && cnt == 7);
-	s = kv.get_equal_below("ZZZ", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_equal_below, "ZZZ", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AA,7|AB,2|AC,3|B,4|BB,5|BC,6|");
-
-	cnt = 10000;
-	UT_ASSERT(kv.count_equal_below("AZ", cnt) == status::OK && cnt == 4);
 	result.clear();
-	s = kv.get_equal_below("AZ", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	cnt = 10000;
+
+	UT_ASSERT(kv.count_equal_below("AZ", cnt) == status::OK && cnt == 4);
+	s = KV_GET_1KEY_CPP_CB(get_equal_below, "AZ", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AA,7|AB,2|AC,3|");
 	result.clear();
@@ -606,17 +335,7 @@ static void GetEqualBelowTest(pmem::kv::db &kv)
 
 	UT_ASSERT(kv.count_equal_below("记!", cnt) == status::OK && cnt == 8);
 	/* testing C-like API */
-	s = kv.get_equal_below(
-		"记!",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append(std::string(k, kb))
-				.append(",")
-				.append(std::string(v, vb))
-				.append("|");
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_below, "记!", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AA,7|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|");
 }
@@ -632,138 +351,49 @@ static void GetEqualBelowTest2(pmem::kv::db &kv)
 	std::string result;
 	std::size_t cnt;
 	UT_ASSERT(kv.count_equal_below("yyy", cnt) == status::OK && cnt == 7);
-	auto s = kv.get_equal_below(
-		"yyy",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	auto s = KV_GET_1KEY_C_CB(get_equal_below, "yyy", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(
-		result ==
-		"<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|<yyy>,<记!>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|rrr,4|sss,5|ttt,6|yyy,记!|");
 	result.clear();
 	cnt = std::numeric_limits<std::size_t>::max();
 
 	UT_ASSERT(kv.count_equal_below("ttt", cnt) == status::OK && cnt == 6);
-	s = kv.get_equal_below(
-		"ttt",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_below, "ttt", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result ==
-		  "<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|rrr,4|sss,5|ttt,6|");
 	result.clear();
 	cnt = 2048;
 
 	UT_ASSERT(kv.count_equal_below("ccc", cnt) == status::OK && cnt == 3);
-	s = kv.get_equal_below(
-		"ccc",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_below, "ccc", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|");
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_equal_below("z", cnt) == status::OK && cnt == 7);
-	s = kv.get_equal_below(
-		"z",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_below, "z", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(
-		result ==
-		"<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|<yyy>,<记!>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|rrr,4|sss,5|ttt,6|yyy,记!|");
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_equal_below("ddd", cnt) == status::OK && cnt == 3);
-	s = kv.get_equal_below(
-		"ddd",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_below, "ddd", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|");
 	result.clear();
 	cnt = 1;
 
 	UT_ASSERT(kv.count_equal_below("a", cnt) == status::OK && cnt == 0);
-	s = kv.get_equal_below(
-		"a",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_below, "a", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 	result.clear();
 	cnt = 500;
 
 	UT_ASSERT(kv.count_equal_below("", cnt) == status::OK && cnt == 0);
-	s = kv.get_equal_below(
-		"",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_equal_below, "", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 }
@@ -776,13 +406,7 @@ static void GetBelowTest(pmem::kv::db &kv)
 	add_basic_keys(kv);
 
 	std::string result;
-	auto s = kv.get_below("AC", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	auto s = KV_GET_1KEY_CPP_CB(get_below, "AC", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AB,2|");
 	result.clear();
@@ -790,46 +414,22 @@ static void GetBelowTest(pmem::kv::db &kv)
 	/* insert new key */
 	UT_ASSERTeq(kv.put("AA", "7"), status::OK);
 
-	s = kv.get_below("AC", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_below, "AC", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AA,7|AB,2|");
 	result.clear();
 
-	s = kv.get_below("", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_below, "", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 	result.clear();
 
-	s = kv.get_below("ZZZZ", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_below, "ZZZZ", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AA,7|AB,2|AC,3|B,4|BB,5|BC,6|");
 	result.clear();
 
-	s = kv.get_below("AD", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_1KEY_CPP_CB(get_below, "AD", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AA,7|AB,2|AC,3|");
 	result.clear();
@@ -838,17 +438,7 @@ static void GetBelowTest(pmem::kv::db &kv)
 	UT_ASSERT(kv.put("记!", "RR") == status::OK);
 
 	/* testing C-like API */
-	s = kv.get_below(
-		"\xFF",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append(std::string(k, kb))
-				.append(",")
-				.append(std::string(v, vb))
-				.append("|");
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_below, "\xFF", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AA,7|AB,2|AC,3|B,4|BB,5|BC,6|记!,RR|");
 }
@@ -864,139 +454,51 @@ static void GetBelowTest2(pmem::kv::db &kv)
 	std::string result;
 	std::size_t cnt;
 	UT_ASSERT(kv.count_below("a", cnt) == status::OK && cnt == 0);
-	auto s = kv.get_below(
-		"a",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	auto s = KV_GET_1KEY_C_CB(get_below, "a", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 	result.clear();
 	cnt = 8192;
 
 	UT_ASSERT(kv.count_below("aaa", cnt) == status::OK && cnt == 0);
-	s = kv.get_below(
-		"aaa",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_below, "aaa", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_below("ccc", cnt) == status::OK && cnt == 2);
-	s = kv.get_below(
-		"ccc",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_below, "ccc", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<aaa>,<1>|<bbb>,<2>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|");
 	result.clear();
 	cnt = 1;
 
 	UT_ASSERT(kv.count_below("ddd", cnt) == status::OK && cnt == 3);
-	s = kv.get_below(
-		"ddd",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_below, "ddd", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|");
 	result.clear();
 	cnt = 100000;
 
 	UT_ASSERT(kv.count_below("x", cnt) == status::OK && cnt == 6);
-	s = kv.get_below(
-		"x",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_below, "x", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result ==
-		  "<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|rrr,4|sss,5|ttt,6|");
 	result.clear();
 	cnt = std::numeric_limits<std::size_t>::max();
 
 	UT_ASSERT(kv.count_below("yyy", cnt) == status::OK && cnt == 6);
-	s = kv.get_below(
-		"yyy",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_below, "yyy", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result ==
-		  "<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|rrr,4|sss,5|ttt,6|");
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_below("z", cnt) == status::OK && cnt == 7);
-	s = kv.get_below(
-		"z",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_1KEY_C_CB(get_below, "z", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(
-		result ==
-		"<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|<yyy>,<记!>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|rrr,4|sss,5|ttt,6|yyy,记!|");
 }
 
 static void GetBetweenTest(pmem::kv::db &kv)
@@ -1008,13 +510,7 @@ static void GetBetweenTest(pmem::kv::db &kv)
 	add_basic_keys(kv);
 
 	std::string result;
-	auto s = kv.get_between("A", "B", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	auto s = KV_GET_2KEYS_CPP_CB(get_between, "A", "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "AB,2|AC,3|");
 	result.clear();
@@ -1022,116 +518,50 @@ static void GetBetweenTest(pmem::kv::db &kv)
 	/* insert new key */
 	UT_ASSERTeq(kv.put("AA", "7"), status::OK);
 
-	s = kv.get_between("A", "B", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_2KEYS_CPP_CB(get_between, "A", "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "AA,7|AB,2|AC,3|");
 	result.clear();
 
-	s = kv.get_between("", "ZZZ", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_2KEYS_CPP_CB(get_between, "", "ZZZ", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AA,7|AB,2|AC,3|B,4|BB,5|BC,6|");
 	result.clear();
 
-	s = kv.get_between("", "A", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_2KEYS_CPP_CB(get_between, "", "A", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 
-	s = kv.get_between("", "B", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_2KEYS_CPP_CB(get_between, "", "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "A,1|AA,7|AB,2|AC,3|");
 	result.clear();
 
-	s = kv.get_between("", "", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_2KEYS_CPP_CB(get_between, "", "", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 
-	s = kv.get_between("A", "A", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_2KEYS_CPP_CB(get_between, "A", "A", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 
-	s = kv.get_between("AC", "A", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_2KEYS_CPP_CB(get_between, "AC", "A", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 
-	s = kv.get_between("B", "A", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_2KEYS_CPP_CB(get_between, "B", "A", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 
-	s = kv.get_between("BD", "A", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_2KEYS_CPP_CB(get_between, "BD", "A", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 
-	s = kv.get_between("ZZZ", "A", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_2KEYS_CPP_CB(get_between, "ZZZ", "A", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 
-	s = kv.get_between("A", "B", [&](string_view k, string_view v) {
-		result.append(k.data(), k.size())
-			.append(",")
-			.append(v.data(), v.size())
-			.append("|");
-		return 0;
-	});
+	s = KV_GET_2KEYS_CPP_CB(get_between, "A", "B", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "AA,7|AB,2|AC,3|");
 	result.clear();
@@ -1140,17 +570,7 @@ static void GetBetweenTest(pmem::kv::db &kv)
 	UT_ASSERT(kv.put("记!", "RR") == status::OK);
 
 	/* testing C-like API */
-	s = kv.get_between(
-		"B", "\xFF",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append(std::string(k, kb))
-				.append(",")
-				.append(std::string(v, vb))
-				.append("|");
-			return 0;
-		},
-		&result);
+	s = KV_GET_2KEYS_C_CB(get_between, "B", "\xFF", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == "BB,5|BC,6|记!,RR|");
 }
@@ -1167,135 +587,49 @@ static void GetBetweenTest2(pmem::kv::db &kv)
 	std::string result;
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	UT_ASSERT(kv.count_between("", "rrr", cnt) == status::OK && cnt == 3);
-	auto s = kv.get_between(
-		"", "rrr",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	auto s = KV_GET_2KEYS_C_CB(get_between, "", "rrr", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|");
 	result.clear();
 	cnt = 0;
 
 	UT_ASSERT(kv.count_between("ccc", "ttt", cnt) == status::OK && cnt == 2);
-	s = kv.get_between(
-		"ccc", "ttt",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_2KEYS_C_CB(get_between, "ccc", "ttt", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<rrr>,<4>|<sss>,<5>|");
+	UT_ASSERT(result == "rrr,4|sss,5|");
 	result.clear();
 	cnt = 2;
 
 	UT_ASSERT(kv.count_between("ddd", "x", cnt) == status::OK && cnt == 3);
-	s = kv.get_between(
-		"ddd", "x",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_2KEYS_C_CB(get_between, "ddd", "x", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<rrr>,<4>|<sss>,<5>|<ttt>,<6>|");
+	UT_ASSERT(result == "rrr,4|sss,5|ttt,6|");
 	result.clear();
 	cnt = 5;
 
 	UT_ASSERT(kv.count_between("aaa", "yyy", cnt) == status::OK && cnt == 5);
-	s = kv.get_between(
-		"aaa", "yyy",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_2KEYS_C_CB(get_between, "aaa", "yyy", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(result == "<bbb>,<2>|<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|");
+	UT_ASSERT(result == "bbb,2|ccc,3|rrr,4|sss,5|ttt,6|");
 	result.clear();
 	cnt = std::numeric_limits<std::size_t>::max();
 
 	UT_ASSERT(kv.count_between("yyy", "zzz", cnt) == status::OK && cnt == 0);
-	s = kv.get_between(
-		"yyy", "zzz",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_2KEYS_C_CB(get_between, "yyy", "zzz", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 	result.clear();
 	cnt = 100;
 
 	UT_ASSERT(kv.count_between("", "zzz", cnt) == status::OK && cnt == 7);
-	s = kv.get_between(
-		"", "zzz",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_2KEYS_C_CB(get_between, "", "zzz", result);
 	UT_ASSERTeq(s, status::OK);
-	UT_ASSERT(
-		result ==
-		"<aaa>,<1>|<bbb>,<2>|<ccc>,<3>|<rrr>,<4>|<sss>,<5>|<ttt>,<6>|<yyy>,<记!>|");
+	UT_ASSERT(result == "aaa,1|bbb,2|ccc,3|rrr,4|sss,5|ttt,6|yyy,记!|");
 	result.clear();
 	cnt = 128;
 
 	UT_ASSERT(kv.count_between("", "", cnt) == status::OK && cnt == 0);
-	s = kv.get_between(
-		"", "",
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
-			const auto c = ((std::string *)arg);
-			c->append("<");
-			c->append(std::string(k, kb));
-			c->append(">,<");
-			c->append(std::string(v, vb));
-			c->append(">|");
-
-			return 0;
-		},
-		&result);
+	s = KV_GET_2KEYS_C_CB(get_between, "", "", result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result.empty());
 }
