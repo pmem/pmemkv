@@ -17,8 +17,8 @@ fi
 PREFIX=/usr
 PACKAGE_TYPE=$1
 
-# v1.9; 31.01.2020
-LIBPMEMOBJ_CPP_VERSION="1.9"
+# Merge pull request #423 from vinser52/concurrent_map; 20.05.2020
+LIBPMEMOBJ_CPP_VERSION="d4fa94a3364e11abf70d5aa7ae63f8a45ce40bfc"
 
 git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
 cd libpmemobj-cpp

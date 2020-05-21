@@ -181,11 +181,12 @@ if(ENGINE_CMAP)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 1000 100 200)
 
-	add_engine_test(ENGINE cmap
-			BINARY error_handling_oom
-			TRACERS none
-			SCRIPT pmemobj_based/default.cmake
-			DB_SIZE 50M)
+	# XXX: https://github.com/pmem/libpmemobj-cpp/issues/516
+	# add_engine_test(ENGINE cmap
+	# BINARY error_handling_oom
+	# TRACERS none
+	# SCRIPT pmemobj_based/default.cmake
+	# DB_SIZE 50M)
 
 	add_engine_test(ENGINE cmap
 			BINARY iterate
