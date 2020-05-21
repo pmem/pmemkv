@@ -12,12 +12,14 @@
 #include <libpmemkv_json_config.h>
 #endif
 
+#include <condition_variable>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <type_traits>
@@ -115,6 +117,34 @@ void parallel_exec(size_t threads_number, Function f)
 	for (auto &t : threads) {
 		t.join();
 	}
+}
+
+/*
+ * This function executes 'concurrency' threads and provides
+ * 'syncthreads' method (synchronization barrier) for f()
+ */
+template <typename Function>
+void parallel_xexec(size_t concurrency, Function f)
+{
+	std::condition_variable cv;
+	std::mutex m;
+	size_t counter = 0;
+
+	auto syncthreads = [&] {
+		std::unique_lock<std::mutex> lock(m);
+		counter++;
+		if (counter < concurrency)
+			cv.wait(lock);
+		else
+			/*
+			 * notify_call could be called outside of a lock
+			 * (it would perform better) but drd complains
+			 * in that case
+			 */
+			cv.notify_all();
+	};
+
+	parallel_exec(concurrency, [&](size_t tid) { f(tid, syncthreads); });
 }
 
 #ifdef JSON_TESTS_SUPPORT
