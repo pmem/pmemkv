@@ -58,6 +58,14 @@ if [[ "$command" == "" ]]; then
 					test_installation)
 			command="./run-build.sh ${builds[@]}";
 			;;
+		valgrind)
+			builds=(tests_gcc_debug_cpp14_valgrind_other)
+			command="./run-build.sh ${builds[@]}";
+			;;
+		memcheck_drd)
+			builds=(tests_gcc_debug_cpp14_valgrind_memcheck_drd)
+			command="./run-build.sh ${builds[@]}";
+			;;
 		compatibility)
 			command="./run-compatibility.sh";
 			;;
