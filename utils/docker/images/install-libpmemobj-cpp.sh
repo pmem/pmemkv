@@ -17,8 +17,8 @@ fi
 PREFIX=/usr
 PACKAGE_TYPE=$1
 
-# v1.9; 31.01.2020
-LIBPMEMOBJ_CPP_VERSION="1.9"
+# Merge pull request #762 from igchor/missing_flush; 22.05.2020
+LIBPMEMOBJ_CPP_VERSION="96db5ab4b5f515a46270bab4b07f58304b1ae009"
 
 git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
 cd libpmemobj-cpp
