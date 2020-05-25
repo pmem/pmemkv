@@ -126,6 +126,11 @@ build_test_ext(NAME persistent_put_get_std_map_multiple_reopen SRC_FILES engine_
 # Tests for sorted engines
 build_test_ext(NAME sorted_iterate SRC_FILES engine_scenarios/sorted/iterate.cc LIBS json)
 build_test_ext(NAME sorted_get_all_gen_params SRC_FILES engine_scenarios/sorted/get_all_gen_params.cc LIBS json)
+build_test_ext(NAME sorted_get_above_gen_params SRC_FILES engine_scenarios/sorted/get_above_gen_params.cc LIBS json)
+build_test_ext(NAME sorted_get_equal_above_gen_params SRC_FILES engine_scenarios/sorted/get_equal_above_gen_params.cc LIBS json)
+build_test_ext(NAME sorted_get_below_gen_params SRC_FILES engine_scenarios/sorted/get_below_gen_params.cc LIBS json)
+build_test_ext(NAME sorted_get_equal_below_gen_params SRC_FILES engine_scenarios/sorted/get_equal_below_gen_params.cc LIBS json)
+build_test_ext(NAME sorted_get_between_gen_params SRC_FILES engine_scenarios/sorted/get_between_gen_params.cc LIBS json)
 
 # Tests for pmemobj engines
 build_test_ext(NAME pmemobj_error_handling_create SRC_FILES engine_scenarios/pmemobj/error_handling_create.cc LIBS json)
@@ -380,6 +385,36 @@ if(ENGINE_CSMAP)
 
 	add_engine_test(ENGINE csmap
 			BINARY sorted_get_all_gen_params
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 32 8)
+
+	add_engine_test(ENGINE csmap
+			BINARY sorted_get_above_gen_params
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 32 8)
+
+	add_engine_test(ENGINE csmap
+			BINARY sorted_get_equal_above_gen_params
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 32 8)
+
+	add_engine_test(ENGINE csmap
+			BINARY sorted_get_below_gen_params
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 32 8)
+
+	add_engine_test(ENGINE csmap
+			BINARY sorted_get_equal_below_gen_params
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 32 8)
+
+	add_engine_test(ENGINE csmap
+			BINARY sorted_get_between_gen_params
 			TRACERS none memcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 32 8)
@@ -666,6 +701,36 @@ if(ENGINE_VSMAP)
 			PARAMS 32 8)
 
 	add_engine_test(ENGINE vsmap
+			BINARY sorted_get_above_gen_params
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake
+			PARAMS 32 8)
+
+	add_engine_test(ENGINE vsmap
+			BINARY sorted_get_equal_above_gen_params
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake
+			PARAMS 32 8)
+
+	add_engine_test(ENGINE vsmap
+			BINARY sorted_get_below_gen_params
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake
+			PARAMS 32 8)
+
+	add_engine_test(ENGINE vsmap
+			BINARY sorted_get_equal_below_gen_params
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake
+			PARAMS 32 8)
+
+	add_engine_test(ENGINE vsmap
+			BINARY sorted_get_between_gen_params
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake
+			PARAMS 32 8)
+
+	add_engine_test(ENGINE vsmap
 			BINARY memkind_error_handling
 			TRACERS none memcheck
 			SCRIPT memkind_based/memkind/error_handling.cmake)
@@ -830,6 +895,41 @@ if(ENGINE_TREE3)
 	# TRACERS none memcheck pmemcheck
 	# SCRIPT pmemobj_based/default.cmake
 	# PARAMS 32 8)
+
+	# XXX to be tested
+	# add_engine_test(ENGINE tree3
+	# BINARY sorted_get_above_gen_params
+	# TRACERS none memcheck pmemcheck
+	# SCRIPT pmemobj_based/default.cmake
+	# PARAMS 32 8)
+
+	# XXX to be tested
+	# add_engine_test(ENGINE tree3
+	# BINARY sorted_get_equal_above_gen_params
+	# TRACERS none memcheck pmemcheck
+	# SCRIPT pmemobj_based/default.cmake
+	# PARAMS 32 8)
+
+	# XXX to be tested
+	# add_engine_test(ENGINE tree3
+	# BINARY sorted_get_below_gen_params
+	# TRACERS none memcheck pmemcheck
+	# SCRIPT pmemobj_based/default.cmake
+	# PARAMS 32 8)
+
+	# XXX to be tested
+	# add_engine_test(ENGINE tree3
+	# BINARY sorted_get_equal_below_gen_params
+	# TRACERS none memcheck pmemcheck
+	# SCRIPT pmemobj_based/default.cmake
+	# PARAMS 32 8)
+
+	# XXX to be tested
+	# add_engine_test(ENGINE tree3
+	# BINARY sorted_get_between_gen_params
+	# TRACERS none memcheck pmemcheck
+	# SCRIPT pmemobj_based/default.cmake
+	# PARAMS 32 8)
 endif(ENGINE_TREE3)
 ################################################################################
 ###################################### STREE ###################################
@@ -989,6 +1089,41 @@ if(ENGINE_STREE)
 	# XXX - timeouts
 	# add_engine_test(ENGINE stree
 	# BINARY sorted_get_all_gen_params
+	# TRACERS none #memcheck pmemcheck
+	# SCRIPT pmemobj_based/default.cmake
+	# PARAMS 8 8)
+
+	# XXX - to be tested
+	# add_engine_test(ENGINE stree
+	# BINARY sorted_get_above_gen_params
+	# TRACERS none #memcheck pmemcheck
+	# SCRIPT pmemobj_based/default.cmake
+	# PARAMS 8 8)
+
+	# XXX - to be tested
+	# add_engine_test(ENGINE stree
+	# BINARY sorted_get_equal_above_gen_params
+	# TRACERS none #memcheck pmemcheck
+	# SCRIPT pmemobj_based/default.cmake
+	# PARAMS 8 8)
+
+	# XXX - to be tested
+	# add_engine_test(ENGINE stree
+	# BINARY sorted_get_below_gen_params
+	# TRACERS none #memcheck pmemcheck
+	# SCRIPT pmemobj_based/default.cmake
+	# PARAMS 8 8)
+
+	# XXX - to be tested
+	# add_engine_test(ENGINE stree
+	# BINARY sorted_get_equal_below_gen_params
+	# TRACERS none #memcheck pmemcheck
+	# SCRIPT pmemobj_based/default.cmake
+	# PARAMS 8 8)
+
+	# XXX - to be tested
+	# add_engine_test(ENGINE stree
+	# BINARY sorted_get_between_gen_params
 	# TRACERS none #memcheck pmemcheck
 	# SCRIPT pmemobj_based/default.cmake
 	# PARAMS 8 8)
