@@ -6,13 +6,17 @@
 #include <algorithm>
 #include <vector>
 
+/**
+ * Helper class for testing get_* functions
+ */
+
 using namespace pmem::kv;
 using kv_pair = std::pair<std::string, std::string>;
 using kv_list = std::vector<kv_pair>;
 
-/**
- * Helper class for testing get_* functions
- */
+const std::string EMPTY_KEY = "";
+const std::string MIN_KEY = std::string(1, char(1));
+const std::string MAX_KEY = std::string(4, char(255));
 
 inline kv_list kv_sort(kv_list list)
 {
@@ -92,6 +96,120 @@ inline void verify_get_all_c(pmem::kv::db &kv, const size_t exp_cnt,
 	kv_list result;
 	UT_ASSERT(kv.count_all(cnt) == status::OK && cnt == exp_cnt);
 	auto s = KV_GET_ALL_C_CB_LST(result);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(result == sorted_exp_result);
+}
+
+inline void verify_get_above(pmem::kv::db &kv, const std::string key,
+			     const size_t exp_cnt, const kv_list &sorted_exp_result)
+{
+	std::size_t cnt;
+	kv_list result;
+	UT_ASSERT(kv.count_above(key, cnt) == status::OK && cnt == exp_cnt);
+	auto s = KV_GET_1KEY_CPP_CB_LST(get_above, key, result);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(result == sorted_exp_result);
+}
+
+inline void verify_get_above_c(pmem::kv::db &kv, const std::string key,
+			       const size_t exp_cnt, const kv_list &sorted_exp_result)
+{
+	std::size_t cnt;
+	kv_list result;
+	UT_ASSERT(kv.count_above(key, cnt) == status::OK && cnt == exp_cnt);
+	auto s = KV_GET_1KEY_C_CB_LST(get_above, key, result);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(result == sorted_exp_result);
+}
+
+inline void verify_get_equal_above(pmem::kv::db &kv, const std::string key,
+				   const size_t exp_cnt, const kv_list &sorted_exp_result)
+{
+	std::size_t cnt;
+	kv_list result;
+	UT_ASSERT(kv.count_equal_above(key, cnt) == status::OK && cnt == exp_cnt);
+	auto s = KV_GET_1KEY_CPP_CB_LST(get_equal_above, key, result);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(result == sorted_exp_result);
+}
+
+inline void verify_get_equal_above_c(pmem::kv::db &kv, const std::string key,
+				     const size_t exp_cnt,
+				     const kv_list &sorted_exp_result)
+{
+	std::size_t cnt;
+	kv_list result;
+	UT_ASSERT(kv.count_equal_above(key, cnt) == status::OK && cnt == exp_cnt);
+	auto s = KV_GET_1KEY_C_CB_LST(get_equal_above, key, result);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(result == sorted_exp_result);
+}
+
+inline void verify_get_below(pmem::kv::db &kv, const std::string key,
+			     const size_t exp_cnt, const kv_list &sorted_exp_result)
+{
+	std::size_t cnt;
+	kv_list result;
+	UT_ASSERT(kv.count_below(key, cnt) == status::OK && cnt == exp_cnt);
+	auto s = KV_GET_1KEY_CPP_CB_LST(get_below, key, result);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(result == sorted_exp_result);
+}
+
+inline void verify_get_below_c(pmem::kv::db &kv, const std::string key,
+			       const size_t exp_cnt, const kv_list &sorted_exp_result)
+{
+	std::size_t cnt;
+	kv_list result;
+	UT_ASSERT(kv.count_below(key, cnt) == status::OK && cnt == exp_cnt);
+	auto s = KV_GET_1KEY_C_CB_LST(get_below, key, result);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(result == sorted_exp_result);
+}
+
+inline void verify_get_equal_below(pmem::kv::db &kv, const std::string key,
+				   const size_t exp_cnt, const kv_list &sorted_exp_result)
+{
+	std::size_t cnt;
+	kv_list result;
+	UT_ASSERT(kv.count_equal_below(key, cnt) == status::OK && cnt == exp_cnt);
+	auto s = KV_GET_1KEY_CPP_CB_LST(get_equal_below, key, result);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(result == sorted_exp_result);
+}
+
+inline void verify_get_equal_below_c(pmem::kv::db &kv, const std::string key,
+				     const size_t exp_cnt,
+				     const kv_list &sorted_exp_result)
+{
+	std::size_t cnt;
+	kv_list result;
+	UT_ASSERT(kv.count_equal_below(key, cnt) == status::OK && cnt == exp_cnt);
+	auto s = KV_GET_1KEY_C_CB_LST(get_equal_below, key, result);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(result == sorted_exp_result);
+}
+
+inline void verify_get_between(pmem::kv::db &kv, const std::string key1,
+			       const std::string key2, const size_t exp_cnt,
+			       const kv_list &sorted_exp_result)
+{
+	std::size_t cnt;
+	kv_list result;
+	UT_ASSERT(kv.count_between(key1, key2, cnt) == status::OK && cnt == exp_cnt);
+	auto s = KV_GET_2KEYS_CPP_CB_LST(get_between, key1, key2, result);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(result == sorted_exp_result);
+}
+
+inline void verify_get_between_c(pmem::kv::db &kv, const std::string key1,
+				 const std::string key2, const size_t exp_cnt,
+				 const kv_list &sorted_exp_result)
+{
+	std::size_t cnt;
+	kv_list result;
+	UT_ASSERT(kv.count_between(key1, key2, cnt) == status::OK && cnt == exp_cnt);
+	auto s = KV_GET_2KEYS_C_CB_LST(get_between, key1, key2, result);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
@@ -189,7 +307,10 @@ inline void add_ext_keys(pmem::kv::db &kv)
 	UT_ASSERT(kv.put("yyy", "记!") == status::OK);
 }
 
-/* generates incremental keys using each char from global variable charset */
+/*
+ * Generates incremental keys using each char from global variable charset.
+ * List looks e.g. like: "A", "AA", ..., "B", "BB", ...
+ */
 inline std::vector<std::string> gen_incr_keys(const size_t max_key_len)
 {
 	std::vector<std::string> keys;
