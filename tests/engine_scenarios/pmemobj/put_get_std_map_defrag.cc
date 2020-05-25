@@ -19,7 +19,8 @@ static void test(int argc, char *argv[])
 
 	auto proto = PutToMapTest(n_inserts, key_length, value_length, kv);
 
-	kv.defrag(0, 100);
+	auto s = kv.defrag(0, 100);
+	UT_ASSERTeq(s, pmem::kv::status::OK);
 
 	VerifyKv(proto, kv);
 

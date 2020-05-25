@@ -47,6 +47,10 @@ int main()
 	UT_ASSERT(test_wrong_engine_name("vcmap"));
 #endif
 
+#ifndef ENGINE_CSMAP
+	UT_ASSERT(test_wrong_engine_name("csmap"));
+#endif
+
 #ifndef ENGINE_TREE3
 	UT_ASSERT(test_wrong_engine_name("tree3"));
 #endif

@@ -7,6 +7,9 @@
 
 using namespace pmem::kv;
 
+// XXX should this be per engine or implemented in some generic way, e.g.
+// UT_ASSERT(kv.some_func() == NOT_SUPPORTED
+//		  || kv.some_func() == TRANSACTION_SCOPE_ERROR); ?
 static void TransactionTest(pmem::obj::pool_base &pmemobj_pool, pmem::kv::db &kv)
 {
 
@@ -23,10 +26,6 @@ static void TransactionTest(pmem::obj::pool_base &pmemobj_pool, pmem::kv::db &kv
 
 	pmem::obj::transaction::run(pmemobj_pool, [&] {
 		UT_ASSERT(kv.remove("key1") == status::TRANSACTION_SCOPE_ERROR);
-	});
-
-	pmem::obj::transaction::run(pmemobj_pool, [&] {
-		UT_ASSERT(kv.defrag() == status::TRANSACTION_SCOPE_ERROR);
 	});
 
 	pmem::obj::transaction::run(pmemobj_pool, [&] {
