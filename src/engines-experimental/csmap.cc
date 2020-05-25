@@ -106,6 +106,7 @@ status csmap::count_below(string_view key, std::size_t &cnt)
 status csmap::count_between(string_view key1, string_view key2, std::size_t &cnt)
 {
 	LOG("count_between for key1=" << key1.data() << ", key2=" << key2.data());
+	check_outside_tx();
 
 	if (container->key_comp()(key1, key2)) {
 		shared_global_lock_type lock(mtx);
