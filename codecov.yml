@@ -1,4 +1,9 @@
 coverage:
+  status:
+    project:
+      default:
+        threshold: 0.2
+
   ignore:
     - doc/
     - examples/
