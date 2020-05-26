@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include "../pmemobj_engine.h"
+#include "../engine.h"
+#include "../pmemobj_handle.h"
 
 #include <libpmemobj++/container/string.hpp>
 #include <libpmemobj++/experimental/concurrent_map.hpp>
@@ -93,6 +94,16 @@ struct pmem_type {
 		std::memset(reserved, 0, sizeof(reserved));
 	}
 
+	static const char *layout()
+	{
+		return "pmemkv_csmap";
+	}
+
+	map_type &operator*()
+	{
+		return map;
+	}
+
 	map_type map;
 	uint64_t reserved[8];
 };
@@ -102,7 +113,7 @@ static_assert(sizeof(pmem_type) == sizeof(map_type) + 64, "");
 } /* namespace csmap */
 } /* namespace internal */
 
-class csmap : public pmemobj_engine_base<internal::csmap::pmem_type> {
+class csmap : public engine_base {
 public:
 	csmap(std::unique_ptr<internal::config> cfg);
 	~csmap();
@@ -146,7 +157,7 @@ private:
 	using unique_node_lock_type = std::unique_lock<node_mutex_type>;
 	using container_type = internal::csmap::map_type;
 
-	void Recover();
+	void recover();
 	status iterate(typename container_type::iterator first,
 		       typename container_type::iterator last, get_kv_callback *callback,
 		       void *arg);
@@ -156,7 +167,8 @@ private:
 	 * synchronize with unsafe_erase() which is not thread-safe.
 	 */
 	global_mutex_type mtx;
-	container_type *container;
+
+	pmemobj_handle<internal::csmap::pmem_type> container;
 };
 
 } /* namespace kv */

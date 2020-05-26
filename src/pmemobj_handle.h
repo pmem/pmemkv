@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2020, Intel Corporation */
 
-#ifndef LIBPMEMKV_PMEMOBJ_ENGINE_H
-#define LIBPMEMKV_PMEMOBJ_ENGINE_H
+#ifndef LIBPMEMKV_PMEMOBJ_HANDLE_H
+#define LIBPMEMKV_PMEMOBJ_HANDLE_H
 
+#include <cassert>
 #include <iostream>
 #include <unistd.h>
 
-#include "engine.h"
-#include "libpmemkv.h"
+#include "config.h"
 #include <libpmemobj++/pool.hpp>
+#include <libpmemobj++/transaction.hpp>
 
 namespace pmem
 {
@@ -25,10 +26,18 @@ static inline void check_outside_tx()
 namespace kv
 {
 
+template <typename T>
+struct layout {
+	static const char *name()
+	{
+		return T::layout();
+	}
+};
+
 template <typename EngineData>
-class pmemobj_engine_base : public engine_base {
+class pmemobj_handle {
 public:
-	pmemobj_engine_base(std::unique_ptr<internal::config> &cfg)
+	pmemobj_handle(std::unique_ptr<internal::config> &cfg)
 	{
 		const char *path = nullptr;
 		std::size_t size;
@@ -57,10 +66,11 @@ public:
 					throw internal::invalid_argument(
 						"Config does not contain item with key: \"size\"");
 
-				pop = pmem::obj::pool<Root>::create(path, LAYOUT, size,
-								    S_IRWXU);
+				pop = pmem::obj::pool<Root>::create(
+					path, layout<EngineData>::name(), size, S_IRWXU);
 			} else {
-				pop = pmem::obj::pool<Root>::open(path, LAYOUT);
+				pop = pmem::obj::pool<Root>::open(
+					path, layout<EngineData>::name());
 			}
 
 			root_oid = pop.root()->ptr.raw_ptr();
@@ -70,15 +80,42 @@ public:
 			pmpool = pmem::obj::pool_base(pmemobj_pool_by_ptr(oid));
 			root_oid = oid;
 		}
+
+		cached_ptr = static_cast<EngineData *>(pmemobj_direct(*root_oid));
 	}
 
-	~pmemobj_engine_base()
+	~pmemobj_handle()
 	{
 		if (cfg_by_path)
 			pmpool.close();
 	}
 
-protected:
+	void initialize(pmem::obj::persistent_ptr<EngineData> ptr)
+	{
+		assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+
+		pmem::obj::transaction::snapshot(root_oid);
+		*root_oid = ptr.raw();
+
+		cached_ptr = static_cast<EngineData *>(pmemobj_direct(*root_oid));
+	}
+
+	pmem::obj::pool_base pool()
+	{
+		return pmpool;
+	}
+
+	EngineData *get()
+	{
+		return cached_ptr;
+	}
+
+	EngineData *operator->()
+	{
+		return get();
+	}
+
+private:
 	struct Root {
 		pmem::obj::persistent_ptr<EngineData>
 			ptr; /* used when path is specified */
@@ -88,9 +125,11 @@ protected:
 	PMEMoid *root_oid;
 
 	bool cfg_by_path = false;
+
+	EngineData *cached_ptr = nullptr;
 };
 
 } /* namespace kv */
 } /* namespace pmem */
 
-#endif /* LIBPMEMKV_PMEMOBJ_ENGINE_H */
+#endif /* LIBPMEMKV_PMEMOBJ_HANDLE_H */

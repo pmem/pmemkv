@@ -11,14 +11,14 @@ namespace pmem
 namespace kv
 {
 
-cmap::cmap(std::unique_ptr<internal::config> cfg) : pmemobj_engine_base(cfg)
+cmap::cmap(std::unique_ptr<internal::config> cfg) : container(cfg)
 {
 	static_assert(
 		sizeof(internal::cmap::string_t) == 40,
 		"Wrong size of cmap value and key. This probably means that std::string has size > 32");
 
+	recover();
 	LOG("Started ok");
-	Recover();
 }
 
 cmap::~cmap()
@@ -116,21 +116,18 @@ status cmap::defrag(double start_percent, double amount_percent)
 	return status::OK;
 }
 
-void cmap::Recover()
+void cmap::recover()
 {
-	if (!OID_IS_NULL(*root_oid)) {
-		container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(*root_oid);
-		container->runtime_initialize();
-	} else {
-		pmem::obj::transaction::run(pmpool, [&] {
-			pmem::obj::transaction::snapshot(root_oid);
-			*root_oid =
-				pmem::obj::make_persistent<internal::cmap::map_t>().raw();
-			container = (pmem::kv::internal::cmap::map_t *)pmemobj_direct(
-				*root_oid);
-			container->runtime_initialize();
+	if (!container.get()) {
+		auto pop = container.pool();
+
+		obj::transaction::run(pop, [&] {
+			container.initialize(
+				obj::make_persistent<internal::cmap::map_t>());
 		});
 	}
+
+	container->runtime_initialize();
 }
 
 } // namespace kv
