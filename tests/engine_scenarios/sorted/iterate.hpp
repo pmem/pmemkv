@@ -7,7 +7,7 @@
 #include <vector>
 
 /**
- * Helper class for testing get_* functions
+ * Helper class for testing get_* and count_* functions
  */
 
 using namespace pmem::kv;
@@ -213,74 +213,6 @@ inline void verify_get_between_c(pmem::kv::db &kv, const std::string key1,
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
-
-namespace legacy
-{
-#define KV_GET_ALL_CPP_CB(res)                                                           \
-	kv.get_all([&](string_view k, string_view v) {                                   \
-		res.append(k.data(), k.size())                                           \
-			.append(",")                                                     \
-			.append(v.data(), v.size())                                      \
-			.append("|");                                                    \
-		return 0;                                                                \
-	})
-
-#define KV_GET_ALL_C_CB(res)                                                             \
-	kv.get_all(                                                                      \
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {      \
-			const auto c = ((std::string *)arg);                             \
-			c->append(std::string(k, kb))                                    \
-				.append(",")                                             \
-				.append(std::string(v, vb))                              \
-				.append("|");                                            \
-			return 0;                                                        \
-		},                                                                       \
-		&res)
-
-#define KV_GET_1KEY_CPP_CB(func, key, res)                                               \
-	kv.func(key, [&](string_view k, string_view v) {                                 \
-		res.append(k.data(), k.size())                                           \
-			.append(",")                                                     \
-			.append(v.data(), v.size())                                      \
-			.append("|");                                                    \
-		return 0;                                                                \
-	})
-
-#define KV_GET_1KEY_C_CB(func, key, res)                                                 \
-	kv.func(                                                                         \
-		key,                                                                     \
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {      \
-			const auto c = ((std::string *)arg);                             \
-			c->append(std::string(k, kb))                                    \
-				.append(",")                                             \
-				.append(std::string(v, vb))                              \
-				.append("|");                                            \
-			return 0;                                                        \
-		},                                                                       \
-		&res)
-
-#define KV_GET_2KEYS_CPP_CB(func, key1, key2, res)                                       \
-	kv.func(key1, key2, [&](string_view k, string_view v) {                          \
-		res.append(k.data(), k.size())                                           \
-			.append(",")                                                     \
-			.append(v.data(), v.size())                                      \
-			.append("|");                                                    \
-		return 0;                                                                \
-	})
-
-#define KV_GET_2KEYS_C_CB(func, key1, key2, res)                                         \
-	kv.func(                                                                         \
-		key1, key2,                                                              \
-		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {      \
-			const auto c = ((std::string *)arg);                             \
-			c->append(std::string(k, kb))                                    \
-				.append(",")                                             \
-				.append(std::string(v, vb))                              \
-				.append("|");                                            \
-			return 0;                                                        \
-		},                                                                       \
-		&res)
-} /* namespace legacy */
 
 const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		       "abcdefghijklmnopqrstuvwxyz";
