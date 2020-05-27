@@ -653,17 +653,19 @@ if(ENGINE_VCMAP)
 			SCRIPT memkind_based/default.cmake
 			PARAMS 8 50 100)
 
-	add_engine_test(ENGINE vcmap
-			BINARY concurrent_put_get_remove_single_op_params
-			TRACERS none # XXX - tbb lock does not work well with drd or helgrind
-			SCRIPT memkind_based/default.cmake
-			PARAMS 1000)
+	# XXX: https://github.com/pmem/pmemkv/issues/699
+	# add_engine_test(ENGINE vcmap
+	# BINARY concurrent_put_get_remove_single_op_params
+	# TRACERS none # XXX - tbb lock does not work well with drd or helgrind
+	# SCRIPT memkind_based/default.cmake
+	# PARAMS 1000)
 
-	add_engine_test(ENGINE vcmap
-			BINARY concurrent_put_get_remove_single_op_params
-			TRACERS memcheck # XXX - tbb lock does not work well with drd or helgrind
-			SCRIPT memkind_based/default.cmake
-			PARAMS 400)
+	# XXX: https://github.com/pmem/pmemkv/issues/699
+	# add_engine_test(ENGINE vcmap
+	# BINARY concurrent_put_get_remove_single_op_params
+	# TRACERS memcheck # XXX - tbb lock does not work well with drd or helgrind
+	# SCRIPT memkind_based/default.cmake
+	# PARAMS 400)
 
 	add_engine_test(ENGINE vcmap
 			BINARY memkind_error_handling
