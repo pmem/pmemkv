@@ -223,9 +223,15 @@ if(ENGINE_CMAP)
 
 	add_engine_test(ENGINE cmap
 			BINARY concurrent_put_get_remove_single_op_params
-			TRACERS none memcheck
+			TRACERS none
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 1000)
+
+	add_engine_test(ENGINE cmap
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS memcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 400)
 
 	if (TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE cmap
@@ -428,9 +434,15 @@ if(ENGINE_CSMAP)
 
 	add_engine_test(ENGINE csmap
 			BINARY concurrent_put_get_remove_single_op_params
-			TRACERS none memcheck
+			TRACERS none
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 1000)
+
+	add_engine_test(ENGINE csmap
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS memcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 400)
 
 	if (TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE csmap
@@ -600,9 +612,15 @@ if(ENGINE_VCMAP)
 
 	add_engine_test(ENGINE vcmap
 			BINARY concurrent_put_get_remove_single_op_params
-			TRACERS none memcheck # XXX - tbb lock does not work well with drd or helgrind
+			TRACERS none # XXX - tbb lock does not work well with drd or helgrind
 			SCRIPT memkind_based/default.cmake
 			PARAMS 1000)
+
+	add_engine_test(ENGINE vcmap
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS memcheck # XXX - tbb lock does not work well with drd or helgrind
+			SCRIPT memkind_based/default.cmake
+			PARAMS 400)
 
 	add_engine_test(ENGINE vcmap
 			BINARY memkind_error_handling
