@@ -39,7 +39,10 @@ int main(int argc, char *argv[])
 	}
 
 	pmem_unmap(addr, size);
-	remove(path);
+	if (remove(path) != 0) {
+		perror("remove(path) failed");
+		return 2;
+	}
 
 	if (is_pmem)
 		return 0;
