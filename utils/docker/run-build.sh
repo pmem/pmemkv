@@ -11,9 +11,11 @@ set -e
 
 source `dirname $0`/prepare-for-build.sh
 
+# params set for the file (if not previously set, the right-hand param is used)
 TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
 BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
 CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-ON}
+TESTS_LONG=${TESTS_LONG:-OFF}
 
 cd $WORKDIR
 
@@ -36,6 +38,7 @@ function tests_gcc_debug_cpp11() {
 		-DENGINE_STREE=1 \
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
 		-DCHECK_CPP_STYLE=${CHECK_CPP_STYLE} \
+		-DTESTS_LONG=${TESTS_LONG} \
 		-DDEVELOPER_MODE=1 \
 		-DTESTS_USE_FORCED_PMEM=1 \
 		-DTESTS_PMEMOBJ_DRD_HELGRIND=1 \
@@ -67,6 +70,7 @@ function tests_gcc_debug_cpp14() {
 		-DCOVERAGE=$COVERAGE \
 		-DENGINE_CSMAP=1 \
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
+		-DTESTS_LONG=${TESTS_LONG} \
 		-DDEVELOPER_MODE=1 \
 		-DTESTS_USE_FORCED_PMEM=1 \
 		-DTESTS_PMEMOBJ_DRD_HELGRIND=1 \
@@ -99,6 +103,7 @@ function tests_gcc_debug_cpp14_valgrind_other() {
 		-DENGINE_CSMAP=1 \
 		-DENGINE_STREE=1 \
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
+		-DTESTS_LONG=${TESTS_LONG} \
 		-DTESTS_USE_FORCED_PMEM=1 \
 		-DCXX_STANDARD=14
 
@@ -127,6 +132,7 @@ function tests_gcc_debug_cpp14_valgrind_memcheck_drd() {
 		-DCOVERAGE=$COVERAGE \
 		-DENGINE_CSMAP=1 \
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
+		-DTESTS_LONG=${TESTS_LONG} \
 		-DTESTS_USE_FORCED_PMEM=1 \
 		-DTESTS_PMEMOBJ_DRD_HELGRIND=1 \
 		-DCXX_STANDARD=14
