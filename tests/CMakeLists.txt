@@ -275,9 +275,17 @@ if(ENGINE_CMAP)
 
 	add_engine_test(ENGINE cmap
 			BINARY pmemobj_error_handling_tx_oom
-			TRACERS none # memcheck runs really slow
+			TRACERS none
 			SCRIPT pmemobj_based/default.cmake
 			DB_SIZE 200M)
+
+	if (TESTS_LONG)
+		add_engine_test(ENGINE cmap
+				BINARY pmemobj_error_handling_tx_oom
+				TRACERS memcheck
+				SCRIPT pmemobj_based/default.cmake
+				DB_SIZE 200M)
+	endif()
 
 	add_engine_test(ENGINE cmap
 			BINARY pmemobj_error_handling_create
@@ -472,9 +480,17 @@ if(ENGINE_CSMAP)
 
 	add_engine_test(ENGINE csmap
 			BINARY pmemobj_error_handling_tx_oom
-			TRACERS none # memcheck runs really slow
+			TRACERS none
 			SCRIPT pmemobj_based/default.cmake
 			DB_SIZE 200M)
+
+	if (TESTS_LONG)
+		add_engine_test(ENGINE csmap
+				BINARY pmemobj_error_handling_tx_oom
+				TRACERS memcheck
+				SCRIPT pmemobj_based/default.cmake
+				DB_SIZE 200M)
+	endif()
 
 	add_engine_test(ENGINE csmap
 			BINARY pmemobj_error_handling_create
