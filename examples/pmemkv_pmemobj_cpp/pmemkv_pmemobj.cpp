@@ -107,10 +107,14 @@ int main(int argc, char *argv[])
 		delete kv_2;
 
 	} catch (std::exception &e) {
-		std::cerr << e.what() << std::endl;
+		std::cerr << "Exception occured: " << e.what() << std::endl;
 	}
 
-	pop.close();
+	try {
+		pop.close();
+	} catch (const std::logic_error &e) {
+		std::cerr << "Exception occured: " << e.what() << std::endl;
+	}
 
 	return 0;
 }
