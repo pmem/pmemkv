@@ -1,3 +1,23 @@
+Thu May 28 2019 Szymon Romik <szymon.romik@intel.com>
+
+	* Version 1.2-rc1
+
+	This release introduces a new experimantal engine - csmap (cuncurrent
+	sorted map, backed by libpmemobj-cpp's concurrent_map).
+
+	We have also provided support for custom comparators for sorted engines.
+
+	Features:
+	- csmap engine (concurrent sorted map)
+	- support for custom comparator for sorted engines
+
+	Optimizations:
+	- vsmap::put() now uses emplace() internally
+
+	Other changes:
+	- test framework refactor (scenario-based tests, extednded tests for
+		concurrentcy and sorting)
+
 Fri Feb 07 2020 Igor Chorążewicz <igor.chorazewicz@intel.com>
 
 	* Version 1.0.2
