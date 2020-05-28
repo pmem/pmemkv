@@ -447,7 +447,13 @@ if(ENGINE_CSMAP)
 			BINARY sorted_get_above_gen_params
 			TRACERS none memcheck
 			SCRIPT pmemobj_based/default.cmake
-			PARAMS 32 8)
+			PARAMS default 32 8)
+
+	add_engine_test(ENGINE csmap
+			BINARY sorted_get_above_gen_params
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS reverse 32 8)
 
 	add_engine_test(ENGINE csmap
 			BINARY sorted_get_equal_above_gen_params
@@ -785,7 +791,13 @@ if(ENGINE_VSMAP)
 			BINARY sorted_get_above_gen_params
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake
-			PARAMS 32 8)
+			PARAMS default 32 8)
+
+	add_engine_test(ENGINE vsmap
+			BINARY sorted_get_above_gen_params
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake
+			PARAMS reverse 32 8)
 
 	add_engine_test(ENGINE vsmap
 			BINARY sorted_get_equal_above_gen_params
