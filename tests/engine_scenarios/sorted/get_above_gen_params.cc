@@ -13,7 +13,6 @@ static void GetAboveTest(std::string engine, pmem::kv::config &&config)
 {
 	/**
 	 * TEST: Basic test with hardcoded strings. Some new keys added.
-	 * It's NOT suitable to test with custom comparator.
 	 */
 	auto kv = INITIALIZE_KV(engine, std::move(config));
 	verify_get_above(kv, EMPTY_KEY, 0, kv_list());
@@ -58,12 +57,56 @@ static void GetAboveTest(std::string engine, pmem::kv::config &&config)
 	kv.close();
 }
 
+static void GetAboveReverseTest(std::string engine, pmem::kv::config &&config)
+{
+	/**
+	 * TEST: Basic test with hardcoded strings. Some new keys added.
+	 */
+	auto kv = INITIALIZE_KV(engine, std::move(config));
+	verify_get_above(kv, EMPTY_KEY, 0, {});
+	verify_get_above_c(kv, MAX_KEY, 0, {});
+
+	/* insert bunch of keys */
+	add_basic_keys(kv);
+
+	verify_get_above(kv, EMPTY_KEY, 0, {});
+
+	auto expected = kv_list{{"AC", "3"}, {"AB", "2"}, {"A", "1"}};
+	verify_get_above(kv, "B", 3, expected);
+
+	/* insert new key */
+	UT_ASSERTeq(kv.put("BD", "7"), status::OK);
+
+	expected = kv_list{{"AC", "3"}, {"AB", "2"}, {"A", "1"}};
+	verify_get_above(kv, "B", 3, expected);
+
+	expected = kv_list{{"BD", "7"}, {"BC", "6"}, {"BB", "5"}, {"B", "4"},
+			   {"AC", "3"}, {"AB", "2"}, {"A", "1"}};
+	verify_get_above(kv, MAX_KEY, 7, expected);
+
+	/* insert new key with special char in key */
+	UT_ASSERT(kv.put("记!", "RR") == status::OK);
+
+	/* testing C-like API */
+	expected = kv_list{{"AC", "3"}, {"AB", "2"}, {"A", "1"}};
+	verify_get_above_c(kv, "B", 3, expected);
+
+	expected = kv_list{{"BD", "7"}, {"BC", "6"}, {"BB", "5"}, {"B", "4"},
+			   {"AC", "3"}, {"AB", "2"}, {"A", "1"}};
+	verify_get_above_c(kv, "记!", 7, expected);
+
+	CLEAR_KV(kv);
+	verify_get_above_c(kv, MIN_KEY, 0, {});
+	verify_get_above_c(kv, MAX_KEY, 0, {});
+
+	kv.close();
+}
+
 static void GetAboveTest2(std::string engine, pmem::kv::config &&config)
 {
 	/**
 	 * TEST: Basic test with hardcoded strings. Some keys are removed.
 	 * This test is using C-like API.
-	 * It's NOT suitable to test with custom comparator.
 	 */
 	auto kv = INITIALIZE_KV(engine, std::move(config));
 	verify_get_above_c(kv, MIN_KEY, 0, kv_list());
@@ -94,7 +137,7 @@ static void GetAboveTest2(std::string engine, pmem::kv::config &&config)
 	verify_get_above_c(kv, "z", 0, kv_list());
 
 	CLEAR_KV(kv);
-	verify_get_above_c(kv, MIN_KEY, 0, kv_list());
+	verify_get_above_c(kv, MAX_KEY, 0, kv_list());
 
 	kv.close();
 }
@@ -316,22 +359,36 @@ static void GetAboveIncrReverseTest(std::string engine, pmem::kv::config &&confi
 
 static void test(int argc, char *argv[])
 {
-	if (argc < 3)
-		UT_FATAL("usage: %s engine json_config items max_key_len", argv[0]);
+	if (argc < 6)
+		UT_FATAL("usage: %s engine json_config comparator items max_key_len",
+			 argv[0]);
 
 	auto engine = std::string(argv[1]);
-	size_t items = std::stoull(argv[3]);
-	size_t max_key_len = std::stoull(argv[4]);
+	auto comparator = std::string(argv[3]);
+	size_t items = std::stoull(argv[4]);
+	size_t max_key_len = std::stoull(argv[5]);
 
 	auto seed = unsigned(std::time(0));
 	printf("rand seed: %u\n", seed);
 	std::srand(seed);
 
-	GetAboveTest(engine, CONFIG_FROM_JSON(argv[2]));
-	GetAboveTest2(engine, CONFIG_FROM_JSON(argv[2]));
-	GetAboveRandTest(engine, CONFIG_FROM_JSON(argv[2]), items, max_key_len);
-	GetAboveIncrTest(engine, CONFIG_FROM_JSON(argv[2]), max_key_len);
-	GetAboveIncrReverseTest(engine, CONFIG_FROM_JSON(argv[2]), max_key_len);
+	if (comparator == "default") {
+		GetAboveTest(engine, CONFIG_FROM_JSON(argv[2]));
+		GetAboveTest2(engine, CONFIG_FROM_JSON(argv[2]));
+		GetAboveRandTest(engine, CONFIG_FROM_JSON(argv[2]), items, max_key_len);
+		GetAboveIncrTest(engine, CONFIG_FROM_JSON(argv[2]), max_key_len);
+		GetAboveIncrReverseTest(engine, CONFIG_FROM_JSON(argv[2]), max_key_len);
+	} else if (comparator == "reverse") {
+		auto make_config = [&] {
+			auto cfg = CONFIG_FROM_JSON(argv[2]);
+			UT_ASSERTeq(cfg.put_comparator(reverse_comparator{}), status::OK);
+
+			return cfg;
+		};
+
+		GetAboveReverseTest(engine, make_config());
+	} else
+		UT_FATAL("Unknown comparator");
 }
 
 int main(int argc, char *argv[])

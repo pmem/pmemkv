@@ -280,3 +280,40 @@ inline std::vector<std::string> gen_rand_keys(const size_t cnt, const size_t max
 
 	return keys;
 }
+
+/* Custom comparator */
+class reverse_comparator {
+public:
+	reverse_comparator() : runtime_data(new int(RUNTIME_DATA_VAL))
+	{
+	}
+
+	reverse_comparator(reverse_comparator &&cmp)
+	{
+		this->runtime_data = cmp.runtime_data;
+		cmp.runtime_data = nullptr;
+	}
+
+	reverse_comparator(const reverse_comparator &cmp) = delete;
+
+	~reverse_comparator()
+	{
+		delete runtime_data;
+	}
+
+	int compare(string_view key1, string_view key2) const
+	{
+		UT_ASSERT(*runtime_data == RUNTIME_DATA_VAL);
+
+		return key2.compare(key1);
+	}
+
+	std::string name()
+	{
+		return "reverse_comparator";
+	}
+
+private:
+	static constexpr int RUNTIME_DATA_VAL = 0xABC;
+	int *runtime_data;
+};
