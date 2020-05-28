@@ -439,49 +439,49 @@ if(ENGINE_CSMAP)
 
 	add_engine_test(ENGINE csmap
 			BINARY sorted_get_all_gen_params
-			TRACERS none memcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 32 8)
 
 	add_engine_test(ENGINE csmap
 			BINARY sorted_get_above_gen_params
-			TRACERS none memcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS default 32 8)
 
 	add_engine_test(ENGINE csmap
 			BINARY sorted_get_above_gen_params
-			TRACERS none memcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS reverse 32 8)
 
 	add_engine_test(ENGINE csmap
 			BINARY sorted_get_equal_above_gen_params
-			TRACERS none memcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 32 8)
 
 	add_engine_test(ENGINE csmap
 			BINARY sorted_get_below_gen_params
-			TRACERS none memcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 32 8)
 
 	add_engine_test(ENGINE csmap
 			BINARY sorted_get_equal_below_gen_params
-			TRACERS none memcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 32 8)
 
 	add_engine_test(ENGINE csmap
 			BINARY sorted_get_between_gen_params
-			TRACERS none memcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 32 8)
 
 	add_engine_test(ENGINE csmap
 			BINARY concurrent_iterate_params
-			TRACERS none memcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 24 200)
 
@@ -495,7 +495,7 @@ if(ENGINE_CSMAP)
 
 	add_engine_test(ENGINE csmap
 			BINARY concurrent_put_get_remove_params
-			TRACERS none memcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8 50)
 
@@ -509,7 +509,7 @@ if(ENGINE_CSMAP)
 
 	add_engine_test(ENGINE csmap
 			BINARY concurrent_put_get_remove_gen_params
-			TRACERS none memcheck
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8 50 100)
 
@@ -529,7 +529,7 @@ if(ENGINE_CSMAP)
 
 	add_engine_test(ENGINE csmap
 			BINARY concurrent_put_get_remove_single_op_params
-			TRACERS memcheck
+			TRACERS memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 400)
 
