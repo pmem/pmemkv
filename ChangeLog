@@ -1,6 +1,6 @@
-Thu May 28 2019 Szymon Romik <szymon.romik@intel.com>
+Fri May 29 2019 Szymon Romik <szymon.romik@intel.com>
 
-	* Version 1.2-rc1
+	* Version 1.2
 
 	This release introduces a new experimantal engine - csmap (cuncurrent
 	sorted map, backed by libpmemobj-cpp's concurrent_map).
