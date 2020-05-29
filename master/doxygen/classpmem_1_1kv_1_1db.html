@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.1-git131.g998af7f</span>
+   &#160;<span id="projectnumber">1.2-git1.g244c3b0</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -375,7 +375,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>It returns number of currently stored elements in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the given <em>key</em>. </p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the lower bound of counting </td></tr>
@@ -457,7 +457,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>It returns number of currently stored elements in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are less than the given <em>key</em>. </p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the upper bound of counting </td></tr>
@@ -510,7 +510,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>It returns number of currently stored elements in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the <em>key1</em> and less than the <em>key2</em>. </p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key1</td><td>sets the lower bound of counting </td></tr>
@@ -558,7 +558,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>It returns number of currently stored elements in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than or equal to the given <em>key</em>. </p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the lower bound of counting </td></tr>
@@ -605,7 +605,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>It returns number of currently stored elements in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are lower than or equal to the given <em>key</em>. </p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the lower bound of counting </td></tr>
@@ -918,7 +918,7 @@ Private Attributes</h2></td></tr>
 
 <p>Executes (C-like) callback function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the given <em>key</em>. </p>
 <p>Arguments passed to the callback function are: pointer to a key, size of the key, pointer to a value, size of the value and <em>arg</em> specified by the user. Callback can stop iteration by returning non-zero value. In that case <em><a class="el" href="classpmem_1_1kv_1_1db.html#acc008b94f62399f47237d3bdab0989e0" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are greater t...">get_above()</a></em> returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the lower bound for querying </td></tr>
@@ -967,7 +967,7 @@ Private Attributes</h2></td></tr>
 
 <p>Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the given <em>key</em>. </p>
 <p>Callback can stop iteration by returning non-zero value. In that case <em><a class="el" href="classpmem_1_1kv_1_1db.html#acc008b94f62399f47237d3bdab0989e0" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are greater t...">get_above()</a></em> returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the lower bound for querying </td></tr>
@@ -1104,7 +1104,7 @@ Private Attributes</h2></td></tr>
 
 <p>Executes (C-like) callback function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are lower than the given <em>key</em>. </p>
 <p>Arguments passed to the callback function are: pointer to a key, size of the key, pointer to a value, size of the value and <em>arg</em> specified by the user. Callback can stop iteration by returning non-zero value. In that case <em><a class="el" href="classpmem_1_1kv_1_1db.html#ad8c8aba193345dc3c30336ab349b6066" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are lower tha...">get_below()</a></em> returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the upper bound for querying </td></tr>
@@ -1153,7 +1153,7 @@ Private Attributes</h2></td></tr>
 
 <p>Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are less than the given <em>key</em>. </p>
 <p>Callback can stop iteration by returning non-zero value. In that case <em><a class="el" href="classpmem_1_1kv_1_1db.html#ad8c8aba193345dc3c30336ab349b6066" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are lower tha...">get_below()</a></em> returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the upper bound for querying </td></tr>
@@ -1213,7 +1213,7 @@ Private Attributes</h2></td></tr>
 
 <p>Executes (C-like) callback function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the <em>key1</em> and less than the <em>key2</em>. </p>
 <p>Arguments passed to the callback function are: pointer to a key, size of the key, pointer to a value, size of the value and <em>arg</em> specified by the user. Callback can stop iteration by returning non-zero value. In that case <em><a class="el" href="classpmem_1_1kv_1_1db.html#aadc338822098cc657cdb944962319b70" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are greater t...">get_between()</a></em> returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key1</td><td>sets the lower bound for querying </td></tr>
@@ -1269,7 +1269,7 @@ Private Attributes</h2></td></tr>
 
 <p>Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the <em>key1</em> and less than the <em>key2</em>. </p>
 <p>Callback can stop iteration by returning non-zero value. In that case <em><a class="el" href="classpmem_1_1kv_1_1db.html#aadc338822098cc657cdb944962319b70" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are greater t...">get_between()</a></em> returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key1</td><td>sets the lower bound for querying </td></tr>
@@ -1324,7 +1324,7 @@ Private Attributes</h2></td></tr>
 
 <p>Executes (C-like) callback function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than or equal to the given <em>key</em>. </p>
 <p>Arguments passed to the callback function are: pointer to a key, size of the key, pointer to a value, size of the value and <em>arg</em> specified by the user. Callback can stop iteration by returning non-zero value. In that case <em><a class="el" href="classpmem_1_1kv_1_1db.html#a564e74f87cd0c460e99108c5ca0520cf" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are greater t...">get_equal_above()</a></em> returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the lower bound for querying </td></tr>
@@ -1373,7 +1373,7 @@ Private Attributes</h2></td></tr>
 
 <p>Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than or equal to the given <em>key</em>. </p>
 <p>Callback can stop iteration by returning non-zero value. In that case <a class="el" href="classpmem_1_1kv_1_1db.html#a564e74f87cd0c460e99108c5ca0520cf" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are greater t...">get_equal_above()</a>* returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the lower bound for querying </td></tr>
@@ -1427,7 +1427,7 @@ Private Attributes</h2></td></tr>
 
 <p>Executes (C-like) callback function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are lower than or equal to the given <em>key</em>. </p>
 <p>Arguments passed to the callback function are: pointer to a key, size of the key, pointer to a value, size of the value and <em>arg</em> specified by the user. Callback can stop iteration by returning non-zero value. In that case <em><a class="el" href="classpmem_1_1kv_1_1db.html#aaa568e1363f13ed055cd026f7a440563" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are lower tha...">get_equal_below()</a></em> returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the upper bound for querying </td></tr>
@@ -1476,7 +1476,7 @@ Private Attributes</h2></td></tr>
 
 <p>Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are lower than or equal to the given <em>key</em>. </p>
 <p>Callback can stop iteration by returning non-zero value. In that case <a class="el" href="classpmem_1_1kv_1_1db.html#aaa568e1363f13ed055cd026f7a440563" title="Executes (C-like) callback function for every record stored in pmem::kv::db, whose keys are lower tha...">get_equal_below()</a>* returns <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0" title="iteration was stopped by user&#39;s callback">pmem::kv::status::STOPPED_BY_CB</a>. Returning 0 continues iteration.</p>
-<p>Keys are sorted in binary order (see std::string::compare).</p>
+<p>Keys are sorted in order specified by a comparator.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>sets the upper bound for querying </td></tr>

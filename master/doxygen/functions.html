@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.1-git131.g998af7f</span>
+   &#160;<span id="projectnumber">1.2-git1.g244c3b0</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -82,14 +82,28 @@ $(function() {
 
 
 <h3><a id="index_c"></a>- c -</h3><ul>
+<li>c_cmp
+: <a class="el" href="structpmem_1_1kv_1_1internal_1_1comparator__config__entry.html#a9011b394dc7e29527b1a0354042a8bf5">pmem::kv::internal::comparator_config_entry</a>
+</li>
 <li>close()
 : <a class="el" href="classpmem_1_1kv_1_1db.html#ab19d3a8e0b976f5c2ad06b14e542755c">pmem::kv::db</a>
 </li>
+<li>cmp
+: <a class="el" href="structpmem_1_1kv_1_1internal_1_1comparator__wrapper.html#abb70bb447d427b6e7dda70538dd3de64">pmem::kv::internal::comparator_wrapper&lt; Comparator &gt;</a>
+</li>
+<li>comparator_config_entry()
+: <a class="el" href="structpmem_1_1kv_1_1internal_1_1comparator__config__entry.html#a873db1100a4ff973772c7c0774a7d60b">pmem::kv::internal::comparator_config_entry</a>
+</li>
+<li>comparator_wrapper()
+: <a class="el" href="structpmem_1_1kv_1_1internal_1_1comparator__wrapper.html#a8f0ec1c6b80063177f6a7fbcf2c7f5fc">pmem::kv::internal::comparator_wrapper&lt; Comparator &gt;</a>
+</li>
 <li>compare()
-: <a class="el" href="classpmem_1_1kv_1_1string__view.html#a0359a915e273700f1c45164e90839231">pmem::kv::string_view</a>
+: <a class="el" href="classpmem_1_1kv_1_1internal_1_1comparator__base.html#a7fd70768f9201214b7df71f952b8e936">pmem::kv::internal::comparator_base</a>
+, <a class="el" href="structpmem_1_1kv_1_1internal_1_1comparator__wrapper.html#a1596fb78cefa108ff9f9fd9552fae20e">pmem::kv::internal::comparator_wrapper&lt; Comparator &gt;</a>
+, <a class="el" href="classpmem_1_1kv_1_1string__view.html#a0359a915e273700f1c45164e90839231">pmem::kv::string_view</a>
 </li>
 <li>config()
-: <a class="el" href="classpmem_1_1kv_1_1config.html#a453fb71449acb6e81591d4fc4c9a607f">pmem::kv::config</a>
+: <a class="el" href="classpmem_1_1kv_1_1config.html#a4b7a6da90bd85d2d77a55ae191b11ad9">pmem::kv::config</a>
 </li>
 <li>count_above()
 : <a class="el" href="classpmem_1_1kv_1_1db.html#a39d9dd4dafa5f9918666dfc82ae5b4c1">pmem::kv::db</a>
@@ -138,6 +152,7 @@ $(function() {
 <h3><a id="index_g"></a>- g -</h3><ul>
 <li>get()
 : <a class="el" href="classpmem_1_1kv_1_1db.html#aff3cbefb1fa8e9bd611cc3a6a5137fa7">pmem::kv::db</a>
+, <a class="el" href="structpmem_1_1kv_1_1internal_1_1comparator__config__entry.html#a7e3d6dc31d712300250e0ba9a0d6d5be">pmem::kv::internal::comparator_config_entry</a>
 , <a class="el" href="structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper.html#a697b21ab9daef23b2bab78f3bcaa84ee">pmem::kv::internal::unique_ptr_wrapper&lt; T, D &gt;</a>
 , <a class="el" href="structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper__base.html#a8eb3670f74bbffec65e838625f187251">pmem::kv::internal::unique_ptr_wrapper_base</a>
 </li>
@@ -160,7 +175,7 @@ $(function() {
 : <a class="el" href="classpmem_1_1kv_1_1db.html#a564e74f87cd0c460e99108c5ca0520cf">pmem::kv::db</a>
 </li>
 <li>get_equal_below()
-: <a class="el" href="classpmem_1_1kv_1_1db.html#aaa568e1363f13ed055cd026f7a440563">pmem::kv::db</a>
+: <a class="el" href="classpmem_1_1kv_1_1db.html#ac12681d430646f34aba8e9635e4c6861">pmem::kv::db</a>
 </li>
 <li>get_int64()
 : <a class="el" href="classpmem_1_1kv_1_1config.html#a701c6892d4c18dac018f0362ab25acc4">pmem::kv::config</a>
@@ -198,10 +213,14 @@ $(function() {
 
 <h3><a id="index_p"></a>- p -</h3><ul>
 <li>ptr
-: <a class="el" href="structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper.html#a8ba6ff57823a1c3c0a89637555280a38">pmem::kv::internal::unique_ptr_wrapper&lt; T, D &gt;</a>
+: <a class="el" href="structpmem_1_1kv_1_1internal_1_1comparator__config__entry.html#a242122210993f0ba744ad8dddab549e9">pmem::kv::internal::comparator_config_entry</a>
+, <a class="el" href="structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper.html#a8ba6ff57823a1c3c0a89637555280a38">pmem::kv::internal::unique_ptr_wrapper&lt; T, D &gt;</a>
 </li>
 <li>put()
 : <a class="el" href="classpmem_1_1kv_1_1db.html#a31dbecf3c960dec47d4a04328b9efd92">pmem::kv::db</a>
+</li>
+<li>put_comparator()
+: <a class="el" href="classpmem_1_1kv_1_1config.html#a95af80763cf924cf0b656d4ded034222">pmem::kv::config</a>
 </li>
 <li>put_data()
 : <a class="el" href="classpmem_1_1kv_1_1config.html#af6c8419518a384cdce1f36cd2a1e4545">pmem::kv::config</a>
@@ -249,6 +268,9 @@ $(function() {
 
 
 <h3><a id="index__7E"></a>- ~ -</h3><ul>
+<li>~comparator_base()
+: <a class="el" href="classpmem_1_1kv_1_1internal_1_1comparator__base.html#a11cc4a794734ed399341c2ca8e09af50">pmem::kv::internal::comparator_base</a>
+</li>
 <li>~config()
 : <a class="el" href="classpmem_1_1kv_1_1config.html#ad5412f019159502c0129286298e966e9">pmem::kv::config</a>
 </li>

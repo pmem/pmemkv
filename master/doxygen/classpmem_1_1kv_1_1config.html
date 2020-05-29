@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.1-git131.g998af7f</span>
+   &#160;<span id="projectnumber">1.2-git1.g244c3b0</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -103,6 +103,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a206c04471a1fab7400a0e0e87760fda9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classpmem_1_1kv_1_1config.html">config</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#a206c04471a1fab7400a0e0e87760fda9">operator=</a> (<a class="el" href="classpmem_1_1kv_1_1config.html">config</a> &amp;&amp;other) noexcept</td></tr>
 <tr class="memdesc:a206c04471a1fab7400a0e0e87760fda9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move assignment operator.  <a href="#a206c04471a1fab7400a0e0e87760fda9">More...</a><br /></td></tr>
 <tr class="separator:a206c04471a1fab7400a0e0e87760fda9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95af80763cf924cf0b656d4ded034222"><td class="memTemplParams" colspan="2">template&lt;typename Comparator &gt; </td></tr>
+<tr class="memitem:a95af80763cf924cf0b656d4ded034222"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#a95af80763cf924cf0b656d4ded034222">put_comparator</a> (Comparator &amp;&amp;comparator)</td></tr>
+<tr class="memdesc:a95af80763cf924cf0b656d4ded034222"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts comparator object to a config.  <a href="#a95af80763cf924cf0b656d4ded034222">More...</a><br /></td></tr>
+<tr class="separator:a95af80763cf924cf0b656d4ded034222"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6c8419518a384cdce1f36cd2a1e4545"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:af6c8419518a384cdce1f36cd2a1e4545"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#af6c8419518a384cdce1f36cd2a1e4545">put_data</a> (const std::string &amp;key, const T *value, const std::size_t number=1) noexcept</td></tr>
 <tr class="memdesc:af6c8419518a384cdce1f36cd2a1e4545"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts binary data pointed by value, of type T, with count of elements to a config.  <a href="#af6c8419518a384cdce1f36cd2a1e4545">More...</a><br /></td></tr>
@@ -625,6 +629,49 @@ template&lt;typename T &gt; </div>
 <p>Move assignment operator. </p>
 <p>Deletes previous config and replaces it with another config. Ownership is transferred to config class. </p>
 
+</div>
+</div>
+<a id="a95af80763cf924cf0b656d4ded034222"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95af80763cf924cf0b656d4ded034222">&#9670;&nbsp;</a></span>put_comparator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Comparator &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::config::put_comparator </td>
+          <td>(</td>
+          <td class="paramtype">Comparator &amp;&amp;&#160;</td>
+          <td class="paramname"><em>comparator</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Puts comparator object to a config. </p>
+<p>Comparator must:</p><ul>
+<li>implement <code>int compare(pmem::kv::string_view, pmem::kv::string_view)</code></li>
+<li>implement <code>std::string name()</code></li>
+<li>be copy or move constructible</li>
+<li>be thread safe</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">comparator</td><td>forwarding reference to a comparator</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a></dd></dl>
+<p>Example of custom comparator: </p><div class="fragment"><div class="line"><span class="keyword">class </span>lexicographical_comparator {</div><div class="line"><span class="keyword">public</span>:</div><div class="line">    <span class="keywordtype">int</span> compare(string_view k1, string_view k2)</div><div class="line">    {</div><div class="line">        <span class="keywordflow">if</span> (k1.compare(k2) == 0)</div><div class="line">            <span class="keywordflow">return</span> 0;</div><div class="line">        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (std::lexicographical_compare(k1.data(), k1.data() + k1.size(),</div><div class="line">                              k2.data(), k2.data() + k2.size()))</div><div class="line">            <span class="keywordflow">return</span> -1;</div><div class="line">        <span class="keywordflow">else</span></div><div class="line">            <span class="keywordflow">return</span> 1;</div><div class="line">    }</div><div class="line"></div><div class="line">    std::string name()</div><div class="line">    {</div><div class="line">        <span class="keywordflow">return</span> <span class="stringliteral">&quot;lexicographical_comparator&quot;</span>;</div><div class="line">    }</div><div class="line">};</div></div><!-- fragment -->
 </div>
 </div>
 <a id="af6c8419518a384cdce1f36cd2a1e4545"></a>

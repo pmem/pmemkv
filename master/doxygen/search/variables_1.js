@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['ptr',['ptr',['../structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper.html#a8ba6ff57823a1c3c0a89637555280a38',1,'pmem::kv::internal::unique_ptr_wrapper']]]
+  ['c_5fcmp',['c_cmp',['../structpmem_1_1kv_1_1internal_1_1comparator__config__entry.html#a9011b394dc7e29527b1a0354042a8bf5',1,'pmem::kv::internal::comparator_config_entry']]],
+  ['cmp',['cmp',['../structpmem_1_1kv_1_1internal_1_1comparator__wrapper.html#abb70bb447d427b6e7dda70538dd3de64',1,'pmem::kv::internal::comparator_wrapper']]]
 ];
