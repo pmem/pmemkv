@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.1-git131.g998af7f</span>
+   &#160;<span id="projectnumber">1.2-git1.g244c3b0</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -83,6 +83,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacepmem_1_1kv_1_1internal"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv_1_1internal.html">internal</a></td></tr>
+<tr class="memdesc:namespacepmem_1_1kv_1_1internal"><td class="mdescLeft">&#160;</td><td class="mdescRight">internal pmemkv classes for C++ API <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
@@ -105,6 +106,8 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a3d14c2b2e57bef5dbca29560b4b7e721"><td class="memItemLeft" align="right" valign="top">typedef void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a3d14c2b2e57bef5dbca29560b4b7e721">get_v_function</a>(<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> value)</td></tr>
 <tr class="memdesc:a3d14c2b2e57bef5dbca29560b4b7e721"><td class="mdescLeft">&#160;</td><td class="mdescRight">The C++ idiomatic function type to use for callback using only the value.  <a href="#a3d14c2b2e57bef5dbca29560b4b7e721">More...</a><br /></td></tr>
 <tr class="separator:a3d14c2b2e57bef5dbca29560b4b7e721"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a030860872cabda2262ece46fc77785d7"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a030860872cabda2262ece46fc77785d7">comparator_function</a>(<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key1, <a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key2)</td></tr>
+<tr class="separator:a030860872cabda2262ece46fc77785d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c0f1ef8ac77b4f70bd027c60956ea9d"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> = pmemkv_get_kv_callback</td></tr>
 <tr class="memdesc:a9c0f1ef8ac77b4f70bd027c60956ea9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Key-value pair callback, C-style.  <a href="#a9c0f1ef8ac77b4f70bd027c60956ea9d">More...</a><br /></td></tr>
 <tr class="separator:a9c0f1ef8ac77b4f70bd027c60956ea9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -128,7 +131,9 @@ Enumerations</h2></td></tr>
 &#160;&#160;<a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231ac56ddb8056b120c9d5fee05981f219c6">status::OUT_OF_MEMORY</a>, 
 <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a1b216524ee497e527dfea31344c137e2">status::WRONG_ENGINE_NAME</a>, 
 <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a563d1c46f9b9ece2ee9fc95e85ce2cfe">status::TRANSACTION_SCOPE_ERROR</a>, 
-<a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a0f3ff38a7ae1da8aab727eeabca0905a">status::DEFRAG_ERROR</a> = PMEMKV_STATUS_DEFRAG_ERROR
+<a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a0f3ff38a7ae1da8aab727eeabca0905a">status::DEFRAG_ERROR</a> = PMEMKV_STATUS_DEFRAG_ERROR, 
+<br />
+&#160;&#160;<a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a756f166f53b2a5ff80f7c72ea796c562">status::COMPARATOR_MISMATCH</a>
 <br />
  }</td></tr>
 <tr class="memdesc:a966ec5140bba4b6f4cc4e9aa15979231"><td class="mdescLeft">&#160;</td><td class="mdescRight">Status returned by pmemkv functions.  <a href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">More...</a><br /></td></tr>
@@ -138,6 +143,20 @@ Enumerations</h2></td></tr>
 <div class="textblock"><p>Main pmemkv namespace. </p>
 <p>It contains all pmemkv public types, enums, classes with their functions and members. It is located within pmem namespace. </p>
 </div><h2 class="groupheader">Typedef Documentation</h2>
+<a id="a030860872cabda2262ece46fc77785d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a030860872cabda2262ece46fc77785d7">&#9670;&nbsp;</a></span>comparator_function</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef int pmem::kv::comparator_function(<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key1, <a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key2)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a9c0f1ef8ac77b4f70bd027c60956ea9d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9c0f1ef8ac77b4f70bd027c60956ea9d">&#9670;&nbsp;</a></span>get_kv_callback</h2>
 
@@ -263,6 +282,8 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="a966ec5140bba4b6f4cc4e9aa15979231a563d1c46f9b9ece2ee9fc95e85ce2cfe"></a>TRANSACTION_SCOPE_ERROR&#160;</td><td class="fielddoc"><p>an error with the scope of the libpmemobj transaction </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a966ec5140bba4b6f4cc4e9aa15979231a0f3ff38a7ae1da8aab727eeabca0905a"></a>DEFRAG_ERROR&#160;</td><td class="fielddoc"><p>the defragmentation process failed (possibly in the middle of a run) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a966ec5140bba4b6f4cc4e9aa15979231a756f166f53b2a5ff80f7c72ea796c562"></a>COMPARATOR_MISMATCH&#160;</td><td class="fielddoc"><p>db was created with a different comparator </p>
 </td></tr>
 </table>
 

@@ -5,8 +5,8 @@ var indexSectionsWithContent =
   2: "p",
   3: "lr",
   4: "cdegioprsu~",
-  5: "_p",
-  6: "g",
+  5: "_cp",
+  6: "cg",
   7: "s",
   8: "cdinostuw",
   9: "p"
