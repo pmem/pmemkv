@@ -192,7 +192,7 @@ set(PKG_CONFIG_REQUIRES)
 set(DEB_DEPENDS)
 set(RPM_DEPENDS)
 
-if (ENGINE_CSMAP AND CXX_STANDARD LESS 14)
+if(ENGINE_CSMAP AND CXX_STANDARD LESS 14)
 	message(FATAL_ERROR "CXX_STANDARD must be >= 14 if ENGINE_CSMAP is set")
 endif()
 
@@ -263,14 +263,14 @@ if(DEVELOPER_MODE)
 	if(NOT PERL_FOUND)
 		message(FATAL_ERROR "Perl not found")
 	endif()
-	if (PERL_VERSION_STRING VERSION_LESS 5.16)
+	if(PERL_VERSION_STRING VERSION_LESS 5.16)
 		message(FATAL_ERROR "Minimum required version of Perl is 5.16)")
 	endif()
 
 	execute_process(COMMAND ${PERL_EXECUTABLE} -MText::Diff -e ""
 			ERROR_QUIET
 			RESULT_VARIABLE PERL_TEXT_DIFF_STATUS)
-	if (PERL_TEXT_DIFF_STATUS)
+	if(PERL_TEXT_DIFF_STATUS)
 		message(FATAL_ERROR "Text::Diff Perl module not found (install libtext-diff-perl or perl-Text-Diff)")
 	endif()
 
