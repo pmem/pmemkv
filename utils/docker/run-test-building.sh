@@ -206,7 +206,7 @@ do
 	ctest -R wrong_engine_name_test --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
-		upload_codecov tests
+		upload_codecov wrong_engine_names
 	fi
 
 	cd $WORKDIR

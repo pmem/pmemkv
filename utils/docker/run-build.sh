@@ -44,7 +44,7 @@ function tests_gcc_debug_cpp11() {
 	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
-		upload_codecov tests
+		upload_codecov gcc_debug_cpp11
 	fi
 
 	cd ..
@@ -79,7 +79,7 @@ function tests_gcc_debug_cpp14() {
 	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
-		upload_codecov tests
+		upload_codecov gcc_debug_cpp14
 	fi
 
 	cd ..
@@ -112,7 +112,7 @@ function tests_gcc_debug_cpp14_valgrind_other() {
 	ctest -E "_none|_memcheck|_drd" --timeout 590 --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
-		upload_codecov tests
+		upload_codecov gcc_debug_cpp14_valgrind_other
 	fi
 
 	cd ..
@@ -145,7 +145,7 @@ function tests_gcc_debug_cpp14_valgrind_memcheck_drd() {
 	ctest -R "_memcheck|_drd" --timeout 590 --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
-		upload_codecov tests
+		upload_codecov gcc_debug_cpp14_valgrind_memcheck_drd
 	fi
 
 	cd ..
