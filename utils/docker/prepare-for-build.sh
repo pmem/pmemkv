@@ -3,7 +3,8 @@
 # Copyright 2019-2020, Intel Corporation
 
 #
-# prepare-for-build.sh - prepare the Docker image for the build
+# prepare-for-build.sh - prepare the Docker image for the builds
+#                        and defines functions for other scripts.
 #
 
 set -e
@@ -15,13 +16,6 @@ function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
 }
 
-function cleanup() {
-	find . -name ".coverage" -exec rm {} \;
-	find . -name "coverage.xml" -exec rm {} \;
-	find . -name "*.gcov" -exec rm {} \;
-	find . -name "*.gcda" -exec rm {} \;
-}
-
 function upload_codecov() {
 	clang_used=$(cmake -LA -N . | grep CMAKE_CXX_COMPILER | grep clang | wc -c)
 
@@ -31,9 +25,13 @@ function upload_codecov() {
 		gcovexe="gcov"
 	fi
 
-	# the output is redundant in this case, i.e. we rely on parsed report from codecov on github
+	# run gcov exe, using their bash (set flag and remove parsed coverage files)
 	bash <(curl -s https://codecov.io/bash) -c -F $1 -x "$gcovexe"
-	cleanup
+
+	find . -name ".coverage" -exec rm {} \;
+	find . -name "coverage.xml" -exec rm {} \;
+	find . -name "*.gcov" -exec rm {} \;
+	find . -name "*.gcda" -exec rm {} \;
 }
 
 function compile_example_standalone() {

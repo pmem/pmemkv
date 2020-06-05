@@ -5,23 +5,24 @@
 #
 # run-test-building.sh - is called inside a Docker container,
 #                        starts testing of pmemkv building
-#                        and automatic update of the documentation
+#                        and automatic update of the documentation.
 #
 
 set -e
 
 source `dirname $0`/prepare-for-build.sh
 
+# params set for the file (if not previously set, the right-hand param is used)
 TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
 TEST_PACKAGES=${TEST_PACKAGES:-ON}
 BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
 
-function run_test_check_support_cpp20_gcc() {
+###############################################################################
+# BUILD test_gcc_cpp20
+###############################################################################
+function test_gcc_cpp20() {
+	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
 	CWD=$(pwd)
-	echo
-	echo "##############################################################"
-	echo "### Checking C++20 support in g++"
-	echo "##############################################################"
 	mkdir $WORKDIR/build
 	cd $WORKDIR/build
 
@@ -39,9 +40,15 @@ function run_test_check_support_cpp20_gcc() {
 
 	cd $CWD
 	rm -rf $WORKDIR/build
+
+	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
-function run_test_check_support_cpp20_clang() {
+###############################################################################
+# BUILD test_clang_cpp20 llvm
+###############################################################################
+function test_clang_cpp20() {
+	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
 	CWD=$(pwd)
 	echo
 	echo "##############################################################"
@@ -64,13 +71,15 @@ function run_test_check_support_cpp20_clang() {
 
 	cd $CWD
 	rm -rf $WORKDIR/build
+
+	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
-function verify_building_of_packages() {
-	echo
-	echo "##############################################################"
-	echo "### Verifying building of packages"
-	echo "##############################################################"
+###############################################################################
+# BUILD test_building_of_packages
+###############################################################################
+function test_building_of_packages() {
+	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
 
 	# Fetch git history for `git describe` to work,
 	# so that package has proper 'version' field
@@ -115,14 +124,20 @@ function verify_building_of_packages() {
 
 	cd $WORKDIR
 	rm -rf $WORKDIR/build
+
+	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
+# helper function to check building with specified CMake flag
 function build_with_flags() {
+	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
+
 	CMAKE_FLAGS_AND_SETTINGS=$@
 	echo
 	echo "##############################################################"
 	echo "### Verifying building with flag: ${CMAKE_FLAGS_AND_SETTINGS}"
 	echo "##############################################################"
+
 	mkdir $WORKDIR/build
 	cd $WORKDIR/build
 
@@ -133,8 +148,11 @@ function build_with_flags() {
 
 	cd $WORKDIR
 	rm -rf $WORKDIR/build
+
+	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
+# Main:
 cd $WORKDIR
 
 CMAKE_VERSION=$(cmake --version | head -n1 | grep -oE '[0-9].[0-9]*')
@@ -144,8 +162,8 @@ CMAKE_VERSION_NUMBER=$((100 * $CMAKE_VERSION_MAJOR + $CMAKE_VERSION_MINOR))
 
 # CXX_STANDARD==20 is supported since CMake 3.12
 if [ $CMAKE_VERSION_NUMBER -ge 312 ]; then
-	run_test_check_support_cpp20_gcc
-	run_test_check_support_cpp20_clang
+	test_gcc_cpp20
+	test_clang_cpp20
 fi
 
 echo
@@ -217,20 +235,23 @@ ctest -N
 cd $WORKDIR
 rm -rf $WORKDIR/build
 
-# test build with specific CMake flags set
+echo
+echo "##############################################################"
+echo "### Verifying build with specific CMake flags"
+echo "##############################################################"
 build_with_flags -DBUILD_JSON_CONFIG=OFF -DTESTS_JSON=OFF
 
 # building of packages should be verified only if PACKAGE_MANAGER equals 'rpm' or 'deb'
 case $PACKAGE_MANAGER in
 	rpm|deb)
-		[ "$TEST_PACKAGES" == "ON" ] && verify_building_of_packages
+		[ "$TEST_PACKAGES" == "ON" ] && test_building_of_packages
 		;;
 	*)
 		echo "Notice: skipping building of packages because PACKAGE_MANAGER is not equal 'rpm' nor 'deb' ..."
 		;;
 esac
 
-# Trigger auto doc update on master
+# Trigger auto doc update
 if [[ "$AUTO_DOC_UPDATE" == "1" ]]; then
 	echo "Running auto doc update"
 

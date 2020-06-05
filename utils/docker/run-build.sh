@@ -4,7 +4,7 @@
 
 #
 # run-build.sh - is called inside a Docker container,
-#                starts pmemkv build with tests.
+#                starts pmemkv builds (defined by the CI jobs) with tests.
 #
 
 set -e
@@ -17,14 +17,9 @@ BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
 CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-ON}
 TESTS_LONG=${TESTS_LONG:-OFF}
 
-cd $WORKDIR
-
-echo
-echo "### Making sure there is no libpmemkv currently installed"
-echo "---------------------------- Error expected! ------------------------------"
-compile_example_standalone pmemkv_basic_cpp && exit 1
-echo "---------------------------------------------------------------------------"
-
+###############################################################################
+# BUILD tests_gcc_debug_cpp11
+###############################################################################
 function tests_gcc_debug_cpp11() {
 	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
 	mkdir build
@@ -58,6 +53,9 @@ function tests_gcc_debug_cpp11() {
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
+###############################################################################
+# BUILD tests_gcc_debug_cpp14
+###############################################################################
 function tests_gcc_debug_cpp14() {
 	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
 	mkdir build
@@ -90,6 +88,9 @@ function tests_gcc_debug_cpp14() {
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
+###############################################################################
+# BUILD tests_gcc_debug_cpp14_valgrind_other
+###############################################################################
 function tests_gcc_debug_cpp14_valgrind_other() {
 	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
 	mkdir build
@@ -120,6 +121,9 @@ function tests_gcc_debug_cpp14_valgrind_other() {
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
+###############################################################################
+# BUILD tests_gcc_debug_cpp14_valgrind_memcheck_drd
+###############################################################################
 function tests_gcc_debug_cpp14_valgrind_memcheck_drd() {
 	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
 	mkdir build
@@ -150,6 +154,9 @@ function tests_gcc_debug_cpp14_valgrind_memcheck_drd() {
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
+###############################################################################
+# BUILD test_installation
+###############################################################################
 function test_installation() {
 	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
 	mkdir build
@@ -191,7 +198,16 @@ function test_installation() {
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
-#Run build steps passed as script arguments
+# Main:
+cd $WORKDIR
+
+echo
+echo "### Making sure there is no libpmemkv currently installed"
+echo "---------------------------- Error expected! ------------------------------"
+compile_example_standalone pmemkv_basic_cpp && exit 1
+echo "---------------------------------------------------------------------------"
+
+# Run build steps passed as script arguments
 build_steps=$@
 for build in $build_steps
 do
