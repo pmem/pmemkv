@@ -67,7 +67,6 @@ Possible statuses:
 	* Only critical bugs (security, data integrity, etc.) will be backported,
 	* Patch versions will be released when needed (based on severity of found issues),
 	* Branch will remain in "limited maintanance" status based on original release availability in popular distros,
-	* Annoucement about transition to EOL at least a half year before.
 3. EOL:
 	* No support,
 	* No bug fixes,
