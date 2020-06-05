@@ -152,6 +152,7 @@ Next we'll walk you through the steps of creating a new engine.
 * In `src/engine.cc`:
     * Add `#include "engines/mytree.h"` (within `#ifdef ENGINE_MYTREE` clause)
     * Update `create_engine` to return new `my_tree` instances
+* In script(s) executed in CIs (at least in `utils/docker/run-test-building.sh`) add a check/build for new engine
 * Build & verify engine now works with high-level bindings (see [README](README.md#language-bindings) for information on current bindings)
 
 ### Documentation
