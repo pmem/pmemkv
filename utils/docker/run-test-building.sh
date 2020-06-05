@@ -45,37 +45,6 @@ function test_gcc_cpp20() {
 }
 
 ###############################################################################
-# BUILD test_clang_cpp20 llvm
-###############################################################################
-function test_clang_cpp20() {
-	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
-	CWD=$(pwd)
-	echo
-	echo "##############################################################"
-	echo "### Checking C++20 support in clang++"
-	echo "##############################################################"
-	mkdir $WORKDIR/build
-	cd $WORKDIR/build
-
-	CC=clang CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
-		-DTEST_DIR=$TEST_DIR \
-		-DCMAKE_INSTALL_PREFIX=$PREFIX \
-		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
-		-DCOVERAGE=$COVERAGE \
-		-DDEVELOPER_MODE=1 \
-		-DCXX_STANDARD=20
-
-	make -j$(nproc)
-	# Run basic tests
-	ctest -R "SimpleTest" --output-on-failure
-
-	cd $CWD
-	rm -rf $WORKDIR/build
-
-	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
-}
-
-###############################################################################
 # BUILD test_building_of_packages
 ###############################################################################
 function test_building_of_packages() {
@@ -155,15 +124,9 @@ function build_with_flags() {
 # Main:
 cd $WORKDIR
 
-CMAKE_VERSION=$(cmake --version | head -n1 | grep -oE '[0-9].[0-9]*')
-CMAKE_VERSION_MAJOR=$(echo $CMAKE_VERSION | cut -d. -f1)
-CMAKE_VERSION_MINOR=$(echo $CMAKE_VERSION | cut -d. -f2)
-CMAKE_VERSION_NUMBER=$((100 * $CMAKE_VERSION_MAJOR + $CMAKE_VERSION_MINOR))
-
 # CXX_STANDARD==20 is supported since CMake 3.12
 if [ $CMAKE_VERSION_NUMBER -ge 312 ]; then
 	test_gcc_cpp20
-	test_clang_cpp20
 fi
 
 echo

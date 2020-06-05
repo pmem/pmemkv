@@ -12,15 +12,16 @@ env:
     - GITHUB_REPO=pmem/pmemkv
     - DOCKERHUB_REPO=pmem/pmemkv
   matrix:
-    - TYPE=normal OS=fedora OS_VER=31
-    - TYPE=normal OS=ubuntu OS_VER=19.10
-    - TYPE=normal OS=ubuntu OS_VER=19.10 COVERAGE=1
+    - TYPE=debug OS=fedora OS_VER=31
+    - TYPE=debug OS=ubuntu OS_VER=19.10 COVERAGE=1
+    - TYPE=release OS=fedora OS_VER=31
+    - TYPE=release OS=ubuntu OS_VER=19.10
     - TYPE=valgrind OS=ubuntu OS_VER=19.10
     - TYPE=memcheck_drd OS=ubuntu OS_VER=19.10
-    - TYPE=building OS=fedora OS_VER=31 COVERAGE=1 PUSH_IMAGE=1 AUTO_DOC_UPDATE=1
-    - TYPE=building OS=ubuntu OS_VER=19.10 COVERAGE=1 PUSH_IMAGE=1
-    - TYPE=bindings OS=ubuntu OS_VER=19.10_bindings PUSH_IMAGE=1
+    - TYPE=building OS=fedora OS_VER=31 PUSH_IMAGE=1 AUTO_DOC_UPDATE=1
+    - TYPE=building OS=ubuntu OS_VER=19.10 PUSH_IMAGE=1 COVERAGE=1
     - TYPE=compatibility OS=fedora OS_VER=31
+    - TYPE=bindings OS=ubuntu OS_VER=19.10_bindings PUSH_IMAGE=1
     - TYPE=coverity OS=ubuntu OS_VER=19.10
 
 before_install:

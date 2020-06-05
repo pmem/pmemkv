@@ -155,15 +155,55 @@ function tests_gcc_debug_cpp14_valgrind_memcheck_drd() {
 }
 
 ###############################################################################
-# BUILD test_installation
+# BUILD tests_clang_release_cpp20 llvm
 ###############################################################################
-function test_installation() {
+function tests_clang_release_cpp20() {
+	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
+
+	# CXX_STANDARD==20 is supported since CMake 3.12
+	if [ $CMAKE_VERSION_NUMBER -lt 312 ]; then
+		echo "ERROR: C++20 is supported in CMake since 3.12, installed version: ${CMAKE_VERSION}"
+		exit 1
+	fi
+
+	mkdir build
+	cd build
+
+	CC=clang CXX=clang++ cmake .. -DCMAKE_BUILD_TYPE=Release \
+		-DTEST_DIR=$TEST_DIR \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DCOVERAGE=$COVERAGE \
+		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
+		-DTESTS_LONG=${TESTS_LONG} \
+		-DTESTS_USE_FORCED_PMEM=1 \
+		-DTESTS_PMEMOBJ_DRD_HELGRIND=1 \
+		-DDEVELOPER_MODE=1 \
+		-DCXX_STANDARD=20
+
+	make -j$(nproc)
+	make -j$(nproc) doc
+	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
+
+	if [ "$COVERAGE" == "1" ]; then
+		upload_codecov clang_release_cpp20
+	fi
+
+	cd ..
+	rm -rf build
+
+	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
+}
+
+###############################################################################
+# BUILD test_release_installation
+###############################################################################
+function test_release_installation() {
 	printf "\n$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} START$(tput sgr 0)\n"
 	mkdir build
 	cd build
 
 	CC=gcc CXX=g++ \
-	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+	cmake .. -DCMAKE_BUILD_TYPE=Release \
 		-DBUILD_TESTS=0 \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX \
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG}

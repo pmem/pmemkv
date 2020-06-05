@@ -12,6 +12,12 @@ set -e
 EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
 
+# CMake's version assigned to variable(s) (a single number representation for easier comparison)
+CMAKE_VERSION=$(cmake --version | head -n1 | grep -oE '[0-9].[0-9]*')
+CMAKE_VERSION_MAJOR=$(echo $CMAKE_VERSION | cut -d. -f1)
+CMAKE_VERSION_MINOR=$(echo $CMAKE_VERSION | cut -d. -f2)
+CMAKE_VERSION_NUMBER=$((100 * $CMAKE_VERSION_MAJOR + $CMAKE_VERSION_MINOR))
+
 function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
 }
