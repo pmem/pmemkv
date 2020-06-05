@@ -7,19 +7,7 @@ project(pmemkv)
 include(cmake/helpers.cmake)
 set_version(VERSION)
 
-# set the default build type
-if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
-	set(DEFAULT_BUILD_TYPE "Debug")
-else()
-	set(DEFAULT_BUILD_TYPE "RelWithDebInfo")
-endif()
-
-if(NOT CMAKE_BUILD_TYPE)
-	message(STATUS "Setting build type to the default one (${DEFAULT_BUILD_TYPE})")
-	set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}"
-		CACHE STRING "Choose a type of build (Debug, Release or RelWithDebInfo)" FORCE)
-endif()
-
+## CMake build options
 option(BUILD_DOC "build documentation" ON)
 option(BUILD_EXAMPLES "build examples" ON)
 option(BUILD_TESTS "build tests" ON)
@@ -30,11 +18,10 @@ option(TESTS_USE_FORCED_PMEM "run tests with PMEM_IS_PMEM_FORCE=1" OFF)
 option(TESTS_USE_VALGRIND "enable tests with valgrind (if found)" ON)
 option(TESTS_PMEMOBJ_DRD_HELGRIND "enable test of pmemobj engines under drd and helgrind (they should only be run on PMEM)")
 option(TESTS_JSON "enable tests which require libpmemkv_json_config library (BUILD_JSON_CONFIG have to be ON)" ON)
-
 option(COVERAGE "run coverage test" OFF)
-if(COVERAGE)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage")
-endif()
+
+option(DEVELOPER_MODE "enable developer's checks" OFF)
+option(CHECK_CPP_STYLE "check code style of C++ sources" OFF)
 
 # Each engine can be enabled separately.
 # By default all experimental engines are turned off.
@@ -46,55 +33,39 @@ option(ENGINE_CACHING "enable experimental caching engine" OFF)
 option(ENGINE_STREE "enable experimental stree engine" OFF)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 
-option(DEVELOPER_MODE "enable developer's checks" OFF)
-option(CHECK_CPP_STYLE "check code style of C++ sources" OFF)
+## Set required and useful variables
+set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
+
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
+
+# Set the default build type
+if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+	set(DEFAULT_BUILD_TYPE "Debug")
+else()
+	set(DEFAULT_BUILD_TYPE "RelWithDebInfo")
+endif()
+if(NOT CMAKE_BUILD_TYPE)
+	message(STATUS "Setting build type to the default one (${DEFAULT_BUILD_TYPE})")
+	set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}"
+		CACHE STRING "Choose a type of build (Debug, Release or RelWithDebInfo)" FORCE)
+endif()
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.10)
+set(LIBPMEMOBJ_REQUIRED_VERSION 1.8)
+set(LIBPMEM_REQUIRED_VERSION 1.7)
+set(MEMKIND_REQUIRED_VERSION 1.8.0)
+
+set(PKG_CONFIG_REQUIRES)
+set(DEB_DEPENDS)
+set(RPM_DEPENDS)
+
+set(TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/test CACHE STRING "working directory for tests")
 
 # Do not treat include directories from the interfaces
 # of consumed Imported Targets as SYSTEM by default.
 set(CMAKE_NO_SYSTEM_FROM_IMPORTED 1)
-
-if(ENGINE_CMAP)
-	add_definitions(-DENGINE_CMAP)
-	message(STATUS "CMAP engine is ON")
-else()
-	message(STATUS "CMAP engine is OFF")
-endif()
-if(ENGINE_CSMAP)
-	add_definitions(-DENGINE_CSMAP)
-	message(STATUS "CSMAP engine is ON")
-else()
-	message(STATUS "CSMAP engine is OFF")
-endif()
-if(ENGINE_VCMAP)
-	add_definitions(-DENGINE_VCMAP)
-	message(STATUS "VCMAP engine is ON")
-else()
-	message(STATUS "VCMAP engine is OFF")
-endif()
-if(ENGINE_VSMAP)
-	add_definitions(-DENGINE_VSMAP)
-	message(STATUS "VSMAP engine is ON")
-else()
-	message(STATUS "VSMAP engine is OFF")
-endif()
-if(ENGINE_CACHING)
-	add_definitions(-DENGINE_CACHING)
-	message(STATUS "CACHING engine is ON")
-else()
-	message(STATUS "CACHING engine is OFF")
-endif()
-if(ENGINE_STREE)
-	add_definitions(-DENGINE_STREE)
-	message(STATUS "STREE engine is ON")
-else()
-	message(STATUS "STREE engine is OFF")
-endif()
-if(ENGINE_TREE3)
-	add_definitions(-DENGINE_TREE3)
-	message(STATUS "TREE3 engine is ON")
-else()
-	message(STATUS "TREE3 engine is OFF")
-endif()
 
 set(SOURCE_FILES
 	src/libpmemkv.cc
@@ -151,20 +122,60 @@ if(ENGINE_TREE3)
 	)
 endif()
 
+## Setup defines and check status of each engine
+if(ENGINE_CMAP)
+	add_definitions(-DENGINE_CMAP)
+	message(STATUS "CMAP engine is ON")
+else()
+	message(STATUS "CMAP engine is OFF")
+endif()
+if(ENGINE_CSMAP)
+	add_definitions(-DENGINE_CSMAP)
+	message(STATUS "CSMAP engine is ON")
 
-set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
+	if(CXX_STANDARD LESS 14)
+		message(FATAL_ERROR "CXX_STANDARD must be >= 14 if ENGINE_CSMAP is ON")
+	endif()
+else()
+	message(STATUS "CSMAP engine is OFF")
+endif()
+if(ENGINE_VCMAP)
+	add_definitions(-DENGINE_VCMAP)
+	message(STATUS "VCMAP engine is ON")
+else()
+	message(STATUS "VCMAP engine is OFF")
+endif()
+if(ENGINE_VSMAP)
+	add_definitions(-DENGINE_VSMAP)
+	message(STATUS "VSMAP engine is ON")
+else()
+	message(STATUS "VSMAP engine is OFF")
+endif()
+if(ENGINE_CACHING)
+	add_definitions(-DENGINE_CACHING)
+	message(STATUS "CACHING engine is ON")
+else()
+	message(STATUS "CACHING engine is OFF")
+endif()
+if(ENGINE_STREE)
+	add_definitions(-DENGINE_STREE)
+	message(STATUS "STREE engine is ON")
+else()
+	message(STATUS "STREE engine is OFF")
+endif()
+if(ENGINE_TREE3)
+	add_definitions(-DENGINE_TREE3)
+	message(STATUS "TREE3 engine is ON")
+else()
+	message(STATUS "TREE3 engine is OFF")
+endif()
 
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
-set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.10)
-set(LIBPMEMOBJ_REQUIRED_VERSION 1.8)
-set(LIBPMEM_REQUIRED_VERSION 1.7)
-set(MEMKIND_REQUIRED_VERSION 1.8.0)
-
+## Set compiler's flags
 if(DEVELOPER_MODE)
 	add_common_flag(-Werror)
+endif()
+if(COVERAGE)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage")
 endif()
 
 add_common_flag(-Wall)
@@ -181,20 +192,13 @@ add_common_flag(-DDEBUG DEBUG)
 
 add_common_flag("-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2" RELEASE)
 
+## Setup environment, find packages, configure list of package dependencies
 find_package(PkgConfig QUIET)
 include(FindPerl)
 include(ExternalProject)
 include(FindThreads)
 include(CheckCXXSourceCompiles)
 include(GNUInstallDirs)
-
-set(PKG_CONFIG_REQUIRES)
-set(DEB_DEPENDS)
-set(RPM_DEPENDS)
-
-if(ENGINE_CSMAP AND CXX_STANDARD LESS 14)
-	message(FATAL_ERROR "CXX_STANDARD must be >= 14 if ENGINE_CSMAP is set")
-endif()
 
 if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_CSMAP OR ENGINE_STREE OR ENGINE_TREE3)
 	include(libpmemobj++)
@@ -229,60 +233,15 @@ string(REPLACE ";" " " PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES}")
 string(REPLACE ";" ", " RPM_PACKAGE_REQUIRES "${RPM_DEPENDS}")
 string(REPLACE ";" ", " DEB_PACKAGE_REQUIRES "${DEB_DEPENDS}")
 
-add_custom_target(checkers ALL)
-add_custom_target(cppstyle)
-add_custom_target(cppformat)
-add_custom_target(check-whitespace)
-add_custom_target(check-license
-	COMMAND ${CMAKE_SOURCE_DIR}/utils/check_license/check-headers.sh
-		${CMAKE_SOURCE_DIR}
-		BSD-3-Clause)
-
-add_custom_target(check-whitespace-main
-		COMMAND ${PERL_EXECUTABLE}
-			${CMAKE_SOURCE_DIR}/utils/check_whitespace
-			${CMAKE_SOURCE_DIR}/utils/check_license/*.sh
-			${CMAKE_SOURCE_DIR}/*.md)
-
-add_dependencies(check-whitespace check-whitespace-main)
-
-if(CHECK_CPP_STYLE)
-	find_program(CLANG_FORMAT NAMES clang-format clang-format-9 clang-format-9.0)
-	set(CLANG_FORMAT_REQUIRED "9.0")
-	if(CLANG_FORMAT)
-		get_program_version_major_minor(${CLANG_FORMAT} CLANG_FORMAT_VERSION)
-		if(NOT (CLANG_FORMAT_VERSION VERSION_EQUAL CLANG_FORMAT_REQUIRED))
-			message(FATAL_ERROR "required clang-format version is ${CLANG_FORMAT_REQUIRED} (version ${CLANG_FORMAT_VERSION} is installed)")
-		endif()
-	else()
-		message(FATAL_ERROR "CHECK_CPP_STYLE=ON, but clang-format not found (required version: ${CLANG_FORMAT_REQUIRED})")
-	endif()
-endif()
-
-if(DEVELOPER_MODE)
-	if(NOT PERL_FOUND)
-		message(FATAL_ERROR "Perl not found")
-	endif()
-	if(PERL_VERSION_STRING VERSION_LESS 5.16)
-		message(FATAL_ERROR "Minimum required version of Perl is 5.16)")
-	endif()
-
-	execute_process(COMMAND ${PERL_EXECUTABLE} -MText::Diff -e ""
-			ERROR_QUIET
-			RESULT_VARIABLE PERL_TEXT_DIFF_STATUS)
-	if(PERL_TEXT_DIFF_STATUS)
-		message(FATAL_ERROR "Text::Diff Perl module not found (install libtext-diff-perl or perl-Text-Diff)")
-	endif()
-
-	add_dependencies(checkers cppstyle)
-	add_dependencies(checkers check-whitespace)
-	add_dependencies(checkers check-license)
-endif()
-
+## Link libraries, setup targets
 add_library(pmemkv SHARED ${SOURCE_FILES})
 set_target_properties(pmemkv PROPERTIES SOVERSION 1)
 target_link_libraries(pmemkv PRIVATE
 	-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv.map)
+
+target_include_directories(pmemkv PRIVATE src/valgrind)
+# Enable libpmemobj-cpp valgrind annotations
+target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_ENABLED=1)
 
 if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_CSMAP OR ENGINE_STREE OR ENGINE_TREE3)
 	target_link_libraries(pmemkv PRIVATE ${LIBPMEMOBJ++_LIBRARIES})
@@ -298,6 +257,99 @@ if(ENGINE_CACHING)
 	target_link_libraries(pmemkv PRIVATE acl_cpp protocol acl)
 endif()
 
+## Configure make install/uninstall and packages
+configure_file(libpmemkv.pc.in libpmemkv.pc @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/libpmemkv.pc
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
+set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER "src/libpmemkv.h;src/libpmemkv.hpp")
+
+install(TARGETS pmemkv
+		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+configure_file(
+	"${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+	IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
+if(NOT "${CPACK_GENERATOR}" STREQUAL "")
+	include(${CMAKE_SOURCE_DIR}/cmake/packages.cmake)
+endif()
+
+## Setup additional targets
+add_custom_target(checkers ALL)
+add_custom_target(cppstyle)
+add_custom_target(cppformat)
+add_custom_target(check-whitespace)
+add_custom_target(check-license
+	COMMAND ${CMAKE_SOURCE_DIR}/utils/check_license/check-headers.sh
+		${CMAKE_SOURCE_DIR}
+		BSD-3-Clause)
+
+if(CHECK_CPP_STYLE)
+	# check for required programs for code style check and add dependency to ALL
+	find_program(CLANG_FORMAT NAMES clang-format clang-format-9 clang-format-9.0)
+	set(CLANG_FORMAT_REQUIRED "9.0")
+	if(CLANG_FORMAT)
+		get_program_version_major_minor(${CLANG_FORMAT} CLANG_FORMAT_VERSION)
+		if(NOT (CLANG_FORMAT_VERSION VERSION_EQUAL CLANG_FORMAT_REQUIRED))
+			message(FATAL_ERROR "required clang-format version is ${CLANG_FORMAT_REQUIRED} (version ${CLANG_FORMAT_VERSION} is installed)")
+		endif()
+	else()
+		message(FATAL_ERROR "CHECK_CPP_STYLE=ON, but clang-format not found (required version: ${CLANG_FORMAT_REQUIRED})")
+	endif()
+
+	add_dependencies(checkers cppstyle)
+endif()
+
+if(DEVELOPER_MODE)
+	# check for required programs for whitespace and license checks and add dependencies to ALL
+	if(NOT PERL_FOUND)
+		message(FATAL_ERROR "Perl not found")
+	endif()
+	if(PERL_VERSION_STRING VERSION_LESS 5.16)
+		message(FATAL_ERROR "Minimum required version of Perl is 5.16)")
+	endif()
+
+	execute_process(COMMAND ${PERL_EXECUTABLE} -MText::Diff -e ""
+			ERROR_QUIET
+			RESULT_VARIABLE PERL_TEXT_DIFF_STATUS)
+	if(PERL_TEXT_DIFF_STATUS)
+		message(FATAL_ERROR "Text::Diff Perl module not found (install libtext-diff-perl or perl-Text-Diff)")
+	endif()
+
+	add_dependencies(checkers check-whitespace)
+	add_dependencies(checkers check-license)
+endif()
+
+add_cppstyle(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/comparator/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
+
+add_check_whitespace(main ${CMAKE_SOURCE_DIR}/utils/check_whitespace
+			${CMAKE_SOURCE_DIR}/utils/check_license/*.sh
+			${CMAKE_SOURCE_DIR}/*.md)
+
+add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/comparator/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
+
+## Add sub-directories if builds enabled
 if(BUILD_JSON_CONFIG)
 	include(rapidjson)
 	add_definitions(-DBUILD_JSON_CONFIG)
@@ -327,16 +379,9 @@ if(BUILD_JSON_CONFIG)
 		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
-target_include_directories(pmemkv PRIVATE src/valgrind)
-# Enable libpmemobj-cpp valgrind annotations
-target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_ENABLED=1)
-
 if(BUILD_EXAMPLES)
 	add_subdirectory(examples)
 endif()
-
-set(TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/test
-	CACHE STRING "working directory for tests")
 
 if(BUILD_TESTS)
 	if(PKG_CONFIG_FOUND)
@@ -365,47 +410,6 @@ if(BUILD_TESTS)
 	add_subdirectory(tests)
 endif()
 
-configure_file(libpmemkv.pc.in libpmemkv.pc @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/libpmemkv.pc
-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-
-set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER "src/libpmemkv.h;src/libpmemkv.hpp")
-
 if(BUILD_DOC)
 	add_subdirectory(doc)
-endif()
-
-install(TARGETS pmemkv
-		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-configure_file(
-	"${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-	IMMEDIATE @ONLY)
-
-add_custom_target(uninstall
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-
-add_cppstyle(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/comparator/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
-
-add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/comparator/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
-
-if(NOT "${CPACK_GENERATOR}" STREQUAL "")
-	include(${CMAKE_SOURCE_DIR}/cmake/packages.cmake)
 endif()
