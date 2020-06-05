@@ -51,11 +51,11 @@ The **C++ API** of pmemkv is documented in the Doxygen documentation listed belo
 Currently all branches/releases are fully supported. Latest releases can be
 seen on the ["releases" tab on the Github page](https://github.com/pmem/pmemkv/releases).
 
-| Version branch | First release date | Maintenance status |
-| -------------- | ------------------ | ------------------ |
-| stable-1.2 | May 29, 2020 | Full |
-| stable-1.1 | Jan 31, 2020 | Full |
-| stable-1.0 | Oct 4, 2019 | Full |
+| Version branch | First release date | Last patch release | Maintenance status |
+| -------------- | ------------------ | ------------------ | ------------------ |
+| stable-1.2 | May 29, 2020 | N/A | Full |
+| stable-1.1 | Jan 31, 2020 | N/A | Full |
+| stable-1.0 | Oct 4, 2019 | 1.0.2 (Mar 6, 2020) | Full |
 
 Possible statuses:
 1. Full maintenance:
