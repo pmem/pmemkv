@@ -1,0 +1,198 @@
+//
+// Copyright 2019-2020, Intel Corporation
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in
+//       the documentation and/or other materials provided with the
+//       distribution.
+//
+//     * Neither the name of the copyright holder nor the names of its
+//       contributors may be used to endorse or promote products derived
+//       from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
+// define common properties of pipelines:
+
+description_param = '''
+	string {
+		name('DESCRIPTION')
+		defaultValue('')
+		trim(true)
+		description('description')
+	}
+'''
+
+label_param = '''
+	string {
+		name('LABEL')
+		defaultValue('fedora')
+		trim(true)
+		description("node to run job on: rhel8_1, openSUSE, fedora31, ubuntu19, debian10")
+	}
+'''
+
+repo_url_param = '''
+	string {
+		name('REPO_URL')
+		defaultValue('https://github.com/pmem/pmemkv.git')
+		trim(true)
+		description("Git repository address")
+	}
+'''
+
+branch_param = '''
+	string {
+		name('BRANCH')
+		defaultValue('master')
+		trim(true)
+		description("Repository branch")
+	}
+'''
+
+type_param = '''
+	choiceParam('TEST_TYPE', ['normal', 'building', 'bindings', 'compability', 'coverity'], 'Type of tests')
+'''
+
+coverage_param = '''
+	choiceParam('COVERAGE', ['yes', 'no'], 'Enable code coverage')
+'''
+
+gitlab_connection = '''
+	properties {
+		gitLabConnection {
+			gitLabConnection('gitlabIT')
+		}
+	}
+'''
+
+email_options_param = '''
+	string {
+		name('EMAIL_RECIPIENTS')
+		defaultValue('')
+		trim(true)
+		description("Recipients of the e-mail sent after execution, separated by the comma.")
+	}
+	booleanParam('SEND_RESULTS', true, 'Uncheck to disable sending email with report after execution')
+'''
+
+def remote_definition(current_job_script_path) {
+    return """
+		definition {
+			cpsScm {
+				scm {
+					git {
+						remote {
+							url('https://github.com/pmem/pmemkv.git')
+							branch('${jenkins_files_branch_source}')
+							scriptPath('${current_job_script_path}')
+						}
+					}
+				}
+			}
+		}
+	"""
+}
+
+// this branch will be used to pull jobs when building Jenkinsfile job and for pulling repository when loading libraries in prepare job stage:
+jenkins_files_branch_source = 'master'
+
+environmental_variables = """
+	environmentVariables {
+		envs(
+			api_lib: "jenkins_files/utils/jenkins/lib/api.groovy",
+			lib_path: "jenkins_files/utils/jenkins/lib/",
+			scripts_path: "jenkins_files/utils/jenkins/scripts/",
+			jenkins_files_repo: "https://github.com/pmem/pmemkv.git",
+			jenkins_files_branch: "*/${jenkins_files_branch_source}"			
+		)
+	}
+"""
+
+triggers = '''
+	triggers {
+		gitlabPush {
+			buildOnMergeRequestEvents(true)
+			buildOnPushEvents(true)
+			enableCiSkip(false)
+			setBuildDescription(false)
+			rebuildOpenMergeRequest('never')
+		}
+	}
+'''
+
+node {
+	stage('pmemkv_linux'){
+        jobDsl scriptText: """pipelineJob("pmemkv_linux") {
+			parameters {
+				${label_param}
+				${branch_param}
+				${type_param}
+				${repo_url_param}
+				${description_param}
+				${coverage_param}
+				${email_options_param}
+			}
+			${gitlab_connection}
+			${environmental_variables}
+			${triggers}
+			${remote_definition 'utils/jenkins/pmemkv_linux.jenkins'}
+		}"""
+    }
+    stage('pmemkv_linux_matrix'){
+        jobDsl scriptText: """matrixJob("pmemkv_linux_matrix") {
+        	parameters {
+				matrixCombinationsParam('COMBINATIONS', '', 'choose which combinations to run')
+				${branch_param}
+				${coverage_param}
+				${repo_url_param}
+				${description_param}
+				${email_options_param}
+        	}
+			axes {
+		        text('DISTRO', 'ubuntu', 'ubuntuLTS', 'fedora')
+		        text('TYPE', 'normal', 'building', 'bindings', 'compability', 'coverity')
+		        label('master', 'master')
+		    }
+		    steps {
+		        downstreamParameterized {
+					trigger("pmemkv_linux") {
+						parameters {
+							predefinedProp('COV', '\${COVERAGE}')
+							predefinedProp('TEST_TYPE', '\${TYPE}')
+							predefinedProp('LABEL', '\${DISTRO}')
+							predefinedProp('BRANCH', '\${BRANCH}')
+							predefinedProp('REPO_URL', '\${REPO_URL}')
+							predefinedProp('EMAIL_RECIPIENTS', '\${EMAIL_RECIPIENTS}')
+                            booleanParam('SEND_EMAIL', true)
+                            predefinedProp('DESCRIPTION', '\${DESCRIPTION}  #Triggered by pmemkv matrixJob #\${BUILD_NUMBER}   ->   \${JENKINS_URL}view/all/job/pmemkv_linux_matrix/\${BUILD_NUMBER}')
+						}
+					block {
+						buildStepFailure('FAILURE')
+						failure('FAILURE')
+						unstable('UNSTABLE')
+						}
+					}
+				}
+		    }
+		}"""
+    }
+}
