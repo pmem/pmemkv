@@ -212,5 +212,10 @@ status engine_base::defrag(double start_percent, double amount_percent)
 	return status::NOT_SUPPORTED;
 }
 
+status engine_base::batch_remove(size_t num_keys, struct pmemkv_key *keys)
+{
+	return status::NOT_SUPPORTED;
+}
+
 } // namespace kv
 } // namespace pmem

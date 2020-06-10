@@ -6,6 +6,7 @@
 #
 LIBPMEMKV_1.0 {
 	global:
+		pmemkv_batch_remove;
 		pmemkv_close;
 		pmemkv_config_delete;
 		pmemkv_config_get_data;

@@ -102,6 +102,7 @@ add_test_generic(NAME json_to_config TRACERS none memcheck)
 
 ## Test scenarios (parametrized at least with engine name)
 # Tests for all engines
+build_test_ext(NAME batch_remove SRC_FILES engine_scenarios/all/batch_remove.cc LIBS json)
 build_test_ext(NAME put_get_remove SRC_FILES engine_scenarios/all/put_get_remove.cc LIBS json)
 build_test_ext(NAME put_get_remove_charset_params SRC_FILES engine_scenarios/all/put_get_remove_charset_params.cc LIBS json)
 build_test_ext(NAME put_get_remove_long_key SRC_FILES engine_scenarios/all/put_get_remove_long_key.cc LIBS json)
@@ -360,6 +361,11 @@ if(ENGINE_CSMAP)
 			BINARY comparator_basic_c
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY batch_remove
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE csmap
 			BINARY comparator_basic_persistent_c

@@ -25,6 +25,11 @@ extern "C" {
 #define PMEMKV_STATUS_DEFRAG_ERROR 11
 #define PMEMKV_STATUS_COMPARATOR_MISMATCH 12
 
+struct pmemkv_key {
+	const char *data;
+	size_t size;
+};
+
 typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;
 typedef struct pmemkv_comparator pmemkv_comparator;
@@ -90,6 +95,8 @@ int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
 int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb);
 
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
+
+int pmemkv_batch_remove(pmemkv_db *db, size_t num_keys, struct pmemkv_key *keys);
 
 int pmemkv_defrag(pmemkv_db *db, double start_percent, double amount_percent);
 

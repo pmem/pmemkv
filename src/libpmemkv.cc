@@ -519,6 +519,16 @@ int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb)
 	});
 }
 
+int pmemkv_batch_remove(pmemkv_db *db, size_t num_keys, struct pmemkv_key *keys)
+{
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->batch_remove(num_keys, keys);
+	});
+}
+
 int pmemkv_defrag(pmemkv_db *db, double start_percent, double amount_percent)
 {
 	if (!db)

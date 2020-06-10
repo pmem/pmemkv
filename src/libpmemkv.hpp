@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
 
 #if __cpp_lib_string_view
 #include <string_view>
@@ -263,6 +264,8 @@ public:
 	status put(string_view key, string_view value) noexcept;
 	status remove(string_view key) noexcept;
 	status defrag(double start_percent = 0, double amount_percent = 100);
+
+	status batch_remove(std::vector<string_view> keys) noexcept;
 
 	std::string errormsg();
 
@@ -1399,6 +1402,20 @@ inline status db::put(string_view key, string_view value) noexcept
 inline status db::remove(string_view key) noexcept
 {
 	return static_cast<status>(pmemkv_remove(this->_db, key.data(), key.size()));
+}
+
+/**
+ * Removes from database records with given *keys*.
+ * The operation is atomic - either all keys are remove or none of them.
+ *
+ * @param[in] keys vector of keys to be removed
+ *
+ * @return pmem::kv::status
+ */
+inline status db::batch_remove(std::vector<string_view> keys) noexcept
+{
+	return static_cast<status>(
+		pmemkv_batch_remove(this->_db, keys.size(), (pmemkv_key *)keys.data()));
 }
 
 /**

@@ -106,6 +106,8 @@ public:
 
 	status exists(string_view key) final;
 
+	status batch_remove(size_t num_keys, struct pmemkv_key *keys) final;
+
 	status get(string_view key, get_v_callback *callback, void *arg) final;
 
 	status put(string_view key, string_view value) final;

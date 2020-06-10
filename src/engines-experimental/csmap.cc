@@ -277,6 +277,27 @@ status csmap::remove(string_view key)
 	return container->unsafe_erase(key) > 0 ? status::OK : status::NOT_FOUND;
 }
 
+status csmap::batch_remove(size_t num_keys, struct pmemkv_key *keys)
+{
+	LOG("remove " << num_keys << " keys");
+	check_outside_tx();
+	unique_global_lock_type lock(mtx);
+
+	try {
+		pmem::obj::transaction::run(pmpool, [&] {
+			for (std::size_t i = 0; i < num_keys; i++) {
+				if (container->unsafe_erase(
+					    string_view(keys[i].data, keys[i].size)) == 0)
+					pmem::obj::transaction::abort(0);
+			}
+		});
+	} catch (pmem::manual_tx_abort &) {
+		return status::NOT_FOUND;
+	}
+
+	return status::OK;
+}
+
 void csmap::Recover()
 {
 	if (!OID_IS_NULL(*root_oid)) {
