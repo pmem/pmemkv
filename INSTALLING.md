@@ -17,7 +17,7 @@ Key/Value Datastore for Persistent Memory
 
 * 64-bit Linux (OSX and Windows are not yet supported)
 * libpmem and libpmemobj, which are part of [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.8
-* [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings 1.9 for PMDK (required by all engines except blackhole and caching)
+* [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) - C++ bindings 1.10 for PMDK (required by all engines except blackhole and caching)
 * [memkind](https://github.com/memkind/memkind) - Volatile memory manager 1.8.0 (required by vsmap & vcmap engines)
 * [TBB](https://github.com/01org/tbb) - Thread Building Blocks (required by vcmap engine)
 * [RapidJSON](https://github.com/tencent/rapidjson) - JSON parser (required by `libpmemkv_json_config` helper library)
@@ -120,7 +120,7 @@ Install latest PMDK:
 cd ~
 git clone https://github.com/pmem/pmdk
 cd pmdk
-make -j8
+make -j$(nproc)
 su -c 'make install'
 export PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig
 ```
@@ -176,7 +176,7 @@ Install latest PMDK:
 cd ~
 git clone https://github.com/pmem/pmdk
 cd pmdk
-make -j8
+make -j$(nproc)
 sudo make install
 ```
 
@@ -189,7 +189,7 @@ cd libpmemobj-cpp
 mkdir build
 cd build
 cmake ..
-make
+make -j$(nproc)
 sudo make install
 ```
 
