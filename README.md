@@ -63,7 +63,6 @@ Abovementioned bindings are maintained in separate GitHub repositories, but are 
 in sync with the main `pmemkv` distribution.
 
 * Java - https://github.com/pmem/pmemkv-java
-	* \+ Java Native Interface - https://github.com/pmem/pmemkv-jni
 * Node.js - https://github.com/pmem/pmemkv-nodejs
 * Python - https://github.com/pmem/pmemkv-python
 * Ruby - https://github.com/pmem/pmemkv-ruby
