@@ -32,6 +32,7 @@ option(ENGINE_CSMAP "enable experimental csmap engine (requires CXX_STANDARD to 
 option(ENGINE_CACHING "enable experimental caching engine" OFF)
 option(ENGINE_STREE "enable experimental stree engine" ON)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
+option(ENGINE_RADIX "enable experimental radix engine" OFF)
 
 ## Set required and useful variables
 set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
@@ -49,6 +50,12 @@ if(NOT CMAKE_BUILD_TYPE)
 	message(STATUS "Setting build type to the default one (${DEFAULT_BUILD_TYPE})")
 	set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}"
 		CACHE STRING "Choose a type of build (Debug, Release or RelWithDebInfo)" FORCE)
+endif()
+if(ENGINE_RADIX)
+	add_definitions(-DENGINE_RADIX)
+	message(STATUS "RADIX engine is ON")
+else()
+	message(STATUS "RADIX engine is OFF")
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
@@ -119,6 +126,12 @@ if(ENGINE_TREE3)
 	list(APPEND SOURCE_FILES
 		src/engines-experimental/tree3.h
 		src/engines-experimental/tree3.cc
+	)
+endif()
+if(ENGINE_RADIX)
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/radix.h
+		src/engines-experimental/radix.cc
 	)
 endif()
 
@@ -200,7 +213,7 @@ include(FindThreads)
 include(CheckCXXSourceCompiles)
 include(GNUInstallDirs)
 
-if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_CSMAP OR ENGINE_STREE OR ENGINE_TREE3)
+if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_CSMAP OR ENGINE_STREE OR ENGINE_TREE3 OR ENGINE_RADIX)
 	include(libpmemobj++)
 	list(APPEND PKG_CONFIG_REQUIRES "libpmemobj++ >= ${LIBPMEMOBJ_CPP_REQUIRED_VERSION}")
 	list(APPEND RPM_DEPENDS "libpmemobj >= ${LIBPMEMOBJ_REQUIRED_VERSION}")
@@ -243,7 +256,7 @@ target_include_directories(pmemkv PRIVATE src/valgrind)
 # Enable libpmemobj-cpp valgrind annotations
 target_compile_options(pmemkv PRIVATE -DLIBPMEMOBJ_CPP_VG_ENABLED=1)
 
-if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_CSMAP OR ENGINE_STREE OR ENGINE_TREE3)
+if(ENGINE_VSMAP OR ENGINE_VCMAP OR ENGINE_CMAP OR ENGINE_CSMAP OR ENGINE_STREE OR ENGINE_TREE3 OR ENGINE_RADIX)
 	target_link_libraries(pmemkv PRIVATE ${LIBPMEMOBJ++_LIBRARIES})
 endif()
 if(ENGINE_VSMAP OR ENGINE_VCMAP)
