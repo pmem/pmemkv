@@ -21,6 +21,10 @@
 #include "engines-experimental/csmap.h"
 #endif
 
+#ifdef ENGINE_RADIX
+#include "engines-experimental/radix.h"
+#endif
+
 #ifdef ENGINE_CACHING
 #include "engines-experimental/caching.h"
 #endif
@@ -52,6 +56,9 @@ static constexpr const char *available_engines = "blackhole"
 #endif
 #ifdef ENGINE_CSMAP
 						 ", csmap"
+#endif
+#ifdef ENGINE_RADIX
+						 ", radix"
 #endif
 #ifdef ENGINE_VSMAP
 						 ", vsmap"
@@ -99,6 +106,13 @@ engine_base::create_engine(const std::string &engine,
 	if (engine == "csmap") {
 		engine_base::check_config_null(engine, cfg);
 		return std::unique_ptr<engine_base>(new pmem::kv::csmap(std::move(cfg)));
+	}
+#endif
+
+#ifdef ENGINE_RADIX
+	if (engine == "radix") {
+		engine_base::check_config_null(engine, cfg);
+		return std::unique_ptr<engine_base>(new pmem::kv::radix(std::move(cfg)));
 	}
 #endif
 
