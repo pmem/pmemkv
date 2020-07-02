@@ -16,8 +16,7 @@ ENV OS ubuntu
 ENV OS_VER 19.10_bindings
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
-ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
-ENV JAVA_TOOL_OPTIONS -Dfile.encoding=UTF-8
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 # Additional parameters to build docker without building components
 ARG SKIP_VALGRIND_BUILD
@@ -54,7 +53,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	maven \
 	npm \
 	numactl \
-	openjdk-11-jdk \
+	openjdk-8-jdk \
 	pandoc \
 	pkg-config \
 	python3-dev \
