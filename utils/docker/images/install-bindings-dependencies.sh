@@ -38,12 +38,12 @@ cd pmemkv
 git checkout $PMEMKV_VERSION
 mkdir build
 cd build
-# only VSMAP engine is enabled, because Java tests need it
+# only VSMAP and CMAP engines are enabled, because Java tests need it
 
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX \
 	-DENGINE_VSMAP=ON \
-	-DENGINE_CMAP=OFF \
+	-DENGINE_CMAP=ON \
 	-DENGINE_VCMAP=OFF \
 	-DENGINE_CACHING=OFF \
 	-DENGINE_STREE=OFF \
