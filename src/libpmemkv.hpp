@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "libpmemkv.h"
+#include <libpmemobj/pool_base.h>
 
 /*! \file libpmemkv.hpp
 	\brief Main C++ pmemkv public header.
@@ -157,9 +158,6 @@ public:
 	config &operator=(const config &other) = delete;
 	config &operator=(config &&other) noexcept;
 
-	template <typename Comparator>
-	status put_comparator(Comparator &&comparator);
-
 	template <typename T>
 	status put_data(const std::string &key, const T *value,
 			const std::size_t number = 1) noexcept;
@@ -172,6 +170,13 @@ public:
 	status put_uint64(const std::string &key, std::uint64_t value) noexcept;
 	status put_int64(const std::string &key, std::int64_t value) noexcept;
 	status put_string(const std::string &key, const std::string &value) noexcept;
+
+	status put_size(std::uint64_t size) noexcept;
+	status put_path(const std::string &path) noexcept;
+	status put_force_create(bool value) noexcept;
+	status put_oid(PMEMoid *oid) noexcept;
+	template <typename Comparator>
+	status put_comparator(Comparator &&comparator);
 
 	template <typename T>
 	status get_data(const std::string &key, T *&value, std::size_t &number) const
@@ -627,6 +632,60 @@ inline status config::put_string(const std::string &key,
 
 	return static_cast<status>(
 		pmemkv_config_put_string(this->_config, key.data(), value.data()));
+}
+
+/**
+ * Puts size to a config
+ *
+ * @param[in] size of the database in bytes.
+ *
+ * @return pmem::kv::status
+ */
+inline status config::put_size(std::uint64_t size) noexcept
+{
+	return put_uint64("size", size);
+}
+
+/**
+ * Puts path to a config.
+ *
+ * @param[in] path to a database file or to a poolset file (see **poolset**(5) for
+ * details). Note that when using poolset file, size should be 0.
+ *
+ * @return pmem::kv::status
+ */
+inline status config::put_path(const std::string &path) noexcept
+{
+	return put_string("path", path);
+}
+
+/**
+ * Puts force_create parameter to a config, For supporting engines If false,
+ * pmemkv opens file specified by 'path', otherwise it creates it. False by
+ * default.
+ *
+ * @return pmem::kv::status
+ */
+inline status config::put_force_create(bool value) noexcept
+{
+	return put_uint64("force_create", value ? 1 : 0);
+}
+
+/**
+ * Puts PMEMoid object to a config
+ *
+ * @param[in] oid pointer (for details see **libpmemobj**(7)) which points to the engine
+ * data. If oid is null engine will allocate new data, otherwise it will use existing
+ * one.
+ *
+ * @return pmem::kv::status
+ */
+inline status config::put_oid(PMEMoid *oid) noexcept
+{
+	if (init() != 0)
+		return status::UNKNOWN_ERROR;
+
+	return static_cast<status>(pmemkv_config_put_oid(this->_config, oid));
 }
 
 /**
