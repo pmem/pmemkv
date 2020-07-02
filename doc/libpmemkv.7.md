@@ -139,8 +139,6 @@ Existing bindings:
 
 + Java - for details see <https://github.com/pmem/pmemkv-java>
 
-+ JNI - for details see <https://github.com/pmem/pmemkv-jni>
-
 + Node.js - for details see <https://github.com/pmem/pmemkv-nodejs>
 
 + Python - for details see <https://github.com/pmem/pmemkv-python>
