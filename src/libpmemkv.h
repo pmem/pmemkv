@@ -4,6 +4,7 @@
 #ifndef LIBPMEMKV_H
 #define LIBPMEMKV_H
 
+#include <libpmemobj/pool_base.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -36,6 +37,10 @@ typedef void pmemkv_get_v_callback(const char *value, size_t valuebytes, void *a
 typedef int pmemkv_compare_function(const char *key1, size_t keybytes1, const char *key2,
 				    size_t keybytes2, void *arg);
 
+pmemkv_comparator *pmemkv_comparator_new(pmemkv_compare_function *fn, const char *name,
+					 void *arg);
+void pmemkv_comparator_delete(pmemkv_comparator *comparator);
+
 pmemkv_config *pmemkv_config_new(void);
 void pmemkv_config_delete(pmemkv_config *config);
 int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *value,
@@ -54,9 +59,11 @@ int pmemkv_config_get_uint64(pmemkv_config *config, const char *key, uint64_t *v
 int pmemkv_config_get_int64(pmemkv_config *config, const char *key, int64_t *value);
 int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char **value);
 
-pmemkv_comparator *pmemkv_comparator_new(pmemkv_compare_function *fn, const char *name,
-					 void *arg);
-void pmemkv_comparator_delete(pmemkv_comparator *comparator);
+int pmemkv_config_put_size(pmemkv_config *config, uint64_t value);
+int pmemkv_config_put_path(pmemkv_config *config, const char *value);
+int pmemkv_config_put_force_create(pmemkv_config *config);
+int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);
+int pmemkv_config_put_oid(pmemkv_config *config, PMEMoid *oid);
 
 int pmemkv_open(const char *engine, pmemkv_config *config, pmemkv_db **db);
 void pmemkv_close(pmemkv_db *kv);
