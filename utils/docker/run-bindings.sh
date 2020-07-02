@@ -55,7 +55,7 @@ cd pmemkv-java
 git checkout $JAVA_VERSION
 mkdir -p ~/.m2/repository
 cp -r /opt/bindings/java/repository ~/.m2/
-mvn --offline install
+mvn install
 
 echo
 echo "####################################################################"
