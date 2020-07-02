@@ -173,6 +173,32 @@ int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char 
 	});
 }
 
+int pmemkv_config_put_size(pmemkv_config *config, uint64_t value)
+{
+	return pmemkv_config_put_uint64(config, "size", value);
+}
+
+int pmemkv_config_put_path(pmemkv_config *config, const char *value)
+{
+	return pmemkv_config_put_string(config, "path", value);
+}
+
+int pmemkv_config_put_force_create(pmemkv_config *config, bool value)
+{
+	return pmemkv_config_put_uint64(config, "force_create", value ? 1 : 0);
+}
+
+int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator)
+{
+	return pmemkv_config_put_object(config, "comparator", comparator,
+					(void (*)(void *)) & pmemkv_comparator_delete);
+}
+
+int pmemkv_config_put_oid(pmemkv_config *config, PMEMoid *oid)
+{
+	return pmemkv_config_put_object(config, "oid", oid, NULL);
+}
+
 int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **value,
 			   size_t *value_size)
 {
