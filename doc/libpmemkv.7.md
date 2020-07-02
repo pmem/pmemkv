@@ -64,7 +64,7 @@ libpmemobj-cpp packages are required.
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
-* **path** -- Path to a database file or to a poolset file (see **poolset**(5) for details). Not that when using poolset file, size should be 0
+* **path** -- Path to a database file or to a poolset file (see **poolset**(5) for details). Note that when using poolset file, size should be 0
 	+ type: string
 * **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it.
 	+ type: uint64_t
