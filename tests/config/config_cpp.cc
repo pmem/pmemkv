@@ -3,6 +3,8 @@
 
 #include "unittest.hpp"
 #include <libpmemkv.hpp>
+#include <string>
+#include <vector>
 
 #include <limits>
 
@@ -14,6 +16,8 @@ using namespace pmem::kv;
 
 static const int INIT_VAL = 1;
 static const int DELETED_VAL = 2;
+static const char *PATH = "/some/path";
+static const uint64_t SIZE = 0xDEADBEEF;
 
 struct custom_type {
 	int a;
@@ -29,7 +33,7 @@ static void deleter(custom_type *ct_ptr)
 static void simple_test()
 {
 	/**
-	 * TEST: add and read data from config, using all available methods
+	 * TEST: add and read data from config, using basic methods.
 	 */
 	auto cfg = new config;
 	UT_ASSERT(cfg != nullptr);
@@ -58,6 +62,15 @@ static void simple_test()
 	ptr_deleter->b = INIT_VAL;
 	s = cfg->put_object("object_ptr_with_deleter", ptr_deleter,
 			    (void (*)(void *)) & deleter);
+	ASSERT_STATUS(s, status::OK);
+
+	s = cfg->put_path(PATH);
+	ASSERT_STATUS(s, status::OK);
+
+	s = cfg->put_size(SIZE);
+	ASSERT_STATUS(s, status::OK);
+
+	s = cfg->put_force_create(true);
 	ASSERT_STATUS(s, status::OK);
 
 	std::string value_string;
@@ -102,6 +115,19 @@ static void simple_test()
 	int64_t none;
 	ASSERT_STATUS(cfg->get_int64("non-existent", none), status::NOT_FOUND);
 
+	s = cfg->get_string("path", value_string);
+	ASSERT_STATUS(s, status::OK);
+	UT_ASSERT(value_string == PATH);
+
+	uint64_t int_us;
+	s = cfg->get_uint64("size", int_us);
+	ASSERT_STATUS(s, status::OK);
+	UT_ASSERTeq(int_us, SIZE);
+
+	s = cfg->get_uint64("force_create", int_us);
+	ASSERT_STATUS(s, status::OK);
+	UT_ASSERTeq(int_us, 1);
+
 	delete cfg;
 	cfg = nullptr;
 
@@ -115,6 +141,70 @@ static void simple_test()
 
 	delete ptr;
 	delete ptr_deleter;
+}
+
+static void put_edge_cases()
+{
+	/**
+	 * TEST: Edge cases input data for some methods.
+	 */
+
+	auto cfg = new config;
+	auto s = cfg->put_force_create(false);
+	ASSERT_STATUS(s, status::OK);
+
+	uint64_t int_us;
+	s = cfg->get_uint64("force_create", int_us);
+	ASSERT_STATUS(s, status::OK);
+	UT_ASSERTeq(int_us, 0);
+
+	auto max_size = std::numeric_limits<uint64_t>::max();
+	s = cfg->put_size(max_size);
+	ASSERT_STATUS(s, status::OK);
+
+	s = cfg->get_uint64("size", int_us);
+	ASSERT_STATUS(s, status::OK);
+	UT_ASSERTeq(int_us, max_size);
+
+	delete cfg;
+
+	/* Some of those strings are not real paths, but config should not crash on them
+	 * */
+	std::vector<std::string> paths = {" ", "", "//",
+					  ",./;'[]-=<>?:\"{}|_+!@#$%^&*()`~", "/👾"};
+	for (auto path : paths) {
+		auto cfg = new config();
+		s = cfg->put_path(path);
+		ASSERT_STATUS(s, status::OK);
+
+		std::string value_string;
+		s = cfg->get_string("path", value_string);
+		ASSERT_STATUS(s, status::OK);
+		UT_ASSERT(value_string == path);
+		delete cfg;
+	}
+}
+
+static void put_oid_simple_test()
+{
+	/**
+	 * TEST: basic check for put_oid method.
+	 */
+
+	auto cfg = new config;
+	UT_ASSERT(cfg != NULL);
+
+	PMEMoid oid;
+	status ret = cfg->put_oid(&oid);
+	ASSERT_STATUS(ret, status::OK);
+
+	PMEMoid *oid_ptr;
+
+	ret = cfg->get_object("oid", oid_ptr);
+	ASSERT_STATUS(ret, status::OK);
+	UT_ASSERTeq(&oid, oid_ptr);
+
+	delete cfg;
 }
 
 static void object_unique_ptr_default_deleter_test()
@@ -346,6 +436,8 @@ static void not_found_test()
 static void test(int argc, char *argv[])
 {
 	simple_test();
+	put_oid_simple_test();
+	put_edge_cases();
 	object_unique_ptr_nullptr_test();
 	object_unique_ptr_default_deleter_test();
 	object_unique_ptr_custom_deleter_test();
