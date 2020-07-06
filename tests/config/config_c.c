@@ -4,6 +4,7 @@
 #include "unittest.h"
 #include <libpmemkv.h>
 
+#include <libpmemobj/pool_base.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -123,6 +124,39 @@ static void simple_test()
 
 	free(ptr);
 	free(ptr_deleter);
+}
+
+static void setters_test()
+{
+	/**
+	 * TEST: add and read data from config, using all available methods
+	 */
+	pmemkv_config *config = pmemkv_config_new();
+	UT_ASSERT(config != NULL);
+
+	int ret = pmemkv_config_put_path(config, "/path/to/file");
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	ret = pmemkv_config_put_size(config, 8388608);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	ret = pmemkv_config_put_force_create(config);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	const char *value_string;
+	ret = pmemkv_config_get_string(config, "path", &value_string);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERT(strcmp(value_string, "/path/to/file") == 0);
+
+	int64_t value_int;
+	ret = pmemkv_config_get_int64(config, "size", &value_int);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_int, 8388608);
+
+	int64_t value_uint;
+	ret = pmemkv_config_get_int64(config, "force_create", &value_uint);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_uint, 1);
 }
 
 static void free_deleter_test()
@@ -393,4 +427,5 @@ int main(int argc, char *argv[])
 	integral_conversion_test();
 	not_found_test();
 	null_config_test();
+	setters_test();
 }

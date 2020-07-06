@@ -7,9 +7,9 @@ static void FailsToOpenInstanceWithInvalidPath(std::string engine,
 					       std::string non_existent_path)
 {
 	pmem::kv::config cfg;
-	auto s = cfg.put_string("path", non_existent_path);
+	auto s = cfg.put_path(non_existent_path);
 	UT_ASSERTeq(s, pmem::kv::status::OK);
-	s = cfg.put_uint64("size", 83886080);
+	s = cfg.put_size(83886080);
 	UT_ASSERTeq(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
@@ -23,7 +23,7 @@ static void FailsToOpenInstanceWithInvalidPath(std::string engine,
 static void NoSizeInConfig(std::string engine)
 {
 	pmem::kv::config cfg;
-	auto s = cfg.put_string("path", "some_path");
+	auto s = cfg.put_path("some_path");
 	UT_ASSERTeq(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
@@ -35,7 +35,7 @@ static void NoSizeInConfig(std::string engine)
 static void NoPathInConfig(std::string engine)
 {
 	pmem::kv::config cfg;
-	auto s = cfg.put_uint64("size", 83886080);
+	auto s = cfg.put_size(83886080);
 	UT_ASSERTeq(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
