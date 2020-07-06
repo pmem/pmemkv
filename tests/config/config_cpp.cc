@@ -14,6 +14,8 @@ using namespace pmem::kv;
 
 static const int INIT_VAL = 1;
 static const int DELETED_VAL = 2;
+static const char *PATH = "/some/path";
+static const uint64_t SIZE = 0xDEADBEEF;
 
 struct custom_type {
 	int a;
@@ -60,6 +62,15 @@ static void simple_test()
 			    (void (*)(void *)) & deleter);
 	ASSERT_STATUS(s, status::OK);
 
+	s = cfg->put_path(PATH);
+	UT_ASSERTeq(s, status::OK);
+
+	s = cfg->put_size(SIZE);
+	UT_ASSERTeq(s, status::OK);
+
+	s = cfg->put_force_create(true);
+	UT_ASSERTeq(s, status::OK);
+
 	std::string value_string;
 	s = cfg->get_string("string", value_string);
 	ASSERT_STATUS(s, status::OK);
@@ -102,6 +113,19 @@ static void simple_test()
 	int64_t none;
 	ASSERT_STATUS(cfg->get_int64("non-existent", none), status::NOT_FOUND);
 
+	s = cfg->get_string("path", value_string);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(value_string == PATH);
+
+	uint64_t int_us;
+	s = cfg->get_uint64("size", int_us);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERTeq(int_us, SIZE);
+
+	s = cfg->get_uint64("force_create", int_us);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERTeq(int_us, 1);
+
 	delete cfg;
 	cfg = nullptr;
 
@@ -115,6 +139,24 @@ static void simple_test()
 
 	delete ptr;
 	delete ptr_deleter;
+}
+
+static void put_oid_simple_test()
+{
+	auto cfg = new config;
+	UT_ASSERT(cfg != NULL);
+
+	PMEMoid oid;
+	status ret = cfg->put_oid(&oid);
+	UT_ASSERTeq(ret, status::OK);
+
+	PMEMoid *oid_ptr;
+
+	ret = cfg->get_object("oid", oid_ptr);
+	UT_ASSERTeq(ret, status::OK);
+	UT_ASSERTeq(&oid, oid_ptr);
+
+	delete cfg;
 }
 
 static void object_unique_ptr_default_deleter_test()
@@ -326,6 +368,7 @@ static void not_found_test()
 static void test(int argc, char *argv[])
 {
 	simple_test();
+	put_oid_simple_test();
 	object_unique_ptr_nullptr_test();
 	object_unique_ptr_default_deleter_test();
 	object_unique_ptr_custom_deleter_test();
