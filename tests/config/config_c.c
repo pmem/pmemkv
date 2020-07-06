@@ -4,6 +4,7 @@
 #include "unittest.h"
 #include <libpmemkv.h>
 
+#include <libpmemobj/pool_base.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -14,6 +15,8 @@
 static const int TEST_VAL = 0xABC;
 static const int INIT_VAL = 1;
 static const int DELETED_VAL = 2;
+static const char *PATH = "/some/path";
+static const uint64_t SIZE = 0xDEADBEEF;
 
 struct custom_type {
 	int a;
@@ -74,6 +77,15 @@ static void simple_test()
 				       (void (*)(void *)) & deleter);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 
+	ret = pmemkv_config_put_path(config, PATH);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	ret = pmemkv_config_put_size(config, SIZE);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
+	ret = pmemkv_config_put_force_create(config, true);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+
 	const char *value_string;
 	ret = pmemkv_config_get_string(config, "string", &value_string);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
@@ -109,6 +121,19 @@ static void simple_test()
 	int64_t none;
 	UT_ASSERTeq(pmemkv_config_get_int64(config, "non-existent", &none),
 		    PMEMKV_STATUS_NOT_FOUND);
+
+	ret = pmemkv_config_get_string(config, "path", &value_string);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERT(strcmp(value_string, PATH) == 0);
+
+	uint64_t value_uint;
+	ret = pmemkv_config_get_uint64(config, "size", &value_uint);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_uint, SIZE);
+
+	ret = pmemkv_config_get_uint64(config, "force_create", &value_uint);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_uint, 1);
 
 	pmemkv_config_delete(config);
 	config = NULL;

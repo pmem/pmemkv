@@ -29,8 +29,7 @@ static void insert(const char *engine, pmemkv_config *cfg)
 {
 	pmemkv_comparator *cmp = create_cmp("valid_cmp");
 
-	int s = pmemkv_config_put_object(cfg, "comparator", (void *)cmp,
-					 (void(*))pmemkv_comparator_delete);
+	int s = pmemkv_config_put_comparator(cfg, cmp);
 	UT_ASSERTeq(s, PMEMKV_STATUS_OK);
 
 	pmemkv_db *db;
@@ -53,8 +52,7 @@ static void check_valid(const char *engine, pmemkv_config *cfg)
 {
 	pmemkv_comparator *cmp = create_cmp("valid_cmp");
 
-	int s = pmemkv_config_put_object(cfg, "comparator", (void *)cmp,
-					 (void(*))pmemkv_comparator_delete);
+	int s = pmemkv_config_put_comparator(cfg, (void *)cmp);
 	UT_ASSERTeq(s, PMEMKV_STATUS_OK);
 
 	pmemkv_db *db;
@@ -78,8 +76,7 @@ static void check_invalid(const char *engine, pmemkv_config *cfg)
 {
 	pmemkv_comparator *cmp = create_cmp("invalid_cmp");
 
-	int s = pmemkv_config_put_object(cfg, "comparator", (void *)cmp,
-					 (void(*))pmemkv_comparator_delete);
+	int s = pmemkv_config_put_comparator(cfg, (void *)cmp);
 	UT_ASSERTeq(s, PMEMKV_STATUS_OK);
 
 	pmemkv_db *db;
