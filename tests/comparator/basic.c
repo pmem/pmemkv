@@ -38,8 +38,7 @@ static void test_valid_comparator(const char *engine, pmemkv_config *cfg)
 						       "single_byte_compare", &ARG_VALUE);
 	UT_ASSERTne(cmp, NULL);
 
-	int s = pmemkv_config_put_object(cfg, "comparator", cmp,
-					 (void (*)(void *)) & pmemkv_comparator_delete);
+	int s = pmemkv_config_put_comparator(cfg, cmp);
 	UT_ASSERTeq(s, PMEMKV_STATUS_OK);
 
 	pmemkv_db *db;
