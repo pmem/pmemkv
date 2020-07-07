@@ -3,7 +3,8 @@
 # Copyright 2019-2020, Intel Corporation
 
 #
-# prepare-for-build.sh - prepare the Docker image for the build
+# prepare-for-build.sh - prepare the Docker image for the builds
+#                        and defines functions for other scripts.
 #
 
 set -e
@@ -11,15 +12,14 @@ set -e
 EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
 
+# CMake's version assigned to variable(s) (a single number representation for easier comparison)
+CMAKE_VERSION=$(cmake --version | head -n1 | grep -oE '[0-9].[0-9]*')
+CMAKE_VERSION_MAJOR=$(echo $CMAKE_VERSION | cut -d. -f1)
+CMAKE_VERSION_MINOR=$(echo $CMAKE_VERSION | cut -d. -f2)
+CMAKE_VERSION_NUMBER=$((100 * $CMAKE_VERSION_MAJOR + $CMAKE_VERSION_MINOR))
+
 function sudo_password() {
 	echo $USERPASS | sudo -Sk $*
-}
-
-function cleanup() {
-	find . -name ".coverage" -exec rm {} \;
-	find . -name "coverage.xml" -exec rm {} \;
-	find . -name "*.gcov" -exec rm {} \;
-	find . -name "*.gcda" -exec rm {} \;
 }
 
 function upload_codecov() {
@@ -31,9 +31,13 @@ function upload_codecov() {
 		gcovexe="gcov"
 	fi
 
-	# the output is redundant in this case, i.e. we rely on parsed report from codecov on github
+	# run gcov exe, using their bash (set flag and remove parsed coverage files)
 	bash <(curl -s https://codecov.io/bash) -c -F $1 -x "$gcovexe"
-	cleanup
+
+	find . -name ".coverage" -exec rm {} \;
+	find . -name "coverage.xml" -exec rm {} \;
+	find . -name "*.gcov" -exec rm {} \;
+	find . -name "*.gcda" -exec rm {} \;
 }
 
 function compile_example_standalone() {

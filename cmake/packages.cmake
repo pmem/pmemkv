@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 
 #
 # packages.cmake - CPack configuration for rpm and deb generation
@@ -50,7 +50,7 @@ set(CPACK_DEBIAN_PACKAGE_NAME "libpmemkv-dev")
 set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION})
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE amd64)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS ${DEB_PACKAGE_REQUIRES})
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "lukasz.stolarczuk@intel.com")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "szymon.romik@intel.com")
 
 if("${CPACK_GENERATOR}" STREQUAL "RPM")
 	set(CPACK_PACKAGE_FILE_NAME

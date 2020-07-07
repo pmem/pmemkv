@@ -52,10 +52,14 @@ containerName=pmemkv-${OS}-${OS_VER}
 
 if [[ "$command" == "" ]]; then
 	case $TYPE in
-		normal)
+		debug)
 			builds=(tests_gcc_debug_cpp11
-					tests_gcc_debug_cpp14
-					test_installation)
+					tests_gcc_debug_cpp14)
+			command="./run-build.sh ${builds[@]}";
+			;;
+		release)
+			builds=(tests_clang_release_cpp20
+					test_release_installation)
 			command="./run-build.sh ${builds[@]}";
 			;;
 		valgrind)

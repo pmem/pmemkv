@@ -216,7 +216,7 @@ if(ENGINE_CMAP)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8 50)
 
-	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+	if(TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE cmap
 				BINARY concurrent_put_get_remove_params
 				TRACERS drd helgrind
@@ -230,7 +230,7 @@ if(ENGINE_CMAP)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8 50 100)
 
-	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+	if(TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE cmap
 				BINARY concurrent_put_get_remove_gen_params
 				TRACERS drd helgrind
@@ -250,7 +250,7 @@ if(ENGINE_CMAP)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 400)
 
-	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+	if(TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE cmap
 				BINARY concurrent_put_get_remove_single_op_params
 				TRACERS drd helgrind
@@ -302,7 +302,7 @@ if(ENGINE_CMAP)
 			SCRIPT pmemobj_based/default.cmake
 			DB_SIZE 200M)
 
-	if (TESTS_LONG)
+	if(TESTS_LONG)
 		add_engine_test(ENGINE cmap
 				BINARY pmemobj_error_handling_tx_oom
 				TRACERS memcheck
@@ -485,7 +485,7 @@ if(ENGINE_CSMAP)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 24 200)
 
-	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+	if(TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE csmap
 				BINARY concurrent_iterate_params
 				TRACERS drd # helgrind XXX: skip list lock order error
@@ -499,7 +499,7 @@ if(ENGINE_CSMAP)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8 50)
 
-	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+	if(TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE csmap
 				BINARY concurrent_put_get_remove_params
 				TRACERS drd # helgrind XXX: skip list lock order error
@@ -513,7 +513,7 @@ if(ENGINE_CSMAP)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8 50 100)
 
-	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+	if(TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE csmap
 				BINARY concurrent_put_get_remove_gen_params
 				TRACERS drd # helgrind XXX: skip list lock order error
@@ -533,7 +533,7 @@ if(ENGINE_CSMAP)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 400)
 
-	if (TESTS_PMEMOBJ_DRD_HELGRIND)
+	if(TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE csmap
 				BINARY concurrent_put_get_remove_single_op_params
 				TRACERS drd # helgrind XXX: skip list lock order error
@@ -585,7 +585,7 @@ if(ENGINE_CSMAP)
 			SCRIPT pmemobj_based/default.cmake
 			DB_SIZE 200M)
 
-	if (TESTS_LONG)
+	if(TESTS_LONG)
 		add_engine_test(ENGINE csmap
 				BINARY pmemobj_error_handling_tx_oom
 				TRACERS memcheck
