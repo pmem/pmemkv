@@ -49,11 +49,11 @@ int main(int argc, char *argv[])
 	LOG("Creating config");
 	config cfg;
 
-	status s = cfg.put_string("path", argv[1]);
+	status s = cfg.put_path(argv[1]);
 	assert(s == status::OK);
-	s = cfg.put_uint64("size", SIZE);
+	s = cfg.put_size(SIZE);
 	assert(s == status::OK);
-	s = cfg.put_uint64("force_create", 1);
+	s = cfg.put_force_create();
 	assert(s == status::OK);
 	s = cfg.put_comparator(lexicographical_comparator{});
 	assert(s == status::OK);
