@@ -54,18 +54,17 @@ int main(int argc, char *argv[])
 	pmemkv_config *cfg = pmemkv_config_new();
 	assert(cfg != NULL);
 
-	int s = pmemkv_config_put_string(cfg, "path", argv[1]);
+	int s = pmemkv_config_put_path(cfg, argv[1]);
 	assert(s == PMEMKV_STATUS_OK);
-	s = pmemkv_config_put_uint64(cfg, "size", SIZE);
+	s = pmemkv_config_put_size(cfg, SIZE);
 	assert(s == PMEMKV_STATUS_OK);
-	s = pmemkv_config_put_uint64(cfg, "force_create", 1);
+	s = pmemkv_config_put_force_create(cfg, true);
 	assert(s == PMEMKV_STATUS_OK);
 
 	pmemkv_comparator *cmp = pmemkv_comparator_new(&reverse_three_way_compare,
 						       "reverse_three_way_compare", NULL);
 	assert(cmp != NULL);
-	s = pmemkv_config_put_object(cfg, "comparator", cmp,
-				     (void (*)(void *)) & pmemkv_comparator_delete);
+	s = pmemkv_config_put_comparator(cfg, cmp);
 	assert(s == PMEMKV_STATUS_OK);
 
 	LOG("Opening pmemkv database with 'csmap' engine");
