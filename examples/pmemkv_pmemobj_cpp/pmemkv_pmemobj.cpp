@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
 		config cfg_1;
 		config cfg_2;
 
-		status ret = cfg_1.put_object("oid", &(pop.root()->oids->at(0)), nullptr);
+		status ret = cfg_1.put_oid(&(pop.root()->oids->at(0)));
 		assert(ret == status::OK);
-		ret = cfg_2.put_object("oid", &(pop.root()->oids->at(1)), nullptr);
+		ret = cfg_2.put_oid(&(pop.root()->oids->at(1)));
 		assert(ret == status::OK);
 
 		LOG("Starting first cmap engine");

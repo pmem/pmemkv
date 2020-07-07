@@ -50,7 +50,7 @@ static void xdeleter(struct custom_type_wrapper *ct_ptr)
 static void simple_test()
 {
 	/**
-	 * TEST: add and read data from config, using all available methods
+	 * TEST: add and read data from config, using put_parameters functions
 	 */
 	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);

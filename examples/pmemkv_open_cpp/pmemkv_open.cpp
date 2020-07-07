@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	LOG("Creating config");
 	config cfg;
 
-	status s = cfg.put_string("path", argv[1]);
+	status s = cfg.put_path(argv[1]);
 	assert(s == status::OK);
 
 	LOG("Opening pmemkv database with 'cmap' engine");
