@@ -10,6 +10,12 @@
 #include <iostream>
 #include <libpmemkv.hpp>
 
+#define ASSERT(expr)                                                                     \
+	do {                                                                             \
+		if (!(expr))                                                             \
+			std::cout << pmemkv_errormsg() << std::endl;                     \
+		assert(expr);                                                            \
+	} while (0)
 #define LOG(msg) std::cout << msg << std::endl
 
 using namespace pmem::kv;
@@ -28,30 +34,30 @@ int main(int argc, char *argv[])
 	config cfg;
 
 	status s = cfg.put_path(argv[1]);
-	assert(s == status::OK);
+	ASSERT(s == status::OK);
 	s = cfg.put_size(SIZE);
-	assert(s == status::OK);
+	ASSERT(s == status::OK);
 	s = cfg.put_force_create();
-	assert(s == status::OK);
+	ASSERT(s == status::OK);
 
 	LOG("Opening pmemkv database with 'cmap' engine");
 	db *kv = new db();
-	assert(kv != nullptr);
+	ASSERT(kv != nullptr);
 	s = kv->open("cmap", std::move(cfg));
-	assert(s == status::OK);
+	ASSERT(s == status::OK);
 
 	LOG("Putting new key");
 	s = kv->put("key1", "value1");
-	assert(s == status::OK);
+	ASSERT(s == status::OK);
 
 	size_t cnt;
 	s = kv->count_all(cnt);
-	assert(s == status::OK && cnt == 1);
+	ASSERT(s == status::OK && cnt == 1);
 
 	LOG("Reading key back");
 	std::string value;
 	s = kv->get("key1", &value);
-	assert(s == status::OK && value == "value1");
+	ASSERT(s == status::OK && value == "value1");
 
 	LOG("Iterating existing keys");
 	kv->put("key2", "value2");
@@ -63,13 +69,13 @@ int main(int argc, char *argv[])
 
 	LOG("Defragmenting the database");
 	s = kv->defrag(0, 100);
-	assert(s == status::OK);
+	ASSERT(s == status::OK);
 
 	LOG("Removing existing key");
 	s = kv->remove("key1");
-	assert(s == status::OK);
+	ASSERT(s == status::OK);
 	s = kv->exists("key1");
-	assert(s == status::NOT_FOUND);
+	ASSERT(s == status::NOT_FOUND);
 
 	LOG("Closing database");
 	delete kv;
