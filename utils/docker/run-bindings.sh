@@ -10,6 +10,8 @@ set -e
 
 source `dirname $0`/prepare-for-build.sh
 
+PREFIX="/usr"
+
 # master: Merge pull request #44 from lukaszstolarczuk/update-tra..., 21.11.2019
 RUBY_VERSION="3741e3df698245fc8a15822a1aa85b5c211fd332"
 
