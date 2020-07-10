@@ -28,7 +28,13 @@ void null_db_all_funcs_test()
 	s = pmemkv_count_above(NULL, key1, strlen(key1), &cnt);
 	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
 
+	s = pmemkv_count_equal_above(NULL, key1, strlen(key1), &cnt);
+	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+
 	s = pmemkv_count_below(NULL, key1, strlen(key1), &cnt);
+	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	s = pmemkv_count_equal_below(NULL, key1, strlen(key1), &cnt);
 	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
 
 	s = pmemkv_count_between(NULL, key1, strlen(key1), key2, strlen(key2), &cnt);
@@ -40,7 +46,13 @@ void null_db_all_funcs_test()
 	s = pmemkv_get_above(NULL, key1, strlen(key1), NULL, NULL);
 	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
 
+	s = pmemkv_get_equal_above(NULL, key1, strlen(key1), NULL, NULL);
+	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+
 	s = pmemkv_get_below(NULL, key1, strlen(key1), NULL, NULL);
+	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	s = pmemkv_get_equal_below(NULL, key1, strlen(key1), NULL, NULL);
 	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
 
 	s = pmemkv_get_between(NULL, key1, strlen(key1), key2, strlen(key2), NULL, NULL);
