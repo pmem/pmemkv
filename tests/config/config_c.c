@@ -350,6 +350,9 @@ static void null_config_test()
 	ret = pmemkv_config_put_int64(NULL, "int", 123);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
 
+	ret = pmemkv_config_put_uint64(NULL, "uint", 123456);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
+
 	struct custom_type *ptr = malloc(sizeof(struct custom_type));
 	ptr->a = INIT_VAL;
 	ptr->b = INIT_VAL;
@@ -365,6 +368,10 @@ static void null_config_test()
 
 	int64_t value_int;
 	ret = pmemkv_config_get_int64(NULL, "int", &value_int);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	uint64_t value_uint;
+	ret = pmemkv_config_get_uint64(NULL, "uint", &value_uint);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_INVALID_ARGUMENT);
 
 	struct custom_type *value_custom_ptr;
