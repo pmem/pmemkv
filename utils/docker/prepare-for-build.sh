@@ -23,21 +23,28 @@ function sudo_password() {
 }
 
 function upload_codecov() {
-	clang_used=$(cmake -LA -N . | grep CMAKE_CXX_COMPILER | grep clang | wc -c)
+	printf "\n$(tput setaf 1)$(tput setab 7)COVERAGE ${FUNCNAME[0]} START$(tput sgr 0)\n"
 
+	# set proper gcov command
+	clang_used=$(cmake -LA -N . | grep CMAKE_CXX_COMPILER | grep clang | wc -c)
 	if [[ $clang_used > 0 ]]; then
 		gcovexe="llvm-cov gcov"
 	else
 		gcovexe="gcov"
 	fi
 
-	# run gcov exe, using their bash (set flag and remove parsed coverage files)
-	bash <(curl -s https://codecov.io/bash) -c -F $1 -x "$gcovexe"
+	# run gcov exe, using their bash (remove parsed coverage files, set flag and exit 1 if not successful)
+	# there's parsed report on codecov.io, but we display it in logs (it's short, do not disable it nor pipe to /dev/null)
+	bash <(curl -s https://codecov.io/bash) -c -F $1 -Z -x "$gcovexe"
 
-	find . -name ".coverage" -exec rm {} \;
-	find . -name "coverage.xml" -exec rm {} \;
-	find . -name "*.gcov" -exec rm {} \;
-	find . -name "*.gcda" -exec rm {} \;
+	printf "check for any leftover gcov files\n"
+	leftover_files=$(find . -name ".coverage" -o -name "coverage.xml" -o -name "*.gcov" -o -name "*.gcda" -o -name "*.gcno" | wc -l)
+	if [[ $leftover_files > 0 ]]; then
+		# display found files
+		find . -name ".coverage" -o -name "coverage.xml" -o -name "*.gcov" -o -name "*.gcda" -o -name "*.gcno"
+	fi
+
+	printf "$(tput setaf 1)$(tput setab 7)COVERAGE ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
 function compile_example_standalone() {
