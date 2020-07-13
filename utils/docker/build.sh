@@ -11,7 +11,7 @@
 # - run this script from its location or set the variable 'HOST_WORKDIR' to
 #   where the root of this project is on the host machine,
 # - set variables 'OS' and 'OS_VER' properly to a system you want to build this
-#   repo on (for proper values take a look on the list of Dockerfiles at the
+#   repo on (for proper values take a look at the list of Dockerfiles at the
 #   utils/docker/images directory), eg. OS=ubuntu, OS_VER=19.10.
 #
 
@@ -91,7 +91,6 @@ fi
 
 if [ "$COVERAGE" == "1" ]; then
 	docker_opts="${docker_opts} `bash <(curl -s https://codecov.io/env)`";
-	ci_env=`bash <(curl -s https://codecov.io/env)`
 fi
 
 if [ -n "$DNS_SERVER" ]; then DNS_SETTING=" --dns=$DNS_SERVER "; fi
@@ -119,7 +118,6 @@ echo Building on ${OS}-${OS_VER}
 docker run --privileged=true --name=$containerName -i $TTY \
 	$DNS_SETTING \
 	${docker_opts} \
-	$ci_env \
 	--env http_proxy=$http_proxy \
 	--env https_proxy=$https_proxy \
 	--env WORKDIR=$WORKDIR \
