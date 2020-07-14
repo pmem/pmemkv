@@ -13,11 +13,8 @@ source `dirname $0`/prepare-for-build.sh
 # master: Merge pull request #44 from lukaszstolarczuk/update-tra..., 21.11.2019
 RUBY_VERSION="3741e3df698245fc8a15822a1aa85b5c211fd332"
 
-# master: Merge pull request #34 from igchor/add_pmemkv_errormsg, 06.12.2020
-JNI_VERSION="fcc8370b230ab3236d062a121e22dcebf37b90ec"
-
-# master: Merge pull request #38 from lukaszstolarczuk/update-tra..., 17.03.2020
-JAVA_VERSION="ab8747c3baf4af8cd2ce1985986d7fcc241ccd65"
+# master: common: pmemkv-java 1.0 release, 30.06.2020
+JAVA_VERSION="bada69f43447d7a664171458e0ca6d5d535feeb3"
 
 # master: Merge pull request #49 from how759/buffer-arguments, 02.03.2020
 NODEJS_VERSION="12ecc0a9c3205425bf0aa1767eada53834535045"
@@ -49,18 +46,6 @@ bundle install --local
 bundle exec rspec
 
 echo
-echo "#################################################################"
-echo "### Verifying building and installing of the pmemkv-jni bindings "
-echo "#################################################################"
-cd ~
-git clone https://github.com/pmem/pmemkv-jni.git
-cd pmemkv-jni
-git checkout $JNI_VERSION
-
-make test
-sudo_password -S make install prefix=$PREFIX
-
-echo
 echo "##################################################################"
 echo "### Verifying building and installing of the pmemkv-java bindings "
 echo "##################################################################"
@@ -70,7 +55,7 @@ cd pmemkv-java
 git checkout $JAVA_VERSION
 mkdir -p ~/.m2/repository
 cp -r /opt/bindings/java/repository ~/.m2/
-mvn --offline install
+mvn install
 
 echo
 echo "####################################################################"

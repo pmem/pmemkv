@@ -8,7 +8,7 @@ secondary_title: pmemkv
 ...
 
 [comment]: <> (SPDX-License-Identifier: BSD-3-Clause)
-[comment]: <> (Copyright 2019, Intel Corporation)
+[comment]: <> (Copyright 2019-2020, Intel Corporation)
 
 [comment]: <> (libpmemkv.7 -- man page for libpmemkv)
 
@@ -138,8 +138,6 @@ Bindings for other languages are available on GitHub. Currently they support onl
 Existing bindings:
 
 + Java - for details see <https://github.com/pmem/pmemkv-java>
-
-+ JNI - for details see <https://github.com/pmem/pmemkv-jni>
 
 + Node.js - for details see <https://github.com/pmem/pmemkv-nodejs>
 
