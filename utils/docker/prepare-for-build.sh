@@ -35,7 +35,7 @@ function upload_codecov() {
 
 	# run gcov exe, using their bash (remove parsed coverage files, set flag and exit 1 if not successful)
 	# we rely on parsed report on codecov.io; the output is quite long, hence it's disabled using -X flag
-	bash <(curl -s https://codecov.io/bash) -c -F $1 -Z -x "$gcovexe" -X "gcovout"
+	/opt/scripts/codecov -c -F $1 -Z -x "$gcovexe" -X "gcovout"
 
 	printf "check for any leftover gcov files\n"
 	leftover_files=$(find . -name "*.gcov")
