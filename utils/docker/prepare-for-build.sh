@@ -33,9 +33,12 @@ function upload_codecov() {
 		gcovexe="gcov"
 	fi
 
+	# WA: download specific (working) codecov-bash script:
+	curl -s https://raw.githubusercontent.com/codecov/codecov-bash/25b54705e809f71d94fb26420d50d98f3eb598e8/codecov > .codecov
+	chmod +x .codecov
 	# run gcov exe, using their bash (remove parsed coverage files, set flag and exit 1 if not successful)
 	# there's parsed report on codecov.io, but we display it in logs (it's short, do not disable it nor pipe to /dev/null)
-	bash <(curl -s https://codecov.io/bash) -c -F $1 -Z -x "$gcovexe"
+	./.codecov -c -F $1 -Z -x "$gcovexe"
 
 	printf "check for any leftover gcov files\n"
 	leftover_files=$(find . -name ".coverage" -o -name "coverage.xml" -o -name "*.gcov" -o -name "*.gcda" -o -name "*.gcno" | wc -l)
