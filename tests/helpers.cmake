@@ -295,10 +295,12 @@ function(pmreorder_execute expect_success engine conf_file name)
 
     set(ENV{PMEMOBJ_CONF} "copy_on_write.at_open=1")
 
+    string(REPLACE "\"" "\\\"" ESCAPED_ARGN "${ARGN}")
+
     set(cmd pmreorder -l ${BIN_DIR}/${TEST_NAME}.storelog
                     -o ${BIN_DIR}/${TEST_NAME}.pmreorder
                     -r ${engine}
-                    -p "${name} ${ARGN}"
+                    -p "${name} ${ESCAPED_ARGN}"
                     -x ${conf_file})
 
     execute_common(${expect_success} ${TRACER}_${TESTCASE} ${cmd})
