@@ -38,6 +38,10 @@ function test_gcc_cpp20() {
 	# Run basic tests
 	ctest -R "SimpleTest" --output-on-failure
 
+	if [ "$COVERAGE" == "1" ]; then
+		upload_codecov test_gcc_cpp20
+	fi
+
 	cd $CWD
 	rm -rf $WORKDIR/build
 
@@ -167,10 +171,6 @@ do
 	# list all tests in this build
 	ctest -N
 	ctest -R wrong_engine_name_test --output-on-failure
-
-	if [ "$COVERAGE" == "1" ]; then
-		upload_codecov wrong_engine_names
-	fi
 
 	cd $WORKDIR
 	rm -rf $WORKDIR/build

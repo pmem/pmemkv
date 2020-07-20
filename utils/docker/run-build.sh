@@ -40,7 +40,6 @@ function tests_gcc_debug_cpp11() {
 		-DCXX_STANDARD=11
 
 	make -j$(nproc)
-	make -j$(nproc) doc
 	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
@@ -75,7 +74,6 @@ function tests_gcc_debug_cpp14() {
 		-DCXX_STANDARD=14
 
 	make -j$(nproc)
-	make -j$(nproc) doc
 	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
@@ -181,7 +179,6 @@ function tests_clang_release_cpp20() {
 		-DCXX_STANDARD=20
 
 	make -j$(nproc)
-	make -j$(nproc) doc
 	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
