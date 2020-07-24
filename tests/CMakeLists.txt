@@ -47,7 +47,7 @@ if(TESTS_JSON AND NOT BUILD_JSON_CONFIG)
 elseif(NOT TESTS_JSON)
 	message(WARNING
 		"Most of pmemkv's tests require the 'libpmemkv_json_config' library. "
-		"To enable these tests use TESTS_JSON option (and turn BUILD_JSON_CONFIG on.")
+		"To enable these tests use TESTS_JSON option (and turn BUILD_JSON_CONFIG on).")
 endif()
 
 add_library(test_backtrace STATIC common/test_backtrace.c)

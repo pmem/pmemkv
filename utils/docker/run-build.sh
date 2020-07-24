@@ -246,6 +246,11 @@ echo "--------------------------------------------------------------------------
 
 # Run build steps passed as script arguments
 build_steps=$@
+if [[ -z "$build_steps" ]]; then
+	echo "ERROR: The variable build_steps with selected builds to run is not set!"
+	exit 1
+fi
+
 for build in $build_steps
 do
 	$build

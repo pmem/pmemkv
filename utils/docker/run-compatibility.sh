@@ -64,6 +64,8 @@ mkdir 1.0.1
 cd 1.0.1
 PKG_CONFIG_PATH=$PREFIX_1_0_1/lib64/pkgconfig cmake ../../tests/compatibility
 make -j$(nproc)
-cd ..
+cd ../..
 
 PMEM_IS_PMEM_FORCE=1 $WORKDIR/tests/compatibility/cmap.sh $WORKDIR/build/head/cmap_compatibility $WORKDIR/build/1.0.1/cmap_compatibility $TEST_DIR/testfile
+
+rm -rf $WORKDIR/build
