@@ -47,7 +47,7 @@ if [[ -z "$HOST_WORKDIR" ]]; then
 	exit 1
 fi
 
-imageName=${DOCKERHUB_REPO}:1.2-${OS}-${OS_VER}
+imageName=${DOCKERHUB_REPO}:1.3-${OS}-${OS_VER}
 containerName=pmemkv-${OS}-${OS_VER}
 
 if [[ "$command" == "" ]]; then
