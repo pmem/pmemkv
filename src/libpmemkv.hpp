@@ -73,9 +73,11 @@ private:
 
 /**
  * The C++ idiomatic function type to use for callback using key-value pair.
+ * It is used by get_*() calls.
  *
  * @param[in] key returned by callback item's key
  * @param[in] value returned by callback item's data
+ * @return ...XXX
  */
 typedef int get_kv_function(string_view key, string_view value);
 /**
@@ -85,17 +87,28 @@ typedef int get_kv_function(string_view key, string_view value);
  * @param[in] value returned by callback item's data
  */
 typedef void get_v_function(string_view value);
+/**
+ * The C++ idiomatic function type to use for callback using only the value.
+ * It is used by update() calls.
+ *
+ * @param[in] value returned by callback item's data
+ */
+typedef int update_v_function(string_view value);
 
 typedef int comparator_function(string_view key1, string_view key2);
 
 /**
- * Key-value pair callback, C-style.
+ * Key-value pair callback for get* functions, C-style.
  */
 using get_kv_callback = pmemkv_get_kv_callback;
 /**
- * Value-only callback, C-style.
+ * Value-only callback for get* functions, C-style.
  */
 using get_v_callback = pmemkv_get_v_callback;
+/**
+ * Value-only callback for update function, C-style.
+ */
+using update_v_callback = pmemkv_update_v_callback;
 
 /*! \enum status
 	\brief Status returned by pmemkv functions.
@@ -282,6 +295,13 @@ public:
 	status get(string_view key, get_v_callback *callback, void *arg) noexcept;
 	status get(string_view key, std::function<get_v_function> f) noexcept;
 	status get(string_view key, std::string *value) noexcept;
+
+	status update(string_view key, size_t v_offset, size_t v_size,
+		      update_v_callback *callback, void *arg) noexcept;
+	status update(string_view key, size_t v_offset, size_t v_size,
+		      std::function<update_v_function> f) noexcept;
+	status update(string_view key, string_view value) noexcept;
+	// XXX: add tests for cpp api
 
 	status put(string_view key, string_view value) noexcept;
 	status remove(string_view key) noexcept;
@@ -888,6 +908,13 @@ static inline void call_get_v_function(const char *value, size_t valuebytes, voi
 		string_view(value, valuebytes));
 }
 
+static inline int call_update_v_function(char *value, size_t valuebytes, void *arg)
+{
+	return (*reinterpret_cast<std::function<update_v_function> *>(arg))(
+		string_view(value, valuebytes));
+}
+
+// XXX: dodac wlasny callback jak "get_copy", tak zeby update'owal cala wartosc
 static inline void call_get_copy(const char *v, size_t vb, void *arg)
 {
 	auto c = reinterpret_cast<std::string *>(arg);
@@ -1348,7 +1375,7 @@ inline status db::exists(string_view key) noexcept
  * pmem::kv::status::OK. If record does not exist pmem::kv::status::NOT_FOUND
  * is returned. Other possible return values are described in pmem::kv::status.
  * *Callback* is called with the following parameters:
- * pointer to a value, size of the value and *arg* specified by the user.
+ * const pointer to a value, size of the value and *arg* specified by the user.
  * This function is guaranteed to be implemented by all engines.
  *
  * @param[in] key record's key to query for
@@ -1409,6 +1436,66 @@ inline status db::put(string_view key, string_view value) noexcept
 {
 	return static_cast<status>(pmemkv_put(this->_db, key.data(), key.size(),
 					      value.data(), value.size()));
+}
+
+/**
+ * Executes (C-like) *callback* function for record with given *key*. If
+ * record is present and no error occurred, the function returns
+ * pmem::kv::status::OK. If record does not exist pmem::kv::status::NOT_FOUND
+ * is returned. Other possible return values are described in pmem::kv::status.
+ * *Callback* is called with the following parameters:
+ * pointer to a value, size of the value and *arg* specified by the user.
+ * Update is called on pointed part of the value. Callback should get
+ * already snapshotted range of data (if required). Modifining out-of-range data
+ * is an undefined behavior. XXX: fixme?
+ *
+ * @param[in] key record's key to query for
+ * @param[in] v_offset value offset, points where update starts XXX ?
+ * @param[in] v_size size of the value's part to update XXX ?
+ * @param[in] callback function to be called for returned element
+ * @param[in] arg additional arguments to be passed to callback
+ *
+ * @return pmem::kv::status
+ */
+
+inline status db::update(string_view key, size_t v_offset, size_t v_size,
+			 update_v_callback *callback, void *arg) noexcept
+{
+	return static_cast<status>(pmemkv_update(this->_db, key.data(), key.size(),
+						 v_offset, v_size, callback, arg));
+}
+
+/**
+ * Executes function for record with given *key*. If record is present and
+ * no error occurred the function returns pmem::kv::status::OK. If record does
+ * not exist pmem::kv::status::NOT_FOUND is returned.
+ * XXX: function's return
+ *
+ * @param[in] key record's key to query for
+ * @param[in] f function called for returned element, it is called with only
+ *				one param - value (key is known)
+ *XXX: fixme
+ * @return pmem::kv::status
+ */
+inline status db::update(string_view key, size_t v_offset, size_t v_size, std::function<update_v_function> f) noexcept
+{
+	return static_cast<status>(
+		pmemkv_update(this->_db, key.data(), key.size(), v_offset, v_size, call_update_v_function, &f));
+}
+
+/**
+ * Updates whole value.
+ * XXX: perhaps it'd be better to transactionally remove and put.
+ *
+ * @param[in] key record's key to query for
+ * @param[out] value new value to put for the key
+ *XXX: fixme
+ * @return pmem::kv::status
+ */
+inline status db::update(string_view key, string_view value) noexcept
+{
+	return static_cast<status>(
+		pmemkv_update(this->_db, key.data(), key.size(), 0, value.size(), call_update_XXX, my_own_f));
 }
 
 /**

@@ -42,6 +42,7 @@ LIBPMEMKV_1.0 {
 		pmemkv_open;
 		pmemkv_put;
 		pmemkv_remove;
+		pmemkv_update;
 	local:
 		*;
 };

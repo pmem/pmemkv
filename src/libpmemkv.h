@@ -32,6 +32,7 @@ typedef struct pmemkv_comparator pmemkv_comparator;
 typedef int pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
 				   size_t valuebytes, void *arg);
 typedef void pmemkv_get_v_callback(const char *value, size_t valuebytes, void *arg);
+typedef int pmemkv_update_v_callback(char *value, size_t valuebytes, void *arg);
 
 typedef int pmemkv_compare_function(const char *key1, size_t keybytes1, const char *key2,
 				    size_t keybytes2, void *arg);
@@ -88,6 +89,8 @@ int pmemkv_get(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_v_callback *c
 int pmemkv_get_copy(pmemkv_db *db, const char *k, size_t kb, char *buffer,
 		    size_t buffer_size, size_t *value_size);
 int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb);
+int pmemkv_update(pmemkv_db *db, const char *k, size_t kb, size_t v_offset, size_t v_size,
+		  pmemkv_update_v_callback *c, void *arg);
 
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
 

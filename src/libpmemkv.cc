@@ -509,6 +509,18 @@ int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb
 	});
 }
 
+int pmemkv_update(pmemkv_db *db, const char *k, size_t kb, size_t v_offset, size_t v_size,
+		  pmemkv_update_v_callback *c, void *arg)
+{
+	if (!db)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		return db_to_internal(db)->update(pmem::kv::string_view(k, kb), v_offset,
+						  v_size, c, arg);
+	});
+}
+
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb)
 {
 	if (!db)

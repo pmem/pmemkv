@@ -202,6 +202,12 @@ status engine_base::get_between(string_view key1, string_view key2,
 	return status::NOT_SUPPORTED;
 }
 
+status engine_base::update(string_view key, size_t v_offset, size_t v_size,
+			   update_v_callback *callback, void *arg)
+{
+	return status::NOT_SUPPORTED;
+}
+
 status engine_base::exists(string_view key)
 {
 	return status::NOT_SUPPORTED;
