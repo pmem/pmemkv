@@ -32,11 +32,12 @@
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
 #              environment prepared for running pmemkv build and tests.
+#              Separate build for testing rapidjson installed from package.
 #
 
 # Pull base image
-FROM ubuntu:20.04
-MAINTAINER lukasz.stolarczuk@intel.com
+FROM ubuntu:19.10
+MAINTAINER szymon.romik@intel.com
 
 # Update the Apt cache and install basic tools
 RUN apt-get update
@@ -50,11 +51,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	curl \
 	debhelper \
 	devscripts \
-	doxygen \
 	fakeroot \
 	git \
-	graphviz \
-	hub \
 	libc6-dbg \
 	libdaxctl-dev \
 	libgtest-dev \
@@ -68,15 +66,12 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	numactl \
 	pandoc \
 	pkg-config \
+	rapidjson-dev \
 	ruby \
 	sudo \
 	wget \
 	whois \
  && rm -rf /var/lib/apt/lists/*
-
-# Install rapidjson from sources
-COPY install-rapidjson.sh install-rapidjson.sh
-RUN ./install-rapidjson.sh
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -102,6 +97,6 @@ USER $USER
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER 20.04
+ENV OS_VER 19.10
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1

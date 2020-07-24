@@ -10,6 +10,7 @@ services:
 env:
   matrix:
     - TYPE=normal OS=fedora OS_VER=31
+    - TYPE=normal OS=ubuntu OS_VER=19.10
     - TYPE=normal OS=ubuntu OS_VER=20.04
     - TYPE=normal OS=ubuntu OS_VER=20.04 COVERAGE=1
     - TYPE=building OS=fedora OS_VER=31 COVERAGE=1 PUSH_IMAGE=1

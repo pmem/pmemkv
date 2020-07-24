@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 #
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,78 +31,21 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#              environment prepared for running pmemkv build and tests.
+# install-rapidjson.sh - installs rapidjson from sources
 #
 
-# Pull base image
-FROM ubuntu:20.04
-MAINTAINER lukasz.stolarczuk@intel.com
+set -e
 
-# Update the Apt cache and install basic tools
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-	autoconf \
-	automake \
-	build-essential \
-	clang \
-	clang-format-8 \
-	cmake \
-	curl \
-	debhelper \
-	devscripts \
-	doxygen \
-	fakeroot \
-	git \
-	graphviz \
-	hub \
-	libc6-dbg \
-	libdaxctl-dev \
-	libgtest-dev \
-	libndctl-dev \
-	libnode-dev \
-	libnuma-dev \
-	libtbb-dev \
-	libtext-diff-perl \
-	libtool \
-	libunwind8-dev \
-	numactl \
-	pandoc \
-	pkg-config \
-	ruby \
-	sudo \
-	wget \
-	whois \
- && rm -rf /var/lib/apt/lists/*
+git clone https://github.com/Tencent/rapidjson
+cd rapidjson
+# master: Merge pull request #1760 from escherstair/fix_ce6_support, 07.08.2020
+git checkout "ce81bc9edfe773667a7a4454ba81dac72ed4364c"
 
-# Install rapidjson from sources
-COPY install-rapidjson.sh install-rapidjson.sh
-RUN ./install-rapidjson.sh
+mkdir build
+cd build
+cmake ..
+make -j$(nproc)
+sudo make -j$(nproc) install
 
-# Install valgrind
-COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
-
-# Install pmdk
-COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh dpkg
-
-# Install pmdk c++ bindings
-COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh DEB
-
-# Install memkind
-COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh
-
-# Add user
-ENV USER user
-ENV USERPASS pass
-RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
-USER $USER
-
-# Set required environment variables
-ENV OS ubuntu
-ENV OS_VER 20.04
-ENV PACKAGE_MANAGER deb
-ENV NOTTY 1
+cd ../..
+rm -r rapidjson
