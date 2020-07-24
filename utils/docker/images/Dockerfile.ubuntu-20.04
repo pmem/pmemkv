@@ -45,7 +45,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	automake \
 	build-essential \
 	clang \
-	clang-format \
+	clang-format-8 \
 	cmake \
 	curl \
 	debhelper \
