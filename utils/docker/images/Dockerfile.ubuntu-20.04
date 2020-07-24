@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2016-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,48 +30,50 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
+# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
 #              environment prepared for running pmemkv build and tests.
 #
 
 # Pull base image
-FROM fedora:30
+FROM ubuntu:20.04
 MAINTAINER lukasz.stolarczuk@intel.com
 
-# Install basic tools
-RUN dnf update -y \
- && dnf install -y \
+# Update the Apt cache and install basic tools
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	autoconf \
 	automake \
+	build-essential \
 	clang \
+	clang-format \
 	cmake \
-	daxctl-devel \
+	curl \
+	debhelper \
+	devscripts \
 	doxygen \
-	gcc \
-	gcc-c++ \
-	gdb \
+	fakeroot \
 	git \
 	graphviz \
-	gtest-devel \
+	hub \
+	libc6-dbg \
+	libdaxctl-dev \
+	libgtest-dev \
+	libndctl-dev \
+	libnode-dev \
+	libnuma-dev \
+	libtbb-dev \
+	libtext-diff-perl \
 	libtool \
-	make \
-	man \
-	ndctl-devel \
-	numactl-devel \
+	libunwind8-dev \
+	numactl \
 	pandoc \
-	passwd \
-	perl-Text-Diff \
-	rapidjson-devel \
-	rpm-build \
+	pkg-config \
+	rapidjson-dev \
+	ruby \
 	sudo \
-	tbb-devel \
-	unzip \
 	wget \
-	which \
-&& dnf clean all
-
-# Install glibc-debuginfo
-RUN dnf debuginfo-install -y glibc
+	whois \
+ && rm -rf /var/lib/apt/lists/*
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -79,11 +81,11 @@ RUN ./install-valgrind.sh
 
 # Install pmdk
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh rpm
+RUN ./install-pmdk.sh dpkg
 
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh RPM
+RUN ./install-libpmemobj-cpp.sh DEB
 
 # Install memkind
 COPY install-memkind.sh install-memkind.sh
@@ -92,14 +94,11 @@ RUN ./install-memkind.sh
 # Add user
 ENV USER user
 ENV USERPASS pass
-RUN useradd -m $USER
-RUN echo $USERPASS | passwd $USER --stdin
-RUN gpasswd wheel -a $USER
+RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
 USER $USER
 
 # Set required environment variables
-ENV OS fedora
-ENV OS_VER 30
-ENV PACKAGE_MANAGER rpm
+ENV OS ubuntu
+ENV OS_VER 20.04
+ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
-
