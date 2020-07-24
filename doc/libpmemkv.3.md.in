@@ -32,6 +32,7 @@ secondary_title: pmemkv
 typedef int pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
 			size_t valuebytes, void *arg);
 typedef void pmemkv_get_v_callback(const char *value, size_t valuebytes, void *arg);
+typedef int pmemkv_update_v_callback(char *value, size_t valuebytes, void *arg);
 
 int pmemkv_open(const char *engine, pmemkv_config *config, pmemkv_db **db);
 void pmemkv_close(pmemkv_db *kv);
@@ -156,7 +157,7 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 	If record is present and no error occurred the function returns PMEMKV\_STATUS\_OK.
 	If record does not exist PMEMKV\_STATUS\_NOT\_FOUND is returned.
 	Other possible return values are described in the *ERRORS* section.
-	Function `c` is called with the following parameters: pointer to a value, size of the value and `arg` specified by the user.
+	Function `c` is called with the following parameters: const pointer to a value, size of the value and `arg` specified by the user.
 	`Value` points to the location where data is actually stored (no copy occurs).
 	This function is guaranteed to be implemented by all engines.
 
@@ -175,6 +176,16 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 :	Inserts a key-value pair into pmemkv database. `kb` is the length of key `k` and `vb` is the length of value `v`.
 	When this function returns, caller is free to reuse both buffers.
 	This function is guaranteed to be implemented by all engines.
+
+`int pmemkv_update(pmemkv_db *db, const char *k, size_t kb, size_t v_offset, size_t v_size, pmemkv_update_v_callback *c, void *arg);`
+
+:	Executes function `c` on record with key `k` (of length `kb`).
+	If record is present and no error occurred the function returns PMEMKV\_STATUS\_OK.
+	If record does not exist PMEMKV\_STATUS\_NOT\_FOUND is returned.
+	Other possible return values are described in the *ERRORS* section.
+	Function `c` is called with the following parameters: pointer to a value, size of the value and `arg` specified by the user.
+	Callback returns actual update size.
+	XXX: fixme
 
 `int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);`
 

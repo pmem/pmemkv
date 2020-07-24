@@ -67,6 +67,9 @@ void null_db_all_funcs_test()
 	s = pmemkv_get_copy(NULL, key1, strlen(key1), val, 10, &cnt);
 	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
 
+	s = pmemkv_update(NULL, key1, strlen(key1), 0, 0, NULL, NULL);
+	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+
 	s = pmemkv_put(NULL, key1, strlen(key1), value1, strlen(value1));
 	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
 

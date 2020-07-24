@@ -52,6 +52,8 @@ static void BlackholeSimpleTest()
 	ASSERT_STATUS(kv.get(key, nullptr, nullptr), status::NOT_FOUND);
 
 	ASSERT_STATUS(kv.defrag(), status::NOT_SUPPORTED);
+	ASSERT_STATUS(kv.update("", 0, 0, nullptr, nullptr), status::NOT_SUPPORTED);
+	// XXX: ASSERT_STATUS(kv.update(...), status::NOT_SUPPORTED);
 
 	kv.close();
 }
