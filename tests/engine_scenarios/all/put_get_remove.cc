@@ -359,6 +359,29 @@ static void RemoveNonexistentTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.exists("key1"), status::OK);
 }
 
+static void CtorMoveDBTest(pmem::kv::db &kv)
+{
+	/**
+	 * TEST: test db constructor from another instance of db class.
+	 */
+
+	/* put key1 in original db */
+	UT_ASSERT(kv.put("key1", "value1") == status::OK);
+
+	db kv_new(std::move(kv));
+
+	UT_ASSERT(kv_new.put("key2", "value2") == status::OK);
+	std::string value;
+	value = "ABC";
+
+	UT_ASSERT(kv_new.get("key1", &value) == status::OK && value == "value1");
+	UT_ASSERT(kv_new.get("key2", &value) == status::OK && value == "value2");
+	UT_ASSERT(kv_new.remove("key1") == status::OK);
+	UT_ASSERT(kv_new.remove("key2") == status::OK);
+
+	kv_new.close();
+}
+
 static void test(int argc, char *argv[])
 {
 	if (argc < 3)
@@ -382,6 +405,8 @@ static void test(int argc, char *argv[])
 				 RemoveExistingTest,
 				 RemoveHeadlessTest,
 				 RemoveNonexistentTest,
+				 /* ctor test has to be the last one; it invalidates kv */
+				 CtorMoveDBTest,
 			 });
 }
 
