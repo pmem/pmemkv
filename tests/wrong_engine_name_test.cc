@@ -38,6 +38,9 @@ static void errormsg_test()
 	/* Test whether errormsg is cleared correctly after each error */
 	UT_ASSERT(pmem::kv::errormsg() == err);
 
+	/* Test if instance of db reports the same error */
+	UT_ASSERT(kv.errormsg() == err);
+
 	kv.close();
 }
 
