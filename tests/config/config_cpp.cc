@@ -273,10 +273,30 @@ static void constructors_test()
 	s = move_config->get_int64("int", int_s);
 	UT_ASSERTeq(s, status::NOT_FOUND);
 
+	/* create new config... */
+	delete cfg;
+	cfg = new config();
+	s = cfg->put_string("string", "config");
+	UT_ASSERTeq(s, status::OK);
+
+	config *move_assign = new config();
+	s = move_assign->put_string("move_string", "value");
+	UT_ASSERTeq(s, status::OK);
+
+	/* ... and check move assignment operator */
+	*move_assign = std::move(*cfg);
+
+	std::string string_s;
+	s = move_assign->get_string("move_string", string_s);
+	UT_ASSERTeq(s, status::NOT_FOUND);
+	s = move_assign->get_string("string", string_s);
+	UT_ASSERTeq(s, status::OK);
+	UT_ASSERT(string_s == "config");
+
 	/* cleanup */
 	pmemkv_config_delete(c_cfg);
 	delete move_config;
-
+	delete move_assign;
 	delete cfg;
 }
 
