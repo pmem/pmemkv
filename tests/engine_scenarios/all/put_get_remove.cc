@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2017-2020, Intel Corporation */
 
+#include "exceptions.h"
 #include "unittest.hpp"
 
 /**
@@ -314,6 +315,30 @@ static void RemoveNonexistentTest(pmem::kv::db &kv)
 	UT_ASSERT(status::OK == kv.exists("key1"));
 }
 
+static void CreateDBTest(std::string engine, std::string json)
+{
+	/**
+	 * TEST: test db constructor from another instance of db class.
+	 */
+	auto kv = INITIALIZE_KV(engine, CONFIG_FROM_JSON(json));
+	db kv_new(std::move(kv));
+
+	UT_ASSERT(kv_new.put("key1", "value1") == status::OK);
+	std::string value;
+	value = "ABC";
+	UT_ASSERT(kv_new.get("key1", &value) == status::OK && value == "value1");
+	UT_ASSERT(kv_new.remove("key1") == status::OK);
+
+	kv_new.close();
+
+	try {
+		kv.exists("key1");
+	} catch (pmem::kv::internal::error &e) {
+	} catch (...) {
+		UT_FATAL("catch(...){}");
+	}
+}
+
 static void test(int argc, char *argv[])
 {
 	if (argc < 3)
@@ -337,6 +362,7 @@ static void test(int argc, char *argv[])
 				 RemoveHeadlessTest,
 				 RemoveNonexistentTest,
 			 });
+	CreateDBTest(argv[1], argv[2]);
 }
 
 int main(int argc, char *argv[])
