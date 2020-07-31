@@ -77,6 +77,23 @@ status cmap::get(string_view key, get_v_callback *callback, void *arg)
 	return status::OK;
 }
 
+status cmap::update(string_view key, get_v_callback *callback, void *arg)
+{
+	LOG("update key=" << std::string(key.data(), key.size()));
+	check_outside_tx();
+	internal::cmap::map_t::const_accessor result;
+	bool found = container->find(result, key);
+	if (!found) {
+		LOG("  key not found");
+		return status::NOT_FOUND;
+	}
+
+	// ...
+	// string range?
+	//callback(result->second.c_str(), result->second.size(), arg);
+	return status::OK;
+}
+
 status cmap::put(string_view key, string_view value)
 {
 	LOG("put key=" << std::string(key.data(), key.size())
