@@ -16,8 +16,6 @@ namespace pmem
 namespace kv
 {
 
-const std::string LAYOUT = "pmemkv";
-
 class engine_base {
 public:
 	engine_base();

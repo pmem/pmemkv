@@ -20,8 +20,13 @@ static void test(int argc, char *argv[])
 	auto pmemobj_pool_path = std::string(argv[2]);
 	pmem::obj::pool<Root> pmemobj_pool;
 
+	auto layout = std::string("pmemkv");
+	auto engine = std::string(argv[1]);
+	if (engine != "cmap")
+		layout = "pmemkv_" + engine;
+
 	try {
-		pmemobj_pool = pmem::obj::pool<Root>::open(pmemobj_pool_path, "pmemkv");
+		pmemobj_pool = pmem::obj::pool<Root>::open(pmemobj_pool_path, layout);
 	} catch (std::exception &e) {
 		UT_FATALexc(e);
 	}
@@ -30,7 +35,7 @@ static void test(int argc, char *argv[])
 	auto s = cfg.put_object("oid", &(pmemobj_pool.root()->oid), nullptr);
 	UT_ASSERTeq(s, status::OK);
 
-	auto kv = INITIALIZE_KV(argv[1], std::move(cfg));
+	auto kv = INITIALIZE_KV(engine, std::move(cfg));
 
 	TransactionTest(pmemobj_pool, kv);
 

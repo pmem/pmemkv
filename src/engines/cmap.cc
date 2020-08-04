@@ -11,7 +11,7 @@ namespace pmem
 namespace kv
 {
 
-cmap::cmap(std::unique_ptr<internal::config> cfg) : pmemobj_engine_base(cfg)
+cmap::cmap(std::unique_ptr<internal::config> cfg) : pmemobj_engine_base(cfg, "pmemkv")
 {
 	static_assert(
 		sizeof(internal::cmap::string_t) == 40,
