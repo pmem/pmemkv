@@ -19,7 +19,8 @@ namespace pmem
 namespace kv
 {
 
-stree::stree(std::unique_ptr<internal::config> cfg) : pmemobj_engine_base(cfg)
+stree::stree(std::unique_ptr<internal::config> cfg)
+    : pmemobj_engine_base(cfg, "pmemkv_stree")
 {
 	Recover();
 	LOG("Started ok");
