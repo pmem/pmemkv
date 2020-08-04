@@ -5,6 +5,7 @@
 #define LIBPMEMKV_HPP
 
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -132,6 +133,12 @@ enum class status {
 		PMEMKV_STATUS_COMPARATOR_MISMATCH, /**< db was created with a different
 						      comparator */
 };
+
+inline std::ostream &operator<<(std::ostream &os, const status &s)
+{
+	os << "Status number: " << static_cast<int>(s);
+	return os;
+}
 
 /*! \class config
 	\brief Holds configuration parameters for engines.
