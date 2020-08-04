@@ -84,7 +84,7 @@ The following table shows three possible combinations of parameters (where '-' m
 | **3** | - | - | - | set |
 
 A database file or a poolset file can also be created using **pmempool** utility (see **pmempool-create**(1)).
-When using **pmempool create**, "pmemkv" should be passed as layout. Only PMEMOBJ pools are supported.
+When using **pmempool create**, "pmemkv" should be passed as layout for cmap engine and "pmemkv_\<engine-name\>" for other engines (e.g. "pmemkv_stree" for stree engine). Only PMEMOBJ pools are supported.
 
 ## vcmap
 
