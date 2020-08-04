@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2017-2020, Intel Corporation */
 
+#include <sstream>
+
 #include "unittest.hpp"
 
 /**
@@ -81,6 +83,38 @@ static void EmptyValueTest(pmem::kv::db &kv)
 	UT_ASSERT(kv.get("empty", &value1) == status::OK && value1 == "");
 	UT_ASSERT(kv.get("1-space", &value2) == status::OK && value2 == " ");
 	UT_ASSERT(kv.get("two-tab", &value3) == status::OK && value3 == "\t\t");
+}
+
+static void EmptyKeyAndValueTest(pmem::kv::db &kv)
+{
+	status s;
+
+	std::size_t cnt = std::numeric_limits<std::size_t>::max();
+	s = kv.count_all(cnt);
+	UT_ASSERT(s == status::OK);
+	UT_ASSERT(cnt == 0);
+
+	std::ostringstream oss1;
+	oss1 << s;
+	UT_ASSERT(oss1.str() == "OK (0)");
+
+	std::string value = "abc";
+	s = kv.get("", &value);
+	UT_ASSERT(s == status::NOT_FOUND && value == "abc");
+
+	std::ostringstream oss2;
+	oss2 << s;
+	UT_ASSERT(oss2.str() == "NOT_FOUND (2)");
+
+	s = kv.put("", "");
+	UT_ASSERT(s == status::OK);
+	s = kv.count_all(cnt);
+	UT_ASSERT(s == status::OK);
+	UT_ASSERT(cnt == 1);
+
+	s = kv.get("", &value);
+	UT_ASSERT(s == status::OK);
+	UT_ASSERT(value == "");
 }
 
 static void GetClearExternalValueTest(pmem::kv::db &kv)
@@ -324,6 +358,7 @@ static void test(int argc, char *argv[])
 				 SimpleTest,
 				 EmptyKeyTest,
 				 EmptyValueTest,
+				 EmptyKeyAndValueTest,
 				 GetClearExternalValueTest,
 				 GetHeadlessTest,
 				 GetMultipleTest,
