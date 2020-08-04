@@ -5,6 +5,7 @@
 #define LIBPMEMKV_HPP
 
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -132,6 +133,28 @@ enum class status {
 		PMEMKV_STATUS_COMPARATOR_MISMATCH, /**< db was created with a different
 						      comparator */
 };
+
+inline std::ostream &operator<<(std::ostream &os, const status &s)
+{
+	static const std::string statuses[] = {"OK",
+					       "UNKNOWN_ERROR",
+					       "NOT_FOUND",
+					       "NOT_SUPPORTED",
+					       "INVALID_ARGUMENT",
+					       "CONFIG_PARSING_ERROR",
+					       "CONFIG_TYPE_ERROR",
+					       "STOPPED_BY_CB",
+					       "OUT_OF_MEMORY",
+					       "WRONG_ENGINE_NAME",
+					       "TRANSACTION_SCOPE_ERROR",
+					       "DEFRAG_ERROR",
+					       "COMPARATOR_MISMATCH"};
+
+	int status_no = static_cast<int>(s);
+	os << statuses[status_no] << " (" << status_no << ")";
+
+	return os;
+}
 
 /*! \class config
 	\brief Holds configuration parameters for engines.
