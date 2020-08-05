@@ -4,32 +4,32 @@
 #ifndef PERSISTENT_B_TREE
 #define PERSISTENT_B_TREE
 
-#include <algorithm>
-#include <functional>
-#include <memory>
-#include <numeric>
-#include <utility>
-#include <vector>
-
-#include <cassert>
-
+#include <libpmemobj++/detail/common.hpp>
+#include <libpmemobj++/detail/life.hpp>
 #include <libpmemobj++/make_persistent.hpp>
-#include <libpmemobj++/make_persistent_array_atomic.hpp>
-#include <libpmemobj++/make_persistent_atomic.hpp>
 #include <libpmemobj++/persistent_ptr.hpp>
 #include <libpmemobj++/pool.hpp>
 #include <libpmemobj++/transaction.hpp>
 
-namespace persistent
-{
+#include <numeric>
+#include <type_traits>
+#include <vector>
 
+#include <cassert>
+
+namespace pmem
+{
+namespace kv
+{
 namespace internal
 {
+
 using namespace pmem::obj;
 
+/**
+ * Base node type for inner and leaf node types
+ */
 class node_t {
-	uint64_t _level;
-
 public:
 	node_t(uint64_t level = 0) : _level(level)
 	{
@@ -44,1744 +44,2180 @@ public:
 	{
 		return _level;
 	}
-};
 
-template <typename TLeafNode, bool is_const>
+private:
+	uint64_t _level;
+}; /* class node_t */
+
+/**
+ * Implements iteration over a single tree node
+ */
+template <typename LeafType, bool is_const>
 class node_iterator {
-	typedef TLeafNode leaf_node_type;
-	typedef typename std::conditional<is_const, const leaf_node_type *,
-					  leaf_node_type *>::type leaf_node_ptr;
-	friend class node_iterator<leaf_node_type, true>;
+private:
+	using leaf_type = LeafType;
+	using leaf_node_ptr =
+		typename std::conditional<is_const, const leaf_type *, leaf_type *>::type;
+	friend class node_iterator<leaf_type, true>;
 
 public:
-	typedef typename leaf_node_type::value_type value_type;
+	using value_type = typename leaf_type::value_type;
 	using iterator_category = std::random_access_iterator_tag;
-	using difference_type = ptrdiff_t;
-	typedef typename std::conditional<is_const, const value_type &,
-					  value_type &>::type reference;
-	typedef typename std::conditional<is_const, const value_type *,
-					  value_type *>::type pointer;
+	using size_type = typename leaf_type::size_type;
+	using difference_type = typename leaf_type::difference_type;
+	using reference = typename std::conditional<is_const, const value_type &,
+						    value_type &>::type;
+	using pointer = typename std::conditional<is_const, const value_type *,
+						  value_type *>::type;
 
-	node_iterator() : node(nullptr), position(0)
-	{
-	}
+	node_iterator();
 
-	node_iterator(leaf_node_ptr node_ptr, size_t p) : node(node_ptr), position(p)
-	{
-	}
+	node_iterator(leaf_node_ptr node_ptr, size_type p);
 
-	node_iterator(const node_iterator &other)
-	    : node(other.node), position(other.position)
-	{
-	}
+	node_iterator(const node_iterator &other);
 
 	template <typename T = void,
 		  typename = typename std::enable_if<is_const, T>::type>
-	node_iterator(const node_iterator<leaf_node_type, false> &other)
-	    : node(other.node), position(other.position)
-	{
-	}
+	node_iterator(const node_iterator<leaf_type, false> &other);
 
-	node_iterator &operator++()
-	{
-		++position;
-		return *this;
-	}
+	node_iterator &operator++();
+	node_iterator operator++(int);
+	node_iterator &operator--();
+	node_iterator operator--(int);
 
-	node_iterator operator++(int)
-	{
-		node_iterator tmp = *this;
-		++*this;
-		return tmp;
-	}
+	node_iterator operator+(size_type off) const;
+	node_iterator operator+=(difference_type off);
+	node_iterator operator-(difference_type off) const;
 
-	node_iterator &operator--()
-	{
-		assert(position > 0);
-		--position;
-		return *this;
-	}
+	difference_type operator-(const node_iterator &other) const;
 
-	node_iterator operator--(int)
-	{
-		node_iterator tmp = *this;
-		--*this;
-		return tmp;
-	}
+	bool operator==(const node_iterator &other) const;
+	bool operator!=(const node_iterator &other) const;
+	bool operator<(const node_iterator &other) const;
+	bool operator>(const node_iterator &other) const;
 
-	node_iterator operator+(size_t off) const
-	{
-		return node_iterator(node, position + off);
-	}
-
-	node_iterator operator+=(difference_type off)
-	{
-		position += static_cast<std::size_t>(off);
-		return *this;
-	}
-
-	node_iterator operator-(difference_type off) const
-	{
-		assert(node != nullptr);
-		assert(position >= off);
-		return node_iterator(node, position - off);
-	}
-
-	difference_type operator-(const node_iterator &other) const
-	{
-		assert(node != nullptr);
-		assert(other.node != nullptr);
-		assert(node == other.node);
-		return static_cast<difference_type>(position - other.position);
-	}
-
-	bool operator==(const node_iterator &other) const
-	{
-		return node == other.node && position == other.position;
-	}
-
-	bool operator!=(const node_iterator &other) const
-	{
-		return !(*this == other);
-	}
-
-	bool operator<(const node_iterator &other) const
-	{
-		assert(node != nullptr);
-		assert(other.node != nullptr);
-		assert(node == other.node);
-		return position < other.position;
-	}
-
-	bool operator>(const node_iterator &other) const
-	{
-		assert(node != nullptr);
-		assert(other.node != nullptr);
-		assert(node == other.node);
-		return position > other.position;
-	}
-
-	reference operator*() const
-	{
-		assert(node != nullptr);
-		return (*node)[position];
-	}
-
-	pointer operator->() const
-	{
-		return &**this;
-	}
+	reference operator*() const;
+	pointer operator->() const;
 
 private:
 	leaf_node_ptr node;
-	size_t position;
-};
+	size_type position;
+}; /* class node_iterator */
 
-template <typename TKey, typename TValue, uint64_t number_entrys_slots>
+template <typename Key, typename T, typename Compare, uint64_t capacity>
 class leaf_node_t : public node_t {
-	/**
-	 * Array of indexes.
-	 */
-	struct leaf_entries_t {
-		leaf_entries_t() : _size(0)
-		{
-			for (uint64_t i = 0; i < number_entrys_slots; ++i) {
-				idxs[i] = i;
-			}
-		}
-
-		uint64_t idxs[number_entrys_slots];
-		size_t _size;
-	};
-
 public:
-	typedef TKey key_type;
-	typedef TValue mapped_type;
-	typedef std::pair<key_type, mapped_type> value_type;
-	typedef value_type &reference;
-	typedef const value_type &const_reference;
-	typedef value_type *pointer;
-	typedef const value_type *const_pointer;
+	using key_type = Key;
+	using mapped_type = T;
+	using key_compare = Compare;
+	using size_type = std::size_t;
+	using difference_type = std::ptrdiff_t;
 
-	typedef node_iterator<leaf_node_t, false> iterator;
-	typedef node_iterator<leaf_node_t, true> const_iterator;
+	using value_type = std::pair<key_type, mapped_type>;
+	using reference = value_type &;
+	using const_reference = const value_type &;
+	using pointer = value_type *;
+	using const_pointer = const value_type *;
 
-	leaf_node_t(uint64_t e) : node_t(), epoch(e), consistent_id(0), p_consistent_id(0)
-	{
-		assert(std::is_sorted(begin(), end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-	}
+	using iterator = node_iterator<leaf_node_t, false>;
+	using const_iterator = node_iterator<leaf_node_t, true>;
 
-	leaf_node_t(uint64_t e, const_reference entry)
-	    : node_t(), epoch(e), consistent_id(0), p_consistent_id(0)
-	{
-		entries[0] = entry;
-		consistent()->idxs[0] = 0;
-		consistent()->_size = 1;
-		assert(std::is_sorted(begin(), end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-	}
+	leaf_node_t();
+	~leaf_node_t();
 
-	leaf_node_t(uint64_t e, const_iterator first, const_iterator last,
-		    const persistent_ptr<leaf_node_t> &_prev,
-		    const persistent_ptr<leaf_node_t> &_next)
-	    : node_t(),
-	      epoch(e),
-	      consistent_id(0),
-	      prev(_prev),
-	      next(_next),
-	      p_consistent_id(0)
-	{
-		copy(first, last);
+	void move(pool_base &pop, persistent_ptr<leaf_node_t> other, const key_compare &);
+	template <typename K, typename M>
+	iterator insert(iterator idxs_pos, K &&key, M &&obj);
 
-		assert(std::distance(first, last) >= 0);
-		assert(size() == static_cast<std::size_t>(std::distance(first, last)));
+	template <typename K>
+	iterator find(const K &key, const key_compare &);
+	template <typename K>
+	const_iterator find(const K &key, const key_compare &) const;
+	template <typename K>
+	iterator lower_bound(const K &key, const key_compare &comp);
 
-		assert(std::is_sorted(begin(), end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-	}
+	template <typename K>
+	size_type erase(pool_base &pop, const K &key, const key_compare &);
 
-	leaf_node_t(uint64_t e, const_reference entry, const_iterator first,
-		    const_iterator last, const persistent_ptr<leaf_node_t> &_prev,
-		    const persistent_ptr<leaf_node_t> &_next)
-	    : node_t(),
-	      epoch(e),
-	      consistent_id(0),
-	      prev(_prev),
-	      next(_next),
-	      p_consistent_id(0)
-	{
-		copy_insert(entry, first, last);
+	iterator begin();
+	const_iterator begin() const;
+	const_iterator cbegin() const;
+	iterator end();
+	const_iterator end() const;
+	const_iterator cend() const;
 
-		assert(std::distance(first, last) >= 0);
-		assert(size() ==
-		       static_cast<std::size_t>(std::distance(first, last)) + 1);
+	size_type size() const;
+	bool full() const;
+	const_reference front() const;
+	const_reference back() const;
+	reference operator[](size_type pos);
+	const_reference operator[](size_type pos) const;
 
-		assert(std::binary_search(begin(), end(), entry,
-					  [](const_reference a, const_reference b) {
-						  return a.first < b.first;
-					  }));
-		assert(std::is_sorted(begin(), end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-	}
-
-	std::pair<iterator, bool> insert(pool_base &pop, const_reference entry)
-	{
-		return insert(pop, entry, this->begin(), this->end());
-	}
-
-	iterator find(const key_type &key)
-	{
-		assert(std::is_sorted(begin(), end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-		iterator it = std::lower_bound(
-			begin(), end(), key, [](const_reference entry, const TKey &key) {
-				return entry.first < key;
-			});
-		if (it == end() || it->first == key)
-			return it;
-		else
-			return end();
-	}
-
-	const_iterator find(const key_type &key) const
-	{
-		assert(std::is_sorted(begin(), end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-		const_iterator it = std::lower_bound(
-			begin(), end(), key, [](const_reference entry, const TKey &key) {
-				return entry.first < key;
-			});
-		if (it == end() || it->first == key)
-			return it;
-		else
-			return end();
-	}
-
-	iterator lower_bound(const key_type &key)
-	{
-		assert(std::is_sorted(begin(), end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-		iterator it = std::lower_bound(
-			begin(), end(), key, [](const_reference entry, const TKey &key) {
-				return entry.first < key;
-			});
-		if (it == end() || it->first == key || it->first > key)
-			return it;
-		else
-			return end();
-	}
-
-	const_iterator lower_bound(const key_type &key) const
-	{
-		assert(std::is_sorted(begin(), end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-		const_iterator it = std::lower_bound(
-			begin(), end(), key, [](const_reference entry, const TKey &key) {
-				return entry.first < key;
-			});
-		if (it == end() || it->first == key || it->first > key)
-			return it;
-		else
-			return end();
-	}
-
-	iterator upper_bound(const key_type &key)
-	{
-		assert(std::is_sorted(begin(), end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-		iterator it = std::upper_bound(
-			begin(), end(), key, [](const TKey &key, const_reference entry) {
-				return key < entry.first;
-			});
-		if (it == end() || it->first > key)
-			return it;
-		else
-			return end();
-	}
-
-	const_iterator upper_bound(const key_type &key) const
-	{
-		assert(std::is_sorted(begin(), end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-		const_iterator it = std::upper_bound(
-			begin(), end(), key, [](const TKey &key, const_reference entry) {
-				return key < entry.first;
-			});
-		if (it == end() || it->first > key)
-			return it;
-		else
-			return end();
-	}
-
-	size_t erase(pool_base &pop, const key_type &key)
-	{
-		assert(std::is_sorted(begin(), end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-		iterator it = find(key);
-		if (it == end())
-			return size_t(0);
-		internal_erase(pop, it);
-		return size_t(1);
-	}
-
-	/**
-	 * Return begin iterator on an array of correct indices.
-	 */
-	iterator begin()
-	{
-		return iterator(this, 0);
-	}
-
-	/**
-	 * Return const_iterator to the beginning.
-	 */
-	const_iterator begin() const
-	{
-		return const_iterator(this, 0);
-	}
-
-	/**
-	 * Return end iterator on an array of indices.
-	 */
-	iterator end()
-	{
-		return iterator(this, consistent()->_size);
-	}
-
-	/**
-	 * Return const_iterator to the end.
-	 */
-	const_iterator end() const
-	{
-		return const_iterator(this, consistent()->_size);
-	}
-
-	/**
-	 * Return the size of the array of entries (key/value).
-	 */
-	size_t size() const
-	{
-		return consistent()->_size;
-	}
-
-	bool full() const
-	{
-		return size() == number_entrys_slots;
-	}
-
-	const_reference back() const
-	{
-		return entries[consistent()->idxs[consistent()->_size - 1]];
-	}
-
-	reference at(size_t pos)
-	{
-		if (size() <= pos) {
-			throw std::out_of_range(
-				"Accessing incorrect element in leaf node");
-		}
-		return entries[consistent()->idxs[pos]];
-	}
-
-	const_reference at(size_t pos) const
-	{
-		if (size() <= pos) {
-			throw std::out_of_range(
-				"Accessing incorrect element in leaf node");
-		}
-		return entries[consistent()->idxs[pos]];
-	}
-
-	reference operator[](size_t pos)
-	{
-		return entries[consistent()->idxs[pos]];
-	}
-
-	const_reference operator[](size_t pos) const
-	{
-		return entries[consistent()->idxs[pos]];
-	}
-
-	const persistent_ptr<leaf_node_t> &get_next() const
-	{
-		return this->next;
-	}
-
-	void set_next(const persistent_ptr<leaf_node_t> &n)
-	{
-		this->next = n;
-	}
-
-	const persistent_ptr<leaf_node_t> &get_prev() const
-	{
-		return this->prev;
-	}
-
-	void set_prev(const persistent_ptr<leaf_node_t> &p)
-	{
-		this->prev = p;
-	}
-
-	void check_consistency(uint64_t global_epoch)
-	{
-		if (global_epoch != epoch) {
-			consistent_id = p_consistent_id;
-			epoch = global_epoch;
-		}
-	}
+	const persistent_ptr<leaf_node_t> &get_next() const;
+	void set_next(const persistent_ptr<leaf_node_t> &n);
+	const persistent_ptr<leaf_node_t> &get_prev() const;
+	void set_prev(const persistent_ptr<leaf_node_t> &p);
 
 private:
-	uint64_t epoch;
-	uint32_t consistent_id;
-	persistent_ptr<leaf_node_t> prev;
-	persistent_ptr<leaf_node_t> next;
-	char padding[64];
-	value_type entries[number_entrys_slots];
-	leaf_entries_t v[2];
-	char padding1[64];
-	uint32_t p_consistent_id;
+	/* uninitialized static array of value_type is used to avoid entries
+	 * default initialization and to avoid additional allocations */
+	union {
+		value_type entries[capacity];
+	};
+	/* array of indexes to support ordering */
+	pmem::obj::array<difference_type, capacity> idxs;
+	pmem::obj::p<size_type> _size;
+	/* persistent pointers to the neighboring leafs */
+	pmem::obj::persistent_ptr<leaf_node_t> prev;
+	pmem::obj::persistent_ptr<leaf_node_t> next;
 
-	leaf_entries_t *consistent()
-	{
-		assert(consistent_id < 2);
-		return v + consistent_id;
-	}
+	/* private helper methods */
+	template <typename... Args>
+	pointer emplace(difference_type pos, Args &&... args);
+	size_type insert_idx(const_iterator pos);
+	void remove_idx(size_type idx);
+	void internal_erase(pool_base &pop, iterator it);
+	bool is_sorted(const key_compare &);
+	void add_to_tx(size_type begin, size_type end);
+}; /* class leaf_node_t */
 
-	const leaf_entries_t *consistent() const
-	{
-		assert(consistent_id < 2);
-		return v + consistent_id;
-	}
-
-	leaf_entries_t *working_copy()
-	{
-		assert(consistent_id < 2);
-		uint32_t working_id = 1 - consistent_id;
-		return v + working_id;
-	}
-
-	void switch_consistent(pool_base &pop)
-	{
-		p_consistent_id = consistent_id = 1 - consistent_id;
-		// TODO: need to check if it make sense to use non-temporal store
-		pop.persist(&p_consistent_id, sizeof(p_consistent_id));
-	}
-
-	/**
-	 * Insert new 'entry' in array of entries, update idxs.
-	 */
-	std::pair<iterator, bool> insert(pool_base &pop, const_reference entry,
-					 iterator begin, iterator end)
-	{
-		assert(!full());
-
-		iterator hint =
-			std::lower_bound(begin, end, entry.first,
-					 [&](const_reference entry, const key_type &key) {
-						 return entry.first < key;
-					 });
-
-		if (hint != end && hint->first == entry.first) {
-			return std::pair<iterator, bool>(hint, false);
-		}
-
-		size_t insert_pos = get_insert_idx();
-		assert(std::none_of(
-			consistent()->idxs, consistent()->idxs + size(),
-			[insert_pos](uint64_t idx) { return insert_pos == idx; }));
-		// insert an entry to the end
-		entries[insert_pos] = entry;
-		pop.flush(&(entries[insert_pos]), sizeof(entries[insert_pos]));
-		// update tmp idxs
-		size_t position = insert_idx(pop, insert_pos, hint);
-		// update consistent
-		switch_consistent(pop);
-
-		assert(std::is_sorted(this->begin(), this->end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-
-		return std::pair<iterator, bool>(iterator(this, position), true);
-	}
-
-	size_t get_insert_idx() const
-	{
-		const leaf_entries_t *c = consistent();
-		return c->idxs[c->_size];
-	}
-
-	size_t insert_idx(pool_base &pop, uint64_t new_entry_idx, iterator hint)
-	{
-		size_t size = this->size();
-		leaf_entries_t *tmp = working_copy();
-		auto in_begin = consistent()->idxs;
-		auto in_end = in_begin + size;
-		auto partition_point = in_begin + std::distance(this->begin(), hint);
-		auto out_begin = tmp->idxs;
-		auto insert_pos = std::copy(in_begin, partition_point, out_begin);
-		*insert_pos = new_entry_idx;
-		std::copy(partition_point, in_end, insert_pos + 1);
-		tmp->_size = size + 1;
-#if 0
-            pop.flush( tmp->idxs, sizeof(tmp->idxs[0])*tmp->_size );
-            pop.persist( &(tmp->_size), sizeof(tmp->_size) );
-#else
-		pop.persist(tmp, sizeof(leaf_entries_t));
-#endif
-		auto result = std::distance(out_begin, insert_pos);
-		assert(result >= 0);
-
-		return static_cast<std::size_t>(result);
-	}
-
-	void remove_idx(pool_base &pop, iterator it)
-	{
-		size_t size = this->size();
-		leaf_entries_t *tmp = working_copy();
-		auto in_begin = consistent()->idxs;
-		auto in_end = in_begin + size;
-		auto partition_point = in_begin + std::distance(this->begin(), it);
-		auto out = tmp->idxs;
-		out = std::copy(in_begin, partition_point, out);
-		out = std::copy(partition_point + 1, in_end, out);
-		*out = *partition_point;
-		tmp->_size = size - 1;
-
-		pop.persist(tmp, sizeof(leaf_entries_t));
-	}
-
-	/**
-	 * Copy entries from another node in the range of [first, last) and insert new
-	 * entry.
-	 */
-	void copy_insert(const_reference entry, const_iterator first, const_iterator last)
-	{
-		assert(std::distance(first, last) >= 0);
-		assert(static_cast<std::size_t>(std::distance(first, last)) <
-		       number_entrys_slots);
-
-		auto d_last = std::merge(first, last, &entry, &entry + 1, entries,
-					 [](const_reference a, const_reference b) {
-						 return a.first < b.first;
-					 });
-
-		assert(std::distance(entries, d_last) >= 0);
-		consistent()->_size =
-			static_cast<std::size_t>(std::distance(entries, d_last));
-
-		std::iota(consistent()->idxs, consistent()->idxs + consistent()->_size,
-			  0);
-	}
-
-	/**
-	 * Copy entries from another node in the range of [first, last).
-	 */
-	void copy(const_iterator first, const_iterator last)
-	{
-		assert(std::distance(first, last) >= 0);
-		assert(static_cast<std::size_t>(std::distance(first, last)) <
-		       number_entrys_slots);
-
-		auto d_last = std::copy(first, last, entries);
-
-		assert(std::distance(entries, d_last) >= 0);
-		consistent()->_size =
-			static_cast<std::size_t>(std::distance(entries, d_last));
-
-		std::iota(consistent()->idxs, consistent()->idxs + consistent()->_size,
-			  0);
-	}
-
-	/**
-	 * Remove element pointed by iterator.
-	 */
-	void internal_erase(pool_base &pop, iterator it)
-	{
-		// update tmp idxs
-		remove_idx(pop, it);
-		// update consistent
-		switch_consistent(pop);
-
-		assert(std::is_sorted(this->begin(), this->end(),
-				      [](const_reference a, const_reference b) {
-					      return a.first < b.first;
-				      }));
-	}
-}; // class leaf_node_t
-
-template <typename TKey, uint64_t number_entrys_slots>
+template <typename Key, typename Compare, uint64_t capacity>
 class inner_node_t : public node_t {
-	typedef inner_node_t<TKey, number_entrys_slots> self_type;
+private:
+	using self_type = inner_node_t<Key, Compare, capacity>;
+	using node_pptr = pmem::obj::persistent_ptr<node_t>;
+	using key_pptr = pmem::obj::persistent_ptr<Key>;
 
 public:
-	typedef TKey key_type;
-	typedef key_type value_type; // Inner node stores only keys
-	typedef value_type &reference;
-	typedef const value_type &const_reference;
-	typedef value_type *pointer;
-	typedef const value_type *const_pointer;
-	typedef node_iterator<self_type, false> iterator;
-	typedef node_iterator<self_type, true> const_iterator;
+	using key_type = Key;
+	using value_type = key_type;
+	using key_compare = Compare;
+
+	using reference = key_type &;
+	using const_reference = const key_type &;
+	using pointer = key_type *;
+	using const_pointer = const key_type *;
+
+	using size_type = std::size_t;
+	using difference_type = std::ptrdiff_t;
+
+	using iterator = node_iterator<self_type, false>;
+	using const_iterator = node_iterator<self_type, true>;
+
+	inner_node_t(size_type level);
+	inner_node_t(size_type level, const_reference key, const node_pptr &first_child,
+		     const node_pptr &second_child);
+	~inner_node_t();
+
+	iterator move(pool_base &pop, inner_node_t &other, key_pptr &partition_key);
+	template <typename K>
+	void replace(iterator it, const K &key);
+	void delete_with_child(iterator it, bool left);
+	void inherit_child(iterator it, node_pptr &child, bool left);
+	void update_splitted_child(pool_base &pop, const_reference key,
+				   node_pptr &left_child, node_pptr &right_child,
+				   const key_compare &);
+
+	template <typename K>
+	std::tuple<node_t *, node_t *, node_t *, iterator>
+	get_child_and_siblings(const K &key, const key_compare &);
+	template <typename K>
+	const node_pptr &get_child(const K &key, const key_compare &) const;
+	const node_pptr &get_child(const_reference key, const key_compare &) const;
+	const node_pptr &get_left_child(const_iterator it) const;
+	const node_pptr &get_right_child(const_iterator it) const;
+
+	bool full() const;
+
+	iterator begin();
+	const_iterator begin() const;
+	const_iterator cbegin() const;
+	iterator end();
+	const_iterator end() const;
+	const_iterator cend() const;
+
+	size_type size() const;
+	const_reference back() const;
+	reference operator[](size_type pos);
+	const_reference operator[](size_type pos) const;
 
 private:
-	const static size_t number_children_slots = number_entrys_slots + 1;
+	key_pptr entries[capacity];
+	node_pptr children[capacity + 1];
+	pmem::obj::p<size_type> _size = 0;
 
-	struct inner_entries_t {
-		value_type entries[number_entrys_slots];
-		persistent_ptr<node_t> children[number_children_slots];
-		size_t _size = 0;
-	};
+	pool_base get_pool() const noexcept;
+	bool is_sorted(const key_compare &);
+}; /* class inner_node_t */
 
-	inner_entries_t v[2];
-	uint32_t consistent_id;
-
-	inner_entries_t *consistent()
-	{
-		assert(consistent_id < 2);
-		return v + consistent_id;
-	}
-
-	inner_entries_t *working_copy()
-	{
-		assert(consistent_id < 2);
-		uint32_t working_id = 1 - consistent_id;
-		return v + working_id;
-	}
-
-	const inner_entries_t *consistent() const
-	{
-		assert(consistent_id < 2);
-		return v + consistent_id;
-	}
-
-	void switch_consistent(pool_base &pop)
-	{
-		consistent_id = 1 - consistent_id;
-		pop.persist(&consistent_id, sizeof(consistent_id));
-	}
-
-public:
-	using difference_type = ptrdiff_t;
-
-	inner_node_t(size_t level, const value_type &key,
-		     const persistent_ptr<node_t> &child_0,
-		     const persistent_ptr<node_t> &child_1)
-	    : node_t(level), consistent_id(0)
-	{
-		inner_entries_t *consist = consistent();
-		consist->entries[0] = key;
-		consist->_size++;
-		consist->children[0] = child_0;
-		consist->children[1] = child_1;
-		assert(std::is_sorted(begin(), end()));
-	}
-
-	inner_node_t(size_t level, const_iterator first, const_iterator last,
-		     const inner_node_t *src)
-	    : node_t(level), consistent_id(0)
-	{
-		auto o_last = std::copy(first, last, consistent()->entries);
-
-		auto result = std::distance(consistent()->entries, o_last);
-		assert(result >= 0);
-		consistent()->_size = static_cast<std::size_t>(result);
-
-		auto in_cbegin = std::next(src->consistent()->children,
-					   std::distance(src->begin(), first));
-		auto in_cend = std::next(
-			in_cbegin, static_cast<difference_type>(consistent()->_size + 1));
-		std::copy(in_cbegin, in_cend, consistent()->children);
-		assert(std::is_sorted(begin(), end()));
-	}
-
-	/**
-	 * Update split node with pair of new nodes
-	 */
-	void update_splitted_child(pool_base &pop, const_reference entry,
-				   persistent_ptr<node_t> &lnode,
-				   persistent_ptr<node_t> &rnode,
-				   const persistent_ptr<node_t> &splitted_node)
-	{
-		assert(!full());
-		iterator partition_point =
-			std::lower_bound(this->begin(), this->end(), entry);
-
-		// Insert new key
-		auto in_entries_begin = consistent()->entries;
-		auto in_entries_end =
-			std::next(in_entries_begin,
-				  static_cast<difference_type>(consistent()->_size));
-		auto in_entries_splitted = std::next(
-			in_entries_begin, std::distance(this->begin(), partition_point));
-
-		auto out_entries_begin = working_copy()->entries;
-
-		auto insert_pos = std::copy(in_entries_begin, in_entries_splitted,
-					    out_entries_begin);
-		*insert_pos = entry;
-		auto out_entries_end =
-			std::copy(in_entries_splitted, in_entries_end, ++insert_pos);
-
-		auto result_entries = std::distance(out_entries_begin, out_entries_end);
-		assert(result_entries >= 0);
-		working_copy()->_size = static_cast<std::size_t>(result_entries);
-
-		pop.flush(working_copy()->entries,
-			  sizeof(working_copy()->entries[0]) * working_copy()->_size);
-		pop.flush(&(working_copy()->_size), sizeof(working_copy()->_size));
-
-		// Update children
-		auto in_children_begin = consistent()->children;
-		auto in_children_splitted = std::next(
-			in_children_begin, std::distance(this->begin(), partition_point));
-		auto in_children_end =
-			std::next(in_children_begin,
-				  static_cast<difference_type>(consistent()->_size + 1));
-		auto out_children_begin = working_copy()->children;
-		assert(*in_children_splitted == splitted_node);
-		auto out_insert_pos = std::copy(in_children_begin, in_children_splitted,
-						out_children_begin);
-		*out_insert_pos++ = lnode;
-		*out_insert_pos++ = rnode;
-		auto out_children_end = std::copy(++in_children_splitted, in_children_end,
-						  out_insert_pos);
-
-		auto result_children =
-			std::distance(out_children_begin, out_children_end);
-		assert(result_children >= 0);
-
-		pop.flush(working_copy()->children,
-			  sizeof(working_copy()->children[0]) *
-				  static_cast<std::size_t>(result_children));
-
-		switch_consistent(pop);
-		assert(std::is_sorted(this->begin(), this->end()));
-	}
-
-	const persistent_ptr<node_t> &get_child(const_reference key) const
-	{
-		auto it = std::lower_bound(this->begin(), this->end(), key);
-		return get_left_child(it);
-	}
-
-	const persistent_ptr<node_t> &get_left_child(const_iterator it) const
-	{
-		auto result = std::distance(this->begin(), it);
-		assert(result >= 0);
-
-		size_t child_pos = static_cast<std::size_t>(result);
-		return this->consistent()->children[child_pos];
-	}
-
-	const persistent_ptr<node_t> &get_right_child(const_iterator it) const
-	{
-		size_t child_pos = std::distance(this->begin(), it) + 1;
-		return this->consistent()->children[child_pos];
-	}
-
-	bool full() const
-	{
-		return this->size() == number_entrys_slots;
-	}
-
-	/**
-	 * Return begin iterator on an array of keys.
-	 */
-	iterator begin()
-	{
-		return iterator(this, 0);
-	}
-
-	const_iterator begin() const
-	{
-		return const_iterator(this, 0);
-	}
-
-	/**
-	 * Return end iterator on an array of keys.
-	 */
-	iterator end()
-	{
-		return begin() + this->size();
-	}
-
-	const_iterator end() const
-	{
-		return begin() + this->size();
-	}
-
-	/**
-	 * Return the size of the array of keys.
-	 */
-	size_t size() const
-	{
-		return consistent()->_size;
-	}
-
-	const_reference back() const
-	{
-		return consistent()->entries[this->size() - 1];
-	}
-
-	reference at(size_t pos)
-	{
-		if (size() <= pos) {
-			throw std::out_of_range(
-				"Accessing incorrect element in inner node");
-		}
-		return consistent()->entries[pos];
-	}
-
-	const_reference at(size_t pos) const
-	{
-		if (size() <= pos) {
-			throw std::out_of_range("Accessing incorrect element inner node");
-		}
-		return consistent()->entries[pos];
-	}
-
-	reference operator[](size_t pos)
-	{
-		return consistent()->entries[pos];
-	}
-
-	const_reference operator[](size_t pos) const
-	{
-		return consistent()->entries[pos];
-	}
-}; // class inner_node_t
-
-template <typename LeafNode, bool is_const>
+template <typename LeafType, bool is_const>
 class b_tree_iterator {
 private:
-	typedef LeafNode leaf_node_type;
-	typedef typename std::conditional<is_const, const leaf_node_type *,
-					  leaf_node_type *>::type leaf_node_ptr;
-	typedef typename std::conditional<
-		is_const, typename leaf_node_type::const_iterator,
-		typename leaf_node_type::iterator>::type leaf_iterator;
-	friend class b_tree_iterator<leaf_node_type, true>;
+	using leaf_type = LeafType;
+	using leaf_node_ptr =
+		typename std::conditional<is_const, const leaf_type *, leaf_type *>::type;
+	using leaf_iterator =
+		typename std::conditional<is_const, typename leaf_type::const_iterator,
+					  typename leaf_type::iterator>::type;
+	friend class b_tree_iterator<leaf_type, true>;
 
 public:
 	using iterator_category = std::bidirectional_iterator_tag;
 	using difference_type = ptrdiff_t;
-	typedef typename leaf_iterator::value_type value_type;
-	typedef typename leaf_iterator::reference reference;
-	typedef typename leaf_iterator::pointer pointer;
+	using value_type = typename leaf_iterator::value_type;
+	using reference = typename leaf_iterator::reference;
+	using pointer = typename leaf_iterator::pointer;
 
-	b_tree_iterator(std::nullptr_t) : current_node(nullptr), leaf_it()
-	{
-	}
-
-	b_tree_iterator(leaf_node_ptr node) : current_node(node), leaf_it(node->begin())
-	{
-	}
-
-	b_tree_iterator(leaf_node_ptr node, leaf_iterator _leaf_it)
-	    : current_node(node), leaf_it(_leaf_it)
-	{
-	}
-
-	b_tree_iterator(const b_tree_iterator &other)
-	    : current_node(other.current_node), leaf_it(other.leaf_it)
-	{
-	}
-
+	b_tree_iterator(std::nullptr_t);
+	b_tree_iterator(leaf_node_ptr node);
+	b_tree_iterator(leaf_node_ptr node, leaf_iterator _leaf_it);
+	b_tree_iterator(const b_tree_iterator &other);
 	template <typename T = void,
 		  typename = typename std::enable_if<is_const, T>::type>
-	b_tree_iterator(const b_tree_iterator<leaf_node_type, false> &other)
-	    : current_node(other.current_node), leaf_it(other.leaf_it)
-	{
-	}
+	b_tree_iterator(const b_tree_iterator<leaf_type, false> &other);
 
-	b_tree_iterator &operator=(const b_tree_iterator &other)
-	{
-		current_node = other.current_node;
-		leaf_it = other.leaf_it;
-		return *this;
-	}
-
-	b_tree_iterator &operator++()
-	{
-		++leaf_it;
-		if (leaf_it == current_node->end()) {
-			leaf_node_ptr tmp = current_node->get_next().get();
-			if (tmp) {
-				current_node = tmp;
-				leaf_it = current_node->begin();
-			}
-		}
-		return *this;
-	}
-
-	b_tree_iterator operator++(int)
-	{
-		b_tree_iterator tmp = *this;
-		++*this;
-		return tmp;
-	}
-
-	b_tree_iterator &operator--()
-	{
-		if (leaf_it == current_node->begin()) {
-			leaf_node_ptr tmp = current_node->get_prev().get();
-			if (tmp) {
-				current_node = tmp;
-				leaf_it = current_node->last();
-			}
-		} else {
-			--leaf_it;
-		}
-		return *this;
-	}
-
-	b_tree_iterator operator--(int)
-	{
-		b_tree_iterator tmp = *this;
-		--*this;
-		return tmp;
-	}
-
-	bool operator==(const b_tree_iterator &other)
-	{
-		return current_node == other.current_node && leaf_it == other.leaf_it;
-	}
-
-	bool operator!=(const b_tree_iterator &other)
-	{
-		return !(*this == other);
-	}
-
-	reference operator*() const
-	{
-		return *(leaf_it);
-	}
-
-	pointer operator->() const
-	{
-		return &**this;
-	}
+	b_tree_iterator &operator=(const b_tree_iterator &other);
+	b_tree_iterator &operator++();
+	b_tree_iterator operator++(int);
+	b_tree_iterator &operator--();
+	b_tree_iterator operator--(int);
+	bool operator==(const b_tree_iterator &other);
+	bool operator!=(const b_tree_iterator &other);
+	reference operator*() const;
+	pointer operator->() const;
 
 private:
 	leaf_node_ptr current_node;
 	leaf_iterator leaf_it;
-}; // class b_tree_iterator
+}; /* class b_tree_iterator */
 
-template <typename TKey, typename TValue, size_t degree>
+template <typename Key, typename T, typename Compare, std::size_t degree>
 class b_tree_base {
-	const static size_t number_entrys_slots = degree - 1;
-	const static size_t number_children_slots = degree;
-	typedef leaf_node_t<TKey, TValue, number_entrys_slots> leaf_node_type;
-	typedef inner_node_t<TKey, number_entrys_slots> inner_node_type;
-	typedef persistent_ptr<node_t> node_persistent_ptr;
-	typedef persistent_ptr<leaf_node_type> leaf_node_persistent_ptr;
-	typedef persistent_ptr<inner_node_type> inner_node_persistent_ptr;
+private:
+	const static std::size_t node_capacity = degree - 1;
+
+	using self_type = b_tree_base<Key, T, Compare, degree>;
+	using leaf_type = leaf_node_t<Key, T, Compare, node_capacity>;
+	using inner_type = inner_node_t<Key, Compare, node_capacity>;
+	using key_pptr = persistent_ptr<Key>;
+	using node_pptr = persistent_ptr<node_t>;
+	using leaf_pptr = persistent_ptr<leaf_type>;
+	using inner_pptr = persistent_ptr<inner_type>;
+	using path_type = std::vector<inner_pptr>;
+
+	using inner_pair = std::pair<inner_pptr, typename inner_type::iterator>;
 
 public:
-	typedef b_tree_base<TKey, TValue, degree> self_type;
-	typedef typename leaf_node_type::value_type value_type;
-	typedef typename leaf_node_type::key_type key_type;
-	typedef typename leaf_node_type::mapped_type mapped_type;
-	typedef typename leaf_node_type::reference reference;
-	typedef typename leaf_node_type::const_reference const_reference;
-	typedef typename leaf_node_type::pointer pointer;
-	typedef typename leaf_node_type::const_pointer const_pointer;
+	using value_type = typename leaf_type::value_type;
+	using key_type = typename leaf_type::key_type;
+	using mapped_type = typename leaf_type::mapped_type;
+	using key_compare = Compare;
+	using size_type = std::size_t;
+	using difference_type = std::ptrdiff_t;
 
-	typedef b_tree_iterator<leaf_node_type, false> iterator;
-	typedef b_tree_iterator<leaf_node_type, true> const_iterator;
+	using reference = typename leaf_type::reference;
+	using const_reference = typename leaf_type::const_reference;
+	using pointer = typename leaf_type::pointer;
+	using const_pointer = typename leaf_type::const_pointer;
 
+	using iterator = b_tree_iterator<leaf_type, false>;
+	using const_iterator = b_tree_iterator<leaf_type, true>;
 	using reverse_iterator = std::reverse_iterator<iterator>;
 	using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
+	b_tree_base();
+	~b_tree_base();
+
+	template <typename K, typename M>
+	std::pair<iterator, bool> try_emplace(K &&key, M &&obj);
+
+	template <typename K>
+	iterator find(const K &key);
+	template <typename K>
+	const_iterator find(const K &key) const;
+	template <typename K>
+	iterator lower_bound(const K &key);
+	template <typename K>
+	const_iterator lower_bound(const K &key) const;
+	template <typename K>
+	iterator upper_bound(const K &key);
+	template <typename K>
+	const_iterator upper_bound(const K &key) const;
+
+	template <typename K>
+	size_type erase(const K &key);
+
+	iterator begin();
+	iterator end();
+	const_iterator begin() const;
+	const_iterator end() const;
+	const_iterator cbegin() const;
+	const_iterator cend() const;
+	reverse_iterator rbegin();
+	reverse_iterator rend();
+
+	size_type size() const noexcept;
+
+	reference operator[](size_type pos);
+	const_reference operator[](size_type pos) const;
+
+	key_compare &key_comp();
+	const key_compare &key_comp() const;
+
 private:
-	static const key_type &get_last_key(const node_persistent_ptr &node)
-	{
-		if (node->leaf()) {
-			return cast_leaf(node.get())->back().first;
-		} else {
-			return cast_inner(node.get())->back();
-		}
-	}
+	node_pptr root;
+	node_pptr split_node;
+	node_pptr left_child;
+	node_pptr right_child;
+	key_compare compare;
+	pmem::obj::p<size_type> _size;
 
-	uint64_t epoch;
+	const key_type &get_last_key(const node_pptr &node);
+	leaf_type *leftmost_leaf() const;
+	leaf_type *rightmost_leaf() const;
 
-	persistent_ptr<node_t> root;
+	void create_new_root(const key_type &, node_pptr &, node_pptr &);
+	typename inner_type::const_iterator split_half(pool_base &pop, inner_pptr &node,
+						       inner_pptr &other,
+						       key_pptr &partition_key);
+	void split_inner_node(pool_base &pop, inner_pptr &src_node);
+	void split_inner_node(pool_base &pop, inner_pptr &src_node,
+			      inner_type *parent_node);
+	template <typename K, typename M>
+	std::pair<iterator, bool> split_leaf_node(pool_base &pop, leaf_pptr &split_leaf,
+						  K &&key, M &&obj);
+	template <typename K, typename M>
+	std::pair<iterator, bool> split_leaf_node(pool_base &pop, inner_type *parent_node,
+						  leaf_pptr &split_leaf, K &&key,
+						  M &&obj);
 
-	/**
-	 * Splitting node.
-	 */
-	persistent_ptr<node_t> split_node;
+	leaf_type *find_leaf_node(const key_type &key) const;
+	template <typename K>
+	leaf_type *find_leaf_node(const K &key) const;
+	template <typename K>
+	leaf_pptr find_leaf_to_insert(const K &key, path_type &path) const;
+	typename path_type::const_iterator find_full_node(const path_type &path);
+	template <typename K, typename M>
+	std::pair<iterator, bool> internal_insert(leaf_pptr leaf, K &&key, M &&obj);
+	template <typename K>
+	leaf_pptr get_path_ext(const K &key, std::vector<inner_pair> &path,
+			       std::vector<std::pair<node_pptr, node_pptr>> &neighbors,
+			       inner_pair &inner_ptr);
+	const_reference get_suitable_entry(inner_pair &node);
+	void delete_leaf_ext(leaf_pptr &leaf, inner_pair &parent, bool has_left_sibling);
+	void delete_inner_ext(inner_pptr &node, inner_pair &parent,
+			      std::pair<node_pptr, node_pptr> &neighbors,
+			      bool has_left_sibling);
 
-	/**
-	 * Left and right node during split.
-	 */
-	persistent_ptr<node_t> left_child;
-
-	persistent_ptr<node_t> right_child;
-
-	void create_new_root(pool_base &, const key_type &, node_persistent_ptr &,
-			     node_persistent_ptr &);
-
-	std::pair<iterator, bool> insert_descend(pool_base &, const_reference);
-
-	typename inner_node_type::const_iterator split_half(pool_base &pop,
-							    persistent_ptr<node_t> &node,
-							    persistent_ptr<node_t> &left,
-							    persistent_ptr<node_t> &right)
-	{
-		assert(split_node == node);
-		inner_node_type *inner = cast_inner(node).get();
-
-		typename inner_node_type::const_iterator middle =
-			inner->begin() + inner->size() / 2;
-		typename inner_node_type::const_iterator l_begin = inner->begin();
-		typename inner_node_type::const_iterator l_end = middle;
-		typename inner_node_type::const_iterator r_begin = middle + 1;
-		typename inner_node_type::const_iterator r_end = inner->end();
-		allocate_inner(pop, left, inner->level(), l_begin, l_end, inner);
-		allocate_inner(pop, right, inner->level(), r_begin, r_end, inner);
-
-		return middle;
-	}
-
-	void split_inner_node(pool_base &pop, const node_persistent_ptr &src_node,
-			      inner_node_type *parent_node, node_persistent_ptr &left,
-			      node_persistent_ptr &right)
-	{
-		assert(split_node == nullptr);
-		assignment(pop, split_node, src_node);
-		typename inner_node_type::const_iterator partition_point =
-			split_half(pop, split_node, left, right);
-		assert(partition_point != cast_inner(split_node)->end());
-		if (parent_node) {
-			parent_node->update_splitted_child(pop, *partition_point, left,
-							   right, split_node);
-		} else { // Root node is split
-			assert(root == split_node);
-			create_new_root(pop, *partition_point, left, right);
-		}
-		deallocate(split_node);
-	}
-
-	iterator split_leaf_node(pool_base &, inner_node_type *, persistent_ptr<node_t> &,
-				 const_reference, persistent_ptr<node_t> &,
-				 persistent_ptr<node_t> &);
-
-	static bool is_left_node(const leaf_node_type *src_node,
-				 const leaf_node_type *lnode)
-	{
-		assert(src_node);
-		assert(lnode);
-		typename leaf_node_type::const_iterator middle =
-			src_node->begin() + src_node->size() / 2;
-
-		return std::includes(lnode->begin(), lnode->end(), src_node->begin(),
-				     middle);
-	}
-
-	static bool is_right_node(const leaf_node_type *src_node,
-				  const leaf_node_type *rnode)
-	{
-		assert(src_node);
-		assert(rnode);
-		typename leaf_node_type::const_iterator middle =
-			src_node->begin() + src_node->size() / 2;
-
-		return std::includes(rnode->begin(), rnode->end(), middle,
-				     src_node->end());
-	}
-
-	void repair_leaf_split(pool_base &pop)
-	{
-		assert(root != nullptr);
-		assert(split_node != nullptr);
-		assert(split_node->leaf());
-
-		const key_type &key = get_last_key(split_node);
-		path_type path;
-
-		leaf_node_persistent_ptr found_node = find_leaf_to_insert(key, path);
-		assert(path[0] == root);
-
-		if (split_node == found_node) { // Split not completed
-			const leaf_node_type *split_leaf = cast_leaf(split_node).get();
-			leaf_node_type *lnode = cast_leaf(left_child).get();
-			leaf_node_type *rnode = cast_leaf(right_child).get();
-
-			if (left_child && is_left_node(split_leaf, lnode)) {
-				if (right_child &&
-				    is_right_node(
-					    split_leaf,
-					    rnode)) { // Both children were allocated
-						      // during split before crash
-					inner_node_type *parent_node = path.empty()
-						? nullptr
-						: path.back().get();
-
-					lnode->set_next(cast_leaf(right_child));
-					pop.persist(lnode->get_next());
-
-					correct_leaf_node_links(pop, split_node,
-								left_child, right_child);
-
-					if (parent_node) {
-						parent_node->update_splitted_child(
-							pop, lnode->back().first,
-							left_child, right_child,
-							split_node);
-					} else {
-						create_new_root(pop, lnode->back().first,
-								left_child, right_child);
-					}
-				} else { // Only left child was allocated during split
-					 // before crash
-					deallocate(left_child);
-				}
-			}
-		} else { // split_node was replaced by two new (left and right) nodes.
-			 // Need to deallocate split_node
-			deallocate(split_node);
-		}
-		split_node = nullptr;
-	}
-
-	void repair_inner_split(pool_base &pop)
-	{
-		assert(root != nullptr);
-		assert(!root->leaf());
-		assert(split_node != nullptr);
-		assert(!split_node->leaf());
-
-		const key_type &key = get_last_key(split_node);
-		path_type path;
-
-		find_leaf_to_insert(key, path);
-		assert(path[0] == root);
-		uint64_t root_level = path[0]->level();
-		uint64_t split_level = split_node->level();
-		assert(split_level <= root_level);
-
-		if (split_node == path[root_level - split_level]) { // Split not completed
-			// we could simply roll back
-			const inner_node_type *inner = cast_inner(split_node).get();
-			typename inner_node_type::const_iterator middle =
-				inner->begin() + inner->size() / 2;
-			if (left_child && !(left_child->leaf()) &&
-			    std::equal(inner->begin(), middle,
-				       cast_inner(left_child)->begin())) {
-				deallocate(left_child);
-			}
-			if (right_child && !(right_child->leaf()) &&
-			    std::equal(middle + 1, inner->end(),
-				       cast_inner(right_child)->begin())) {
-				deallocate(right_child);
-			}
-		} else { // split_node was replaced by two new (left and right) nodes.
-			 // Need to deallocate split_node
-			deallocate(split_node);
-		}
-		split_node = nullptr;
-	}
-
-	void correct_leaf_node_links(pool_base &, persistent_ptr<node_t> &,
-				     persistent_ptr<node_t> &, persistent_ptr<node_t> &);
-
-	void assignment(pool_base &pop, persistent_ptr<node_t> &lhs,
-			const persistent_ptr<node_t> &rhs)
-	{
-		// lhs.raw_ptr()->off = rhs.raw_ptr()->off;
-		lhs = rhs;
-		pop.persist(lhs);
-	}
-
-	leaf_node_type *find_leaf_node(const key_type &key) const
-	{
-		if (root == nullptr)
-			return nullptr;
-
-		node_persistent_ptr node = root;
-		while (!node->leaf()) {
-			node = cast_inner(node)->get_child(key);
-		}
-		leaf_node_type *leaf = cast_leaf(node).get();
-		leaf->check_consistency(epoch);
-		return leaf;
-	}
-
-	// TODO: merge with previous method
-	typedef std::vector<inner_node_persistent_ptr> path_type;
-	leaf_node_persistent_ptr find_leaf_to_insert(const key_type &key,
-						     path_type &path) const
-	{
-		assert(root != nullptr);
-		node_persistent_ptr node = root;
-		while (!node->leaf()) {
-			path.push_back(cast_inner(node));
-
-			node = cast_inner(node)->get_child(key);
-		}
-		leaf_node_persistent_ptr leaf = cast_leaf(node);
-		leaf->check_consistency(epoch);
-		return leaf;
-	}
-
-	typename path_type::const_iterator find_full_node(const path_type &path)
-	{
-		auto i = path.end() - 1;
-		for (; i > path.begin(); --i) {
-			if (!(*i)->full())
-				return i;
-		}
-		return i;
-	}
-
-	leaf_node_type *leftmost_leaf() const
-	{
-		if (root == nullptr)
-			return nullptr;
-
-		node_persistent_ptr node = root;
-		while (!node->leaf()) {
-			inner_node_type *inner_node = cast_inner(node).get();
-			node = inner_node->get_left_child(inner_node->begin());
-		}
-		leaf_node_type *leaf = cast_leaf(node).get();
-		leaf->check_consistency(epoch);
-		return leaf;
-	}
-
-	leaf_node_type *rightmost_leaf() const
-	{
-		if (root == nullptr)
-			return nullptr;
-
-		node_persistent_ptr node = root;
-		while (!node->leaf()) {
-			inner_node_type *inner_node = cast_inner(node).get();
-			node = inner_node->get_left_child(inner_node->end());
-		}
-		leaf_node_type *leaf = cast_leaf(node).get();
-		leaf->check_consistency(epoch);
-		return leaf;
-	}
-
-	static persistent_ptr<inner_node_type> &cast_inner(persistent_ptr<node_t> &node)
-	{
-		return reinterpret_cast<persistent_ptr<inner_node_type> &>(node);
-	}
-
-	static inner_node_type *cast_inner(node_t *node)
-	{
-		return static_cast<inner_node_type *>(node);
-	}
-
-	static persistent_ptr<leaf_node_type> &cast_leaf(persistent_ptr<node_t> &node)
-	{
-		return reinterpret_cast<persistent_ptr<leaf_node_type> &>(node);
-	}
-
-	static leaf_node_type *cast_leaf(node_t *node)
-	{
-		return static_cast<leaf_node_type *>(node);
-	}
+	static inner_pptr &cast_inner(node_pptr &node);
+	static inner_type *cast_inner(node_t *node);
+	static leaf_pptr &cast_leaf(node_pptr &node);
+	static leaf_type *cast_leaf(node_t *node);
+	static node_pptr &cast_node(leaf_pptr &node);
+	static node_pptr &cast_node(inner_pptr &node);
 
 	template <typename... Args>
-	inline persistent_ptr<inner_node_type>
-	allocate_inner(pool_base &pop, persistent_ptr<node_t> &node, Args &&... args)
-	{
-		make_persistent_atomic<inner_node_type>(pop, cast_inner(node), args...);
-		return cast_inner(node);
-	}
-
+	inline inner_pptr allocate_inner(Args &&... args);
 	template <typename... Args>
-	inline persistent_ptr<leaf_node_type>
-	allocate_leaf(pool_base &pop, persistent_ptr<node_t> &node, Args &&... args)
-	{
-		make_persistent_atomic<leaf_node_type>(pop, cast_leaf(node), epoch,
-						       args...);
-		return cast_leaf(node);
+	inline leaf_pptr allocate_leaf(Args &&... args);
+	inline void deallocate(node_pptr &node);
+	inline void deallocate(leaf_pptr &node);
+	inline void deallocate(inner_pptr &node);
+
+	PMEMobjpool *get_objpool();
+	pool_base get_pool_base();
+}; /* class b_tree_base */
+
+// -------------------------------------------------------------------------------------
+// ------------------------------------- node_iterator ---------------------------------
+// -------------------------------------------------------------------------------------
+
+template <typename LeafType, bool is_const>
+node_iterator<LeafType, is_const>::node_iterator() : node(nullptr), position(0)
+{
+}
+
+template <typename LeafType, bool is_const>
+node_iterator<LeafType, is_const>::node_iterator(leaf_node_ptr node_ptr, size_type p)
+    : node(node_ptr), position(p)
+{
+}
+
+template <typename LeafType, bool is_const>
+node_iterator<LeafType, is_const>::node_iterator(const node_iterator &other)
+    : node(other.node), position(other.position)
+{
+}
+
+template <typename LeafType, bool is_const>
+template <typename T, typename>
+node_iterator<LeafType, is_const>::node_iterator(
+	const node_iterator<leaf_type, false> &other)
+    : node(other.node), position(other.position)
+{
+}
+
+template <typename LeafType, bool is_const>
+node_iterator<LeafType, is_const> &node_iterator<LeafType, is_const>::operator++()
+{
+	++position;
+	return *this;
+}
+
+template <typename LeafType, bool is_const>
+node_iterator<LeafType, is_const> node_iterator<LeafType, is_const>::operator++(int)
+{
+	node_iterator tmp = *this;
+	++*this;
+	return tmp;
+}
+
+template <typename LeafType, bool is_const>
+node_iterator<LeafType, is_const> &node_iterator<LeafType, is_const>::operator--()
+{
+	assert(position > 0);
+	--position;
+	return *this;
+}
+
+template <typename LeafType, bool is_const>
+node_iterator<LeafType, is_const> node_iterator<LeafType, is_const>::operator--(int)
+{
+	node_iterator tmp = *this;
+	--*this;
+	return tmp;
+}
+
+template <typename LeafType, bool is_const>
+node_iterator<LeafType, is_const>
+node_iterator<LeafType, is_const>::operator+(size_type off) const
+{
+	return node_iterator(node, position + off);
+}
+
+template <typename LeafType, bool is_const>
+node_iterator<LeafType, is_const>
+node_iterator<LeafType, is_const>::operator+=(difference_type off)
+{
+	position += static_cast<size_type>(off);
+	return *this;
+}
+
+template <typename LeafType, bool is_const>
+node_iterator<LeafType, is_const>
+node_iterator<LeafType, is_const>::operator-(difference_type off) const
+{
+	assert(node != nullptr);
+	assert(position >= static_cast<size_type>(off));
+	return node_iterator(node, position - static_cast<size_type>(off));
+}
+
+template <typename LeafType, bool is_const>
+typename node_iterator<LeafType, is_const>::difference_type
+node_iterator<LeafType, is_const>::operator-(const node_iterator &other) const
+{
+	assert(node != nullptr);
+	assert(other.node != nullptr);
+	assert(node == other.node);
+	return static_cast<difference_type>(position - other.position);
+}
+
+template <typename LeafType, bool is_const>
+bool node_iterator<LeafType, is_const>::operator==(const node_iterator &other) const
+{
+	return node == other.node && position == other.position;
+}
+
+template <typename LeafType, bool is_const>
+bool node_iterator<LeafType, is_const>::operator!=(const node_iterator &other) const
+{
+	return !(*this == other);
+}
+
+template <typename LeafType, bool is_const>
+bool node_iterator<LeafType, is_const>::operator<(const node_iterator &other) const
+{
+	assert(node != nullptr);
+	assert(other.node != nullptr);
+	assert(node == other.node);
+	return position < other.position;
+}
+
+template <typename LeafType, bool is_const>
+bool node_iterator<LeafType, is_const>::operator>(const node_iterator &other) const
+{
+	assert(node != nullptr);
+	assert(other.node != nullptr);
+	assert(node == other.node);
+	return position > other.position;
+}
+
+template <typename LeafType, bool is_const>
+typename node_iterator<LeafType, is_const>::reference
+	node_iterator<LeafType, is_const>::operator*() const
+{
+	assert(node != nullptr);
+	return node->operator[](position);
+}
+
+template <typename LeafType, bool is_const>
+typename node_iterator<LeafType, is_const>::pointer
+	node_iterator<LeafType, is_const>::operator->() const
+{
+	return &**this;
+}
+
+// -------------------------------------------------------------------------------------
+// ------------------------------------- leaf_node_t -----------------------------------
+// -------------------------------------------------------------------------------------
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+leaf_node_t<Key, T, Compare, capacity>::leaf_node_t() : node_t()
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	std::iota(idxs.begin(), idxs.end(), 0);
+	_size = 0;
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+leaf_node_t<Key, T, Compare, capacity>::~leaf_node_t()
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	for (value_type &e : *this) {
+		e.first.~key_type();
+		e.second.~mapped_type();
 	}
+}
 
-	inline void deallocate(persistent_ptr<node_t> &node)
-	{
-		if (node == nullptr)
-			return;
-
-		pool_base pop = get_pool_base();
-		transaction::manual tx(pop);
-		if (node->leaf()) {
-			deallocate_leaf(cast_leaf(node));
-		} else {
-			deallocate_inner(cast_inner(node));
+/**
+ * Moves second half of the 'other' to 'this' in sorted order.
+ * Inserts given key-object as a new entry to an appropriate node.
+ *
+ * @pre std:distance(middle, end) > 0
+ *
+ * @post this = other[middle, end)
+ * @post other = other[0, middle)
+ *
+ * @return iterator on newly inserted entry
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+void leaf_node_t<Key, T, Compare, capacity>::move(pool_base &pop,
+						  persistent_ptr<leaf_node_t> other,
+						  const key_compare &comp)
+{
+	assert(other->full());
+	assert(this->size() == 0);
+	size_type middle_idx = other->size() / 2;
+	auto middle = std::make_move_iterator(other->begin() + middle_idx);
+	auto last = std::make_move_iterator(other->end());
+	auto temp = middle;
+	/* move second half from 'other' to 'this' */
+	pmem::obj::transaction::run(pop, [&] {
+		/* add range to tx before moving to avoid sequential snapshotting */
+		other->add_to_tx(middle_idx, other->size());
+		difference_type count = 0;
+		while (temp != last) {
+			emplace(count++, *temp++);
 		}
-		node = nullptr;
-		transaction::commit();
+		_size = static_cast<size_type>(count);
+		other->_size -= static_cast<size_type>(count);
+	});
+	assert(std::distance(begin(), end()) > 0);
+	assert(is_sorted(comp));
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+template <typename K>
+typename leaf_node_t<Key, T, Compare, capacity>::iterator
+leaf_node_t<Key, T, Compare, capacity>::lower_bound(const K &key, const key_compare &comp)
+{
+	return std::lower_bound(
+		begin(), end(), key,
+		[&comp](const_reference e, const K &key) { return comp(e.first, key); });
+}
+
+/**
+ * Inserts element into the leaf in a sorted way specified by idxs_pos.
+ *
+ * @pre key must not already exist in the leaf.
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+template <typename K, typename M>
+typename leaf_node_t<Key, T, Compare, capacity>::iterator
+leaf_node_t<Key, T, Compare, capacity>::insert(iterator idxs_pos, K &&key, M &&obj)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	assert(!full());
+	difference_type insert_pos = idxs[size()];
+	assert(std::none_of(
+		idxs.cdata(), idxs.cdata() + size(),
+		[&insert_pos](difference_type idx) { return insert_pos == idx; }));
+	// insert an entry to the end
+	emplace(insert_pos, std::forward<K>(key), std::forward<M>(obj));
+	// update idxs & return iterator
+	return iterator(this, insert_idx(idxs_pos));
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+template <typename K>
+typename leaf_node_t<Key, T, Compare, capacity>::iterator
+leaf_node_t<Key, T, Compare, capacity>::find(const K &key, const key_compare &comp)
+{
+	iterator it = lower_bound(key, comp);
+	if (it != end() && (!comp(it->first, key) && !comp(key, it->first))) {
+		return it;
+	} else {
+		return end();
 	}
+}
 
-	inline void deallocate_inner(inner_node_persistent_ptr &node)
-	{
-		delete_persistent<inner_node_type>(node);
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+template <typename K>
+typename leaf_node_t<Key, T, Compare, capacity>::const_iterator
+leaf_node_t<Key, T, Compare, capacity>::find(const K &key, const key_compare &comp) const
+{
+	const_iterator it = lower_bound(key, comp);
+	if (it != cend() && (!comp(it->first, key) && !comp(key, it->first))) {
+		return it;
+	} else {
+		return cend();
 	}
+}
 
-	inline void deallocate_leaf(leaf_node_persistent_ptr &node)
-	{
-		delete_persistent<leaf_node_type>(node);
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+template <typename K>
+typename leaf_node_t<Key, T, Compare, capacity>::size_type
+leaf_node_t<Key, T, Compare, capacity>::erase(pool_base &pop, const K &key,
+					      const key_compare &comp)
+{
+	iterator it = find(key, comp);
+	if (it == end())
+		return size_type(0);
+	internal_erase(pop, it);
+	assert(is_sorted(comp));
+	return size_type(1);
+}
+
+/**
+ * Return begin iterator on an array of correct indices.
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::iterator
+leaf_node_t<Key, T, Compare, capacity>::begin()
+{
+	return iterator(this, 0);
+}
+
+/**
+ * Return const_iterator to the beginning.
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::const_iterator
+leaf_node_t<Key, T, Compare, capacity>::begin() const
+{
+	return const_iterator(this, 0);
+}
+
+/**
+ * Return const_iterator to the beginning.
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::const_iterator
+leaf_node_t<Key, T, Compare, capacity>::cbegin() const
+{
+	return const_iterator(this, 0);
+}
+
+/**
+ * Return end iterator on an array of indices.
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::iterator
+leaf_node_t<Key, T, Compare, capacity>::end()
+{
+	return iterator(this, size());
+}
+
+/**
+ * Return const_iterator to the end.
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::const_iterator
+leaf_node_t<Key, T, Compare, capacity>::end() const
+{
+	return const_iterator(this, size());
+}
+
+/**
+ * Return const_iterator to the end.
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::const_iterator
+leaf_node_t<Key, T, Compare, capacity>::cend() const
+{
+	return const_iterator(this, size());
+}
+
+/**
+ * Return the size of the array of entries (key/value).
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::size_type
+leaf_node_t<Key, T, Compare, capacity>::size() const
+{
+	return _size;
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+bool leaf_node_t<Key, T, Compare, capacity>::full() const
+{
+	return size() == capacity;
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::const_reference
+leaf_node_t<Key, T, Compare, capacity>::front() const
+{
+	return entries[idxs[0]];
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::const_reference
+leaf_node_t<Key, T, Compare, capacity>::back() const
+{
+	return entries[idxs[size() - 1]];
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::reference
+	leaf_node_t<Key, T, Compare, capacity>::operator[](size_type pos)
+{
+	assert(pos <= size());
+	return entries[idxs[pos]];
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::const_reference
+	leaf_node_t<Key, T, Compare, capacity>::operator[](size_type pos) const
+{
+	assert(pos <= size());
+	return entries[idxs[pos]];
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+const persistent_ptr<leaf_node_t<Key, T, Compare, capacity>> &
+leaf_node_t<Key, T, Compare, capacity>::get_next() const
+{
+	return this->next;
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+void leaf_node_t<Key, T, Compare, capacity>::set_next(
+	const persistent_ptr<leaf_node_t> &n)
+{
+	this->next = n;
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+const persistent_ptr<leaf_node_t<Key, T, Compare, capacity>> &
+leaf_node_t<Key, T, Compare, capacity>::get_prev() const
+{
+	return this->prev;
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+void leaf_node_t<Key, T, Compare, capacity>::set_prev(
+	const persistent_ptr<leaf_node_t> &p)
+{
+	this->prev = p;
+}
+
+/**
+ * Constructs value_type in position 'pos' of entries with arguments 'args'.
+ *
+ * @pre must be called in a transaction scope.
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+template <typename... Args>
+typename leaf_node_t<Key, T, Compare, capacity>::pointer
+leaf_node_t<Key, T, Compare, capacity>::emplace(difference_type pos, Args &&... args)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	/* to avoid snapshotting of an uninitialized memory */
+	pmemobj_tx_xadd_range_direct(entries + pos, sizeof(value_type),
+				     POBJ_XADD_NO_SNAPSHOT);
+	return new (entries + pos) value_type(std::forward<Args>(args)...);
+}
+
+/**
+ * Replaces index of newly allocated on position idxs[size()] element in sorted order.
+ *
+ * @param pos - position in sorted idxs array where entry must reside.
+ *
+ * @pre must be used right after addition of a new entry
+ * @pre new entry must be added into idxs[size()] position
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+typename leaf_node_t<Key, T, Compare, capacity>::size_type
+leaf_node_t<Key, T, Compare, capacity>::insert_idx(const_iterator pos)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	difference_type new_entry_idx = idxs[size()];
+
+	auto idx_pos = static_cast<size_type>(std::distance(cbegin(), pos));
+	auto slice = idxs.range(idx_pos, size() - idx_pos);
+	auto to_insert = std::copy_backward(slice.begin(), slice.end(), slice.end() + 1);
+	*(--to_insert) = new_entry_idx;
+	++_size;
+
+	size_type result = static_cast<size_type>(to_insert - idxs.cbegin());
+	assert(result >= 0);
+	return result;
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+void leaf_node_t<Key, T, Compare, capacity>::remove_idx(size_type idx)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	assert(size() > 0);
+
+	difference_type to_replace = idxs[idx];
+	auto slice = idxs.range(idx, size() - idx);
+	auto replace_pos = std::copy(slice.begin() + 1, slice.end(), slice.begin());
+	*replace_pos = to_replace;
+	--_size;
+}
+
+/**
+ * Remove element pointed by iterator.
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+void leaf_node_t<Key, T, Compare, capacity>::internal_erase(pool_base &pop, iterator it)
+{
+	size_type idx = static_cast<size_type>(std::distance(begin(), it));
+	pmem::obj::transaction::run(pop, [&] {
+		/* destruct key-value pair */
+		(*it).first.~key_type();
+		(*it).second.~mapped_type();
+		/* update idxs */
+		remove_idx(idx);
+	});
+}
+
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+bool leaf_node_t<Key, T, Compare, capacity>::is_sorted(const key_compare &comp)
+{
+	return std::is_sorted(begin(), end(),
+			      [&comp](const_reference a, const_reference b) {
+				      return comp(a.first, b.first);
+			      });
+}
+
+/**
+ * Adds the range [begin, end) of underlying array to transaction.
+ */
+template <typename Key, typename T, typename Compare, uint64_t capacity>
+void leaf_node_t<Key, T, Compare, capacity>::add_to_tx(size_type begin, size_type end)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	pmemobj_tx_xadd_range_direct(entries + begin, sizeof(value_type) * (end - begin),
+				     POBJ_XADD_ASSUME_INITIALIZED);
+}
+
+// -------------------------------------------------------------------------------------
+// ------------------------------------- inner_node_t ----------------------------------
+// -------------------------------------------------------------------------------------
+
+template <typename Key, typename Compare, uint64_t capacity>
+inner_node_t<Key, Compare, capacity>::inner_node_t(size_type level)
+    : node_t(level), _size(0)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+}
+
+template <typename Key, typename Compare, uint64_t capacity>
+inner_node_t<Key, Compare, capacity>::inner_node_t(size_type level, const_reference key,
+						   const node_pptr &first_child,
+						   const node_pptr &second_child)
+    : node_t(level)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	entries[0] = pmem::obj::persistent_ptr<key_type>(&key);
+	children[0] = first_child;
+	children[1] = second_child;
+	_size = 1;
+}
+
+template <typename Key, typename Compare, uint64_t capacity>
+inner_node_t<Key, Compare, capacity>::~inner_node_t()
+{
+}
+
+/**
+ * Moves second half from 'other' to 'this'.
+ * Returns iterator to first from 'this'.
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+typename inner_node_t<Key, Compare, capacity>::iterator
+inner_node_t<Key, Compare, capacity>::move(pool_base &pop, inner_node_t &other,
+					   key_pptr &partition_key)
+{
+	assert(size() == 0);
+	assert(other.size() > size_type(1));
+	key_pptr *middle = other.entries + other.size() / 2;
+	key_pptr *last = other.entries + other.size();
+	size_type new_size = static_cast<size_type>(std::distance(middle + 1, last));
+	node_pptr *middle_child = other.children + (other.size() / 2) + 1;
+	node_pptr *last_child = other.children + other.size() + 1;
+	/* move second half from 'other' to 'this' */
+	pmem::obj::transaction::run(pop, [&] {
+		/* save partition key */
+		partition_key = *middle;
+		std::move(middle + 1, last, entries);
+		std::move(middle_child, last_child, children);
+		_size = new_size;
+		other._size -= (new_size + 1);
+	});
+	assert(std::distance(begin(), end()) > 0);
+	return begin();
+}
+
+/**
+ * Changes entry specified by the iterator with key pointer
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+template <typename K>
+void inner_node_t<Key, Compare, capacity>::replace(iterator it, const K &key)
+{
+	size_type pos = static_cast<size_type>(std::distance(begin(), it));
+	entries[pos] = pmem::obj::persistent_ptr<key_type>(&key);
+}
+
+/**
+ * Updates inner node after splitting child.
+ *
+ * @param[in] pop - persistent pool
+ * @param[in] key - key of the first entry in right_child
+ * @param[in] left_child - new child node that must be linked
+ * @param[in] right_child - new child node that must be linked
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+void inner_node_t<Key, Compare, capacity>::update_splitted_child(pool_base &pop,
+								 const_reference key,
+								 node_pptr &left_child,
+								 node_pptr &right_child,
+								 const key_compare &comp)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	assert(!full());
+	const_iterator insert_it = std::lower_bound(
+		cbegin(), cend(), key, [&comp](const_reference lhs, const_reference rhs) {
+			return comp(lhs, rhs);
+		});
+	difference_type insert_idx = std::distance(cbegin(), insert_it);
+	/* update entries inserting new key */
+	key_pptr *to_insert = std::copy_backward(entries + insert_idx, entries + size(),
+						 entries + size() + 1);
+	assert(insert_idx < std::distance(entries, to_insert));
+	*(--to_insert) = pmem::obj::persistent_ptr<key_type>(&key);
+	++_size;
+	/* update children inserting new descendants */
+	node_pptr *to_insert_child = std::copy_backward(
+		children + insert_idx + 1, children + size(), children + size() + 1);
+	*(--to_insert_child) = right_child;
+	*(--to_insert_child) = left_child;
+
+	assert(is_sorted(comp));
+}
+
+/**
+ * Deletes key specified by iterator.
+ * Must be followed by node balancing.
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+void inner_node_t<Key, Compare, capacity>::delete_with_child(iterator it, bool left)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	assert(size() > 0);
+
+	size_type pos = static_cast<size_type>(std::distance(begin(), it));
+	std::move(entries + pos + 1, entries + size(), entries + pos);
+	if (left) {
+		std::move(children + pos + 1, children + size() + 1, children + pos);
+	} else {
+		std::move(children + pos + 2, children + size() + 1, children + pos + 1);
 	}
+	--_size;
+}
 
-	PMEMobjpool *get_objpool()
-	{
-		PMEMoid oid = pmemobj_oid(this);
-		return pmemobj_pool_by_oid(oid);
+/**
+ * Inherits child specified by iterator and 'left' bool.
+ * Key is updated by smallest in right subtree.
+ * Assuming that previous child is no longer used and must be deleted.
+ *
+ * @pre child.size() == 0
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+void inner_node_t<Key, Compare, capacity>::inherit_child(iterator it, node_pptr &child,
+							 bool left)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	assert(size() > 0);
+
+	size_type pos = static_cast<size_type>(std::distance(begin(), it));
+	if (left) {
+		children[pos] = child;
+	} else {
+		children[pos + 1] = child;
 	}
+}
 
-	pool_base get_pool_base()
-	{
-		return pool_base(get_objpool());
+template <typename Key, typename Compare, uint64_t capacity>
+template <typename K>
+const typename inner_node_t<Key, Compare, capacity>::node_pptr &
+inner_node_t<Key, Compare, capacity>::get_child(const K &key,
+						const key_compare &comp) const
+{
+	const_iterator it = std::upper_bound(
+		cbegin(), cend(), key,
+		[&comp](const K &lhs, const_reference rhs) { return comp(lhs, rhs); });
+	return get_left_child(it);
+}
+
+template <typename Key, typename Compare, uint64_t capacity>
+template <typename K>
+std::tuple<node_t *, node_t *, node_t *,
+	   typename inner_node_t<Key, Compare, capacity>::iterator>
+inner_node_t<Key, Compare, capacity>::get_child_and_siblings(const K &key,
+							     const key_compare &comp)
+{
+	assert(size() > 0);
+	iterator it = std::upper_bound(
+		begin(), end(), key,
+		[&comp](const K &lhs, const_reference rhs) { return comp(lhs, rhs); });
+	if (it == begin()) {
+		return std::make_tuple(get_left_child(it).get(), nullptr,
+				       get_right_child(it).get(), it);
+	} else if (it == end()) {
+		return std::make_tuple(get_left_child(it).get(),
+				       get_left_child(it - 1).get(), nullptr, it - 1);
+	} else {
+		return std::make_tuple(get_left_child(it).get(),
+				       get_left_child(it - 1).get(),
+				       get_right_child(it).get(), it - 1);
 	}
+}
 
-public:
-	b_tree_base() : epoch(0)
-	{
-	}
+template <typename Key, typename Compare, uint64_t capacity>
+const typename inner_node_t<Key, Compare, capacity>::node_pptr &
+inner_node_t<Key, Compare, capacity>::get_child(const_reference key,
+						const key_compare &comp) const
+{
+	const_iterator it = std::upper_bound(
+		cbegin(), cend(), key, [&comp](const_reference lhs, const_reference rhs) {
+			return comp(lhs, rhs);
+		});
+	return get_left_child(it);
+}
 
-	std::pair<iterator, bool> insert(const_reference entry)
-	{
-		auto pop = get_pool_base();
+template <typename Key, typename Compare, uint64_t capacity>
+const typename inner_node_t<Key, Compare, capacity>::node_pptr &
+inner_node_t<Key, Compare, capacity>::get_left_child(const_iterator it) const
+{
+	auto result = std::distance(begin(), it);
+	assert(result >= 0);
 
-		if (root == nullptr) {
-			allocate_leaf(pop, root);
+	size_type child_pos = static_cast<size_type>(result);
+	return children[child_pos];
+}
+
+template <typename Key, typename Compare, uint64_t capacity>
+const typename inner_node_t<Key, Compare, capacity>::node_pptr &
+inner_node_t<Key, Compare, capacity>::get_right_child(const_iterator it) const
+{
+	auto result = std::distance(begin(), it);
+	assert(result >= 0);
+
+	size_type child_pos = static_cast<size_type>(result + 1);
+	return children[child_pos];
+}
+
+template <typename Key, typename Compare, uint64_t capacity>
+bool inner_node_t<Key, Compare, capacity>::full() const
+{
+	return this->size() == capacity;
+}
+
+/**
+ * Return begin iterator on an array of keys.
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+typename inner_node_t<Key, Compare, capacity>::iterator
+inner_node_t<Key, Compare, capacity>::begin()
+{
+	return iterator(this, 0);
+}
+
+/**
+ * Return begin const_iterator on an array of keys.
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+typename inner_node_t<Key, Compare, capacity>::const_iterator
+inner_node_t<Key, Compare, capacity>::begin() const
+{
+	return const_iterator(this, 0);
+}
+
+/**
+ * Return begin const_iterator on an array of keys.
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+typename inner_node_t<Key, Compare, capacity>::const_iterator
+inner_node_t<Key, Compare, capacity>::cbegin() const
+{
+	return const_iterator(this, 0);
+}
+
+/**
+ * Return end iterator on an array of keys.
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+typename inner_node_t<Key, Compare, capacity>::iterator
+inner_node_t<Key, Compare, capacity>::end()
+{
+	return begin() + this->size();
+}
+
+/**
+ * Return end const_iterator on an array of keys.
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+typename inner_node_t<Key, Compare, capacity>::const_iterator
+inner_node_t<Key, Compare, capacity>::end() const
+{
+	return begin() + this->size();
+}
+
+/**
+ * Return end const_iterator on an array of keys.
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+typename inner_node_t<Key, Compare, capacity>::const_iterator
+inner_node_t<Key, Compare, capacity>::cend() const
+{
+	return begin() + this->size();
+}
+
+/**
+ * Return the size of the array of keys.
+ */
+template <typename Key, typename Compare, uint64_t capacity>
+typename inner_node_t<Key, Compare, capacity>::size_type
+inner_node_t<Key, Compare, capacity>::size() const
+{
+	return _size;
+}
+
+template <typename Key, typename Compare, uint64_t capacity>
+typename inner_node_t<Key, Compare, capacity>::const_reference
+inner_node_t<Key, Compare, capacity>::back() const
+{
+	return *entries[this->size() - 1];
+}
+
+template <typename Key, typename Compare, uint64_t capacity>
+typename inner_node_t<Key, Compare, capacity>::reference
+	inner_node_t<Key, Compare, capacity>::operator[](size_type pos)
+{
+	assert(pos <= size());
+	return *entries[pos];
+}
+
+template <typename Key, typename Compare, uint64_t capacity>
+typename inner_node_t<Key, Compare, capacity>::const_reference
+	inner_node_t<Key, Compare, capacity>::operator[](size_type pos) const
+{
+	assert(pos <= size());
+	return *entries[pos];
+}
+
+template <typename Key, typename Compare, uint64_t capacity>
+bool inner_node_t<Key, Compare, capacity>::is_sorted(const key_compare &comp)
+{
+	return std::is_sorted(begin(), end(),
+			      [&comp](const key_type &lhs, const key_type &rhs) {
+				      return comp(lhs, rhs);
+			      });
+}
+
+template <typename Key, typename Compare, uint64_t capacity>
+pool_base inner_node_t<Key, Compare, capacity>::get_pool() const noexcept
+{
+	auto pop = pmemobj_pool_by_ptr(this);
+	assert(pop != nullptr);
+	return pool_base(pop);
+}
+
+// -------------------------------------------------------------------------------------
+// ----------------------------------- b_tree_iterator ---------------------------------
+// -------------------------------------------------------------------------------------
+
+template <typename LeafType, bool is_const>
+b_tree_iterator<LeafType, is_const>::b_tree_iterator(std::nullptr_t)
+    : current_node(nullptr), leaf_it()
+{
+}
+
+template <typename LeafType, bool is_const>
+b_tree_iterator<LeafType, is_const>::b_tree_iterator(leaf_node_ptr node)
+    : current_node(node), leaf_it(node->begin())
+{
+}
+
+template <typename LeafType, bool is_const>
+b_tree_iterator<LeafType, is_const>::b_tree_iterator(leaf_node_ptr node,
+						     leaf_iterator _leaf_it)
+    : current_node(node), leaf_it(_leaf_it)
+{
+}
+
+template <typename LeafType, bool is_const>
+b_tree_iterator<LeafType, is_const>::b_tree_iterator(const b_tree_iterator &other)
+    : current_node(other.current_node), leaf_it(other.leaf_it)
+{
+}
+
+template <typename LeafType, bool is_const>
+template <typename T, typename>
+b_tree_iterator<LeafType, is_const>::b_tree_iterator(
+	const b_tree_iterator<leaf_type, false> &other)
+    : current_node(other.current_node), leaf_it(other.leaf_it)
+{
+}
+
+template <typename LeafType, bool is_const>
+b_tree_iterator<LeafType, is_const> &
+b_tree_iterator<LeafType, is_const>::operator=(const b_tree_iterator &other)
+{
+	current_node = other.current_node;
+	leaf_it = other.leaf_it;
+	return *this;
+}
+
+template <typename LeafType, bool is_const>
+b_tree_iterator<LeafType, is_const> &b_tree_iterator<LeafType, is_const>::operator++()
+{
+	++leaf_it;
+	if (leaf_it == current_node->end()) {
+		leaf_node_ptr tmp = current_node->get_next().get();
+		if (tmp) {
+			current_node = tmp;
+			leaf_it = current_node->begin();
 		}
-		assert(root != nullptr);
+	}
+	return *this;
+}
 
-		std::pair<iterator, bool> ret = insert_descend(pop, entry);
+template <typename LeafType, bool is_const>
+b_tree_iterator<LeafType, is_const> b_tree_iterator<LeafType, is_const>::operator++(int)
+{
+	b_tree_iterator tmp = *this;
+	++*this;
+	return tmp;
+}
 
-		return ret;
+template <typename LeafType, bool is_const>
+b_tree_iterator<LeafType, is_const> &b_tree_iterator<LeafType, is_const>::operator--()
+{
+	if (leaf_it == current_node->begin()) {
+		leaf_node_ptr tmp = current_node->get_prev().get();
+		if (tmp) {
+			current_node = tmp;
+			leaf_it = current_node->end();
+		}
+	} else {
+		--leaf_it;
+	}
+	return *this;
+}
+
+template <typename LeafType, bool is_const>
+b_tree_iterator<LeafType, is_const> b_tree_iterator<LeafType, is_const>::operator--(int)
+{
+	b_tree_iterator tmp = *this;
+	--*this;
+	return tmp;
+}
+
+template <typename LeafType, bool is_const>
+bool b_tree_iterator<LeafType, is_const>::operator==(const b_tree_iterator &other)
+{
+	return current_node == other.current_node && leaf_it == other.leaf_it;
+}
+
+template <typename LeafType, bool is_const>
+bool b_tree_iterator<LeafType, is_const>::operator!=(const b_tree_iterator &other)
+{
+	return !(*this == other);
+}
+
+template <typename LeafType, bool is_const>
+typename b_tree_iterator<LeafType, is_const>::reference
+	b_tree_iterator<LeafType, is_const>::operator*() const
+{
+	return *(leaf_it);
+}
+
+template <typename LeafType, bool is_const>
+typename b_tree_iterator<LeafType, is_const>::pointer
+	b_tree_iterator<LeafType, is_const>::operator->() const
+{
+	return &**this;
+}
+
+// -------------------------------------------------------------------------------------
+// ------------------------------------- b_tree_base -----------------------------------
+// -------------------------------------------------------------------------------------
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+b_tree_base<Key, T, Compare, degree>::b_tree_base()
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	cast_leaf(root) = allocate_leaf();
+	_size = 0;
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+b_tree_base<Key, T, Compare, degree>::~b_tree_base()
+{
+	deallocate(root);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K, typename M>
+std::pair<typename b_tree_base<Key, T, Compare, degree>::iterator, bool>
+b_tree_base<Key, T, Compare, degree>::try_emplace(K &&key, M &&obj)
+{
+	auto pop = get_pool_base();
+
+	path_type path;
+	leaf_pptr leaf = find_leaf_to_insert(std::forward<K>(key), path);
+
+	// --------------- entry with the same key found ---------------
+	typename leaf_type::iterator leaf_it = leaf->find(std::forward<K>(key), compare);
+	if (leaf_it != leaf->end()) {
+		return std::pair<iterator, bool>(iterator(leaf.get(), leaf_it), false);
 	}
 
-	iterator find(const key_type &key)
-	{
-		leaf_node_type *leaf = find_leaf_node(key);
-		if (leaf == nullptr)
-			return end();
-
-		typename leaf_node_type::iterator leaf_it = leaf->find(key);
-		if (leaf->end() == leaf_it)
-			return end();
-
-		return iterator(leaf, leaf_it);
+	// ------------------ leaf not full -> insert ------------------
+	if (!leaf->full()) {
+		return internal_insert(leaf, std::forward<K>(key), std::forward<M>(obj));
 	}
 
-	const_iterator find(const key_type &key) const
-	{
-		const leaf_node_type *leaf = find_leaf_node(key);
-		if (leaf == nullptr)
-			return end();
-
-		typename leaf_node_type::const_iterator leaf_it = leaf->find(key);
-		if (leaf->end() == leaf_it)
-			return end();
-
-		return const_iterator(leaf, leaf_it);
+	// -------------------- if root is leaf ------------------------
+	if (path.empty()) {
+		return split_leaf_node(pop, leaf, std::forward<K>(key),
+				       std::forward<M>(obj));
 	}
 
-	/**
-	 * Returns an iterator pointing to the least element which is larger than or equal
-	 * to the given key. Keys are sorted in binary order (see
-	 * std::string::compare).
-	 *
-	 * @param[in] key sets the lower bound (inclusive)
-	 *
-	 * @return iterator
-	 */
-	iterator lower_bound(const key_type &key)
-	{
-		leaf_node_type *leaf = find_leaf_node(key);
-		if (leaf == nullptr)
-			return end();
-
-		typename leaf_node_type::iterator leaf_it = leaf->lower_bound(key);
-		if (leaf->end() == leaf_it)
-			return end();
-
-		return iterator(leaf, leaf_it);
+	// ---------- find the first not full node from leaf -----------
+	auto i = path.end() - 1;
+	for (; i > path.begin(); --i) {
+		if (!(*i)->full()) {
+			break;
+		}
 	}
 
-	/**
-	 * Returns a const iterator pointing to the least element which is larger than or
-	 * equal to the given key. Keys are sorted in binary order (see
-	 * std::string::compare).
-	 *
-	 * @param[in] key sets the lower bound (inclusive)
-	 *
-	 * @return const_iterator
-	 */
-	const_iterator lower_bound(const key_type &key) const
-	{
-		const leaf_node_type *leaf = find_leaf_node(key);
-		if (leaf == nullptr)
-			return end();
+	// -------------- if root is full split root -------------------
+	inner_type *parent_node = nullptr;
+	if ((*i)->full()) {
+		split_inner_node(pop, *i);
+		parent_node = cast_inner(
+			cast_inner(root)->get_child(std::forward<K>(key), compare).get());
+	} else {
+		parent_node = (*i).get();
+	}
+	++i;
 
-		typename leaf_node_type::const_iterator leaf_it = leaf->lower_bound(key);
-		if (leaf->end() == leaf_it)
-			return end();
-
-		return const_iterator(leaf, leaf_it);
+	for (; i != path.end(); ++i) {
+		split_inner_node(pop, *i, parent_node);
+		parent_node = cast_inner(
+			parent_node->get_child(std::forward<K>(key), compare).get());
 	}
 
-	/**
-	 * Returns an iterator pointing to the least element which is larger than the
-	 * given key. Keys are sorted in binary order (see
-	 * std::string::compare).
-	 *
-	 * @param[in] key sets the lower bound (exclusive)
-	 *
-	 * @return iterator
-	 */
-	iterator upper_bound(const key_type &key)
-	{
-		leaf_node_type *leaf = find_leaf_node(key);
-		if (leaf == nullptr)
-			return end();
+	return split_leaf_node(pop, parent_node, leaf, std::forward<K>(key),
+			       std::forward<M>(obj));
+}
 
-		typename leaf_node_type::iterator leaf_it = leaf->upper_bound(key);
-		if (leaf->end() == leaf_it)
-			return end();
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K>
+typename b_tree_base<Key, T, Compare, degree>::iterator
+b_tree_base<Key, T, Compare, degree>::find(const K &key)
+{
+	leaf_type *leaf = find_leaf_node(key);
+	typename leaf_type::iterator leaf_it = leaf->find(key, compare);
+	if (leaf->end() == leaf_it)
+		return end();
 
-		return iterator(leaf, leaf_it);
-	}
+	return iterator(leaf, leaf_it);
+}
 
-	/**
-	 * Returns a const iterator pointing to the least element which is larger than the
-	 * given key. Keys are sorted in binary order (see
-	 * std::string::compare).
-	 *
-	 * @param[in] key sets the lower bound (exclusive)
-	 *
-	 * @return const_iterator
-	 */
-	const_iterator upper_bound(const key_type &key) const
-	{
-		const leaf_node_type *leaf = find_leaf_node(key);
-		if (leaf == nullptr)
-			return end();
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K>
+typename b_tree_base<Key, T, Compare, degree>::const_iterator
+b_tree_base<Key, T, Compare, degree>::find(const K &key) const
+{
+	leaf_type *leaf = find_leaf_node(key);
+	typename leaf_type::const_iterator leaf_it = leaf->find(key);
+	if (leaf->cend() == leaf_it)
+		return cend();
 
-		typename leaf_node_type::const_iterator leaf_it = leaf->upper_bound(key);
-		if (leaf->end() == leaf_it)
-			return end();
+	return const_iterator(leaf, leaf_it);
+}
 
-		return const_iterator(leaf, leaf_it);
-	}
+/**
+ * Returns an iterator pointing to the least element which is larger than or equal
+ * to the given key. Keys are sorted in binary order (see
+ * std::string::compare).
+ *
+ * @param[in] key sets the lower bound (inclusive)
+ *
+ * @return iterator
+ */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K>
+typename b_tree_base<Key, T, Compare, degree>::iterator
+b_tree_base<Key, T, Compare, degree>::lower_bound(const K &key)
+{
+	leaf_type *leaf = find_leaf_node(key);
+	typename leaf_type::iterator leaf_it = std::lower_bound(
+		leaf->begin(), leaf->end(), key, [this](const_reference e, const K &key) {
+			return compare(e.first, key);
+		});
+	if (leaf->end() == leaf_it)
+		return end();
 
-	size_t erase(const key_type &key)
-	{
-		leaf_node_type *leaf = find_leaf_node(key);
-		if (leaf == nullptr)
-			return size_t(0);
-		auto pop = get_pool_base();
-		return leaf->erase(pop, key);
-	}
+	return iterator(leaf, leaf_it);
+}
 
-	void garbage_collection();
+/**
+ * Returns a const iterator pointing to the least element which is larger than or
+ * equal to the given key. Keys are sorted in binary order (see
+ * std::string::compare).
+ *
+ * @param[in] key sets the lower bound (inclusive)
+ *
+ * @return const_iterator
+ */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K>
+typename b_tree_base<Key, T, Compare, degree>::const_iterator
+b_tree_base<Key, T, Compare, degree>::lower_bound(const K &key) const
+{
+	leaf_type *leaf = find_leaf_node(key);
+	typename leaf_type::const_iterator leaf_it =
+		std::lower_bound(leaf->cbegin(), leaf->cend(), key,
+				 [this](const_reference e, const K &key) {
+					 return compare(e.first, key);
+				 });
+	if (leaf->cend() == leaf_it)
+		return cend();
 
-	iterator begin()
-	{
-		return iterator(leftmost_leaf());
-	}
+	return const_iterator(leaf, leaf_it);
+}
 
-	iterator end()
-	{
-		leaf_node_type *leaf = rightmost_leaf();
-		return iterator(leaf,
-				leaf ? leaf->end() : typename leaf_node_type::iterator());
-	}
-
-	const_iterator begin() const
-	{
-		return const_iterator(leftmost_leaf());
-	}
-
-	const_iterator end() const
-	{
-		const leaf_node_type *leaf = rightmost_leaf();
-		return const_iterator(leaf,
-				      leaf ? leaf->end()
-					   : typename leaf_node_type::const_iterator());
-	}
-
-	const_iterator cbegin() const
-	{
-		return begin();
-	}
-
-	const_iterator cend() const
-	{
+/**
+ * Returns an iterator pointing to the least element which is larger than the
+ * given key. Keys are sorted in binary order (see
+ * std::string::compare).
+ *
+ * @param[in] key sets the lower bound (exclusive)
+ *
+ * @return iterator
+ */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K>
+typename b_tree_base<Key, T, Compare, degree>::iterator
+b_tree_base<Key, T, Compare, degree>::upper_bound(const K &key)
+{
+	leaf_type *leaf = find_leaf_node(key);
+	typename leaf_type::iterator leaf_it = std::upper_bound(
+		leaf->begin(), leaf->end(), key, [this](const K &key, const_reference e) {
+			return compare(key, e.first);
+		});
+	if (leaf->end() == leaf_it) {
+		if (leaf->get_next())
+			return iterator(leaf->get_next().get(),
+					leaf->get_next()->begin());
 		return end();
 	}
 
-	reverse_iterator rbegin()
-	{
-		return reverse_iterator(end());
-	}
+	return iterator(leaf, leaf_it);
+}
 
-	reverse_iterator rend()
-	{
-		return reverse_iterator(begin());
-	}
-}; // class b_tree_base
-
-template <typename TKey, typename TValue, size_t degree>
-void b_tree_base<TKey, TValue, degree>::garbage_collection()
+/**
+ * Returns a const iterator pointing to the least element which is larger than the
+ * given key. Keys are sorted in binary order (see
+ * std::string::compare).
+ *
+ * @param[in] key sets the lower bound (exclusive)
+ *
+ * @return const_iterator
+ */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K>
+typename b_tree_base<Key, T, Compare, degree>::const_iterator
+b_tree_base<Key, T, Compare, degree>::upper_bound(const K &key) const
 {
-	pool_base pop = get_pool_base();
-	++epoch;
-	// pop.persist( &epoch, sizeof(epoch) );
+	leaf_type *leaf = find_leaf_node(key);
+	typename leaf_type::const_iterator leaf_it =
+		std::upper_bound(leaf->cbegin(), leaf->cend(), key,
+				 [this](const K &key, const_reference e) {
+					 return compare(key, e.first);
+				 });
+	if (leaf->cend() == leaf_it) {
+		if (leaf->get_next())
+			return iterator(leaf->get_next().get(),
+					leaf->get_next()->cbegin());
+		return cend();
+	}
 
-	if (split_node != nullptr) {
-		if (split_node->leaf()) {
-			repair_leaf_split(pop);
-		} else {
-			repair_inner_split(pop);
+	return const_iterator(leaf, leaf_it);
+}
+
+/**
+ * Searches leaf with given key saving extended path including neighbors and inner node
+ * with pointer to leaf entry (inner_ptr).
+ */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K>
+typename b_tree_base<Key, T, Compare, degree>::leaf_pptr
+b_tree_base<Key, T, Compare, degree>::get_path_ext(
+	const K &key, std::vector<inner_pair> &path,
+	std::vector<std::pair<node_pptr, node_pptr>> &neighbors, inner_pair &inner_ptr)
+{
+	node_pptr temp = root;
+	while (!temp->leaf()) {
+		auto set = cast_inner(temp)->get_child_and_siblings(key, compare);
+		path.push_back(std::make_pair(cast_inner(temp).get(), std::get<3>(set)));
+		neighbors.push_back(std::make_pair(std::get<1>(set), std::get<2>(set)));
+		if (!compare(*std::get<3>(set), key) &&
+		    !compare(key, *std::get<3>(set))) {
+			assert(inner_ptr.first == nullptr); // it should not duplicate
+			inner_ptr = std::make_pair(cast_inner(temp), std::get<3>(set));
 		}
+		temp = std::get<0>(set);
 	}
+	return cast_leaf(temp);
 }
 
-template <typename TKey, typename TValue, size_t degree>
-typename b_tree_base<TKey, TValue, degree>::iterator
-b_tree_base<TKey, TValue, degree>::split_leaf_node(pool_base &pop,
-						   inner_node_type *parent_node,
-						   persistent_ptr<node_t> &src_node,
-						   const_reference entry,
-						   persistent_ptr<node_t> &left,
-						   persistent_ptr<node_t> &right)
+/**
+ * Searches leaf in the right subtree of inner node (node.first), first element of which
+ * must reside at given iterator (node.second).
+ */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::const_reference
+b_tree_base<Key, T, Compare, degree>::get_suitable_entry(inner_pair &node)
 {
-	const leaf_node_type *split_leaf = cast_leaf(src_node).get();
-	assert(split_leaf->full());
-	assignment(pop, split_node, src_node);
-
-	typename leaf_node_type::const_iterator middle =
-		split_leaf->begin() + split_leaf->size() / 2;
-
-	leaf_node_type *insert_node = nullptr;
-	leaf_node_type *lnode = nullptr;
-	if (entry.first < middle->first) {
-		lnode = insert_node =
-			allocate_leaf(pop, left, entry, split_leaf->begin(), middle,
-				      split_leaf->get_prev(), nullptr)
-				.get();
-		allocate_leaf(pop, right, middle, split_leaf->end(), cast_leaf(left),
-			      split_leaf->get_next())
-			.get();
-	} else {
-		lnode = allocate_leaf(pop, left, split_leaf->begin(), middle,
-				      split_leaf->get_prev(), nullptr)
-				.get();
-		insert_node = allocate_leaf(pop, right, entry, middle, split_leaf->end(),
-					    cast_leaf(left), split_leaf->get_next())
-				      .get();
-	}
-
-	lnode->set_next(cast_leaf(right));
-	pop.persist(lnode->get_next());
-
-	correct_leaf_node_links(pop, src_node, left, right);
-
-	if (parent_node) {
-		parent_node->update_splitted_child(pop, lnode->back().first, left, right,
-						   split_node);
-	} else {
-		create_new_root(pop, lnode->back().first, left, right);
-	}
-
-	deallocate(split_node);
-
-	typename leaf_node_type::iterator leaf_it = insert_node->find(entry.first);
-	assert(leaf_it != insert_node->end());
-	assert(leaf_it->first == entry.first);
-	assert(leaf_it->second == entry.second);
-	return iterator(insert_node, leaf_it);
+	node_pptr temp = node.first->get_right_child(node.second);
+	while (!temp->leaf())
+		temp = cast_inner(temp)->get_left_child(cast_inner(temp)->begin());
+	return cast_leaf(temp)->front();
 }
 
-template <typename TKey, typename TValue, size_t degree>
-void b_tree_base<TKey, TValue, degree>::correct_leaf_node_links(
-	pool_base &pop, persistent_ptr<node_t> &src_node, persistent_ptr<node_t> &left,
-	persistent_ptr<node_t> &right)
+/**
+ * Deletes leaf from the tree leaving parent_node and neighbors in consistent state.
+ */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+void b_tree_base<Key, T, Compare, degree>::delete_leaf_ext(leaf_pptr &leaf,
+							   inner_pair &parent,
+							   bool no_left_sibling)
 {
-	persistent_ptr<leaf_node_type> lnode = cast_leaf(left);
-	persistent_ptr<leaf_node_type> rnode = cast_leaf(right);
-	leaf_node_type *current_node = cast_leaf(src_node).get();
-
-	if (current_node->get_prev() != nullptr) {
-		current_node->get_prev()->set_next(lnode);
-		pop.persist(current_node->get_prev()->get_next());
+	/* if left sibling exists then leaf is right child */
+	parent.first->delete_with_child(parent.second, no_left_sibling);
+	/* correct leaf siblings pointers before deleting it */
+	if (leaf->get_prev()) {
+		leaf->get_prev()->set_next(leaf->get_next());
 	}
+	if (leaf->get_next()) {
+		leaf->get_next()->set_prev(leaf->get_prev());
+	}
+	deallocate(leaf);
+}
 
-	if (current_node->get_next() != nullptr) {
-		current_node->get_next()->set_prev(rnode);
-		pop.persist(current_node->get_next()->get_prev());
+/**
+ * Deletes inner node from the tree leaving parent_node and neighbors in consistent state.
+ * Also inherites remaining child.
+ */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+void b_tree_base<Key, T, Compare, degree>::delete_inner_ext(
+	inner_pptr &node, inner_pair &parent, std::pair<node_pptr, node_pptr> &neighbors,
+	bool has_left_sibling)
+{
+	if (neighbors.first) {
+		parent.first->inherit_child(parent.second, neighbors.first,
+					    !has_left_sibling);
+	} else if (neighbors.second) {
+		parent.first->inherit_child(parent.second, neighbors.second,
+					    !has_left_sibling);
+	}
+	deallocate(node);
+}
+
+/**
+ * Erases entry specified by key from the tree.
+ */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K>
+typename b_tree_base<Key, T, Compare, degree>::size_type
+b_tree_base<Key, T, Compare, degree>::erase(const K &key)
+{
+	using const_key = const key_type &;
+	/* search leaf saving path, neighbors */
+	std::vector<inner_pair> path;				// [root, leaf)
+	std::vector<std::pair<node_pptr, node_pptr>> neighbors; // (root, leaf]
+	inner_pair to_replace; // inner node with key reference
+	leaf_pptr leaf = get_path_ext(key, path, neighbors, to_replace);
+
+	auto pop = get_pool_base();
+	size_type result(1);
+	pmem::obj::transaction::run(pop, [&] {
+		/* remove entry */
+		size_type deleted = leaf->erase(pop, key, compare);
+		if (!deleted) {
+			result = size_type(0);
+			return;
+		}
+		/* still left elements in leaf -> replace pointer in inner node */
+		if (leaf->size() > 0) {
+			if (to_replace.first != nullptr) {
+				const_key new_key = get_suitable_entry(to_replace).first;
+				to_replace.first->replace(to_replace.second, new_key);
+			}
+			--_size;
+			return;
+		}
+		/* leaf is empty and it is root */
+		if (path.empty()) {
+			--_size;
+			return;
+		}
+		/* handle leaf node */
+		auto nbors = neighbors.back();
+		auto parent = path.back();
+		/* if left sibling exists then leaf is right child */
+		delete_leaf_ext(leaf, parent, nbors.first == nullptr);
+		/* handle inner nodes */
+		auto node = path.back().first;
+		if (path.size() > 1 && node->size() == 0) {
+			path.pop_back();
+			neighbors.pop_back();
+
+			delete_inner_ext(node, path.back(), nbors,
+					 neighbors.back().first != nullptr);
+		}
+		/* replace pointer in inner node */
+		if (to_replace.first) {
+			const_key new_key = get_suitable_entry(to_replace).first;
+			to_replace.first->replace(to_replace.second, new_key);
+		}
+		/* one of the main subtrees deleted, other will become root */
+		if (path.back().first->size() == 0) {
+			if (nbors.first) {
+				cast_inner(root) = nbors.first;
+			} else if (nbors.second) {
+				cast_inner(root) = nbors.second;
+			}
+		}
+		--_size;
+	});
+	/* all done, return */
+	return result;
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::iterator
+b_tree_base<Key, T, Compare, degree>::begin()
+{
+	return iterator(leftmost_leaf());
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::iterator
+b_tree_base<Key, T, Compare, degree>::end()
+{
+	leaf_type *leaf = rightmost_leaf();
+	return iterator(leaf, leaf->end());
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::const_iterator
+b_tree_base<Key, T, Compare, degree>::begin() const
+{
+	return const_iterator(leftmost_leaf());
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::const_iterator
+b_tree_base<Key, T, Compare, degree>::end() const
+{
+	const leaf_type *leaf = rightmost_leaf();
+	return const_iterator(leaf, leaf->end());
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::const_iterator
+b_tree_base<Key, T, Compare, degree>::cbegin() const
+{
+	return begin();
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::const_iterator
+b_tree_base<Key, T, Compare, degree>::cend() const
+{
+	return end();
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::reverse_iterator
+b_tree_base<Key, T, Compare, degree>::rbegin()
+{
+	return reverse_iterator(end());
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::reverse_iterator
+b_tree_base<Key, T, Compare, degree>::rend()
+{
+	return reverse_iterator(begin());
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::size_type
+b_tree_base<Key, T, Compare, degree>::size() const noexcept
+{
+	return _size;
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::reference
+	b_tree_base<Key, T, Compare, degree>::operator[](size_type pos)
+{
+	leaf_type *temp = leftmost_leaf();
+	while (temp != nullptr && pos >= temp->size()) {
+		pos -= temp->size();
+		temp = temp->get_next().get();
+	}
+	return temp->operator[](pos);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::const_reference
+	b_tree_base<Key, T, Compare, degree>::operator[](size_type pos) const
+{
+	leaf_type *temp = leftmost_leaf();
+	while (temp != nullptr && pos >= temp->size()) {
+		pos -= temp->size();
+		temp = temp->get_next().get();
+	}
+	return temp->operator[](pos);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+const typename b_tree_base<Key, T, Compare, degree>::key_type &
+b_tree_base<Key, T, Compare, degree>::get_last_key(const node_pptr &node)
+{
+	if (node->leaf()) {
+		return cast_leaf(node.get())->back().first;
+	} else {
+		return cast_inner(node.get())->back();
 	}
 }
 
-template <typename TKey, typename TValue, size_t degree>
-void b_tree_base<TKey, TValue, degree>::create_new_root(pool_base &pop,
-							const key_type &key,
-							node_persistent_ptr &l_child,
-							node_persistent_ptr &r_child)
+template <typename Key, typename T, typename Compare, std::size_t degree>
+void b_tree_base<Key, T, Compare, degree>::create_new_root(const key_type &key,
+							   node_pptr &l_child,
+							   node_pptr &r_child)
 {
 	assert(l_child != nullptr);
 	assert(r_child != nullptr);
-	assert(split_node == root);
-
-	allocate_inner(pop, root, root->level() + 1, key, l_child, r_child);
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	cast_inner(root) = allocate_inner(root->level() + 1, key, l_child, r_child);
 }
 
-template <typename TKey, typename TValue, size_t degree>
-std::pair<typename b_tree_base<TKey, TValue, degree>::iterator, bool>
-b_tree_base<TKey, TValue, degree>::insert_descend(pool_base &pop, const_reference entry)
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::inner_type::const_iterator
+b_tree_base<Key, T, Compare, degree>::split_half(pool_base &pop, inner_pptr &node,
+						 inner_pptr &other,
+						 key_pptr &partition_key)
 {
-	path_type path;
-	const key_type &key = entry.first;
-
-	node_persistent_ptr node = find_leaf_to_insert(key, path);
-	leaf_node_type *leaf = cast_leaf(node).get();
-	inner_node_type *parent_node = nullptr;
-
-	if (leaf->full()) {
-		typename leaf_node_type::iterator leaf_it = leaf->find(key);
-		if (leaf_it != leaf->end()) { // Entry with the same key found
-			return std::pair<iterator, bool>(iterator(leaf, leaf_it), false);
-		}
-
-		/**
-		 * If root is leaf.
-		 */
-		if (path.empty()) {
-			iterator it = split_leaf_node(pop, nullptr, node, entry,
-						      left_child, right_child);
-			return std::pair<iterator, bool>(it, true);
-		}
-
-		// find the first full node
-		auto i = find_full_node(path);
-
-		/**
-		 * If root is full. Split root
-		 */
-		if ((*i)->full()) {
-			parent_node = nullptr;
-			split_inner_node(pop, *i, parent_node, left_child, right_child);
-			parent_node = cast_inner(cast_inner(root)->get_child(key).get());
-		} else {
-			parent_node = (*i).get();
-		}
-		++i;
-
-		for (; i != path.end(); ++i) {
-			split_inner_node(pop, *i, parent_node, left_child, right_child);
-
-			parent_node = cast_inner(parent_node->get_child(key).get());
-		}
-
-		iterator it = split_leaf_node(pop, parent_node, node, entry, left_child,
-					      right_child);
-		return std::pair<iterator, bool>(it, true);
-	}
-
-	std::pair<typename leaf_node_type::iterator, bool> ret = leaf->insert(pop, entry);
-	return std::pair<iterator, bool>(iterator(leaf, ret.first), ret.second);
-	;
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	assert(other == nullptr);
+	other = allocate_inner(node->level());
+	return other->move(pop, *node, partition_key);
 }
 
-} // namespace internal
+/* when root is the only inner node */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+void b_tree_base<Key, T, Compare, degree>::split_inner_node(pool_base &pop,
+							    inner_pptr &src_node)
+{
+	assert(root == src_node);
+	pmem::obj::transaction::run(pop, [&] {
+		node_pptr other(nullptr);
+		key_pptr partition_key(nullptr);
+		split_half(pop, src_node, cast_inner(other), partition_key);
+		assert(partition_key != nullptr);
+		create_new_root(*partition_key, cast_node(src_node), other);
+	});
+}
 
-// TODO: add key comparator as a template argument; std::less should be default
-template <typename Key, typename Value, size_t degree>
-class b_tree : public internal::b_tree_base<Key, Value, degree> {
-	// Base type definitions
-	typedef b_tree<Key, Value, degree> self_type;
-	typedef internal::b_tree_base<Key, Value, degree> base_type;
+/* when root is not the only inner node (2 or more inner node layers) */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+void b_tree_base<Key, T, Compare, degree>::split_inner_node(pool_base &pop,
+							    inner_pptr &src_node,
+							    inner_type *parent_node)
+{
+	pmem::obj::transaction::run(pop, [&] {
+		node_pptr other(nullptr);
+		key_pptr partition_key(nullptr);
+		split_half(pop, src_node, cast_inner(other), partition_key);
+		assert(partition_key != nullptr);
+		parent_node->update_splitted_child(pop, *partition_key,
+						   cast_node(src_node), other, compare);
+	});
+}
+
+/* split leaf in case when root is leaf */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K, typename M>
+std::pair<typename b_tree_base<Key, T, Compare, degree>::iterator, bool>
+b_tree_base<Key, T, Compare, degree>::split_leaf_node(pool_base &pop,
+						      leaf_pptr &split_leaf, K &&key,
+						      M &&obj)
+{
+	assert(split_leaf->full());
+
+	leaf_pptr node;
+	std::pair<iterator, bool> result(nullptr, false);
+	auto middle = split_leaf->begin() + split_leaf->size() / 2;
+	bool less = compare(std::forward<K>(key), middle->first);
+	// move second half into node and insert new element where needed
+	pmem::obj::transaction::run(pop, [&] {
+		node = allocate_leaf();
+		node->move(pop, split_leaf, compare);
+		/* insert entriy(key, obj) into needed half */
+		if (less) {
+			result = internal_insert(split_leaf, std::forward<K>(key),
+						 std::forward<M>(obj));
+		} else {
+			result = internal_insert(node, std::forward<K>(key),
+						 std::forward<M>(obj));
+		}
+		create_new_root(node->front().first, cast_node(split_leaf),
+				cast_node(node));
+		// re-set node's pointers
+		node->set_next(split_leaf->get_next());
+		node->set_prev(split_leaf);
+		if (split_leaf->get_next()) {
+			split_leaf->get_next()->set_prev(node);
+		}
+		split_leaf->set_next(node);
+	});
+
+	assert(!compare(result.first->first, key) && !compare(key, result.first->first));
+	return result;
+}
+
+/* split leaf in case when root is not leaf */
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K, typename M>
+std::pair<typename b_tree_base<Key, T, Compare, degree>::iterator, bool>
+b_tree_base<Key, T, Compare, degree>::split_leaf_node(pool_base &pop,
+						      inner_type *parent_node,
+						      leaf_pptr &split_leaf, K &&key,
+						      M &&obj)
+{
+	assert(split_leaf->full());
+
+	leaf_pptr node;
+	std::pair<iterator, bool> result(nullptr, false);
+	auto middle = split_leaf->begin() + split_leaf->size() / 2;
+	bool less = compare(std::forward<K>(key), middle->first);
+	// move second half into node and insert new element where needed
+	pmem::obj::transaction::run(pop, [&] {
+		node = allocate_leaf();
+		node->move(pop, split_leaf, compare);
+		/* insert entriy(key, obj) into needed half */
+		if (less) {
+			result = internal_insert(split_leaf, std::forward<K>(key),
+						 std::forward<M>(obj));
+		} else {
+			result = internal_insert(node, std::forward<K>(key),
+						 std::forward<M>(obj));
+		}
+		// take care of parent node
+		parent_node->update_splitted_child(pop, node->front().first,
+						   cast_node(split_leaf), cast_node(node),
+						   compare);
+		// re-set node's pointers
+		node->set_next(split_leaf->get_next());
+		node->set_prev(split_leaf);
+		if (split_leaf->get_next()) {
+			split_leaf->get_next()->set_prev(node);
+		}
+		split_leaf->set_next(node);
+	});
+
+	assert(!compare(result.first->first, key) && !compare(key, result.first->first));
+	return result;
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::leaf_type *
+b_tree_base<Key, T, Compare, degree>::find_leaf_node(const key_type &key) const
+{
+	assert(root != nullptr);
+	node_pptr node = root;
+	while (!node->leaf()) {
+		node = cast_inner(node)->get_child(key);
+	}
+	return cast_leaf(node).get();
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K>
+typename b_tree_base<Key, T, Compare, degree>::leaf_type *
+b_tree_base<Key, T, Compare, degree>::find_leaf_node(const K &key) const
+{
+	assert(root != nullptr);
+	node_pptr node = root;
+	while (!node->leaf()) {
+		node = cast_inner(node)->get_child(key, compare);
+	}
+	return cast_leaf(node).get();
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K>
+typename b_tree_base<Key, T, Compare, degree>::leaf_pptr
+b_tree_base<Key, T, Compare, degree>::find_leaf_to_insert(const K &key,
+							  path_type &path) const
+{
+	assert(root != nullptr);
+	node_pptr node = root;
+	while (!node->leaf()) {
+		path.push_back(cast_inner(node));
+		node = cast_inner(node)->get_child(key, compare);
+	}
+	return cast_leaf(node);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::path_type::const_iterator
+b_tree_base<Key, T, Compare, degree>::find_full_node(const path_type &path)
+{
+	auto i = path.end() - 1;
+	for (; i > path.begin(); --i) {
+		if (!(*i)->full())
+			return i;
+	}
+	return i;
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename K, typename M>
+std::pair<typename b_tree_base<Key, T, Compare, degree>::iterator, bool>
+b_tree_base<Key, T, Compare, degree>::internal_insert(leaf_pptr leaf, K &&key, M &&obj)
+{
+	auto idxs_pos = leaf->lower_bound(std::forward<K>(key), compare);
+	if (idxs_pos != leaf->end() && !compare(idxs_pos->first, std::forward<K>(key)) &&
+	    !compare(std::forward<K>(key), idxs_pos->first)) {
+		return std::pair<iterator, bool>(iterator(leaf.get(), idxs_pos), false);
+	}
+	auto pop = get_pool_base();
+	typename leaf_type::iterator res;
+	pmem::obj::transaction::run(pop, [&] {
+		res = leaf->insert(idxs_pos, std::forward<K>(key), std::forward<M>(obj));
+		++_size;
+	});
+	return std::pair<iterator, bool>(iterator(leaf.get(), res), true);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::key_compare &
+b_tree_base<Key, T, Compare, degree>::key_comp()
+{
+	return compare;
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+const typename b_tree_base<Key, T, Compare, degree>::key_compare &
+b_tree_base<Key, T, Compare, degree>::key_comp() const
+{
+	return compare;
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::leaf_type *
+b_tree_base<Key, T, Compare, degree>::leftmost_leaf() const
+{
+	assert(root != nullptr);
+	node_pptr node = root;
+	while (!node->leaf()) {
+		inner_type *inner_node = cast_inner(node).get();
+		node = inner_node->get_left_child(inner_node->begin());
+	}
+	return cast_leaf(node).get();
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::leaf_type *
+b_tree_base<Key, T, Compare, degree>::rightmost_leaf() const
+{
+	assert(root != nullptr);
+	node_pptr node = root;
+	while (!node->leaf()) {
+		inner_type *inner_node = cast_inner(node).get();
+		node = inner_node->get_left_child(inner_node->end());
+	}
+	return cast_leaf(node).get();
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::inner_pptr &
+b_tree_base<Key, T, Compare, degree>::cast_inner(node_pptr &node)
+{
+	return reinterpret_cast<inner_pptr &>(node);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::inner_type *
+b_tree_base<Key, T, Compare, degree>::cast_inner(node_t *node)
+{
+	return static_cast<inner_type *>(node);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::leaf_pptr &
+b_tree_base<Key, T, Compare, degree>::cast_leaf(node_pptr &node)
+{
+	return reinterpret_cast<leaf_pptr &>(node);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::leaf_type *
+b_tree_base<Key, T, Compare, degree>::cast_leaf(node_t *node)
+{
+	return static_cast<leaf_type *>(node);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::node_pptr &
+b_tree_base<Key, T, Compare, degree>::cast_node(leaf_pptr &node)
+{
+	return reinterpret_cast<node_pptr &>(node);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+typename b_tree_base<Key, T, Compare, degree>::node_pptr &
+b_tree_base<Key, T, Compare, degree>::cast_node(inner_pptr &node)
+{
+	return reinterpret_cast<node_pptr &>(node);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename... Args>
+inline typename b_tree_base<Key, T, Compare, degree>::inner_pptr
+b_tree_base<Key, T, Compare, degree>::allocate_inner(Args &&... args)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	return make_persistent<inner_type>(std::forward<Args>(args)...);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+template <typename... Args>
+inline typename b_tree_base<Key, T, Compare, degree>::leaf_pptr
+b_tree_base<Key, T, Compare, degree>::allocate_leaf(Args &&... args)
+{
+	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
+	return make_persistent<leaf_type>(std::forward<Args>(args)...);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+inline void b_tree_base<Key, T, Compare, degree>::deallocate(node_pptr &node)
+{
+	assert(node != nullptr);
+	if (node->leaf()) {
+		deallocate(cast_leaf(node));
+	} else {
+		deallocate(cast_inner(node));
+	}
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+inline void b_tree_base<Key, T, Compare, degree>::deallocate(leaf_pptr &node)
+{
+	assert(node != nullptr);
+	pool_base pop = get_pool_base();
+	pmem::obj::transaction::run(pop, [&] {
+		delete_persistent<leaf_type>(node);
+		node = nullptr;
+	});
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+inline void b_tree_base<Key, T, Compare, degree>::deallocate(inner_pptr &node)
+{
+	assert(node != nullptr);
+	pool_base pop = get_pool_base();
+	pmem::obj::transaction::run(pop, [&] {
+		delete_persistent<inner_type>(node);
+		node = nullptr;
+	});
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+PMEMobjpool *b_tree_base<Key, T, Compare, degree>::get_objpool()
+{
+	PMEMoid oid = pmemobj_oid(this);
+	return pmemobj_pool_by_oid(oid);
+}
+
+template <typename Key, typename T, typename Compare, std::size_t degree>
+pool_base b_tree_base<Key, T, Compare, degree>::get_pool_base()
+{
+	return pool_base(get_objpool());
+}
+
+} /* namespace internal */
+
+template <typename Key, typename Value, typename Compare = std::less<Key>,
+	  std::size_t degree = 64>
+class b_tree : public internal::b_tree_base<Key, Value, Compare, degree> {
+private:
+	using base_type = internal::b_tree_base<Key, Value, Compare, degree>;
 
 public:
 	using base_type::begin;
 	using base_type::end;
 	using base_type::erase;
 	using base_type::find;
-	using base_type::insert;
+	using base_type::try_emplace;
 
-	// Type definitions
-	typedef typename base_type::key_type key_type;
-	typedef typename base_type::mapped_type mapped_type;
-	typedef typename base_type::value_type value_type;
-	typedef typename base_type::iterator iterator;
-	typedef typename base_type::const_iterator const_iterator;
-	typedef typename base_type::reverse_iterator reverse_iterator;
+	/* type definitions */
+	using key_type = typename base_type::key_type;
+	using mapped_type = typename base_type::mapped_type;
+	using value_type = typename base_type::value_type;
+	using iterator = typename base_type::iterator;
+	using const_iterator = typename base_type::const_iterator;
+	using reverse_iterator = typename base_type::reverse_iterator;
 
 	explicit b_tree() : base_type()
 	{
 	}
+
 	~b_tree()
 	{
 	}
@@ -1790,5 +2226,6 @@ public:
 	b_tree &operator=(const b_tree &) = delete;
 };
 
+} // namespace kv
 } // namespace persistent
 #endif // PERSISTENT_B_TREE
