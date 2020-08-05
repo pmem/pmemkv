@@ -15,7 +15,8 @@ function(set_version VERSION)
 	endif()
 
 	execute_process(COMMAND git describe
-			OUTPUT_VARIABLE GIT_VERSION)
+			OUTPUT_VARIABLE GIT_VERSION
+			ERROR_QUIET)
 	if(GIT_VERSION)
 		# 1.5-rc1-19-gb8f78a329 -> 1.5-rc1.git19.gb8f78a329
 		string(REGEX MATCHALL
