@@ -6,6 +6,11 @@ include(ctest_helpers.cmake)
 ## Setup
 add_custom_target(tests)
 
+find_libunwind()
+find_pmreorder()
+find_pmempool()
+find_gdb()
+
 # Checks for when DEVELOPER_MODE is ON
 add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.c
@@ -54,10 +59,6 @@ add_library(test_backtrace STATIC common/test_backtrace.c)
 if(LIBUNWIND_FOUND)
 	target_compile_definitions(test_backtrace PUBLIC USE_LIBUNWIND=1)
 endif()
-
-find_pmreorder()
-find_pmempool()
-find_gdb()
 
 add_executable(check_is_pmem common/check_is_pmem.cpp)
 target_link_libraries(check_is_pmem ${LIBPMEM_LIBRARIES})
