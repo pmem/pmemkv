@@ -68,6 +68,7 @@ function(find_pmemcheck)
 
 		string(REGEX MATCH ".*pmemcheck-([0-9.]+),.*" PMEMCHECK_OUT "${PMEMCHECK_OUT}")
 		set(PMEMCHECK_VERSION ${CMAKE_MATCH_1} CACHE INTERNAL "")
+		message(STATUS "Valgrind pmemcheck found, version: ${PMEMCHECK_VERSION}")
 	else()
 		message(WARNING "Valgrind pmemcheck NOT found. Pmemcheck tests will not be performed.")
 	endif()
