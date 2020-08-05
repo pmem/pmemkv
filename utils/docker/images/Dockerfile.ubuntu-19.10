@@ -36,8 +36,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	devscripts \
 	doxygen \
 	fakeroot \
+	gdb \
 	git \
 	graphviz \
+	gzip \
 	libc6-dbg \
 	libdaxctl-dev \
 	libndctl-dev \
@@ -52,7 +54,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	pandoc \
 	pkg-config \
 	rapidjson-dev \
-	ruby \
 	sudo \
 	wget \
 	whois \

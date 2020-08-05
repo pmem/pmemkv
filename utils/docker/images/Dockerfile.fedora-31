@@ -35,6 +35,7 @@ RUN dnf update -y \
 	gdb \
 	git \
 	graphviz \
+	gzip \
 	hub \
 	libtool \
 	libunwind-devel \
@@ -50,7 +51,6 @@ RUN dnf update -y \
 	rpm-build \
 	sudo \
 	tbb-devel \
-	unzip \
 	wget \
 	which \
 && dnf clean all
