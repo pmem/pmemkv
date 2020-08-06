@@ -6,6 +6,7 @@ include(ctest_helpers.cmake)
 ## Setup
 add_custom_target(tests)
 
+# Find valgrind
 if(PKG_CONFIG_FOUND)
 	pkg_check_modules(VALGRIND QUIET valgrind)
 else()
@@ -14,12 +15,11 @@ endif()
 
 if(NOT VALGRIND_FOUND AND TESTS_USE_VALGRIND)
 	message(FATAL_ERROR "Valgrind not found, but flag TESTS_USE_VALGRIND was set.")
+elseif(NOT VALGRIND_FOUND)
+	message(WARNING "Valgrind not found. Valgrind tests will not be performed.")
 endif()
 
-if(VALGRIND_FOUND)
-	find_pmemcheck()
-endif()
-
+# Find libpmem & libpmemobj
 if(PKG_CONFIG_FOUND)
 	pkg_check_modules(LIBPMEMOBJ REQUIRED libpmemobj>=${LIBPMEMOBJ_REQUIRED_VERSION})
 	pkg_check_modules(LIBPMEM REQUIRED libpmem>=${LIBPMEM_REQUIRED_VERSION})
@@ -28,6 +28,7 @@ else()
 	find_package(LIBPMEM REQUIRED ${LIBPMEM_REQUIRED_VERSION})
 endif()
 
+find_pmemcheck()
 find_libunwind()
 find_pmreorder()
 find_pmempool()
@@ -88,7 +89,6 @@ target_link_libraries(check_is_pmem ${LIBPMEM_LIBRARIES})
 if(COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
 endif()
-
 
 ## Common tests
 build_test(wrong_engine_name_test wrong_engine_name_test.cc)
