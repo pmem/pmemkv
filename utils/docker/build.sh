@@ -120,6 +120,7 @@ docker run --privileged=true --name=$containerName -i $TTY \
 	${docker_opts} \
 	--env http_proxy=$http_proxy \
 	--env https_proxy=$https_proxy \
+	--env TERM=xterm-256color \
 	--env WORKDIR=$WORKDIR \
 	--env SCRIPTSDIR=$SCRIPTSDIR \
 	--env COVERAGE=$COVERAGE \
