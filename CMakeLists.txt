@@ -385,28 +385,6 @@ if(BUILD_EXAMPLES)
 endif()
 
 if(BUILD_TESTS)
-	if(PKG_CONFIG_FOUND)
-		pkg_check_modules(VALGRIND QUIET valgrind)
-	else()
-		find_package(VALGRIND QUIET)
-	endif()
-
-	if(NOT VALGRIND_FOUND AND TESTS_USE_VALGRIND)
-		message(FATAL_ERROR "Valgrind not found, but flag TESTS_USE_VALGRIND was set.")
-	endif()
-
-	if(VALGRIND_FOUND)
-		find_pmemcheck()
-	endif()
-
-	if(PKG_CONFIG_FOUND)
-		pkg_check_modules(LIBPMEMOBJ REQUIRED libpmemobj>=${LIBPMEMOBJ_REQUIRED_VERSION})
-		pkg_check_modules(LIBPMEM REQUIRED libpmem>=${LIBPMEM_REQUIRED_VERSION})
-	else()
-		find_package(LIBPMEMOBJ REQUIRED ${LIBPMEMOBJ_REQUIRED_VERSION})
-		find_package(LIBPMEM REQUIRED ${LIBPMEM_REQUIRED_VERSION})
-	endif()
-
 	enable_testing()
 	add_subdirectory(tests)
 endif()
