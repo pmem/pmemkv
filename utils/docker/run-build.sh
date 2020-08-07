@@ -105,7 +105,7 @@ function tests_gcc_debug_cpp14_valgrind_other() {
 		-DCXX_STANDARD=14
 
 	make -j$(nproc)
-	ctest -E "_none|_memcheck|_drd" --timeout 590 --output-on-failure
+	ctest -R "_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
 		upload_codecov gcc_debug_cpp14_valgrind_other
