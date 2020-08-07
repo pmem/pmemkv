@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2018-2019, Intel Corporation
+# Copyright 2018-2020, Intel Corporation
 
 #
 # install-libndctl.sh - installs libndctl
@@ -13,7 +13,7 @@ OS=$1
 echo "==== clone ndctl repo ===="
 git clone https://github.com/pmem/ndctl.git
 cd ndctl
-git checkout tags/v64.1
+git checkout v69
 
 if [ "$OS" = "fedora" ]; then
 	echo "==== setup rpmbuild tree ===="
