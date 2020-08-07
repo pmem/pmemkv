@@ -23,7 +23,7 @@ git checkout $MEMKIND_VERSION
 # set OS-specific configure options
 OS_SPECIFIC=""
 case $(echo $OS | cut -d'-' -f1) in
-	centos|opensuse)
+	centos|opensuse|archlinux)
 		OS_SPECIFIC="--libdir=/usr/lib64"
 		;;
 esac
