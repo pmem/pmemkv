@@ -12,6 +12,15 @@ env:
     - GITHUB_REPO=pmem/pmemkv
     - DOCKERHUB_REPO=pmem/pmemkv
   matrix:
+    - TYPE=debug OS=archlinux-base OS_VER=latest
+    - TYPE=debug OS=centos OS_VER=8
+    - TYPE=debug OS=debian OS_VER=testing
+    - TYPE=debug OS=debian OS_VER=unstable
+    - TYPE=debug OS=fedora OS_VER=rawhide
+    - TYPE=debug OS=opensuse-leap OS_VER=latest
+    - TYPE=debug OS=opensuse-tumbleweed OS_VER=latest
+    - TYPE=debug OS=ubuntu OS_VER=rolling
+
     - TYPE=debug OS=fedora OS_VER=31
     - TYPE=debug OS=ubuntu OS_VER=19.10 COVERAGE=1
     - TYPE=release OS=fedora OS_VER=31
