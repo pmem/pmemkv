@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2016-2020, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of archlinux-based
@@ -35,6 +35,7 @@ RUN pacman -S --noconfirm \
 	gdb \
 	git \
 	graphviz \
+	gzip \
 	intel-tbb \
 	libunwind \
 	llvm \
@@ -44,7 +45,6 @@ RUN pacman -S --noconfirm \
 	perl-text-diff \
 	pkg-config \
 	rapidjson \
-	ruby \
 	sfml \
 	sudo \
 	wget \

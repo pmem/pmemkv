@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2016-2020, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of opensuse-based
@@ -41,7 +41,7 @@ RUN zypper install -y \
 	gdb \
 	git \
 	graphviz \
-	hub \
+	gzip \
 	keyutils-devel \
 	libtool \
 	make \
@@ -51,6 +51,7 @@ RUN zypper install -y \
 	libndctl-devel \
 	libnuma-devel \
 	libudev-devel \
+	libunwind-devel \
 	libuuid-devel \
 	pandoc \
 	perl-Text-Diff \
