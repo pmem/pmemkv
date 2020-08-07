@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2016-2020, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of debian-based
@@ -28,7 +28,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	automake \
 	build-essential \
 	clang \
-	clang-format \
+	clang-format-9 \
 	cmake \
 	curl \
 	debhelper \
@@ -36,7 +36,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	doxygen \
 	fakeroot \
 	git \
+	gdb \
 	graphviz \
+	gzip \
 	libc6-dbg \
 	libdaxctl-dev \
 	libndctl-dev \
@@ -51,7 +53,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	pandoc \
 	pkg-config \
 	rapidjson-dev \
-	ruby \
 	sudo \
 	wget \
 	whois \
