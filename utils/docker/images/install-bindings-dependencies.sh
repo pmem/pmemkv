@@ -10,17 +10,17 @@
 
 set -e
 
-# master: Merge pull request #624 from igchor/catch_std_exception, 17.03.2020
-PMEMKV_VERSION="a2a70b994d57dd3fa9edbf0c7c9bbebb01dc2f5f"
+# master: Merge pull request #737 from lukaszstolarczuk/fix-CI-p..., 07.08.2020
+PMEMKV_VERSION="88cd43e7e3e6b62f67e73a48650e27e0fb90d7ea"
 
-# master: Merge pull request #44 from lukaszstolarczuk/update-tra..., 21.11.2019
+# master: Merge pull request #44 from lukaszstolarczuk/update-tr..., 21.11.2019
 RUBY_VERSION="3741e3df698245fc8a15822a1aa85b5c211fd332"
 
-# master: common: pmemkv-java 1.0 release, 30.06.2020
-JAVA_VERSION="bada69f43447d7a664171458e0ca6d5d535feeb3"
+# master: Merge pull request #85 from karczex/pictures_example, 17.07.2020
+JAVA_VERSION="bd03a2eef6f3d1c0f47b045ebaa8b0e337b17592"
 
-# master: Merge pull request #49 from how759/buffer-arguments, 02.03.2020
-NODEJS_VERSION="12ecc0a9c3205425bf0aa1767eada53834535045"
+# master: Merge pull request #55 from lukaszstolarczuk/fix-comment, 03.04.2020
+NODEJS_VERSION="76600e002b9d9105d3f46b7cc2bf991931286cec"
 
 PREFIX=/usr
 rm -rf /opt/bindings
