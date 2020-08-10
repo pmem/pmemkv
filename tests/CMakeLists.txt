@@ -1116,14 +1116,12 @@ if(ENGINE_STREE)
 				DB_SIZE 4G PARAMS 400000)
 	endif()
 
-	if(PMREORDER_SUPPORTED AND GDB_FOUND)
+	if(PMREORDER_SUPPORTED)
 		add_engine_test(ENGINE stree
 				BINARY pmreorder_insert
 				TRACERS none
 				SCRIPT pmemobj_based/pmreorder/insert.cmake)
-	endif()
 
-	if(PMREORDER_SUPPORTED)
 		add_engine_test(ENGINE stree
 				BINARY pmreorder_erase
 				TRACERS none
