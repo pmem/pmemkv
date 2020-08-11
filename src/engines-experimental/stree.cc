@@ -20,7 +20,7 @@ namespace kv
 {
 
 stree::stree(std::unique_ptr<internal::config> cfg)
-    : pmemobj_engine_base(cfg), config(std::move(cfg))
+    : pmemobj_engine_base(cfg, "pmemkv_stree"), config(std::move(cfg))
 {
 	Recover();
 	LOG("Started ok");

@@ -16,7 +16,8 @@ namespace pmem
 namespace kv
 {
 
-tree3::tree3(std::unique_ptr<internal::config> cfg) : pmemobj_engine_base(cfg)
+tree3::tree3(std::unique_ptr<internal::config> cfg)
+    : pmemobj_engine_base(cfg, "pmemkv_tree3")
 {
 	Recover();
 	LOG("Started ok");

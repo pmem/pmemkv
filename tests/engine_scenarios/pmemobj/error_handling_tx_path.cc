@@ -13,13 +13,18 @@ static void test(int argc, char *argv[])
 	auto pmemobj_pool_path = std::string(argv[3]);
 	pmem::obj::pool_base pmemobj_pool;
 
+	auto layout = std::string("pmemkv");
+	auto engine = std::string(argv[1]);
+	if (engine != "cmap")
+		layout = "pmemkv_" + engine;
+
 	try {
-		pmemobj_pool = pmem::obj::pool_base::open(pmemobj_pool_path, "pmemkv");
+		pmemobj_pool = pmem::obj::pool_base::open(pmemobj_pool_path, layout);
 	} catch (std::exception &e) {
 		UT_FATALexc(e);
 	}
 
-	auto kv = INITIALIZE_KV(argv[1], CONFIG_FROM_JSON(argv[2]));
+	auto kv = INITIALIZE_KV(engine, CONFIG_FROM_JSON(argv[2]));
 
 	TransactionTest(pmemobj_pool, kv);
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2020, Intel Corporation */
 
 #ifndef LIBPMEMKV_PMEMOBJ_ENGINE_H
 #define LIBPMEMKV_PMEMOBJ_ENGINE_H
@@ -28,7 +28,8 @@ namespace kv
 template <typename EngineData>
 class pmemobj_engine_base : public engine_base {
 public:
-	pmemobj_engine_base(std::unique_ptr<internal::config> &cfg)
+	pmemobj_engine_base(std::unique_ptr<internal::config> &cfg,
+			    const std::string &layout)
 	{
 		const char *path = nullptr;
 		std::size_t size;
@@ -57,10 +58,10 @@ public:
 					throw internal::invalid_argument(
 						"Config does not contain item with key: \"size\"");
 
-				pop = pmem::obj::pool<Root>::create(path, LAYOUT, size,
+				pop = pmem::obj::pool<Root>::create(path, layout, size,
 								    S_IRWXU);
 			} else {
-				pop = pmem::obj::pool<Root>::open(path, LAYOUT);
+				pop = pmem::obj::pool<Root>::open(path, layout);
 			}
 
 			root_oid = pop.root()->ptr.raw_ptr();

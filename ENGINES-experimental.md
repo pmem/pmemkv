@@ -12,7 +12,7 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_TREE3` o
 
 ### Configuration
 
-Configuration must specify a `path` to a PMDK persistent pool, which can be a file (on a DAX filesystem),
+Configuration must specify a `path` to a PMDK persistent pool (with layout "pmemkv_tree3"), which can be a file (on a DAX filesystem),
 a DAX device, or a PMDK poolset file.
 
 * **path** -- Path to the database file
@@ -53,7 +53,7 @@ Remove method is currently implemented to take a global lock - it blocks all oth
 
 ### Configuration
 
-* **path** -- Path to the database file
+* **path** -- Path to the database file (layout "pmemkv_csmap")
 	+ type: string
 * **force_create** -- If 0, pmemkv opens the file specified by 'path', otherwise it creates the file
 	+ type: uint64_t
@@ -68,7 +68,7 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_STREE` o
 
 ### Configuration
 
-* **path** -- Path to the database file
+* **path** -- Path to the database file (layout "pmemkv_stree")
 	+ type: string
 * **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it
 	+ type: uint64_t
