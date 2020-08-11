@@ -70,7 +70,7 @@ void verify_init_elements(const std::set<uint64_t> &init, pmem::kv::db &kv)
 		return 0;
 	});
 
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(keys.size() >= init.size());
 
 	for (const auto &v : init) {
@@ -96,7 +96,7 @@ static void ConcurrentIterationAndPutTest(const size_t threads_number,
 
 		std::string value =
 			std::string(value_prefix_size, '0') + std::to_string(k);
-		UT_ASSERTeq(kv.put(uint64_to_strv(k), value), status::OK);
+		ASSERT_STATUS(kv.put(uint64_to_strv(k), value), status::OK);
 	}
 
 	parallel_xexec(
@@ -110,8 +110,8 @@ static void ConcurrentIterationAndPutTest(const size_t threads_number,
 					std::string value =
 						std::string(value_prefix_size, '0') +
 						std::to_string(k);
-					UT_ASSERTeq(kv.put(uint64_to_strv(k), value),
-						    status::OK);
+					ASSERT_STATUS(kv.put(uint64_to_strv(k), value),
+						      status::OK);
 				}
 			} else if (thread_id < threads_number / 2) {
 				for (uint64_t i = 0; i < thread_items; i++) {
@@ -120,7 +120,7 @@ static void ConcurrentIterationAndPutTest(const size_t threads_number,
 					std::string value =
 						std::string(value_prefix_size, '1') +
 						std::to_string(existing_e);
-					UT_ASSERTeq(
+					ASSERT_STATUS(
 						kv.put(uint64_to_strv(existing_e), value),
 						status::OK);
 				}
@@ -150,7 +150,7 @@ static void ConcurrentIterationAndRemoveTest(const size_t threads_number,
 
 		std::string value =
 			std::string(value_prefix_size, '0') + std::to_string(k);
-		UT_ASSERTeq(kv.put(uint64_to_strv(k), value), status::OK);
+		ASSERT_STATUS(kv.put(uint64_to_strv(k), value), status::OK);
 	}
 
 	for (uint64_t i = 0; i < init_size; i++) {
@@ -159,7 +159,7 @@ static void ConcurrentIterationAndRemoveTest(const size_t threads_number,
 
 		std::string value =
 			std::string(value_prefix_size, '0') + std::to_string(k);
-		UT_ASSERTeq(kv.put(uint64_to_strv(k), value), status::OK);
+		ASSERT_STATUS(kv.put(uint64_to_strv(k), value), status::OK);
 	}
 
 	parallel_xexec(threads_number,

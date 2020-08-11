@@ -8,26 +8,31 @@ using namespace pmem::kv;
 static void insert(pmem::kv::db &kv)
 {
 
-	UT_ASSERT(kv.put("abc", "A1") == status::OK);
-	UT_ASSERT(kv.put("def", "B2") == status::OK);
-	UT_ASSERT(kv.put("hij", "C3") == status::OK);
+	ASSERT_STATUS(kv.put("abc", "A1"), status::OK);
+	ASSERT_STATUS(kv.put("def", "B2"), status::OK);
+	ASSERT_STATUS(kv.put("hij", "C3"), status::OK);
 }
 
 static void check(pmem::kv::db &kv)
 {
 
-	UT_ASSERT(kv.put("jkl", "D4") == status::OK);
-	UT_ASSERT(kv.put("mno", "E5") == status::OK);
+	ASSERT_STATUS(kv.put("jkl", "D4"), status::OK);
+	ASSERT_STATUS(kv.put("mno", "E5"), status::OK);
 	std::string value1;
-	UT_ASSERT(kv.get("abc", &value1) == status::OK && value1 == "A1");
+	ASSERT_STATUS(kv.get("abc", &value1), status::OK);
+	UT_ASSERT(value1 == "A1");
 	std::string value2;
-	UT_ASSERT(kv.get("def", &value2) == status::OK && value2 == "B2");
+	ASSERT_STATUS(kv.get("def", &value2), status::OK);
+	UT_ASSERT(value2 == "B2");
 	std::string value3;
-	UT_ASSERT(kv.get("hij", &value3) == status::OK && value3 == "C3");
+	ASSERT_STATUS(kv.get("hij", &value3), status::OK);
+	UT_ASSERT(value3 == "C3");
 	std::string value4;
-	UT_ASSERT(kv.get("jkl", &value4) == status::OK && value4 == "D4");
+	ASSERT_STATUS(kv.get("jkl", &value4), status::OK);
+	UT_ASSERT(value4 == "D4");
 	std::string value5;
-	UT_ASSERT(kv.get("mno", &value5) == status::OK && value5 == "E5");
+	ASSERT_STATUS(kv.get("mno", &value5), status::OK);
+	UT_ASSERT(value5 == "E5");
 }
 
 static void test(int argc, char *argv[])

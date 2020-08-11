@@ -8,40 +8,40 @@ static void FailsToOpenInstanceWithInvalidPath(std::string engine,
 {
 	pmem::kv::config cfg;
 	auto s = cfg.put_string("path", non_existent_path);
-	UT_ASSERTeq(s, pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = cfg.put_uint64("size", 83886080);
-	UT_ASSERTeq(s, pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
 	s = kv.open(engine, std::move(cfg));
 
 	/* Not-existent path supplied */
 	// XXX - should be WRONG_PATH
-	UT_ASSERTeq(pmem::kv::status::UNKNOWN_ERROR, s);
+	ASSERT_STATUS(s, pmem::kv::status::UNKNOWN_ERROR);
 }
 
 static void NoSizeInConfig(std::string engine)
 {
 	pmem::kv::config cfg;
 	auto s = cfg.put_string("path", "some_path");
-	UT_ASSERTeq(s, pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
 	s = kv.open(engine, std::move(cfg));
 
-	UT_ASSERTeq(pmem::kv::status::INVALID_ARGUMENT, s);
+	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
 static void NoPathInConfig(std::string engine)
 {
 	pmem::kv::config cfg;
 	auto s = cfg.put_uint64("size", 83886080);
-	UT_ASSERTeq(s, pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
 	s = kv.open(engine, std::move(cfg));
 
-	UT_ASSERTeq(pmem::kv::status::INVALID_ARGUMENT, s);
+	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
 static void test(int argc, char *argv[])

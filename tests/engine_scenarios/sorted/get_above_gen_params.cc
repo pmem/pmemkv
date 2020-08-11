@@ -28,7 +28,7 @@ static void GetAboveTest(std::string engine, pmem::kv::config &&config)
 	verify_get_above(kv, "B", 2, kv_sort(expected));
 
 	/* insert new key */
-	UT_ASSERTeq(kv.put("BD", "7"), status::OK);
+	ASSERT_STATUS(kv.put("BD", "7"), status::OK);
 
 	expected = kv_list{{"BB", "5"}, {"BC", "6"}, {"BD", "7"}};
 	verify_get_above(kv, "B", 3, kv_sort(expected));
@@ -43,7 +43,7 @@ static void GetAboveTest(std::string engine, pmem::kv::config &&config)
 	verify_get_above(kv, "BA", 3, kv_sort(expected));
 
 	/* insert new key with special char in key */
-	UT_ASSERT(kv.put("记!", "RR") == status::OK);
+	ASSERT_STATUS(kv.put("记!", "RR"), status::OK);
 
 	/* testing C-like API */
 	expected = kv_list{{"BB", "5"}, {"BC", "6"}, {"BD", "7"}, {"记!", "RR"}};
@@ -75,7 +75,7 @@ static void GetAboveReverseTest(std::string engine, pmem::kv::config &&config)
 	verify_get_above(kv, "B", 3, expected);
 
 	/* insert new key */
-	UT_ASSERTeq(kv.put("BD", "7"), status::OK);
+	ASSERT_STATUS(kv.put("BD", "7"), status::OK);
 
 	expected = kv_list{{"AC", "3"}, {"AB", "2"}, {"A", "1"}};
 	verify_get_above(kv, "B", 3, expected);
@@ -85,7 +85,7 @@ static void GetAboveReverseTest(std::string engine, pmem::kv::config &&config)
 	verify_get_above(kv, MAX_KEY, 7, expected);
 
 	/* insert new key with special char in key */
-	UT_ASSERT(kv.put("记!", "RR") == status::OK);
+	ASSERT_STATUS(kv.put("记!", "RR"), status::OK);
 
 	/* testing C-like API */
 	expected = kv_list{{"AC", "3"}, {"AB", "2"}, {"A", "1"}};
@@ -129,7 +129,7 @@ static void GetAboveTest2(std::string engine, pmem::kv::config &&config)
 	verify_get_above_c(kv, "ddd", 4, kv_sort(expected));
 
 	/* remove one key */
-	UT_ASSERTeq(kv.remove("sss"), status::OK);
+	ASSERT_STATUS(kv.remove("sss"), status::OK);
 
 	expected = kv_list{{"rrr", "4"}, {"ttt", "6"}, {"yyy", "记!"}};
 	verify_get_above_c(kv, "ddd", 3, kv_sort(expected));
@@ -154,7 +154,7 @@ static void GetAboveRandTest(std::string engine, pmem::kv::config &&config,
 	/* XXX: to be enabled for Comparator support (in all below test functions) */
 	// auto cmp = std::unique_ptr<comparator>(new Comparator());
 	// auto s = config.put_comparator(std::move(cmp));
-	// UT_ASSERTeq(s, status::OK);
+	// ASSERT_STATUS(s, status::OK);
 
 	auto kv = INITIALIZE_KV(engine, std::move(config));
 	verify_get_above(kv, "randtest", 0, kv_list());
@@ -167,7 +167,7 @@ static void GetAboveRandTest(std::string engine, pmem::kv::config &&config,
 	for (size_t i = 0; i < items; i++) {
 		value = std::to_string(i);
 		key = keys[i];
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		/* verifies all elements */
@@ -217,7 +217,7 @@ static void GetAboveIncrTest(std::string engine, pmem::kv::config &&config,
 	for (size_t i = 0; i < keys_cnt; i++) {
 		key = keys[i];
 		value = std::to_string(i);
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		/* verifies all elements */
@@ -239,8 +239,8 @@ static void GetAboveIncrTest(std::string engine, pmem::kv::config &&config,
 
 	/* start over with two inital keys */
 	CLEAR_KV(kv);
-	UT_ASSERTeq(kv.put(MAX_KEY, "init0"), status::OK);
-	UT_ASSERTeq(kv.put(MAX_KEY + MAX_KEY, "init1"), status::OK);
+	ASSERT_STATUS(kv.put(MAX_KEY, "init0"), status::OK);
+	ASSERT_STATUS(kv.put(MAX_KEY + MAX_KEY, "init1"), status::OK);
 
 	expected = kv_list{{MAX_KEY, "init0"}, {MAX_KEY + MAX_KEY, "init1"}};
 	verify_get_above(kv, MIN_KEY, 2, kv_sort(expected));
@@ -251,7 +251,7 @@ static void GetAboveIncrTest(std::string engine, pmem::kv::config &&config,
 	for (size_t i = 0; i < keys_cnt; i++) {
 		key = keys[i];
 		value = std::to_string(i);
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		/* verifies all elements */
@@ -288,7 +288,7 @@ static void GetAboveIncrReverseTest(std::string engine, pmem::kv::config &&confi
 	for (size_t i = keys_cnt; i > 0; i--) {
 		key = keys[i - 1];
 		value = std::to_string(i - 1);
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		/* verifies all elements */
@@ -305,8 +305,8 @@ static void GetAboveIncrReverseTest(std::string engine, pmem::kv::config &&confi
 	/* remove 19th key */
 	UT_ASSERT(keys_cnt > 20);
 	key = keys[19];
-	UT_ASSERTeq(kv.get(key, &value), status::OK);
-	UT_ASSERTeq(kv.remove(key), status::OK);
+	ASSERT_STATUS(kv.get(key, &value), status::OK);
+	ASSERT_STATUS(kv.remove(key), status::OK);
 	expected.erase(std::remove(expected.begin(), expected.end(), kv_pair{key, value}),
 		       expected.end());
 	keys_cnt--;
@@ -322,8 +322,8 @@ static void GetAboveIncrReverseTest(std::string engine, pmem::kv::config &&confi
 	/* remove 9th key */
 	UT_ASSERT(keys_cnt > 9);
 	key = keys[8];
-	UT_ASSERTeq(kv.get(key, &value), status::OK);
-	UT_ASSERTeq(kv.remove(key), status::OK);
+	ASSERT_STATUS(kv.get(key, &value), status::OK);
+	ASSERT_STATUS(kv.remove(key), status::OK);
 	expected.erase(std::remove(expected.begin(), expected.end(), kv_pair{key, value}),
 		       expected.end());
 	keys_cnt--;
@@ -334,8 +334,8 @@ static void GetAboveIncrReverseTest(std::string engine, pmem::kv::config &&confi
 	/* remove 3rd key */
 	UT_ASSERT(keys_cnt > 3);
 	key = keys[2];
-	UT_ASSERTeq(kv.get(key, &value), status::OK);
-	UT_ASSERTeq(kv.remove(key), status::OK);
+	ASSERT_STATUS(kv.get(key, &value), status::OK);
+	ASSERT_STATUS(kv.remove(key), status::OK);
 	expected.erase(std::remove(expected.begin(), expected.end(), kv_pair{key, value}),
 		       expected.end());
 	keys_cnt--;
@@ -343,12 +343,12 @@ static void GetAboveIncrReverseTest(std::string engine, pmem::kv::config &&confi
 	/* verifies all elements */
 	verify_get_above_c(kv, MIN_KEY, keys_cnt, kv_sort(expected));
 
-	UT_ASSERTeq(kv.put("!@", "!@"), status::OK);
+	ASSERT_STATUS(kv.put("!@", "!@"), status::OK);
 	expected.emplace_back("!@", "!@");
 	keys_cnt++;
 	verify_get_above_c(kv, MIN_KEY, keys_cnt, kv_sort(expected));
 
-	UT_ASSERTeq(kv.put("<my_key>", "<my_key>"), status::OK);
+	ASSERT_STATUS(kv.put("<my_key>", "<my_key>"), status::OK);
 	expected.emplace_back("<my_key>", "<my_key>");
 	keys_cnt++;
 	verify_get_above_c(kv, MIN_KEY, keys_cnt, kv_sort(expected));
@@ -381,7 +381,8 @@ static void test(int argc, char *argv[])
 	} else if (comparator == "reverse") {
 		auto make_config = [&] {
 			auto cfg = CONFIG_FROM_JSON(argv[2]);
-			UT_ASSERTeq(cfg.put_comparator(reverse_comparator{}), status::OK);
+			ASSERT_STATUS(cfg.put_comparator(reverse_comparator{}),
+				      status::OK);
 
 			return cfg;
 		};

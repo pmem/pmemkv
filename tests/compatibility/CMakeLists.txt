@@ -16,7 +16,7 @@ pkg_check_modules(LIBPMEMKV REQUIRED libpmemkv)
 function(build_binary name)
 	add_executable(${name} ${ARGN})
 
-	target_include_directories(${name} PRIVATE ${LIBPMEMKV_INCLUDE_DIRS})
+	target_include_directories(${name} PRIVATE ${LIBPMEMKV_INCLUDE_DIRS} ../common/)
 	target_link_directories(${name} PRIVATE ${LIBPMEMKV_LIBRARY_DIRS})
 	target_link_libraries(${name} pmemkv)
 endfunction()

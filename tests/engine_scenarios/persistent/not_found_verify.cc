@@ -7,15 +7,15 @@ using namespace pmem::kv;
 
 static void insert(pmem::kv::db &kv)
 {
-	UT_ASSERT(kv.put("tmpkey", "tmpvalue1") == status::OK);
+	ASSERT_STATUS(kv.put("tmpkey", "tmpvalue1"), status::OK);
 }
 
 static void check(pmem::kv::db &kv)
 {
 
-	UT_ASSERT(kv.remove("tmpkey") == status::OK);
+	ASSERT_STATUS(kv.remove("tmpkey"), status::OK);
 	std::string value;
-	UT_ASSERT(kv.get("tmpkey", &value) == status::NOT_FOUND);
+	ASSERT_STATUS(kv.get("tmpkey", &value), status::NOT_FOUND);
 }
 
 static void test(int argc, char *argv[])

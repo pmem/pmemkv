@@ -11,7 +11,7 @@ static void OOM(pmem::kv::db &kv)
 		if (s == pmem::kv::status::OUT_OF_MEMORY)
 			break;
 
-		UT_ASSERTeq(s, pmem::kv::status::OK);
+		ASSERT_STATUS(s, pmem::kv::status::OK);
 
 		cnt++;
 	}
@@ -22,12 +22,12 @@ static void OOM(pmem::kv::db &kv)
 	/* Start freeing elements from the smallest one */
 	for (size_t i = 0; i < cnt; i++) {
 		auto s = kv.remove(std::to_string(i));
-		UT_ASSERTeq(s, pmem::kv::status::OK);
+		ASSERT_STATUS(s, pmem::kv::status::OK);
 	}
 
 	size_t count = std::numeric_limits<size_t>::max();
 	auto s = kv.count_all(count);
-	UT_ASSERTeq(s, pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	UT_ASSERTeq(count, 0);
 }
 
