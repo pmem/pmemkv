@@ -5,9 +5,9 @@
 
 static void DefragInvalidArgument(pmem::kv::db &kv)
 {
-	UT_ASSERT(kv.defrag(50, 100) == pmem::kv::status::INVALID_ARGUMENT);
-	UT_ASSERT(kv.defrag(0, 101) == pmem::kv::status::INVALID_ARGUMENT);
-	UT_ASSERT(kv.defrag(101, 0) == pmem::kv::status::INVALID_ARGUMENT);
+	ASSERT_STATUS(kv.defrag(50, 100), pmem::kv::status::INVALID_ARGUMENT);
+	ASSERT_STATUS(kv.defrag(0, 101), pmem::kv::status::INVALID_ARGUMENT);
+	ASSERT_STATUS(kv.defrag(101, 0), pmem::kv::status::INVALID_ARGUMENT);
 }
 
 static void test(int argc, char *argv[])

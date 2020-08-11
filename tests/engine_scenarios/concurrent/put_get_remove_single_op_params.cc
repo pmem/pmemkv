@@ -24,7 +24,7 @@ static void MultithreadedGetAndRemove(const size_t threads_number, pmem::kv::db 
 								    keys[thread_id])),
 							    0);
 					});
-			UT_ASSERTeq(s, status::OK);
+			ASSERT_STATUS(s, status::OK);
 
 			s = kv.get(uint64_to_strv(keys[thread_id - 1]),
 				   [&](string_view value) {

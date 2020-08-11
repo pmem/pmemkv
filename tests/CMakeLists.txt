@@ -68,9 +68,6 @@ endif()
 
 
 ## Common tests
-build_test(print_status_test print_status_test.cc)
-add_test_generic(NAME print_status_test TRACERS none)
-
 build_test(wrong_engine_name_test wrong_engine_name_test.cc)
 add_test_generic(NAME wrong_engine_name_test TRACERS none)
 

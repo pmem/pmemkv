@@ -60,9 +60,9 @@ TEST_F(CachingTest, PutKeyValue)
 		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
-	ASSERT_TRUE(kv->defrag() == status::NOT_SUPPORTED);
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
+	ASSERT_STATUS(kv->defrag(), status::NOT_SUPPORTED);
 }
 
 TEST_F(CachingTest, PutUpdateValue)
@@ -73,13 +73,15 @@ TEST_F(CachingTest, PutUpdateValue)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::string value;
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
-	ASSERT_TRUE(kv->put("key1", "value11") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
+	ASSERT_STATUS(kv->put("key1", "value11"), status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 	value = "";
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value11");
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value11");
 }
 
 TEST_F(CachingTest, PutKeywithinTTL)
@@ -90,14 +92,15 @@ TEST_F(CachingTest, PutKeywithinTTL)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::string value;
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
 	sleep(1);
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
 	sleep(1);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 1);
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 }
 
 TEST_F(CachingTest, PutKeyExpiredTTL)
@@ -107,9 +110,9 @@ TEST_F(CachingTest, PutKeyExpiredTTL)
 		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
 	sleep(2);
-	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
+	ASSERT_STATUS(kv->exists("key1"), status::NOT_FOUND);
 }
 
 TEST_F(CachingTest, EmptyKeyTest)
@@ -119,19 +122,23 @@ TEST_F(CachingTest, EmptyKeyTest)
 		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
-	ASSERT_TRUE(kv->put("", "empty") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put(" ", "single-space") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("\t\t", "two-tab") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("&*", " ") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("", "empty"), status::OK);
+	ASSERT_STATUS(kv->put(" ", "single-space"), status::OK);
+	ASSERT_STATUS(kv->put("\t\t", "two-tab"), status::OK);
+	ASSERT_STATUS(kv->put("&*", " "), status::OK);
 	std::string value1, value2, value3, value4;
-	ASSERT_TRUE(status::OK == kv->exists(""));
-	ASSERT_TRUE(kv->get("", &value1) == status::OK && value1 == "empty");
-	ASSERT_TRUE(status::OK == kv->exists(" "));
-	ASSERT_TRUE(kv->get(" ", &value2) == status::OK && value2 == "single-space");
-	ASSERT_TRUE(status::OK == kv->exists("\t\t"));
-	ASSERT_TRUE(kv->get("\t\t", &value3) == status::OK && value3 == "two-tab");
-	ASSERT_TRUE(status::OK == kv->exists("&*"));
-	ASSERT_TRUE(kv->get("&*", &value4) == status::OK && value4 == " ");
+	ASSERT_STATUS(kv->exists(""), status::OK);
+	ASSERT_STATUS(kv->get("", &value1), status::OK);
+	ASSERT_TRUE(value1 == "empty");
+	ASSERT_STATUS(kv->exists(" "), status::OK);
+	ASSERT_STATUS(kv->get(" ", &value2), status::OK);
+	ASSERT_TRUE(value2 == "single-space");
+	ASSERT_STATUS(kv->exists("\t\t"), status::OK);
+	ASSERT_STATUS(kv->get("\t\t", &value3), status::OK);
+	ASSERT_TRUE(value3 == "two-tab");
+	ASSERT_STATUS(kv->exists("&*"), status::OK);
+	ASSERT_STATUS(kv->get("&*", &value4), status::OK);
+	ASSERT_TRUE(value4 == " ");
 }
 
 TEST_F(CachingTest, EmptyValueTest)
@@ -141,13 +148,16 @@ TEST_F(CachingTest, EmptyValueTest)
 		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
-	ASSERT_TRUE(kv->put("empty", "") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("single-space", " ") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("two-tab", "\t\t") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("empty", ""), status::OK);
+	ASSERT_STATUS(kv->put("single-space", " "), status::OK);
+	ASSERT_STATUS(kv->put("two-tab", "\t\t"), status::OK);
 	std::string value1, value2, value3;
-	ASSERT_TRUE(kv->get("empty", &value1) == status::OK && value1 == "");
-	ASSERT_TRUE(kv->get("single-space", &value2) == status::OK && value2 == " ");
-	ASSERT_TRUE(kv->get("two-tab", &value3) == status::OK && value3 == "\t\t");
+	ASSERT_STATUS(kv->get("empty", &value1), status::OK);
+	ASSERT_TRUE(value1 == "");
+	ASSERT_STATUS(kv->get("single-space", &value2), status::OK);
+	ASSERT_TRUE(value2 == " ");
+	ASSERT_STATUS(kv->get("two-tab", &value3), status::OK);
+	ASSERT_TRUE(value3 == "\t\t");
 }
 
 TEST_F(CachingTest, SimpleMemcached)
@@ -158,7 +168,7 @@ TEST_F(CachingTest, SimpleMemcached)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 	memcached_server_st *servers = NULL;
 	memcached_st *memc;
@@ -175,9 +185,9 @@ TEST_F(CachingTest, SimpleMemcached)
 				   (time_t)0, (uint32_t)0);
 
 	std::string value;
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK &&
-		    value == "value1"); // getting the key from remote
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->get("key1", &value), status::OK); // getting the key from remote
+	ASSERT_TRUE(value == "value1");
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 }
 
 TEST_F(CachingTest, SimpleRedis)
@@ -188,7 +198,7 @@ TEST_F(CachingTest, SimpleRedis)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	int conn_timeout = 30, rw_timeout = 10;
@@ -198,7 +208,8 @@ TEST_F(CachingTest, SimpleRedis)
 	cmd.set("key1", "value1");
 
 	std::string value;
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
 }
 
 TEST_F(CachingTest, UnknownLocalMemcachedKey)
@@ -209,7 +220,7 @@ TEST_F(CachingTest, UnknownLocalMemcachedKey)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	memcached_server_st *servers = NULL;
@@ -231,7 +242,7 @@ TEST_F(CachingTest, UnknownLocalMemcachedKey)
 	ASSERT_TRUE(return_value == NULL); // key is not present in memcached
 
 	std::string val;
-	ASSERT_TRUE(kv->get("key1", &val) == status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key1", &val), status::NOT_FOUND);
 }
 
 TEST_F(CachingTest, UnknownLocalRedisKey)
@@ -242,7 +253,7 @@ TEST_F(CachingTest, UnknownLocalRedisKey)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	int conn_timeout = 30, rw_timeout = 10;
@@ -253,7 +264,7 @@ TEST_F(CachingTest, UnknownLocalRedisKey)
 	ASSERT_TRUE(cmd.exists("key1") == 0);
 
 	std::string value;
-	ASSERT_TRUE(kv->get("key1", &value) == status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key1", &value), status::NOT_FOUND);
 }
 
 TEST_F(CachingTest, SimpleGetAllTest)
@@ -264,15 +275,15 @@ TEST_F(CachingTest, SimpleGetAllTest)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
+	ASSERT_STATUS(kv->put("key2", "value2"), status::OK);
+	ASSERT_STATUS(kv->put("key3", "value3"), status::OK);
+	ASSERT_STATUS(kv->put("key4", "value4"), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 4);
 
 	std::string result;
@@ -315,15 +326,15 @@ TEST_F(CachingTest, GetAllTTLValidExpired)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
+	ASSERT_STATUS(kv->put("key2", "value2"), status::OK);
+	ASSERT_STATUS(kv->put("key3", "value3"), status::OK);
+	ASSERT_STATUS(kv->put("key4", "value4"), status::OK);
 	sleep(2);
-	ASSERT_TRUE(kv->put("key5", "value5") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key5", "value5"), status::OK);
 
 	std::string result;
 	kv->get_all(
@@ -340,7 +351,7 @@ TEST_F(CachingTest, GetAllTTLValidExpired)
 		&result);
 	ASSERT_TRUE(result == "<key5>,<value5>|");
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 1);
 }
 
@@ -352,7 +363,7 @@ TEST_F(CachingTest, GetAllEmptyCache)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 	std::string result;
 	kv->get_all(
@@ -369,7 +380,7 @@ TEST_F(CachingTest, GetAllEmptyCache)
 		&result);
 	ASSERT_TRUE(result == "");
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 }
 
@@ -381,17 +392,17 @@ TEST_F(CachingTest, GetAllZeroTTL)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
+	ASSERT_STATUS(kv->put("key2", "value2"), status::OK);
 	sleep(1);
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key3", "value3"), status::OK);
+	ASSERT_STATUS(kv->put("key4", "value4"), status::OK);
 	sleep(1);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 4);
 
 	std::string result;
@@ -434,17 +445,17 @@ TEST_F(CachingTest, SimpleCount)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 1);
 	sleep(2);
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key2", "value2"), status::OK);
+	ASSERT_STATUS(kv->put("key3", "value3"), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 2);
 }
 
@@ -456,20 +467,20 @@ TEST_F(CachingTest, SimpleZeroTTLCount)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
+	ASSERT_STATUS(kv->put("key2", "value2"), status::OK);
+	ASSERT_STATUS(kv->put("key3", "value3"), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 3);
 	sleep(1);
-	ASSERT_TRUE(kv->put("key4", "value4") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->put("key5", "value5") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key4", "value4"), status::OK);
+	ASSERT_STATUS(kv->put("key5", "value5"), status::OK);
 	sleep(1);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 5);
 }
 
@@ -480,14 +491,14 @@ TEST_F(CachingTest, SimpleRemovekey)
 		"{\"host\":\"127.0.0.1\",\"port\":6379,\"attempts\":5,\"ttl\":1,\"path\":\"/dev/shm/pmemkv\",\"remote_type\":\"Redis\",\"remote_user\":\"xxx\", \"remote_pwd\":\"yyy\", \"remote_url\":\"...\", \"subengine\":\"" +
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
-	ASSERT_TRUE(kv->remove("key1") == status::OK);
-	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->remove("key1") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->put("key2", "value2") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
+	ASSERT_STATUS(kv->remove("key1"), status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::NOT_FOUND);
+	ASSERT_STATUS(kv->remove("key1"), status::NOT_FOUND);
+	ASSERT_STATUS(kv->put("key2", "value2"), status::OK);
 	sleep(2);
-	ASSERT_TRUE(kv->remove("key2") == status::OK);
+	ASSERT_STATUS(kv->remove("key2"), status::OK);
 }
 
 TEST_F(CachingTest, SimpleExistsKey)
@@ -498,21 +509,21 @@ TEST_F(CachingTest, SimpleExistsKey)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
-	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->exists("key1"), status::NOT_FOUND);
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
 	sleep(1);
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 	sleep(1);
 	// key1 not expired even after 1+1 sec sleep as Exists above updated on local
 	// cache
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 1);
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 	sleep(2);
-	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
+	ASSERT_STATUS(kv->exists("key1"), status::NOT_FOUND);
 }
 
 TEST_F(CachingTest, Redis_Integration)
@@ -523,32 +534,33 @@ TEST_F(CachingTest, Redis_Integration)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 1);
 
 	std::string value;
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
-	ASSERT_TRUE(kv->remove("key1") == status::OK);
-	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
+	ASSERT_STATUS(kv->remove("key1"), status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::NOT_FOUND);
 
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
 	sleep(1);
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 	sleep(1);
-	ASSERT_TRUE(kv->exists("key1") ==
-		    status::OK); // key1 is not expired though the sleep is 1+1 sec
+	ASSERT_STATUS(kv->exists("key1") ==
+		      status::OK); // key1 is not expired though the sleep is 1+1 sec
 	// as Exists API above updated the timestamp
 
 	sleep(2);
-	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->exists("key2") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->exists("key3") == status::NOT_FOUND);
+	ASSERT_STATUS(kv->exists("key1"), status::NOT_FOUND);
+	ASSERT_STATUS(kv->exists("key2"), status::NOT_FOUND);
+	ASSERT_STATUS(kv->exists("key3"), status::NOT_FOUND);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	// Remote redis connection
@@ -559,16 +571,19 @@ TEST_F(CachingTest, Redis_Integration)
 
 	cmd.set("key1", "value1");
 	cmd.set("key2", "value2");
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key3", "value3"), status::OK);
 	value = "";
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 	value = "";
-	ASSERT_TRUE(kv->get("key2", &value) == status::OK && value == "value2");
-	ASSERT_TRUE(kv->exists("key2") == status::OK);
+	ASSERT_STATUS(kv->get("key2", &value), status::OK);
+	ASSERT_TRUE(value == "value2");
+	ASSERT_STATUS(kv->exists("key2"), status::OK);
 	value = "";
-	ASSERT_TRUE(kv->get("key3", &value) == status::OK && value == "value3");
-	ASSERT_TRUE(kv->exists("key3") == status::OK);
+	ASSERT_STATUS(kv->get("key3", &value), status::OK);
+	ASSERT_STATUS(value == "value3");
+	ASSERT_STATUS(kv->exists("key3"), status::OK);
 
 	std::string result;
 	kv->get_all(
@@ -609,15 +624,17 @@ TEST_F(CachingTest, Redis_Integration)
 		&result);
 	ASSERT_TRUE(result == "");
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	value = "";
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
 	value = "";
-	ASSERT_TRUE(kv->get("key2", &value) == status::OK && value == "value2");
+	ASSERT_STATUS(kv->get("key2", &value), status::OK);
+	ASSERT_TRUE(value == "value2");
 	value = "";
-	ASSERT_TRUE(kv->get("key3", &value) == status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key3", &value), status::NOT_FOUND);
 
 #if 0
 	result = "";
@@ -652,7 +669,7 @@ TEST_F(CachingTest, Redis_Integration)
 	ASSERT_TRUE(result == "");
 #endif
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	cmd.del("key1");
@@ -660,13 +677,14 @@ TEST_F(CachingTest, Redis_Integration)
 	ASSERT_TRUE(cmd.exists("key1") == 0);
 	ASSERT_TRUE(cmd.exists("key2") == 0);
 	value = "";
-	ASSERT_TRUE(kv->get("key1", &value) == status::NOT_FOUND);
-	ASSERT_TRUE(kv->get("key2", &value) == status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key1", &value), status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key2", &value), status::NOT_FOUND);
 
 	cmd.set("key1", "value1");
-	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 
 	cmd.del("key1");
 }
@@ -679,32 +697,33 @@ TEST_F(CachingTest, Memcached_Integration)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 1);
 
 	std::string value;
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
-	ASSERT_TRUE(kv->remove("key1") == status::OK);
-	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
+	ASSERT_STATUS(kv->remove("key1"), status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::NOT_FOUND);
 
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
 	sleep(1);
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 	sleep(1);
-	ASSERT_TRUE(kv->exists("key1") ==
-		    status::OK); // key1 is not expired though the sleep is 1+1 sec
+	ASSERT_STATUS(kv->exists("key1") ==
+		      status::OK); // key1 is not expired though the sleep is 1+1 sec
 	// as Exists API above updated the timestamp
 
 	sleep(2); // TTL is 1 sec
-	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->exists("key2") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->exists("key3") == status::NOT_FOUND);
+	ASSERT_STATUS(kv->exists("key1"), status::NOT_FOUND);
+	ASSERT_STATUS(kv->exists("key2"), status::NOT_FOUND);
+	ASSERT_STATUS(kv->exists("key3"), status::NOT_FOUND);
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	// Remote memcached connection
@@ -726,21 +745,24 @@ TEST_F(CachingTest, Memcached_Integration)
 	}
 
 	value = "";
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK &&
-		    value == "value1"); // getting the key from remote
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1"); // getting the key from remote
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 	memcached_set(memc, "key2", key_length, "value2", value_length, (time_t)0,
 		      (uint32_t)0);
-	ASSERT_TRUE(kv->put("key3", "value3") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key3", "value3"), status::OK);
 	value = "";
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 	value = "";
-	ASSERT_TRUE(kv->get("key2", &value) == status::OK && value == "value2");
-	ASSERT_TRUE(kv->exists("key2") == status::OK);
+	ASSERT_STATUS(kv->get("key2", &value), status::OK);
+	ASSERT_TRUE(value == "value2");
+	ASSERT_STATUS(kv->exists("key2"), status::OK);
 	value = "";
-	ASSERT_TRUE(kv->get("key3", &value) == status::OK && value == "value3");
-	ASSERT_TRUE(kv->exists("key3") == status::OK);
+	ASSERT_STATUS(kv->get("key3", &value), status::OK);
+	ASSERT_TRUE(value == "value3");
+	ASSERT_STATUS(kv->exists("key3"), status::OK);
 
 	std::string result;
 	kv->get_all(
@@ -781,15 +803,17 @@ TEST_F(CachingTest, Memcached_Integration)
 		&result);
 	ASSERT_TRUE(result == "");
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	value = "";
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
 	value = "";
-	ASSERT_TRUE(kv->get("key2", &value) == status::OK && value == "value2");
+	ASSERT_STATUS(kv->get("key2", &value), status::OK);
+	ASSERT_TRUE(value == "value2");
 	value = "";
-	ASSERT_TRUE(kv->get("key3", &value) == status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key3", &value), status::NOT_FOUND);
 
 #if 0
 	result = "";
@@ -824,7 +848,7 @@ TEST_F(CachingTest, Memcached_Integration)
 	ASSERT_TRUE(result == "");
 #endif
 	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 0);
 
 	memcached_delete(memc, "key1", key_length, (time_t)0);
@@ -836,14 +860,15 @@ TEST_F(CachingTest, Memcached_Integration)
 				      &flags, &rc);
 	ASSERT_TRUE(return_value2 == NULL); // key is not present in memcached
 	value = "";
-	ASSERT_TRUE(kv->get("key1", &value) == status::NOT_FOUND);
-	ASSERT_TRUE(kv->get("key2", &value) == status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key1", &value), status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key2", &value), status::NOT_FOUND);
 
 	memcached_set(memc, "key1", key_length, "value1", value_length, (time_t)0,
 		      (uint32_t)0);
-	ASSERT_TRUE(kv->exists("key1") == status::NOT_FOUND);
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::NOT_FOUND);
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 	memcached_delete(memc, "key1", key_length, (time_t)0);
 }
 
@@ -863,12 +888,13 @@ TEST_F(CachingTest, LargeTTL)
 			ENGINE + "\",\"subengine_config\":{\"path\":\"" + PATH +
 			"\", \"size\": 1073741824, \"force_create\": 1}}"));
 	std::string value;
-	ASSERT_TRUE(kv->put("key1", "value1") == status::OK) << errormsg();
+	ASSERT_STATUS(kv->put("key1", "value1"), status::OK);
 	sleep(1);
-	ASSERT_TRUE(kv->get("key1", &value) == status::OK && value == "value1");
+	ASSERT_STATUS(kv->get("key1", &value), status::OK);
+	ASSERT_TRUE(value == "value1");
 	sleep(1);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_TRUE(kv->count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv->count_all(cnt), status::OK);
 	ASSERT_TRUE(cnt == 1);
-	ASSERT_TRUE(kv->exists("key1") == status::OK);
+	ASSERT_STATUS(kv->exists("key1"), status::OK);
 }

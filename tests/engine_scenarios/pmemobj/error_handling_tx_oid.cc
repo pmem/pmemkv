@@ -28,7 +28,7 @@ static void test(int argc, char *argv[])
 
 	pmem::kv::config cfg;
 	auto s = cfg.put_object("oid", &(pmemobj_pool.root()->oid), nullptr);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	auto kv = INITIALIZE_KV(argv[1], std::move(cfg));
 
