@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2017-2020, Intel Corporation */
 
-#include <sstream>
-
 #include "unittest.hpp"
 
 /**
@@ -87,34 +85,20 @@ static void EmptyValueTest(pmem::kv::db &kv)
 
 static void EmptyKeyAndValueTest(pmem::kv::db &kv)
 {
-	status s;
-
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	s = kv.count_all(cnt);
-	UT_ASSERT(s == status::OK && cnt == 0);
-
-	std::ostringstream oss1;
-	oss1 << s;
-	UT_ASSERT(oss1.str() == "OK (0)");
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
+	UT_ASSERT(cnt == 0);
 
 	std::string value = "abc";
-	s = kv.get("", &value);
-	UT_ASSERT(s == status::NOT_FOUND && value == "abc");
+	ASSERT_STATUS(kv.get("", &value), status::NOT_FOUND);
+	UT_ASSERT(value == "abc");
 
-	std::ostringstream oss2;
-	oss2 << s;
-	UT_ASSERT(oss2.str() == "NOT_FOUND (2)");
+	ASSERT_STATUS(kv.put("", ""), status::OK);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
+	UT_ASSERT(cnt == 1);
 
-	s = kv.put("", "");
-	UT_ASSERT(s == status::OK);
-	s = kv.count_all(cnt);
-	UT_ASSERT(s == status::OK && cnt == 1);
-
-	oss2 << s;
-	UT_ASSERT(oss2.str() == "NOT_FOUND (2)OK (0)");
-
-	s = kv.get("", &value);
-	UT_ASSERT(s == status::OK && value == "");
+	ASSERT_STATUS(kv.get("", &value), status::OK);
+	UT_ASSERT(value == "");
 }
 
 static void GetClearExternalValueTest(pmem::kv::db &kv)
