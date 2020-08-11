@@ -10,12 +10,14 @@ static void insert(pmem::kv::db &kv)
 {
 
 	std::string value;
-	UT_ASSERT(kv.put("key1", "value1") == status::OK);
-	UT_ASSERT(kv.get("key1", &value) == status::OK && value == "value1");
+	ASSERT_STATUS(kv.put("key1", "value1"), status::OK);
+	ASSERT_STATUS(kv.get("key1", &value), status::OK);
+	UT_ASSERT(value == "value1");
 
 	std::string new_value;
-	UT_ASSERT(kv.put("key1", "VALUE1") == status::OK); // same size
-	UT_ASSERT(kv.get("key1", &new_value) == status::OK && new_value == "VALUE1");
+	ASSERT_STATUS(kv.put("key1", "VALUE1"), status::OK); // same size
+	ASSERT_STATUS(kv.get("key1", &new_value), status::OK);
+	UT_ASSERT(new_value == "VALUE1");
 
 	kv.close();
 }
@@ -23,12 +25,14 @@ static void check(pmem::kv::db &kv)
 {
 
 	std::string new_value2;
-	UT_ASSERT(kv.put("key1", "new_value") == status::OK); // longer size
-	UT_ASSERT(kv.get("key1", &new_value2) == status::OK && new_value2 == "new_value");
+	ASSERT_STATUS(kv.put("key1", "new_value"), status::OK); // longer size
+	ASSERT_STATUS(kv.get("key1", &new_value2), status::OK);
+	UT_ASSERT(new_value2 == "new_value");
 
 	std::string new_value3;
-	UT_ASSERT(kv.put("key1", "?") == status::OK); // shorter size
-	UT_ASSERT(kv.get("key1", &new_value3) == status::OK && new_value3 == "?");
+	ASSERT_STATUS(kv.put("key1", "?"), status::OK); // shorter size
+	ASSERT_STATUS(kv.get("key1", &new_value3), status::OK);
+	UT_ASSERT(new_value3 == "?");
 }
 
 static void test(int argc, char *argv[])

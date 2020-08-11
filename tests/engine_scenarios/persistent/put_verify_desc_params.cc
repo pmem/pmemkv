@@ -10,9 +10,10 @@ static void insert(const size_t iterations, pmem::kv::db &kv)
 
 	for (size_t i = iterations; i >= 1; i--) {
 		std::string istr = std::to_string(i);
-		UT_ASSERT(kv.put(istr, ("ABC" + istr)) == status::OK);
+		ASSERT_STATUS(kv.put(istr, ("ABC" + istr)), status::OK);
 		std::string value;
-		UT_ASSERT(kv.get(istr, &value) == status::OK && value == ("ABC" + istr));
+		ASSERT_STATUS(kv.get(istr, &value), status::OK);
+		UT_ASSERT(value == ("ABC" + istr));
 	}
 }
 static void check(const size_t iterations, pmem::kv::db &kv)
@@ -20,10 +21,11 @@ static void check(const size_t iterations, pmem::kv::db &kv)
 	for (size_t i = iterations; i >= 1; i--) {
 		std::string istr = std::to_string(i);
 		std::string value;
-		UT_ASSERT(kv.get(istr, &value) == status::OK && value == ("ABC" + istr));
+		ASSERT_STATUS(kv.get(istr, &value), status::OK);
+		UT_ASSERT(value == ("ABC" + istr));
 	}
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == iterations);
 }
 

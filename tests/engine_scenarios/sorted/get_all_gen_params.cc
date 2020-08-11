@@ -25,21 +25,21 @@ static void GetAllTest(std::string engine, pmem::kv::config &&config)
 	verify_get_all(kv, 6, kv_sort(expected));
 
 	/* insert new key */
-	UT_ASSERTeq(kv.put("BD", "7"), status::OK);
+	ASSERT_STATUS(kv.put("BD", "7"), status::OK);
 
 	expected = kv_list{{"A", "1"},	{"AB", "2"}, {"AC", "3"}, {"B", "4"},
 			   {"BB", "5"}, {"BC", "6"}, {"BD", "7"}};
 	verify_get_all(kv, 7, kv_sort(expected));
 
 	/* insert new key */
-	UT_ASSERTeq(kv.put("AA", "8"), status::OK);
+	ASSERT_STATUS(kv.put("AA", "8"), status::OK);
 
 	expected = kv_list{{"A", "1"}, {"AA", "8"}, {"AB", "2"}, {"AC", "3"},
 			   {"B", "4"}, {"BB", "5"}, {"BC", "6"}, {"BD", "7"}};
 	verify_get_all(kv, 8, kv_sort(expected));
 
 	/* insert new key with special char in key */
-	UT_ASSERT(kv.put("记!", "RR") == status::OK);
+	ASSERT_STATUS(kv.put("记!", "RR"), status::OK);
 
 	expected =
 		kv_list{{"A", "1"},  {"AA", "8"}, {"AB", "2"}, {"AC", "3"},  {"B", "4"},
@@ -57,8 +57,8 @@ static void GetAllTest(std::string engine, pmem::kv::config &&config)
 	verify_get_all_c(kv, 16, kv_sort(expected));
 
 	/* remove two keys */
-	UT_ASSERTeq(kv.remove("A"), status::OK);
-	UT_ASSERTeq(kv.remove("BC"), status::OK);
+	ASSERT_STATUS(kv.remove("A"), status::OK);
+	ASSERT_STATUS(kv.remove("BC"), status::OK);
 
 	/* testing C-like API */
 	expected = kv_list{{"AA", "8"},	   {"AB", "2"},	 {"AC", "3"},  {"B", "4"},
@@ -83,7 +83,7 @@ static void GetAllRandTest(std::string engine, pmem::kv::config &&config,
 	/* XXX: to be enabled for Comparator support (in all below test functions) */
 	// auto cmp = std::unique_ptr<comparator>(new Comparator());
 	// auto s = config.put_comparator(std::move(cmp));
-	// UT_ASSERTeq(s, status::OK);
+	// ASSERT_STATUS(s, status::OK);
 
 	auto kv = INITIALIZE_KV(engine, std::move(config));
 	verify_get_all(kv, 0, kv_list());
@@ -95,7 +95,7 @@ static void GetAllRandTest(std::string engine, pmem::kv::config &&config,
 	for (size_t i = 0; i < items; i++) {
 		value = std::to_string(i);
 		key = keys[i];
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		verify_get_all(kv, i + 1, kv_sort(expected));
@@ -125,7 +125,7 @@ static void GetAllIncrTest(std::string engine, pmem::kv::config &&config,
 	for (size_t i = 0; i < keys_cnt; i++) {
 		key = keys[i];
 		value = std::to_string(i);
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		verify_get_all(kv, i + 1, kv_sort(expected));
@@ -135,9 +135,9 @@ static void GetAllIncrTest(std::string engine, pmem::kv::config &&config,
 	CLEAR_KV(kv);
 	const std::string mid_key = std::string(2, char(127));
 
-	UT_ASSERTeq(kv.put(MIN_KEY, "init0"), status::OK);
-	UT_ASSERTeq(kv.put(mid_key, "init1"), status::OK);
-	UT_ASSERTeq(kv.put(MAX_KEY, "init2"), status::OK);
+	ASSERT_STATUS(kv.put(MIN_KEY, "init0"), status::OK);
+	ASSERT_STATUS(kv.put(mid_key, "init1"), status::OK);
+	ASSERT_STATUS(kv.put(MAX_KEY, "init2"), status::OK);
 	expected = kv_list{{MIN_KEY, "init0"}, {mid_key, "init1"}, {MAX_KEY, "init2"}};
 
 	/* testing C-like API */
@@ -148,7 +148,7 @@ static void GetAllIncrTest(std::string engine, pmem::kv::config &&config,
 	for (size_t i = 0; i < keys_cnt; i++) {
 		key = keys[i];
 		value = std::to_string(i);
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		verify_get_all(kv, i + 4, kv_sort(expected));
@@ -181,7 +181,7 @@ static void GetAllIncrReverseTest(std::string engine, pmem::kv::config &&config,
 	for (size_t i = keys_cnt; i > 0; i--) {
 		key = keys[i - 1];
 		value = std::to_string(i - 1);
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		verify_get_all(kv, keys_cnt - i + 1, kv_sort(expected));
@@ -192,8 +192,8 @@ static void GetAllIncrReverseTest(std::string engine, pmem::kv::config &&config,
 	/* remove and check at 19th key */
 	UT_ASSERT(keys_cnt > 20);
 	key = keys[19];
-	UT_ASSERTeq(kv.get(key, &value), status::OK);
-	UT_ASSERTeq(kv.remove(key), status::OK);
+	ASSERT_STATUS(kv.get(key, &value), status::OK);
+	ASSERT_STATUS(kv.remove(key), status::OK);
 	expected.erase(std::remove(expected.begin(), expected.end(), kv_pair{key, value}),
 		       expected.end());
 	keys_cnt--;
@@ -202,8 +202,8 @@ static void GetAllIncrReverseTest(std::string engine, pmem::kv::config &&config,
 	/* remove and check at 9th key */
 	UT_ASSERT(keys_cnt > 9);
 	key = keys[8];
-	UT_ASSERTeq(kv.get(key, &value), status::OK);
-	UT_ASSERTeq(kv.remove(key), status::OK);
+	ASSERT_STATUS(kv.get(key, &value), status::OK);
+	ASSERT_STATUS(kv.remove(key), status::OK);
 	expected.erase(std::remove(expected.begin(), expected.end(), kv_pair{key, value}),
 		       expected.end());
 	keys_cnt--;
@@ -212,19 +212,19 @@ static void GetAllIncrReverseTest(std::string engine, pmem::kv::config &&config,
 	/* remove and check at 3rd key */
 	UT_ASSERT(keys_cnt > 3);
 	key = keys[2];
-	UT_ASSERTeq(kv.get(key, &value), status::OK);
-	UT_ASSERTeq(kv.remove(key), status::OK);
+	ASSERT_STATUS(kv.get(key, &value), status::OK);
+	ASSERT_STATUS(kv.remove(key), status::OK);
 	expected.erase(std::remove(expected.begin(), expected.end(), kv_pair{key, value}),
 		       expected.end());
 	keys_cnt--;
 	verify_get_all_c(kv, keys_cnt, kv_sort(expected));
 
-	UT_ASSERTeq(kv.put("!@", "!@"), status::OK);
+	ASSERT_STATUS(kv.put("!@", "!@"), status::OK);
 	expected.emplace_back("!@", "!@");
 	keys_cnt++;
 	verify_get_all_c(kv, keys_cnt, kv_sort(expected));
 
-	UT_ASSERTeq(kv.put("<my_key>", "<my_key>"), status::OK);
+	ASSERT_STATUS(kv.put("<my_key>", "<my_key>"), status::OK);
 	expected.emplace_back("<my_key>", "<my_key>");
 	keys_cnt++;
 	verify_get_all_c(kv, keys_cnt, kv_sort(expected));

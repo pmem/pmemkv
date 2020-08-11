@@ -9,24 +9,24 @@ static void BlackholeSimpleTest()
 {
 	db kv;
 	auto s = kv.open("blackhole");
-	UT_ASSERTeq(status::OK, s);
+	ASSERT_STATUS(s, status::OK);
 
 	std::string value;
 	std::size_t cnt = 1;
 
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 0);
-	UT_ASSERT(kv.get("key1", &value) == status::NOT_FOUND);
-	UT_ASSERT(kv.put("key1", "value1") == status::OK);
+	ASSERT_STATUS(kv.get("key1", &value), status::NOT_FOUND);
+	ASSERT_STATUS(kv.put("key1", "value1"), status::OK);
 
 	cnt = 1;
 
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 0);
-	UT_ASSERT(kv.get("key1", &value) == status::NOT_FOUND);
-	UT_ASSERT(kv.remove("key1") == status::OK);
-	UT_ASSERT(kv.get("key1", &value) == status::NOT_FOUND);
-	UT_ASSERT(kv.defrag() == status::NOT_SUPPORTED);
+	ASSERT_STATUS(kv.get("key1", &value), status::NOT_FOUND);
+	ASSERT_STATUS(kv.remove("key1"), status::OK);
+	ASSERT_STATUS(kv.get("key1", &value), status::NOT_FOUND);
+	ASSERT_STATUS(kv.defrag(), status::NOT_SUPPORTED);
 
 	kv.close();
 }
@@ -35,17 +35,17 @@ static void BlackholeRangeTest()
 {
 	db kv;
 	auto s = kv.open("blackhole");
-	UT_ASSERTeq(status::OK, s);
+	ASSERT_STATUS(s, status::OK);
 
 	std::string result;
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.put("key1", "value1") == status::OK);
-	UT_ASSERT(kv.put("key2", "value2") == status::OK);
-	UT_ASSERT(kv.put("key3", "value3") == status::OK);
+	ASSERT_STATUS(kv.put("key1", "value1"), status::OK);
+	ASSERT_STATUS(kv.put("key2", "value2"), status::OK);
+	ASSERT_STATUS(kv.put("key3", "value3"), status::OK);
 
-	UT_ASSERT(kv.count_above("key1", cnt) == status::OK);
+	ASSERT_STATUS(kv.count_above("key1", cnt), status::OK);
 	UT_ASSERTeq(0, cnt);
-	UT_ASSERT(kv.get_above(
+	ASSERT_STATUS(kv.get_above(
 			  "key1",
 			  [](const char *k, size_t kb, const char *v, size_t vb,
 			     void *arg) {
@@ -54,13 +54,13 @@ static void BlackholeRangeTest()
 				  c->append(std::string(v, vb));
 				  return 0;
 			  },
-			  &result) == status::NOT_FOUND);
+			  &result), status::NOT_FOUND);
 	UT_ASSERT(result.empty());
 
 	cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_equal_above("key1", cnt) == status::OK);
+	ASSERT_STATUS(kv.count_equal_above("key1", cnt), status::OK);
 	UT_ASSERTeq(0, cnt);
-	UT_ASSERT(kv.get_equal_above(
+	ASSERT_STATUS(kv.get_equal_above(
 			  "key1",
 			  [](const char *k, size_t kb, const char *v, size_t vb,
 			     void *arg) {
@@ -69,13 +69,13 @@ static void BlackholeRangeTest()
 				  c->append(std::string(v, vb));
 				  return 0;
 			  },
-			  &result) == status::NOT_FOUND);
+			  &result), status::NOT_FOUND);
 	UT_ASSERT(result.empty());
 
 	cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_below("key1", cnt) == status::OK);
+	ASSERT_STATUS(kv.count_below("key1", cnt), status::OK);
 	UT_ASSERTeq(0, cnt);
-	UT_ASSERT(kv.get_below(
+	ASSERT_STATUS(kv.get_below(
 			  "key1",
 			  [](const char *k, size_t kb, const char *v, size_t vb,
 			     void *arg) {
@@ -84,13 +84,13 @@ static void BlackholeRangeTest()
 				  c->append(std::string(v, vb));
 				  return 0;
 			  },
-			  &result) == status::NOT_FOUND);
+			  &result), status::NOT_FOUND);
 	UT_ASSERT(result.empty());
 
 	cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_equal_below("key1", cnt) == status::OK);
+	ASSERT_STATUS(kv.count_equal_below("key1", cnt), status::OK);
 	UT_ASSERTeq(0, cnt);
-	UT_ASSERT(kv.get_equal_below(
+	ASSERT_STATUS(kv.get_equal_below(
 			  "key1",
 			  [](const char *k, size_t kb, const char *v, size_t vb,
 			     void *arg) {
@@ -99,13 +99,13 @@ static void BlackholeRangeTest()
 				  c->append(std::string(v, vb));
 				  return 0;
 			  },
-			  &result) == status::NOT_FOUND);
+			  &result), status::NOT_FOUND);
 	UT_ASSERT(result.empty());
 
 	cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_between("", "key3", cnt) == status::OK);
+	ASSERT_STATUS(kv.count_between("", "key3", cnt), status::OK);
 	UT_ASSERTeq(0, cnt);
-	UT_ASSERT(kv.get_between(
+	ASSERT_STATUS(kv.get_between(
 			  "", "key3",
 			  [](const char *k, size_t kb, const char *v, size_t vb,
 			     void *arg) {
@@ -114,7 +114,7 @@ static void BlackholeRangeTest()
 				  c->append(std::string(v, vb));
 				  return 0;
 			  },
-			  &result) == status::NOT_FOUND);
+			  &result), status::NOT_FOUND);
 	UT_ASSERT(result.empty());
 
 	kv.close();
