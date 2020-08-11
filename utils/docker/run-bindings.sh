@@ -10,14 +10,14 @@ set -e
 
 source `dirname $0`/prepare-for-build.sh
 
-# master: Merge pull request #44 from lukaszstolarczuk/update-tra..., 21.11.2019
+# master: Merge pull request #44 from lukaszstolarczuk/update-tr..., 21.11.2019
 RUBY_VERSION="3741e3df698245fc8a15822a1aa85b5c211fd332"
 
-# master: common: pmemkv-java 1.0 release, 30.06.2020
-JAVA_VERSION="bada69f43447d7a664171458e0ca6d5d535feeb3"
+# master: Merge pull request #85 from karczex/pictures_example, 17.07.2020
+JAVA_VERSION="bd03a2eef6f3d1c0f47b045ebaa8b0e337b17592"
 
-# master: Merge pull request #49 from how759/buffer-arguments, 02.03.2020
-NODEJS_VERSION="12ecc0a9c3205425bf0aa1767eada53834535045"
+# master: Merge pull request #55 from lukaszstolarczuk/fix-comment, 03.04.2020
+NODEJS_VERSION="76600e002b9d9105d3f46b7cc2bf991931286cec"
 
 # master: ver. 1.0, 03.03.2020
 PYTHON_VERSION="094bc84fdabff81c2eb2017d32caad2582835f90"
