@@ -27,16 +27,16 @@ static void insert(std::string name, pmem::kv::config &&cfg)
 {
 	pmem::kv::db kv;
 	auto s = kv.open(name, std::move(cfg));
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	s = kv.put("A", "A");
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	s = kv.put("B", "B");
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	s = kv.put("C", "C");
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	s = kv.put("D", "D");
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	kv.close();
 }
@@ -45,16 +45,16 @@ static void check_valid(std::string name, pmem::kv::config &&cfg)
 {
 	pmem::kv::db kv;
 	auto s = kv.open(name, std::move(cfg));
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	size_t cnt = std::numeric_limits<size_t>::max();
 	s = kv.count_above("B", cnt);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(cnt, 2);
 
 	cnt = std::numeric_limits<size_t>::max();
 	s = kv.count_below("B", cnt);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(cnt, 1);
 	kv.close();
 }
@@ -62,11 +62,11 @@ static void check_valid(std::string name, pmem::kv::config &&cfg)
 static void check_invalid(std::string name, pmem::kv::config &&cfg)
 {
 	auto s = cfg.put_comparator(invalid_comparator{});
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	pmem::kv::db kv;
 	s = kv.open(name, std::move(cfg));
-	UT_ASSERTeq(s, status::COMPARATOR_MISMATCH);
+	ASSERT_STATUS(s, status::COMPARATOR_MISMATCH);
 
 	UT_ASSERT(pmem::kv::errormsg() == EXPECTED_ERR_MSG);
 }

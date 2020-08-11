@@ -34,7 +34,7 @@ static void GetBelowTest(std::string engine, pmem::kv::config &&config)
 	verify_get_equal_below(kv, "AA", 1, kv_sort(expected));
 
 	/* insert new key */
-	UT_ASSERTeq(kv.put("BD", "7"), status::OK);
+	ASSERT_STATUS(kv.put("BD", "7"), status::OK);
 
 	expected = kv_list{{"A", "1"}, {"AB", "2"}, {"AC", "3"}, {"B", "4"}};
 	verify_get_equal_below(kv, "B", 4, kv_sort(expected));
@@ -50,7 +50,7 @@ static void GetBelowTest(std::string engine, pmem::kv::config &&config)
 	verify_get_equal_below(kv, "BD", 7, kv_sort(expected));
 
 	/* insert new key with special char in key */
-	UT_ASSERT(kv.put("记!", "RR") == status::OK);
+	ASSERT_STATUS(kv.put("记!", "RR"), status::OK);
 
 	expected = kv_list{{"A", "1"},	{"AB", "2"}, {"AC", "3"}, {"B", "4"},
 			   {"BB", "5"}, {"BC", "6"}, {"BD", "7"}};
@@ -99,7 +99,7 @@ static void GetBelowTest2(std::string engine, pmem::kv::config &&config)
 	verify_get_equal_below_c(kv, "ddd", 3, kv_sort(expected));
 
 	/* remove one key */
-	UT_ASSERTeq(kv.remove("sss"), status::OK);
+	ASSERT_STATUS(kv.remove("sss"), status::OK);
 
 	expected = kv_list{{"aaa", "1"}, {"bbb", "2"}, {"ccc", "3"}, {"rrr", "4"}};
 	verify_get_equal_below_c(kv, "sss", 4, kv_sort(expected));
@@ -127,7 +127,7 @@ static void GetBelowRandTest(std::string engine, pmem::kv::config &&config,
 	/* XXX: to be enabled for Comparator support (in all below test functions) */
 	// auto cmp = std::unique_ptr<comparator>(new Comparator());
 	// auto s = config.put_comparator(std::move(cmp));
-	// UT_ASSERTeq(s, status::OK);
+	// ASSERT_STATUS(s, status::OK);
 
 	auto kv = INITIALIZE_KV(engine, std::move(config));
 	verify_get_equal_below(kv, "randtest", 0, kv_list());
@@ -140,7 +140,7 @@ static void GetBelowRandTest(std::string engine, pmem::kv::config &&config,
 	for (size_t i = 0; i < items; i++) {
 		value = std::to_string(i);
 		key = keys[i];
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		/* verifies all elements */
@@ -191,7 +191,7 @@ static void GetBelowIncrTest(std::string engine, pmem::kv::config &&config,
 	for (size_t i = 0; i < keys_cnt; i++) {
 		key = keys[i];
 		value = std::to_string(i);
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		/* verifies all elements */
@@ -213,8 +213,8 @@ static void GetBelowIncrTest(std::string engine, pmem::kv::config &&config,
 
 	/* start over with two inital keys */
 	CLEAR_KV(kv);
-	UT_ASSERTeq(kv.put(MIN_KEY, "init0"), status::OK);
-	UT_ASSERTeq(kv.put(MIN_KEY + MIN_KEY, "init1"), status::OK);
+	ASSERT_STATUS(kv.put(MIN_KEY, "init0"), status::OK);
+	ASSERT_STATUS(kv.put(MIN_KEY + MIN_KEY, "init1"), status::OK);
 
 	expected = kv_list{{MIN_KEY, "init0"}, {MIN_KEY + MIN_KEY, "init1"}};
 	verify_get_equal_below(kv, MAX_KEY, 2, kv_sort(expected));
@@ -225,7 +225,7 @@ static void GetBelowIncrTest(std::string engine, pmem::kv::config &&config,
 	for (size_t i = 0; i < keys_cnt; i++) {
 		key = keys[i];
 		value = std::to_string(i);
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		if (i % 5 == 0) {
@@ -265,7 +265,7 @@ static void GetBelowIncrReverseTest(std::string engine, pmem::kv::config &&confi
 	for (size_t i = keys_cnt; i > 0; i--) {
 		key = keys[i - 1];
 		value = std::to_string(i - 1);
-		UT_ASSERTeq(kv.put(key, value), status::OK);
+		ASSERT_STATUS(kv.put(key, value), status::OK);
 		expected.emplace_back(key, value);
 
 		size_t curr_iter = keys_cnt - i + 1;
@@ -283,8 +283,8 @@ static void GetBelowIncrReverseTest(std::string engine, pmem::kv::config &&confi
 	/* remove 19th key */
 	UT_ASSERT(keys_cnt > 20);
 	key = keys[19];
-	UT_ASSERTeq(kv.get(key, &value), status::OK);
-	UT_ASSERTeq(kv.remove(key), status::OK);
+	ASSERT_STATUS(kv.get(key, &value), status::OK);
+	ASSERT_STATUS(kv.remove(key), status::OK);
 	expected.erase(std::remove(expected.begin(), expected.end(), kv_pair{key, value}),
 		       expected.end());
 	keys_cnt--;
@@ -300,8 +300,8 @@ static void GetBelowIncrReverseTest(std::string engine, pmem::kv::config &&confi
 	/* remove 9th key */
 	UT_ASSERT(keys_cnt > 9);
 	key = keys[8];
-	UT_ASSERTeq(kv.get(key, &value), status::OK);
-	UT_ASSERTeq(kv.remove(key), status::OK);
+	ASSERT_STATUS(kv.get(key, &value), status::OK);
+	ASSERT_STATUS(kv.remove(key), status::OK);
 	expected.erase(std::remove(expected.begin(), expected.end(), kv_pair{key, value}),
 		       expected.end());
 	keys_cnt--;
@@ -312,8 +312,8 @@ static void GetBelowIncrReverseTest(std::string engine, pmem::kv::config &&confi
 	/* remove 3rd key */
 	UT_ASSERT(keys_cnt > 3);
 	key = keys[2];
-	UT_ASSERTeq(kv.get(key, &value), status::OK);
-	UT_ASSERTeq(kv.remove(key), status::OK);
+	ASSERT_STATUS(kv.get(key, &value), status::OK);
+	ASSERT_STATUS(kv.remove(key), status::OK);
 	expected.erase(std::remove(expected.begin(), expected.end(), kv_pair{key, value}),
 		       expected.end());
 	keys_cnt--;
@@ -321,12 +321,12 @@ static void GetBelowIncrReverseTest(std::string engine, pmem::kv::config &&confi
 	/* verifies all elements */
 	verify_get_equal_below_c(kv, MAX_KEY, keys_cnt, kv_sort(expected));
 
-	UT_ASSERTeq(kv.put("!@", "!@"), status::OK);
+	ASSERT_STATUS(kv.put("!@", "!@"), status::OK);
 	expected.emplace_back("!@", "!@");
 	keys_cnt++;
 	verify_get_equal_below_c(kv, MAX_KEY, keys_cnt, kv_sort(expected));
 
-	UT_ASSERTeq(kv.put("<my_key>", "<my_key>"), status::OK);
+	ASSERT_STATUS(kv.put("<my_key>", "<my_key>"), status::OK);
 	expected.emplace_back("<my_key>", "<my_key>");
 	keys_cnt++;
 	verify_get_equal_below_c(kv, MAX_KEY, keys_cnt, kv_sort(expected));

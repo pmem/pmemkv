@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2020, Intel Corporation */
 
 #include <cassert>
 #include <iostream>
@@ -15,15 +15,15 @@ pmem::kv::db *db_create(std::string path)
 	pmem::kv::config cfg;
 
 	pmem::kv::status s = cfg.put_string("path", path);
-	assert(s == pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = cfg.put_uint64("size", SIZE);
-	assert(s == pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = cfg.put_uint64("force_create", 1);
-	assert(s == pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db *kv = new pmem::kv::db;
 	s = kv->open("cmap", std::move(cfg));
-	assert(s == pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	return kv;
 }
@@ -33,11 +33,11 @@ pmem::kv::db *db_open(std::string path)
 	pmem::kv::config cfg;
 
 	pmem::kv::status s = cfg.put_string("path", path);
-	assert(s == pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db *kv = new pmem::kv::db;
 	s = kv->open("cmap", std::move(cfg));
-	assert(s == pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	return kv;
 }
@@ -46,7 +46,7 @@ void populate_db(pmem::kv::db &db, size_t num_elements)
 {
 	for (size_t i = 0; i < num_elements; i++) {
 		auto s = db.put(std::to_string(i), std::to_string(i));
-		assert(s == pmem::kv::status::OK);
+		ASSERT_STATUS(s, pmem::kv::status::OK);
 	}
 }
 
@@ -54,7 +54,7 @@ void verify_db(pmem::kv::db &db, size_t num_elements)
 {
 	std::size_t count;
 	auto s = db.count_all(count);
-	assert(s == pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	assert(count == num_elements);
 
 	for (size_t i = 0; i < num_elements; i++) {
@@ -62,7 +62,7 @@ void verify_db(pmem::kv::db &db, size_t num_elements)
 			assert(std::to_string(i).compare(0, std::string::npos,
 							 value.data()) == 0);
 		});
-		assert(s == pmem::kv::status::OK);
+		ASSERT_STATUS(s, pmem::kv::status::OK);
 	}
 }
 

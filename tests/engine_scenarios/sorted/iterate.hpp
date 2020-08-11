@@ -82,10 +82,11 @@ inline void verify_get_all(pmem::kv::db &kv, const size_t exp_cnt,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_all(cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 
 	auto s = KV_GET_ALL_CPP_CB_LST(result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -94,9 +95,10 @@ inline void verify_get_all_c(pmem::kv::db &kv, const size_t exp_cnt,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_all(cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_ALL_C_CB_LST(result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -105,9 +107,10 @@ inline void verify_get_above(pmem::kv::db &kv, const std::string key,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_above(key, cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_above(key, cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_1KEY_CPP_CB_LST(get_above, key, result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -116,9 +119,10 @@ inline void verify_get_above_c(pmem::kv::db &kv, const std::string key,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_above(key, cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_above(key, cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_1KEY_C_CB_LST(get_above, key, result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -127,9 +131,10 @@ inline void verify_get_equal_above(pmem::kv::db &kv, const std::string key,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_equal_above(key, cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_equal_above(key, cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_1KEY_CPP_CB_LST(get_equal_above, key, result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -139,9 +144,10 @@ inline void verify_get_equal_above_c(pmem::kv::db &kv, const std::string key,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_equal_above(key, cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_equal_above(key, cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_1KEY_C_CB_LST(get_equal_above, key, result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -150,9 +156,10 @@ inline void verify_get_below(pmem::kv::db &kv, const std::string key,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_below(key, cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_below(key, cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_1KEY_CPP_CB_LST(get_below, key, result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -161,9 +168,10 @@ inline void verify_get_below_c(pmem::kv::db &kv, const std::string key,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_below(key, cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_below(key, cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_1KEY_C_CB_LST(get_below, key, result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -172,9 +180,10 @@ inline void verify_get_equal_below(pmem::kv::db &kv, const std::string key,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_equal_below(key, cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_equal_below(key, cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_1KEY_CPP_CB_LST(get_equal_below, key, result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -184,9 +193,10 @@ inline void verify_get_equal_below_c(pmem::kv::db &kv, const std::string key,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_equal_below(key, cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_equal_below(key, cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_1KEY_C_CB_LST(get_equal_below, key, result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -196,9 +206,10 @@ inline void verify_get_between(pmem::kv::db &kv, const std::string key1,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_between(key1, key2, cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_between(key1, key2, cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_2KEYS_CPP_CB_LST(get_between, key1, key2, result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -208,9 +219,10 @@ inline void verify_get_between_c(pmem::kv::db &kv, const std::string key1,
 {
 	std::size_t cnt;
 	kv_list result;
-	UT_ASSERT(kv.count_between(key1, key2, cnt) == status::OK && cnt == exp_cnt);
+	ASSERT_STATUS(kv.count_between(key1, key2, cnt), status::OK);
+	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_2KEYS_C_CB_LST(get_between, key1, key2, result);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
 }
 
@@ -220,23 +232,23 @@ const size_t charset_size = strlen(charset);
 
 inline void add_basic_keys(pmem::kv::db &kv)
 {
-	UT_ASSERTeq(kv.put("A", "1"), status::OK);
-	UT_ASSERTeq(kv.put("AB", "2"), status::OK);
-	UT_ASSERTeq(kv.put("AC", "3"), status::OK);
-	UT_ASSERTeq(kv.put("B", "4"), status::OK);
-	UT_ASSERTeq(kv.put("BB", "5"), status::OK);
-	UT_ASSERTeq(kv.put("BC", "6"), status::OK);
+	ASSERT_STATUS(kv.put("A", "1"), status::OK);
+	ASSERT_STATUS(kv.put("AB", "2"), status::OK);
+	ASSERT_STATUS(kv.put("AC", "3"), status::OK);
+	ASSERT_STATUS(kv.put("B", "4"), status::OK);
+	ASSERT_STATUS(kv.put("BB", "5"), status::OK);
+	ASSERT_STATUS(kv.put("BC", "6"), status::OK);
 }
 
 inline void add_ext_keys(pmem::kv::db &kv)
 {
-	UT_ASSERT(kv.put("aaa", "1") == status::OK);
-	UT_ASSERT(kv.put("bbb", "2") == status::OK);
-	UT_ASSERT(kv.put("ccc", "3") == status::OK);
-	UT_ASSERT(kv.put("rrr", "4") == status::OK);
-	UT_ASSERT(kv.put("sss", "5") == status::OK);
-	UT_ASSERT(kv.put("ttt", "6") == status::OK);
-	UT_ASSERT(kv.put("yyy", "记!") == status::OK);
+	ASSERT_STATUS(kv.put("aaa", "1"), status::OK);
+	ASSERT_STATUS(kv.put("bbb", "2"), status::OK);
+	ASSERT_STATUS(kv.put("ccc", "3"), status::OK);
+	ASSERT_STATUS(kv.put("rrr", "4"), status::OK);
+	ASSERT_STATUS(kv.put("sss", "5"), status::OK);
+	ASSERT_STATUS(kv.put("ttt", "6"), status::OK);
+	ASSERT_STATUS(kv.put("yyy", "记!"), status::OK);
 }
 
 /*

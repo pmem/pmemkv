@@ -20,7 +20,7 @@ static void test(int argc, char *argv[])
 	auto proto = PutToMapTest(n_inserts, key_length, value_length, kv);
 
 	auto s = kv.defrag(0, 100);
-	UT_ASSERTeq(s, pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	VerifyKv(proto, kv);
 

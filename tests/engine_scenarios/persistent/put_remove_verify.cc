@@ -8,22 +8,24 @@ using namespace pmem::kv;
 static void insert(pmem::kv::db &kv)
 {
 
-	UT_ASSERT(kv.put("key1", "value1") == status::OK);
-	UT_ASSERT(kv.put("key2", "value2") == status::OK);
-	UT_ASSERT(kv.put("key3", "value3") == status::OK);
-	UT_ASSERT(kv.remove("key2") == status::OK);
-	UT_ASSERT(kv.put("key3", "VALUE3") == status::OK);
+	ASSERT_STATUS(kv.put("key1", "value1"), status::OK);
+	ASSERT_STATUS(kv.put("key2", "value2"), status::OK);
+	ASSERT_STATUS(kv.put("key3", "value3"), status::OK);
+	ASSERT_STATUS(kv.remove("key2"), status::OK);
+	ASSERT_STATUS(kv.put("key3", "VALUE3"), status::OK);
 }
 
 static void check(pmem::kv::db &kv)
 {
 
 	std::string value1;
-	UT_ASSERT(kv.get("key1", &value1) == status::OK && value1 == "value1");
+	ASSERT_STATUS(kv.get("key1", &value1), status::OK);
+	UT_ASSERT(value1 == "value1");
 	std::string value2;
-	UT_ASSERT(kv.get("key2", &value2) == status::NOT_FOUND);
+	ASSERT_STATUS(kv.get("key2", &value2), status::NOT_FOUND);
 	std::string value3;
-	UT_ASSERT(kv.get("key3", &value3) == status::OK && value3 == "VALUE3");
+	ASSERT_STATUS(kv.get("key3", &value3), status::OK);
+	UT_ASSERT(value3 == "VALUE3");
 }
 
 static void test(int argc, char *argv[])

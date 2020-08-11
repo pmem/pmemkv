@@ -10,69 +10,69 @@ static void FailsToCreateInstanceWithNonExistentPath(std::string non_existent_pa
 {
 	pmem::kv::config config;
 	auto s = config.put_string("path", non_existent_path);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_uint64("force_create", 1);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_uint64("size", 5 * PMEMOBJ_MIN_POOL);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
 	s = kv.open(engine, std::move(config));
 
 	/* Not-existent path supplied */
 	// XXX - should be WRONG_PATH
-	UT_ASSERTeq(pmem::kv::status::UNKNOWN_ERROR, s);
+	ASSERT_STATUS(s, pmem::kv::status::UNKNOWN_ERROR);
 }
 
 static void FailsToCreateInstanceWithHugeSize(std::string path, std::string engine)
 {
 	pmem::kv::config config;
 	auto s = config.put_string("path", path);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_uint64("force_create", 1);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_uint64("size", 9223372036854775807);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
 	s = kv.open(engine, std::move(config));
 
 	/* Too big pool size supplied */
 	// XXX - should be WRONG_SIZE
-	UT_ASSERTeq(pmem::kv::status::UNKNOWN_ERROR, s);
+	ASSERT_STATUS(s, pmem::kv::status::UNKNOWN_ERROR);
 }
 
 static void FailsToCreateInstanceWithTinySize(std::string path, std::string engine)
 {
 	pmem::kv::config config;
 	auto s = config.put_string("path", path);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_uint64("force_create", 1);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_uint64("size", PMEMOBJ_MIN_POOL - 1);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
 	s = kv.open(engine, std::move(config));
 
 	/* Too small pool size supplied */
 	// XXX - should be WRONG_SIZE
-	UT_ASSERTeq(pmem::kv::status::UNKNOWN_ERROR, s);
+	ASSERT_STATUS(s, pmem::kv::status::UNKNOWN_ERROR);
 }
 
 static void FailsToCreateInstanceWithNoSize(std::string path, std::string engine)
 {
 	pmem::kv::config config;
 	auto s = config.put_string("path", path);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_uint64("force_create", 1);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
 	s = kv.open(engine, std::move(config));
 
 	/* No size supplied */
-	UT_ASSERTeq(pmem::kv::status::INVALID_ARGUMENT, s);
+	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
 static void FailsToCreateInstanceWithPathAndOid(std::string path, std::string engine)
@@ -81,34 +81,34 @@ static void FailsToCreateInstanceWithPathAndOid(std::string path, std::string en
 
 	pmem::kv::config config;
 	auto s = config.put_string("path", path);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_object("oid", &oid, nullptr);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_uint64("force_create", 1);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_uint64("size", 5 * PMEMOBJ_MIN_POOL);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
 	s = kv.open(engine, std::move(config));
 
 	/* Both path and oid supplied */
-	UT_ASSERTeq(pmem::kv::status::INVALID_ARGUMENT, s);
+	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
 static void FailsToCreateInstanceWithNoPathAndOid(std::string path, std::string engine)
 {
 	pmem::kv::config config;
 	auto s = config.put_uint64("force_create", 1);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_uint64("size", 5 * PMEMOBJ_MIN_POOL);
-	UT_ASSERTeq(pmem::kv::status::OK, s);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
 	s = kv.open(engine, std::move(config));
 
 	/* No path and no oid supplied */
-	UT_ASSERTeq(pmem::kv::status::INVALID_ARGUMENT, s);
+	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
 static void test(int argc, char *argv[])

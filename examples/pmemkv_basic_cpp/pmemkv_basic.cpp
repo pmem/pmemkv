@@ -72,8 +72,10 @@ int main(int argc, char *argv[])
 	s = kv->exists("key1");
 	assert(s == status::NOT_FOUND);
 
-	/* example of using pmem:kv:status with std::ostream and operator<<,
+	/* examples of using pmem:kv:status with std::ostream and operator<<,
 	 * it's useful for debugging. */
+	std::cout << s << std::endl;
+
 	std::ostringstream oss;
 	oss << s;
 	assert(oss.str() == "NOT_FOUND (2)");

@@ -16,7 +16,7 @@ void validate(pmem::kv::db &kv)
 		auto s = kv.get(istr, [&](pmem::kv::string_view val) {
 			UT_ASSERT(val.compare(istr + "!") == 0);
 		});
-		UT_ASSERTeq(s, pmem::kv::status::OK);
+		ASSERT_STATUS(s, pmem::kv::status::OK);
 	}
 }
 
@@ -24,7 +24,7 @@ void populate(pmem::kv::db &kv)
 {
 	for (size_t i = 0; i < init_iterations; i++) {
 		std::string istr = std::to_string(i);
-		UT_ASSERTeq(kv.put(istr, (istr + "!")), pmem::kv::status::OK);
+		ASSERT_STATUS(kv.put(istr, (istr + "!")), pmem::kv::status::OK);
 	}
 }
 
@@ -32,11 +32,11 @@ void LongStringTest(pmem::kv::db &kv)
 {
 	populate(kv);
 
-	UT_ASSERT(kv.remove("100") == pmem::kv::status::OK);
+	ASSERT_STATUS(kv.remove("100"), pmem::kv::status::OK);
 	tx_alloc_should_fail = true;
-	UT_ASSERT(kv.put("100", LONGSTR) == pmem::kv::status::OUT_OF_MEMORY);
+	ASSERT_STATUS(kv.put("100", LONGSTR), pmem::kv::status::OUT_OF_MEMORY);
 	tx_alloc_should_fail = false;
-	UT_ASSERT(kv.put("100", "100!") == pmem::kv::status::OK);
+	ASSERT_STATUS(kv.put("100", "100!"), pmem::kv::status::OK);
 
 	validate(kv);
 }
@@ -47,11 +47,11 @@ void ShortKeyTest(pmem::kv::db &kv)
 
 	tx_alloc_should_fail = true;
 	for (int i = 0; i <= 99999; i++) {
-		UT_ASSERT(kv.put("123456", LONGSTR) == pmem::kv::status::OUT_OF_MEMORY);
+		ASSERT_STATUS(kv.put("123456", LONGSTR), pmem::kv::status::OUT_OF_MEMORY);
 	}
 	tx_alloc_should_fail = false;
-	UT_ASSERT(kv.remove("4567") == pmem::kv::status::OK);
-	UT_ASSERT(kv.put("4567", "4567!") == pmem::kv::status::OK);
+	ASSERT_STATUS(kv.remove("4567"), pmem::kv::status::OK);
+	ASSERT_STATUS(kv.put("4567", "4567!"), pmem::kv::status::OK);
 
 	validate(kv);
 }
@@ -62,12 +62,12 @@ void LongKeyTest(pmem::kv::db &kv)
 
 	tx_alloc_should_fail = true;
 	for (int i = 0; i <= 99999; i++) {
-		UT_ASSERT(kv.put(LONGSTR, "1") == pmem::kv::status::OUT_OF_MEMORY);
-		UT_ASSERT(kv.put(LONGSTR, LONGSTR) == pmem::kv::status::OUT_OF_MEMORY);
+		ASSERT_STATUS(kv.put(LONGSTR, "1"), pmem::kv::status::OUT_OF_MEMORY);
+		ASSERT_STATUS(kv.put(LONGSTR, LONGSTR), pmem::kv::status::OUT_OF_MEMORY);
 	}
 	tx_alloc_should_fail = false;
-	UT_ASSERT(kv.remove("34567") == pmem::kv::status::OK);
-	UT_ASSERT(kv.put("34567", "34567!") == pmem::kv::status::OK);
+	ASSERT_STATUS(kv.remove("34567"), pmem::kv::status::OK);
+	ASSERT_STATUS(kv.put("34567", "34567!"), pmem::kv::status::OK);
 
 	validate(kv);
 }
