@@ -8,39 +8,44 @@ using namespace pmem::kv;
 static void PutKeysOfDifferentSizesTest(pmem::kv::db &kv)
 {
 	std::string value;
-	UT_ASSERT(kv.put("123456789ABCDE", "A") == status::OK);
+	ASSERT_STATUS(kv.put("123456789ABCDE", "A"), status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 1);
-	UT_ASSERT(kv.get("123456789ABCDE", &value) == status::OK && value == "A");
+	ASSERT_STATUS(kv.get("123456789ABCDE", &value), status::OK);
+	UT_ASSERT(value == "A");
 
 	std::string value2;
-	UT_ASSERT(kv.put("123456789ABCDEF", "B") == status::OK);
+	ASSERT_STATUS(kv.put("123456789ABCDEF", "B"), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 2);
-	UT_ASSERT(kv.get("123456789ABCDEF", &value2) == status::OK && value2 == "B");
+	ASSERT_STATUS(kv.get("123456789ABCDEF", &value2), status::OK);
+	UT_ASSERT(value2 == "B");
 
 	std::string value3;
-	UT_ASSERT(kv.put("12345678ABCDEFG", "C") == status::OK);
+	ASSERT_STATUS(kv.put("12345678ABCDEFG", "C"), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 3);
-	UT_ASSERT(kv.get("12345678ABCDEFG", &value3) == status::OK && value3 == "C");
+	ASSERT_STATUS(kv.get("12345678ABCDEFG", &value3), status::OK);
+	UT_ASSERT(value3 == "C");
 
 	std::string value4;
-	UT_ASSERT(kv.put("123456789", "D") == status::OK);
+	ASSERT_STATUS(kv.put("123456789", "D"), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 4);
-	UT_ASSERT(kv.get("123456789", &value4) == status::OK && value4 == "D");
+	ASSERT_STATUS(kv.get("123456789", &value4), status::OK);
+	UT_ASSERT(value4 == "D");
 
 	std::string value5;
-	UT_ASSERT(kv.put("123456789ABCDEFGHI", "E") == status::OK);
+	ASSERT_STATUS(kv.put("123456789ABCDEFGHI", "E"), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
-	UT_ASSERT(kv.count_all(cnt) == status::OK);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 5);
-	UT_ASSERT(kv.get("123456789ABCDEFGHI", &value5) == status::OK && value5 == "E");
+	ASSERT_STATUS(kv.get("123456789ABCDEFGHI", &value5), status::OK);
+	UT_ASSERT(value5 == "E");
 }
 
 static void test(int argc, char *argv[])

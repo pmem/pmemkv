@@ -33,7 +33,7 @@ std::map<std::string, std::string> PutToMapTest(size_t n_inserts, size_t key_len
 		const auto &val = record.second;
 
 		auto s = kv.put(key, val);
-		UT_ASSERTeq(status::OK, s);
+		ASSERT_STATUS(s, status::OK);
 	}
 
 	return proto_dictionary;
@@ -49,6 +49,6 @@ void VerifyKv(const std::map<std::string, std::string> &prototype, pmem::kv::db 
 		auto s = kv.get(key, [&](string_view value) {
 			UT_ASSERT(value.compare(val) == 0);
 		});
-		UT_ASSERTeq(status::OK, s);
+		ASSERT_STATUS(s, status::OK);
 	}
 }
