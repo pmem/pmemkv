@@ -12,7 +12,7 @@ set -e
 OS=$1
 
 # v1.10.0, contains new libmemkind namespace
-MEMKIND_VERSION=v1.10.0
+MEMKIND_VERSION=v1.10.1-rc2
 
 WORKDIR=$(pwd)
 
