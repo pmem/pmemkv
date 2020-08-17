@@ -66,6 +66,10 @@ if(COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
 endif()
 
+# Check compilation of compatibility test.
+# It's executed separately as CI job (run-compatibility.sh).
+add_subdirectory(compatibility)
+
 
 ## Common tests
 build_test(wrong_engine_name_test wrong_engine_name_test.cc)
