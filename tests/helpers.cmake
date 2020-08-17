@@ -36,13 +36,6 @@ endfunction()
 function(finish)
     print_logs()
 
-    if(EXISTS ${SRC_DIR}/${TEST_NAME}.err.match)
-        match(${BIN_DIR}/${TEST_NAME}.err ${SRC_DIR}/${TEST_NAME}.err.match)
-    endif()
-    if(EXISTS ${SRC_DIR}/${TEST_NAME}.out.match)
-        match(${BIN_DIR}/${TEST_NAME}.out ${SRC_DIR}/${TEST_NAME}.out.match)
-    endif()
-
     execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${PARENT_DIR}/${TEST_NAME})
 endfunction()
 
@@ -166,35 +159,27 @@ function(execute_common expect_success output_file name)
 
     print_logs()
 
-    # memcheck and pmemcheck match files should follow name pattern:
-    # testname_testcaseno_memcheck/pmemcheck.err.match
-    # If they do exist, ignore test result - it will be verified during
-    # log matching in finish() function.
-    if(EXISTS ${SRC_DIR}/${TEST_NAME}.err.match)
-        valgrind_ignore_warnings(${BIN_DIR}/${TEST_NAME}.err)
     # pmemcheck is a special snowflake and it doesn't set exit code when
     # it detects an error, so we have to look at its output if match file
     # was not found.
-    else()
-        if(${TRACER} STREQUAL pmemcheck)
-            if(NOT EXISTS ${BIN_DIR}/${TEST_NAME}.err)
-                message(FATAL_ERROR "${TEST_NAME}.err not found.")
-            endif()
-
-            file(READ ${BIN_DIR}/${TEST_NAME}.err PMEMCHECK_ERR)
-            message(STATUS "Stderr:\n${PMEMCHECK_ERR}\nEnd of stderr")
-            if(NOT PMEMCHECK_ERR MATCHES "ERROR SUMMARY: 0")
-                message(FATAL_ERROR "${TRACE} ${name} ${ARGN} failed: ${res}")
-            endif()
+    if(${TRACER} STREQUAL pmemcheck)
+        if(NOT EXISTS ${BIN_DIR}/${TEST_NAME}.err)
+            message(FATAL_ERROR "${TEST_NAME}.err not found.")
         endif()
 
-        if(res AND expect_success)
+        file(READ ${BIN_DIR}/${TEST_NAME}.err PMEMCHECK_ERR)
+        message(STATUS "Stderr:\n${PMEMCHECK_ERR}\nEnd of stderr")
+        if(NOT PMEMCHECK_ERR MATCHES "ERROR SUMMARY: 0")
             message(FATAL_ERROR "${TRACE} ${name} ${ARGN} failed: ${res}")
         endif()
+    endif()
 
-        if(NOT res AND NOT expect_success)
-            message(FATAL_ERROR "${TRACE} ${name} ${ARGN} unexpectedly succeeded: ${res}")
-        endif()
+    if(res AND expect_success)
+        message(FATAL_ERROR "${TRACE} ${name} ${ARGN} failed: ${res}")
+    endif()
+
+    if(NOT res AND NOT expect_success)
+        message(FATAL_ERROR "${TRACE} ${name} ${ARGN} unexpectedly succeeded: ${res}")
     endif()
 
     if(TESTS_USE_FORCED_PMEM)
