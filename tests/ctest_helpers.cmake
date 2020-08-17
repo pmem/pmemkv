@@ -141,7 +141,7 @@ function(add_testcase executable test_name tracer testcase cmake_script)
 			${GLOBAL_TEST_ARGS}
 			-DTEST_NAME=${test_name}_${testcase}_${tracer}
 			-DTESTCASE=${testcase}
-			-DSRC_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${test_name}
+			-DPARENT_SRC_DIR=${CMAKE_CURRENT_SOURCE_DIR}
 			-DBIN_DIR=${CMAKE_CURRENT_BINARY_DIR}/${test_name}_${testcase}_${tracer}
 			-DTEST_EXECUTABLE=$<TARGET_FILE:${executable}>
 			-DTRACER=${tracer}

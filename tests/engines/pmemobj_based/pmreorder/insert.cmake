@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright 2020, Intel Corporation
 
-include(${SRC_DIR}/../helpers.cmake)
-include(${SRC_DIR}/../engines/pmemobj_based/helpers.cmake)
+include(${PARENT_SRC_DIR}/helpers.cmake)
+include(${PARENT_SRC_DIR}/engines/pmemobj_based/helpers.cmake)
 
 setup()
 
@@ -16,6 +16,6 @@ make_config({"path":"${DIR}/testfile"})
 
 execute(${TEST_EXECUTABLE} ${ENGINE} ${CONFIG} create ${PARAMS})
 pmreorder_create_store_log(${DIR}/testfile ${TEST_EXECUTABLE} ${ENGINE} ${CONFIG} insert ${PARAMS})
-pmreorder_execute(true ReorderAccumulative ${SRC_DIR}/pmreorder.conf ${TEST_EXECUTABLE} ${ENGINE} ${CONFIG} open ${PARAMS})
+pmreorder_execute(true ReorderAccumulative ${PARENT_SRC_DIR}/engines/pmemobj_based/pmreorder/pmreorder.conf ${TEST_EXECUTABLE} ${ENGINE} ${CONFIG} open ${PARAMS})
 
 finish()
