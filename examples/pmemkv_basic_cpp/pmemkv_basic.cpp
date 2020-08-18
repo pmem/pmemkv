@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <libpmemkv.hpp>
+#include <sstream>
 
 #define LOG(msg) std::cout << msg << std::endl
 
@@ -70,6 +71,16 @@ int main(int argc, char *argv[])
 	assert(s == status::OK);
 	s = kv->exists("key1");
 	assert(s == status::NOT_FOUND);
+
+	/* Examples of using pmem:kv:status with std::ostream and operator<<,
+	 * it's useful for debugging. */
+	/* Print status */
+	std::cout << s << std::endl;
+
+	/* Write status to ostringstream */
+	std::ostringstream oss;
+	oss << s;
+	assert(oss.str() == "NOT_FOUND (2)");
 
 	LOG("Closing database");
 	delete kv;

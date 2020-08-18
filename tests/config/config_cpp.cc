@@ -35,72 +35,72 @@ static void simple_test()
 	UT_ASSERT(cfg != nullptr);
 
 	status s = cfg->put_string("string", "abc");
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	s = cfg->put_int64("int", 123);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	custom_type *ptr = new custom_type;
 	ptr->a = INIT_VAL;
 	ptr->b = INIT_VAL;
 	s = cfg->put_object("object_ptr", ptr, nullptr);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	s = cfg->put_data("object", ptr);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	int array[3] = {1, 15, 77};
 	s = cfg->put_data("array", array, 3);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	custom_type *ptr_deleter = new custom_type;
 	ptr_deleter->a = INIT_VAL;
 	ptr_deleter->b = INIT_VAL;
 	s = cfg->put_object("object_ptr_with_deleter", ptr_deleter,
 			    (void (*)(void *)) & deleter);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	std::string value_string;
 	s = cfg->get_string("string", value_string);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(value_string == "abc");
 
 	int64_t value_int;
 	s = cfg->get_int64("int", value_int);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(value_int, 123);
 
 	custom_type *value_custom_ptr;
 	s = cfg->get_object("object_ptr", value_custom_ptr);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(value_custom_ptr->a, INIT_VAL);
 	UT_ASSERTeq(value_custom_ptr->b, INIT_VAL);
 
 	custom_type *value_custom_ptr_deleter;
 	s = cfg->get_object("object_ptr_with_deleter", value_custom_ptr_deleter);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(value_custom_ptr_deleter->a, INIT_VAL);
 	UT_ASSERTeq(value_custom_ptr_deleter->b, INIT_VAL);
 
 	custom_type *value_custom;
-	size_t value_custom_count;
+	size_t value_custom_count = 0;
 	s = cfg->get_data("object", value_custom, value_custom_count);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(value_custom_count, 1U);
 	UT_ASSERTeq(value_custom->a, INIT_VAL);
 	UT_ASSERTeq(value_custom->b, INIT_VAL);
 
 	int *value_array;
-	size_t value_array_count;
+	size_t value_array_count = 0;
 	s = cfg->get_data("array", value_array, value_array_count);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(value_array_count, 3U);
 	UT_ASSERTeq(value_array[0], 1);
 	UT_ASSERTeq(value_array[1], 15);
 	UT_ASSERTeq(value_array[2], 77);
 
 	int64_t none;
-	UT_ASSERTeq(cfg->get_int64("non-existent", none), status::NOT_FOUND);
+	ASSERT_STATUS(cfg->get_int64("non-existent", none), status::NOT_FOUND);
 
 	delete cfg;
 	cfg = nullptr;
@@ -126,7 +126,7 @@ static void object_unique_ptr_default_deleter_test()
 	ptr_default->a = INIT_VAL;
 	ptr_default->b = INIT_VAL;
 	auto s = cfg->put_object("object_ptr", std::move(ptr_default));
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	delete cfg;
 }
@@ -138,11 +138,11 @@ static void object_unique_ptr_nullptr_test()
 
 	auto ptr = std::unique_ptr<custom_type>(nullptr);
 	auto s = cfg->put_object("object_ptr", std::move(ptr));
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	custom_type *raw_ptr;
 	s = cfg->get_object("object_ptr", raw_ptr);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(raw_ptr, nullptr);
 
 	delete cfg;
@@ -166,7 +166,7 @@ static void object_unique_ptr_custom_deleter_test()
 	auto *raw_ptr = ptr_custom.get();
 
 	auto s = cfg->put_object("object_ptr", std::move(ptr_custom));
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	delete cfg;
 
@@ -187,53 +187,53 @@ static void integral_conversion_test()
 	UT_ASSERT(cfg != nullptr);
 
 	status s = cfg->put_int64("int", 123);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	s = cfg->put_uint64("uint", 123);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	s = cfg->put_int64("negative-int", -123);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	s = cfg->put_uint64("uint-max", std::numeric_limits<size_t>::max());
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	int64_t int_s;
 	s = cfg->get_int64("int", int_s);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(int_s, 123);
 
 	size_t int_us;
 	s = cfg->get_uint64("int", int_us);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(int_us, 123U);
 
 	int64_t uint_s;
 	s = cfg->get_int64("uint", uint_s);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(uint_s, 123);
 
 	size_t uint_us;
 	s = cfg->get_uint64("uint", uint_us);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(uint_us, 123U);
 
 	int64_t neg_int_s;
 	s = cfg->get_int64("negative-int", neg_int_s);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(neg_int_s, -123);
 
 	size_t neg_int_us;
 	s = cfg->get_uint64("negative-int", neg_int_us);
-	UT_ASSERTeq(s, status::CONFIG_TYPE_ERROR);
+	ASSERT_STATUS(s, status::CONFIG_TYPE_ERROR);
 
 	int64_t uint_max_s;
 	s = cfg->get_int64("uint-max", uint_max_s);
-	UT_ASSERTeq(s, status::CONFIG_TYPE_ERROR);
+	ASSERT_STATUS(s, status::CONFIG_TYPE_ERROR);
 
 	size_t uint_max_us;
 	s = cfg->get_uint64("uint-max", uint_max_us);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(uint_max_us, std::numeric_limits<size_t>::max());
 
 	delete cfg;
@@ -254,13 +254,13 @@ static void constructors_test()
 
 	/* put value to C++ config */
 	auto s = cfg->put_int64("int", 65535);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	/* use move constructor and test if data is still accessible */
 	config *move_config = new config(std::move(*cfg));
 	int64_t int_s;
 	s = move_config->get_int64("int", int_s);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(int_s, 65535);
 
 	/* release new C++ config and test if data is accessible in C config */
@@ -271,7 +271,7 @@ static void constructors_test()
 
 	/* check if moved config is empty */
 	s = move_config->get_int64("int", int_s);
-	UT_ASSERTeq(s, status::NOT_FOUND);
+	ASSERT_STATUS(s, status::NOT_FOUND);
 
 	/* cleanup */
 	pmemkv_config_delete(c_cfg);
@@ -296,24 +296,26 @@ static void not_found_test()
 	custom_type *my_object;
 	size_t my_object_count = 0;
 
-	UT_ASSERTeq(cfg->get_string("string", my_string), status::NOT_FOUND);
-	UT_ASSERTeq(cfg->get_int64("int", my_int), status::NOT_FOUND);
-	UT_ASSERTeq(cfg->get_uint64("uint", my_uint), status::NOT_FOUND);
-	UT_ASSERTeq(cfg->get_object("object", my_object), status::NOT_FOUND);
-	UT_ASSERTeq(cfg->get_data("data", my_object, my_object_count), status::NOT_FOUND);
+	ASSERT_STATUS(cfg->get_string("string", my_string), status::NOT_FOUND);
+	ASSERT_STATUS(cfg->get_int64("int", my_int), status::NOT_FOUND);
+	ASSERT_STATUS(cfg->get_uint64("uint", my_uint), status::NOT_FOUND);
+	ASSERT_STATUS(cfg->get_object("object", my_object), status::NOT_FOUND);
+	ASSERT_STATUS(cfg->get_data("data", my_object, my_object_count),
+		      status::NOT_FOUND);
 	UT_ASSERTeq(my_object_count, 0U);
 
 	/* initialize config with any put */
 	cfg->put_int64("init", 0);
 
 	/* all gets should return NOT_FOUND when looking for non-existing key */
-	UT_ASSERTeq(cfg->get_string("non-existent-string", my_string), status::NOT_FOUND);
-	UT_ASSERTeq(cfg->get_int64("non-existent-int", my_int), status::NOT_FOUND);
-	UT_ASSERTeq(cfg->get_uint64("non-existent-uint", my_uint), status::NOT_FOUND);
-	UT_ASSERTeq(cfg->get_object("non-existent-object_ptr", my_object),
-		    status::NOT_FOUND);
-	UT_ASSERTeq(cfg->get_data("non-existent-data", my_object, my_object_count),
-		    status::NOT_FOUND);
+	ASSERT_STATUS(cfg->get_string("non-existent-string", my_string),
+		      status::NOT_FOUND);
+	ASSERT_STATUS(cfg->get_int64("non-existent-int", my_int), status::NOT_FOUND);
+	ASSERT_STATUS(cfg->get_uint64("non-existent-uint", my_uint), status::NOT_FOUND);
+	ASSERT_STATUS(cfg->get_object("non-existent-object_ptr", my_object),
+		      status::NOT_FOUND);
+	ASSERT_STATUS(cfg->get_data("non-existent-data", my_object, my_object_count),
+		      status::NOT_FOUND);
 	UT_ASSERTeq(my_object_count, 0U);
 
 	delete cfg;
