@@ -6,6 +6,34 @@ include(ctest_helpers.cmake)
 ## Setup
 add_custom_target(tests)
 
+# Find valgrind
+if(PKG_CONFIG_FOUND)
+	pkg_check_modules(VALGRIND QUIET valgrind)
+else()
+	find_package(VALGRIND QUIET)
+endif()
+
+if(NOT VALGRIND_FOUND AND TESTS_USE_VALGRIND)
+	message(FATAL_ERROR "Valgrind not found, but flag TESTS_USE_VALGRIND was set.")
+elseif(NOT VALGRIND_FOUND)
+	message(WARNING "Valgrind not found. Valgrind tests will not be performed.")
+endif()
+
+# Find libpmem & libpmemobj
+if(PKG_CONFIG_FOUND)
+	pkg_check_modules(LIBPMEMOBJ REQUIRED libpmemobj>=${LIBPMEMOBJ_REQUIRED_VERSION})
+	pkg_check_modules(LIBPMEM REQUIRED libpmem>=${LIBPMEM_REQUIRED_VERSION})
+else()
+	find_package(LIBPMEMOBJ REQUIRED ${LIBPMEMOBJ_REQUIRED_VERSION})
+	find_package(LIBPMEM REQUIRED ${LIBPMEM_REQUIRED_VERSION})
+endif()
+
+find_pmemcheck()
+find_libunwind()
+find_pmreorder()
+find_pmempool()
+find_gdb()
+
 # Checks for when DEVELOPER_MODE is ON
 add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.c
@@ -55,17 +83,12 @@ if(LIBUNWIND_FOUND)
 	target_compile_definitions(test_backtrace PUBLIC USE_LIBUNWIND=1)
 endif()
 
-find_pmreorder()
-find_pmempool()
-find_gdb()
-
 add_executable(check_is_pmem common/check_is_pmem.cpp)
 target_link_libraries(check_is_pmem ${LIBPMEM_LIBRARIES})
 
 if(COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
 endif()
-
 
 ## Common tests
 build_test(wrong_engine_name_test wrong_engine_name_test.cc)

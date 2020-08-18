@@ -15,7 +15,8 @@ function(set_version VERSION)
 	endif()
 
 	execute_process(COMMAND git describe
-			OUTPUT_VARIABLE GIT_VERSION)
+			OUTPUT_VARIABLE GIT_VERSION
+			ERROR_QUIET)
 	if(GIT_VERSION)
 		# 1.5-rc1-19-gb8f78a329 -> 1.5-rc1.git19.gb8f78a329
 		string(REGEX MATCHALL
@@ -45,30 +46,6 @@ function(set_version VERSION)
 		set(VERSION
 			${GIT_COMMIT}
 			PARENT_SCOPE)
-	endif()
-endfunction()
-
-function(find_pmemcheck)
-	set(ENV{PATH} ${VALGRIND_PREFIX}/bin:$ENV{PATH})
-	execute_process(COMMAND valgrind --tool=pmemcheck --help
-			RESULT_VARIABLE VALGRIND_PMEMCHECK_RET
-			OUTPUT_QUIET
-			ERROR_QUIET)
-	if(VALGRIND_PMEMCHECK_RET)
-		set(VALGRIND_PMEMCHECK_FOUND 0 CACHE INTERNAL "")
-	else()
-		set(VALGRIND_PMEMCHECK_FOUND 1 CACHE INTERNAL "")
-	endif()
-
-	if(VALGRIND_PMEMCHECK_FOUND)
-		execute_process(COMMAND valgrind --tool=pmemcheck true
-				ERROR_VARIABLE PMEMCHECK_OUT
-				OUTPUT_QUIET)
-
-		string(REGEX MATCH ".*pmemcheck-([0-9.]+),.*" PMEMCHECK_OUT "${PMEMCHECK_OUT}")
-		set(PMEMCHECK_VERSION ${CMAKE_MATCH_1} CACHE INTERNAL "")
-	else()
-		message(WARNING "Valgrind pmemcheck NOT found. Pmemcheck tests will not be performed.")
 	endif()
 endfunction()
 
