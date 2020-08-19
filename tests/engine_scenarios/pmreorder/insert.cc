@@ -2,7 +2,7 @@
 /* Copyright 2020, Intel Corporation */
 
 /*
- * break_insert.cpp -- break insert pmreorder test
+ * insert.cc -- insert pmreorder test
  */
 
 #include "unittest.hpp"
