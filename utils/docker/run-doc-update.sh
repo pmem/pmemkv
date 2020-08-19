@@ -61,7 +61,8 @@ rm -r ./${VERSION}
 mkdir -p ./${VERSION}/manpages/
 mkdir -p ./${VERSION}/doxygen/
 
-cp -f $CURR_DIR/doc/*.md ./${VERSION}/manpages/
+# copy all manpages (with format like <manpage>.<section>.md)
+cp -f $CURR_DIR/doc/*.*.md ./${VERSION}/manpages/
 cp -fr $CURR_DIR/cpp_html/* ./${VERSION}/doxygen/
 
 # Fix the title tag:
