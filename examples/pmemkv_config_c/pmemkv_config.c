@@ -2,7 +2,8 @@
 /* Copyright 2019-2020, Intel Corporation */
 
 /*
- * pmemkv_config.c -- example usage of pmemkv config API
+ * pmemkv_config.c -- example usage of the part of the pmemkv config API
+ * to set and get data based on their data type.
  */
 
 #include <assert.h>
