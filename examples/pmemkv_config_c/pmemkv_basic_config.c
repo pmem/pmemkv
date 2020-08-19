@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
 	ASSERT(config != NULL);
 
 	/* Add path parameter to config. Meaning of this is dependent on chosen engine.
+<<<<<<< HEAD
 	 *  E.g. if config is used with cmap engine,
 	 *  it is a path to a database file or to a poolset file. However for
 	 *  vcmap it is a path to an existing directory */
@@ -51,6 +52,15 @@ int main(int argc, char *argv[])
 	ASSERT(status == PMEMKV_STATUS_OK);
 
 	/* Specifies size of the database */
+=======
+	 *  E.g. if config is used with cmap enine,
+	 *  it is path to a database file or to a poolset file. However for
+	 *  vcmap it is path to an existing directory */
+	int status = pmemkv_config_put_path(config, argv[1]);
+	ASSERT(status == PMEMKV_STATUS_OK);
+
+	/* specifies size of the database */
+>>>>>>> dc091c0... Add example for config setters API
 	status = pmemkv_config_put_size(config, SIZE);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
@@ -65,7 +75,11 @@ int main(int argc, char *argv[])
 	status = pmemkv_config_put_comparator(config, cmp);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
+<<<<<<< HEAD
 	/* Adds pointer to oid (for details see libpmemkv(7)) which points to engine
+=======
+	/* Add Pointer to oid (for details see libpmemobj(7)) which points to engine
+>>>>>>> dc091c0... Add example for config setters API
 	 * data to config */
 	PMEMoid oid;
 	status = pmemkv_config_put_oid(config, &oid);
