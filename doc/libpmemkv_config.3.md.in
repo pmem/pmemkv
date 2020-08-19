@@ -225,7 +225,20 @@ Possible return values are:
 
 # EXAMPLE #
 
-The following example is taken from `examples/pmemkv_config_c/pmemkv_config.c`.
+The following examples are taken from `examples/pmemkv_config_c` directory.
+
+## BASIC EXAMPLE ##
+
+Usage of `pmemkv_config_put_path()`, `pmemkv_config_put_size()`, `pmemkv_config_put_force_create()`, `pmemkv_config_put_oid()` and `pmemkv_config_put_comparator()`.
+
+
+```c
+@C_BASIC_EXAMPLE@
+```
+
+## TYPE BASED CONFIGURATION EXAMPLE ##
+
+Usage of `pmemkv_config_put_int64()`, `pmemkv_config_put_uint64()`, `pmemkv_config_put_data()`, `pmemkv_config_put_object()` and `pmemkv_config_put_string()` and corresponding `pmemkv_config_get_*()` functions.
 
 ```c
 @C_EXAMPLE@
