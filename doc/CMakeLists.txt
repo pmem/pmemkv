@@ -27,7 +27,10 @@ if(PANDOC)
 
 	strip_example(
 		${CMAKE_SOURCE_DIR}/examples/pmemkv_config_c/pmemkv_config.c
-		C_EXAMPLE)
+		CONFIG_TYPE_BASED_EXAMPLE)
+	strip_example(
+		${CMAKE_SOURCE_DIR}/examples/pmemkv_config_c/pmemkv_basic_config.c
+		CONFIG_BASIC_EXAMPLE)
 	configure_file(${CMAKE_SOURCE_DIR}/doc/libpmemkv_config.3.md.in
 		${CMAKE_BINARY_DIR}/man/tmp/libpmemkv_config.3.md)
 
