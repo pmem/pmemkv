@@ -47,6 +47,9 @@ target_link_libraries(example-pmemkv_basic_c pmemkv)
 add_example(pmemkv_pmemobj_cpp pmemkv_pmemobj_cpp/pmemkv_pmemobj.cpp)
 target_link_libraries(example-pmemkv_pmemobj_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
 
+add_example(pmemkv_basic_config_c pmemkv_config_c/pmemkv_basic_config.c)
+target_link_libraries(example-pmemkv_basic_config_c pmemkv ${LIBPMEMOBJ++_LIBRARIES})
+
 if(BUILD_JSON_CONFIG)
 	add_example(pmemkv_config_c pmemkv_config_c/pmemkv_config.c)
 	target_link_libraries(example-pmemkv_config_c pmemkv pmemkv_json_config)
