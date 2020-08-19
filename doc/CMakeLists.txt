@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019, Intel Corporation
+# Copyright 2019-2020, Intel Corporation
 
 add_check_whitespace(man
-	${CMAKE_CURRENT_SOURCE_DIR}/*.md)
+	${CMAKE_CURRENT_SOURCE_DIR}/*.*)
 
+# prepare C documenation (using manpage format)
 find_program(PANDOC NAMES pandoc)
 if(PANDOC)
 	# Prepare C_EXAMPLE content to inject, based on the code
@@ -75,6 +76,7 @@ else()
 	message(WARNING "pandoc not found - man pages will not be generated")
 endif()
 
+# prepare C++ documentation (using doxygen format)
 include(FindDoxygen)
 if(DOXYGEN_FOUND AND DOXYGEN_DOT_FOUND)
 	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv.Doxyfile.in"
@@ -86,6 +88,7 @@ else()
 	message(WARNING "Dot tool not found - Doxygen documentation will not be generated")
 endif()
 
+# set 'doc' target for make
 if(PANDOC AND DOXYGEN_FOUND AND DOXYGEN_DOT_FOUND)
 	add_custom_target(doc ALL
 		${DOXYGEN_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/libpmemkv.Doxyfile"
