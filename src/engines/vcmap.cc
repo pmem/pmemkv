@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2020, Intel Corporation */
 
 #include "vcmap.h"
 #include "../out.h"
-#include <libpmemobj++/transaction.hpp>
 
 #include <iostream>
 
@@ -96,6 +95,27 @@ status vcmap::get(string_view key, get_v_callback *callback, void *arg)
 
 	callback(result->second.c_str(), result->second.size(), arg);
 	return status::OK;
+}
+
+status vcmap::update(string_view key, size_t v_offset, size_t v_size,
+		     update_v_callback *callback, void *arg)
+{
+	LOG("update key=" << std::string(key.data(), key.size()));
+
+	map_t::accessor result;
+	auto result_found = pmem_kv_container.find(
+		result, pmem_string(key.data(), key.size(), ch_allocator));
+	if (!result_found) {
+		LOG("  key not found");
+		return status::NOT_FOUND;
+	}
+
+	char *editable_element = const_cast<char *>(result->second.c_str()) + v_offset;
+	auto editable_element_size = std::min(v_size, result->second.size());
+
+	return snapshot(editable_element, editable_element_size, [&]() {
+		return callback(editable_element, editable_element_size, arg);
+	});
 }
 
 status vcmap::put(string_view key, string_view value)

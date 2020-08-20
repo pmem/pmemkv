@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2017-2020, Intel Corporation */
 
+#include <algorithm>
+
 #include "engine.h"
 
 #include "engines/blackhole.h"
@@ -230,6 +232,16 @@ status engine_base::exists(string_view key)
 status engine_base::defrag(double start_percent, double amount_percent)
 {
 	return status::NOT_SUPPORTED;
+}
+
+status engine_base::snapshot(char *element, size_t size, std::function<int()> f)
+{
+	auto snapshot = std::string(element, size);
+	if (f() != 0) {
+		std::copy(snapshot.begin(), snapshot.end(), element);
+		return status::STOPPED_BY_CB;
+	}
+	return status::OK;
 }
 
 } // namespace kv

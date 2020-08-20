@@ -31,6 +31,12 @@ int get_kv_callback(const char *k, size_t kb, const char *value, size_t value_by
 	return 0;
 }
 
+int update_callback(char *value, size_t valuebytes, void *arg)
+{
+	memset(value, 'D', valuebytes);
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	if (argc < 2) {
@@ -81,6 +87,15 @@ int main(int argc, char *argv[])
 	pmemkv_put(db, key2, strlen(key2), value2, strlen(value2));
 	pmemkv_put(db, key3, strlen(key3), value3, strlen(value3));
 	pmemkv_get_all(db, &get_kv_callback, NULL);
+
+	LOG("Updating key");
+	s = pmemkv_update(db, key1, strlen(key1), 0, 2, update_callback, NULL);
+	assert(s == PMEMKV_STATUS_OK);
+
+	LOG("Reading changed key back");
+	s = pmemkv_get_copy(db, key1, strlen(key1), val, MAX_VAL_LEN, NULL);
+	assert(s == PMEMKV_STATUS_OK);
+	assert(!strcmp(val, "DDlue1"));
 
 	LOG("Removing existing key");
 	s = pmemkv_remove(db, key1, strlen(key1));

@@ -4,7 +4,7 @@
 #include "unittest.hpp"
 
 /**
- * Tests adding, reading and removing data; basic short, tests
+ * Tests adding, reading, updateing and removing data; basic short, tests
  */
 
 using namespace pmem::kv;
@@ -29,8 +29,33 @@ static void SimpleTest(pmem::kv::db &kv)
 		value.append(v.data(), v.size());
 	}) == status::OK);
 	UT_ASSERT(value == "value1");
+	size_t len_to_update = 3;
+	size_t offset = 0;
+	ASSERT_STATUS(kv.update("key1", offset, len_to_update,
+				[](slice v) {
+					std::fill(v.begin(), v.end(), 'D');
+					return 0;
+				}),
+		      status::OK);
+	ASSERT_STATUS(kv.get("key1", &value), status::OK);
+	UT_ASSERT(value == "DDDue1");
 }
 
+static void UpdateRollback(pmem::kv::db &kv)
+{
+	ASSERT_STATUS(kv.put("key1", "FooBar"), status::OK);
+	size_t offset = 0;
+	size_t len_to_update = 3;
+	ASSERT_STATUS(kv.update("key1", offset, len_to_update,
+				[](slice v) {
+					std::fill(v.begin(), v.end(), 'D');
+					return 1;
+				}),
+		      status::STOPPED_BY_CB);
+	std::string value;
+	ASSERT_STATUS(kv.get("key1", &value), status::OK);
+	UT_ASSERT(value == "FooBar");
+}
 static void EmptyKeyTest(pmem::kv::db &kv)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
@@ -392,6 +417,7 @@ static void test(int argc, char *argv[])
 	run_engine_tests(argv[1], argv[2],
 			 {
 				 SimpleTest,
+				 UpdateRollback,
 				 EmptyKeyTest,
 				 EmptyValueTest,
 				 EmptyKeyAndValueTest,

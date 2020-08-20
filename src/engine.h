@@ -58,6 +58,9 @@ public:
 private:
 	static void check_config_null(const std::string &engine_name,
 				      std::unique_ptr<internal::config> &cfg);
+
+protected:
+	virtual status snapshot(char *element, size_t size, std::function<int()> f);
 };
 
 } /* namespace kv */

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2020, Intel Corporation */
 
 #include "blackhole.h"
 #include <iostream>
@@ -131,6 +131,15 @@ status blackhole::exists(string_view key)
 status blackhole::get(string_view key, get_v_callback *callback, void *arg)
 {
 	LOG("get key=" << std::string(key.data(), key.size()));
+
+	return status::NOT_FOUND;
+}
+
+status blackhole::update(string_view key, size_t v_offset, size_t v_size,
+			 update_v_callback *callback, void *arg)
+{
+	LOG("update for key=" << std::string(key.data(), key.size())
+			      << " with offset=" << v_offset << " and size=" << v_size);
 
 	return status::NOT_FOUND;
 }
