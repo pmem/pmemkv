@@ -10,6 +10,7 @@
 #include "engine.h"
 #include "libpmemkv.h"
 #include <libpmemobj++/pool.hpp>
+#include <libpmemobj++/transaction.hpp>
 
 namespace pmem
 {
@@ -89,6 +90,22 @@ protected:
 	PMEMoid *root_oid;
 
 	bool cfg_by_path = false;
+
+	status snapshot(char *element, size_t size, std::function<int()> f)
+	{
+		try {
+			pmem::obj::transaction::run(pmpool, [&] {
+				pmem::obj::transaction::snapshot(element, size);
+				if (f() != 0) {
+					pmem::obj::transaction::abort(
+						static_cast<int>(status::STOPPED_BY_CB));
+				}
+			});
+		} catch (pmem::manual_tx_abort &e) {
+			return status::STOPPED_BY_CB;
+		}
+		return status::OK;
+	}
 };
 
 } /* namespace kv */

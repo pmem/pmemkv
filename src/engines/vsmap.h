@@ -52,6 +52,9 @@ public:
 
 	status put(string_view key, string_view value) final;
 
+	status update(string_view key, size_t v_offset, size_t v_size,
+		      update_v_callback *callback, void *arg) final;
+
 	status remove(string_view key) final;
 
 private:

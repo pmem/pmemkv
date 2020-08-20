@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <libpmemkv.hpp>
 #include <sstream>
@@ -22,6 +23,12 @@
 using namespace pmem::kv;
 
 const uint64_t SIZE = 1024UL * 1024UL * 1024UL;
+
+int update_callback(char *value, size_t valuebytes, void *arg)
+{
+	std::memset(value, 'D', valuebytes);
+	return 0;
+}
 
 int main(int argc, char *argv[])
 {
@@ -69,6 +76,24 @@ int main(int argc, char *argv[])
 		LOG("  visited: " << k.data());
 		return 0;
 	});
+
+	LOG("Updating part of existing key");
+	s = kv->update("key1", 0, 2, [](slice v) {
+		std::fill(v.begin(), v.end(), 'D');
+		return 0;
+	});
+	assert(s == status::OK && value == "value1");
+	LOG("Reading key back");
+	s = kv->get("key1", &value);
+	assert(s == status::OK && value != "value1");
+	std::cout << "New value: " << value << std::endl;
+
+	LOG("Updating entire existing key");
+	s = kv->put("key1", "FooBar");
+	LOG("Reading key back");
+	s = kv->get("key1", &value);
+	assert(s == status::OK && value == "FooBar");
+	std::cout << "New value: " << value << std::endl;
 
 	LOG("Defragmenting the database");
 	s = kv->defrag(0, 100);

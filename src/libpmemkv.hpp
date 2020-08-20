@@ -15,6 +15,8 @@
 #include "libpmemkv.h"
 #include <libpmemobj/pool_base.h>
 
+#include <libpmemobj++/slice.hpp>
+
 /*! \file libpmemkv.hpp
 	\brief Main C++ pmemkv public header.
 
@@ -41,6 +43,8 @@ namespace kv
 
 using string_view = obj::string_view;
 
+using slice = pmem::obj::slice<char *>;
+
 /**
  * The C++ idiomatic function type to use for callback using key-value pair.
  * It is used by get_*() calls.
@@ -63,7 +67,7 @@ typedef void get_v_function(string_view value);
  *
  * @param[in] value returned by callback item's data
  */
-typedef int update_v_function(string_view value);
+typedef int update_v_function(slice value);
 
 typedef int comparator_function(string_view key1, string_view key2);
 
@@ -274,7 +278,6 @@ public:
 		      update_v_callback *callback, void *arg) noexcept;
 	status update(string_view key, size_t v_offset, size_t v_size,
 		      std::function<update_v_function> f) noexcept;
-	status update(string_view key, string_view value) noexcept;
 	// XXX: add tests for cpp api
 
 	status put(string_view key, string_view value) noexcept;
@@ -856,7 +859,7 @@ static inline void call_get_v_function(const char *value, size_t valuebytes, voi
 static inline int call_update_v_function(char *value, size_t valuebytes, void *arg)
 {
 	return (*reinterpret_cast<std::function<update_v_function> *>(arg))(
-		string_view(value, valuebytes));
+		slice(value, value + valuebytes));
 }
 
 // XXX: dodac wlasny callback jak "get_copy", tak zeby update'owal cala wartosc
@@ -1422,25 +1425,10 @@ inline status db::update(string_view key, size_t v_offset, size_t v_size,
  *XXX: fixme
  * @return pmem::kv::status
  */
-inline status db::update(string_view key, size_t v_offset, size_t v_size, std::function<update_v_function> f) noexcept
+inline status db::update(string_view key, size_t v_offset, size_t v_size,
+			 std::function<update_v_function> f) noexcept
 {
-	return static_cast<status>(
-		pmemkv_update(this->_db, key.data(), key.size(), v_offset, v_size, call_update_v_function, &f));
-}
-
-/**
- * Updates whole value.
- * XXX: perhaps it'd be better to transactionally remove and put.
- *
- * @param[in] key record's key to query for
- * @param[out] value new value to put for the key
- *XXX: fixme
- * @return pmem::kv::status
- */
-inline status db::update(string_view key, string_view value) noexcept
-{
-	return static_cast<status>(
-		pmemkv_update(this->_db, key.data(), key.size(), 0, value.size(), call_update_XXX, my_own_f));
+	return update(key, v_offset, v_size, call_update_v_function, &f);
 }
 
 /**

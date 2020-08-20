@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2020, Intel Corporation */
 
 #pragma once
 
@@ -39,6 +39,8 @@ public:
 	status get(string_view key, get_v_callback *callback, void *arg) final;
 
 	status put(string_view key, string_view value) final;
+	status update(string_view key, size_t v_offset, size_t v_size,
+		      update_v_callback *callback, void *arg) final;
 
 	status remove(string_view key) final;
 };

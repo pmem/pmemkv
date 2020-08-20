@@ -276,6 +276,24 @@ status vsmap::get(string_view key, get_v_callback *callback, void *arg)
 	return status::OK;
 }
 
+status vsmap::update(string_view key, size_t v_offset, size_t v_size,
+		     update_v_callback *callback, void *arg)
+{
+	LOG("update key=" << std::string(key.data(), key.size()));
+
+	auto pos = pmem_kv_container.find(key_type(key.data(), key.size(), kv_allocator));
+	if (pos == pmem_kv_container.end()) {
+		LOG("  key not found");
+		return status::NOT_FOUND;
+	}
+
+	char *editable_element = const_cast<char *>(pos->second.c_str()) + v_offset;
+	auto editable_element_size = std::min(v_size, pos->second.size());
+	return snapshot(editable_element, editable_element_size, [&]() {
+		return callback(editable_element, editable_element_size, arg);
+	});
+}
+
 status vsmap::put(string_view key, string_view value)
 {
 	LOG("put key=" << std::string(key.data(), key.size())

@@ -77,21 +77,22 @@ status cmap::get(string_view key, get_v_callback *callback, void *arg)
 	return status::OK;
 }
 
-status cmap::update(string_view key, get_v_callback *callback, void *arg)
+status cmap::update(string_view key, size_t v_offset, size_t v_size,
+		    update_v_callback *callback, void *arg)
 {
 	LOG("update key=" << std::string(key.data(), key.size()));
 	check_outside_tx();
-	internal::cmap::map_t::const_accessor result;
+	internal::cmap::map_t::accessor result;
 	bool found = container->find(result, key);
 	if (!found) {
 		LOG("  key not found");
 		return status::NOT_FOUND;
 	}
-
-	// ...
-	// string range?
-	//callback(result->second.c_str(), result->second.size(), arg);
-	return status::OK;
+	char *editable_element = const_cast<char *>(result->second.c_str()) + v_offset;
+	auto editable_element_size = std::min(v_size, result->second.size());
+	return snapshot(editable_element, editable_element_size, [&]() {
+		return callback(editable_element, editable_element_size, arg);
+	});
 }
 
 status cmap::put(string_view key, string_view value)
