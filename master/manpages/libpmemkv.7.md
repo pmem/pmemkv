@@ -8,7 +8,7 @@ secondary_title: pmemkv
 ...
 
 [comment]: <> (SPDX-License-Identifier: BSD-3-Clause)
-[comment]: <> (Copyright 2019, Intel Corporation)
+[comment]: <> (Copyright 2019-2020, Intel Corporation)
 
 [comment]: <> (libpmemkv.7 -- man page for libpmemkv)
 
@@ -84,7 +84,7 @@ The following table shows three possible combinations of parameters (where '-' m
 | **3** | - | - | - | set |
 
 A database file or a poolset file can also be created using **pmempool** utility (see **pmempool-create**(1)).
-When using **pmempool create**, "pmemkv" should be passed as layout. Only PMEMOBJ pools are supported.
+When using **pmempool create**, "pmemkv" should be passed as layout for cmap engine and "pmemkv_\<engine-name\>" for other engines (e.g. "pmemkv_stree" for stree engine). Only PMEMOBJ pools are supported.
 
 ## vcmap
 
@@ -138,8 +138,6 @@ Bindings for other languages are available on GitHub. Currently they support onl
 Existing bindings:
 
 + Java - for details see <https://github.com/pmem/pmemkv-java>
-
-+ JNI - for details see <https://github.com/pmem/pmemkv-jni>
 
 + Node.js - for details see <https://github.com/pmem/pmemkv-nodejs>
 
