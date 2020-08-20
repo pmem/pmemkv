@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2016-2020, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of opensuse-based
@@ -41,16 +41,18 @@ RUN zypper install -y \
 	gdb \
 	git \
 	graphviz \
-	hub \
+	gzip \
 	keyutils-devel \
-	libtool \
 	make \
 	man \
+	memkind-devel \
 	libjson-c-devel \
 	libkmod-devel \
 	libndctl-devel \
 	libnuma-devel \
+	libtool \
 	libudev-devel \
+	libunwind-devel \
 	libuuid-devel \
 	pandoc \
 	perl-Text-Diff \
@@ -89,10 +91,6 @@ RUN ./install-pmdk.sh rpm
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
 RUN ./install-libpmemobj-cpp.sh RPM
-
-# Install memkind
-COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh opensuse
 
 # Add user
 ENV USER user
