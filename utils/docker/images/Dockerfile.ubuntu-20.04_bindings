@@ -30,60 +30,69 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
-#              environment prepared for running pmemkv build and tests.
+# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
+#				environment prepared for executing build and tests
+#				of pmemkv-* bindings repositories.
 #
 
 # Pull base image
-FROM fedora:31
+FROM ubuntu:20.04
 MAINTAINER szymon.romik@intel.com
 
 # Set required environment variables
-ENV OS fedora
-ENV OS_VER 31
-ENV PACKAGE_MANAGER rpm
+ENV OS ubuntu
+ENV OS_VER 20.04_bindings
+ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+ENV JAVA_TOOL_OPTIONS -Dfile.encoding=UTF-8
 
 # Additional parameters to build docker without building components
 ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 
-# Install basic tools
-RUN dnf update -y \
- && dnf install -y \
+# Update the Apt cache and install basic tools
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	autoconf \
 	automake \
+	build-essential \
 	clang \
+	clang-format-9 \
 	cmake \
-	daxctl-devel \
+	curl \
+	debhelper \
+	devscripts \
 	doxygen \
-	gcc \
-	gcc-c++ \
-	gdb \
+	fakeroot \
 	git \
 	graphviz \
-	gtest-devel \
-	hub \
+	libc6-dbg \
+	libdaxctl-dev \
+	libgtest-dev \
+	libndctl-dev \
+	libnode-dev \
+	libnuma-dev \
+	libmemkind-dev \
+	libtbb-dev \
+	libtext-diff-perl \
 	libtool \
-	make \
-	man \
-	memkind-devel \
-	ndctl-devel \
-	numactl-devel \
+	libunwind8-dev \
+	maven \
+	npm \
+	numactl \
+	openjdk-11-jdk \
 	pandoc \
-	passwd \
-	perl-Text-Diff \
-	rpm-build \
+	pkg-config \
+	python3-dev \
+	python3-distutils \
+	python3-pip \
+	ruby-dev \
 	sudo \
-	tbb-devel \
-	unzip \
 	wget \
-	which \
-&& dnf clean all
-
-# Install glibc-debuginfo
-RUN dnf debuginfo-install -y glibc
+	whois \
+ && rm -rf /var/lib/apt/lists/*
 
 # Install rapidjson from sources
 COPY install-rapidjson.sh install-rapidjson.sh
@@ -95,16 +104,19 @@ RUN ./install-valgrind.sh
 
 # Install pmdk
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh rpm
+RUN ./install-pmdk.sh dpkg
 
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh RPM
+RUN ./install-libpmemobj-cpp.sh DEB
+
+# Bindings
+RUN pip3 install pytest setuptools wheel
+COPY install-bindings-dependencies.sh install-bindings-dependencies.sh
+RUN ./install-bindings-dependencies.sh
 
 # Add user
 ENV USER user
 ENV USERPASS pass
-RUN useradd -m $USER
-RUN echo "$USER:$USERPASS" | chpasswd
-RUN gpasswd wheel -a $USER
+RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
 USER $USER
