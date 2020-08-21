@@ -5,27 +5,52 @@
 
 using namespace pmem::kv;
 
+/**
+ * Blackhole engine is specific, it mostly does nothing,
+ * but we can use it to test C++ API.
+ */
+
 static void BlackholeSimpleTest()
 {
+	/**
+	 * TEST: Basic test for blackhole methods.
+	 */
 	db kv;
 	auto s = kv.open("blackhole");
 	ASSERT_STATUS(s, status::OK);
 
 	std::string value;
 	std::size_t cnt = 1;
+	std::string result;
+	auto key = "key1";
+	(void)value;
+	(void)result;
+	(void)key;
 
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
-	ASSERT_STATUS(kv.get("key1", &value), status::NOT_FOUND);
-	ASSERT_STATUS(kv.put("key1", "value1"), status::OK);
+	UT_ASSERTeq(cnt, 0);
+	ASSERT_STATUS(kv.get(key, &value), status::NOT_FOUND);
+	ASSERT_STATUS(kv.put(key, "value1"), status::OK);
+	ASSERT_STATUS(kv.exists(key), status::NOT_FOUND);
 
 	cnt = 1;
-
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
-	ASSERT_STATUS(kv.get("key1", &value), status::NOT_FOUND);
-	ASSERT_STATUS(kv.remove("key1"), status::OK);
-	ASSERT_STATUS(kv.get("key1", &value), status::NOT_FOUND);
+	UT_ASSERTeq(cnt, 0);
+	ASSERT_STATUS(kv.get_all(
+			  [](const char *k, size_t kb, const char *v, size_t vb,
+			     void *arg) {
+				  const auto c = ((std::string *)arg);
+				  c->append(std::string(k, kb));
+				  c->append(std::string(v, vb));
+				  return 0;
+			  },
+			  &result), status::NOT_FOUND);
+	UT_ASSERT(result.empty());
+	ASSERT_STATUS(kv.get(key, &value), status::NOT_FOUND);
+	ASSERT_STATUS(kv.remove(key), status::OK);
+	ASSERT_STATUS(kv.get(key, &value), status::NOT_FOUND);
+	ASSERT_STATUS(kv.get(key, nullptr, nullptr), status::NOT_FOUND);
+
 	ASSERT_STATUS(kv.defrag(), status::NOT_SUPPORTED);
 
 	kv.close();
@@ -33,6 +58,9 @@ static void BlackholeSimpleTest()
 
 static void BlackholeRangeTest()
 {
+	/**
+	 * TEST: Testf for all range methods (designed for sorted engines).
+	 */
 	db kv;
 	auto s = kv.open("blackhole");
 	ASSERT_STATUS(s, status::OK);
