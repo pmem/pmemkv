@@ -681,7 +681,7 @@ inline status config::put_size(std::uint64_t size) noexcept
  * Puts path to a config.
  *
  * @param[in] path to a database file or to a poolset file (see **poolset**(5) for
- * details). Note that when using poolset file, size should be 0
+ * details). Note that when using poolset file, size should be 0.
  *
  * @return pmem::kv::status
  */
@@ -693,7 +693,7 @@ inline status config::put_path(const std::string &path) noexcept
 /**
  * Puts force_create parameter to a config, For supporting engines If false,
  * pmemkv opens file specified by 'path', otherwise it creates it. False by
- * default
+ * default.
  *
  * @return pmem::kv::status
  */

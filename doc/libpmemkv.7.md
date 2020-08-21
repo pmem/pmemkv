@@ -50,9 +50,10 @@ The most mature and recommended engine to use for persistent use-cases is **cmap
 
 Each engine can be manually turned on and off at build time, using CMake options. All engines listed here are enabled and ready to use.
 
-To configure an engine, pmemkv_config is used (**libpmemkv_config**(3)). Below is a list of engines along with config parameters they expect. Each parameter has corresponding function (pmemkv_config_put_path, pmemkv_config_put_comparator, etc.), which guarantee type safety. For example to insert `path` parameter to the config, user should call pmemkv_config_put_path().
-For some use cases, like creating config from parsed input file, more convenient may be inserting parameters by its type instead of name. Each paramter has a certain type and may be inserted to a config using appropriate function (pmemkv_config_put_string, pmemkv_config_put_int64, etc.). For example, to insert a parameter of type `string`, `pmemkv_config_put_string` function may be used.
-Those two ways of inserting parameters into config may be used together or interchangeably.
+To configure an engine, pmemkv_config is used (**libpmemkv_config**(3)). Below is a list of engines along with config parameters they expect. Each parameter has corresponding function (pmemkv_config_put_path, pmemkv_config_put_comparator, etc.), which guarantees type safety. For example to insert `path` parameter to the config, user should call pmemkv_config_put_path().
+For some use cases, like creating config from parsed input, it may be more convinient to insert parameters by its type instead of name. Each paramter has a certain type and may be inserted to a config using appropriate function (pmemkv_config_put_string, pmemkv_config_put_int64, etc.). For example, to insert a parameter of type `string`, `pmemkv_config_put_string` function may be used.
+Those two ways of inserting parameters into config may be used interchangeably.
+
 For description of pmemkv core API see **libpmemkv**(3).
 
 ## cmap
