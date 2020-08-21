@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2016-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -35,7 +35,7 @@
 #
 
 # Pull base image
-FROM fedora:30
+FROM fedora:31
 MAINTAINER lukasz.stolarczuk@intel.com
 
 # Install basic tools
@@ -61,7 +61,6 @@ RUN dnf update -y \
 	pandoc \
 	passwd \
 	perl-Text-Diff \
-	rapidjson-devel \
 	rpm-build \
 	sudo \
 	tbb-devel \
@@ -72,6 +71,10 @@ RUN dnf update -y \
 
 # Install glibc-debuginfo
 RUN dnf debuginfo-install -y glibc
+
+# Install rapidjson from sources
+COPY install-rapidjson.sh install-rapidjson.sh
+RUN ./install-rapidjson.sh
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -99,7 +102,7 @@ USER $USER
 
 # Set required environment variables
 ENV OS fedora
-ENV OS_VER 30
+ENV OS_VER 31
 ENV PACKAGE_MANAGER rpm
 ENV NOTTY 1
 

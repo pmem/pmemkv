@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -113,7 +113,7 @@ TEST_F(ConfigCppTest, SimpleTest_TRACERS_M)
 	ASSERT_EQ(value_custom_ptr_deleter->b, 'b');
 
 	custom_type *value_custom;
-	size_t value_custom_count;
+	size_t value_custom_count = 0;
 	s = cfg->get_data("object", value_custom, value_custom_count);
 	ASSERT_EQ(s, status::OK);
 	ASSERT_EQ(value_custom_count, 1U);
@@ -121,7 +121,7 @@ TEST_F(ConfigCppTest, SimpleTest_TRACERS_M)
 	ASSERT_EQ(value_custom->b, 'a');
 
 	int *value_array;
-	size_t value_array_count;
+	size_t value_array_count = 0;
 	s = cfg->get_data("array", value_array, value_array_count);
 	ASSERT_EQ(s, status::OK);
 	ASSERT_EQ(value_array_count, 3U);

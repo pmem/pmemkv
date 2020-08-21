@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,6 +39,11 @@
 
 // Tests and params' list
 #include "basic_tests.h"
+
+// Workaround to support gtest in versions 1.8.1 and 1.10
+#ifndef INSTANTIATE_TEST_SUITE_P
+#define INSTANTIATE_TEST_SUITE_P INSTANTIATE_TEST_CASE_P
+#endif
 
 class PmemkvCApiTest : public ::testing::TestWithParam<Basic> {
 public:
@@ -188,5 +193,5 @@ TEST_P(PmemkvCApiTest, NullConfig)
 	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 }
 
-INSTANTIATE_TEST_CASE_P(basic_tests, PmemkvCApiTest, ::testing::ValuesIn(basic_tests),
-			GetTestName());
+INSTANTIATE_TEST_SUITE_P(basic_tests, PmemkvCApiTest, ::testing::ValuesIn(basic_tests),
+			 GetTestName());

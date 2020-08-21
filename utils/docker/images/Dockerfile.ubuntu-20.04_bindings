@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2016-2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -36,7 +36,7 @@
 #
 
 # Pull base image
-FROM ubuntu:19.04
+FROM ubuntu:20.04
 MAINTAINER lukasz.stolarczuk@intel.com
 
 # Update the Apt cache and install basic tools
@@ -46,7 +46,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	automake \
 	build-essential \
 	clang \
-	clang-format \
+	clang-format-8 \
 	cmake \
 	curl \
 	debhelper \
@@ -73,7 +73,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	pkg-config \
 	python3-dev \
 	python3-distutils \
-	rapidjson-dev \
 	ruby-dev \
 	sudo \
 	wget \
@@ -83,6 +82,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 # Install Googletest
 COPY install-googletest.sh install-googletest.sh
 RUN ./install-googletest.sh
+
+# Install rapidjson from sources
+COPY install-rapidjson.sh install-rapidjson.sh
+RUN ./install-rapidjson.sh
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -112,6 +115,6 @@ USER $USER
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER 19.04
+ENV OS_VER 20.04
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
