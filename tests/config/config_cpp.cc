@@ -31,7 +31,7 @@ static void deleter(custom_type *ct_ptr)
 static void simple_test()
 {
 	/**
-	 * TEST: add and read data from config, using all available methods
+	 * TEST: add and read data from config, using basic methods.
 	 */
 	auto cfg = new config;
 	UT_ASSERT(cfg != nullptr);
@@ -63,13 +63,13 @@ static void simple_test()
 	ASSERT_STATUS(s, status::OK);
 
 	s = cfg->put_path(PATH);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	s = cfg->put_size(SIZE);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	s = cfg->put_force_create(true);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 
 	std::string value_string;
 	s = cfg->get_string("string", value_string);
@@ -114,16 +114,16 @@ static void simple_test()
 	ASSERT_STATUS(cfg->get_int64("non-existent", none), status::NOT_FOUND);
 
 	s = cfg->get_string("path", value_string);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(value_string == PATH);
 
 	uint64_t int_us;
 	s = cfg->get_uint64("size", int_us);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(int_us, SIZE);
 
 	s = cfg->get_uint64("force_create", int_us);
-	UT_ASSERTeq(s, status::OK);
+	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(int_us, 1);
 
 	delete cfg;
@@ -143,17 +143,21 @@ static void simple_test()
 
 static void put_oid_simple_test()
 {
+	/**
+	 * TEST: basic check for put_oid method.
+	 */
+
 	auto cfg = new config;
 	UT_ASSERT(cfg != NULL);
 
 	PMEMoid oid;
 	status ret = cfg->put_oid(&oid);
-	UT_ASSERTeq(ret, status::OK);
+	ASSERT_STATUS(ret, status::OK);
 
 	PMEMoid *oid_ptr;
 
 	ret = cfg->get_object("oid", oid_ptr);
-	UT_ASSERTeq(ret, status::OK);
+	ASSERT_STATUS(ret, status::OK);
 	UT_ASSERTeq(&oid, oid_ptr);
 
 	delete cfg;

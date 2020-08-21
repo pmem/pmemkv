@@ -50,7 +50,7 @@ static void xdeleter(struct custom_type_wrapper *ct_ptr)
 static void simple_test()
 {
 	/**
-	 * TEST: add and read data from config, using put_parameters functions
+	 * TEST: add and read data from config, using basic functions
 	 */
 	pmemkv_config *config = pmemkv_config_new();
 	UT_ASSERT(config != NULL);
@@ -152,6 +152,9 @@ static void simple_test()
 
 static void put_oid_simple_test()
 {
+	/**
+	 * TEST: basic check for put_oid function.
+	 */
 	pmemkv_config *cfg = pmemkv_config_new();
 	UT_ASSERT(cfg != NULL);
 	PMEMoid oid;
