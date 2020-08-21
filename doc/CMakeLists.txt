@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright 2019-2020, Intel Corporation
 
-function(strip_example PATH  VAL)
-	# Prepare C_EXAMPLE content to inject, based on the code
-	# of the 'examples/pmemkv_basic_c/pmemkv_basic.c' example;
-	# remove comments (with the license and the file description)
-	# up to the first preprocessor's directive.
+function(strip_example PATH VAL)
+	# Prepare example code to inject into man page.
+	# Read file file pointed by ${PATH}, remove comments (with the license
+	# and the file description) up to the first preprocessor's directive,
+	# and place it in ${VAL} in caller scope
 	file(READ
 		${PATH}
 		example_content)
