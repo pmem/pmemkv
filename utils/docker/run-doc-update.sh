@@ -17,7 +17,7 @@ USER_NAME="pmem"
 REPO_NAME="pmemkv"
 CURR_DIR=$(pwd)
 
-ORIGIN="https://${GITHUB_TOKEN}@github.com/${BOT_NAME}/${REPO_NAME}"
+ORIGIN="https://${DOC_UPDATE_GITHUB_TOKEN}@github.com/${BOT_NAME}/${REPO_NAME}"
 UPSTREAM="https://github.com/${USER_NAME}/${REPO_NAME}"
 # master or stable-* branch
 TARGET_BRANCH=${CI_BRANCH}
