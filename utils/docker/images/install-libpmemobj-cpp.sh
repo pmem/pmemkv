@@ -17,8 +17,8 @@ fi
 PREFIX=/usr
 PACKAGE_TYPE=$1
 
-# common: 1.10 release; 28.05.2020
-LIBPMEMOBJ_CPP_VERSION="1.10"
+# Merge pull request #792 from igchor/radix_tree_inline; 18.08.2020
+LIBPMEMOBJ_CPP_VERSION="39895391980be1b18a946556cafb98dbf7276e4b"
 
 git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
 cd libpmemobj-cpp

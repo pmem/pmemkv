@@ -76,6 +76,10 @@ int main()
 	UT_ASSERT(wrong_engine_name_test("caching"));
 #endif
 
+#ifndef ENGINE_RADIX
+	UT_ASSERT(wrong_engine_name_test("radix"));
+#endif
+
 	errormsg_test();
 
 	return 0;
