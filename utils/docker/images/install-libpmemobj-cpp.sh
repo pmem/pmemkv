@@ -14,31 +14,36 @@ if [ "${SKIP_LIBPMEMOBJCPP_BUILD}" ]; then
 	exit
 fi
 
-PREFIX=/usr
-PACKAGE_TYPE=$1
+PREFIX="/usr"
+PACKAGE_TYPE=${1^^} #To uppercase
+echo "PACKAGE_TYPE: ${PACKAGE_TYPE}"
 
 # Merge pull request #792 from igchor/radix_tree_inline; 18.08.2020
 LIBPMEMOBJ_CPP_VERSION="39895391980be1b18a946556cafb98dbf7276e4b"
+echo "LIBPMEMOBJ_CPP_VERSION: ${LIBPMEMOBJ_CPP_VERSION}"
 
-git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02
-cd libpmemobj-cpp
-git checkout $LIBPMEMOBJ_CPP_VERSION
+build_dir=$(mktemp -d -t libpmemobj-cpp-XXX)
+
+git clone https://github.com/pmem/libpmemobj-cpp --shallow-since=2019-10-02 ${build_dir}
+
+pushd ${build_dir}
+git checkout ${LIBPMEMOBJ_CPP_VERSION}
 
 mkdir build
 cd build
 
-cmake .. -DCPACK_GENERATOR="$PACKAGE_TYPE" -DCMAKE_INSTALL_PREFIX=$PREFIX
+cmake .. -DCPACK_GENERATOR="${PACKAGE_TYPE}" -DCMAKE_INSTALL_PREFIX=${PREFIX}
 
-if [ "$PACKAGE_TYPE" = "" ]; then
+if [ "${PACKAGE_TYPE}" = "" ]; then
 	make -j$(nproc) install
 else
 	make -j$(nproc) package
-	if [ "$PACKAGE_TYPE" = "DEB" ]; then
+	if [ "${PACKAGE_TYPE}" = "DEB" ]; then
 		sudo dpkg -i libpmemobj++*.deb
-	elif [ "$PACKAGE_TYPE" = "RPM" ]; then
-		sudo rpm -i libpmemobj++*.rpm
+	elif [ "${PACKAGE_TYPE}" = "RPM" ]; then
+		sudo rpm -iv libpmemobj++*.rpm
 	fi
 fi
 
-cd ../..
-rm -r libpmemobj-cpp
+popd
+rm -r ${build_dir} 
