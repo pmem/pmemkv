@@ -17,11 +17,12 @@ USER_NAME="pmem"
 REPO_NAME="pmemkv"
 CURR_DIR=$(pwd)
 
-ORIGIN="https://${DOC_UPDATE_GITHUB_TOKEN}@github.com/${BOT_NAME}/${REPO_NAME}"
+ORIGIN="https://${DOC_UPDATE_GITHUB_TOKEN}:x-oauth-basic@github.com/${BOT_NAME}/${REPO_NAME}"
 UPSTREAM="https://github.com/${USER_NAME}/${REPO_NAME}"
 # master or stable-* branch
 TARGET_BRANCH=${CI_BRANCH}
 VERSION=${TARGET_BRANCHES[$TARGET_BRANCH]}
+export GITHUB_TOKEN=${DOC_UPDATE_GITHUB_TOKEN}
 
 if [ -z $VERSION ]; then
 	echo "Target location for branch $TARGET_BRANCH is not defined."
@@ -35,6 +36,7 @@ git remote add upstream ${UPSTREAM}
 
 git config --local user.name ${BOT_NAME}
 git config --local user.email "${BOT_NAME}@intel.com"
+hub config --global hub.protocol https
 
 git remote update
 git checkout -B ${TARGET_BRANCH} upstream/${TARGET_BRANCH}

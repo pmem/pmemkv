@@ -21,7 +21,7 @@ jobs:
     env:
       DOCKERHUB_USER:          ${{ secrets.DOCKERHUB_USER }}
       DOCKERHUB_PASSWORD:      ${{ secrets.DOCKERHUB_PASSWORD }}
-      DOC_UPDATE_GITHUB_TOKEN: ${{ secrets.DOC_UPDATE_GITHUB_TOKEN }}
+      DOC_UPDATE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
       HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
       WORKDIR:        utils/docker
     strategy:
