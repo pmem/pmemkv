@@ -12,26 +12,27 @@ set -e
 
 source `dirname $0`/valid-branches.sh
 
-BOT_NAME="pmem-bot"
-USER_NAME="pmem"
+BOT_NAME=${DOC_UPDATE_BOT_NAME:-"pmem-bot"}
+GITHUB_UPSTREAM_USER_NAME="${GITHUB_UPSTREAM_USER_NAME:-"pmem"}"
 REPO_NAME="pmemkv"
-CURR_DIR=$(pwd)
+ARTIFACTS_DIR=$(mktemp -d -t ARTIFACTS-XXX)
 
-ORIGIN="https://${DOC_UPDATE_GITHUB_TOKEN}:x-oauth-basic@github.com/${BOT_NAME}/${REPO_NAME}"
-UPSTREAM="https://github.com/${USER_NAME}/${REPO_NAME}"
+ORIGIN="https://${DOC_UPDATE_GITHUB_TOKEN}@github.com/${BOT_NAME}/${REPO_NAME}"
+UPSTREAM="https://github.com/${GITHUB_UPSTREAM_USER_NAME}/${REPO_NAME}"
 # master or stable-* branch
 TARGET_BRANCH=${CI_BRANCH}
 VERSION=${TARGET_BRANCHES[$TARGET_BRANCH]}
 export GITHUB_TOKEN=${DOC_UPDATE_GITHUB_TOKEN}
 
 if [ -z $VERSION ]; then
-	echo "Target location for branch $TARGET_BRANCH is not defined."
+	echo "Target location for branch ${TARGET_BRANCH} is not defined."
 	exit 1
 fi
-
+REPO_DIR=$(mktemp -d -t pmemkv-XXX)
+pushd ${REPO_DIR}
 # Clone repo
-git clone ${ORIGIN}
-cd $CURR_DIR/${REPO_NAME}
+git clone ${ORIGIN} ${REPO_DIR}
+cd ${REPO_DIR}
 git remote add upstream ${UPSTREAM}
 
 git config --local user.name ${BOT_NAME}
@@ -42,20 +43,20 @@ git remote update
 git checkout -B ${TARGET_BRANCH} upstream/${TARGET_BRANCH}
 
 # Build docs
-mkdir $CURR_DIR/${REPO_NAME}/build
-cd $CURR_DIR/${REPO_NAME}/build
+mkdir -p ${REPO_DIR}/build
+cd ${REPO_DIR}/build
 
 cmake .. -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF
 make -j$(nproc) doc
-cp $CURR_DIR/${REPO_NAME}/build/man/tmp/*.md $CURR_DIR/${REPO_NAME}/doc/
-cp -r $CURR_DIR/${REPO_NAME}/doc $CURR_DIR/
-cp -r $CURR_DIR/${REPO_NAME}/build/doc/cpp_html $CURR_DIR/
+cp ${REPO_DIR}/build/man/tmp/*.md ${REPO_DIR}/doc/
+cp -r ${REPO_DIR}/doc ${ARTIFACTS_DIR}/
+cp -r ${REPO_DIR}/build/doc/cpp_html ${ARTIFACTS_DIR}/
 
-cd $CURR_DIR/${REPO_NAME}
+cd ${REPO_DIR}
 
 # Checkout gh-pages and copy docs
 GH_PAGES_NAME="gh-pages-for-${TARGET_BRANCH}"
-git checkout -B $GH_PAGES_NAME upstream/gh-pages
+git checkout -B ${GH_PAGES_NAME} upstream/gh-pages
 git clean -dfx
 
 # Clean old content, since some files might have been deleted
@@ -64,8 +65,8 @@ mkdir -p ./${VERSION}/manpages/
 mkdir -p ./${VERSION}/doxygen/
 
 # copy all manpages (with format like <manpage>.<section>.md)
-cp -f $CURR_DIR/doc/*.*.md ./${VERSION}/manpages/
-cp -fr $CURR_DIR/cpp_html/* ./${VERSION}/doxygen/
+cp -f ${ARTIFACTS_DIR}/doc/*.*.md ./${VERSION}/manpages/
+cp -fr ${ARTIFACTS_DIR}/cpp_html/* ./${VERSION}/doxygen/
 
 # Fix the title tag:
 # get rid of _MP macro, it changes e.g. "_MP(PMEMKV, 7)" to "PMEMKV"
@@ -77,10 +78,11 @@ sed -i 's/^title:\ _MP(*\([A-Za-z_-]*\).*$/title:\ \1/g' ./${VERSION}/manpages/*
 # changes which were reverted).
 git add -A
 git commit -m "doc: automatic gh-pages docs update" && true
-git push -f ${ORIGIN} $GH_PAGES_NAME
+git push -f ${ORIGIN} ${GH_PAGES_NAME}
 
 # Makes pull request.
 # When there is already an open PR or there are no changes an error is thrown, which we ignore.
-hub pull-request -f -b ${USER_NAME}:gh-pages -h ${BOT_NAME}:${GH_PAGES_NAME} -m "doc: automatic gh-pages docs update" && true
+hub pull-request -f -b ${GITHUB_UPSTREAM_USER_NAME}:gh-pages -h ${BOT_NAME}:${GH_PAGES_NAME} -m "doc: automatic gh-pages docs update" && true
 
+popd
 exit 0

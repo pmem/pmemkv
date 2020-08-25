@@ -81,6 +81,20 @@ to use your real name (not an alias) when committing your changes to PMEMKV:
 Author: Random J Developer <random@developer.example.org>
 ```
 
+# Configuring Github fork
+
+To build and submit documentation as automatically generated pull request,
+the repository have to be properly configured.
+
+* [Personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) for Github account have to be generated.
+
+* Already generated personal access token have to be set in pmemkv repository
+  [Secrets](https://docs.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets) as "DOC_UPDATE_GITHUB_TOKEN" variable
+
+* DOC_UPDATE_BOT_NAME secret variable have to be set. In most cases it would be
+  the same as Github account name.
+
+
 # Creating New Engines
 
 There are several motivations to create a `pmemkv` storage engine:

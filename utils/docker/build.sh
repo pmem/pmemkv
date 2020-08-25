@@ -21,6 +21,10 @@ source $(dirname $0)/set-ci-vars.sh
 source $(dirname $0)/set-vars.sh
 source $(dirname $0)/valid-branches.sh
 
+doc_varialbes_error="To build documentation and upload it as github pull request \
+variables 'DOC_UPDATE_BOT_NAME' and 'DOC_UPDATE_GITHUB_TOKEN' have to be provided. \
+for more details please read CONTRIBUTION.md"
+
 if [[ "$CI_EVENT_TYPE" != "cron" && "$CI_BRANCH" != "coverity_scan" \
 	&& "$TYPE" == "coverity" ]]; then
 	echo "INFO: Skip Coverity scan job if build is triggered neither by " \
@@ -46,6 +50,7 @@ if [[ -z "$HOST_WORKDIR" ]]; then
 		"the root of this project on the host machine"
 	exit 1
 fi
+
 
 imageName=${DOCKERHUB_REPO}:1.3-${OS}-${OS_VER}
 containerName=pmemkv-${OS}-${OS_VER}
@@ -82,6 +87,13 @@ if [[ "$command" == "" ]]; then
 		bindings)
 			command="./run-bindings.sh";
 			;;
+		doc)
+			if [[ -z "${DOC_UPDATE_BOT_NAME}" || -z "${DOC_UPDATE_GITHUB_TOKEN}" ]]; then
+				echo "${doc_varialbes_error}"
+				exit 0
+			fi
+			command="./run-doc-update.sh";
+			;;
 		*)
 			echo "ERROR: wrong build TYPE"
 			exit 1
@@ -94,11 +106,6 @@ if [ "$COVERAGE" == "1" ]; then
 fi
 
 if [ -n "$DNS_SERVER" ]; then DNS_SETTING=" --dns=$DNS_SERVER "; fi
-
-# Only run doc update on $GITHUB_REPO master or stable branch
-if [[ -z "${CI_BRANCH}" || -z "${TARGET_BRANCHES[${CI_BRANCH}]}" || "$CI_EVENT_TYPE" == "pull_request" || "$CI_REPO_SLUG" != "${GITHUB_REPO}" ]]; then
-	AUTO_DOC_UPDATE=0
-fi
 
 # Check if we are running on a CI (Travis or GitHub Actions)
 [ -n "$GITHUB_ACTIONS" -o -n "$TRAVIS" ] && CI_RUN="YES" || CI_RUN="NO"
@@ -134,6 +141,9 @@ docker run --privileged=true --name=$containerName -i $TTY \
 	--env CI_BRANCH=$CI_BRANCH \
 	--env CI_EVENT_TYPE=$CI_EVENT_TYPE \
 	--env DOC_UPDATE_GITHUB_TOKEN=$DOC_UPDATE_GITHUB_TOKEN \
+	--env DOC_UPDATE_BOT_NAME=$DOC_UPDATE_BOT_NAME \
+	--env GITHUB_TOKEN=$GITHUB_TOKEN \
+	--env GITHUB_UPSTREAM_USER_NAME=$GITHUB_USER_NAME \
 	--env COVERITY_SCAN_TOKEN=$COVERITY_SCAN_TOKEN \
 	--env COVERITY_SCAN_NOTIFICATION_EMAIL=$COVERITY_SCAN_NOTIFICATION_EMAIL \
 	--env TEST_PACKAGES=${TEST_PACKAGES:-ON} \
