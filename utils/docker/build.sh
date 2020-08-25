@@ -82,6 +82,9 @@ if [[ "$command" == "" ]]; then
 		bindings)
 			command="./run-bindings.sh";
 			;;
+		doc)
+			command="./run-doc-update.sh";
+			;;
 		*)
 			echo "ERROR: wrong build TYPE"
 			exit 1
@@ -94,11 +97,6 @@ if [ "$COVERAGE" == "1" ]; then
 fi
 
 if [ -n "$DNS_SERVER" ]; then DNS_SETTING=" --dns=$DNS_SERVER "; fi
-
-# Only run doc update on $GITHUB_REPO master or stable branch
-if [[ -z "${CI_BRANCH}" || -z "${TARGET_BRANCHES[${CI_BRANCH}]}" || "$CI_EVENT_TYPE" == "pull_request" || "$CI_REPO_SLUG" != "${GITHUB_REPO}" ]]; then
-	AUTO_DOC_UPDATE=0
-fi
 
 # Check if we are running on a CI (Travis or GitHub Actions)
 [ -n "$GITHUB_ACTIONS" -o -n "$TRAVIS" ] && CI_RUN="YES" || CI_RUN="NO"
@@ -134,6 +132,9 @@ docker run --privileged=true --name=$containerName -i $TTY \
 	--env CI_BRANCH=$CI_BRANCH \
 	--env CI_EVENT_TYPE=$CI_EVENT_TYPE \
 	--env DOC_UPDATE_GITHUB_TOKEN=$DOC_UPDATE_GITHUB_TOKEN \
+	--env DOC_UPDATE_BOT_NAME=$DOC_UPDATE_BOT_NAME \
+	--env GITHUB_TOKEN=$GITHUB_TOKEN \
+	--env GITHUB_UPSTREAM_USER_NAME=$GITHUB_USER_NAME \
 	--env COVERITY_SCAN_TOKEN=$COVERITY_SCAN_TOKEN \
 	--env COVERITY_SCAN_NOTIFICATION_EMAIL=$COVERITY_SCAN_NOTIFICATION_EMAIL \
 	--env TEST_PACKAGES=${TEST_PACKAGES:-ON} \
