@@ -12,12 +12,12 @@
 
 set -e
 
-if [[ -z "$OS" ]]; then
+if [[ -z "${OS}" ]]; then
 	echo "OS environment variable is not set"
 	exit 1
 fi
 
-if [[ -z "$OS_VER" ]]; then
+if [[ -z "${OS_VER}" ]]; then
 	echo "OS_VER environment variable is not set"
 	exit 1
 fi
@@ -38,7 +38,7 @@ then
 fi
 
 # Log in to the Docker Hub
-docker login -u="$DOCKERHUB_USER" -p="$DOCKERHUB_PASSWORD"
+docker login -u="${DOCKERHUB_USER}" -p="${DOCKERHUB_PASSWORD}"
 
 # Push the image to the repository
 docker push ${DOCKERHUB_REPO}:${TAG}
