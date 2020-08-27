@@ -1,12 +1,12 @@
 var indexSectionsWithContent =
 {
   0: "_cdegilnoprstuw~",
-  1: "cdsu",
+  1: "cdu",
   2: "p",
   3: "lr",
-  4: "cdegioprsu~",
+  4: "cdegiopru~",
   5: "_cp",
-  6: "cg",
+  6: "cgs",
   7: "s",
   8: "cdinostuw",
   9: "p"

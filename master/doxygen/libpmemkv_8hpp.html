@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PMEMKV: /pmemkv/doc_update/pmemkv/src/libpmemkv.hpp File Reference</title>
+<title>PMEMKV: /tmp/pmemkv-IXI/src/libpmemkv.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.2-git77.g94abda8</span>
+   &#160;<span id="projectnumber">0.8-git722.gb2d7f30</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -82,6 +82,7 @@ $(function() {
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;functional&gt;</code><br />
 <code>#include &lt;iostream&gt;</code><br />
+<code>#include &lt;libpmemobj++/string_view.hpp&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
 <code>#include &lt;stdexcept&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
@@ -92,9 +93,6 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1string__view.html">pmem::kv::string_view</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Our brief std::string_view implementation.  <a href="classpmem_1_1kv_1_1string__view.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html">pmem::kv::config</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds configuration parameters for engines.  <a href="classpmem_1_1kv_1_1config.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -126,6 +124,8 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
+<tr class="memitem:aa8cc4736e5bca1f316a2c9a79ff1150b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">pmem::kv::string_view</a> = obj::string_view</td></tr>
+<tr class="separator:aa8cc4736e5bca1f316a2c9a79ff1150b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aecad92e5fa73c55c5b7cd33f1a6c5bb4"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">pmem::kv::get_kv_function</a>(string_view key, string_view value)</td></tr>
 <tr class="memdesc:aecad92e5fa73c55c5b7cd33f1a6c5bb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The C++ idiomatic function type to use for callback using key-value pair.  <a href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">More...</a><br /></td></tr>
 <tr class="separator:aecad92e5fa73c55c5b7cd33f1a6c5bb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
