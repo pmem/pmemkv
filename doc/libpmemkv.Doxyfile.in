@@ -168,7 +168,7 @@ STRIP_FROM_PATH = @CMAKE_SOURCE_DIR@/include/
 # should specify the list of include paths that are normally passed to the
 # compiler using the -I flag.
 
-STRIP_FROM_INC_PATH = @CMAKE_SOURCE_DIR@/include/
+STRIP_FROM_INC_PATH =
 
 #---------------------------------------------------------------------------
 # Configuration options related to the LATEX output
