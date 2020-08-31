@@ -94,6 +94,9 @@ the repository have to be properly configured.
 * DOC_UPDATE_BOT_NAME secret variable have to be set. In most cases it would be
   the same as Github account name.
 
+* DOC_REPO_OWNER secret variable have to be set. Name of Github account, which will be target to make the documentation automatic pull request.
+  In most cases it would be the same as Github account name.
+
 
 # Creating New Engines
 
