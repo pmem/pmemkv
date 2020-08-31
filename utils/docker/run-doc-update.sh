@@ -13,12 +13,12 @@ set -e
 source `dirname $0`/valid-branches.sh
 
 BOT_NAME=${DOC_UPDATE_BOT_NAME:-"pmem-bot"}
-GITHUB_UPSTREAM_USER_NAME="${GITHUB_UPSTREAM_USER_NAME:-"pmem"}"
+DOC_REPO_OWNER="${DOC_REPO_OWNER:-"pmem"}"
 REPO_NAME="pmemkv"
 ARTIFACTS_DIR=$(mktemp -d -t ARTIFACTS-XXX)
 
 ORIGIN="https://${DOC_UPDATE_GITHUB_TOKEN}@github.com/${BOT_NAME}/${REPO_NAME}"
-UPSTREAM="https://github.com/${GITHUB_UPSTREAM_USER_NAME}/${REPO_NAME}"
+UPSTREAM="https://github.com/${DOC_REPO_OWNER}/${REPO_NAME}"
 # master or stable-* branch
 TARGET_BRANCH=${CI_BRANCH}
 VERSION=${TARGET_BRANCHES[$TARGET_BRANCH]}
@@ -82,7 +82,7 @@ git push -f ${ORIGIN} ${GH_PAGES_NAME}
 
 # Makes pull request.
 # When there is already an open PR or there are no changes an error is thrown, which we ignore.
-hub pull-request -f -b ${GITHUB_UPSTREAM_USER_NAME}:gh-pages -h ${BOT_NAME}:${GH_PAGES_NAME} -m "doc: automatic gh-pages docs update" && true
+hub pull-request -f -b ${DOC_REPO_OWNER}:gh-pages -h ${BOT_NAME}:${GH_PAGES_NAME} -m "doc: automatic gh-pages docs update" && true
 
 popd
 exit 0
