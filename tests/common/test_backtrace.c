@@ -26,6 +26,20 @@
 /*
  * test_dump_backtrace -- dump stacktrace to error log using libunwind
  */
+
+static const Signal signals[] = {
+	{SIGINT, "SIGINT"},	  {SIGILL, "SIGILL"},	{SIGABRT, "SIGABRT"},
+	{SIGFPE, "SIGFPE"},	  {SIGSEGV, "SIGSEGV"}, {SIGTERM, "SIGTERM"},
+	{SIGHUP, "SIGHUP"},	  {SIGQUIT, "SIGQUIT"}, {SIGTRAP, "SIGTRAP"},
+	{SIGKILL, "SIGKILL"},	  {SIGBUS, "SIGBUS"},	{SIGSYS, "SIGSYS"},
+	{SIGPIPE, "SIGPIPE"},	  {SIGALRM, "SIGALRM"}, {SIGURG, "SIGURG"},
+	{SIGSTOP, "SIGSTOP"},	  {SIGTSTP, "SIGTSTP"}, {SIGCONT, "SIGCONT"},
+	{SIGCHLD, "SIGCHLD"},	  {SIGTTIN, "SIGTTIN"}, {SIGTTOU, "SIGTTOU"},
+	{SIGPOLL, "SIGPOLL"},	  {SIGXCPU, "SIGXCPU"}, {SIGXFSZ, "SIGXFSZ"},
+	{SIGPROF, "SIGPROF"},	  {SIGUSR1, "SIGUSR1"}, {SIGUSR2, "SIGUSR2"},
+	{SIGVTALRM, "SIGVTALRM"},
+};
+
 void test_dump_backtrace(void)
 {
 	unw_context_t context;
@@ -160,7 +174,7 @@ void test_dump_backtrace(void)
  */
 void test_sighandler(int sig)
 {
-	printf("\nSignal %d, backtrace:\n", sig);
+	printf("\nSignal %s, backtrace:\n", signals[sig].signal_name);
 	test_dump_backtrace();
 	printf("\n");
 	exit(128 + sig);
