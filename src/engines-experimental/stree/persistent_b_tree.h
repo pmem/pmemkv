@@ -82,6 +82,13 @@ public:
 	{
 	}
 
+	node_iterator &operator=(const node_iterator &other)
+	{
+		node = other.node;
+		position = other.position;
+		return *this;
+	}
+
 	node_iterator &operator++()
 	{
 		++position;
