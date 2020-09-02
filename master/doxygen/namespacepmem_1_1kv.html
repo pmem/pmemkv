@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.2-git77.g94abda8</span>
+   &#160;<span id="projectnumber">1.2-git105.g20c4d68</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -95,19 +95,18 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html">db</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Main pmemkv class, it provides functions to operate on data in database.  <a href="classpmem_1_1kv_1_1db.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Our brief std::string_view implementation.  <a href="classpmem_1_1kv_1_1string__view.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:aecad92e5fa73c55c5b7cd33f1a6c5bb4"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a>(<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, <a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> value)</td></tr>
+<tr class="memitem:aa8cc4736e5bca1f316a2c9a79ff1150b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> = obj::string_view</td></tr>
+<tr class="separator:aa8cc4736e5bca1f316a2c9a79ff1150b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecad92e5fa73c55c5b7cd33f1a6c5bb4"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a>(<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> value)</td></tr>
 <tr class="memdesc:aecad92e5fa73c55c5b7cd33f1a6c5bb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The C++ idiomatic function type to use for callback using key-value pair.  <a href="#aecad92e5fa73c55c5b7cd33f1a6c5bb4">More...</a><br /></td></tr>
 <tr class="separator:aecad92e5fa73c55c5b7cd33f1a6c5bb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3d14c2b2e57bef5dbca29560b4b7e721"><td class="memItemLeft" align="right" valign="top">typedef void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a3d14c2b2e57bef5dbca29560b4b7e721">get_v_function</a>(<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> value)</td></tr>
+<tr class="memitem:a3d14c2b2e57bef5dbca29560b4b7e721"><td class="memItemLeft" align="right" valign="top">typedef void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a3d14c2b2e57bef5dbca29560b4b7e721">get_v_function</a>(<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> value)</td></tr>
 <tr class="memdesc:a3d14c2b2e57bef5dbca29560b4b7e721"><td class="mdescLeft">&#160;</td><td class="mdescRight">The C++ idiomatic function type to use for callback using only the value.  <a href="#a3d14c2b2e57bef5dbca29560b4b7e721">More...</a><br /></td></tr>
 <tr class="separator:a3d14c2b2e57bef5dbca29560b4b7e721"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a030860872cabda2262ece46fc77785d7"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a030860872cabda2262ece46fc77785d7">comparator_function</a>(<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key1, <a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key2)</td></tr>
+<tr class="memitem:a030860872cabda2262ece46fc77785d7"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a030860872cabda2262ece46fc77785d7">comparator_function</a>(<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key1, <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key2)</td></tr>
 <tr class="separator:a030860872cabda2262ece46fc77785d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c0f1ef8ac77b4f70bd027c60956ea9d"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> = pmemkv_get_kv_callback</td></tr>
 <tr class="memdesc:a9c0f1ef8ac77b4f70bd027c60956ea9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Key-value pair callback, C-style.  <a href="#a9c0f1ef8ac77b4f70bd027c60956ea9d">More...</a><br /></td></tr>
@@ -156,7 +155,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef int pmem::kv::comparator_function(<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key1, <a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key2)</td>
+          <td class="memname">typedef int pmem::kv::comparator_function(<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key1, <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key2)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -186,7 +185,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef int pmem::kv::get_kv_function(<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, <a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> value)</td>
+          <td class="memname">typedef int pmem::kv::get_kv_function(<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> value)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -225,7 +224,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef void pmem::kv::get_v_function(<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> value)</td>
+          <td class="memname">typedef void pmem::kv::get_v_function(<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> value)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -238,6 +237,20 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="aa8cc4736e5bca1f316a2c9a79ff1150b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8cc4736e5bca1f316a2c9a79ff1150b">&#9670;&nbsp;</a></span>string_view</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">pmem::kv::string_view</a> = typedef obj::string_view</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

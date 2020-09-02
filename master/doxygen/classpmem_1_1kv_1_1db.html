@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.2-git77.g94abda8</span>
+   &#160;<span id="projectnumber">1.2-git105.g20c4d68</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -79,7 +79,7 @@ $(function() {
 <p>Main pmemkv class, it provides functions to operate on data in database.  
  <a href="classpmem_1_1kv_1_1db.html#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="libpmemkv_8hpp_source.html">/pmemkv/doc_update/pmemkv/src/libpmemkv.hpp</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -111,19 +111,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a045d8e25af7fcbeae241a86009bcb950"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a045d8e25af7fcbeae241a86009bcb950">count_all</a> (std::size_t &amp;cnt) noexcept</td></tr>
 <tr class="memdesc:a045d8e25af7fcbeae241a86009bcb950"><td class="mdescLeft">&#160;</td><td class="mdescRight">It returns number of currently stored elements in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>.  <a href="#a045d8e25af7fcbeae241a86009bcb950">More...</a><br /></td></tr>
 <tr class="separator:a045d8e25af7fcbeae241a86009bcb950"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a39d9dd4dafa5f9918666dfc82ae5b4c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a39d9dd4dafa5f9918666dfc82ae5b4c1">count_above</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, std::size_t &amp;cnt) noexcept</td></tr>
+<tr class="memitem:a39d9dd4dafa5f9918666dfc82ae5b4c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a39d9dd4dafa5f9918666dfc82ae5b4c1">count_above</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, std::size_t &amp;cnt) noexcept</td></tr>
 <tr class="memdesc:a39d9dd4dafa5f9918666dfc82ae5b4c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">It returns number of currently stored elements in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the given <em>key</em>.  <a href="#a39d9dd4dafa5f9918666dfc82ae5b4c1">More...</a><br /></td></tr>
 <tr class="separator:a39d9dd4dafa5f9918666dfc82ae5b4c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb4fd35487a8003e5da86e9f63fe177f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#adb4fd35487a8003e5da86e9f63fe177f">count_equal_above</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, std::size_t &amp;cnt) noexcept</td></tr>
+<tr class="memitem:adb4fd35487a8003e5da86e9f63fe177f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#adb4fd35487a8003e5da86e9f63fe177f">count_equal_above</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, std::size_t &amp;cnt) noexcept</td></tr>
 <tr class="memdesc:adb4fd35487a8003e5da86e9f63fe177f"><td class="mdescLeft">&#160;</td><td class="mdescRight">It returns number of currently stored elements in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than or equal to the given <em>key</em>.  <a href="#adb4fd35487a8003e5da86e9f63fe177f">More...</a><br /></td></tr>
 <tr class="separator:adb4fd35487a8003e5da86e9f63fe177f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af8422e62900d3dc256e5a6138bf97d10"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#af8422e62900d3dc256e5a6138bf97d10">count_equal_below</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, std::size_t &amp;cnt) noexcept</td></tr>
+<tr class="memitem:af8422e62900d3dc256e5a6138bf97d10"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#af8422e62900d3dc256e5a6138bf97d10">count_equal_below</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, std::size_t &amp;cnt) noexcept</td></tr>
 <tr class="memdesc:af8422e62900d3dc256e5a6138bf97d10"><td class="mdescLeft">&#160;</td><td class="mdescRight">It returns number of currently stored elements in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are lower than or equal to the given <em>key</em>.  <a href="#af8422e62900d3dc256e5a6138bf97d10">More...</a><br /></td></tr>
 <tr class="separator:af8422e62900d3dc256e5a6138bf97d10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8f2c91118f8bccfe9b2b8c7447b4a11b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a8f2c91118f8bccfe9b2b8c7447b4a11b">count_below</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, std::size_t &amp;cnt) noexcept</td></tr>
+<tr class="memitem:a8f2c91118f8bccfe9b2b8c7447b4a11b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a8f2c91118f8bccfe9b2b8c7447b4a11b">count_below</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, std::size_t &amp;cnt) noexcept</td></tr>
 <tr class="memdesc:a8f2c91118f8bccfe9b2b8c7447b4a11b"><td class="mdescLeft">&#160;</td><td class="mdescRight">It returns number of currently stored elements in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are less than the given <em>key</em>.  <a href="#a8f2c91118f8bccfe9b2b8c7447b4a11b">More...</a><br /></td></tr>
 <tr class="separator:a8f2c91118f8bccfe9b2b8c7447b4a11b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82271c073c7374d8e3bb4553aba00a5c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a82271c073c7374d8e3bb4553aba00a5c">count_between</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key1, <a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key2, std::size_t &amp;cnt) noexcept</td></tr>
+<tr class="memitem:a82271c073c7374d8e3bb4553aba00a5c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a82271c073c7374d8e3bb4553aba00a5c">count_between</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key1, <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key2, std::size_t &amp;cnt) noexcept</td></tr>
 <tr class="memdesc:a82271c073c7374d8e3bb4553aba00a5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">It returns number of currently stored elements in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the <em>key1</em> and less than the <em>key2</em>.  <a href="#a82271c073c7374d8e3bb4553aba00a5c">More...</a><br /></td></tr>
 <tr class="separator:a82271c073c7374d8e3bb4553aba00a5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70aedc11acdeceb27297e68e9f366b8b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a70aedc11acdeceb27297e68e9f366b8b">get_all</a> (<a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> *callback, void *arg) noexcept</td></tr>
@@ -132,52 +132,52 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac207d1c98500c16693b0d38484e227bd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#ac207d1c98500c16693b0d38484e227bd">get_all</a> (std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a> &gt; f) noexcept</td></tr>
 <tr class="memdesc:ac207d1c98500c16693b0d38484e227bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>.  <a href="#ac207d1c98500c16693b0d38484e227bd">More...</a><br /></td></tr>
 <tr class="separator:ac207d1c98500c16693b0d38484e227bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acc008b94f62399f47237d3bdab0989e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#acc008b94f62399f47237d3bdab0989e0">get_above</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> *callback, void *arg) noexcept</td></tr>
+<tr class="memitem:acc008b94f62399f47237d3bdab0989e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#acc008b94f62399f47237d3bdab0989e0">get_above</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> *callback, void *arg) noexcept</td></tr>
 <tr class="memdesc:acc008b94f62399f47237d3bdab0989e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes (C-like) callback function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the given <em>key</em>.  <a href="#acc008b94f62399f47237d3bdab0989e0">More...</a><br /></td></tr>
 <tr class="separator:acc008b94f62399f47237d3bdab0989e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a944ae4dbb041f63c778b1f67013178c7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a944ae4dbb041f63c778b1f67013178c7">get_above</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a> &gt; f) noexcept</td></tr>
+<tr class="memitem:a944ae4dbb041f63c778b1f67013178c7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a944ae4dbb041f63c778b1f67013178c7">get_above</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a> &gt; f) noexcept</td></tr>
 <tr class="memdesc:a944ae4dbb041f63c778b1f67013178c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the given <em>key</em>.  <a href="#a944ae4dbb041f63c778b1f67013178c7">More...</a><br /></td></tr>
 <tr class="separator:a944ae4dbb041f63c778b1f67013178c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a564e74f87cd0c460e99108c5ca0520cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a564e74f87cd0c460e99108c5ca0520cf">get_equal_above</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> *callback, void *arg) noexcept</td></tr>
+<tr class="memitem:a564e74f87cd0c460e99108c5ca0520cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a564e74f87cd0c460e99108c5ca0520cf">get_equal_above</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> *callback, void *arg) noexcept</td></tr>
 <tr class="memdesc:a564e74f87cd0c460e99108c5ca0520cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes (C-like) callback function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than or equal to the given <em>key</em>.  <a href="#a564e74f87cd0c460e99108c5ca0520cf">More...</a><br /></td></tr>
 <tr class="separator:a564e74f87cd0c460e99108c5ca0520cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b5aab6ba2a00ef3119978ce51f4031c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a6b5aab6ba2a00ef3119978ce51f4031c">get_equal_above</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a> &gt; f) noexcept</td></tr>
+<tr class="memitem:a6b5aab6ba2a00ef3119978ce51f4031c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a6b5aab6ba2a00ef3119978ce51f4031c">get_equal_above</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a> &gt; f) noexcept</td></tr>
 <tr class="memdesc:a6b5aab6ba2a00ef3119978ce51f4031c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than or equal to the given <em>key</em>.  <a href="#a6b5aab6ba2a00ef3119978ce51f4031c">More...</a><br /></td></tr>
 <tr class="separator:a6b5aab6ba2a00ef3119978ce51f4031c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa568e1363f13ed055cd026f7a440563"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#aaa568e1363f13ed055cd026f7a440563">get_equal_below</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> *callback, void *arg) noexcept</td></tr>
+<tr class="memitem:aaa568e1363f13ed055cd026f7a440563"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#aaa568e1363f13ed055cd026f7a440563">get_equal_below</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> *callback, void *arg) noexcept</td></tr>
 <tr class="memdesc:aaa568e1363f13ed055cd026f7a440563"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes (C-like) callback function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are lower than or equal to the given <em>key</em>.  <a href="#aaa568e1363f13ed055cd026f7a440563">More...</a><br /></td></tr>
 <tr class="separator:aaa568e1363f13ed055cd026f7a440563"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac12681d430646f34aba8e9635e4c6861"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#ac12681d430646f34aba8e9635e4c6861">get_equal_below</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a> &gt; f) noexcept</td></tr>
+<tr class="memitem:ac12681d430646f34aba8e9635e4c6861"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#ac12681d430646f34aba8e9635e4c6861">get_equal_below</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a> &gt; f) noexcept</td></tr>
 <tr class="memdesc:ac12681d430646f34aba8e9635e4c6861"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are lower than or equal to the given <em>key</em>.  <a href="#ac12681d430646f34aba8e9635e4c6861">More...</a><br /></td></tr>
 <tr class="separator:ac12681d430646f34aba8e9635e4c6861"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad8c8aba193345dc3c30336ab349b6066"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#ad8c8aba193345dc3c30336ab349b6066">get_below</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> *callback, void *arg) noexcept</td></tr>
+<tr class="memitem:ad8c8aba193345dc3c30336ab349b6066"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#ad8c8aba193345dc3c30336ab349b6066">get_below</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> *callback, void *arg) noexcept</td></tr>
 <tr class="memdesc:ad8c8aba193345dc3c30336ab349b6066"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes (C-like) callback function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are lower than the given <em>key</em>.  <a href="#ad8c8aba193345dc3c30336ab349b6066">More...</a><br /></td></tr>
 <tr class="separator:ad8c8aba193345dc3c30336ab349b6066"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95e15e03d045b838b870960ac638c289"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a95e15e03d045b838b870960ac638c289">get_below</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a> &gt; f) noexcept</td></tr>
+<tr class="memitem:a95e15e03d045b838b870960ac638c289"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a95e15e03d045b838b870960ac638c289">get_below</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a> &gt; f) noexcept</td></tr>
 <tr class="memdesc:a95e15e03d045b838b870960ac638c289"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are less than the given <em>key</em>.  <a href="#a95e15e03d045b838b870960ac638c289">More...</a><br /></td></tr>
 <tr class="separator:a95e15e03d045b838b870960ac638c289"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aadc338822098cc657cdb944962319b70"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#aadc338822098cc657cdb944962319b70">get_between</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key1, <a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key2, <a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> *callback, void *arg) noexcept</td></tr>
+<tr class="memitem:aadc338822098cc657cdb944962319b70"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#aadc338822098cc657cdb944962319b70">get_between</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key1, <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key2, <a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> *callback, void *arg) noexcept</td></tr>
 <tr class="memdesc:aadc338822098cc657cdb944962319b70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes (C-like) callback function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the <em>key1</em> and less than the <em>key2</em>.  <a href="#aadc338822098cc657cdb944962319b70">More...</a><br /></td></tr>
 <tr class="separator:aadc338822098cc657cdb944962319b70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2af6ddc03f117464155f79abdba66c7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a2af6ddc03f117464155f79abdba66c7d">get_between</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key1, <a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key2, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a> &gt; f) noexcept</td></tr>
+<tr class="memitem:a2af6ddc03f117464155f79abdba66c7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a2af6ddc03f117464155f79abdba66c7d">get_between</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key1, <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key2, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a> &gt; f) noexcept</td></tr>
 <tr class="memdesc:a2af6ddc03f117464155f79abdba66c7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes function for every record stored in <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a>, whose keys are greater than the <em>key1</em> and less than the <em>key2</em>.  <a href="#a2af6ddc03f117464155f79abdba66c7d">More...</a><br /></td></tr>
 <tr class="separator:a2af6ddc03f117464155f79abdba66c7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a130ec5171d0afa3d8fe9b5604910c679"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a130ec5171d0afa3d8fe9b5604910c679">exists</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key) noexcept</td></tr>
+<tr class="memitem:a130ec5171d0afa3d8fe9b5604910c679"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a130ec5171d0afa3d8fe9b5604910c679">exists</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key) noexcept</td></tr>
 <tr class="memdesc:a130ec5171d0afa3d8fe9b5604910c679"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks existence of record with given <em>key</em>.  <a href="#a130ec5171d0afa3d8fe9b5604910c679">More...</a><br /></td></tr>
 <tr class="separator:a130ec5171d0afa3d8fe9b5604910c679"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff3cbefb1fa8e9bd611cc3a6a5137fa7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#aff3cbefb1fa8e9bd611cc3a6a5137fa7">get</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#a314a9ee9a3cb6fd0fb696ee02de9b9d1">get_v_callback</a> *callback, void *arg) noexcept</td></tr>
+<tr class="memitem:aff3cbefb1fa8e9bd611cc3a6a5137fa7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#aff3cbefb1fa8e9bd611cc3a6a5137fa7">get</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#a314a9ee9a3cb6fd0fb696ee02de9b9d1">get_v_callback</a> *callback, void *arg) noexcept</td></tr>
 <tr class="memdesc:aff3cbefb1fa8e9bd611cc3a6a5137fa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes (C-like) <em>callback</em> function for record with given <em>key</em>.  <a href="#aff3cbefb1fa8e9bd611cc3a6a5137fa7">More...</a><br /></td></tr>
 <tr class="separator:aff3cbefb1fa8e9bd611cc3a6a5137fa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a21042c3290cc3f89dcdf73119dba0c08"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a21042c3290cc3f89dcdf73119dba0c08">get</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#a3d14c2b2e57bef5dbca29560b4b7e721">get_v_function</a> &gt; f) noexcept</td></tr>
+<tr class="memitem:a21042c3290cc3f89dcdf73119dba0c08"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a21042c3290cc3f89dcdf73119dba0c08">get</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, std::function&lt; <a class="el" href="namespacepmem_1_1kv.html#a3d14c2b2e57bef5dbca29560b4b7e721">get_v_function</a> &gt; f) noexcept</td></tr>
 <tr class="memdesc:a21042c3290cc3f89dcdf73119dba0c08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes function for record with given <em>key</em>.  <a href="#a21042c3290cc3f89dcdf73119dba0c08">More...</a><br /></td></tr>
 <tr class="separator:a21042c3290cc3f89dcdf73119dba0c08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18ff1cfa44c8786d17a5b53518771314"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a18ff1cfa44c8786d17a5b53518771314">get</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, std::string *value) noexcept</td></tr>
+<tr class="memitem:a18ff1cfa44c8786d17a5b53518771314"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a18ff1cfa44c8786d17a5b53518771314">get</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, std::string *value) noexcept</td></tr>
 <tr class="memdesc:a18ff1cfa44c8786d17a5b53518771314"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets value copy of record with given <em>key</em>.  <a href="#a18ff1cfa44c8786d17a5b53518771314">More...</a><br /></td></tr>
 <tr class="separator:a18ff1cfa44c8786d17a5b53518771314"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a31dbecf3c960dec47d4a04328b9efd92"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a31dbecf3c960dec47d4a04328b9efd92">put</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key, <a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> value) noexcept</td></tr>
+<tr class="memitem:a31dbecf3c960dec47d4a04328b9efd92"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a31dbecf3c960dec47d4a04328b9efd92">put</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> value) noexcept</td></tr>
 <tr class="memdesc:a31dbecf3c960dec47d4a04328b9efd92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inserts a key-value pair into pmemkv database.  <a href="#a31dbecf3c960dec47d4a04328b9efd92">More...</a><br /></td></tr>
 <tr class="separator:a31dbecf3c960dec47d4a04328b9efd92"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a31167b93a66c88559ff11010e1e130c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a31167b93a66c88559ff11010e1e130c1">remove</a> (<a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a> key) noexcept</td></tr>
+<tr class="memitem:a31167b93a66c88559ff11010e1e130c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a31167b93a66c88559ff11010e1e130c1">remove</a> (<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key) noexcept</td></tr>
 <tr class="memdesc:a31167b93a66c88559ff11010e1e130c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes from database record with given <em>key</em>.  <a href="#a31167b93a66c88559ff11010e1e130c1">More...</a><br /></td></tr>
 <tr class="separator:a31167b93a66c88559ff11010e1e130c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a247061eab0155ce92b24885be6afd207"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a247061eab0155ce92b24885be6afd207">defrag</a> (double start_percent=0, double amount_percent=100)</td></tr>
@@ -352,7 +352,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::count_above </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -434,7 +434,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::count_below </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -481,13 +481,13 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::count_between </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key1</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key2</em>, </td>
         </tr>
         <tr>
@@ -535,7 +535,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::count_equal_above </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -582,7 +582,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::count_equal_below </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -704,7 +704,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::exists </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em></td><td>)</td>
           <td></td>
         </tr>
@@ -740,7 +740,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -794,7 +794,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -841,7 +841,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -888,7 +888,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get_above </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -943,7 +943,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get_above </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -1074,7 +1074,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get_below </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -1129,7 +1129,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get_below </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -1177,13 +1177,13 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get_between </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key1</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key2</em>, </td>
         </tr>
         <tr>
@@ -1239,13 +1239,13 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get_between </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key1</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key2</em>, </td>
         </tr>
         <tr>
@@ -1294,7 +1294,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get_equal_above </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -1349,7 +1349,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get_equal_above </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -1397,7 +1397,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get_equal_below </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -1452,7 +1452,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::get_equal_below </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
@@ -1642,13 +1642,13 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::put </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>value</em>&#160;</td>
         </tr>
         <tr>
@@ -1689,7 +1689,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::db::remove </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classpmem_1_1kv_1_1string__view.html">string_view</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a>&#160;</td>
           <td class="paramname"><em>key</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1737,7 +1737,7 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/pmemkv/doc_update/pmemkv/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
+<li>/tmp/pmemkv-zZF/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
