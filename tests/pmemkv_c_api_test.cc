@@ -40,6 +40,11 @@
 // Tests and params' list
 #include "basic_tests.h"
 
+// Workaround to support gtest in versions 1.8.1 and 1.10
+#ifndef INSTANTIATE_TEST_SUITE_P
+#define INSTANTIATE_TEST_SUITE_P INSTANTIATE_TEST_CASE_P
+#endif
+
 class PmemkvCApiTest : public ::testing::TestWithParam<Basic> {
 public:
 	std::map<std::string, int> init_status;
@@ -192,5 +197,5 @@ TEST_P(PmemkvCApiTest, NullConfig)
 	ASSERT_TRUE(s == PMEMKV_STATUS_INVALID_ARGUMENT) << pmemkv_errormsg();
 }
 
-INSTANTIATE_TEST_CASE_P(basic_tests, PmemkvCApiTest, ::testing::ValuesIn(basic_tests),
-			GetTestName());
+INSTANTIATE_TEST_SUITE_P(basic_tests, PmemkvCApiTest, ::testing::ValuesIn(basic_tests),
+			 GetTestName());

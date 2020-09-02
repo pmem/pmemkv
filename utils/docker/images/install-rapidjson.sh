@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 #
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2020, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,81 +31,21 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
-#              environment prepared for running pmemkv build and tests.
+# install-rapidjson.sh - installs rapidjson from sources
 #
 
-# Pull base image
-FROM fedora:31
-MAINTAINER szymon.romik@intel.com
+set -e
 
-# Set required environment variables
-ENV OS fedora
-ENV OS_VER 31
-ENV PACKAGE_MANAGER rpm
-ENV NOTTY 1
+git clone https://github.com/Tencent/rapidjson
+cd rapidjson
+# master: Merge pull request #1760 from escherstair/fix_ce6_support, 07.08.2020
+git checkout "ce81bc9edfe773667a7a4454ba81dac72ed4364c"
 
-# Additional parameters to build docker without building components
-ARG SKIP_VALGRIND_BUILD
-ARG SKIP_PMDK_BUILD
-ARG SKIP_LIBPMEMOBJCPP_BUILD
+mkdir build
+cd build
+cmake ..
+make -j$(nproc)
+sudo make -j$(nproc) install
 
-# Install basic tools
-RUN dnf update -y \
- && dnf install -y \
-	autoconf \
-	automake \
-	clang \
-	cmake \
-	daxctl-devel \
-	doxygen \
-	gcc \
-	gcc-c++ \
-	gdb \
-	git \
-	graphviz \
-	gtest-devel \
-	hub \
-	libtool \
-	make \
-	man \
-	memkind-devel \
-	ndctl-devel \
-	numactl-devel \
-	pandoc \
-	passwd \
-	perl-Text-Diff \
-	rpm-build \
-	sudo \
-	tbb-devel \
-	unzip \
-	wget \
-	which \
-&& dnf clean all
-
-# Install glibc-debuginfo
-RUN dnf debuginfo-install -y glibc
-
-# Install rapidjson from sources
-COPY install-rapidjson.sh install-rapidjson.sh
-RUN ./install-rapidjson.sh
-
-# Install valgrind
-COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
-
-# Install pmdk
-COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh rpm
-
-# Install pmdk c++ bindings
-COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh RPM
-
-# Add user
-ENV USER user
-ENV USERPASS pass
-RUN useradd -m $USER
-RUN echo "$USER:$USERPASS" | chpasswd
-RUN gpasswd wheel -a $USER
-USER $USER
+cd ../..
+rm -r rapidjson
