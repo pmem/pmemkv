@@ -31,6 +31,13 @@ secondary_title: pmemkv
 
 pmemkv_config *pmemkv_config_new(void);
 void pmemkv_config_delete(pmemkv_config *config);
+
+int pmemkv_config_put_size(pmemkv_config *config, uint64_t value);
+int pmemkv_config_put_path(pmemkv_config *config, const char *value);
+int pmemkv_config_put_force_create(pmemkv_config *config, bool value);
+int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);
+int pmemkv_config_put_oid(pmemkv_config *config, PMEMoid *oid);
+
 int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *value,
 			size_t value_size);
 int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value,
@@ -40,6 +47,7 @@ int pmemkv_config_put_object_cb(pmemkv_config *config, const char *key, void *va
 int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value);
 int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value);
 int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value);
+
 int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **value,
 			size_t *value_size);
 int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **value);
@@ -82,6 +90,30 @@ Every engine has documented all supported config parameters (please see **libpme
 :	Deletes pmemkv_config. Should be called ONLY for configs which were not
 	passed to pmemkv_open (as this function moves ownership of the config to
 	the database).
+
+`int pmemkv_config_put_size(pmemkv_config *config, uint64_t value);`
+
+:	Puts `value` to a config at key `size`. This function provides type
+	safety for **size** parameter.
+
+`int pmemkv_config_put_path(pmemkv_config *config, const char *value);`
+
+:	Puts `value` to a config at key **path**. This function provides type
+	safety for `path` parameter.
+
+`int pmemkv_config_put_force_create(pmemkv_config Wconfig, bool value);`
+
+:	Puts force_create parameter to a config. In engines which supports this parameter, if false,
+	pmemkv opens the file specified by 'path', otherwise it creates it. False by default.
+
+`int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);`
+
+:	Puts comparator object to a config. To create an instance of pmemkv_comparator object,
+	`pmemkv_comparator_new()` function shoud be used.
+
+`int pmemkv_config_put_oid(pmemkv_config *config, PMEMoid *oid);`
+
+:	Puts PMEMoid object to a config (for details see **libpmemkv**(7)).
 
 `int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value);`
 
@@ -193,15 +225,103 @@ Possible return values are:
 
 # EXAMPLE #
 
-The following example is taken from `examples/pmemkv_config_c/pmemkv_config.c`.
+The following examples are taken from `examples/pmemkv_config_c` directory.
+
+## BASIC EXAMPLE ##
+
+Usage of basic config functions to set parameters based on their functionality and get based on their data type, e.g. 'pmemkv_config_put_path()' or 'pmemkv_config_put_size()'.
 
 ```c
-// SPDX-License-Identifier: BSD-3-Clause
+#include <assert.h>
+#include <libpmemkv.h>
+#include <libpmemobj/pool_base.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define ASSERT(expr)                                                                     \
+	do {                                                                             \
+		if (!(expr))                                                             \
+			puts(pmemkv_errormsg());                                         \
+		assert(expr);                                                            \
+	} while (0)
+
+static const uint64_t SIZE = 1024UL * 1024UL * 1024UL;
+
+int key_length_compare(const char *key1, size_t keybytes1, const char *key2,
+		       size_t keybytes2, void *arg)
+{
+	if (keybytes2 < keybytes1)
+		return -1;
+	else if (keybytes2 > keybytes1)
+		return 1;
+	else
+		return 0;
+}
+
+int main(int argc, char *argv[])
+{
+	if (argc < 2) {
+		fprintf(stderr, "Usage: %s file\n", argv[0]);
+		exit(1);
+	}
+
+	/* Create config */
+	pmemkv_config *config = pmemkv_config_new();
+	ASSERT(config != NULL);
+
+	/* Add path parameter to config. Meaning of this is dependent on chosen engine.
+	 *  E.g. if config is used with cmap engine,
+	 *  it is a path to a database file or to a poolset file. However for
+	 *  vcmap it is a path to an existing directory */
+	int status = pmemkv_config_put_path(config, argv[1]);
+	ASSERT(status == PMEMKV_STATUS_OK);
+
+	/* Specifies size of the database */
+	status = pmemkv_config_put_size(config, SIZE);
+	ASSERT(status == PMEMKV_STATUS_OK);
+
+	/* Specifies value of force create flag */
+	status = pmemkv_config_put_force_create(config, true);
+	ASSERT(status == PMEMKV_STATUS_OK);
+
+	/* Specifies comparator used by the engine */
+	pmemkv_comparator *cmp =
+		pmemkv_comparator_new(&key_length_compare, "key_length_compare", NULL);
+	ASSERT(cmp != NULL);
+	status = pmemkv_config_put_comparator(config, cmp);
+	ASSERT(status == PMEMKV_STATUS_OK);
+
+	/* Adds pointer to oid (for details see libpmemkv(7)) to the config */
+	PMEMoid oid;
+	status = pmemkv_config_put_oid(config, &oid);
+	ASSERT(status == PMEMKV_STATUS_OK);
+
+	pmemkv_config_delete(config);
+
+	return 0;
+}
+
+```
+
+## TYPE BASED CONFIGURATION EXAMPLE ##
+
+Usage of config functions to set and get data based on their data type, e.g. 'pmemkv_config_put_int64()' or 'pmemkv_config_put_object()'.
+
+```c
 #include <assert.h>
 #include <libpmemkv.h>
 #include <libpmemkv_json_config.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define ASSERT(expr)                                                                     \
+	do {                                                                             \
+		if (!(expr))                                                             \
+			puts(pmemkv_errormsg());                                         \
+		assert(expr);                                                            \
+	} while (0)
 
 /* deleter for int pointer */
 void free_int_ptr(void *ptr)
@@ -212,47 +332,47 @@ void free_int_ptr(void *ptr)
 int main()
 {
 	pmemkv_config *config = pmemkv_config_new();
-	assert(config != NULL);
+	ASSERT(config != NULL);
 
 	/* Put int64_t value */
 	int status = pmemkv_config_put_int64(config, "size", 1073741824);
-	assert(status == PMEMKV_STATUS_OK);
+	ASSERT(status == PMEMKV_STATUS_OK);
 
 	char buffer[] = "ABC";
 
 	/* Put binary data stored in buffer */
 	status = pmemkv_config_put_data(config, "binary", buffer, 3);
-	assert(status == PMEMKV_STATUS_OK);
+	ASSERT(status == PMEMKV_STATUS_OK);
 
 	const void *data;
 	size_t data_size;
 
 	/* Get pointer to binary data stored in config */
 	status = pmemkv_config_get_data(config, "binary", &data, &data_size);
-	assert(status == PMEMKV_STATUS_OK);
-	assert(data_size == 3);
-	assert(((const char *)data)[0] == 'A');
+	ASSERT(status == PMEMKV_STATUS_OK);
+	ASSERT(data_size == 3);
+	ASSERT(((const char *)data)[0] == 'A');
 
 	int *int_ptr = malloc(sizeof(int));
-	assert(int_ptr != NULL);
+	ASSERT(int_ptr != NULL);
 	*int_ptr = 10;
 
 	/* Put pointer to dynamically allocated object, free_int_ptr is called on
 	 * pmemkv_config_delete */
 	status = pmemkv_config_put_object(config, "int_ptr", int_ptr, &free_int_ptr);
-	assert(status == PMEMKV_STATUS_OK);
+	ASSERT(status == PMEMKV_STATUS_OK);
 
 	int *get_int_ptr;
 
 	/* Get pointer to object stored in config */
 	status = pmemkv_config_get_object(config, "int_ptr", (void **)&get_int_ptr);
-	assert(status == PMEMKV_STATUS_OK);
-	assert(*get_int_ptr == 10);
+	ASSERT(status == PMEMKV_STATUS_OK);
+	ASSERT(*get_int_ptr == 10);
 
 	pmemkv_config_delete(config);
 
 	pmemkv_config *config_from_json = pmemkv_config_new();
-	assert(config_from_json != NULL);
+	ASSERT(config_from_json != NULL);
 
 	/* Parse JSON and put all items found into config_from_json */
 	status = pmemkv_config_from_json(config_from_json, "{\"path\":\"/dev/shm\",\
@@ -261,24 +381,24 @@ int main()
 			\"size\":1073741824\
 			}\
 		}");
-	assert(status == PMEMKV_STATUS_OK);
+	ASSERT(status == PMEMKV_STATUS_OK);
 
 	const char *path;
 	status = pmemkv_config_get_string(config_from_json, "path", &path);
-	assert(status == PMEMKV_STATUS_OK);
-	assert(strcmp(path, "/dev/shm") == 0);
+	ASSERT(status == PMEMKV_STATUS_OK);
+	ASSERT(strcmp(path, "/dev/shm") == 0);
 
 	pmemkv_config *subconfig;
 
 	/* Get pointer to nested configuration "subconfig" */
 	status = pmemkv_config_get_object(config_from_json, "subconfig",
 					  (void **)&subconfig);
-	assert(status == PMEMKV_STATUS_OK);
+	ASSERT(status == PMEMKV_STATUS_OK);
 
 	size_t sub_size;
 	status = pmemkv_config_get_uint64(subconfig, "size", &sub_size);
-	assert(status == PMEMKV_STATUS_OK);
-	assert(sub_size == 1073741824);
+	ASSERT(status == PMEMKV_STATUS_OK);
+	ASSERT(sub_size == 1073741824);
 
 	pmemkv_config_delete(config_from_json);
 
