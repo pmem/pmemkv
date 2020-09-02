@@ -17,6 +17,12 @@
 #include <libpmemobj++/transaction.hpp>
 
 #undef LOG
+#define ASSERT(expr)                                                                     \
+	do {                                                                             \
+		if (!(expr))                                                             \
+			std::cout << pmemkv_errormsg() << std::endl;                     \
+		assert(expr);                                                            \
+	} while (0)
 #define LOG(msg) std::cout << msg << std::endl
 
 using namespace pmem::kv;
@@ -55,50 +61,50 @@ int main(int argc, char *argv[])
 		config cfg_1;
 		config cfg_2;
 
-		status ret = cfg_1.put_object("oid", &(pop.root()->oids->at(0)), nullptr);
-		assert(ret == status::OK);
-		ret = cfg_2.put_object("oid", &(pop.root()->oids->at(1)), nullptr);
-		assert(ret == status::OK);
+		status ret = cfg_1.put_oid(&(pop.root()->oids->at(0)));
+		ASSERT(ret == status::OK);
+		ret = cfg_2.put_oid(&(pop.root()->oids->at(1)));
+		ASSERT(ret == status::OK);
 
 		LOG("Starting first cmap engine");
 		db *kv_1 = new db();
-		assert(kv_1 != nullptr);
+		ASSERT(kv_1 != nullptr);
 		status s = kv_1->open("cmap", std::move(cfg_1));
-		assert(s == status::OK);
+		ASSERT(s == status::OK);
 
 		*(pop.root()->str) = "some string";
 
 		LOG("Starting second cmap engine");
 		db *kv_2 = new db();
-		assert(kv_2 != nullptr);
+		ASSERT(kv_2 != nullptr);
 		s = kv_2->open("cmap", std::move(cfg_2));
-		assert(s == status::OK);
+		ASSERT(s == status::OK);
 
 		LOG("Putting new key into first cmap");
 		s = kv_1->put("key_1", "value_1");
-		assert(s == status::OK);
+		ASSERT(s == status::OK);
 
 		LOG("Putting new key into second cmap");
 		s = kv_2->put("key_2", "value_2");
-		assert(s == status::OK);
+		ASSERT(s == status::OK);
 
 		LOG("Reading key back from first cmap");
 		std::string value;
 		s = kv_1->get("key_1", &value);
-		assert(s == status::OK && value == "value_1");
+		ASSERT(s == status::OK && value == "value_1");
 
 		LOG("Reading key back from second cmap");
 		value.clear();
 		s = kv_2->get("key_2", &value);
-		assert(s == status::OK && value == "value_2");
+		ASSERT(s == status::OK && value == "value_2");
 
 		LOG("Defragmenting the first cmap");
 		s = kv_1->defrag(0, 100);
-		assert(s == status::OK);
+		ASSERT(s == status::OK);
 
 		LOG("Defragmenting the second cmap");
 		s = kv_2->defrag(0, 100);
-		assert(s == status::OK);
+		ASSERT(s == status::OK);
 
 		LOG("Stopping first cmap engine");
 		delete kv_1;

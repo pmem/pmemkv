@@ -31,6 +31,13 @@ secondary_title: pmemkv
 
 pmemkv_config *pmemkv_config_new(void);
 void pmemkv_config_delete(pmemkv_config *config);
+
+int pmemkv_config_put_size(pmemkv_config *config, uint64_t value);
+int pmemkv_config_put_path(pmemkv_config *config, const char *value);
+int pmemkv_config_put_force_create(pmemkv_config *config, bool value);
+int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);
+int pmemkv_config_put_oid(pmemkv_config *config, PMEMoid *oid);
+
 int pmemkv_config_put_data(pmemkv_config *config, const char *key, const void *value,
 			size_t value_size);
 int pmemkv_config_put_object(pmemkv_config *config, const char *key, void *value,
@@ -40,6 +47,7 @@ int pmemkv_config_put_object_cb(pmemkv_config *config, const char *key, void *va
 int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value);
 int pmemkv_config_put_int64(pmemkv_config *config, const char *key, int64_t value);
 int pmemkv_config_put_string(pmemkv_config *config, const char *key, const char *value);
+
 int pmemkv_config_get_data(pmemkv_config *config, const char *key, const void **value,
 			size_t *value_size);
 int pmemkv_config_get_object(pmemkv_config *config, const char *key, void **value);
@@ -82,6 +90,30 @@ Every engine has documented all supported config parameters (please see **libpme
 :	Deletes pmemkv_config. Should be called ONLY for configs which were not
 	passed to pmemkv_open (as this function moves ownership of the config to
 	the database).
+
+`int pmemkv_config_put_size(pmemkv_config *config, uint64_t value);`
+
+:	Puts `value` to a config at key `size`. This function provides type
+	safety for **size** parameter.
+
+`int pmemkv_config_put_path(pmemkv_config *config, const char *value);`
+
+:	Puts `value` to a config at key **path**. This function provides type
+	safety for `path` parameter.
+
+`int pmemkv_config_put_force_create(pmemkv_config Wconfig, bool value);`
+
+:	Puts force_create parameter to a config. In engines which supports this parameter, if false,
+	pmemkv opens the file specified by 'path', otherwise it creates it. False by default.
+
+`int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);`
+
+:	Puts comparator object to a config. To create an instance of pmemkv_comparator object,
+	`pmemkv_comparator_new()` function shoud be used.
+
+`int pmemkv_config_put_oid(pmemkv_config *config, PMEMoid *oid);`
+
+:	Puts PMEMoid object to a config (for details see **libpmemkv**(7)).
 
 `int pmemkv_config_put_uint64(pmemkv_config *config, const char *key, uint64_t value);`
 
@@ -193,10 +225,22 @@ Possible return values are:
 
 # EXAMPLE #
 
-The following example is taken from `examples/pmemkv_config_c/pmemkv_config.c`.
+The following examples are taken from `examples/pmemkv_config_c` directory.
+
+## BASIC EXAMPLE ##
+
+Usage of basic config functions to set parameters based on their functionality and get based on their data type, e.g. 'pmemkv_config_put_path()' or 'pmemkv_config_put_size()'.
 
 ```c
-@C_EXAMPLE@
+@CONFIG_BASIC_EXAMPLE@
+```
+
+## TYPE BASED CONFIGURATION EXAMPLE ##
+
+Usage of config functions to set and get data based on their data type, e.g. 'pmemkv_config_put_int64()' or 'pmemkv_config_put_object()'.
+
+```c
+@CONFIG_TYPE_BASED_EXAMPLE@
 ```
 
 # SEE ALSO #

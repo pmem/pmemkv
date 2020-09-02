@@ -11,6 +11,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define ASSERT(expr)                                                                     \
+	do {                                                                             \
+		if (!(expr))                                                             \
+			puts(pmemkv_errormsg());                                         \
+		assert(expr);                                                            \
+	} while (0)
+
 #define LOG(msg) puts(msg)
 #define MAX_VAL_LEN 64
 
@@ -34,37 +41,37 @@ int main(int argc, char *argv[])
 	/* See libpmemkv_config(3) for more detailed example of config creation */
 	LOG("Creating config");
 	pmemkv_config *cfg = pmemkv_config_new();
-	assert(cfg != NULL);
+	ASSERT(cfg != NULL);
 
-	int s = pmemkv_config_put_string(cfg, "path", argv[1]);
-	assert(s == PMEMKV_STATUS_OK);
-	s = pmemkv_config_put_uint64(cfg, "size", SIZE);
-	assert(s == PMEMKV_STATUS_OK);
-	s = pmemkv_config_put_uint64(cfg, "force_create", 1);
-	assert(s == PMEMKV_STATUS_OK);
+	int s = pmemkv_config_put_path(cfg, argv[1]);
+	ASSERT(s == PMEMKV_STATUS_OK);
+	s = pmemkv_config_put_size(cfg, SIZE);
+	ASSERT(s == PMEMKV_STATUS_OK);
+	s = pmemkv_config_put_force_create(cfg, true);
+	ASSERT(s == PMEMKV_STATUS_OK);
 
 	LOG("Opening pmemkv database with 'cmap' engine");
 	pmemkv_db *db = NULL;
 	s = pmemkv_open("cmap", cfg, &db);
-	assert(s == PMEMKV_STATUS_OK);
-	assert(db != NULL);
+	ASSERT(s == PMEMKV_STATUS_OK);
+	ASSERT(db != NULL);
 
 	LOG("Putting new key");
 	const char *key1 = "key1";
 	const char *value1 = "value1";
 	s = pmemkv_put(db, key1, strlen(key1), value1, strlen(value1));
-	assert(s == PMEMKV_STATUS_OK);
+	ASSERT(s == PMEMKV_STATUS_OK);
 
 	size_t cnt;
 	s = pmemkv_count_all(db, &cnt);
-	assert(s == PMEMKV_STATUS_OK);
-	assert(cnt == 1);
+	ASSERT(s == PMEMKV_STATUS_OK);
+	ASSERT(cnt == 1);
 
 	LOG("Reading key back");
 	char val[MAX_VAL_LEN];
 	s = pmemkv_get_copy(db, key1, strlen(key1), val, MAX_VAL_LEN, NULL);
-	assert(s == PMEMKV_STATUS_OK);
-	assert(!strcmp(val, "value1"));
+	ASSERT(s == PMEMKV_STATUS_OK);
+	ASSERT(!strcmp(val, "value1"));
 
 	LOG("Iterating existing keys");
 	const char *key2 = "key2";
@@ -77,12 +84,12 @@ int main(int argc, char *argv[])
 
 	LOG("Removing existing key");
 	s = pmemkv_remove(db, key1, strlen(key1));
-	assert(s == PMEMKV_STATUS_OK);
-	assert(pmemkv_exists(db, key1, strlen(key1)) == PMEMKV_STATUS_NOT_FOUND);
+	ASSERT(s == PMEMKV_STATUS_OK);
+	ASSERT(pmemkv_exists(db, key1, strlen(key1)) == PMEMKV_STATUS_NOT_FOUND);
 
 	LOG("Defragmenting the database");
 	s = pmemkv_defrag(db, 0, 100);
-	assert(s == PMEMKV_STATUS_OK);
+	ASSERT(s == PMEMKV_STATUS_OK);
 
 	LOG("Closing database");
 	pmemkv_close(db);
