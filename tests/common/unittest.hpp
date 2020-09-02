@@ -175,7 +175,7 @@ pmem::kv::db INITIALIZE_KV(std::string engine, pmem::kv::config &&config)
 {
 	pmem::kv::db kv;
 	auto s = kv.open(engine, std::move(config));
-	UT_ASSERTeq(s, pmem::kv::status::OK);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	return kv;
 }
@@ -190,7 +190,7 @@ void CLEAR_KV(pmem::kv::db &kv)
 	});
 
 	for (auto &k : keys)
-		kv.remove(k);
+		ASSERT_STATUS(kv.remove(k), pmem::kv::status::OK);
 }
 
 #ifdef JSON_TESTS_SUPPORT

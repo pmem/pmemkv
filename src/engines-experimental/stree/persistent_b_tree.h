@@ -80,6 +80,8 @@ public:
 		  typename = typename std::enable_if<is_const, T>::type>
 	node_iterator(const node_iterator<leaf_type, false> &other);
 
+	node_iterator &operator=(const node_iterator &other);
+
 	node_iterator &operator++();
 	node_iterator operator++(int);
 	node_iterator &operator--();
@@ -455,6 +457,15 @@ node_iterator<LeafType, is_const>::node_iterator(
 	const node_iterator<leaf_type, false> &other)
     : node(other.node), position(other.position)
 {
+}
+
+template <typename LeafType, bool is_const>
+node_iterator<LeafType, is_const> &
+node_iterator<LeafType, is_const>::operator=(const node_iterator &other)
+{
+	node = other.node;
+	position = other.position;
+	return *this;
 }
 
 template <typename LeafType, bool is_const>
