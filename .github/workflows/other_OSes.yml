@@ -1,0 +1,46 @@
+
+name: pmemkv-other
+on:
+  schedule:
+    # run this job at 01:00 UTC everyday
+    # XXX: when checked it works properly, change to e.g. "every Monday"
+    - cron:  '0 1 * * *'
+
+env:
+  REPO:           pmemkv
+  GITHUB_REPO:    pmem/pmemkv
+  DOCKERHUB_REPO: pmem/pmemkv
+
+jobs:
+  linux:
+    name: pmemkv-other
+    runs-on: ubuntu-latest
+    env:
+      HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
+      WORKDIR:        utils/docker
+    strategy:
+      matrix:
+        CONFIG: ["TYPE=debug OS=centos OS_VER=8",
+                 # Arch. fails because of: https://github.com/memkind/memkind/issues/317
+                 # "TYPE=debug OS=archlinux-base OS_VER=latest"
+                 "TYPE=debug OS=debian OS_VER=testing",
+                 "TYPE=debug OS=debian OS_VER=unstable",
+                 # Fed. rawhide fails because of: https://github.com/pmem/pmdk/issues/4938
+                 # "TYPE=debug OS=fedora OS_VER=rawhide",
+                 "TYPE=debug OS=opensuse-leap OS_VER=latest",
+                 "TYPE=debug OS=opensuse-tumbleweed OS_VER=latest",
+                 "TYPE=debug OS=ubuntu OS_VER=rolling"]
+    steps:
+       - name: Print out the current date and time
+         run: date
+
+       - name: Clone the git repo
+         uses: actions/checkout@v2
+         with:
+            fetch-depth: 50
+
+       - name: Pull or rebuild the image
+         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh rebuild
+
+       - name: Run the build
+         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
