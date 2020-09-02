@@ -24,7 +24,7 @@ static void test_init(pmem::kv::db &kv)
 {
 	for (int i = 0; i < len_elements; i++) {
 		std::string element = std::to_string(i);
-		kv.put(element, element);
+		ASSERT_STATUS(kv.put(element, element), pmem::kv::status::OK);
 		check_exist(kv, element, pmem::kv::status::OK);
 	}
 }
@@ -32,18 +32,18 @@ static void test_init(pmem::kv::db &kv)
 static void test_insert(pmem::kv::db &kv)
 {
 	std::size_t size;
-	kv.count_all(size);
+	ASSERT_STATUS(kv.count_all(size), pmem::kv::status::OK);
 	UT_ASSERT(size == len_elements);
 
 	std::string element = std::to_string(len_elements);
-	kv.put(element, element);
+	ASSERT_STATUS(kv.put(element, element), pmem::kv::status::OK);
 	check_exist(kv, element, pmem::kv::status::OK);
 }
 
 static void check_consistency(pmem::kv::db &kv)
 {
 	std::size_t size;
-	kv.count_all(size);
+	ASSERT_STATUS(kv.count_all(size), pmem::kv::status::OK);
 	std::size_t count = 0;
 
 	for (int i = 0; i <= len_elements; i++) {

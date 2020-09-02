@@ -65,8 +65,10 @@ int main(int argc, char *argv[])
 	ASSERT(s == status::OK && value == "value1");
 
 	LOG("Iterating existing keys");
-	kv->put("key2", "value2");
-	kv->put("key3", "value3");
+	s = kv->put("key2", "value2");
+	ASSERT(s == status::OK);
+	s = kv->put("key3", "value3");
+	ASSERT(s == status::OK);
 	kv->get_all([](string_view k, string_view v) {
 		LOG("  visited: " << k.data());
 		return 0;
