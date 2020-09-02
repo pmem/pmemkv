@@ -42,7 +42,6 @@ status stree::count_all(std::size_t &cnt)
 	check_outside_tx();
 
 	cnt = my_btree->size();
-	assert(cnt >= 0);
 
 	return status::OK;
 }
