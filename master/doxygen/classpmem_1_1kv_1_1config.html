@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.2-git105.g20c4d68</span>
+   &#160;<span id="projectnumber">1.2-git115.g0cd9436</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -103,10 +103,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a206c04471a1fab7400a0e0e87760fda9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classpmem_1_1kv_1_1config.html">config</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#a206c04471a1fab7400a0e0e87760fda9">operator=</a> (<a class="el" href="classpmem_1_1kv_1_1config.html">config</a> &amp;&amp;other) noexcept</td></tr>
 <tr class="memdesc:a206c04471a1fab7400a0e0e87760fda9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move assignment operator.  <a href="#a206c04471a1fab7400a0e0e87760fda9">More...</a><br /></td></tr>
 <tr class="separator:a206c04471a1fab7400a0e0e87760fda9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95af80763cf924cf0b656d4ded034222"><td class="memTemplParams" colspan="2">template&lt;typename Comparator &gt; </td></tr>
-<tr class="memitem:a95af80763cf924cf0b656d4ded034222"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#a95af80763cf924cf0b656d4ded034222">put_comparator</a> (Comparator &amp;&amp;comparator)</td></tr>
-<tr class="memdesc:a95af80763cf924cf0b656d4ded034222"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts comparator object to a config.  <a href="#a95af80763cf924cf0b656d4ded034222">More...</a><br /></td></tr>
-<tr class="separator:a95af80763cf924cf0b656d4ded034222"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6c8419518a384cdce1f36cd2a1e4545"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:af6c8419518a384cdce1f36cd2a1e4545"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#af6c8419518a384cdce1f36cd2a1e4545">put_data</a> (const std::string &amp;key, const T *value, const std::size_t number=1) noexcept</td></tr>
 <tr class="memdesc:af6c8419518a384cdce1f36cd2a1e4545"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts binary data pointed by value, of type T, with count of elements to a config.  <a href="#af6c8419518a384cdce1f36cd2a1e4545">More...</a><br /></td></tr>
@@ -128,6 +124,22 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6b14f4878bd1ba832e43da8bf2a6ffc9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#a6b14f4878bd1ba832e43da8bf2a6ffc9">put_string</a> (const std::string &amp;key, const std::string &amp;value) noexcept</td></tr>
 <tr class="memdesc:a6b14f4878bd1ba832e43da8bf2a6ffc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts string value to a config.  <a href="#a6b14f4878bd1ba832e43da8bf2a6ffc9">More...</a><br /></td></tr>
 <tr class="separator:a6b14f4878bd1ba832e43da8bf2a6ffc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44b187e6f020ae04a024a6df2b6629e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#a44b187e6f020ae04a024a6df2b6629e0">put_size</a> (std::uint64_t size) noexcept</td></tr>
+<tr class="memdesc:a44b187e6f020ae04a024a6df2b6629e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts size to a config.  <a href="#a44b187e6f020ae04a024a6df2b6629e0">More...</a><br /></td></tr>
+<tr class="separator:a44b187e6f020ae04a024a6df2b6629e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc5378a2f1df9c5273dcfd81b67b3664"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#acc5378a2f1df9c5273dcfd81b67b3664">put_path</a> (const std::string &amp;path) noexcept</td></tr>
+<tr class="memdesc:acc5378a2f1df9c5273dcfd81b67b3664"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts path to a config.  <a href="#acc5378a2f1df9c5273dcfd81b67b3664">More...</a><br /></td></tr>
+<tr class="separator:acc5378a2f1df9c5273dcfd81b67b3664"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae64b5cc81866de14f975d7238acb26c3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#ae64b5cc81866de14f975d7238acb26c3">put_force_create</a> (bool value) noexcept</td></tr>
+<tr class="memdesc:ae64b5cc81866de14f975d7238acb26c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts force_create parameter to a config, For supporting engines If false, pmemkv opens file specified by 'path', otherwise it creates it.  <a href="#ae64b5cc81866de14f975d7238acb26c3">More...</a><br /></td></tr>
+<tr class="separator:ae64b5cc81866de14f975d7238acb26c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab41100ae393deddbfbcd2bbfef818744"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#ab41100ae393deddbfbcd2bbfef818744">put_oid</a> (PMEMoid *oid) noexcept</td></tr>
+<tr class="memdesc:ab41100ae393deddbfbcd2bbfef818744"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts PMEMoid object to a config.  <a href="#ab41100ae393deddbfbcd2bbfef818744">More...</a><br /></td></tr>
+<tr class="separator:ab41100ae393deddbfbcd2bbfef818744"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95af80763cf924cf0b656d4ded034222"><td class="memTemplParams" colspan="2">template&lt;typename Comparator &gt; </td></tr>
+<tr class="memitem:a95af80763cf924cf0b656d4ded034222"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#a95af80763cf924cf0b656d4ded034222">put_comparator</a> (Comparator &amp;&amp;comparator)</td></tr>
+<tr class="memdesc:a95af80763cf924cf0b656d4ded034222"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts comparator object to a config.  <a href="#a95af80763cf924cf0b656d4ded034222">More...</a><br /></td></tr>
+<tr class="separator:a95af80763cf924cf0b656d4ded034222"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac97a0c8d0e9ac021a739c5ff7f054f85"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:ac97a0c8d0e9ac021a739c5ff7f054f85"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html#ac97a0c8d0e9ac021a739c5ff7f054f85">get_data</a> (const std::string &amp;key, T *&amp;value, std::size_t &amp;number) const noexcept</td></tr>
 <tr class="memdesc:ac97a0c8d0e9ac021a739c5ff7f054f85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets object from a config item with key name and copies it into T object value.  <a href="#ac97a0c8d0e9ac021a739c5ff7f054f85">More...</a><br /></td></tr>
@@ -730,6 +742,36 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a id="ae64b5cc81866de14f975d7238acb26c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae64b5cc81866de14f975d7238acb26c3">&#9670;&nbsp;</a></span>put_force_create()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::config::put_force_create </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Puts force_create parameter to a config, For supporting engines If false, pmemkv opens file specified by 'path', otherwise it creates it. </p>
+<p>False by default.</p>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+
+</div>
+</div>
 <a id="ad9020906aa23b44157ce25fc83c425c8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad9020906aa23b44157ce25fc83c425c8">&#9670;&nbsp;</a></span>put_int64()</h2>
 
@@ -872,6 +914,111 @@ template&lt;typename T , typename D &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>The string representing config item's name. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">object</td><td>unique_ptr to an object.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+
+</div>
+</div>
+<a id="ab41100ae393deddbfbcd2bbfef818744"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab41100ae393deddbfbcd2bbfef818744">&#9670;&nbsp;</a></span>put_oid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::config::put_oid </td>
+          <td>(</td>
+          <td class="paramtype">PMEMoid *&#160;</td>
+          <td class="paramname"><em>oid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Puts PMEMoid object to a config. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">oid</td><td>pointer (for details see <b>libpmemobj</b>(7)) which points to the engine data. If oid is null engine will allocate new data, otherwise it will use existing one.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+
+</div>
+</div>
+<a id="acc5378a2f1df9c5273dcfd81b67b3664"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc5378a2f1df9c5273dcfd81b67b3664">&#9670;&nbsp;</a></span>put_path()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::config::put_path </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>path</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Puts path to a config. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>to a database file or to a poolset file (see <b>poolset</b>(5) for details). Note that when using poolset file, size should be 0.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+
+</div>
+</div>
+<a id="a44b187e6f020ae04a024a6df2b6629e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44b187e6f020ae04a024a6df2b6629e0">&#9670;&nbsp;</a></span>put_size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> pmem::kv::config::put_size </td>
+          <td>(</td>
+          <td class="paramtype">std::uint64_t&#160;</td>
+          <td class="paramname"><em>size</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Puts size to a config. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>of the database in bytes.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1023,7 +1170,7 @@ template&lt;typename T , typename D &gt; </div>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/tmp/pmemkv-zZF/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
+<li>/tmp/pmemkv-EBG/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
