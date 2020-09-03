@@ -160,7 +160,7 @@ void test_dump_backtrace(void)
  */
 void test_sighandler(int sig)
 {
-	printf("\nSignal %d, backtrace:\n", sig);
+	printf("\nSignal: %s, backtrace:\n", strsignal(sig));
 	test_dump_backtrace();
 	printf("\n");
 	exit(128 + sig);
