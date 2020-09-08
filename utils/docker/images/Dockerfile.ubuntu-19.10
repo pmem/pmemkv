@@ -31,8 +31,9 @@
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#              environment prepared for running pmemkv build and tests.
+#              environment, prepared for running pmemkv build and tests.
 #              Separate image for testing rapidjson installed from package.
+#
 
 # Pull base image
 FROM ubuntu:19.10
