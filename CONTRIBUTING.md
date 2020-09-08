@@ -83,19 +83,20 @@ Author: Random J Developer <random@developer.example.org>
 
 # Configuring Github fork
 
-To build and submit documentation as automatically generated pull request,
-the repository have to be properly configured.
+To build and submit documentation as an automatically generated pull request,
+the repository has to be properly configured.
 
-* [Personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) for Github account have to be generated.
+* [Personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) for Github account has to be generated.
+  * Such personal access token has to be set in pmemkv repository's
+  [secrets](https://docs.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets)
+  as `DOC_UPDATE_GITHUB_TOKEN` variable.
 
-* Already generated personal access token have to be set in pmemkv repository
-  [Secrets](https://docs.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets) as "DOC_UPDATE_GITHUB_TOKEN" variable
-
-* DOC_UPDATE_BOT_NAME secret variable have to be set. In most cases it would be
+* `DOC_UPDATE_BOT_NAME` secret variable has to be set. In most cases it will be
   the same as Github account name.
 
-* DOC_REPO_OWNER secret variable have to be set. Name of Github account, which will be target to make the documentation automatic pull request.
-  In most cases it would be the same as Github account name.
+* `DOC_REPO_OWNER` secret variable has to be set. Name of the Github account,
+  which will be target to make an automatic pull request with documentation.
+  In most cases it will be the same as Github account name.
 
 
 # Creating New Engines
