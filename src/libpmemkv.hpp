@@ -317,6 +317,9 @@ inline config::config(config &&other) noexcept
  */
 inline config &config::operator=(config &&other) noexcept
 {
+	if (this == &other)
+		return *this;
+
 	if (this->_config)
 		pmemkv_config_delete(this->_config);
 
@@ -720,6 +723,9 @@ inline db::db(db &&other) noexcept
  */
 inline db &db::operator=(db &&other) noexcept
 {
+	if (this == &other)
+		return *this;
+
 	close();
 
 	std::swap(this->_db, other._db);
