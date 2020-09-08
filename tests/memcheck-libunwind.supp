@@ -21,3 +21,11 @@
    obj:*libunwind*
    ...
 }
+{
+   libunwind exception suppresion
+   Memcheck:Param
+   write(buf)
+   ...
+   obj:*libunwind*
+   ...
+}
