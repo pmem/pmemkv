@@ -148,7 +148,7 @@ docker run --privileged=true --name=$containerName -i $TTY \
 	--env COVERITY_SCAN_NOTIFICATION_EMAIL=$COVERITY_SCAN_NOTIFICATION_EMAIL \
 	--env TEST_PACKAGES=${TEST_PACKAGES:-ON} \
 	--env BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON} \
-	--env CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-ON} \
+	--env CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-OFF} \
 	--env DEFAULT_TEST_DIR=/dev/shm \
 	--shm-size=4G \
 	-v $HOST_WORKDIR:$WORKDIR \
