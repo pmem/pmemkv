@@ -91,12 +91,13 @@ protected:
 
 	bool cfg_by_path = false;
 
-	status snapshot(char *element, size_t size, std::function<int()> f)
+	template <typename F, typename... T>
+	status snapshot(char *element, size_t size, F f, T... args)
 	{
 		try {
 			pmem::obj::transaction::run(pmpool, [&] {
 				pmem::obj::transaction::snapshot(element, size);
-				if (f() != 0) {
+				if (f(args...) != 0) {
 					pmem::obj::transaction::abort(
 						static_cast<int>(status::STOPPED_BY_CB));
 				}

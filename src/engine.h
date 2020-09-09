@@ -60,8 +60,20 @@ private:
 				      std::unique_ptr<internal::config> &cfg);
 
 protected:
-	virtual status snapshot(char *element, size_t size, std::function<int()> f);
+	template <typename F, typename... T>
+	status snapshot(char *element, size_t size, F f, T... args);
 };
+
+template <typename F, typename... T>
+status engine_base::snapshot(char *element, size_t size, F f, T... args)
+{
+	auto snapshot = std::string(element, size);
+	if (f(args...) != 0) {
+		std::copy(snapshot.begin(), snapshot.end(), element);
+		return status::STOPPED_BY_CB;
+	}
+	return status::OK;
+}
 
 } /* namespace kv */
 } /* namespace pmem */
