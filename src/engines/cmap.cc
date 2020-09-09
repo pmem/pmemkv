@@ -88,7 +88,7 @@ status cmap::update(string_view key, size_t v_offset, size_t v_size,
 		LOG("  key not found");
 		return status::NOT_FOUND;
 	}
-	char *editable_element = const_cast<char *>(result->second.c_str()) + v_offset;
+	char *editable_element = result->second.data() + v_offset;
 	auto editable_element_size = std::min(v_size, result->second.size());
 	return snapshot(editable_element, editable_element_size, [&]() {
 		return callback(editable_element, editable_element_size, arg);
