@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['kv',['kv',['../namespacepmem_1_1kv.html',1,'pmem']]],
-  ['pmem',['pmem',['../namespacepmem.html',1,'']]]
+  ['kv_70',['kv',['../namespacepmem_1_1kv.html',1,'pmem']]],
+  ['pmem_71',['pmem',['../namespacepmem.html',1,'']]]
 ];
