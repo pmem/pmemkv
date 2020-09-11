@@ -254,7 +254,7 @@ add_custom_target(check-whitespace-main
 add_dependencies(check-whitespace check-whitespace-main)
 
 if(CHECK_CPP_STYLE)
-	find_program(CLANG_FORMAT NAMES clang-format clang-format-9.0)
+	find_program(CLANG_FORMAT NAMES clang-format clang-format-9 clang-format-9.0)
 	set(CLANG_FORMAT_REQUIRED "9.0")
 	if(CLANG_FORMAT)
 		get_program_version_major_minor(${CLANG_FORMAT} CLANG_FORMAT_VERSION)
