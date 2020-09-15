@@ -224,3 +224,5 @@ HTML_TIMESTAMP = NO
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
 PREDEFINED = __cpp_lib_uncaught_exceptions _WIN32
+
+WARN_AS_ERROR = @DOXYGEN_WARN_AS_ERROR@
