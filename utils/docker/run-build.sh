@@ -230,12 +230,13 @@ function test_release_installation() {
 	# Expect failure - non-existing path is passed
 	run_example_standalone pmemkv_open_cpp /non-existing/path && exit 1
 
-	# Uninstall libraries and cleanup build dirs
+	# Uninstall libraries, cleanup build dirs and example poolset
 	cd $WORKDIR/build
 	sudo_password -S make uninstall
 	cd $WORKDIR
 	rm -rf build
 	rm -rf $EXAMPLE_TEST_DIR
+	rm /dev/shm/pmemkv_open_ex_pool.part*
 
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
