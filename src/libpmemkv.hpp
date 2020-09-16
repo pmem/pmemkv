@@ -67,7 +67,7 @@ typedef void get_v_function(string_view value);
  *
  * @param[in] value returned by callback item's data
  */
-typedef int update_v_function(slice value);
+typedef int update_v_function(string_view value);
 
 typedef int comparator_function(string_view key1, string_view key2);
 
@@ -278,6 +278,8 @@ public:
 		      update_v_callback *callback, void *arg) noexcept;
 	status update(string_view key, size_t v_offset, size_t v_size,
 		      std::function<update_v_function> f) noexcept;
+
+	static slice promote_to_update(string_view value);
 	// XXX: add tests for cpp api
 
 	status put(string_view key, string_view value) noexcept;
@@ -859,7 +861,7 @@ static inline void call_get_v_function(const char *value, size_t valuebytes, voi
 static inline int call_update_v_function(char *value, size_t valuebytes, void *arg)
 {
 	return (*reinterpret_cast<std::function<update_v_function> *>(arg))(
-		slice(value, value + valuebytes));
+		string_view(value, valuebytes));
 }
 
 // XXX: dodac wlasny callback jak "get_copy", tak zeby update'owal cala wartosc
@@ -1431,6 +1433,11 @@ inline status db::update(string_view key, size_t v_offset, size_t v_size,
 	return update(key, v_offset, v_size, call_update_v_function, &f);
 }
 
+inline slice db::promote_to_update(string_view value)
+{
+	char *rw_data = const_cast<char *>(value.data());
+	return slice(rw_data, rw_data + value.size());
+}
 /**
  * Removes from database record with given *key*.
  * This function is guaranteed to be implemented by all engines.

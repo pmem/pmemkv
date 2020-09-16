@@ -32,8 +32,9 @@ static void SimpleTest(pmem::kv::db &kv)
 	size_t len_to_update = 3;
 	size_t offset = 0;
 	ASSERT_STATUS(kv.update("key1", offset, len_to_update,
-				[](slice v) {
-					std::fill(v.begin(), v.end(), 'D');
+				[&](string_view v) {
+					auto ev = pmem::kv::db::promote_to_update(v);
+					std::fill(ev.begin(), ev.end(), 'D');
 					return 0;
 				}),
 		      status::OK);
@@ -47,8 +48,9 @@ static void UpdateRollback(pmem::kv::db &kv)
 	size_t offset = 0;
 	size_t len_to_update = 3;
 	ASSERT_STATUS(kv.update("key1", offset, len_to_update,
-				[](slice v) {
-					std::fill(v.begin(), v.end(), 'D');
+				[&](string_view v) {
+					auto ev = pmem::kv::db::promote_to_update(v);
+					std::fill(ev.begin(), ev.end(), 'D');
 					return 1;
 				}),
 		      status::STOPPED_BY_CB);
