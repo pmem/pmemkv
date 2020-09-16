@@ -210,7 +210,7 @@ function test_release_installation() {
 	make -j$(nproc)
 	sudo_password -S make -j$(nproc) install
 
-	# Verify installed libraries
+	echo "Verify installed libraries:"
 	compile_example_standalone pmemkv_basic_c
 	run_example_standalone pmemkv_basic_c pool
 	compile_example_standalone pmemkv_basic_cpp
@@ -222,15 +222,15 @@ function test_release_installation() {
 	compile_example_standalone pmemkv_pmemobj_cpp
 	run_example_standalone pmemkv_pmemobj_cpp pool
 
-	# Poolset example
+	echo "Poolset example:"
 	compile_example_standalone pmemkv_open_cpp
 	pmempool create -l "pmemkv" obj $WORKDIR/examples/example.poolset
 	run_example_standalone pmemkv_open_cpp $WORKDIR/examples/example.poolset
 
-	# Expect failure - non-existing path is passed
+	echo "Expect failure - non-existing path is passed:"
 	run_example_standalone pmemkv_open_cpp /non-existing/path && exit 1
 
-	# Uninstall libraries, cleanup build dirs and example poolset
+	echo "Uninstall libraries, cleanup build dirs and example poolset:"
 	cd $WORKDIR/build
 	sudo_password -S make uninstall
 	cd $WORKDIR
@@ -250,7 +250,7 @@ echo "---------------------------- Error expected! -----------------------------
 compile_example_standalone pmemkv_basic_cpp && exit 1
 echo "---------------------------------------------------------------------------"
 
-# Run build steps passed as script arguments
+echo "Run build steps passed as script arguments:"
 build_steps=$@
 if [[ -z "$build_steps" ]]; then
 	echo "ERROR: The variable build_steps with selected builds to run is not set!"

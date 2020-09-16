@@ -50,6 +50,7 @@ function upload_codecov() {
 
 function compile_example_standalone() {
 	example_name=$1
+	echo "Compile standalone example: ${example_name}"
 
 	rm -rf $EXAMPLE_TEST_DIR
 	mkdir $EXAMPLE_TEST_DIR
@@ -70,6 +71,7 @@ function compile_example_standalone() {
 function run_example_standalone() {
 	example_name=$1
 	pool_path=$2
+	echo "Run standalone example: ${example_name} with path: ${pool_path}"
 
 	cd $EXAMPLE_TEST_DIR
 
