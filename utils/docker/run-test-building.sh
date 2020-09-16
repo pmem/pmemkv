@@ -215,16 +215,3 @@ case $PACKAGE_MANAGER in
 		echo "Notice: skipping building of packages because PACKAGE_MANAGER is not equal 'rpm' nor 'deb' ..."
 		;;
 esac
-
-# Trigger auto doc update
-if [[ "$AUTO_DOC_UPDATE" == "1" ]]; then
-	echo "Running auto doc update"
-
-	mkdir -p $WORKDIR/doc_update
-	cd $WORKDIR/doc_update
-
-	$SCRIPTSDIR/run-doc-update.sh
-
-	cd $WORKDIR
-	rm -rf $WORKDIR/doc_update
-fi

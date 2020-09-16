@@ -49,7 +49,6 @@ jobs:
         DOC_UPDATE_GITHUB_TOKEN: ${{ secrets.DOC_UPDATE_GITHUB_TOKEN }}
         DOC_UPDATE_BOT_NAME: ${{ secrets.DOC_UPDATE_BOT_NAME }}
         DOC_REPO_OWNER: ${{ secrets.DOC_REPO_OWNER }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
         WORKDIR:        utils/docker
       if:
