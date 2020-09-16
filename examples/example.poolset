@@ -1,3 +1,3 @@
 PMEMPOOLSET
-100M /dev/shm/pool.part0
-100M /dev/shm/pool.part1
+100M /dev/shm/pmemkv_open_ex_pool.part0
+100M /dev/shm/pmemkv_open_ex_pool.part1
