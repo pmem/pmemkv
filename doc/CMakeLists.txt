@@ -80,6 +80,12 @@ endif()
 # prepare C++ documentation (using doxygen format)
 include(FindDoxygen)
 if(DOXYGEN_FOUND AND DOXYGEN_DOT_FOUND)
+	if(DEVELOPER_MODE)
+		set(DOXYGEN_WARN_AS_ERROR "YES")
+	else()
+		set(DOXYGEN_WARN_AS_ERROR "NO")
+	endif()
+
 	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv.Doxyfile.in"
 		"${CMAKE_CURRENT_BINARY_DIR}/libpmemkv.Doxyfile" @ONLY)
 	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cpp_html/ DESTINATION ${CMAKE_INSTALL_DOCDIR})
