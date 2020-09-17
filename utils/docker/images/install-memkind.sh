@@ -3,36 +3,34 @@
 # Copyright 2019-2020, Intel Corporation
 
 #
-# install-memkind.sh <OS> - installs memkind from sources; depends on
+# install-memkind.sh - installs memkind from sources; depends on
 #		the system it uses proper installation paramaters
 #
 
 set -e
 
-OS=$1
-
-# v1.10.0, contains new libmemkind namespace
+# v1.10.1, contains new libmemkind namespace
 MEMKIND_VERSION=v1.10.1
 
 WORKDIR=$(pwd)
 
 git clone https://github.com/memkind/memkind
-cd $WORKDIR/memkind
-git checkout $MEMKIND_VERSION
+cd ${WORKDIR}/memkind
+git checkout ${MEMKIND_VERSION}
 
-# set OS-specific configure options
+echo "set OS-specific configure options"
 OS_SPECIFIC=""
-case $(echo $OS | cut -d'-' -f1) in
+case $(echo ${OS} | cut -d'-' -f1) in
 	centos|opensuse)
 		OS_SPECIFIC="--libdir=/usr/lib64"
 		;;
 esac
 
 ./autogen.sh
-./configure --prefix=/usr $OS_SPECIFIC
+./configure --prefix=/usr ${OS_SPECIFIC}
 make -j$(nproc)
 make -j$(nproc) install
 
-# cleanup
-cd $WORKDIR
+echo "cleanup:"
+cd ${WORKDIR}
 rm -r memkind

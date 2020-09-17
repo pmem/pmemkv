@@ -76,7 +76,7 @@ RUN ./install-libpmemobj-cpp.sh RPM
 
 # Install memkind
 COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh centos
+RUN ./install-memkind.sh
 
 # Add user
 ENV USER user
