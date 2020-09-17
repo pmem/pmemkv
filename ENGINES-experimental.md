@@ -1,6 +1,7 @@
 # Experimental Storage Engines for pmemkv
 
 - [tree3](#tree3)
+- [csmap](#csmap)
 - [stree](#stree)
 - [caching](#caching)
 
@@ -41,7 +42,7 @@ a given key. Leaf modifications are accelerated using
 
 ### Prerequisites
 
-Libpmemobj-cpp package is required.
+No additional packages are required.
 
 # csmap
 
@@ -82,7 +83,7 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_STREE` o
 
 ### Prerequisites
 
-Libpmemobj-cpp package is required.
+No additional packages are required.
 
 
 # caching

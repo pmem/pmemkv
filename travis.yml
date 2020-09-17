@@ -12,16 +12,17 @@ env:
     - GITHUB_REPO=pmem/pmemkv
     - DOCKERHUB_REPO=pmem/pmemkv
   matrix:
-    - TYPE=normal OS=fedora OS_VER=31
-    - TYPE=normal OS=ubuntu OS_VER=19.10
-    - TYPE=normal OS=ubuntu OS_VER=19.10 COVERAGE=1
-    - TYPE=valgrind OS=ubuntu OS_VER=19.10
-    - TYPE=memcheck_drd OS=ubuntu OS_VER=19.10
-    - TYPE=building OS=fedora OS_VER=31 COVERAGE=1 PUSH_IMAGE=1 AUTO_DOC_UPDATE=1
-    - TYPE=building OS=ubuntu OS_VER=19.10 COVERAGE=1 PUSH_IMAGE=1
-    - TYPE=bindings OS=ubuntu OS_VER=19.10_bindings PUSH_IMAGE=1
-    - TYPE=compatibility OS=fedora OS_VER=31
-    - TYPE=coverity OS=ubuntu OS_VER=19.10
+    - TYPE=normal OS=fedora OS_VER=32
+    - TYPE=normal OS=ubuntu OS_VER=19.10 PUSH_IMAGE=1
+    - TYPE=normal OS=ubuntu OS_VER=20.04 CHECK_CPP_STYLE=1
+    - TYPE=normal OS=ubuntu OS_VER=20.04 COVERAGE=1
+    - TYPE=valgrind OS=ubuntu OS_VER=20.04
+    - TYPE=memcheck_drd OS=ubuntu OS_VER=20.04
+    - TYPE=building OS=fedora OS_VER=32 COVERAGE=1 PUSH_IMAGE=1 AUTO_DOC_UPDATE=1
+    - TYPE=building OS=ubuntu OS_VER=20.04 COVERAGE=1 PUSH_IMAGE=1
+    - TYPE=bindings OS=ubuntu OS_VER=20.04_bindings PUSH_IMAGE=1
+    - TYPE=compatibility OS=fedora OS_VER=32
+    - TYPE=coverity OS=ubuntu OS_VER=20.04
 
 before_install:
   - echo $TRAVIS_COMMIT_RANGE

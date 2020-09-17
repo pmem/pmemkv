@@ -136,7 +136,7 @@ docker run --privileged=true --name=$containerName -i $TTY \
 	--env TEST_PACKAGES=${TEST_PACKAGES:-ON} \
 	--env TESTS_LONG=${TESTS_LONG:-OFF} \
 	--env BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON} \
-	--env CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-ON} \
+	--env CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-OFF} \
 	--env DEFAULT_TEST_DIR=/dev/shm \
 	--shm-size=4G \
 	-v $HOST_WORKDIR:$WORKDIR \
