@@ -81,6 +81,11 @@ public:
 		return pstr.c_str();
 	}
 
+	char *data()
+	{
+		return pstr.data();
+	}
+
 	size_t size() const
 	{
 		return pstr.size();
