@@ -74,7 +74,12 @@ HIDE_UNDOC_CLASSES = NO
 # standard output by doxygen. If QUIET is set to YES this implies that the
 # messages are off.
 
-QUIET = YES
+QUIET = NO
+
+# The COLS_IN_ALPHA_INDEX tag can be used to specify the number of columns
+# in which the alphabetical index list will be split.
+
+COLS_IN_ALPHA_INDEX = 1
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
