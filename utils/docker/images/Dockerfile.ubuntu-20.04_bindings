@@ -8,12 +8,12 @@
 #
 
 # Pull base image
-FROM ubuntu:19.10
+FROM ubuntu:20.04
 MAINTAINER szymon.romik@intel.com
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER 19.10_bindings
+ENV OS_VER 20.04_bindings
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
@@ -30,7 +30,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	automake \
 	build-essential \
 	clang \
-	clang-format \
+	clang-format-9 \
 	cmake \
 	curl \
 	debhelper \
@@ -59,12 +59,15 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	python3-dev \
 	python3-distutils \
 	python3-pip \
-	rapidjson-dev \
 	ruby-dev \
 	sudo \
 	wget \
 	whois \
  && rm -rf /var/lib/apt/lists/*
+
+# Install rapidjson from sources
+COPY install-rapidjson.sh install-rapidjson.sh
+RUN ./install-rapidjson.sh
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh

@@ -83,7 +83,7 @@ static void simple_test()
 	UT_ASSERTeq(value_custom_ptr_deleter->b, INIT_VAL);
 
 	custom_type *value_custom;
-	size_t value_custom_count;
+	size_t value_custom_count = 0;
 	s = cfg->get_data("object", value_custom, value_custom_count);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERTeq(value_custom_count, 1U);
@@ -91,7 +91,7 @@ static void simple_test()
 	UT_ASSERTeq(value_custom->b, INIT_VAL);
 
 	int *value_array;
-	size_t value_array_count;
+	size_t value_array_count = 0;
 	s = cfg->get_data("array", value_array, value_array_count);
 	UT_ASSERTeq(s, status::OK);
 	UT_ASSERTeq(value_array_count, 3U);
