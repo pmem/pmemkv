@@ -7,7 +7,7 @@
 #                starts pmemkv builds (defined by the CI jobs) with tests.
 #
 
-set -e
+set -eE
 
 source `dirname $0`/prepare-for-build.sh
 
@@ -16,6 +16,7 @@ TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
 BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
 CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-ON}
 TESTS_LONG=${TESTS_LONG:-OFF}
+INTERRUPT_ON_FAILURE=${INTERRUPT_ON_FAILURE:-ON}
 
 ###############################################################################
 # BUILD tests_gcc_debug_cpp11
@@ -242,6 +243,10 @@ function test_release_installation() {
 }
 
 # Main:
+if [ "${INTERRUPT_ON_FAILURE}" == "OFF" ]; then
+	echo "Do not interrupt test session on failures"
+	set +e
+fi
 cd $WORKDIR
 
 echo
@@ -257,7 +262,11 @@ if [[ -z "$build_steps" ]]; then
 	exit 1
 fi
 
+error_cnt=0
+trap 'let error_cnt++' ERR
+
 for build in $build_steps
 do
-	$build
+	${build}
 done
+exit ${error_cnt}
