@@ -112,7 +112,7 @@ pipeline {
 								TEST_DIR = "/dev/shm"
 								break
 							}
-						def ENV_VAL="export DEFAULT_TEST_DIR=${TEST_DIR}; export WORKDIR=${WORKSPACE_DIR}/${PMEMKV_DIR}; export SCRIPTSDIR=\$WORKDIR/utils/docker; ${COV_PARAM}"
+						def ENV_VAL="export DEFAULT_TEST_DIR=${TEST_DIR}; export WORKDIR=${WORKSPACE_DIR}/${PMEMKV_DIR}; export SCRIPTSDIR=\$WORKDIR/utils/docker; export INTERRUPT_ON_FAILURE=OFF; ${COV_PARAM}"
 						/* Specified Java version must be used for bindings */
 						def JAVA_HOME="JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64"
 						libs.api.echo_header("Running test type: ${params.TEST_TYPE}")
