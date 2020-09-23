@@ -16,8 +16,8 @@ PMEMKV_VERSION="88cd43e7e3e6b62f67e73a48650e27e0fb90d7ea"
 # master: Merge pull request #44 from lukaszstolarczuk/update-tr..., 21.11.2019
 RUBY_VERSION="3741e3df698245fc8a15822a1aa85b5c211fd332"
 
-# master: Merge pull request #85 from karczex/pictures_example, 17.07.2020
-JAVA_VERSION="bd03a2eef6f3d1c0f47b045ebaa8b0e337b17592"
+# master: Merge pull request #90 from lukaszstolarczuk/merge-sta..., 09.09.2020
+JAVA_VERSION="e04ca43b5e5590c653cbdec35a87e0279a4f1a7a"
 
 # master: Merge pull request #55 from lukaszstolarczuk/fix-comment, 03.04.2020
 NODEJS_VERSION="76600e002b9d9105d3f46b7cc2bf991931286cec"
@@ -35,7 +35,6 @@ cd pmemkv
 git checkout $PMEMKV_VERSION
 mkdir build
 cd build
-
 # Pmemkv at this point is needed only to be linked with jni. As tests are skipped,
 # engines are not needed.
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -82,7 +81,7 @@ rm -r ~/.m2/repository/io/pmem
 mv -v ~/.m2/repository /opt/bindings/java/
 
 #
-#  NodeJS dependencies - all of the dependencies needed to run
+# NodeJS dependencies - all of the dependencies needed to run
 #                          pmemkv-nodejs will be saved
 #                          in the /opt/bindings/nodejs/ directory
 cd $WORKDIR

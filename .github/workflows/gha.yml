@@ -7,63 +7,64 @@ env:
     DOCKERHUB_REPO: pmem/pmemkv
 
 jobs:
-    linux:
-      name: pmemkv
-      runs-on: ubuntu-latest
-      env:
-        DOCKERHUB_USER:          ${{ secrets.DOCKERHUB_USER }}
-        DOCKERHUB_PASSWORD:      ${{ secrets.DOCKERHUB_PASSWORD }}
-        HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
-        WORKDIR:        utils/docker
-      strategy:
-        matrix:
-          CONFIG: ["TYPE=debug OS=fedora OS_VER=31",
-                   "TYPE=debug OS=ubuntu OS_VER=19.10 COVERAGE=1",
-                   "TYPE=release OS=fedora OS_VER=31",
-                   "TYPE=release OS=ubuntu OS_VER=19.10",
-                   "TYPE=valgrind OS=ubuntu OS_VER=19.10",
-                   "TYPE=memcheck_drd OS=ubuntu OS_VER=19.10",
-                   "TYPE=building OS=fedora OS_VER=31 PUSH_IMAGE=1",
-                   "TYPE=building OS=ubuntu OS_VER=19.10 PUSH_IMAGE=1 COVERAGE=1",
-                   "TYPE=compatibility OS=fedora OS_VER=31",
-                   "TYPE=bindings OS=ubuntu OS_VER=19.10_bindings PUSH_IMAGE=1"]
-      steps:
-        - name: Clone the git repo
-          uses: actions/checkout@v2
-          with:
-            fetch-depth: 50
+  linux:
+    name: pmemkv
+    runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USER:          ${{ secrets.DOCKERHUB_USER }}
+      DOCKERHUB_PASSWORD:      ${{ secrets.DOCKERHUB_PASSWORD }}
+      HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
+      WORKDIR:        utils/docker
+    strategy:
+      matrix:
+        CONFIG: ["TYPE=debug OS=fedora OS_VER=32",
+                 "TYPE=debug OS=ubuntu OS_VER=19.10 PUSH_IMAGE=1",
+                 "TYPE=debug OS=ubuntu OS_VER=20.04 CHECK_CPP_STYLE=1 COVERAGE=1",
+                 "TYPE=release OS=fedora OS_VER=32",
+                 "TYPE=release OS=ubuntu OS_VER=20.04",
+                 "TYPE=valgrind OS=ubuntu OS_VER=20.04",
+                 "TYPE=memcheck_drd OS=ubuntu OS_VER=20.04",
+                 "TYPE=building OS=fedora OS_VER=32 PUSH_IMAGE=1",
+                 "TYPE=building OS=ubuntu OS_VER=20.04 PUSH_IMAGE=1 COVERAGE=1 ",
+                 "TYPE=compatibility OS=fedora OS_VER=32",
+                 "TYPE=bindings OS=ubuntu OS_VER=20.04_bindings PUSH_IMAGE=1"]
+    steps:
+      - name: Clone the git repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 50
 
-        - name: Pull or rebuild the image
-          run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh
+      - name: Pull or rebuild the image
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh
 
-        - name: Run the build
-          run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
+      - name: Run the build
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
 
-        - name: Push the image
-          run: cd $WORKDIR && source ./set-vars.sh && ${{ matrix.CONFIG }} /bin/bash -c "if [[ -f ${CI_FILE_PUSH_IMAGE_TO_REPO} ]]; then images/push-image.sh $OS-$OS_VER; fi"
-    doc:
-      name: build and publish docs
-      runs-on: ubuntu-latest
-      needs: linux
-      env:
-        DOC_UPDATE_GITHUB_TOKEN: ${{ secrets.DOC_UPDATE_GITHUB_TOKEN }}
-        DOC_UPDATE_BOT_NAME: ${{ secrets.DOC_UPDATE_BOT_NAME }}
-        DOC_REPO_OWNER: ${{ secrets.DOC_REPO_OWNER }}
-        HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
-        WORKDIR:        utils/docker
-      if:
-        contains( 'refs/heads/master
-                  refs/heads/stable-1.0
-                  refs/heads/stable-1.1
-                  refs/heads/stable-1.2
-                  ' , github.ref)
-      strategy:
-        matrix:
-          CONFIG: ["TYPE=doc OS=fedora OS_VER=31"]
-      steps:
-         - name: Clone the git repo
-           uses: actions/checkout@v2
-           with:
-              fetch-depth: 50
-         - name: Run the build
-           run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
+      - name: Push the image
+        run: cd $WORKDIR && source ./set-vars.sh && ${{ matrix.CONFIG }} /bin/bash -c "if [[ -f ${CI_FILE_PUSH_IMAGE_TO_REPO} ]]; then images/push-image.sh $OS-$OS_VER; fi"
+  doc:
+    name: build and publish docs
+    runs-on: ubuntu-latest
+    needs: linux
+    env:
+      DOC_UPDATE_GITHUB_TOKEN: ${{ secrets.DOC_UPDATE_GITHUB_TOKEN }}
+      DOC_UPDATE_BOT_NAME: ${{ secrets.DOC_UPDATE_BOT_NAME }}
+      DOC_REPO_OWNER: ${{ secrets.DOC_REPO_OWNER }}
+      HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
+      WORKDIR:        utils/docker
+    if:
+      contains( 'refs/heads/master
+                refs/heads/stable-1.0
+                refs/heads/stable-1.1
+                refs/heads/stable-1.2
+                ' , github.ref)
+    strategy:
+      matrix:
+        CONFIG: ["TYPE=doc OS=fedora OS_VER=32"]
+    steps:
+      - name: Clone the git repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 50
+      - name: Run the build
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh

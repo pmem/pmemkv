@@ -283,8 +283,8 @@ public:
 	b_tree_iterator operator++(int);
 	b_tree_iterator &operator--();
 	b_tree_iterator operator--(int);
-	bool operator==(const b_tree_iterator &other);
-	bool operator!=(const b_tree_iterator &other);
+	bool operator==(const b_tree_iterator &other) const;
+	bool operator!=(const b_tree_iterator &other) const;
 	reference operator*() const;
 	pointer operator->() const;
 
@@ -1361,13 +1361,13 @@ b_tree_iterator<LeafType, is_const> b_tree_iterator<LeafType, is_const>::operato
 }
 
 template <typename LeafType, bool is_const>
-bool b_tree_iterator<LeafType, is_const>::operator==(const b_tree_iterator &other)
+bool b_tree_iterator<LeafType, is_const>::operator==(const b_tree_iterator &other) const
 {
 	return current_node == other.current_node && leaf_it == other.leaf_it;
 }
 
 template <typename LeafType, bool is_const>
-bool b_tree_iterator<LeafType, is_const>::operator!=(const b_tree_iterator &other)
+bool b_tree_iterator<LeafType, is_const>::operator!=(const b_tree_iterator &other) const
 {
 	return !(*this == other);
 }

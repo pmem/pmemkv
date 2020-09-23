@@ -60,7 +60,7 @@ git checkout -B ${GH_PAGES_NAME} upstream/gh-pages
 git clean -dfx
 
 # Clean old content, since some files might have been deleted
-rm -r ./${VERSION}
+rm -rf ./${VERSION}
 mkdir -p ./${VERSION}/manpages/
 mkdir -p ./${VERSION}/doxygen/
 
