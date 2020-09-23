@@ -971,12 +971,12 @@ public:
 		return tmp;
 	}
 
-	bool operator==(const b_tree_iterator &other)
+	bool operator==(const b_tree_iterator &other) const
 	{
 		return current_node == other.current_node && leaf_it == other.leaf_it;
 	}
 
-	bool operator!=(const b_tree_iterator &other)
+	bool operator!=(const b_tree_iterator &other) const
 	{
 		return !(*this == other);
 	}
