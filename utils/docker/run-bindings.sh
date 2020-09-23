@@ -13,8 +13,8 @@ source `dirname $0`/prepare-for-build.sh
 # master: Merge pull request #44 from lukaszstolarczuk/update-tr..., 21.11.2019
 RUBY_VERSION="3741e3df698245fc8a15822a1aa85b5c211fd332"
 
-# master: Merge pull request #85 from karczex/pictures_example, 17.07.2020
-JAVA_VERSION="bd03a2eef6f3d1c0f47b045ebaa8b0e337b17592"
+# master: Merge pull request #90 from lukaszstolarczuk/merge-sta..., 09.09.2020
+JAVA_VERSION="e04ca43b5e5590c653cbdec35a87e0279a4f1a7a"
 
 # master: Merge pull request #55 from lukaszstolarczuk/fix-comment, 03.04.2020
 NODEJS_VERSION="76600e002b9d9105d3f46b7cc2bf991931286cec"

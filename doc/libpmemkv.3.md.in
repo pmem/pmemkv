@@ -76,6 +76,10 @@ Every function which accepts key expects `const char *k` pointer to data and its
 Some of the functions (mainly range-query API) are not guaranteed to be implemented by all engines.
 If an engine does not support a certain function, it will return PMEMKV\_STATUS\_NOT\_SUPPORTED.
 
+Note: There are no explicit upper_bound/lower_bound functions. If you want to obtain an element(s)
+above or below the selected key, you can use pmemkv_get_above() or pmemkv_get_below().
+See descriptions of these functions for details.
+
 `int pmemkv_open(const char *engine, pmemkv_config *config, pmemkv_db **db);`
 
 :	Opens the pmemkv database and stores a pointer to a *pmemkv_db* instance in `*db`.
@@ -125,7 +129,7 @@ If an engine does not support a certain function, it will return PMEMKV\_STATUS\
 	PMEMKV\_STATUS\_STOPPED\_BY\_CB. Returning 0 continues iteration.
 	Order of the elements is specified by a comparator (see **libpmemkv**(7)).
 
-`int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c, oid *arg);`
+`int pmemkv_get_below(pmemkv_db *db, const char *k, size_t kb, pmemkv_get_kv_callback *c, void *arg);`
 
 :	Executes function `c` for every record stored in `db` whose keys are less than
 	key `k` (of length `kb`). Arguments passed to `c` are: pointer to a key, size of the key, pointer to a value, size of

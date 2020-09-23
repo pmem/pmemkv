@@ -202,6 +202,11 @@ private:
 	Database class for creating, opening and closing pmemkv's data file.
 	It provides functions to write, read & remove data, count elements stored
 	and check for existence of an element based on its key.
+
+	Note: It does not explicitly provide upper_bound/lower_bound functions.
+	If you want to obtain an element(s) above or below the selected key,
+	you can use pmem::kv::get_above() or pmem::kv::get_below().
+	See descriptions of these functions for details.
 */
 class db {
 public:
@@ -399,6 +404,9 @@ inline config::config(config &&other) noexcept
  */
 inline config &config::operator=(config &&other) noexcept
 {
+	if (this == &other)
+		return *this;
+
 	if (this->_config)
 		pmemkv_config_delete(this->_config);
 
@@ -869,6 +877,9 @@ inline db::db(db &&other) noexcept
  */
 inline db &db::operator=(db &&other) noexcept
 {
+	if (this == &other)
+		return *this;
+
 	close();
 
 	std::swap(this->_db, other._db);

@@ -3,17 +3,16 @@
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#              environment, prepared for running pmemkv build and tests.
-#              Separate image for testing rapidjson installed from package.
+#              environment prepared for running pmemkv build and tests.
 #
 
 # Pull base image
-FROM ubuntu:19.10
+FROM ubuntu:20.04
 MAINTAINER szymon.romik@intel.com
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER 19.10
+ENV OS_VER 20.04
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
 
@@ -21,6 +20,7 @@ ENV NOTTY 1
 ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
+ARG SKIP_SCRIPTS_DOWNLOAD
 
 ENV COVERITY_DEPS "\
 	ruby \
@@ -43,7 +43,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	gdb \
 	git \
 	graphviz \
-	gzip \
 	libc6-dbg \
 	libdaxctl-dev \
 	libndctl-dev \
@@ -57,12 +56,15 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	numactl \
 	pandoc \
 	pkg-config \
-	rapidjson-dev \
 	sudo \
 	wget \
 	whois \
 	$COVERITY_DEPS \
  && rm -rf /var/lib/apt/lists/*
+
+# Install rapidjson from sources
+COPY install-rapidjson.sh install-rapidjson.sh
+RUN ./install-rapidjson.sh
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -75,6 +77,11 @@ RUN ./install-pmdk.sh dpkg
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
 RUN ./install-libpmemobj-cpp.sh DEB
+
+# Download scripts required in run-*.sh
+COPY download-scripts.sh download-scripts.sh
+COPY 0001-fix-generating-gcov-files-and-turn-off-verbose-log.patch 0001-fix-generating-gcov-files-and-turn-off-verbose-log.patch
+RUN ./download-scripts.sh
 
 # Add user
 ENV USER user

@@ -62,7 +62,6 @@ A persistent concurrent engine, backed by a hashmap that allows calling get, put
 Data stored using this engine is persistent and guaranteed to be consistent in case of any kind of interruption (crash / power loss / etc).
 
 Internally this engine uses persistent concurrent hashmap and persistent string from libpmemobj-cpp library (for details see <https://github.com/pmem/libpmemobj-cpp>). Persistent string is used as a type of a key and a value. Engine's functions should not be called within libpmemobj transactions (improper call by user will result thrown exception).
-libpmemobj-cpp packages are required.
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
@@ -93,7 +92,7 @@ When using **pmempool create**, "pmemkv" should be passed as layout for cmap eng
 A volatile concurrent engine, backed by memkind. Data written using this engine is lost after database is closed.
 
 This engine is built on top of tbb::concurrent\_hash\_map data structure and uses PMEM C++ allocator to allocate memory. std::basic\_string is used as a type of a key and a value.
-Memkind, TBB and libpmemobj-cpp packages are required.
+Memkind and TBB packages are required.
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
@@ -108,7 +107,7 @@ This engine requires the following config parameters (see **libpmemkv_config**(3
 A volatile single-threaded sorted engine, backed by memkind. Data written using this engine is lost after database is closed.
 
 This engine is built on top of std::map and uses PMEM C++ allocator to allocate memory. std::basic\_string is used as a type of a key and a value.
-Memkind and libpmemobj-cpp packages are required.
+Memkind package is required.
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
