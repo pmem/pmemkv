@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2020, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -971,12 +971,12 @@ public:
 		return tmp;
 	}
 
-	bool operator==(const b_tree_iterator &other)
+	bool operator==(const b_tree_iterator &other) const
 	{
 		return current_node == other.current_node && leaf_it == other.leaf_it;
 	}
 
-	bool operator!=(const b_tree_iterator &other)
+	bool operator!=(const b_tree_iterator &other) const
 	{
 		return !(*this == other);
 	}
