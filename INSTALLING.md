@@ -212,44 +212,13 @@ Finally [build and install pmemkv from sources](#building-from-sources).
 To enable experimental engine(s) use adequate CMake parameter, e.g.:
 
 ```sh
-cmake .. -DENGINE_CACHING=ON
+cmake .. -DENGINE_CSMAP=ON
 ```
 
 Now build will contain selected experimental engine(s) and their dependencies, that are not available by default.
 
-Additional libraries (not listed above, in prerequisites section) are required only by caching engine. If you want to use it
-you need to follow these instructions:
-
-First build and install `pmemkv` as described above. Then, install client libraries for Memcached:
-
-```sh
-cd ~
-mkdir work
-cd work
-wget https://launchpad.net/libmemcached/1.0/0.21/+download/libmemcached-0.21.tar.gz
-tar -xvf libmemcached-0.21.tar.gz
-mv libmemcached-0.21 libmemcached
-cd libmemcached
-./configure
-make
-su -c 'make install'
-```
-
-Install client libraries for Redis:
-
-```sh
-cd ~
-mkdir work
-cd work
-git clone https://github.com/acl-dev/acl.git
-mv acl libacl
-cd libacl/lib_acl_cpp
-make
-cd ../lib_acl
-make
-cd ../lib_protocol
-make
-```
+Experimental engines may require additional libraries, see **prerequisites** section of a selected
+engine in [ENGINES-experimental.md](./ENGINES-experimental.md).
 
 ## Building packages
 

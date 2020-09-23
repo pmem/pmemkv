@@ -25,10 +25,6 @@
 #include "engines-experimental/radix.h"
 #endif
 
-#ifdef ENGINE_CACHING
-#include "engines-experimental/caching.h"
-#endif
-
 #ifdef ENGINE_STREE
 #include "engines-experimental/stree.h"
 #endif
@@ -71,9 +67,6 @@ static constexpr const char *available_engines = "blackhole"
 #endif
 #ifdef ENGINE_STREE
 						 ", stree"
-#endif
-#ifdef ENGINE_CACHING
-						 ", caching"
 #endif
 	;
 
@@ -141,14 +134,6 @@ engine_base::create_engine(const std::string &engine,
 	if (engine == "stree") {
 		engine_base::check_config_null(engine, cfg);
 		return std::unique_ptr<engine_base>(new pmem::kv::stree(std::move(cfg)));
-	}
-#endif
-
-#ifdef ENGINE_CACHING
-	if (engine == "caching") {
-		engine_base::check_config_null(engine, cfg);
-		return std::unique_ptr<engine_base>(
-			new pmem::kv::caching(std::move(cfg)));
 	}
 #endif
 

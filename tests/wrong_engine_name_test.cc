@@ -72,10 +72,6 @@ int main()
 	UT_ASSERT(wrong_engine_name_test("stree"));
 #endif
 
-#ifndef ENGINE_CACHING
-	UT_ASSERT(wrong_engine_name_test("caching"));
-#endif
-
 #ifndef ENGINE_RADIX
 	UT_ASSERT(wrong_engine_name_test("radix"));
 #endif

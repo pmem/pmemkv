@@ -142,9 +142,6 @@ engines_flags=(
 	ENGINE_VCMAP
 	ENGINE_CMAP
 	ENGINE_CSMAP
-	# XXX: caching engine requires libacl and memcached installed in docker images
-	# and firstly we need to remove hardcoded INCLUDE paths (see #244)
-	# ENGINE_CACHING
 	ENGINE_STREE
 	ENGINE_TREE3
 	ENGINE_RADIX
