@@ -121,11 +121,16 @@ pipeline {
 							switch (params.TEST_TYPE) {
 								case 'normal':
 									libs.api.echo_header("Test options: ${params.TEST_OPTIONS}")
-									libs.api.run_bash_script("""
-										${ENV_VAL}
-										builds=(${params.TEST_OPTIONS})
-										./run-build.sh \${builds[@]}
-									""")
+									params.TEST_OPTIONS.split().each { build ->
+										stage("${build}") {
+											catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+										libs.api.run_bash_script("""
+											${ENV_VAL}
+											./run-build.sh ${build}
+										""")
+										}
+										}
+									}
 									break;
 								case 'building':
 									libs.api.run_bash_script("""

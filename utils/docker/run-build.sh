@@ -17,6 +17,7 @@ BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
 CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-ON}
 TESTS_LONG=${TESTS_LONG:-OFF}
 
+
 ###############################################################################
 # BUILD tests_gcc_debug_cpp11
 ###############################################################################
@@ -45,9 +46,7 @@ function tests_gcc_debug_cpp11() {
 		upload_codecov gcc_debug_cpp11
 	fi
 
-	cd ..
-	rm -r build
-
+	workspace_cleanup
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
@@ -80,9 +79,7 @@ function tests_gcc_debug_cpp14() {
 		upload_codecov gcc_debug_cpp14
 	fi
 
-	cd ..
-	rm -r build
-
+	workspace_cleanup
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
@@ -113,9 +110,7 @@ function tests_gcc_debug_cpp14_valgrind_other() {
 		upload_codecov gcc_debug_cpp14_valgrind_other
 	fi
 
-	cd ..
-	rm -r build
-
+	workspace_cleanup
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
@@ -147,9 +142,7 @@ function tests_gcc_debug_cpp14_valgrind_memcheck_drd() {
 		upload_codecov gcc_debug_cpp14_valgrind_memcheck_drd
 	fi
 
-	cd ..
-	rm -r build
-
+	workspace_cleanup
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
@@ -187,9 +180,7 @@ function tests_clang_release_cpp20() {
 		upload_codecov clang_release_cpp20
 	fi
 
-	cd ..
-	rm -rf build
-
+	workspace_cleanup
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
@@ -230,19 +221,19 @@ function test_release_installation() {
 	echo "Expect failure - non-existing path is passed:"
 	run_example_standalone pmemkv_open_cpp /non-existing/path && exit 1
 
-	echo "Uninstall libraries, cleanup build dirs and example poolset:"
+	echo "Uninstall libraries"
 	cd $WORKDIR/build
 	sudo_password -S make uninstall
-	cd $WORKDIR
-	rm -rf build
-	rm -rf $EXAMPLE_TEST_DIR
-	pmempool rm -f ${WORKDIR}/examples/example.poolset
 
+	workspace_cleanup
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
 # Main:
 cd $WORKDIR
+
+echo "### Cleaning workspace"
+workspace_cleanup
 
 echo
 echo "### Making sure there is no libpmemkv currently installed"
@@ -252,6 +243,8 @@ echo "--------------------------------------------------------------------------
 
 echo "Run build steps passed as script arguments:"
 build_steps=$@
+echo "Defined build steps: ${build_steps}"
+
 if [[ -z "$build_steps" ]]; then
 	echo "ERROR: The variable build_steps with selected builds to run is not set!"
 	exit 1
