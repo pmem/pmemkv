@@ -27,8 +27,7 @@ RUN dnf install -y 'dnf-command(config-manager)'
 RUN dnf config-manager --set-enabled PowerTools
 
 # Install basic tools
-RUN dnf update -y \
- && dnf install -y \
+RUN dnf install -y \
 	autoconf \
 	automake \
 	clang \
@@ -76,7 +75,7 @@ RUN ./install-libpmemobj-cpp.sh RPM
 
 # Install memkind
 COPY install-memkind.sh install-memkind.sh
-RUN ./install-memkind.sh centos
+RUN ./install-memkind.sh
 
 # Add user
 ENV USER user
