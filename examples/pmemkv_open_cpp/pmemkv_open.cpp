@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2020, Intel Corporation */
 
 /*
  * pmemkv_open.cpp -- example usage of pmemkv with already existing pools.
@@ -59,8 +59,10 @@ int main(int argc, char *argv[])
 	assert(s == status::OK && value == "value1");
 
 	LOG("Iterating existing keys");
-	kv->put("key2", "value2");
-	kv->put("key3", "value3");
+	s = kv->put("key2", "value2");
+	assert(s == status::OK);
+	s = kv->put("key3", "value3");
+	assert(s == status::OK);
 	kv->get_all([](string_view k, string_view v) {
 		LOG("  visited: " << k.data());
 		return 0;

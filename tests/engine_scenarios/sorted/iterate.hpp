@@ -296,6 +296,8 @@ public:
 
 	reverse_comparator(const reverse_comparator &cmp) = delete;
 
+	reverse_comparator &operator=(const reverse_comparator &cmp) = delete;
+
 	~reverse_comparator()
 	{
 		delete runtime_data;
