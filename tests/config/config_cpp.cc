@@ -373,20 +373,22 @@ static void constructors_test()
 	s = move_assign->put_string("move_string", "value");
 	ASSERT_STATUS(s, status::OK);
 
-	/* ... and check move assignment operator */
+	/* ... and check move assignment operator
+		from different and the same config */
 	*move_assign = std::move(*cfg);
+	config *move_assign2 = std::move(move_assign);
 
 	std::string string_s;
-	s = move_assign->get_string("move_string", string_s);
+	s = move_assign2->get_string("move_string", string_s);
 	ASSERT_STATUS(s, status::NOT_FOUND);
-	s = move_assign->get_string("string", string_s);
+	s = move_assign2->get_string("string", string_s);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(string_s == "config");
 
 	/* cleanup */
 	pmemkv_config_delete(c_cfg);
 	delete move_config;
-	delete move_assign;
+	delete move_assign2;
 	delete cfg;
 }
 
