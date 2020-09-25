@@ -463,6 +463,9 @@ template <typename LeafType, bool is_const>
 node_iterator<LeafType, is_const> &
 node_iterator<LeafType, is_const>::operator=(const node_iterator &other)
 {
+	if (this == &other)
+		return *this;
+
 	node = other.node;
 	position = other.position;
 	return *this;
