@@ -63,6 +63,10 @@ Remove method is currently implemented to take a global lock - it blocks all oth
 * **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
 	+ type: uint64_t
 
+### Prerequisites
+
+No additional packages are required.
+
 # radix
 
 A persistent, sorted (without custom comparator support) engine, backed by a radix tree.
@@ -77,6 +81,10 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_RADIX` o
 	+ default value: 0
 * **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
 	+ type: uint64_t
+
+### Prerequisites
+
+No additional packages are required.
 
 # stree
 
