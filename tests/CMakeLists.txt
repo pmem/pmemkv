@@ -50,8 +50,7 @@ add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.c*)
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.h*)
 
 add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.*
@@ -65,8 +64,7 @@ add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/memkind/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/persistent/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/engines-experimental/*.*)
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*)
 
 if(TESTS_JSON AND NOT BUILD_JSON_CONFIG)
 	message(FATAL_ERROR "Tests requiring 'libpmemkv_json_config' library "
@@ -1309,21 +1307,6 @@ if(ENGINE_STREE)
 			PARAMS 32 8)
 endif(ENGINE_STREE)
 ################################################################################
-###################################### CACHING #################################
-if(ENGINE_CACHING)
-	# Test scenarios are not ported for caching engine
-	if(ENGINE_TREE3 AND BUILD_JSON_CONFIG)
-		build_test(caching_test engines/experimental/caching_test.cc)
-	elseif(NOT BUILD_JSON_CONFIG)
-		message(WARNING
-			"Caching tests require the 'libpmemkv_json_config' library, which is not built, "
-			"hence they are disabled. If you want to run them use -DBUILD_JSON_CONFIG=ON option.")
-	else()
-		message(WARNING
-			"Caching tests are set to work with TREE3 engine, which is disabled, hence "
-			"they are also disabled. If you want to run them use -DENGINE_TREE3=ON option.")
-	endif()
-endif()
 ###################################### RADIX ###################################
 if(ENGINE_RADIX)
 	add_engine_test(ENGINE radix

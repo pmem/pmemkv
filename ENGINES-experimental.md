@@ -4,8 +4,6 @@
 - [csmap](#csmap)
 - [radix](#radix)
 - [stree](#stree)
-- [caching](#caching)
-
 
 # tree3
 
@@ -109,47 +107,7 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_STREE` o
 
 No additional packages are required.
 
-
-# caching
-
-This engine is using a sub engine from the list above to cache requests to external Redis or Memcached server.
-It is disabled by default. It can be enabled in CMake using the `ENGINE_CACHING` option.
-
-### Configuration
-
-Caching engine itself requires server connection settings. Part of the config required for the sub engine should be relevant to chosen engine.
-
-* **host** -- Server's IP
-	+ type: string
-* **port** -- Server's port
-	+ type: int64_t
-* **attempts** -- Number of connection attempts
-	+ type: int64_t
-* **ttl** -- Time to live [in seconds]
-	+ type: int64_t
-	+ default value: 0
-* **remote_type** -- Server's type (Redis or Memcached)
-	+ type: string
-* **remote_user** -- Connection's user
-	+ type: string
-* **remote_pwd** -- User's password
-	+ type: string
-* **remote_url** -- Remote (server's) URL
-	+ type: string
-* **subengine** -- Config object for sub engine with its required settings
-	+ type: object
-
-### Internals
-
-(TBD)
-
-### Prerequisites
-
-Memcached and libacl ([see here for installation guide](INSTALLING.md#using-experimental-engines))
-packages are required.
-
-
-### Related Work
+# Related Work
 ---------
 
 **pmse**
@@ -210,3 +168,10 @@ keys and values.
 Use of PMDK C++ bindings by `tree3` was lifted from this example program.
 Many thanks to [@tomaszkapela](https://github.com/tomaszkapela)
 for providing a great example to follow!
+
+# Archived engines
+
+**caching**
+
+It was present in releases <= 1.2
+That engine was using a sub engine (one of other engines) to cache requests to external Redis or Memcached server.

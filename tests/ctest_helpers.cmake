@@ -316,13 +316,6 @@ function(add_engine_test)
 		set(TEST_NAME "${TEST_NAME}_${parsed_params}")
 	endif()
 
-	if(${TEST_ENGINE} STREQUAL "caching")
-		# caching tests require lib_acl and memcached included,
-		# so we need to link them to test binary itself
-		target_link_libraries(${TEST_BINARY} memcached)
-		target_link_libraries(${TEST_BINARY} acl_cpp protocol acl)
-	endif()
-
 	# Use "|PARAM|" as list separator so that CMake does not expand it
 	# when passing to the test script
 	string(REPLACE ";" "|PARAM|" raw_params "${TEST_PARAMS}")
