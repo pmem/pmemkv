@@ -597,9 +597,13 @@ template <typename Key, typename T, typename Compare, uint64_t capacity>
 leaf_node_t<Key, T, Compare, capacity>::~leaf_node_t()
 {
 	assert(pmemobj_tx_stage() == TX_STAGE_WORK);
-	for (value_type &e : *this) {
-		e.first.~key_type();
-		e.second.~mapped_type();
+	try {
+		for (value_type &e : *this) {
+			e.first.~key_type();
+			e.second.~mapped_type();
+		}
+	} catch (transaction_error &e) {
+		std::terminate();
 	}
 }
 
@@ -1404,7 +1408,11 @@ b_tree_base<Key, T, Compare, degree>::b_tree_base()
 template <typename Key, typename T, typename Compare, std::size_t degree>
 b_tree_base<Key, T, Compare, degree>::~b_tree_base()
 {
-	deallocate(root);
+	try {
+		deallocate(root);
+	} catch (transaction_error &e) {
+		std::terminate();
+	}
 }
 
 template <typename Key, typename T, typename Compare, std::size_t degree>
