@@ -2,8 +2,8 @@
 name: pmemkv-other
 on:
   schedule:
-    # run this job at 01:00 UTC every second day
-    - cron:  '0 1 */2 * *'
+    # run this job at 01:00 UTC everyday
+    - cron:  '0 1 * * *'
 
 env:
   REPO:           pmemkv
