@@ -1,3 +1,29 @@
+Thu Oct 01 2020 Szymon Romik <szymon.romik@intel.com>
+
+	* Version 1.3-rc1
+
+	This release introduces a new experimental engine - radix (single-threaded
+	sorted map, backed by libpmemobj-cpp's radix_tree container).
+
+	We have also extended configuration class API and redesign optimized
+	version of stree engine.
+
+	Features:
+	- radix engine (single-threaded sorted map)
+	- config setters with type safety for common config fields
+	- stree engine optimization (single-threaded sorted map with custom
+		comparator support)
+
+	Major fixes:
+	- fixed operator== in stree engine
+	- fixed missing checks in move assignment operators
+
+	Other changes:
+	- operator<< for pmem::kv::status
+
+	Known issues:
+	- vcmap (github issues #623, #798)
+
 Fri May 29 2019 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.2
