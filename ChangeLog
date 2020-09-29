@@ -1,3 +1,24 @@
+Tue Sep 29 2020 Szymon Romik <szymon.romik@intel.com>
+
+	* Version 1.3-rc1
+
+	This release introduces a new experimantal engine - radix (single-threaded
+	sorted map, backed by libpmemobj-cpp's radix_tree container).
+
+	We have also extended configuration class API and support custom setters.
+
+	Features:
+	- radix engine (single-threaded sorted map)
+	- config setters
+
+	Major fixes:
+	- fixed operator== in stree engine
+	- fixed missing checks in move assignment operators
+
+	Other changes:
+	- operator<< for pmem::kv::statuse
+	- extended compatibility tests
+
 Fri May 29 2019 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.2
