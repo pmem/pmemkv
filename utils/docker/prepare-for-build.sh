@@ -87,6 +87,15 @@ function run_example_standalone() {
 	cd -
 }
 
+function workspace_cleanup() {
+	echo "Cleanup build dirs and example poolset:"
+
+	cd ${WORKDIR}
+	rm -rf ${WORKDIR}/build
+	rm -rf ${EXAMPLE_TEST_DIR}
+	pmempool rm -f ${WORKDIR}/examples/example.poolset
+}
+
 # this should be run only on CIs
 if [ "$CI_RUN" == "YES" ]; then
 	sudo_password chown -R $(id -u).$(id -g) $WORKDIR

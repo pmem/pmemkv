@@ -42,8 +42,7 @@ function test_gcc_cpp20() {
 		upload_codecov test_gcc_cpp20
 	fi
 
-	cd $CWD
-	rm -rf $WORKDIR/build
+	workspace_cleanup
 
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
@@ -95,8 +94,7 @@ function test_building_of_packages() {
 		sudo_password rpm -e --nodeps libpmemkv-devel
 	fi
 
-	cd $WORKDIR
-	rm -rf $WORKDIR/build
+	workspace_cleanup
 
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
@@ -119,13 +117,14 @@ function build_with_flags() {
 	# list all tests in this build
 	ctest -N
 
-	cd $WORKDIR
-	rm -rf $WORKDIR/build
+	workspace_cleanup
 
 	printf "$(tput setaf 1)$(tput setab 7)BUILD ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
 # Main:
+
+workspace_cleanup
 cd $WORKDIR
 
 # CXX_STANDARD==20 is supported since CMake 3.12
@@ -170,8 +169,7 @@ do
 	ctest -N
 	ctest -R wrong_engine_name_test --output-on-failure
 
-	cd $WORKDIR
-	rm -rf $WORKDIR/build
+	workspace_cleanup
 done
 
 echo
@@ -194,8 +192,7 @@ make -j$(nproc)
 # list all tests in this build
 ctest -N
 
-cd $WORKDIR
-rm -rf $WORKDIR/build
+workspace_cleanup
 
 echo
 echo "##############################################################"

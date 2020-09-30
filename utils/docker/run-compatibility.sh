@@ -27,8 +27,7 @@ function build_and_install_pmemkv() {
 	make -j$(nproc)
 	sudo_password -S make -j$(nproc) install
 
-	cd ${WORKDIR}
-	rm -rf ${WORKDIR}/build
+	workspace_cleanup
 }
 
 function verify_compatibility() {
@@ -56,7 +55,7 @@ function verify_compatibility() {
 
 	PMEM_IS_PMEM_FORCE=1 ${WORKDIR}/tests/compatibility/cmap.sh ${WORKDIR}/build/pmemkv-HEAD/cmap_compatibility ${WORKDIR}/build/pmemkv-${version}/cmap_compatibility $TEST_DIR/testfile
 
-	rm -rf ${WORKDIR}/build
+	workspace_cleanup
 }
 
 ## Main:
