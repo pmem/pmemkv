@@ -21,6 +21,9 @@ ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 
+ENV LIBPMEMOBJ_CPP_DEPS "\
+	libatomic"
+
 # Install basic tools
 RUN dnf update -y \
  && dnf install -y \
@@ -53,6 +56,7 @@ RUN dnf update -y \
 	unzip \
 	wget \
 	which \
+	$LIBPMEMOBJ_CPP_DEPS \
 && dnf clean all
 
 # Install glibc-debuginfo

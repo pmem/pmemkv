@@ -26,6 +26,9 @@ RUN dnf install -y epel-release
 RUN dnf install -y 'dnf-command(config-manager)'
 RUN dnf config-manager --set-enabled PowerTools
 
+ENV LIBPMEMOBJ_CPP_DEPS "\
+	libatomic"
+
 # Install basic tools
 RUN dnf install -y \
 	autoconf \
@@ -56,6 +59,7 @@ RUN dnf install -y \
 	tbb-devel \
 	wget \
 	which \
+	$LIBPMEMOBJ_CPP_DEPS \
 && dnf clean all
 
 # Install glibc-debuginfo
