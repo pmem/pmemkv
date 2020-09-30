@@ -373,8 +373,11 @@ static void constructors_test()
 	s = move_assign->put_string("move_string", "value");
 	ASSERT_STATUS(s, status::OK);
 
-	/* ... and check move assignment operator */
+	/* ... and check move assignment operator
+		from different and the same config */
 	*move_assign = std::move(*cfg);
+	auto &move_assign2 = *move_assign;
+	*move_assign = std::move(move_assign2);
 
 	std::string string_s;
 	s = move_assign->get_string("move_string", string_s);

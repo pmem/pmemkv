@@ -359,10 +359,11 @@ static void RemoveNonexistentTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.exists("key1"), status::OK);
 }
 
-static void CtorMoveDBTest(pmem::kv::db &kv)
+static void MoveDBTest(pmem::kv::db &kv)
 {
 	/**
-	 * TEST: test db constructor from another instance of db class.
+	 * TEST: test db constructor from another instance of db class
+	 *	and move assignment operator (from different and the same db).
 	 */
 
 	/* put key1 in original db */
@@ -379,9 +380,22 @@ static void CtorMoveDBTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv_new.get("key2", &value), status::OK);
 	UT_ASSERT(value == "value2");
 	ASSERT_STATUS(kv_new.remove("key1"), status::OK);
-	ASSERT_STATUS(kv_new.remove("key2"), status::OK);
 
-	kv_new.close();
+	db kv_assign_new = std::move(kv_new);
+	auto &kv_assign_new2 = kv_assign_new;
+	kv_assign_new = std::move(kv_assign_new2);
+
+	ASSERT_STATUS(kv_assign_new.put("key3", "value3"), status::OK);
+
+	ASSERT_STATUS(kv_assign_new.get("key2", &value), status::OK);
+	UT_ASSERT(value == "value2");
+	ASSERT_STATUS(kv_assign_new.get("key3", &value), status::OK);
+	UT_ASSERT(value == "value3");
+
+	ASSERT_STATUS(kv_assign_new.remove("key2"), status::OK);
+	ASSERT_STATUS(kv_assign_new.remove("key3"), status::OK);
+
+	kv_assign_new.close();
 }
 
 static void test(int argc, char *argv[])
@@ -389,27 +403,28 @@ static void test(int argc, char *argv[])
 	if (argc < 3)
 		UT_FATAL("usage: %s engine json_config", argv[0]);
 
-	run_engine_tests(argv[1], argv[2],
-			 {
-				 SimpleTest,
-				 EmptyKeyTest,
-				 EmptyValueTest,
-				 EmptyKeyAndValueTest,
-				 GetClearExternalValueTest,
-				 GetHeadlessTest,
-				 GetMultipleTest,
-				 GetMultiple2Test,
-				 GetNonexistentTest,
-				 PutTest,
-				 PutValuesOfDifferentSizesTest,
-				 RemoveAllTest,
-				 RemoveAndInsertTest,
-				 RemoveExistingTest,
-				 RemoveHeadlessTest,
-				 RemoveNonexistentTest,
-				 /* ctor test has to be the last one; it invalidates kv */
-				 CtorMoveDBTest,
-			 });
+	run_engine_tests(
+		argv[1], argv[2],
+		{
+			SimpleTest,
+			EmptyKeyTest,
+			EmptyValueTest,
+			EmptyKeyAndValueTest,
+			GetClearExternalValueTest,
+			GetHeadlessTest,
+			GetMultipleTest,
+			GetMultiple2Test,
+			GetNonexistentTest,
+			PutTest,
+			PutValuesOfDifferentSizesTest,
+			RemoveAllTest,
+			RemoveAndInsertTest,
+			RemoveExistingTest,
+			RemoveHeadlessTest,
+			RemoveNonexistentTest,
+			/* move DB test has to be the last one; it invalidates kv */
+			MoveDBTest,
+		});
 }
 
 int main(int argc, char *argv[])
