@@ -17,6 +17,12 @@ BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
 CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-ON}
 TESTS_LONG=${TESTS_LONG:-OFF}
 
+#set arbitrary test timeouts
+if [ "${TESTS_LONG}" == "OFF"]; then
+	TEST_TIMEOUT=590
+else
+	TEST_TIMEOUT=3600
+fi
 
 ###############################################################################
 # BUILD tests_gcc_debug_cpp11
@@ -40,7 +46,7 @@ function tests_gcc_debug_cpp11() {
 		-DCXX_STANDARD=11
 
 	make -j$(nproc)
-	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
+	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout ${TEST_TIMEOUT} --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
 		upload_codecov gcc_debug_cpp11
@@ -73,7 +79,7 @@ function tests_gcc_debug_cpp14() {
 		-DCXX_STANDARD=14
 
 	make -j$(nproc)
-	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
+	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout ${TEST_TIMEOUT} --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
 		upload_codecov gcc_debug_cpp14
@@ -104,7 +110,7 @@ function tests_gcc_debug_cpp14_valgrind_other() {
 		-DCXX_STANDARD=14
 
 	make -j$(nproc)
-	ctest -R "_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
+	ctest -R "_helgrind|_pmemcheck|_pmreorder" --timeout ${TEST_TIMEOUT} --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
 		upload_codecov gcc_debug_cpp14_valgrind_other
@@ -136,7 +142,7 @@ function tests_gcc_debug_cpp14_valgrind_memcheck_drd() {
 		-DCXX_STANDARD=14
 
 	make -j$(nproc)
-	ctest -R "_memcheck|_drd" --timeout 590 --output-on-failure
+	ctest -R "_memcheck|_drd" --timeout ${TEST_TIMEOUT} --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
 		upload_codecov gcc_debug_cpp14_valgrind_memcheck_drd
@@ -174,7 +180,7 @@ function tests_clang_release_cpp20() {
 		-DCXX_STANDARD=20
 
 	make -j$(nproc)
-	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout 590 --output-on-failure
+	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout ${TEST_TIMEOUT} --output-on-failure
 
 	if [ "$COVERAGE" == "1" ]; then
 		upload_codecov clang_release_cpp20
