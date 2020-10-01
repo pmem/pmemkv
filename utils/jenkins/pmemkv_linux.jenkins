@@ -112,7 +112,7 @@ pipeline {
 								TEST_DIR = "/dev/shm"
 								break
 							}
-						def ENV_VAL="export DEFAULT_TEST_DIR=${TEST_DIR}; export WORKDIR=${WORKSPACE_DIR}/${PMEMKV_DIR}; export SCRIPTSDIR=\$WORKDIR/utils/docker; export TESTS_LONG=ON; export TERM=xterm-256color; ${COV_PARAM}"
+						def ENV_VAL="export DEFAULT_TEST_DIR=${TEST_DIR}; export WORKDIR=${WORKSPACE_DIR}/${PMEMKV_DIR}; export SCRIPTSDIR=\$WORKDIR/utils/docker; export TESTS_LONG=ON; export TERM=xterm-256color; export TEST_TIMEOUT=3600; ${COV_PARAM}"
 						libs.api.echo_header("Running test type: ${params.TEST_TYPE}")
 						dir("${PMEMKV_PATH}/utils/docker")
 						{

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2021, Intel Corporation
 
 #
 # run-test-building.sh - is called inside a Docker container,
@@ -16,6 +16,7 @@ source `dirname $0`/prepare-for-build.sh
 TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
 TEST_PACKAGES=${TEST_PACKAGES:-ON}
 BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
+TEST_TIMEOUT=${TEST_TIMEOUT:-600}
 
 ###############################################################################
 # BUILD test_gcc_cpp20
@@ -36,7 +37,7 @@ function test_gcc_cpp20() {
 
 	make -j$(nproc)
 	# Run basic tests
-	ctest -R "SimpleTest" --output-on-failure
+	ctest -R "SimpleTest" --output-on-failure --timeout ${TEST_TIMEOUT}
 
 	if [ "$COVERAGE" == "1" ]; then
 		upload_codecov test_gcc_cpp20
@@ -167,7 +168,7 @@ do
 	make -j$(nproc)
 	# list all tests in this build
 	ctest -N
-	ctest -R wrong_engine_name_test --output-on-failure
+	ctest -R wrong_engine_name_test --output-on-failure --timeout ${TEST_TIMEOUT}
 
 	workspace_cleanup
 done
