@@ -16,6 +16,7 @@ source `dirname $0`/prepare-for-build.sh
 TEST_DIR=${PMEMKV_TEST_DIR:-${DEFAULT_TEST_DIR}}
 TEST_PACKAGES=${TEST_PACKAGES:-ON}
 BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
+TESTS_USE_FORCED_PMEM=${TESTS_USE_FORCED_PMEM:-ON}
 TEST_TIMEOUT=${TEST_TIMEOUT:-600}
 
 ###############################################################################
@@ -33,6 +34,7 @@ function test_gcc_cpp20() {
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
 		-DCOVERAGE=$COVERAGE \
 		-DDEVELOPER_MODE=1 \
+		-DTESTS_USE_FORCED_PMEM=${TESTS_USE_FORCED_PMEM} \
 		-DCXX_STANDARD=20
 
 	make -j$(nproc)
