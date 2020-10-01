@@ -106,7 +106,6 @@ if(ENGINE_STREE)
 		src/engines-experimental/stree.h
 		src/engines-experimental/stree.cc
 		src/engines-experimental/stree/persistent_b_tree.h
-		src/engines-experimental/stree/pstring.h
 	)
 endif()
 if(ENGINE_TREE3)
