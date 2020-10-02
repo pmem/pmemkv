@@ -1,6 +1,6 @@
-Thu Oct 01 2020 Szymon Romik <szymon.romik@intel.com>
+Fri Oct 02 2020 Szymon Romik <szymon.romik@intel.com>
 
-	* Version 1.3-rc1
+	* Version 1.3
 
 	This release introduces a new experimental engine - radix (single-threaded
 	sorted map, backed by libpmemobj-cpp's radix_tree container).
