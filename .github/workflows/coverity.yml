@@ -1,0 +1,37 @@
+
+name: pmemkv-coverity
+
+on:
+  schedule:
+    # run this job at 00:00 UTC everyday
+    - cron:  '0 0 * * *'
+
+env:
+  REPO:           pmemkv
+  GITHUB_REPO:    pmem/pmemkv
+  DOCKERHUB_REPO: pmem/pmemkv
+
+jobs:
+  linux:
+    name: pmemkv-coverity
+    runs-on: ubuntu-latest
+    env:
+      COVERITY_SCAN_NOTIFICATION_EMAIL:  ${{ secrets.COVERITY_SCAN_NOTIFICATION_EMAIL }}
+      COVERITY_SCAN_TOKEN:               ${{ secrets.COVERITY_SCAN_TOKEN }}
+      HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
+      WORKDIR:        utils/docker
+    strategy:
+      matrix:
+        CONFIG: ["TYPE=coverity OS=ubuntu OS_VER=20.04"]
+    steps:
+      - name: Print out the current date and time
+        run: date
+
+      - name: Clone the git repo
+        uses: actions/checkout@v2
+
+      - name: Pull or rebuild the image
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh
+
+      - name: Run the build
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build-CI.sh

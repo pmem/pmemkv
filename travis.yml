@@ -7,12 +7,15 @@ language: cpp
 services:
   - docker
 
+# currently, Travis is turned off - all jobs run on GHA
+if: false
+
 env:
   global:
     - GITHUB_REPO=pmem/pmemkv
     - DOCKERHUB_REPO=pmem/pmemkv
   matrix:
-    - TYPE=coverity OS=ubuntu OS_VER=20.04
+  #  - TYPE= OS= OS_VER=
 
 before_install:
   - echo $TRAVIS_COMMIT_RANGE
