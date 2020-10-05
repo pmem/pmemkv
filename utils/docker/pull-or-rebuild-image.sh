@@ -25,13 +25,6 @@ set -e
 source $(dirname $0)/set-ci-vars.sh
 source $(dirname $0)/set-vars.sh
 
-if [[ "$CI_EVENT_TYPE" != "cron" && "$CI_BRANCH" != "coverity_scan" \
-	&& "$TYPE" == "coverity" ]]; then
-	echo "INFO: Skip Coverity scan job if build is triggered neither by " \
-		"'cron' nor by a push to 'coverity_scan' branch"
-	exit 0
-fi
-
 if [[ -z "$OS" || -z "$OS_VER" ]]; then
 	echo "ERROR: The variables OS and OS_VER have to be set properly " \
              "(eg. OS=fedora, OS_VER=31)."
