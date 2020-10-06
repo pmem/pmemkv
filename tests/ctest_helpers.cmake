@@ -304,6 +304,17 @@ function(add_engine_test)
 
 	if("${TEST_DB_SIZE}" STREQUAL "")
 		set(TEST_DB_SIZE 104857600) # 100MB
+	elseif("${TEST_DB_SIZE}" STREQUAL "MIN_JEMALLOC_ARENA_SIZE")
+		execute_process(COMMAND nproc OUTPUT_VARIABLE NPROC)
+		#By default jemalloc creates 4 arenas for each logical CPU with 2MB chunks
+		math(EXPR TEST_DB_SIZE "${NPROC} * 4 * 2 * 1024 * 1024")
+
+		#Limit size DB_SIZE with arbitrary chosen threshold
+		math(EXPR TEST_DB_SIZE_THRESHOLD "256 * 4 * 2 * 1024 * 1024")
+		if( TEST_DB_SIZE GREATER ${TEST_DB_SIZE_THRESHOLD})
+			message(WARNING "TEST_DB_SIZE reached threshold: ${TEST_DB_SIZE_THRESHOLD}. This may cause failures in some tests of memkind based engines")
+			set(TEST_DB_SIZE ${TEST_DB_SIZE_THRESHOLD})
+		endif()
 	endif()
 
 	get_filename_component(script_name ${cmake_script} NAME)
