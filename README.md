@@ -22,6 +22,7 @@ Up-to-date support/maintenance status of branches/releases is available on [pmem
 The C++ API of pmemkv is documented in the Doxygen documentation listed below:
 
 - [master](https://pmem.io/pmemkv/master/doxygen/index.html)
+- [v1.3](https://pmem.io/pmemkv/v1.3/doxygen/index.html)
 - [v1.2](https://pmem.io/pmemkv/v1.2/doxygen/index.html)
 - [v1.1](https://pmem.io/pmemkv/v1.1/doxygen/index.html)
 - [v1.0](https://pmem.io/pmemkv/v1.0/doxygen/index.html)
