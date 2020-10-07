@@ -18,6 +18,13 @@ for the current **master**:
 * [libpmemkv_config.3](./master/manpages/libpmemkv_config.3.html)
 * [libpmemkv_json_config.3](./master/manpages/libpmemkv_json_config.3.html)
 
+for version **1.3**:
+
+* [libpmemkv.3](./v1.3/manpages/libpmemkv.3.html)
+* [libpmemkv.7](./v1.3/manpages/libpmemkv.7.html)
+* [libpmemkv_config.3](./v1.3/manpages/libpmemkv_config.3.html)
+* [libpmemkv_json_config.3](./v1.3/manpages/libpmemkv_json_config.3.html)
+
 for version **1.2**:
 
 * [libpmemkv.3](./v1.2/manpages/libpmemkv.3.html)
@@ -32,19 +39,12 @@ for version **1.1**:
 * [libpmemkv_config.3](./v1.1/manpages/libpmemkv_config.3.html)
 * [libpmemkv_json_config.3](./v1.1/manpages/libpmemkv_json_config.3.html)
 
-for version **1.0**:
-
-* [libpmemkv.3](./v1.0/manpages/libpmemkv.3.html)
-* [libpmemkv.7](./v1.0/manpages/libpmemkv.7.html)
-* [libpmemkv_config.3](./v1.0/manpages/libpmemkv_config.3.html)
-* [libpmemkv_json_config.3](./v1.0/manpages/libpmemkv_json_config.3.html)
-
 The **C++ API** of pmemkv is documented in the Doxygen documentation listed below:
 
 * [master](./master/doxygen/index.html)
+* [v1.3](./v1.3/doxygen/index.html)
 * [v1.2](./v1.2/doxygen/index.html)
 * [v1.1](./v1.1/doxygen/index.html)
-* [v1.0](./v1.0/doxygen/index.html)
 
 ## Releases' support status
 
@@ -53,9 +53,10 @@ seen on the ["releases" tab on the Github page](https://github.com/pmem/pmemkv/r
 
 | Version branch | First release date | Last patch release | Maintenance status |
 | -------------- | ------------------ | ------------------ | ------------------ |
+| stable-1.3 | Oct 02, 2020 | N/A | Full |
 | stable-1.2 | May 29, 2020 | N/A | Full |
 | stable-1.1 | Jan 31, 2020 | N/A | Full |
-| stable-1.0 | Oct 4, 2019 | 1.0.2 (Mar 6, 2020) | Full |
+| stable-1.0 | Oct 4, 2019 | 1.0.3 (Oct 06, 2020) | EOL |
 
 Possible statuses:
 1. Full maintenance:
@@ -80,3 +81,14 @@ The following series of blog articles provides an introduction to **pmemkv**:
 * [Zero-copy leaf splits in pmemkv](https://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html)
 * [Benchmarking with different storage engines using pmemkv](https://pmem.io/2017/12/27/pmemkv-benchmarking-engines.html)
 * [Language bindings for pmemkv](https://pmem.io/2020/03/04/pmemkv-bindings.html)
+
+## Archived documentation
+
+For version **1.0.3**:
+
+* [C++ Doxygen docs](./v1.0/doxygen/index.html)
+* C manpages:
+  * [libpmemkv.3](./v1.0/manpages/libpmemkv.3.html)
+  * [libpmemkv.7](./v1.0/manpages/libpmemkv.7.html)
+  * [libpmemkv_config.3](./v1.0/manpages/libpmemkv_config.3.html)
+  * [libpmemkv_json_config.3](./v1.0/manpages/libpmemkv_json_config.3.html)
