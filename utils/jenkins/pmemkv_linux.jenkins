@@ -145,7 +145,7 @@ pipeline {
 									""")
 									break;
 								default:
-									throw new java.lang.UnsupportedOperationException("TEST_TYPE value '${params.TEST_TYPE}' is not supported. Select: normal, building, bindings, compatibility or coverity.");
+									throw new java.lang.UnsupportedOperationException("TEST_TYPE value '${params.TEST_TYPE}' is not supported. Select: normal, building or compatibility.");
 							}
 						}
 						libs.api.echo_header("Finished running tests.")

@@ -22,10 +22,6 @@ ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 
-ENV COVERITY_DEPS "\
-	ruby \
-	wget"
-
 # Update the Apt cache and install basic tools
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -61,7 +57,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	sudo \
 	wget \
 	whois \
-	$COVERITY_DEPS \
  && rm -rf /var/lib/apt/lists/*
 
 # Install valgrind

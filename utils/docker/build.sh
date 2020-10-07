@@ -24,13 +24,6 @@ doc_variables_error="To build documentation and upload it as a Github pull reque
 variables 'DOC_UPDATE_BOT_NAME', 'DOC_REPO_OWNER' and 'DOC_UPDATE_GITHUB_TOKEN' have to be provided. \
 For more details please read CONTRIBUTING.md"
 
-if [[ "$CI_EVENT_TYPE" != "cron" && "$CI_BRANCH" != "coverity_scan" \
-	&& "$TYPE" == "coverity" ]]; then
-	echo "INFO: Skip Coverity scan job if build is triggered neither by " \
-		"'cron' nor by a push to 'coverity_scan' branch"
-	exit 0
-fi
-
 if [[ -z "$OS" || -z "$OS_VER" ]]; then
 	echo "ERROR: The variables OS and OS_VER have to be set " \
 		"(eg. OS=fedora, OS_VER=31)."
