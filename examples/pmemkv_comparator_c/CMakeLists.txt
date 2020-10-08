@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright 2020, Intel Corporation
 
-cmake_minimum_required(VERSION 3.5)
-project(pmemkv_basic CXX)
+cmake_minimum_required(VERSION 3.3)
+project(pmemkv_basic C)
 
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
