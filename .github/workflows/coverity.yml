@@ -1,6 +1,5 @@
 
 name: pmemkv-coverity
-
 on:
   schedule:
     # run this job at 00:00 UTC everyday
@@ -34,4 +33,4 @@ jobs:
         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh
 
       - name: Run the build
-        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build-CI.sh
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
