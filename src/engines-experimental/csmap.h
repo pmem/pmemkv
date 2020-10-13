@@ -23,14 +23,7 @@ namespace internal
 namespace csmap
 {
 
-struct key_type : public pmem::obj::string {
-	key_type() = default;
-	key_type(const key_type &) = default;
-	key_type(key_type &&) = default;
-	key_type(string_view str) : pmem::obj::string(str.data(), str.size())
-	{
-	}
-};
+using key_type = pmem::obj::string;
 
 static_assert(sizeof(key_type) == 32, "");
 
