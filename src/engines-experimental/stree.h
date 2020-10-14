@@ -29,22 +29,7 @@ namespace stree
  */
 const size_t DEGREE = 32;
 
-struct string_t : public pmem::obj::string {
-	string_t() = default;
-	string_t(const string_t &) = default;
-	string_t(string_t &&) = default;
-	string_t(string_view str) : pmem::obj::string(str.data(), str.size())
-	{
-	}
-	pmem::obj::string &operator=(const string_view &other)
-	{
-		return pmem::obj::string::assign(other.data(), other.size());
-	}
-	pmem::obj::string &operator=(const string_t &other)
-	{
-		return pmem::obj::string::assign(other.data(), other.size());
-	}
-};
+using string_t = pmem::obj::string;
 
 using key_type = string_t;
 using value_type = string_t;
