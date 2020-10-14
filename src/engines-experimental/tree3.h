@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2020, Intel Corporation */
 
 #pragma once
 
@@ -179,6 +179,8 @@ class tree3
     : public pmemobj_engine_base<internal::tree3::KVLeaf> { // hybrid B+ tree engine
 public:
 	tree3(std::unique_ptr<internal::config> cfg);
+	tree3(const tree3 &) = delete;
+	tree3 &operator=(const tree3 &) = delete;
 	~tree3();
 
 	std::string name() final;
@@ -213,8 +215,6 @@ protected:
 	void Recover();
 
 private:
-	tree3(const tree3 &);	       // prevent copying
-	void operator=(const tree3 &); // prevent assigning
 	vector<persistent_ptr<internal::tree3::KVLeaf>>
 		leaves_prealloc;		      // persisted but unused leaves
 	unique_ptr<internal::tree3::KVNode> tree_top; // pointer to uppermost inner node
