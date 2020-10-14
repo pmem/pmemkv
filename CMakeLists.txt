@@ -32,6 +32,7 @@ option(ENGINE_CSMAP "enable experimental csmap engine (requires CXX_STANDARD to 
 option(ENGINE_STREE "enable experimental stree engine" ON)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 option(ENGINE_RADIX "enable experimental radix engine" OFF)
+option(USE_CCACHE "Use ccache if it is available in the system" ON)
 
 ## Set required and useful variables
 set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
@@ -62,6 +63,12 @@ set(DEB_DEPENDS)
 set(RPM_DEPENDS)
 
 set(TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/test CACHE STRING "working directory for tests")
+
+# Configure the ccache as compiler launcher
+find_program(CCACHE_FOUND ccache)
+if(USE_CCACHE AND CCACHE_FOUND)
+	set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+endif()
 
 # Do not treat include directories from the interfaces
 # of consumed Imported Targets as SYSTEM by default.
