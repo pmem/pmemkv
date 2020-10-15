@@ -35,4 +35,3 @@ Later, for major/minor release:
 - once gh-pages branch contains new documentation:
   - add there (in index.md) new links to manpages and Doxygen docs
   - update there "Releases' support status" table (update any other release's status if needed)
-  - add new docs' links in README.md on **master** branch
