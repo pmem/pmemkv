@@ -73,10 +73,7 @@ int main()
 
 	/* Parse JSON and put all items found into config_from_json */
 	status = pmemkv_config_from_json(config_from_json, "{\"path\":\"/dev/shm\",\
-		 \"size\":1073741824,\
-		 \"subconfig\":{\
-			\"size\":1073741824\
-			}\
+		 \"size\":1073741824\
 		}");
 	ASSERT(status == PMEMKV_STATUS_OK);
 
@@ -84,18 +81,6 @@ int main()
 	status = pmemkv_config_get_string(config_from_json, "path", &path);
 	ASSERT(status == PMEMKV_STATUS_OK);
 	ASSERT(strcmp(path, "/dev/shm") == 0);
-
-	pmemkv_config *subconfig;
-
-	/* Get pointer to nested configuration "subconfig" */
-	status = pmemkv_config_get_object(config_from_json, "subconfig",
-					  (void **)&subconfig);
-	ASSERT(status == PMEMKV_STATUS_OK);
-
-	size_t sub_size;
-	status = pmemkv_config_get_uint64(subconfig, "size", &sub_size);
-	ASSERT(status == PMEMKV_STATUS_OK);
-	ASSERT(sub_size == 1073741824);
 
 	pmemkv_config_delete(config_from_json);
 

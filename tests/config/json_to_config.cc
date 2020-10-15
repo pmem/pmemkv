@@ -21,7 +21,7 @@ static void simple_test()
 
 	auto ret = pmemkv_config_from_json(
 		config, "{\"string\": \"abc\", \"int\": 123, \"bool\": true}");
-	// XXX: extend by adding "false", subconfig, negative value
+	// XXX: extend by adding "false", negative value
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 
 	const char *value_string;

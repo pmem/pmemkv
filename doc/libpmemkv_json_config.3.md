@@ -47,7 +47,6 @@ pmemkv_json_config is a helper library that provides two functions:
 	in JSON strings and their corresponding types in pmemkv_config are:
 	+ **number** -- int64 or uint64
 	+ **string** -- const char *
-	+ **object** -- (another JSON string) -> pointer to pmemkv_config (can be obtained using pmemkv_config_get_object)
 	+ **True**, **False** -- int64
 
 `const char *pmemkv_config_from_json_errormsg(void);`

@@ -47,32 +47,6 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 				if (status != PMEMKV_STATUS_OK)
 					throw std::runtime_error(
 						"Inserting bool to the config failed");
-			} else if (itr->value.IsObject()) {
-				rapidjson::StringBuffer sb;
-				rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
-				itr->value.Accept(writer);
-
-				auto sub_cfg = pmemkv_config_new();
-
-				if (sub_cfg == nullptr) {
-					ERR() << "Cannot allocate subconfig";
-					return PMEMKV_STATUS_OUT_OF_MEMORY;
-				}
-
-				auto status =
-					pmemkv_config_from_json(sub_cfg, sb.GetString());
-				if (status != PMEMKV_STATUS_OK) {
-					pmemkv_config_delete(sub_cfg);
-					throw std::runtime_error(
-						"Cannot parse subconfig");
-				}
-
-				status = pmemkv_config_put_object(
-					config, itr->name.GetString(), sub_cfg,
-					(void (*)(void *)) & pmemkv_config_delete);
-				if (status != PMEMKV_STATUS_OK)
-					throw std::runtime_error(
-						"Inserting a new entry to the config failed");
 			} else {
 				static std::string kTypeNames[] = {
 					"Null",	 "False",  "True",  "Object",
