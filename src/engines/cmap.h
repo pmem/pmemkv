@@ -86,7 +86,7 @@ public:
 	status defrag(double start_percent, double amount_percent) final;
 
 private:
-	void Recover();
+	void Recover(size_t reserve_count);
 	internal::cmap::map_t *container;
 };
 
