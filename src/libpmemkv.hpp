@@ -177,6 +177,7 @@ public:
 	status put_oid(PMEMoid *oid) noexcept;
 	template <typename Comparator>
 	status put_comparator(Comparator &&comparator);
+	status put_reserve(std::uint64_t reserve_count) noexcept;
 
 	template <typename T>
 	status get_data(const std::string &key, T *&value, std::size_t &number) const
@@ -694,6 +695,22 @@ inline status config::put_oid(PMEMoid *oid) noexcept
 		return status::UNKNOWN_ERROR;
 
 	return static_cast<status>(pmemkv_config_put_oid(this->_config, oid));
+}
+
+/**
+ * Puts reserve_count to a config
+ * XXX: add more description
+ *
+ * @param[in] reserve_count The count of elements to reserve space/memory in the database.
+ *
+ * @return pmem::kv::status
+ */
+inline status config::put_reserve(std::uint64_t reserve_count) noexcept
+{
+	if (init() != 0)
+		return status::UNKNOWN_ERROR;
+
+	return put_uint64("reserve", reserve_count);
 }
 
 /**
