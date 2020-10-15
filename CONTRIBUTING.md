@@ -210,4 +210,4 @@ As noted in the example above, the experimental CMake module should use `-experi
 
 ### Documentation
 
-* In `ENGINES-experimental.md`, add `mytree` section
+* In `doc/ENGINES-experimental.md`, add `mytree` section
