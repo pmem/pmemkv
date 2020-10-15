@@ -2,9 +2,9 @@
 
 [![Travis build status](https://travis-ci.org/pmem/pmemkv.svg?branch=master)](https://travis-ci.org/pmem/pmemkv)
 [![GHA build status](https://github.com/pmem/pmemkv/workflows/pmemkv/badge.svg?branch=master)](https://github.com/pmem/pmemkv/actions)
-[![PMEMKV version](https://img.shields.io/github/tag/pmem/pmemkv.svg)](https://github.com/pmem/pmemkv/releases/latest)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/18408/badge.svg)](https://scan.coverity.com/projects/pmem-pmemkv)
 [![Coverage Status](https://codecov.io/github/pmem/pmemkv/coverage.svg?branch=master)](https://codecov.io/gh/pmem/pmemkv/branch/master)
+[![PMEMKV version](https://img.shields.io/github/tag/pmem/pmemkv.svg)](https://github.com/pmem/pmemkv/releases/latest)
 [![Packaging status](https://repology.org/badge/tiny-repos/pmemkv.svg)](https://repology.org/project/pmemkv/versions)
 
 Key/Value Datastore for Persistent Memory
@@ -14,22 +14,22 @@ Key/Value Datastore for Persistent Memory
 `pmemkv` is a local/embedded key-value datastore optimized for persistent memory.
 Rather than being tied to a single language or backing implementation, `pmemkv`
 provides different options for language bindings and storage engines.
-For more information, see https://pmem.io/pmemkv.
+
+For more information, including **C API** documentation in form of manuals,
+and **C++ API** docs in form of Doxygen html files see: https://pmem.io/pmemkv.
+Documentation is available for every branch/release. For most recent always see
+**master**'s version - [C++ master docs](https://pmem.io/pmemkv/master/doxygen/index.html)
+and [C master libpmemkv(3)](https://pmem.io/pmemkv/master/manpages/libpmemkv.3.html).
 
 Latest releases can be found on the ["releases" tab](https://github.com/pmem/pmemkv/releases).
-Up-to-date support/maintenance status of branches/releases is available on [pmem.io](https://pmem.io/pmemkv).
 
-The C++ API of pmemkv is documented in the Doxygen documentation listed below:
-
-- [master](https://pmem.io/pmemkv/master/doxygen/index.html)
-- [v1.3](https://pmem.io/pmemkv/v1.3/doxygen/index.html)
-- [v1.2](https://pmem.io/pmemkv/v1.2/doxygen/index.html)
-- [v1.1](https://pmem.io/pmemkv/v1.1/doxygen/index.html)
-- [v1.0](https://pmem.io/pmemkv/v1.0/doxygen/index.html)
+Up-to-date, current support/maintenance status of branches/releases is available on
+[pmem.io](https://pmem.io/pmemkv/index.html#releases-support-status).
 
 There is also a small helper library `pmemkv_json_config` provided.
 See its [manual](doc/libpmemkv_json_config.3.md) for details.
 
+### README's table of contents:
 - [Installation](#installation)
 - [Language Bindings](#language-bindings)
 - [Storage Engines](#storage-engines)
@@ -45,7 +45,7 @@ build rpm and deb packages and explains usage of experimental engines and pool s
 - [Installing on Fedora](INSTALLING.md#installing-on-fedora)
 - [Installing on Ubuntu](INSTALLING.md#installing-on-ubuntu)
 - [Using Experimental Engines](INSTALLING.md#using-experimental-engines)
-- [Building packages](INSTALLING.md#building-packages)
+- [Building Packages](INSTALLING.md#building-packages)
 - [Using a Pool Set](INSTALLING.md#using-a-pool-set)
 
 ## Language Bindings
@@ -80,8 +80,8 @@ all language bindings and utilities. Engines are loaded by name at runtime.
 | [cmap](doc/libpmemkv.7.md#cmap) | Concurrent hash map | No | Yes | No |
 | [vsmap](doc/libpmemkv.7.md#vsmap) | Volatile sorted hash map | No | No | Yes |
 | [vcmap](doc/libpmemkv.7.md#vcmap) | Volatile concurrent hash map | No | Yes | No |
-| [csmap](doc/ENGINES-experimental.md#csmap) | Concurrent sorted map | Yes | Yes | Yes |
-| [radix](doc/ENGINES-experimental.md#radix) | Radix tree | Yes | No | Yes |
+| [csmap](doc/ENGINES-experimental.md#csmap) | [Concurrent sorted map](https://pmem.io/libpmemobj-cpp/master/doxygen/classpmem_1_1obj_1_1experimental_1_1concurrent__map.html) | Yes | Yes | Yes |
+| [radix](doc/ENGINES-experimental.md#radix) | [Radix tree](https://pmem.io/libpmemobj-cpp/master/doxygen/classpmem_1_1obj_1_1experimental_1_1radix__tree.html) | Yes | No | Yes |
 | [tree3](doc/ENGINES-experimental.md#tree3) | Persistent B+ tree | Yes | No | No |
 | [stree](doc/ENGINES-experimental.md#stree) | Sorted persistent B+ tree | Yes | No | Yes |
 
