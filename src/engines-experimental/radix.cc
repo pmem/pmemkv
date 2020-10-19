@@ -276,5 +276,175 @@ void radix::Recover()
 	}
 }
 
+internal::iterator_base *radix::new_iterator()
+{
+	return new radix_iterator<false>{container};
+}
+
+internal::iterator_base *radix::new_const_iterator()
+{
+	return new radix_iterator<true>{container};
+}
+
+radix::radix_iterator<true>::radix_iterator(container_type *c)
+    : container(c), _it(c->begin()), pop(pmem::obj::pool_by_vptr(c))
+{
+}
+
+radix::radix_iterator<false>::radix_iterator(container_type *c)
+    : radix::radix_iterator<true>(c)
+{
+}
+
+status radix::radix_iterator<true>::seek(string_view key)
+{
+	_it = container->find(key);
+	if (_it != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+status radix::radix_iterator<true>::seek_lower(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::seek_lower_eq(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::seek_higher(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::seek_higher_eq(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::seek_to_first()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->begin();
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::seek_to_last()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->end();
+	--_it;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::next()
+{
+	if (_it == container->end() || ++_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::prev()
+{
+	if (_it == container->begin())
+		return status::NOT_FOUND;
+
+	--_it;
+
+	return status::OK;
+}
+
+std::pair<string_view, status> radix::radix_iterator<true>::key()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {_it->key().cdata(), status::OK};
+}
+
+std::pair<pmem::obj::slice<const char *>, status>
+radix::radix_iterator<true>::read_range(size_t pos, size_t n)
+{
+	if (_it == container->end())
+		return {{nullptr, nullptr}, status::NOT_FOUND};
+
+	if (pos + n > _it->value().size())
+		n = _it->value().size() - pos;
+
+	return {{_it->value().cdata() + pos, _it->value().cdata() + pos + n}, status::OK};
+}
+
+std::pair<pmem::obj::slice<char *>, status>
+radix::radix_iterator<false>::write_range(size_t pos, size_t n)
+{
+	if (_it == container->end())
+		return {{nullptr, nullptr}, status::NOT_FOUND};
+
+	/* check if position of iterator changed */
+	auto key = _it->key().cdata();
+	if (snapshotted_key.compare(key) != 0) {
+		abort();
+		snapshotted_key = key;
+	}
+
+	if (pos + n > _it->value().size())
+		n = _it->value().size() - pos;
+
+	log.push_back({std::string(_it->value().cdata() + pos, n), pos});
+	auto &val = log[log.size() - 1].first;
+
+	return {{&val[0], &val[n]}, status::OK};
+}
+
+status radix::radix_iterator<false>::commit()
+{
+	/* check if position of iterator changed before commit */
+	if (snapshotted_key.compare(_it->key().cdata()) != 0)
+		abort();
+
+	pmem::obj::transaction::run(pop, [&] {
+		for (auto &p : log) {
+			auto dest = _it->value().range(p.second, p.first.size());
+			std::copy(p.first.begin(), p.first.end(), dest.begin());
+		}
+	});
+	log.clear();
+	return status::OK;
+}
+
 } // namespace kv
 } // namespace pmem
