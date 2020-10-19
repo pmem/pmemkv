@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <iostream>
+#include <libpmemobj++/slice.hpp>
 #include <libpmemobj++/string_view.hpp>
 #include <memory>
 #include <stdexcept>
@@ -38,7 +39,6 @@ namespace pmem
 */
 namespace kv
 {
-
 using string_view = obj::string_view;
 
 /**
@@ -201,7 +201,15 @@ private:
 	See descriptions of these functions for details.
 */
 class db {
+	template <bool IsConst>
+	class iterator;
+
+	class accessor;
+
 public:
+	using read_iterator = iterator<true>;
+	using write_iterator = iterator<false>;
+
 	db() noexcept;
 
 	status open(const std::string &engine_name, config &&cfg = config{}) noexcept;
@@ -250,11 +258,168 @@ public:
 	status remove(string_view key) noexcept;
 	status defrag(double start_percent = 0, double amount_percent = 100);
 
+	write_iterator new_write_iterator();
+	read_iterator new_read_iterator();
+
 	std::string errormsg();
 
 private:
 	std::unique_ptr<pmemkv_db, decltype(&pmemkv_close)> db_;
 };
+
+template <bool IsConst>
+class db::iterator {
+	using iterator_type = typename std::conditional<IsConst, pmemkv_read_iterator,
+							pmemkv_write_iterator>::type;
+
+public:
+	iterator(iterator_type *it);
+
+	status seek(string_view key) noexcept;
+	status seek_lower(string_view key) noexcept;
+	status seek_lower_eq(string_view key) noexcept;
+	status seek_higher(string_view key) noexcept;
+	status seek_higher_eq(string_view key) noexcept;
+
+	status seek_to_first() noexcept;
+	status seek_to_last() noexcept;
+
+	status next() noexcept;
+	status prev() noexcept;
+
+	// XXX: result<string_view, status>
+	std::pair<string_view, status> key() noexcept;
+
+	// XXX: result<slice<InputIt>, status>
+	std::pair<pmem::obj::slice<const char *>, status> read_range(size_t pos,
+								     size_t n);
+
+	template <bool IC = IsConst>
+	typename std::enable_if<!IC, std::pair<pmem::obj::slice<char *>, status>>::type
+	write_range(size_t pos, size_t n);
+
+	template <bool IC = IsConst>
+	typename std::enable_if<!IC, status>::type commit();
+	template <bool IC = IsConst>
+	typename std::enable_if<!IC>::type abort();
+
+private:
+	std::unique_ptr<iterator_type, decltype(&pmemkv_iterator_delete)> it_;
+};
+
+template <bool IsConst>
+db::iterator<IsConst>::iterator(iterator_type *it) : it_(it, &pmemkv_iterator_delete)
+{
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek(
+		static_cast<void *>(this->it_.get()), key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_lower(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_lower(
+		static_cast<void *>(this->it_.get()), key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_lower_eq(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_lower_eq(
+		static_cast<void *>(this->it_.get()), key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_higher(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_higher(
+		static_cast<void *>(this->it_.get()), key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_higher_eq(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_higher_eq(
+		static_cast<void *>(this->it_.get()), key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_to_first() noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_seek_to_first(static_cast<void *>(this->it_.get())));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_to_last() noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_seek_to_last(static_cast<void *>(this->it_.get())));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::next() noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_next(static_cast<void *>(this->it_.get())));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::prev() noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_prev(static_cast<void *>(this->it_.get())));
+}
+
+template <bool IsConst>
+inline std::pair<string_view, status> db::iterator<IsConst>::key() noexcept
+{
+	const char *c;
+	size_t size;
+	auto s = pmemkv_iterator_key(static_cast<void *>(this->it_.get()), &c, &size);
+	return {string_view{c, size}, static_cast<status>(s)};
+}
+
+template <bool IsConst>
+inline std::pair<pmem::obj::slice<const char *>, status>
+db::iterator<IsConst>::read_range(size_t pos, size_t n)
+{
+	const char *data;
+	size_t size;
+	auto s = pmemkv_iterator_read_range(static_cast<void *>(this->it_.get()), pos, n,
+					    &data, &size);
+	return {{data, data + size}, static_cast<status>(s)};
+}
+
+template <>
+template <>
+inline std::pair<pmem::obj::slice<char *>, status>
+db::iterator<false>::write_range(size_t pos, size_t n)
+{
+	char *data;
+	size_t size;
+	auto s = pmemkv_write_iterator_write_range(this->it_.get(), pos, n, &data, &size);
+	return {{data, data + size}, static_cast<status>(s)};
+}
+
+template <>
+template <>
+inline status db::iterator<false>::commit()
+{
+	auto s = static_cast<status>(pmemkv_write_iterator_commit(this->it_.get()));
+	return s;
+}
+
+template <>
+template <>
+inline void db::iterator<false>::abort()
+{
+	pmemkv_write_iterator_abort(this->it_.get());
+}
 
 /*! \namespace pmem::kv::internal
 	\brief internal pmemkv classes for C++ API
@@ -1289,6 +1454,16 @@ inline status db::defrag(double start_percent, double amount_percent)
 {
 	return static_cast<status>(
 		pmemkv_defrag(this->db_.get(), start_percent, amount_percent));
+}
+
+inline db::write_iterator db::new_write_iterator()
+{
+	return db::iterator<false>{pmemkv_write_iterator_new(db_.get())};
+}
+
+inline db::read_iterator db::new_read_iterator()
+{
+	return db::iterator<true>{pmemkv_read_iterator_new(db_.get())};
 }
 
 /**
