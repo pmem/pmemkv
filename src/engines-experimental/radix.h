@@ -4,6 +4,7 @@
 #pragma once
 
 #include "../comparator/pmemobj_comparator.h"
+#include "../iterator.h"
 #include "../pmemobj_engine.h"
 
 #include <libpmemobj++/persistent_ptr.hpp>
@@ -56,6 +57,9 @@ static_assert(sizeof(pmem_type) == sizeof(map_type) + 64, "");
  * More info about radix tree: https://en.wikipedia.org/wiki/Radix_tree
  */
 class radix : public pmemobj_engine_base<internal::radix::pmem_type> {
+	template <bool IsConst>
+	class radix_iterator;
+
 public:
 	radix(std::unique_ptr<internal::config> cfg);
 	~radix();
@@ -90,6 +94,9 @@ public:
 
 	status remove(string_view key) final;
 
+	status new_iterator(internal::iterator<false> *&it) final;
+	status new_const_iterator(internal::iterator<true> *&it) final;
+
 private:
 	using container_type = internal::radix::map_type;
 
@@ -100,6 +107,58 @@ private:
 
 	container_type *container;
 	std::unique_ptr<internal::config> config;
+};
+
+template <>
+class radix::radix_iterator<false> : public internal::iterator<false> {
+	using container_type = radix::container_type;
+
+public:
+	radix_iterator(container_type *container);
+
+	status seek(string_view key) final;
+	status seek_lower(string_view key) final;
+	status seek_lower_eq(string_view key) final;
+	status seek_higher(string_view key) final;
+	status seek_higher_eq(string_view key) final;
+
+	status seek_to_first() final;
+	status seek_to_last() final;
+
+	status next() final;
+	status prev() final;
+
+	// result<string_view, status> key();
+	// result<accessor, status> value();
+private:
+	container_type *container;
+	container_type::iterator _it;
+};
+
+template <>
+class radix::radix_iterator<true> : public internal::iterator<true> {
+	using container_type = radix::container_type;
+
+public:
+	radix_iterator(container_type *container);
+
+	status seek(string_view key) final;
+	status seek_lower(string_view key) final;
+	status seek_lower_eq(string_view key) final;
+	status seek_higher(string_view key) final;
+	status seek_higher_eq(string_view key) final;
+
+	status seek_to_first() final;
+	status seek_to_last() final;
+
+	status next() final;
+	status prev() final;
+
+	// result<string_view, status> key();
+	// result<string_view, status> value();
+private:
+	container_type *container;
+	container_type::iterator _it;
 };
 
 } /* namespace kv */

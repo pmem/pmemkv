@@ -1508,6 +1508,11 @@ if(ENGINE_RADIX)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 32 8)
 
+	add_engine_test(ENGINE radix
+			BINARY iterator_basic
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
 	if(PMREORDER_SUPPORTED)
 		add_engine_test(ENGINE radix
 				BINARY pmreorder_insert
