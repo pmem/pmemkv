@@ -38,7 +38,6 @@ namespace pmem
 */
 namespace kv
 {
-
 using string_view = obj::string_view;
 
 /**
@@ -209,7 +208,13 @@ private:
 	See descriptions of these functions for details.
 */
 class db {
+	template <bool IsConst>
+	class iterator;
+
 public:
+	using read_iterator = iterator<true>;
+	using write_iterator = iterator<false>;
+
 	db() noexcept;
 	~db();
 
@@ -266,11 +271,111 @@ public:
 	status remove(string_view key) noexcept;
 	status defrag(double start_percent = 0, double amount_percent = 100);
 
+	write_iterator new_write_iterator();
+	read_iterator new_read_iterator();
+
 	std::string errormsg();
 
 private:
 	pmemkv_db *_db;
 };
+
+template <bool IsConst>
+class db::iterator {
+	using iterator_type = typename std::conditional<IsConst, pmemkv_read_iterator,
+							pmemkv_write_iterator>::type;
+
+public:
+	iterator(iterator_type *it);
+	~iterator();
+
+	status seek(string_view key) noexcept;
+	status seek_lower(string_view key) noexcept;
+	status seek_lower_eq(string_view key) noexcept;
+	status seek_higher(string_view key) noexcept;
+	status seek_higher_eq(string_view key) noexcept;
+
+	status seek_to_first() noexcept;
+	status seek_to_last() noexcept;
+
+	status next() noexcept;
+	status prev() noexcept;
+
+private:
+	iterator_type *_it;
+};
+
+template <bool IsConst>
+db::iterator<IsConst>::iterator(iterator_type *it) : _it(it)
+{
+}
+
+template <bool IsConst>
+db::iterator<IsConst>::~iterator()
+{
+	pmemkv_iterator_delete(_it);
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek(string_view key) noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_seek(static_cast<void *>(_it), key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_lower(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_lower(static_cast<void *>(_it),
+							      key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_lower_eq(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_lower_eq(static_cast<void *>(_it),
+								 key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_higher(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_higher(static_cast<void *>(_it),
+							       key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_higher_eq(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_higher_eq(
+		static_cast<void *>(_it), key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_to_first() noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_seek_to_first(static_cast<void *>(_it)));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_to_last() noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_seek_to_last(static_cast<void *>(_it)));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::next() noexcept
+{
+	return static_cast<status>(pmemkv_iterator_next(static_cast<void *>(_it)));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::prev() noexcept
+{
+	return static_cast<status>(pmemkv_iterator_prev(static_cast<void *>(_it)));
+}
 
 /*! \namespace pmem::kv::internal
 	\brief internal pmemkv classes for C++ API
@@ -1394,6 +1499,16 @@ inline status db::defrag(double start_percent, double amount_percent)
 {
 	return static_cast<status>(
 		pmemkv_defrag(this->_db, start_percent, amount_percent));
+}
+
+inline db::write_iterator db::new_write_iterator()
+{
+	return db::iterator<false>{pmemkv_write_iterator_new(_db)};
+}
+
+inline db::read_iterator db::new_read_iterator()
+{
+	return db::iterator<true>{pmemkv_read_iterator_new(_db)};
 }
 
 /**
