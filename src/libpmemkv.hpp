@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <iostream>
+#include <libpmemobj++/slice.hpp>
 #include <libpmemobj++/string_view.hpp>
 #include <memory>
 #include <stdexcept>
@@ -38,7 +39,6 @@ namespace pmem
 */
 namespace kv
 {
-
 using string_view = obj::string_view;
 
 /**
@@ -209,7 +209,15 @@ private:
 	See descriptions of these functions for details.
 */
 class db {
+	template <bool IsConst>
+	class iterator;
+
+	class accessor;
+
 public:
+	using read_iterator = iterator<true>;
+	using write_iterator = iterator<false>;
+
 	db() noexcept;
 	~db();
 
@@ -266,11 +274,200 @@ public:
 	status remove(string_view key) noexcept;
 	status defrag(double start_percent = 0, double amount_percent = 100);
 
+	write_iterator new_write_iterator();
+	read_iterator new_read_iterator();
+
 	std::string errormsg();
 
 private:
 	pmemkv_db *_db;
 };
+
+template <bool IsConst>
+class db::iterator {
+	using iterator_type = typename std::conditional<IsConst, pmemkv_read_iterator,
+							pmemkv_write_iterator>::type;
+	using value_return_type =
+		typename std::conditional<IsConst, string_view, db::accessor>::type;
+
+public:
+	iterator(iterator_type *it);
+	iterator(iterator &&other) = default;
+	iterator(const iterator &other) = delete;
+
+	iterator &operator=(const iterator &other) = delete;
+	// iterator& operator=(iterator &&other); // TODO: do we want move assignment op?
+
+	status seek(string_view key) noexcept;
+	status seek_lower(string_view key) noexcept;
+	status seek_lower_eq(string_view key) noexcept;
+	status seek_higher(string_view key) noexcept;
+	status seek_higher_eq(string_view key) noexcept;
+
+	status seek_to_first() noexcept;
+	status seek_to_last() noexcept;
+
+	status next() noexcept;
+	status prev() noexcept;
+
+	// XXX: result<string_view, status>
+	std::pair<string_view, status> key() noexcept;
+	std::pair<value_return_type, status> value() noexcept;
+
+private:
+	std::unique_ptr<iterator_type, std::function<void(iterator_type *)>> _it;
+};
+
+class db::accessor {
+public:
+	accessor(pmemkv_accessor *acc);
+	accessor(accessor &&other) = default;
+	accessor(const accessor &other) = delete;
+
+	accessor &operator=(const accessor &other) = delete;
+	// accessor& operator=(accesor &&other); // TODO: do we want move assignment op?
+
+	// XXX: result<slice<InputIt>, status>
+	std::pair<pmem::obj::slice<const char *>, status> read_range(size_t pos,
+								     size_t n);
+	std::pair<pmem::obj::slice<char *>, status> write_range(size_t pos, size_t n);
+
+	status commit();
+	void abort();
+
+private:
+	std::unique_ptr<pmemkv_accessor, std::function<void(pmemkv_accessor *)>> _acc;
+};
+
+template <bool IsConst>
+db::iterator<IsConst>::iterator(iterator_type *it)
+    : _it(it, [](iterator_type *i) { pmemkv_iterator_delete(i); })
+{
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek(static_cast<void *>(_it.get()),
+							key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_lower(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_lower(
+		static_cast<void *>(_it.get()), key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_lower_eq(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_lower_eq(
+		static_cast<void *>(_it.get()), key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_higher(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_higher(
+		static_cast<void *>(_it.get()), key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_higher_eq(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_higher_eq(
+		static_cast<void *>(_it.get()), key.data(), key.size()));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_to_first() noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_seek_to_first(static_cast<void *>(_it.get())));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::seek_to_last() noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_seek_to_last(static_cast<void *>(_it.get())));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::next() noexcept
+{
+	return static_cast<status>(pmemkv_iterator_next(static_cast<void *>(_it.get())));
+}
+
+template <bool IsConst>
+status db::iterator<IsConst>::prev() noexcept
+{
+	return static_cast<status>(pmemkv_iterator_prev(static_cast<void *>(_it.get())));
+}
+
+template <bool IsConst>
+inline std::pair<string_view, status> db::iterator<IsConst>::key() noexcept
+{
+	const char *c;
+	size_t size;
+	auto s = pmemkv_iterator_key(static_cast<void *>(_it.get()), &c, &size);
+	return {string_view{c, size}, static_cast<status>(s)};
+}
+
+template <>
+inline std::pair<string_view, status> db::iterator<true>::value() noexcept
+{
+	const char *c;
+	size_t size;
+	auto s = pmemkv_read_iterator_value(_it.get(), &c, &size);
+	return {string_view{c, size}, static_cast<status>(s)};
+}
+
+template <>
+inline std::pair<db::accessor, status> db::iterator<false>::value() noexcept
+{
+	pmemkv_accessor *acc;
+	auto s = pmemkv_write_iterator_value(_it.get(), &acc);
+
+	return {db::accessor{acc}, static_cast<status>(s)};
+}
+
+inline db::accessor::accessor(pmemkv_accessor *acc)
+    : _acc(acc, [](pmemkv_accessor *a) { pmemkv_accessor_delete(a); })
+{
+}
+
+inline std::pair<pmem::obj::slice<const char *>, status>
+db::accessor::read_range(size_t pos, size_t n)
+{
+	const char *data;
+	size_t size;
+	auto s = pmemkv_accessor_read_range(_acc.get(), pos, n, &data, &size);
+	return {{data, data + size}, static_cast<status>(s)};
+}
+
+inline std::pair<pmem::obj::slice<char *>, status> db::accessor::write_range(size_t pos,
+									     size_t n)
+{
+	char *data;
+	size_t size;
+	auto s = pmemkv_accessor_write_range(_acc.get(), pos, n, &data, &size);
+	return {{data, data + size}, static_cast<status>(s)};
+}
+
+inline status db::accessor::commit()
+{
+	auto s = static_cast<status>(pmemkv_accessor_commit(_acc.get()));
+	_acc = nullptr;
+	return s;
+}
+
+inline void db::accessor::abort()
+{
+	pmemkv_accessor_abort(_acc.get());
+	_acc = nullptr;
+}
 
 /*! \namespace pmem::kv::internal
 	\brief internal pmemkv classes for C++ API
@@ -1394,6 +1591,16 @@ inline status db::defrag(double start_percent, double amount_percent)
 {
 	return static_cast<status>(
 		pmemkv_defrag(this->_db, start_percent, amount_percent));
+}
+
+inline db::write_iterator db::new_write_iterator()
+{
+	return db::iterator<false>{pmemkv_write_iterator_new(_db)};
+}
+
+inline db::read_iterator db::new_read_iterator()
+{
+	return db::iterator<true>{pmemkv_read_iterator_new(_db)};
 }
 
 /**

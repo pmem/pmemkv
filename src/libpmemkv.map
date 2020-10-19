@@ -6,6 +6,11 @@
 #
 LIBPMEMKV_1.0 {
 	global:
+		pmemkv_accessor_abort;
+		pmemkv_accessor_commit;
+		pmemkv_accessor_delete;
+		pmemkv_accessor_read_range;
+		pmemkv_accessor_write_range;
 		pmemkv_close;
 		pmemkv_config_delete;
 		pmemkv_config_get_data;
@@ -44,9 +49,24 @@ LIBPMEMKV_1.0 {
 		pmemkv_get_copy;
 		pmemkv_get_equal_above;
 		pmemkv_get_equal_below;
+		pmemkv_iterator_delete;
+		pmemkv_iterator_key;
+		pmemkv_iterator_next;
+		pmemkv_iterator_prev;
+		pmemkv_iterator_seek;
+		pmemkv_iterator_seek_higher;
+		pmemkv_iterator_seek_higher_eq;
+		pmemkv_iterator_seek_lower;
+		pmemkv_iterator_seek_lower_eq;
+		pmemkv_iterator_seek_to_first;
+		pmemkv_iterator_seek_to_last;
 		pmemkv_open;
 		pmemkv_put;
 		pmemkv_remove;
+		pmemkv_read_iterator_new;
+		pmemkv_read_iterator_value;
+		pmemkv_write_iterator_new;
+		pmemkv_write_iterator_value;
 	local:
 		*;
 };

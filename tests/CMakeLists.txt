@@ -181,6 +181,10 @@ build_test_ext(NAME comparator_default_reopen_c SRC_FILES comparator/default_reo
 build_test_ext(NAME comparator_custom_reopen_cpp SRC_FILES comparator/custom_reopen.cc LIBS json)
 build_test_ext(NAME comparator_default_reopen_cpp SRC_FILES comparator/default_reopen.cc LIBS json)
 
+# Tests for iterator
+build_test_ext(NAME iterator_basic SRC_FILES engine_scenarios/all/iterator_basic.cc LIBS json)
+build_test_ext(NAME iterator_sorted SRC_FILES engine_scenarios/sorted/iterator_sorted.cc LIBS json)
+
 ###################################### CMAP ####################################
 if(ENGINE_CMAP)
 	add_engine_test(ENGINE cmap

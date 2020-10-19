@@ -76,6 +76,8 @@ set(SOURCE_FILES
 	src/engines/blackhole.h
 	src/out.cc
 	src/out.h
+	src/iterator.h
+	src/iterator.cc
 )
 # Add each engine source separately
 if(ENGINE_CMAP)
