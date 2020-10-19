@@ -31,6 +31,10 @@ typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;
 typedef struct pmemkv_comparator pmemkv_comparator;
 
+typedef struct pmemkv_read_iterator pmemkv_read_iterator;
+typedef struct pmemkv_write_iterator pmemkv_write_iterator;
+typedef struct pmemkv_accessor pmemkv_accessor;
+
 typedef int pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
 				   size_t valuebytes, void *arg);
 typedef void pmemkv_get_v_callback(const char *value, size_t valuebytes, void *arg);
@@ -100,6 +104,40 @@ int pmemkv_put(pmemkv_db *db, const char *k, size_t kb, const char *v, size_t vb
 int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
 
 int pmemkv_defrag(pmemkv_db *db, double start_percent, double amount_percent);
+
+pmemkv_read_iterator *pmemkv_read_iterator_new(pmemkv_db *db);
+pmemkv_write_iterator *pmemkv_write_iterator_new(pmemkv_db *db);
+
+void pmemkv_iterator_delete(void *it);
+
+int pmemkv_iterator_seek(void *it, const char *k, size_t kb);
+int pmemkv_iterator_seek_lower(void *it, const char *k, size_t kb);
+int pmemkv_iterator_seek_lower_eq(void *it, const char *k, size_t kb);
+int pmemkv_iterator_seek_higher(void *it, const char *k, size_t kb);
+int pmemkv_iterator_seek_higher_eq(void *it, const char *k, size_t kb);
+
+int pmemkv_iterator_seek_to_first(void *it);
+int pmemkv_iterator_seek_to_last(void *it);
+
+int pmemkv_iterator_next(void *it);
+int pmemkv_iterator_prev(void *it);
+
+/*int pmemkv_iterator_key(void* it, const char** k, size_t* kb);
+int pmemkv_iterator_key(void *it, const char** k, size_t* kb);
+
+int pmemkv_read_iterator_value(pmemkv_read_iterator* it, const char** val, size_t* kb);
+int pmemkv_write_iterator_value(pmemkv_write_iterator* it, pmemkv_accessor** acc);
+
+int pmemkv_accessor_read_range(pmemkv_accessor* acc, size_t pos, size_t n, const char**
+data, size_t *kb); int pmemkv_accessor_write_range(pmemkv_accessor* acc, size_t pos,
+size_t n, char** data, size_t *kb);
+
+// both commit and abort will consume the iterator (destroy it)
+int pmemkv_accessor_commit(pmemkv_accessor*);
+void pmemkv_accessor_abort(pmemkv_accessor*);
+
+// void pmemkv_accessor_delete(pmemkv_accessor*); // probably not needed if commit/abort
+consumes the iterator*/
 
 const char *pmemkv_errormsg(void);
 
