@@ -22,6 +22,7 @@ option(COVERAGE "run coverage test" OFF)
 
 option(DEVELOPER_MODE "enable developer's checks" OFF)
 option(CHECK_CPP_STYLE "check code style of C++ sources" OFF)
+option(USE_CCACHE "Use ccache if it is available in the system" ON)
 
 # Each engine can be enabled separately.
 # By default all experimental engines are turned off.
@@ -203,6 +204,12 @@ include(libpmemobj++)
 list(APPEND PKG_CONFIG_REQUIRES "libpmemobj++ >= ${LIBPMEMOBJ_CPP_REQUIRED_VERSION}")
 list(APPEND RPM_DEPENDS "libpmemobj >= ${LIBPMEMOBJ_REQUIRED_VERSION}")
 list(APPEND DEB_DEPENDS "libpmemobj1 (>= ${LIBPMEMOBJ_REQUIRED_VERSION}) | libpmemobj (>= ${LIBPMEMOBJ_REQUIRED_VERSION})")
+
+# Configure the ccache as compiler launcher
+find_program(CCACHE_FOUND ccache)
+if(USE_CCACHE AND CCACHE_FOUND)
+	set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+endif()
 
 if(ENGINE_VSMAP OR ENGINE_VCMAP)
 	include(memkind)
