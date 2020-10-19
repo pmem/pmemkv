@@ -276,5 +276,173 @@ void radix::Recover()
 	}
 }
 
+internal::iterator<false> *radix::new_iterator()
+{
+	return new radix_iterator<false>{container};
+}
+
+internal::iterator<true> *radix::new_const_iterator()
+{
+	return new radix_iterator<true>{container};
+}
+
+template <bool IsConst>
+radix::radix_iterator<IsConst>::radix_iterator(container_type *c)
+    : container(c), _it(c->begin()), pop(pmem::obj::pool_by_vptr(c))
+{
+}
+
+template <bool IsConst>
+status radix::radix_iterator<IsConst>::seek(string_view key)
+{
+	_it = container->find(key);
+	if (_it != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+template <bool IsConst>
+status radix::radix_iterator<IsConst>::seek_lower(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status radix::radix_iterator<IsConst>::seek_lower_eq(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status radix::radix_iterator<IsConst>::seek_higher(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status radix::radix_iterator<IsConst>::seek_higher_eq(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status radix::radix_iterator<IsConst>::seek_to_first()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->begin();
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status radix::radix_iterator<IsConst>::seek_to_last()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->end();
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status radix::radix_iterator<IsConst>::next()
+{
+	if (_it == container->end() || ++_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status radix::radix_iterator<IsConst>::prev()
+{
+	if (_it == container->begin())
+		return status::NOT_FOUND;
+
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+std::pair<string_view, status> radix::radix_iterator<IsConst>::key()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {_it->key().cdata(), status::OK};
+}
+
+template <>
+std::pair<string_view, status> radix::radix_iterator<true>::value()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {{_it->value().data()}, status::OK};
+}
+
+template <>
+std::pair<internal::accessor_base *, status> radix::radix_iterator<false>::value()
+{
+	if (_it == container->end())
+		return {nullptr, status::NOT_FOUND};
+
+	return {new radix_accessor{_it, pop}, status::OK};
+}
+
+radix::radix_accessor::radix_accessor(container_type::iterator it,
+				      pmem::obj::pool_base &pop)
+    : non_volatile_accessor(pop), _it(it)
+{
+}
+
+std::pair<pmem::obj::slice<const char *>, status>
+radix::radix_accessor::read_range(size_t pos, size_t n)
+{
+	if (pos + n > _it->value().size())
+		n = _it->value().size() - pos;
+
+	return {{_it->value().cdata() + pos, _it->value().cdata() + pos + n}, status::OK};
+}
+
+std::pair<pmem::obj::slice<char *>, status> radix::radix_accessor::write_range(size_t pos,
+									       size_t n)
+{
+	if (pos + n > _it->value().size())
+		n = _it->value().size() - pos;
+
+	return {_it->value().range(pos, n), status::OK};
+}
+
 } // namespace kv
 } // namespace pmem

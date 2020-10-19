@@ -4,6 +4,7 @@
 #pragma once
 
 #include "../comparator/pmemobj_comparator.h"
+#include "../iterator.h"
 #include "../pmemobj_engine.h"
 
 #include <libpmemobj++/persistent_ptr.hpp>
@@ -56,6 +57,11 @@ static_assert(sizeof(pmem_type) == sizeof(map_type) + 64, "");
  * More info about radix tree: https://en.wikipedia.org/wiki/Radix_tree
  */
 class radix : public pmemobj_engine_base<internal::radix::pmem_type> {
+	template <bool IsConst>
+	class radix_iterator;
+
+	class radix_accessor;
+
 public:
 	radix(std::unique_ptr<internal::config> cfg);
 	~radix();
@@ -90,6 +96,9 @@ public:
 
 	status remove(string_view key) final;
 
+	internal::iterator<false> *new_iterator() final;
+	internal::iterator<true> *new_const_iterator() final;
+
 private:
 	using container_type = internal::radix::map_type;
 
@@ -100,6 +109,50 @@ private:
 
 	container_type *container;
 	std::unique_ptr<internal::config> config;
+};
+
+template <bool IsConst>
+class radix::radix_iterator : public internal::iterator<IsConst> {
+	using container_type = radix::container_type;
+	using value_return_type =
+		typename std::conditional<IsConst, string_view,
+					  internal::accessor_base *>::type;
+
+public:
+	radix_iterator(container_type *container);
+
+	status seek(string_view key) final;
+	status seek_lower(string_view key) final;
+	status seek_lower_eq(string_view key) final;
+	status seek_higher(string_view key) final;
+	status seek_higher_eq(string_view key) final;
+
+	status seek_to_first() final;
+	status seek_to_last() final;
+
+	status next() final;
+	status prev() final;
+
+	std::pair<string_view, status> key() final;
+	std::pair<value_return_type, status> value() final;
+
+private:
+	container_type *container;
+	container_type::iterator _it;
+	pmem::obj::pool_base pop;
+};
+
+class radix::radix_accessor : public internal::non_volatile_accessor {
+public:
+	radix_accessor(container_type::iterator it, pmem::obj::pool_base &pop);
+
+	std::pair<pmem::obj::slice<const char *>, status> read_range(size_t pos,
+								     size_t n) final;
+	std::pair<pmem::obj::slice<char *>, status> write_range(size_t pos,
+								size_t n) final;
+
+private:
+	container_type::iterator _it;
 };
 
 } /* namespace kv */
