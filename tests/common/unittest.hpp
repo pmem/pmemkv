@@ -106,6 +106,13 @@ static inline void UT_EXCEPTION(std::exception &e)
 				 expected_string.c_str());                               \
 	} while (0)
 
+#define ASSERT_SIZE(kv, expected_size)                                                   \
+	do {                                                                             \
+		size_t cnt;                                                              \
+		ASSERT_STATUS(kv.count_all(cnt), pmem::kv::status::OK);                  \
+		UT_ASSERTeq(cnt, expected_size);                                         \
+	} while (0)
+
 static inline int run_test(std::function<void()> test)
 {
 	test_register_sighandlers();
