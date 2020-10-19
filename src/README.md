@@ -17,3 +17,4 @@ Here user can found description of C++ API.
 	* pmem::kv::db::remove() to get rid of selected key (ant its value)
  * class pmem::kv::config to setup parameters to open/create database
  * class pmem::kv::tx for grouping operations into a single atomic action
+ * class pmem::kv::db::iterator to iterate over records in db
