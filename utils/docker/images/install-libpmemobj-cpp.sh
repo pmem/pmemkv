@@ -18,8 +18,8 @@ PREFIX="/usr"
 PACKAGE_TYPE=${1^^} #To uppercase
 echo "PACKAGE_TYPE: ${PACKAGE_TYPE}"
 
-# Merge pull request #927 from JanDorniak99/range_method_basic_string; 13.10.2020
-LIBPMEMOBJ_CPP_VERSION="216012ae7beca8223c43c56b4d0288eec6c3a179"
+# Merge pull request #991 from igchor/merge_1.11_into_master; 10.12.2020
+LIBPMEMOBJ_CPP_VERSION="1277d53c15a0e69ba7af2912818c72f2cb7ac708"
 echo "LIBPMEMOBJ_CPP_VERSION: ${LIBPMEMOBJ_CPP_VERSION}"
 
 build_dir=$(mktemp -d -t libpmemobj-cpp-XXX)
