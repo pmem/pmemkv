@@ -4,6 +4,7 @@
 #pragma once
 
 #include "../comparator/pmemobj_comparator.h"
+#include "../iterator.h"
 #include "../pmemobj_engine.h"
 
 #include <libpmemobj++/persistent_ptr.hpp>
@@ -56,6 +57,9 @@ static_assert(sizeof(pmem_type) == sizeof(map_type) + 64, "");
  * More info about radix tree: https://en.wikipedia.org/wiki/Radix_tree
  */
 class radix : public pmemobj_engine_base<internal::radix::pmem_type> {
+	template <bool IsConst>
+	class radix_iterator;
+
 public:
 	radix(std::unique_ptr<internal::config> cfg);
 	~radix();
@@ -90,6 +94,9 @@ public:
 
 	status remove(string_view key) final;
 
+	internal::iterator_base *new_iterator() final;
+	internal::iterator_base *new_const_iterator() final;
+
 private:
 	using container_type = internal::radix::map_type;
 
@@ -100,6 +107,52 @@ private:
 
 	container_type *container;
 	std::unique_ptr<internal::config> config;
+};
+
+template <>
+class radix::radix_iterator<true> : virtual public internal::iterator_base {
+	using container_type = radix::container_type;
+
+public:
+	radix_iterator(container_type *container);
+
+	status seek(string_view key) final;
+	status seek_lower(string_view key) final;
+	status seek_lower_eq(string_view key) final;
+	status seek_higher(string_view key) final;
+	status seek_higher_eq(string_view key) final;
+
+	status seek_to_first() final;
+	status seek_to_last() final;
+
+	status is_next() final;
+	status next() final;
+	status prev() final;
+
+	result<string_view> key() final;
+
+	result<pmem::obj::slice<const char *>> read_range(size_t pos, size_t n) final;
+
+protected:
+	container_type *container;
+	container_type::iterator _it;
+	pmem::obj::pool_base pop;
+};
+
+template <>
+class radix::radix_iterator<false> : public radix::radix_iterator<true> {
+	using container_type = radix::container_type;
+
+public:
+	radix_iterator(container_type *container);
+
+	result<pmem::obj::slice<char *>> write_range(size_t pos, size_t n) final;
+
+	status commit() final;
+	void abort() final;
+
+private:
+	std::vector<std::pair<std::string, size_t>> log;
 };
 
 } /* namespace kv */
