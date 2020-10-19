@@ -2,7 +2,7 @@
 /* Copyright 2020, Intel Corporation */
 
 /*
- * erase.cpp -- erase pmreorder test
+ * erase.cc -- erase pmreorder test
  */
 
 #include "unittest.hpp"

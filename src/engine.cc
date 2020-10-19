@@ -211,5 +211,15 @@ status engine_base::defrag(double start_percent, double amount_percent)
 	return status::NOT_SUPPORTED;
 }
 
+engine_base::iterator *engine_base::new_iterator()
+{
+	throw status::NOT_SUPPORTED;
+}
+
+engine_base::iterator *engine_base::new_const_iterator()
+{
+	throw status::NOT_SUPPORTED;
+}
+
 } // namespace kv
 } // namespace pmem
