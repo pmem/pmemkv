@@ -7,6 +7,7 @@
 #include <cassert>
 #include <functional>
 #include <iostream>
+#include <libpmemobj++/slice.hpp>
 #include <libpmemobj++/string_view.hpp>
 #include <memory>
 #include <stdexcept>
@@ -39,7 +40,6 @@ namespace pmem
 */
 namespace kv
 {
-
 using string_view = obj::string_view;
 
 /**
@@ -482,7 +482,13 @@ private:
 	See descriptions of these functions for details.
 */
 class db {
+	template <bool IsConst>
+	class iterator;
+
 public:
+	using read_iterator = iterator<true>;
+	using write_iterator = iterator<false>;
+
 	db() noexcept;
 
 	status open(const std::string &engine_name, config &&cfg = config{}) noexcept;
@@ -531,11 +537,543 @@ public:
 	status remove(string_view key) noexcept;
 	status defrag(double start_percent = 0, double amount_percent = 100);
 
+	result<write_iterator> new_write_iterator();
+	result<read_iterator> new_read_iterator();
+
 	std::string errormsg();
 
 private:
 	std::unique_ptr<pmemkv_db, decltype(&pmemkv_close)> db_;
 };
+
+/*! \class db::iterator
+	\brief Iterator provides methods to iterate over records in db.
+
+	EXPERIMENTAL API
+
+	It can be only created by methods in db (db.new_read_iterator() - for a read
+	iterator, and db.new_write_iterator() for a write iterator).
+
+	Both iterator types (write_iterator and read_iterator) allow reading record's
+	key and value. A write_iterator additionally can modify record's value
+	transactionally.
+
+	Holding simultaneously in the same thread more than one iterator is undefined
+	behavior.
+*/
+template <bool IsConst>
+class db::iterator {
+	using iterator_type = typename std::conditional<IsConst, pmemkv_iterator,
+							pmemkv_write_iterator>::type;
+
+	template <typename T>
+	class OutputIterator;
+
+public:
+	iterator(iterator_type *it);
+
+	status seek(string_view key) noexcept;
+	status seek_lower(string_view key) noexcept;
+	status seek_lower_eq(string_view key) noexcept;
+	status seek_higher(string_view key) noexcept;
+	status seek_higher_eq(string_view key) noexcept;
+
+	status seek_to_first() noexcept;
+	status seek_to_last() noexcept;
+
+	status is_next() noexcept;
+	status next() noexcept;
+	status prev() noexcept;
+
+	result<string_view> key() noexcept;
+
+	result<string_view>
+	read_range(size_t pos = 0,
+		   size_t n = std::numeric_limits<size_t>::max()) noexcept;
+
+	template <bool IC = IsConst>
+	typename std::enable_if<!IC, result<pmem::obj::slice<OutputIterator<char>>>>::type
+	write_range(size_t pos = 0,
+		    size_t n = std::numeric_limits<size_t>::max()) noexcept;
+
+	template <bool IC = IsConst>
+	typename std::enable_if<!IC, status>::type commit() noexcept;
+	template <bool IC = IsConst>
+	typename std::enable_if<!IC>::type abort() noexcept;
+
+private:
+	std::unique_ptr<
+		iterator_type,
+		typename std::conditional<IsConst, decltype(&pmemkv_iterator_delete),
+					  decltype(&pmemkv_write_iterator_delete)>::type>
+		it_;
+
+	pmemkv_iterator *get_raw_it();
+};
+
+/*! \class db::iterator::OutputIterator
+	\brief OutputIterator provides iteration through elements without a possibility of
+	reading them. It is only allowed to modify them.
+*/
+template <bool IsConst>
+template <typename T>
+class db::iterator<IsConst>::OutputIterator {
+	struct assign_only;
+
+public:
+	using reference = assign_only &;
+	using pointer = void;
+	using difference_type = std::ptrdiff_t;
+	using value_type = void;
+	using iterator_category = std::output_iterator_tag;
+
+	OutputIterator(T *x);
+
+	reference operator*();
+
+	OutputIterator &operator++();
+	OutputIterator operator++(int);
+
+	OutputIterator &operator--();
+	OutputIterator operator--(int);
+
+	assign_only operator[](difference_type pos);
+
+	difference_type operator-(const OutputIterator &other) const;
+
+	bool operator!=(const OutputIterator &other) const;
+
+private:
+	struct assign_only {
+		friend OutputIterator<T>;
+
+		assign_only(T *x);
+
+		assign_only &operator=(const T &x);
+
+	private:
+		T *c;
+	};
+
+	assign_only ao;
+};
+
+template <bool IsConst>
+template <typename T>
+db::iterator<IsConst>::OutputIterator<T>::OutputIterator(T *x) : ao(x)
+{
+}
+
+template <bool IsConst>
+template <typename T>
+typename db::iterator<IsConst>::template OutputIterator<T>::reference
+	db::iterator<IsConst>::OutputIterator<T>::operator*()
+{
+	return ao;
+}
+
+template <bool IsConst>
+template <typename T>
+typename db::iterator<IsConst>::template OutputIterator<T> &
+db::iterator<IsConst>::OutputIterator<T>::operator++()
+{
+	ao.c += sizeof(T);
+	return *this;
+}
+
+template <bool IsConst>
+template <typename T>
+typename db::iterator<IsConst>::template OutputIterator<T>
+db::iterator<IsConst>::OutputIterator<T>::operator++(int)
+{
+	auto tmp = *this;
+	++(*this);
+	return tmp;
+}
+
+template <bool IsConst>
+template <typename T>
+typename db::iterator<IsConst>::template OutputIterator<T> &
+db::iterator<IsConst>::OutputIterator<T>::operator--()
+{
+	ao.c -= sizeof(T);
+	return *this;
+}
+
+template <bool IsConst>
+template <typename T>
+typename db::iterator<IsConst>::template OutputIterator<T>
+db::iterator<IsConst>::OutputIterator<T>::operator--(int)
+{
+	auto tmp = *this;
+	--(*this);
+	return tmp;
+}
+
+template <bool IsConst>
+template <typename T>
+typename db::iterator<IsConst>::template OutputIterator<T>::assign_only
+	db::iterator<IsConst>::OutputIterator<T>::operator[](difference_type pos)
+{
+	return assign_only(ao.c + pos);
+}
+
+template <bool IsConst>
+template <typename T>
+typename db::iterator<IsConst>::template OutputIterator<T>::difference_type
+db::iterator<IsConst>::OutputIterator<T>::operator-(const OutputIterator &other) const
+{
+	return this->ao.c - other.ao.c;
+}
+
+template <bool IsConst>
+template <typename T>
+bool db::iterator<IsConst>::OutputIterator<T>::operator!=(
+	const OutputIterator &other) const
+{
+	return this->ao.c != other.ao.c;
+}
+
+template <bool IsConst>
+template <typename T>
+db::iterator<IsConst>::OutputIterator<T>::assign_only::assign_only(T *x) : c(x)
+{
+}
+
+template <bool IsConst>
+template <typename T>
+typename db::iterator<IsConst>::template OutputIterator<T>::assign_only &
+db::iterator<IsConst>::OutputIterator<T>::assign_only::operator=(const T &x)
+{
+	*c = x;
+	return *this;
+}
+
+template <>
+inline db::iterator<true>::iterator(iterator_type *it) : it_(it, &pmemkv_iterator_delete)
+{
+}
+
+template <>
+inline db::iterator<false>::iterator(iterator_type *it)
+    : it_(it, &pmemkv_write_iterator_delete)
+{
+}
+
+/**
+ * Changes iterator position to the record with given *key*.
+ * If the record is present and no errors occurred, returns pmem::kv::status::OK. If the
+ * record does not exist, pmem::kv::status::NOT_FOUND is returned and the iterator
+ * position is undefined. Other possible return values are described in pmem::kv::status.
+ *
+ * It internally aborts all changes made to an element previously pointed by the iterator.
+ *
+ * @param[in] key key that will be equal to the key of the record on the new iterator
+ * position
+ *
+ * @return pmem::kv::status
+ */
+template <bool IsConst>
+inline status db::iterator<IsConst>::seek(string_view key) noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_seek(this->get_raw_it(), key.data(), key.size()));
+}
+
+/**
+ * Changes iterator position to the record with key lower than given *key*.
+ * If the record is present and no errors occurred, returns pmem::kv::status::OK. If the
+ * record does not exist, pmem::kv::status::NOT_FOUND is returned and the iterator
+ * position is undefined. Other possible return values are described in pmem::kv::status.
+ *
+ * It internally aborts all changes made to an element previously pointed by the iterator.
+ *
+ * @param[in] key key that will be higher than the key of the record on the new iterator
+ * position
+ *
+ * @return pmem::kv::status
+ */
+template <bool IsConst>
+inline status db::iterator<IsConst>::seek_lower(string_view key) noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_seek_lower(this->get_raw_it(), key.data(), key.size()));
+}
+
+/**
+ * Changes iterator position to the record with key equal or lower than given *key*.
+ * If the record is present and no errors occurred, returns pmem::kv::status::OK. If the
+ * record does not exist, pmem::kv::status::NOT_FOUND is returned and the iterator
+ * position is undefined. Other possible return values are described in pmem::kv::status.
+ *
+ * It internally aborts all changes made to an element previously pointed by the iterator.
+ *
+ * @param[in] key key that will be equal or higher than the key of the record on the new
+ * iterator position
+ *
+ * @return pmem::kv::status
+ */
+template <bool IsConst>
+inline status db::iterator<IsConst>::seek_lower_eq(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_lower_eq(this->get_raw_it(),
+								 key.data(), key.size()));
+}
+
+/**
+ * Changes iterator position to the record with key higher than given *key*.
+ * If the record is present and no errors occurred, returns pmem::kv::status::OK. If the
+ * record does not exist, pmem::kv::status::NOT_FOUND is returned and the iterator
+ * position is undefined. Other possible return values are described in pmem::kv::status.
+ *
+ * It internally aborts all changes made to an element previously pointed by the iterator.
+ *
+ * @param[in] key key that will be lower than the key of the record on the new iterator
+ * position
+ *
+ * @return pmem::kv::status
+ */
+template <bool IsConst>
+inline status db::iterator<IsConst>::seek_higher(string_view key) noexcept
+{
+	return static_cast<status>(
+		pmemkv_iterator_seek_higher(this->get_raw_it(), key.data(), key.size()));
+}
+
+/**
+ * Changes iterator position to the record with key equal or higher than given *key*.
+ * If the record is present and no errors occurred, returns pmem::kv::status::OK. If the
+ * record does not exist, pmem::kv::status::NOT_FOUND is returned and the iterator
+ * position is undefined. Other possible return values are described in pmem::kv::status.
+ *
+ * It internally aborts all changes made to an element previously pointed by the iterator.
+ *
+ * @param[in] key key that will be equal or lower than the key of the record on the new
+ * iterator position
+ *
+ * @return pmem::kv::status
+ */
+template <bool IsConst>
+inline status db::iterator<IsConst>::seek_higher_eq(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_higher_eq(
+		this->get_raw_it(), key.data(), key.size()));
+}
+
+/**
+ * Changes iterator position to the first record.
+ * If db isn't empty, and no errors occurred, returns
+ * pmem::kv::status::OK. If db is empty, pmem::kv::status::NOT_FOUND is returned
+ * and the iterator position is undefined. Other possible return values are described in
+ * pmem::kv::status.
+ *
+ * It internally aborts all changes made to an element previously pointed by the iterator.
+ *
+ * @return pmem::kv::status
+ */
+template <bool IsConst>
+inline status db::iterator<IsConst>::seek_to_first() noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_to_first(this->get_raw_it()));
+}
+
+/**
+ * Changes iterator position to the last record.
+ * If db isn't empty, and no errors occurred, returns
+ * pmem::kv::status::OK. If db is empty, pmem::kv::status::NOT_FOUND is returned
+ * and the iterator position is undefined. Other possible return values are described in
+ * pmem::kv::status.
+ *
+ * It internally aborts all changes made to an element previously pointed by the iterator.
+ *
+ * @return pmem::kv::status
+ */
+template <bool IsConst>
+inline status db::iterator<IsConst>::seek_to_last() noexcept
+{
+	return static_cast<status>(pmemkv_iterator_seek_to_last(this->get_raw_it()));
+}
+
+/**
+ * Checks if there is a next record available. If true is returned, it is guaranteed that
+ * iterator.next() will return status::OK, otherwise iterator is already on the last
+ * element and iterator.next() will return status::NOT_FOUND.
+ *
+ * If the iterator is on an undefined position, calling this method is undefined
+ * behaviour.
+ *
+ * @return bool
+ */
+template <bool IsConst>
+inline status db::iterator<IsConst>::is_next() noexcept
+{
+	return static_cast<status>(pmemkv_iterator_is_next(this->get_raw_it()));
+}
+
+/**
+ * Changes iterator position to the next record.
+ * If the next record exists, returns pmem::kv::status::OK, otherwise
+ * pmem::kv::status::NOT_FOUND is returned and the iterator position is undefined. Other
+ * possible return values are described in pmem::kv::status.
+ *
+ * It internally aborts all changes made to an element previously pointed by the iterator.
+ *
+ * If the iterator is on an undefined position, calling this method is undefined
+ * behaviour.
+ *
+ * @return pmem::kv::status
+ */
+template <bool IsConst>
+inline status db::iterator<IsConst>::next() noexcept
+{
+	return static_cast<status>(pmemkv_iterator_next(this->get_raw_it()));
+}
+
+/**
+ * Changes iterator position to the previous record.
+ * If the previous record exists, returns pmem::kv::status::OK, otherwise
+ * pmem::kv::status::NOT_FOUND is returned and the iterator position is undefined. Other
+ * possible return values are described in pmem::kv::status.
+ *
+ * It internally aborts all changes made to an element previously pointed by the iterator.
+ *
+ * If the iterator is on an undefined position, calling this method is undefined
+ * behaviour.
+ *
+ * @return pmem::kv::status
+ */
+template <bool IsConst>
+inline status db::iterator<IsConst>::prev() noexcept
+{
+	return static_cast<status>(pmemkv_iterator_prev(this->get_raw_it()));
+}
+
+/**
+ * Returns record's key (pmem::kv::string_view), in
+ * pmem::kv::result<pmem::kv::string_view>.
+ *
+ * If the iterator is on an undefined position, calling this method is undefined
+ * behaviour.
+ *
+ * @return pmem::kv::result<pmem::kv::string_view>
+ */
+template <bool IsConst>
+inline result<string_view> db::iterator<IsConst>::key() noexcept
+{
+	const char *c;
+	size_t size;
+	auto s = static_cast<status>(pmemkv_iterator_key(this->get_raw_it(), &c, &size));
+
+	if (s == status::OK)
+		return {string_view{c, size}};
+	else
+		return {s};
+}
+
+/**
+ * Returns value's range (pmem::kv::string_view) to read, in pmem::kv::result.
+ *
+ * It is only used to read a value, if you want to modify the value, use
+ * db::iterator::write_range instead.
+ *
+ * If the iterator is on an undefined position, calling this method is undefined
+ * behaviour.
+ *
+ * @param[in] pos position of the element in a value which will be the first element in
+ * the returned range (default = 0)
+ * @param[in] n number of elements in range (default = std::numeric_limits<size_t>::max(),
+ * if n is bigger than length of a value it's automatically shrinked)
+ *
+ * @return pmem::kv::result<pmem::kv::string_view>
+ */
+template <bool IsConst>
+inline result<string_view> db::iterator<IsConst>::read_range(size_t pos,
+							     size_t n) noexcept
+{
+	const char *data;
+	size_t size;
+	auto s = static_cast<status>(
+		pmemkv_iterator_read_range(this->get_raw_it(), pos, n, &data, &size));
+
+	if (s == status::OK)
+		return {string_view{data, size}};
+	else
+		return {s};
+}
+
+/**
+ * Returns value's range (pmem::obj::slice<db::iterator::OutputIterator<char>>) to modify,
+ * in pmem::kv::result.
+ *
+ * It is only used to modify a value, if you want to read the value, use
+ * db::iterator::read_range instead.
+ *
+ * Changes made on a requested range are not persistent until db::iterator::commit is
+ * called.
+ *
+ * If iterator is on an undefined position, calling this method is undefined behaviour.
+ *
+ * @param[in] pos position of the element in a value which will be the first element in
+ * the returned range (default = 0)
+ * @param[in] n number of elements in range (default = std::numeric_limits<size_t>::max(),
+ * if n is bigger than length of a value it's automatically shrinked)
+ *
+ * @return pmem::kv::result<pmem::obj::slice<db::iterator::OutputIterator<char>>>
+ */
+template <>
+template <>
+inline result<pmem::obj::slice<db::iterator<false>::OutputIterator<char>>>
+db::iterator<false>::write_range(size_t pos, size_t n) noexcept
+{
+	char *data;
+	size_t size;
+	auto s = static_cast<status>(
+		pmemkv_write_iterator_write_range(this->it_.get(), pos, n, &data, &size));
+
+	if (s == status::OK)
+		return {{data, data + size}};
+	else
+		return {s};
+}
+
+/**
+ * Commits modifications made on the current record.
+ *
+ * Calling this method is the only way to save modifications made by the iterator on the
+ * current record. You need to call this method before changing the iterator position,
+ * otherwise modifications will be automatically aborted.
+ *
+ * @return pmem::kv::status
+ */
+template <>
+template <>
+inline status db::iterator<false>::commit() noexcept
+{
+	auto s = static_cast<status>(pmemkv_write_iterator_commit(this->it_.get()));
+	return s;
+}
+
+/**
+ * Aborts uncommitted modifications made on the current record.
+ */
+template <>
+template <>
+inline void db::iterator<false>::abort() noexcept
+{
+	pmemkv_write_iterator_abort(this->it_.get());
+}
+
+template <>
+inline pmemkv_iterator *db::iterator<true>::get_raw_it()
+{
+	return it_.get();
+}
+
+template <>
+inline pmemkv_iterator *db::iterator<false>::get_raw_it()
+{
+	return it_.get()->iter;
+}
 
 /*! \namespace pmem::kv::internal
 	\brief internal pmemkv classes for C++ API
@@ -1566,10 +2104,39 @@ inline status db::remove(string_view key) noexcept
  * @return pmem::kv::status
  */
 inline status db::defrag(double start_percent, double amount_percent)
-
 {
 	return static_cast<status>(
 		pmemkv_defrag(this->db_.get(), start_percent, amount_percent));
+}
+
+/**
+ * Returns new write iterator in pmem::kv::result.
+ *
+ * @return pmem::kv::result<db::write_iterator>
+ */
+inline result<db::write_iterator> db::new_write_iterator()
+{
+	pmemkv_write_iterator *tmp;
+	auto ret = static_cast<status>(pmemkv_write_iterator_new(db_.get(), &tmp));
+	if (static_cast<status>(ret) == status::OK)
+		return {db::iterator<false>{tmp}};
+	else
+		return {ret};
+}
+
+/**
+ * Returns new read iterator in pmem::kv::result.
+ *
+ * @return pmem::kv::result<db::read_iterator>
+ */
+inline result<db::read_iterator> db::new_read_iterator()
+{
+	pmemkv_iterator *tmp;
+	auto ret = static_cast<status>(pmemkv_iterator_new(db_.get(), &tmp));
+	if (ret == status::OK)
+		return {db::iterator<true>{tmp}};
+	else
+		return {ret};
 }
 
 /**
