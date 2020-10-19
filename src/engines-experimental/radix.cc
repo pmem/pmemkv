@@ -8,6 +8,49 @@ namespace pmem
 {
 namespace kv
 {
+namespace internal
+{
+namespace radix
+{
+transaction::transaction(pmem::obj::pool_base &pop, map_type *container)
+    : pop(pop), container(container)
+{
+}
+
+status transaction::put(string_view key, string_view value)
+{
+	log.insert(key, value);
+	return status::OK;
+}
+
+status transaction::remove(string_view key)
+{
+	log.remove(key);
+	return status::OK;
+}
+
+status transaction::commit()
+{
+	auto insert_cb = [&](const auto &e) {
+		auto result = container->try_emplace(e.first, e.second);
+
+		if (result.second == false)
+			result.first.assign_val(e.second);
+	};
+
+	auto remove_cb = [&](const auto &e) { container->erase(e.first); };
+
+	pmem::obj::transaction::run(pop, [&] { log.foreach (insert_cb, remove_cb); });
+
+	return status::OK;
+}
+
+void transaction::abort()
+{
+	/* do nothing */
+}
+} /* namespace radix */
+} /* namespace internal */
 
 radix::radix(std::unique_ptr<internal::config> cfg)
     : pmemobj_engine_base(cfg, "pmemkv_radix"), config(std::move(cfg))
@@ -254,6 +297,11 @@ status radix::remove(string_view key)
 	container->erase(it);
 
 	return status::OK;
+}
+
+internal::transaction *radix::begin_tx()
+{
+	return new internal::radix::transaction(pmpool, container);
 }
 
 void radix::Recover()

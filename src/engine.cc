@@ -211,5 +211,10 @@ status engine_base::defrag(double start_percent, double amount_percent)
 	return status::NOT_SUPPORTED;
 }
 
+internal::transaction *engine_base::begin_tx()
+{
+	throw status::NOT_SUPPORTED;
+}
+
 } // namespace kv
 } // namespace pmem

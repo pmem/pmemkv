@@ -30,6 +30,7 @@ extern "C" {
 typedef struct pmemkv_db pmemkv_db;
 typedef struct pmemkv_config pmemkv_config;
 typedef struct pmemkv_comparator pmemkv_comparator;
+typedef struct pmemkv_tx pmemkv_tx;
 
 typedef int pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
 				   size_t valuebytes, void *arg);
@@ -102,6 +103,13 @@ int pmemkv_remove(pmemkv_db *db, const char *k, size_t kb);
 int pmemkv_defrag(pmemkv_db *db, double start_percent, double amount_percent);
 
 const char *pmemkv_errormsg(void);
+
+/* EXPERIMENTAL API */
+pmemkv_tx *pmemkv_tx_begin(pmemkv_db *db);
+int pmemkv_tx_put(pmemkv_tx *tx, const char *k, size_t kb, const char *v, size_t vb);
+int pmemkv_tx_remove(pmemkv_tx *tx, const char *k, size_t kb);
+int pmemkv_tx_commit(pmemkv_tx *tx);
+void pmemkv_tx_abort(pmemkv_tx *tx);
 
 #ifdef __cplusplus
 } /* end extern "C" */
