@@ -47,6 +47,10 @@ LIBPMEMKV_1.0 {
 		pmemkv_open;
 		pmemkv_put;
 		pmemkv_remove;
+		pmemkv_tx_begin;
+		pmemkv_tx_put;
+		pmemkv_tx_commit;
+		pmemkv_tx_abort;
 	local:
 		*;
 };

@@ -39,6 +39,19 @@ struct pmem_type {
 
 static_assert(sizeof(pmem_type) == sizeof(map_type) + 64, "");
 
+class transaction : public ::pmem::kv::internal::transaction {
+public:
+	transaction(pmem::obj::pool_base &pop, map_type *container);
+	status put(string_view key, string_view value) final;
+	status commit() final;
+	void abort() final;
+
+private:
+	pmem::obj::pool_base &pop;
+	std::vector<std::pair<std::string, std::string>> v;
+	map_type *container;
+};
+
 } /* namespace radix */
 } /* namespace internal */
 
@@ -89,6 +102,8 @@ public:
 	status put(string_view key, string_view value) final;
 
 	status remove(string_view key) final;
+
+	internal::transaction *begin_tx() final;
 
 private:
 	using container_type = internal::radix::map_type;

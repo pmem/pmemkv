@@ -196,6 +196,25 @@ private:
 	pmemkv_config *_config;
 };
 
+/*! \class tx
+	\brief Pmemkv transaction handle.
+
+	This class allows grouping several operations into one atomic action.
+*/
+class tx {
+public:
+	tx(pmemkv_tx *tx_) noexcept;
+	tx(const tx &) = delete;
+	tx(tx &&) = default;
+
+	status put(string_view key, string_view value) noexcept;
+	status commit() noexcept;
+	void abort() noexcept;
+
+private:
+	std::unique_ptr<pmemkv_tx, decltype(&pmemkv_tx_abort)> tx_;
+};
+
 /*! \class db
 	\brief Main pmemkv class, it provides functions to operate on data in database.
 
@@ -265,6 +284,9 @@ public:
 	status put(string_view key, string_view value) noexcept;
 	status remove(string_view key) noexcept;
 	status defrag(double start_percent = 0, double amount_percent = 100);
+
+	/* XXX: should return result<tx, status> */
+	tx tx_begin() noexcept;
 
 	std::string errormsg();
 
@@ -820,6 +842,47 @@ inline pmemkv_config *config::release() noexcept
 	auto c = this->_config;
 	this->_config = nullptr;
 	return c;
+}
+
+/**
+ * Constructs C++ tx object from a C pmemkv_tx pointer
+ */
+inline tx::tx(pmemkv_tx *tx_) noexcept : tx_(tx_, &pmemkv_tx_abort)
+{
+}
+
+/**
+ * Inserts a key-value pair into pmemkv database. The inserted elements are not
+ * visible (not even in the same thread) until commit.
+ *
+ * @param[in] key record's key; record will be put into database under its name
+ * @param[in] value data to be inserted into this new database record
+ *
+ * @return pmem::kv::status
+ */
+inline status tx::put(string_view key, string_view value) noexcept
+{
+	return static_cast<status>(pmemkv_tx_put(tx_.get(), key.data(), key.size(),
+						 value.data(), value.size()));
+}
+
+/**
+ * Commits the transaction. All operations of this transaction are applied as
+ * a single power fail-safe atomic action.
+ *
+ * @return pmem::kv::status
+ */
+inline status tx::commit() noexcept
+{
+	return static_cast<status>(pmemkv_tx_commit(tx_.release()));
+}
+
+/**
+ * Aborts the transaction. Transaction class cannot be used after this.
+ */
+inline void tx::abort() noexcept
+{
+	tx_.reset(nullptr);
 }
 
 /*
@@ -1416,6 +1479,16 @@ inline std::string db::errormsg()
 static inline std::string errormsg()
 {
 	return std::string(pmemkv_errormsg());
+}
+
+/**
+ * Start a pmemkv transaction.
+ *
+ * @return transaction handle
+ */
+inline tx db::tx_begin() noexcept
+{
+	return tx(pmemkv_tx_begin(_db));
 }
 
 } /* namespace kv */

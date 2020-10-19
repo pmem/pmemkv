@@ -13,6 +13,7 @@
 #include "libpmemkv.hpp"
 #include "libpmemobj++/pexceptions.hpp"
 #include "out.h"
+#include "transaction.h"
 
 #include <iostream>
 #include <memory>
@@ -50,6 +51,16 @@ static inline pmem::kv::engine_base *db_to_internal(pmemkv_db *db)
 static inline pmemkv_db *db_from_internal(pmem::kv::engine_base *db)
 {
 	return reinterpret_cast<pmemkv_db *>(db);
+}
+
+static inline pmemkv_tx *tx_from_internal(pmem::kv::internal::transaction *tx)
+{
+	return reinterpret_cast<pmemkv_tx *>(tx);
+}
+
+static inline pmem::kv::internal::transaction *tx_to_internal(pmemkv_tx *tx)
+{
+	return reinterpret_cast<pmem::kv::internal::transaction *>(tx);
 }
 
 template <typename Function>
@@ -284,6 +295,61 @@ void pmemkv_comparator_delete(pmemkv_comparator *comparator)
 {
 	try {
 		delete comparator_to_internal(comparator);
+	} catch (const std::exception &exc) {
+		ERR() << exc.what();
+	} catch (...) {
+		ERR() << "Unspecified failure";
+	}
+}
+
+pmemkv_tx *pmemkv_tx_begin(pmemkv_db *db)
+{
+	try {
+		return tx_from_internal(db_to_internal(db)->begin_tx());
+	} catch (const std::exception &exc) {
+		ERR() << exc.what();
+		return nullptr;
+	} catch (...) {
+		ERR() << "Unspecified failure";
+		return nullptr;
+	}
+}
+
+int pmemkv_tx_put(pmemkv_tx *tx, const char *k, size_t kb, const char *v, size_t vb)
+{
+	if (!tx)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		return tx_to_internal(tx)->put(pmem::kv::string_view(k, kb),
+					       pmem::kv::string_view(v, vb));
+	});
+}
+
+int pmemkv_tx_commit(pmemkv_tx *tx)
+{
+	if (!tx)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	auto internal_tx = tx_to_internal(tx);
+
+	return catch_and_return_status(__func__, [&] {
+		auto status = internal_tx->commit();
+
+		if (status == pmem::kv::status::OK)
+			delete internal_tx;
+
+		return status;
+	});
+}
+
+void pmemkv_tx_abort(pmemkv_tx *tx)
+{
+	auto internal_tx = tx_to_internal(tx);
+
+	try {
+		internal_tx->abort();
+		delete internal_tx;
 	} catch (const std::exception &exc) {
 		ERR() << exc.what();
 	} catch (...) {
