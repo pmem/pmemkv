@@ -1534,6 +1534,16 @@ if(ENGINE_RADIX)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
+	add_engine_test(ENGINE radix
+			BINARY iterator_basic
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE radix
+			BINARY iterator_sorted
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
 	if(PMREORDER_SUPPORTED)
 		add_engine_test(ENGINE radix
 				BINARY transaction_put_pmreorder
@@ -1549,6 +1559,11 @@ if(ENGINE_RADIX)
 				BINARY pmreorder_erase
 				TRACERS none
 				SCRIPT pmemobj_based/pmreorder/erase.cmake)
+
+		add_engine_test(ENGINE radix
+				BINARY pmreorder_iterator
+				TRACERS none
+				SCRIPT pmemobj_based/pmreorder/iterator.cmake)
 	endif()
 endif(ENGINE_RADIX)
 ################################################################################
