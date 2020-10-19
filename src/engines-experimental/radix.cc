@@ -276,5 +276,209 @@ void radix::Recover()
 	}
 }
 
+status radix::new_iterator(internal::iterator<false> *&it)
+{
+	it = new radix_iterator<false>{container};
+	return status::OK;
+}
+
+status radix::new_const_iterator(internal::iterator<true> *&it)
+{
+	it = new radix_iterator<true>{container};
+	return status::OK;
+}
+
+radix::radix_iterator<false>::radix_iterator(container_type *c)
+{
+	container = c;
+	_it = container->begin();
+}
+
+status radix::radix_iterator<false>::seek(string_view key)
+{
+	auto result = container->find(key);
+	if (result != container->end()) {
+		_it = result;
+		return status::OK;
+	}
+
+	return status::NOT_FOUND;
+}
+
+status radix::radix_iterator<false>::seek_lower(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<false>::seek_lower_eq(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->begin() &&
+	    key.compare(string_view{_it->key().data(), _it->key().size()}) != 0) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	return status::OK;
+}
+
+status radix::radix_iterator<false>::seek_higher(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<false>::seek_higher_eq(string_view key)
+{
+	_it = --container->upper_bound(key);
+	if (key.compare(string_view{_it->key().data(), _it->key().size()}) == 0 ||
+	    ++_it != container->end())
+		return status::OK;
+	else
+		return status::NOT_FOUND;
+}
+
+status radix::radix_iterator<false>::seek_to_first()
+{
+	_it = container->begin();
+
+	return status::OK;
+}
+
+status radix::radix_iterator<false>::seek_to_last()
+{
+	_it = container->end();
+	--_it;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<false>::next()
+{
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	++_it;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<false>::prev()
+{
+	if (_it == container->begin())
+		return status::NOT_FOUND;
+
+	--_it;
+
+	return status::OK;
+}
+
+radix::radix_iterator<true>::radix_iterator(container_type *c)
+{
+	container = c;
+	_it = container->begin();
+}
+
+status radix::radix_iterator<true>::seek(string_view key)
+{
+	auto result = container->find(key);
+	if (result != container->end()) {
+		_it = result;
+		return status::OK;
+	}
+
+	return status::NOT_FOUND;
+}
+
+status radix::radix_iterator<true>::seek_lower(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::seek_lower_eq(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->begin() &&
+	    key.compare(string_view{_it->key().data(), _it->key().size()}) != 0) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::seek_higher(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::seek_higher_eq(string_view key)
+{
+	_it = --container->upper_bound(key);
+	if (key.compare(string_view{_it->key().data(), _it->key().size()}) == 0 ||
+	    ++_it != container->end())
+		return status::OK;
+	else
+		return status::NOT_FOUND;
+}
+
+status radix::radix_iterator<true>::seek_to_first()
+{
+	_it = container->begin();
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::seek_to_last()
+{
+	_it = container->end();
+	--_it;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::next()
+{
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	++_it;
+
+	return status::OK;
+}
+
+status radix::radix_iterator<true>::prev()
+{
+	if (_it == container->begin())
+		return status::NOT_FOUND;
+
+	--_it;
+
+	return status::OK;
+}
+
 } // namespace kv
 } // namespace pmem
