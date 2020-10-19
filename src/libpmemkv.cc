@@ -9,6 +9,7 @@
 #include "config.h"
 #include "engine.h"
 #include "exceptions.h"
+#include "iterator.h"
 #include "libpmemkv.h"
 #include "libpmemkv.hpp"
 #include "libpmemobj++/pexceptions.hpp"
@@ -50,6 +51,17 @@ static inline pmem::kv::engine_base *db_to_internal(pmemkv_db *db)
 static inline pmemkv_db *db_from_internal(pmem::kv::engine_base *db)
 {
 	return reinterpret_cast<pmemkv_db *>(db);
+}
+
+pmem::kv::internal::iterator_base *iterator_to_base(pmemkv_iterator *it)
+{
+	return reinterpret_cast<pmem::kv::internal::iterator_base *>(it);
+}
+
+static inline pmemkv_iterator *
+iterator_from_internal(pmem::kv::internal::iterator_base *it)
+{
+	return reinterpret_cast<pmemkv_iterator *>(it);
 }
 
 template <typename Function>
@@ -553,6 +565,240 @@ int pmemkv_defrag(pmemkv_db *db, double start_percent, double amount_percent)
 	return catch_and_return_status(__func__, [&] {
 		return db_to_internal(db)->defrag(start_percent, amount_percent);
 	});
+}
+
+int pmemkv_iterator_new(pmemkv_db *db, pmemkv_iterator **it)
+{
+	if (!db || !it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	try {
+		*it = iterator_from_internal(db_to_internal(db)->new_const_iterator());
+		return PMEMKV_STATUS_OK;
+	} catch (const pmem::kv::status &s) {
+		return static_cast<int>(s);
+	} catch (...) {
+		return PMEMKV_STATUS_UNKNOWN_ERROR;
+	}
+}
+
+int pmemkv_write_iterator_new(pmemkv_db *db, pmemkv_write_iterator **it)
+{
+	if (!db || !it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	try {
+		/* pmemkv_write_iterator is returned by pointer, not by copy to be
+		 * consistent with pmemkv_iterator */
+		*it = new pmemkv_write_iterator();
+		(*it)->iter = iterator_from_internal(db_to_internal(db)->new_iterator());
+		return PMEMKV_STATUS_OK;
+	} catch (const pmem::kv::status &s) {
+		delete *it;
+		return static_cast<int>(s);
+	} catch (...) {
+		delete *it;
+		return PMEMKV_STATUS_UNKNOWN_ERROR;
+	}
+}
+
+void pmemkv_iterator_delete(pmemkv_iterator *it)
+{
+	if (!it)
+		return;
+
+	try {
+		delete iterator_to_base(it);
+	} catch (const std::exception &exc) {
+		ERR() << exc.what();
+	} catch (...) {
+		ERR() << "Unspecified failure";
+	}
+}
+
+void pmemkv_write_iterator_delete(pmemkv_write_iterator *it)
+{
+	if (!it)
+		return;
+
+	try {
+		delete iterator_to_base(it->iter);
+		delete it;
+	} catch (const std::exception &exc) {
+		ERR() << exc.what();
+	} catch (...) {
+		ERR() << "Unspecified failure";
+	}
+}
+
+int pmemkv_iterator_seek(pmemkv_iterator *it, const char *k, size_t kb)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		return iterator_to_base(it)->seek(pmem::kv::string_view(k, kb));
+	});
+}
+
+int pmemkv_iterator_seek_lower(pmemkv_iterator *it, const char *k, size_t kb)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		return iterator_to_base(it)->seek_lower(pmem::kv::string_view(k, kb));
+	});
+}
+
+int pmemkv_iterator_seek_lower_eq(pmemkv_iterator *it, const char *k, size_t kb)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		return iterator_to_base(it)->seek_lower_eq(pmem::kv::string_view(k, kb));
+	});
+}
+
+int pmemkv_iterator_seek_higher(pmemkv_iterator *it, const char *k, size_t kb)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		return iterator_to_base(it)->seek_higher(pmem::kv::string_view(k, kb));
+	});
+}
+
+int pmemkv_iterator_seek_higher_eq(pmemkv_iterator *it, const char *k, size_t kb)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		return iterator_to_base(it)->seek_higher_eq(pmem::kv::string_view(k, kb));
+	});
+}
+
+int pmemkv_iterator_seek_to_first(pmemkv_iterator *it)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(
+		__func__, [&] { return iterator_to_base(it)->seek_to_first(); });
+}
+
+int pmemkv_iterator_seek_to_last(pmemkv_iterator *it)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(
+		__func__, [&] { return iterator_to_base(it)->seek_to_last(); });
+}
+
+int pmemkv_iterator_is_next(pmemkv_iterator *it)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__,
+				       [&] { return iterator_to_base(it)->is_next(); });
+}
+
+int pmemkv_iterator_next(pmemkv_iterator *it)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__,
+				       [&] { return iterator_to_base(it)->next(); });
+}
+
+int pmemkv_iterator_prev(pmemkv_iterator *it)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__,
+				       [&] { return iterator_to_base(it)->prev(); });
+}
+
+int pmemkv_iterator_key(pmemkv_iterator *it, const char **k, size_t *kb)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		auto ret = iterator_to_base(it)->key();
+
+		if (!ret.is_ok())
+			return static_cast<int>(ret.get_status());
+
+		auto value = std::move(ret).get_value();
+		*k = value.begin();
+		*kb = value.size();
+
+		return PMEMKV_STATUS_OK;
+	});
+}
+
+int pmemkv_iterator_read_range(pmemkv_iterator *it, size_t pos, size_t n,
+			       const char **data, size_t *kb)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		auto ret = iterator_to_base(it)->read_range(pos, n);
+
+		if (!ret.is_ok())
+			return static_cast<int>(ret.get_status());
+
+		auto value = std::move(ret).get_value();
+		*data = value.begin();
+		*kb = value.size();
+
+		return PMEMKV_STATUS_OK;
+	});
+}
+
+int pmemkv_write_iterator_write_range(pmemkv_write_iterator *it, size_t pos, size_t n,
+				      char **data, size_t *kb)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(__func__, [&] {
+		auto ret = iterator_to_base(it->iter)->write_range(pos, n);
+		if (!ret.is_ok())
+			return static_cast<int>(ret.get_status());
+
+		auto value = std::move(ret).get_value();
+		*data = value.begin();
+		*kb = value.size();
+
+		return PMEMKV_STATUS_OK;
+	});
+}
+
+int pmemkv_write_iterator_commit(pmemkv_write_iterator *it)
+{
+	if (!it)
+		return PMEMKV_STATUS_INVALID_ARGUMENT;
+
+	return catch_and_return_status(
+		__func__, [&] { return iterator_to_base(it->iter)->commit(); });
+}
+
+void pmemkv_write_iterator_abort(pmemkv_write_iterator *it)
+{
+	if (!it)
+		return;
+
+	iterator_to_base(it->iter)->abort();
 }
 
 const char *pmemkv_errormsg(void)
