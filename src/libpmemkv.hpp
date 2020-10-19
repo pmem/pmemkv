@@ -469,6 +469,26 @@ private:
 	std::unique_ptr<pmemkv_config, decltype(&pmemkv_config_delete)> config_;
 };
 
+/*! \class tx
+	\brief Pmemkv transaction handle.
+
+	This API is EXPERIMENTAL and might change.
+
+	This class allows grouping several operations into one atomic action.
+*/
+class tx {
+public:
+	tx(pmemkv_tx *tx_) noexcept;
+
+	status put(string_view key, string_view value) noexcept;
+	status remove(string_view key) noexcept;
+	status commit() noexcept;
+	void abort() noexcept;
+
+private:
+	std::unique_ptr<pmemkv_tx, decltype(&pmemkv_tx_end)> tx_;
+};
+
 /*! \class db
 	\brief Main pmemkv class, it provides functions to operate on data in database.
 
@@ -530,6 +550,8 @@ public:
 	status put(string_view key, string_view value) noexcept;
 	status remove(string_view key) noexcept;
 	status defrag(double start_percent = 0, double amount_percent = 100);
+
+	result<tx> tx_begin() noexcept;
 
 	std::string errormsg();
 
@@ -1044,6 +1066,60 @@ inline status config::get_string(const std::string &key, std::string &value) con
 inline pmemkv_config *config::release() noexcept
 {
 	return this->config_.release();
+}
+
+/**
+ * Constructs C++ tx object from a C pmemkv_tx pointer
+ */
+inline tx::tx(pmemkv_tx *tx_) noexcept : tx_(tx_, &pmemkv_tx_end)
+{
+}
+
+/**
+ * Removes from database record with given *key*. The removed element is still
+ * visible until commit.
+ *
+ * @param[in] key record's key to query for, to be removed
+ *
+ * @return pmem::kv::status
+ */
+inline status tx::remove(string_view key) noexcept
+{
+	return static_cast<status>(pmemkv_tx_remove(tx_.get(), key.data(), key.size()));
+}
+
+/**
+ * Inserts a key-value pair into pmemkv database. The inserted elements are not
+ * visible (not even in the same thread) until commit.
+ *
+ * @param[in] key record's key; record will be put into database under its name
+ * @param[in] value data to be inserted into this new database record
+ *
+ * @return pmem::kv::status
+ */
+inline status tx::put(string_view key, string_view value) noexcept
+{
+	return static_cast<status>(pmemkv_tx_put(tx_.get(), key.data(), key.size(),
+						 value.data(), value.size()));
+}
+
+/**
+ * Commits the transaction. All operations of this transaction are applied as
+ * a single power fail-safe atomic action.
+ *
+ * @return pmem::kv::status
+ */
+inline status tx::commit() noexcept
+{
+	return static_cast<status>(pmemkv_tx_commit(tx_.get()));
+}
+
+/**
+ * Aborts the transaction. Transaction class cannot be used after this.
+ */
+inline void tx::abort() noexcept
+{
+	pmemkv_tx_abort(tx_.get());
 }
 
 /*
@@ -1592,6 +1668,22 @@ inline std::string db::errormsg()
 static inline std::string errormsg()
 {
 	return std::string(pmemkv_errormsg());
+}
+
+/**
+ * Start a pmemkv transaction.
+ *
+ * @return transaction handle
+ */
+inline result<tx> db::tx_begin() noexcept
+{
+	pmemkv_tx *tx_;
+	auto s = static_cast<status>(pmemkv_tx_begin(db_.get(), &tx_));
+
+	if (s == status::OK)
+		return result<tx>(tx(tx_));
+	else
+		return result<tx>(s);
 }
 
 } /* namespace kv */
