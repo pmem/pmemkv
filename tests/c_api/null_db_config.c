@@ -75,6 +75,10 @@ void null_db_all_funcs_test()
 
 	s = pmemkv_defrag(NULL, 0, 100);
 	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	pmemkv_tx *tx;
+	s = pmemkv_tx_begin(NULL, &tx);
+	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
 }
 
 void null_config_test(const char *engine)
@@ -100,6 +104,20 @@ void null_db_test(const char *engine)
 	UT_ASSERTeq(s, PMEMKV_STATUS_INVALID_ARGUMENT);
 
 	/* Config should be deleted by pmemkv */
+}
+
+void null_tx_test(const char *engine)
+{
+	const char *key1 = "key1";
+
+	int s = pmemkv_tx_put(NULL, key1, strlen(key1), key1, strlen(key1));
+	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	s = pmemkv_tx_remove(NULL, key1, strlen(key1));
+	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
+
+	s = pmemkv_tx_commit(NULL);
+	UT_ASSERT(s == PMEMKV_STATUS_INVALID_ARGUMENT);
 }
 
 int main(int argc, char *argv[])
