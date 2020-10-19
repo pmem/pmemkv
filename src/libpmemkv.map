@@ -47,6 +47,19 @@ LIBPMEMKV_1.0 {
 		pmemkv_open;
 		pmemkv_put;
 		pmemkv_remove;
+		pmemkv_read_iterator_new;
+		pmemkv_write_iterator_new;
+		pmemkv_read_iterator_delete;
+		pmemkv_write_iterator_delete;
+		pmemkv_iterator_seek;
+		pmemkv_iterator_seek_lower;
+		pmemkv_iterator_seek_lower_eq;
+		pmemkv_iterator_seek_higher;
+		pmemkv_iterator_seek_higher_eq;
+		pmemkv_iterator_seek_to_first;
+		pmemkv_iterator_seek_to_last;
+		pmemkv_iterator_next;
+		pmemkv_iterator_prev;
 	local:
 		*;
 };

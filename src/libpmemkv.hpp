@@ -38,6 +38,11 @@ namespace pmem
 */
 namespace kv
 {
+namespace internal
+{
+template <bool IsConst>
+class iterator;
+}
 
 using string_view = obj::string_view;
 
@@ -265,6 +270,9 @@ public:
 	status put(string_view key, string_view value) noexcept;
 	status remove(string_view key) noexcept;
 	status defrag(double start_percent = 0, double amount_percent = 100);
+
+	template <bool IsConst>
+	status new_iterator(internal::iterator<IsConst> *&it);
 
 	std::string errormsg();
 
@@ -1394,6 +1402,15 @@ inline status db::defrag(double start_percent, double amount_percent)
 {
 	return static_cast<status>(
 		pmemkv_defrag(this->_db, start_percent, amount_percent));
+}
+
+template <bool IsConst>
+inline status db::new_iterator(internal::iterator<IsConst> *&it)
+{
+	if (IsConst)
+		return static_cast<status>(pmemkv_read_iterator_new(it));
+	else
+		return static_cast<status>(pmemkv_write_iterator_new(it));
 }
 
 /**
