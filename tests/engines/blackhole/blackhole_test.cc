@@ -148,10 +148,28 @@ static void BlackholeRangeTest()
 	kv.close();
 }
 
+static void BlackholeIteratorTest()
+{
+	db kv;
+	auto s = kv.open("blackhole");
+	ASSERT_STATUS(s, status::OK);
+
+	auto write_res = kv.new_write_iterator();
+	UT_ASSERT(!write_res.is_ok());
+	ASSERT_STATUS(write_res.get_status(), pmem::kv::status::NOT_SUPPORTED);
+
+	auto read_res = kv.new_read_iterator();
+	UT_ASSERT(!read_res.is_ok());
+	ASSERT_STATUS(read_res.get_status(), pmem::kv::status::NOT_SUPPORTED);
+
+	kv.close();
+}
+
 int main(int argc, char *argv[])
 {
 	return run_test([&] {
 		BlackholeSimpleTest();
 		BlackholeRangeTest();
+		BlackholeIteratorTest();
 	});
 }

@@ -32,6 +32,11 @@ typedef struct pmemkv_config pmemkv_config;
 typedef struct pmemkv_comparator pmemkv_comparator;
 typedef struct pmemkv_tx pmemkv_tx;
 
+typedef struct pmemkv_iterator pmemkv_iterator;
+typedef struct {
+	pmemkv_iterator *iter;
+} pmemkv_write_iterator;
+
 typedef int pmemkv_get_kv_callback(const char *key, size_t keybytes, const char *value,
 				   size_t valuebytes, void *arg);
 typedef void pmemkv_get_v_callback(const char *value, size_t valuebytes, void *arg);
@@ -111,6 +116,36 @@ int pmemkv_tx_remove(pmemkv_tx *tx, const char *k, size_t kb);
 int pmemkv_tx_commit(pmemkv_tx *tx);
 void pmemkv_tx_abort(pmemkv_tx *tx);
 void pmemkv_tx_end(pmemkv_tx *tx);
+
+/* This API is EXPERIMENTAL and might change. */
+int pmemkv_iterator_new(pmemkv_db *db, pmemkv_iterator **it);
+int pmemkv_write_iterator_new(pmemkv_db *db, pmemkv_write_iterator **it);
+
+void pmemkv_iterator_delete(pmemkv_iterator *it);
+void pmemkv_write_iterator_delete(pmemkv_write_iterator *it);
+
+int pmemkv_iterator_seek(pmemkv_iterator *it, const char *k, size_t kb);
+int pmemkv_iterator_seek_lower(pmemkv_iterator *it, const char *k, size_t kb);
+int pmemkv_iterator_seek_lower_eq(pmemkv_iterator *it, const char *k, size_t kb);
+int pmemkv_iterator_seek_higher(pmemkv_iterator *it, const char *k, size_t kb);
+int pmemkv_iterator_seek_higher_eq(pmemkv_iterator *it, const char *k, size_t kb);
+
+int pmemkv_iterator_seek_to_first(pmemkv_iterator *it);
+int pmemkv_iterator_seek_to_last(pmemkv_iterator *it);
+
+int pmemkv_iterator_is_next(pmemkv_iterator *it);
+int pmemkv_iterator_next(pmemkv_iterator *it);
+int pmemkv_iterator_prev(pmemkv_iterator *it);
+
+int pmemkv_iterator_key(pmemkv_iterator *it, const char **k, size_t *kb);
+
+int pmemkv_iterator_read_range(pmemkv_iterator *it, size_t pos, size_t n,
+			       const char **data, size_t *rb);
+int pmemkv_write_iterator_write_range(pmemkv_write_iterator *it, size_t pos, size_t n,
+				      char **data, size_t *wb);
+
+int pmemkv_write_iterator_commit(pmemkv_write_iterator *it);
+void pmemkv_write_iterator_abort(pmemkv_write_iterator *it);
 
 #ifdef __cplusplus
 } /* end extern "C" */

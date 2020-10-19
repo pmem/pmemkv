@@ -216,5 +216,15 @@ internal::transaction *engine_base::begin_tx()
 	throw status::NOT_SUPPORTED;
 }
 
+engine_base::iterator *engine_base::new_iterator()
+{
+	throw status::NOT_SUPPORTED;
+}
+
+engine_base::iterator *engine_base::new_const_iterator()
+{
+	throw status::NOT_SUPPORTED;
+}
+
 } // namespace kv
 } // namespace pmem
