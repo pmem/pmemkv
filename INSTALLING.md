@@ -218,7 +218,7 @@ cmake .. -DENGINE_CSMAP=ON
 Now build will contain selected experimental engine(s) and their dependencies, that are not available by default.
 
 Experimental engines may require additional libraries, see **prerequisites** section of a selected
-engine in [ENGINES-experimental.md](./ENGINES-experimental.md).
+engine in [ENGINES-experimental.md](doc/ENGINES-experimental.md).
 
 ## Building packages
 
