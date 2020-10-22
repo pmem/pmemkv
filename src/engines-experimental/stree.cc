@@ -129,7 +129,8 @@ status stree::count_between(string_view key1, string_view key2, std::size_t &cnt
 	return status::OK;
 }
 
-status stree::iterate(iterator first, iterator last, get_kv_callback *callback, void *arg)
+status stree::iterate(container_iterator first, container_iterator last,
+		      get_kv_callback *callback, void *arg)
 {
 	for (auto it = first; it != last; ++it) {
 		auto ret = callback(it->first.c_str(), it->first.size(),
@@ -290,6 +291,210 @@ void stree::Recover()
 				internal::extract_comparator(*config));
 		});
 	}
+}
+
+status stree::new_iterator(internal::iterator<false> *&it)
+{
+	it = new stree_iterator<false>{my_btree};
+	return status::OK;
+}
+
+status stree::new_const_iterator(internal::iterator<true> *&it)
+{
+	it = new stree_iterator<true>{my_btree};
+	return status::OK;
+}
+
+stree::stree_iterator<false>::stree_iterator(container_type *c)
+{
+	container = c;
+	_it = container->begin();
+}
+
+status stree::stree_iterator<false>::seek(string_view key)
+{
+	_it = container->find(key);
+	if (_it != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+status stree::stree_iterator<false>::seek_lower(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<false>::seek_lower_eq(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (container->size() == 0 ||
+	    (_it == container->begin() &&
+	     key.compare(string_view{_it->first.data(), _it->first.size()}) != 0)) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	return status::OK;
+}
+
+status stree::stree_iterator<false>::seek_higher(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<false>::seek_higher_eq(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (container->size() == 0 ||
+	    (_it-- == container->end() &&
+	     key.compare(string_view{_it->first.data(), _it->first.size()}) != 0)) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	return status::OK;
+}
+
+status stree::stree_iterator<false>::seek_to_first()
+{
+	_it = container->begin();
+
+	return status::OK;
+}
+
+status stree::stree_iterator<false>::seek_to_last()
+{
+	_it = container->end();
+	--_it;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<false>::next()
+{
+	if (++_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<false>::prev()
+{
+	if (_it == container->begin())
+		return status::NOT_FOUND;
+
+	--_it;
+
+	return status::OK;
+}
+
+stree::stree_iterator<true>::stree_iterator(container_type *c)
+{
+	container = c;
+	_it = container->begin();
+}
+
+status stree::stree_iterator<true>::seek(string_view key)
+{
+	_it = container->find(key);
+	if (_it != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+status stree::stree_iterator<true>::seek_lower(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_lower_eq(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (container->size() == 0 ||
+	    (_it == container->begin() &&
+	     key.compare(string_view{_it->first.data(), _it->first.size()}) != 0)) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_higher(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_higher_eq(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (container->size() == 0 ||
+	    (_it-- == container->end() &&
+	     key.compare(string_view{_it->first.data(), _it->first.size()}) != 0)) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_to_first()
+{
+	_it = container->begin();
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_to_last()
+{
+	_it = container->end();
+	--_it;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::next()
+{
+	if (++_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::prev()
+{
+	if (_it == container->begin())
+		return status::NOT_FOUND;
+
+	--_it;
+
+	return status::OK;
 }
 
 } // namespace kv
