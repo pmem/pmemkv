@@ -13,7 +13,7 @@
 
 set -e
 
-OS_VER=$1
+OS__OS_VER=${1}
 
 function usage {
 	echo "Usage:"
@@ -24,21 +24,26 @@ function usage {
 }
 
 # Check if the argument is not empty
-if [[ -z "$1" ]]; then
+if [[ -z "${OS__OS_VER}" ]]; then
 	usage
 	exit 1
 fi
 
+if [[ -z "${CONTAINER_REG}" ]]; then
+	echo "CONTAINER_REG environment variable is not set"
+	exit 1
+fi
+
 # Check if the file Dockerfile.OS-VER exists
-if [[ ! -f "Dockerfile.$OS_VER" ]]; then
-	echo "Error: Dockerfile.$OS_VER does not exist."
+if [[ ! -f "Dockerfile.${OS__OS_VER}" ]]; then
+	echo "Error: Dockerfile.${OS__OS_VER} does not exist."
 	echo
 	usage
 	exit 1
 fi
 
-# Build a Docker image tagged with ${DOCKERHUB_REPO}:1.4-OS-VER
-docker build -t ${DOCKERHUB_REPO}:1.4-${OS_VER} \
-	--build-arg http_proxy=$http_proxy \
-	--build-arg https_proxy=$https_proxy \
-	-f Dockerfile.${OS_VER} .
+# Build a Docker image tagged with ${CONTAINER_REG}:1.4-OS-VER
+docker build -t ${CONTAINER_REG}:1.4-${OS__OS_VER} \
+	--build-arg http_proxy=${http_proxy} \
+	--build-arg https_proxy=${https_proxy} \
+	-f Dockerfile.${OS__OS_VER} .
