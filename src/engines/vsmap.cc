@@ -302,5 +302,133 @@ status vsmap::remove(string_view key)
 	return (erased == 1) ? status::OK : status::NOT_FOUND;
 }
 
+internal::iterator<false> *vsmap::new_iterator()
+{
+	return new vsmap_iterator<false>{&pmem_kv_container, &kv_allocator};
+}
+
+internal::iterator<true> *vsmap::new_const_iterator()
+{
+	return new vsmap_iterator<true>{&pmem_kv_container, &kv_allocator};
+}
+
+template <bool IsConst>
+vsmap::vsmap_iterator<IsConst>::vsmap_iterator(container_type *c,
+					       vsmap::map_allocator_type *alloc)
+{
+	container = c;
+	kv_allocator = alloc;
+	_it = container->begin();
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek(string_view key)
+{
+	_it = container->find(vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_lower(string_view key)
+{
+	_it = container->lower_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_lower_eq(string_view key)
+{
+	_it = container->lower_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (container->empty() ||
+	    (_it == container->begin() &&
+	     key.compare(string_view{_it->first.data(), _it->first.size()}) != 0)) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_higher(string_view key)
+{
+	_it = container->upper_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_higher_eq(string_view key)
+{
+	_it = container->upper_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (container->empty() ||
+	    (_it-- == container->end() &&
+	     key.compare(string_view{_it->first.data(), _it->first.size()}) != 0)) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_to_first()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->begin();
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_to_last()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->end();
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::next()
+{
+	if (_it == container->end() || ++_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::prev()
+{
+	if (_it == container->begin())
+		return status::NOT_FOUND;
+
+	--_it;
+
+	return status::OK;
+}
+
 } // namespace kv
 } // namespace pmem
