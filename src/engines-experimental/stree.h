@@ -8,6 +8,7 @@
 #include <libpmemobj++/persistent_ptr.hpp>
 
 #include "../comparator/pmemobj_comparator.h"
+#include "../iterator.h"
 #include "../pmemobj_engine.h"
 #include "stree/persistent_b_tree.h"
 
@@ -41,7 +42,12 @@ using btree_type = b_tree<key_type, value_type, internal::pmemobj_compare, DEGRE
 class stree : public pmemobj_engine_base<internal::stree::btree_type> {
 private:
 	using container_type = internal::stree::btree_type;
-	using iterator = typename container_type::iterator;
+	using container_iterator = typename container_type::iterator;
+
+	template <bool IsConst>
+	class stree_iterator;
+
+	class stree_accessor;
 
 public:
 	stree(std::unique_ptr<internal::config> cfg);
@@ -70,15 +76,61 @@ public:
 	status put(string_view key, string_view value) final;
 	status remove(string_view key) final;
 
+	internal::iterator<false> *new_iterator() final;
+	internal::iterator<true> *new_const_iterator() final;
+
 private:
 	stree(const stree &);
 	void operator=(const stree &);
-	status iterate(iterator first, iterator last, get_kv_callback *callback,
-		       void *arg);
+	status iterate(container_iterator first, container_iterator last,
+		       get_kv_callback *callback, void *arg);
 	void Recover();
 
 	internal::stree::btree_type *my_btree;
 	std::unique_ptr<internal::config> config;
+};
+
+template <bool IsConst>
+class stree::stree_iterator : public internal::iterator<IsConst> {
+	using container_type = stree::container_type;
+	using value_return_type =
+		typename std::conditional<IsConst, string_view,
+					  internal::accessor_base *>::type;
+
+public:
+	stree_iterator(container_type *container);
+
+	status seek(string_view key) final;
+	status seek_lower(string_view key) final;
+	status seek_lower_eq(string_view key) final;
+	status seek_higher(string_view key) final;
+	status seek_higher_eq(string_view key) final;
+
+	status seek_to_first() final;
+	status seek_to_last() final;
+
+	status next() final;
+	status prev() final;
+
+	std::pair<string_view, status> key() final;
+	std::pair<value_return_type, status> value() final;
+
+private:
+	container_type *container;
+	container_type::iterator _it;
+	pmem::obj::pool_base pop;
+};
+
+class stree::stree_accessor : public internal::non_volatile_accessor {
+public:
+	stree_accessor(container_type::iterator it, pmem::obj::pool_base &pop);
+
+	std::pair<pmem::obj::slice<const char *>, status> read_range(size_t pos,
+								     size_t n) final;
+	std::pair<pmem::obj::slice<char *>, status> write_range(size_t pos, size_t n);
+
+private:
+	container_type::iterator _it;
 };
 
 } /* namespace kv */

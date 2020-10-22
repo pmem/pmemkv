@@ -129,7 +129,8 @@ status stree::count_between(string_view key1, string_view key2, std::size_t &cnt
 	return status::OK;
 }
 
-status stree::iterate(iterator first, iterator last, get_kv_callback *callback, void *arg)
+status stree::iterate(container_iterator first, container_iterator last,
+		      get_kv_callback *callback, void *arg)
 {
 	for (auto it = first; it != last; ++it) {
 		auto ret = callback(it->first.c_str(), it->first.size(),
@@ -290,6 +291,174 @@ void stree::Recover()
 				internal::extract_comparator(*config));
 		});
 	}
+}
+
+internal::iterator<false> *stree::new_iterator()
+{
+	return new stree_iterator<false>{my_btree};
+}
+
+internal::iterator<true> *stree::new_const_iterator()
+{
+	return new stree_iterator<true>{my_btree};
+}
+
+template <bool IsConst>
+stree::stree_iterator<IsConst>::stree_iterator(container_type *c)
+    : container(c), _it(container->begin()), pop(pmem::obj::pool_by_vptr(c))
+{
+}
+
+template <bool IsConst>
+status stree::stree_iterator<IsConst>::seek(string_view key)
+{
+	_it = container->find(key);
+	if (_it != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+template <bool IsConst>
+status stree::stree_iterator<IsConst>::seek_lower(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status stree::stree_iterator<IsConst>::seek_lower_eq(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status stree::stree_iterator<IsConst>::seek_higher(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status stree::stree_iterator<IsConst>::seek_higher_eq(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status stree::stree_iterator<IsConst>::seek_to_first()
+{
+	if (container->size() == 0)
+		return status::NOT_FOUND;
+
+	_it = container->begin();
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status stree::stree_iterator<IsConst>::seek_to_last()
+{
+	if (container->size() == 0)
+		return status::NOT_FOUND;
+
+	_it = container->end();
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status stree::stree_iterator<IsConst>::next()
+{
+	if (_it == container->end() || ++_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status stree::stree_iterator<IsConst>::prev()
+{
+	if (_it == container->begin())
+		return status::NOT_FOUND;
+
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+std::pair<string_view, status> stree::stree_iterator<IsConst>::key()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {_it->first.cdata(), status::OK};
+}
+
+template <>
+std::pair<string_view, status> stree::stree_iterator<true>::value()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {{_it->second.data()}, status::OK};
+}
+
+template <>
+std::pair<internal::accessor_base *, status> stree::stree_iterator<false>::value()
+{
+	if (_it == container->end())
+		return {nullptr, status::NOT_FOUND};
+
+	return {new stree_accessor{_it, pop}, status::OK};
+}
+
+stree::stree_accessor::stree_accessor(container_type::iterator it,
+				      pmem::obj::pool_base &pop)
+    : non_volatile_accessor(pop), _it(it)
+{
+}
+
+std::pair<pmem::obj::slice<const char *>, status>
+stree::stree_accessor::read_range(size_t pos, size_t n)
+{
+	if (pos + n > _it->second.size())
+		n = _it->second.size() - pos;
+
+	return {_it->second.crange(pos, n), status::OK};
+}
+
+std::pair<pmem::obj::slice<char *>, status> stree::stree_accessor::write_range(size_t pos,
+									       size_t n)
+{
+	if (pos + n > _it->second.size())
+		n = _it->second.size() - pos;
+
+	return {_it->second.range(pos, n), status::OK};
 }
 
 } // namespace kv

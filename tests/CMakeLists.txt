@@ -1319,6 +1319,16 @@ if(ENGINE_STREE)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 32 8)
+
+	add_engine_test(ENGINE stree
+			BINARY iterator_basic
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE stree
+			BINARY iterator_sorted
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_STREE)
 ################################################################################
 ###################################### RADIX ###################################
