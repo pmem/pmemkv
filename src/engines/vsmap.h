@@ -5,6 +5,7 @@
 
 #include "../comparator/volatile_comparator.h"
 #include "../engine.h"
+#include "../iterator.h"
 
 #include "pmem_allocator.h"
 #include <map>
@@ -23,6 +24,9 @@ namespace kv
 {
 
 class vsmap : public engine_base {
+	template <bool IsConst>
+	class vsmap_iterator;
+
 public:
 	vsmap(std::unique_ptr<internal::config> cfg);
 	~vsmap();
@@ -54,6 +58,9 @@ public:
 
 	status remove(string_view key) final;
 
+	internal::iterator_base *new_iterator() final;
+	internal::iterator_base *new_const_iterator() final;
+
 private:
 	using storage_type = std::basic_string<char, std::char_traits<char>,
 					       memkind_ns::allocator<char>>;
@@ -68,6 +75,54 @@ private:
 	map_allocator_type kv_allocator;
 	map_type pmem_kv_container;
 	std::unique_ptr<internal::config> config;
+};
+
+template <>
+class vsmap::vsmap_iterator<true> : virtual public internal::iterator_base {
+	using container_type = vsmap::map_type;
+
+public:
+	vsmap_iterator(container_type *container,
+		       vsmap::map_allocator_type *kv_allocator);
+
+	status seek(string_view key) final;
+	status seek_lower(string_view key) final;
+	status seek_lower_eq(string_view key) final;
+	status seek_higher(string_view key) final;
+	status seek_higher_eq(string_view key) final;
+
+	status seek_to_first() final;
+	status seek_to_last() final;
+
+	status is_next() final;
+	status next() final;
+	status prev() final;
+
+	result<string_view> key() final;
+
+	result<pmem::obj::slice<const char *>> read_range(size_t pos, size_t n) final;
+
+protected:
+	container_type *container;
+	vsmap::map_allocator_type *kv_allocator;
+	container_type::iterator it_;
+};
+
+template <>
+class vsmap::vsmap_iterator<false> : public vsmap::vsmap_iterator<true> {
+	using container_type = vsmap::map_type;
+
+public:
+	vsmap_iterator(container_type *container,
+		       vsmap::map_allocator_type *kv_allocator);
+
+	result<pmem::obj::slice<char *>> write_range(size_t pos, size_t n) final;
+
+	status commit() final;
+	void abort() final;
+
+private:
+	std::vector<std::pair<std::string, size_t>> log;
 };
 
 } /* namespace kv */
