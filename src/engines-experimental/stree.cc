@@ -129,7 +129,8 @@ status stree::count_between(string_view key1, string_view key2, std::size_t &cnt
 	return status::OK;
 }
 
-status stree::iterate(iterator first, iterator last, get_kv_callback *callback, void *arg)
+status stree::iterate(container_iterator first, container_iterator last,
+		      get_kv_callback *callback, void *arg)
 {
 	for (auto it = first; it != last; ++it) {
 		auto ret = callback(it->first.c_str(), it->first.size(),
@@ -290,6 +291,195 @@ void stree::Recover()
 				internal::extract_comparator(*config));
 		});
 	}
+}
+
+internal::iterator_base *stree::new_iterator()
+{
+	return new stree_iterator<false>{my_btree};
+}
+
+internal::iterator_base *stree::new_const_iterator()
+{
+	return new stree_iterator<true>{my_btree};
+}
+
+stree::stree_iterator<true>::stree_iterator(container_type *c)
+    : container(c), it_(nullptr), pop(pmem::obj::pool_by_vptr(c))
+{
+}
+
+stree::stree_iterator<false>::stree_iterator(container_type *c)
+    : stree::stree_iterator<true>(c)
+{
+}
+
+status stree::stree_iterator<true>::seek(string_view key)
+{
+	init_seek();
+
+	it_ = container->find(key);
+	if (it_ != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+status stree::stree_iterator<true>::seek_lower(string_view key)
+{
+	init_seek();
+
+	it_ = container->lower_bound(key);
+	if (it_ == container->begin()) {
+		it_ = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--it_;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_lower_eq(string_view key)
+{
+	init_seek();
+
+	it_ = container->upper_bound(key);
+	if (it_ == container->begin()) {
+		it_ = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--it_;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_higher(string_view key)
+{
+	init_seek();
+
+	it_ = container->upper_bound(key);
+	if (it_ == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_higher_eq(string_view key)
+{
+	init_seek();
+
+	it_ = container->lower_bound(key);
+	if (it_ == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_to_first()
+{
+	init_seek();
+
+	if (container->size() == 0)
+		return status::NOT_FOUND;
+
+	it_ = container->begin();
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_to_last()
+{
+	init_seek();
+
+	if (container->size() == 0)
+		return status::NOT_FOUND;
+
+	it_ = container->end();
+	--it_;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::is_next()
+{
+	auto tmp = it_;
+	if (tmp == container->end() || ++tmp == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::next()
+{
+	init_seek();
+
+	if (it_ == container->end() || ++it_ == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::prev()
+{
+	init_seek();
+
+	if (it_ == container->begin())
+		return status::NOT_FOUND;
+
+	--it_;
+
+	return status::OK;
+}
+
+result<string_view> stree::stree_iterator<true>::key()
+{
+	assert(it_ != container->end());
+
+	return {it_->first.cdata()};
+}
+
+result<pmem::obj::slice<const char *>> stree::stree_iterator<true>::read_range(size_t pos,
+									       size_t n)
+{
+	assert(it_ != container->end());
+
+	if (pos + n > it_->second.size() || pos + n < pos)
+		n = it_->second.size() - pos;
+
+	return {it_->second.crange(pos, n)};
+}
+
+result<pmem::obj::slice<char *>> stree::stree_iterator<false>::write_range(size_t pos,
+									   size_t n)
+{
+	assert(it_ != container->end());
+
+	if (pos + n > it_->second.size() || pos + n < pos)
+		n = it_->second.size() - pos;
+
+	log.push_back({{it_->second.cdata() + pos, n}, pos});
+	auto &val = log.back().first;
+
+	return {{&val[0], &val[0] + n}};
+}
+
+status stree::stree_iterator<false>::commit()
+{
+	pmem::obj::transaction::run(pop, [&] {
+		for (auto &p : log) {
+			auto dest = it_->second.range(p.second, p.first.size());
+			std::copy(p.first.begin(), p.first.end(), dest.begin());
+		}
+	});
+	log.clear();
+
+	return status::OK;
+}
+
+void stree::stree_iterator<false>::abort()
+{
+	log.clear();
 }
 
 } // namespace kv
