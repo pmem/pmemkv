@@ -302,5 +302,176 @@ status vsmap::remove(string_view key)
 	return (erased == 1) ? status::OK : status::NOT_FOUND;
 }
 
+internal::iterator<false> *vsmap::new_iterator()
+{
+	return new vsmap_iterator<false>{&pmem_kv_container, &kv_allocator};
+}
+
+internal::iterator<true> *vsmap::new_const_iterator()
+{
+	return new vsmap_iterator<true>{&pmem_kv_container, &kv_allocator};
+}
+
+template <bool IsConst>
+vsmap::vsmap_iterator<IsConst>::vsmap_iterator(container_type *c,
+					       vsmap::map_allocator_type *alloc)
+    : container(c), kv_allocator(alloc), _it(c->begin())
+{
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek(string_view key)
+{
+	_it = container->find(vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_lower(string_view key)
+{
+	_it = container->lower_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_lower_eq(string_view key)
+{
+	_it = container->upper_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_higher(string_view key)
+{
+	_it = container->upper_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_higher_eq(string_view key)
+{
+	_it = container->lower_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_to_first()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->begin();
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::seek_to_last()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->end();
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::next()
+{
+	if (_it == container->end() || ++_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status vsmap::vsmap_iterator<IsConst>::prev()
+{
+	if (_it == container->begin())
+		return status::NOT_FOUND;
+
+	--_it;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+std::pair<string_view, status> vsmap::vsmap_iterator<IsConst>::key()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {_it->first.data(), status::OK};
+}
+
+template <>
+std::pair<string_view, status> vsmap::vsmap_iterator<true>::value()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {{_it->second.data()}, status::OK};
+}
+
+template <>
+std::pair<internal::accessor_base *, status> vsmap::vsmap_iterator<false>::value()
+{
+	if (_it == container->end())
+		return {nullptr, status::NOT_FOUND};
+
+	return {new vsmap_accessor{_it}, status::OK};
+}
+
+vsmap::vsmap_accessor::vsmap_accessor(map_type::iterator it) : _it(it)
+{
+}
+
+std::pair<pmem::obj::slice<const char *>, status>
+vsmap::vsmap_accessor::read_range(size_t pos, size_t n)
+{
+	if (pos + n > _it->second.size())
+		n = _it->second.size() - pos;
+
+	return {{_it->second.data() + pos, _it->second.data() + pos + n}, status::OK};
+}
+
+std::pair<pmem::obj::slice<char *>, status> vsmap::vsmap_accessor::write_range(size_t pos,
+									       size_t n)
+{
+	if (pos + n > _it->second.size())
+		n = _it->second.size() - pos;
+
+	return {{&(_it->second[0]) + pos, &(_it->second[0]) + pos + n}, status::OK};
+}
+
 } // namespace kv
 } // namespace pmem
