@@ -302,5 +302,179 @@ status vsmap::remove(string_view key)
 	return (erased == 1) ? status::OK : status::NOT_FOUND;
 }
 
+internal::iterator_base *vsmap::new_iterator()
+{
+	return new vsmap_iterator<false>{&pmem_kv_container, &kv_allocator};
+}
+
+internal::iterator_base *vsmap::new_const_iterator()
+{
+	return new vsmap_iterator<true>{&pmem_kv_container, &kv_allocator};
+}
+
+vsmap::vsmap_iterator<true>::vsmap_iterator(container_type *c,
+					    vsmap::map_allocator_type *alloc)
+    : container(c), kv_allocator(alloc), _it(c->begin())
+{
+}
+
+vsmap::vsmap_iterator<false>::vsmap_iterator(container_type *c,
+					     vsmap::map_allocator_type *alloc)
+    : vsmap::vsmap_iterator<true>(c, alloc)
+{
+}
+
+status vsmap::vsmap_iterator<true>::seek(string_view key)
+{
+	_it = container->find(vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+status vsmap::vsmap_iterator<true>::seek_lower(string_view key)
+{
+	_it = container->lower_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::seek_lower_eq(string_view key)
+{
+	_it = container->upper_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::seek_higher(string_view key)
+{
+	_it = container->upper_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::seek_higher_eq(string_view key)
+{
+	_it = container->lower_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::seek_to_first()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->begin();
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::seek_to_last()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->end();
+	--_it;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::next()
+{
+	if (_it == container->end() || ++_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::prev()
+{
+	if (_it == container->begin())
+		return status::NOT_FOUND;
+
+	--_it;
+
+	return status::OK;
+}
+
+std::pair<string_view, status> vsmap::vsmap_iterator<true>::key()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {_it->first.data(), status::OK};
+}
+
+std::pair<pmem::obj::slice<const char *>, status>
+vsmap::vsmap_iterator<true>::read_range(size_t pos, size_t n)
+{
+	if (_it == container->end())
+		return {{nullptr, nullptr}, status::NOT_FOUND};
+
+	if (pos + n > _it->second.size())
+		n = _it->second.size() - pos;
+
+	return {{_it->second.data() + pos, _it->second.data() + pos + n}, status::OK};
+}
+
+std::pair<pmem::obj::slice<char *>, status>
+vsmap::vsmap_iterator<false>::write_range(size_t pos, size_t n)
+{
+	if (_it == container->end())
+		return {{nullptr, nullptr}, status::NOT_FOUND};
+
+	/* check if position of iterator changed */
+	auto key = _it->second.data();
+	if (snapshotted_key.compare(key) != 0) {
+		abort();
+		snapshotted_key = key;
+	}
+
+	if (pos + n > _it->second.size())
+		n = _it->second.size() - pos;
+
+	log.push_back({std::string(&(_it->second[0]), n), pos});
+	auto &val = log[log.size() - 1].first;
+
+	return {{&val[0], &val[0] + n}, status::OK};
+}
+
+status vsmap::vsmap_iterator<false>::commit()
+{
+	/* check if position of iterator changed before commit */
+	if (snapshotted_key.compare(_it->second.data()) != 0)
+		abort();
+
+	for (auto &p : log) {
+		auto dest = &(_it->second[0]) + p.second;
+		std::copy(p.first.begin(), p.first.end(), dest);
+	}
+	log.clear();
+	return status::OK;
+}
+
 } // namespace kv
 } // namespace pmem
