@@ -1,18 +1,20 @@
+
 name: pmemkv
 on: [push, pull_request]
 
 env:
-    REPO:           pmemkv
-    GITHUB_REPO:    pmem/pmemkv
-    DOCKERHUB_REPO: pmem/pmemkv
+  REPO:           pmemkv
+  GITHUB_REPO:    pmem/pmemkv
+  CONTAINER_REG:  ghcr.io/${{github.repository_owner}}/pmemkv
 
 jobs:
   linux:
     name: pmemkv
     runs-on: ubuntu-latest
     env:
-      DOCKERHUB_USER:          ${{ secrets.DOCKERHUB_USER }}
-      DOCKERHUB_PASSWORD:      ${{ secrets.DOCKERHUB_PASSWORD }}
+      # use org's Private Access Token to log in to GitHub Container Registry
+      CONTAINER_REG_USER:   ${{ secrets.GH_CR_USER }}
+      CONTAINER_REG_PASS:   ${{ secrets.GH_CR_PAT }}
       HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
       WORKDIR:        utils/docker
     strategy:
