@@ -129,7 +129,8 @@ status stree::count_between(string_view key1, string_view key2, std::size_t &cnt
 	return status::OK;
 }
 
-status stree::iterate(iterator first, iterator last, get_kv_callback *callback, void *arg)
+status stree::iterate(container_iterator first, container_iterator last,
+		      get_kv_callback *callback, void *arg)
 {
 	for (auto it = first; it != last; ++it) {
 		auto ret = callback(it->first.c_str(), it->first.size(),
@@ -290,6 +291,176 @@ void stree::Recover()
 				internal::extract_comparator(*config));
 		});
 	}
+}
+
+internal::iterator_base *stree::new_iterator()
+{
+	return new stree_iterator<false>{my_btree};
+}
+
+internal::iterator_base *stree::new_const_iterator()
+{
+	return new stree_iterator<true>{my_btree};
+}
+
+stree::stree_iterator<true>::stree_iterator(container_type *c)
+    : container(c), _it(container->begin()), pop(pmem::obj::pool_by_vptr(c))
+{
+}
+
+stree::stree_iterator<false>::stree_iterator(container_type *c)
+    : stree::stree_iterator<true>(c)
+{
+}
+
+status stree::stree_iterator<true>::seek(string_view key)
+{
+	_it = container->find(key);
+	if (_it != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+status stree::stree_iterator<true>::seek_lower(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_lower_eq(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->begin()) {
+		_it = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--_it;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_higher(string_view key)
+{
+	_it = container->upper_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_higher_eq(string_view key)
+{
+	_it = container->lower_bound(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_to_first()
+{
+	if (container->size() == 0)
+		return status::NOT_FOUND;
+
+	_it = container->begin();
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::seek_to_last()
+{
+	if (container->size() == 0)
+		return status::NOT_FOUND;
+
+	_it = container->end();
+	--_it;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::next()
+{
+	if (_it == container->end() || ++_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status stree::stree_iterator<true>::prev()
+{
+	if (_it == container->begin())
+		return status::NOT_FOUND;
+
+	--_it;
+
+	return status::OK;
+}
+
+std::pair<string_view, status> stree::stree_iterator<true>::key()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {_it->first.cdata(), status::OK};
+}
+
+std::pair<pmem::obj::slice<const char *>, status>
+stree::stree_iterator<true>::read_range(size_t pos, size_t n)
+{
+	if (_it == container->end())
+		return {{nullptr, nullptr}, status::NOT_FOUND};
+
+	if (pos + n > _it->second.size() || pos + n < pos)
+		n = _it->second.size() - pos;
+
+	return {_it->second.crange(pos, n), status::OK};
+}
+
+std::pair<pmem::obj::slice<char *>, status>
+stree::stree_iterator<false>::write_range(size_t pos, size_t n)
+{
+	if (_it == container->end())
+		return {{nullptr, nullptr}, status::NOT_FOUND};
+
+	/* check if position of iterator changed */
+	auto key = _it->first.cdata();
+	if (snapshotted_key.compare(key) != 0) {
+		abort();
+		snapshotted_key = key;
+	}
+
+	if (pos + n > _it->second.size() || pos + n < pos)
+		n = _it->second.size() - pos;
+
+	log.push_back({{_it->second.cdata(), n}, pos});
+	auto &val = log[log.size() - 1].first;
+
+	return {{&val[0], &val[0] + n}, status::OK};
+}
+
+status stree::stree_iterator<false>::commit()
+{
+	/* check if position of iterator changed before commit */
+	if (snapshotted_key.compare(_it->first.cdata()) != 0)
+		abort();
+
+	pmem::obj::transaction::run(pop, [&] {
+		for (auto &p : log) {
+			auto dest = _it->second.range(p.second, p.first.size());
+			std::copy(p.first.begin(), p.first.end(), dest.begin());
+		}
+	});
+	log.clear();
+	return status::OK;
 }
 
 } // namespace kv
