@@ -877,6 +877,16 @@ if(ENGINE_VSMAP)
 			BINARY memkind_error_handling
 			TRACERS none memcheck
 			SCRIPT memkind_based/memkind/error_handling.cmake)
+
+	add_engine_test(ENGINE vsmap
+			BINARY iterator_basic
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vsmap
+			BINARY iterator_sorted
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
 endif(ENGINE_VSMAP)
 ################################################################################
 ###################################### TREE3 ###################################
