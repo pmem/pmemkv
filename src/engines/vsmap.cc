@@ -8,6 +8,7 @@
 
 #include <libpmemobj++/transaction.hpp>
 
+#include <cassert>
 #include <iostream>
 
 namespace pmem
@@ -300,6 +301,199 @@ status vsmap::remove(string_view key)
 	size_t erased =
 		pmem_kv_container.erase(key_type(key.data(), key.size(), kv_allocator));
 	return (erased == 1) ? status::OK : status::NOT_FOUND;
+}
+
+internal::iterator_base *vsmap::new_iterator()
+{
+	return new vsmap_iterator<false>{&pmem_kv_container, &kv_allocator};
+}
+
+internal::iterator_base *vsmap::new_const_iterator()
+{
+	return new vsmap_iterator<true>{&pmem_kv_container, &kv_allocator};
+}
+
+vsmap::vsmap_iterator<true>::vsmap_iterator(container_type *c,
+					    vsmap::map_allocator_type *alloc)
+    : container(c), kv_allocator(alloc)
+{
+}
+
+vsmap::vsmap_iterator<false>::vsmap_iterator(container_type *c,
+					     vsmap::map_allocator_type *alloc)
+    : vsmap::vsmap_iterator<true>(c, alloc)
+{
+}
+
+status vsmap::vsmap_iterator<true>::seek(string_view key)
+{
+	init_seek();
+
+	it_ = container->find(vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (it_ != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+status vsmap::vsmap_iterator<true>::seek_lower(string_view key)
+{
+	init_seek();
+
+	it_ = container->lower_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (it_ == container->begin()) {
+		it_ = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--it_;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::seek_lower_eq(string_view key)
+{
+	init_seek();
+
+	it_ = container->upper_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (it_ == container->begin()) {
+		it_ = container->end();
+		return status::NOT_FOUND;
+	}
+
+	--it_;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::seek_higher(string_view key)
+{
+	init_seek();
+
+	it_ = container->upper_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (it_ == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::seek_higher_eq(string_view key)
+{
+	init_seek();
+
+	it_ = container->lower_bound(
+		vsmap::key_type(key.data(), key.size(), *kv_allocator));
+	if (it_ == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::seek_to_first()
+{
+	init_seek();
+
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	it_ = container->begin();
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::seek_to_last()
+{
+	init_seek();
+
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	it_ = container->end();
+	--it_;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::is_next()
+{
+	auto tmp = it_;
+	if (tmp == container->end() || ++tmp == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::next()
+{
+	init_seek();
+
+	if (it_ == container->end() || ++it_ == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+status vsmap::vsmap_iterator<true>::prev()
+{
+	init_seek();
+
+	if (it_ == container->begin())
+		return status::NOT_FOUND;
+
+	--it_;
+
+	return status::OK;
+}
+
+result<string_view> vsmap::vsmap_iterator<true>::key()
+{
+	assert(it_ != container->end());
+
+	return {it_->first.data()};
+}
+
+result<pmem::obj::slice<const char *>> vsmap::vsmap_iterator<true>::read_range(size_t pos,
+									       size_t n)
+{
+	assert(it_ != container->end());
+
+	if (pos + n > it_->second.size() || pos + n < pos)
+		n = it_->second.size() - pos;
+
+	return {{it_->second.data() + pos, it_->second.data() + pos + n}};
+}
+
+result<pmem::obj::slice<char *>> vsmap::vsmap_iterator<false>::write_range(size_t pos,
+									   size_t n)
+{
+	assert(it_ != container->end());
+
+	if (pos + n > it_->second.size() || pos + n < pos)
+		n = it_->second.size() - pos;
+
+	log.push_back({std::string(&(it_->second[pos]), n), pos});
+	auto &val = log.back().first;
+
+	return {{&val[0], &val[0] + n}};
+}
+
+status vsmap::vsmap_iterator<false>::commit()
+{
+	for (auto &p : log) {
+		auto dest = &(it_->second[0]) + p.second;
+		std::copy(p.first.begin(), p.first.end(), dest);
+	}
+	log.clear();
+
+	return status::OK;
+}
+
+void vsmap::vsmap_iterator<false>::abort()
+{
+	log.clear();
 }
 
 } // namespace kv
