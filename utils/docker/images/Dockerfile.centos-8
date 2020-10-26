@@ -40,6 +40,8 @@ RUN dnf update -y \
 	gdb \
 	git \
 	graphviz \
+	gzip \
+	libunwind-devel \
 	libtool \
 	make \
 	man \
@@ -49,10 +51,10 @@ RUN dnf update -y \
 	passwd \
 	perl-Text-Diff \
 	python36 \
+	rapidjson-devel \
 	rpm-build \
 	sudo \
 	tbb-devel \
-	unzip \
 	wget \
 	which \
 && dnf clean all
