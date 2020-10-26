@@ -8,7 +8,7 @@ on:
 env:
   REPO:           pmemkv
   GITHUB_REPO:    pmem/pmemkv
-  DOCKERHUB_REPO: pmem/pmemkv
+  CONTAINER_REG:  ghcr.io/${{github.repository}}
 
 jobs:
   linux:

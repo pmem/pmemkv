@@ -4,20 +4,20 @@
 
 #
 # pull-or-rebuild-image.sh - rebuilds the Docker image used in the
-#                            current Travis build if necessary.
+#                            current build if necessary.
 #
 # The script rebuilds the Docker image if:
 # 1. the Dockerfile for the current OS version (Dockerfile.${OS}-${OS_VER})
 #    or any .sh script in the Dockerfiles directory were modified and committed, or
 # 2. "rebuild" param was passed as first argument to this script.
 #
-# If the Travis build is not of the "pull_request" type (i.e. in case of
-# merge after pull_request) and it succeed, the Docker image should be pushed
-# to the Docker Hub repository. An empty file is created to signal that to
-# further scripts.
+# If the CI build is not of the "pull_request" type (i.e. in case of
+# a pull request merge or any other "push" event) and it succeeds, the Docker image
+# should be pushed to the ${CONTAINER_REG} repository.
+# An empty file is created to signal that to next scripts.
 #
 # If the Docker image does not have to be rebuilt, it will be pulled from
-# Docker Hub.
+# the ${CONTAINER_REG}.
 #
 
 set -e
@@ -77,9 +77,9 @@ for file in $files; do
 		./build-image.sh ${OS}-${OS_VER}
 		popd
 
-		# Check if the image has to be pushed to Docker Hub
+		# Check if the image has to be pushed to the Container Registry
 		# (i.e. the build is triggered by commits to the $GITHUB_REPO
-		# repository's stable-* or master branch, and the Travis build is not
+		# repository's stable-* or master branch, and the CI build is not
 		# of the "pull_request" type). In that case, create the empty
 		# file.
 		if [[ "$CI_REPO_SLUG" == "$GITHUB_REPO" \
@@ -87,10 +87,10 @@ for file in $files; do
 			&& $CI_EVENT_TYPE != "pull_request" \
 			&& $PUSH_IMAGE == "1" ]]
 		then
-			echo "The image will be pushed to Docker Hub"
+			echo "The image will be pushed to the Container Registry: ${CONTAINER_REG}"
 			touch $CI_FILE_PUSH_IMAGE_TO_REPO
 		else
-			echo "Skip pushing the image to Docker Hub"
+			echo "Skip pushing the image to the Container Registry"
 		fi
 
 		exit 0
@@ -98,5 +98,5 @@ for file in $files; do
 done
 
 # Getting here means rebuilding the Docker image is not required.
-# Pull the image from Docker Hub.
-docker pull ${DOCKERHUB_REPO}:1.4-${OS}-${OS_VER}
+# Pull the image from the Container Registry.
+docker pull ${CONTAINER_REG}:1.4-${OS}-${OS_VER}

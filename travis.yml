@@ -13,7 +13,7 @@ if: false
 env:
   global:
     - GITHUB_REPO=pmem/pmemkv
-    - DOCKERHUB_REPO=pmem/pmemkv
+    - CONTAINER_REG=ghcr.io/pmem/pmemkv
   matrix:
   #  - TYPE= OS= OS_VER=
 
