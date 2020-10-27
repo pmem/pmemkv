@@ -231,7 +231,7 @@ status radix::put(string_view key, string_view value)
 		       << ", value.size=" << std::to_string(value.size()));
 	check_outside_tx();
 
-	auto result = container->emplace(key, value);
+	auto result = container->try_emplace(key, value);
 
 	if (result.second == false) {
 		pmem::obj::transaction::run(pmpool,
