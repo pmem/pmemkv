@@ -50,7 +50,8 @@ add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.h*)
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/iterator/*.*)
 
 add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.*
@@ -64,7 +65,8 @@ add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/memkind/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/persistent/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*)
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/iterator/*.*)
 
 if(TESTS_JSON AND NOT BUILD_JSON_CONFIG)
 	message(FATAL_ERROR "Tests requiring 'libpmemkv_json_config' library "
@@ -180,6 +182,9 @@ build_test_ext(NAME comparator_custom_reopen_c SRC_FILES comparator/custom_reope
 build_test_ext(NAME comparator_default_reopen_c SRC_FILES comparator/default_reopen.c LIBS json)
 build_test_ext(NAME comparator_custom_reopen_cpp SRC_FILES comparator/custom_reopen.cc LIBS json)
 build_test_ext(NAME comparator_default_reopen_cpp SRC_FILES comparator/default_reopen.cc LIBS json)
+
+# Tests for iterator
+build_test_ext(NAME iterator_basic SRC_FILES iterator/iterator_basic.cc LIBS json)
 
 ###################################### CMAP ####################################
 if(ENGINE_CMAP)
