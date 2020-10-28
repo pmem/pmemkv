@@ -71,6 +71,9 @@ static_assert(sizeof(pmem_type) == sizeof(map_type) + 64, "");
 } /* namespace internal */
 
 class csmap : public pmemobj_engine_base<internal::csmap::pmem_type> {
+	template <bool IsConst>
+	class csmap_iterator;
+
 public:
 	csmap(std::unique_ptr<internal::config> cfg);
 	~csmap();
@@ -105,6 +108,9 @@ public:
 
 	status remove(string_view key) final;
 
+	internal::iterator<false> *new_iterator() final;
+	internal::iterator<true> *new_const_iterator() final;
+
 private:
 	using node_mutex_type = pmem::obj::shared_mutex;
 	using global_mutex_type = std::shared_timed_mutex;
@@ -126,6 +132,33 @@ private:
 	global_mutex_type mtx;
 	container_type *container;
 	std::unique_ptr<internal::config> config;
+};
+
+template <bool IsConst>
+class csmap::csmap_iterator : public internal::iterator<IsConst> {
+	using container_type = csmap::container_type;
+
+public:
+	csmap_iterator(container_type *container, global_mutex_type &mtx);
+	~csmap_iterator();
+
+	status seek(string_view key) final;
+	status seek_lower(string_view key) final;
+	status seek_lower_eq(string_view key) final;
+	status seek_higher(string_view key) final;
+	status seek_higher_eq(string_view key) final;
+
+	status seek_to_first() final;
+	status seek_to_last() final;
+
+	status next() final;
+
+	// result<string_view, status> key();
+	// result<accessor, status> value();
+private:
+	container_type *container;
+	container_type::const_iterator _it;
+	csmap::shared_global_lock_type lock;
 };
 
 } /* namespace kv */
