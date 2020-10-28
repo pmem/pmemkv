@@ -303,5 +303,156 @@ void csmap::Recover()
 	}
 }
 
+internal::iterator<false> *csmap::new_iterator()
+{
+	return new csmap_iterator<false>{container, mtx};
+}
+
+internal::iterator<true> *csmap::new_const_iterator()
+{
+	return new csmap_iterator<true>{container, mtx};
+}
+
+template <bool IsConst>
+csmap::csmap_iterator<IsConst>::csmap_iterator(container_type *c, global_mutex_type &mtx)
+    : container(c), _it(c->begin()), lock(mtx), pop(pmem::obj::pool_by_vptr(c))
+{
+}
+
+template <bool IsConst>
+status csmap::csmap_iterator<IsConst>::seek(string_view key)
+{
+	_it = container->find(key);
+	if (_it != container->end())
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+template <bool IsConst>
+status csmap::csmap_iterator<IsConst>::seek_lower(string_view key)
+{
+	_it = container->find_lower(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status csmap::csmap_iterator<IsConst>::seek_lower_eq(string_view key)
+{
+	_it = container->find_lower_eq(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status csmap::csmap_iterator<IsConst>::seek_higher(string_view key)
+{
+	_it = container->find_higher(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status csmap::csmap_iterator<IsConst>::seek_higher_eq(string_view key)
+{
+	_it = container->find_higher_eq(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status csmap::csmap_iterator<IsConst>::seek_to_first()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->begin();
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status csmap::csmap_iterator<IsConst>::seek_to_last()
+{
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->begin();
+	std::advance(_it, container->size() - 1);
+
+	return status::OK;
+}
+
+template <bool IsConst>
+status csmap::csmap_iterator<IsConst>::next()
+{
+	if (_it == container->end() || ++_it == container->end())
+		return status::NOT_FOUND;
+
+	return status::OK;
+}
+
+template <bool IsConst>
+std::pair<string_view, status> csmap::csmap_iterator<IsConst>::key()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {_it->first.cdata(), status::OK};
+}
+
+template <>
+std::pair<string_view, status> csmap::csmap_iterator<true>::value()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {{_it->second.val.data()}, status::OK};
+}
+
+template <>
+std::pair<internal::accessor_base *, status> csmap::csmap_iterator<false>::value()
+{
+	if (_it == container->end())
+		return {nullptr, status::NOT_FOUND};
+
+	return {new csmap_accessor{_it, pop}, status::OK};
+}
+
+// XXX
+csmap::csmap_accessor::csmap_accessor(
+	container_type::iterator it,
+	pmem::obj::pool_base &pop)	  //, global_mutex_type &mtx)
+    : non_volatile_accessor(pop), _it(it) // , lock(mtx)
+{
+}
+
+std::pair<pmem::obj::slice<const char *>, status>
+csmap::csmap_accessor::read_range(size_t pos, size_t n)
+{
+	if (pos + n > _it->second.val.size())
+		n = _it->second.val.size() - pos;
+
+	return {_it->second.val.crange(pos, n), status::OK};
+}
+
+std::pair<pmem::obj::slice<char *>, status> csmap::csmap_accessor::write_range(size_t pos,
+									       size_t n)
+{
+	if (pos + n > _it->second.val.size())
+		n = _it->second.val.size() - pos;
+
+	return {_it->second.val.range(pos, n), status::OK};
+}
+
 } // namespace kv
 } // namespace pmem
