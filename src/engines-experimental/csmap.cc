@@ -303,5 +303,202 @@ void csmap::Recover()
 	}
 }
 
+internal::iterator_base *csmap::new_iterator()
+{
+	return new csmap_iterator<false>{container, mtx};
+}
+
+internal::iterator_base *csmap::new_const_iterator()
+{
+	return new csmap_iterator<true>{container, mtx};
+}
+
+csmap::csmap_iterator<true>::csmap_iterator(container_type *c, global_mutex_type &mtx)
+    : container(c), _it(container->begin()), lock(mtx), pop(pmem::obj::pool_by_vptr(c))
+{
+	if (_it != container->end())
+		node_lock = csmap::unique_node_lock_type(_it->second.mtx);
+}
+
+csmap::csmap_iterator<false>::csmap_iterator(container_type *c, global_mutex_type &mtx)
+    : csmap::csmap_iterator<true>(c, mtx)
+{
+}
+
+status csmap::csmap_iterator<true>::seek(string_view key)
+{
+	if (_it != container->end())
+		node_lock.unlock();
+
+	_it = container->find(key);
+	if (_it == container->end()) {
+		return status::NOT_FOUND;
+	}
+
+	node_lock = csmap::unique_node_lock_type(_it->second.mtx);
+
+	return status::OK;
+}
+
+status csmap::csmap_iterator<true>::seek_lower(string_view key)
+{
+	if (_it != container->end())
+		node_lock.unlock();
+
+	_it = container->find_lower(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	node_lock = csmap::unique_node_lock_type(_it->second.mtx);
+
+	return status::OK;
+}
+
+status csmap::csmap_iterator<true>::seek_lower_eq(string_view key)
+{
+	if (_it != container->end())
+		node_lock.unlock();
+
+	_it = container->find_lower_eq(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	node_lock = csmap::unique_node_lock_type(_it->second.mtx);
+
+	return status::OK;
+}
+
+status csmap::csmap_iterator<true>::seek_higher(string_view key)
+{
+	if (_it != container->end())
+		node_lock.unlock();
+
+	_it = container->find_higher(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	node_lock = csmap::unique_node_lock_type(_it->second.mtx);
+
+	return status::OK;
+}
+
+status csmap::csmap_iterator<true>::seek_higher_eq(string_view key)
+{
+	if (_it != container->end())
+		node_lock.unlock();
+
+	_it = container->find_higher_eq(key);
+	if (_it == container->end())
+		return status::NOT_FOUND;
+
+	node_lock = csmap::unique_node_lock_type(_it->second.mtx);
+
+	return status::OK;
+}
+
+status csmap::csmap_iterator<true>::seek_to_first()
+{
+	if (_it != container->end())
+		node_lock.unlock();
+
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->begin();
+
+	node_lock = csmap::unique_node_lock_type(_it->second.mtx);
+
+	return status::OK;
+}
+
+// XXX: change to not implemented?
+status csmap::csmap_iterator<true>::seek_to_last()
+{
+	if (_it != container->end())
+		node_lock.unlock();
+
+	if (container->empty())
+		return status::NOT_FOUND;
+
+	_it = container->begin();
+	std::advance(_it, container->size() - 1);
+
+	node_lock = csmap::unique_node_lock_type(_it->second.mtx);
+
+	return status::OK;
+}
+
+status csmap::csmap_iterator<true>::next()
+{
+	if (_it != container->end())
+		node_lock.unlock();
+
+	if (_it == container->end() || ++_it == container->end())
+		return status::NOT_FOUND;
+
+	node_lock = csmap::unique_node_lock_type(_it->second.mtx);
+
+	return status::OK;
+}
+
+std::pair<string_view, status> csmap::csmap_iterator<true>::key()
+{
+	if (_it == container->end())
+		return {{}, status::NOT_FOUND};
+
+	return {_it->first.cdata(), status::OK};
+}
+
+std::pair<pmem::obj::slice<const char *>, status>
+csmap::csmap_iterator<true>::read_range(size_t pos, size_t n)
+{
+	if (_it == container->end())
+		return {{nullptr, nullptr}, status::NOT_FOUND};
+
+	if (pos + n > _it->second.val.size() || pos + n < pos)
+		n = _it->second.val.size() - pos;
+
+	return {_it->second.val.crange(pos, n), status::OK};
+}
+
+std::pair<pmem::obj::slice<char *>, status>
+csmap::csmap_iterator<false>::write_range(size_t pos, size_t n)
+{
+	if (_it == container->end())
+		return {{nullptr, nullptr}, status::NOT_FOUND};
+
+	/* check if position of iterator changed */
+	auto key = _it->first.cdata();
+	if (snapshotted_key.compare(key) != 0) {
+		abort();
+		snapshotted_key = key;
+	}
+
+	if (pos + n > _it->second.val.size() || pos + n < pos)
+		n = _it->second.val.size() - pos;
+
+	log.push_back({{_it->second.val.cdata(), n}, pos});
+	auto &val = log[log.size() - 1].first;
+
+	return {{&val[0], &val[n]}, status::OK};
+}
+
+status csmap::csmap_iterator<false>::commit()
+{
+	/* check if position of iterator changed before commit */
+	if (snapshotted_key.compare(_it->first.cdata()) != 0)
+		abort();
+
+	pmem::obj::transaction::run(pop, [&] {
+		for (auto &p : log) {
+			auto dest = _it->second.val.range(p.second, p.first.size());
+			std::copy(p.first.begin(), p.first.end(), dest.begin());
+		}
+	});
+	log.clear();
+
+	return status::OK;
+}
+
 } // namespace kv
 } // namespace pmem

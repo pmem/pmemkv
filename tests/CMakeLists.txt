@@ -579,6 +579,12 @@ if(ENGINE_CSMAP)
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 100)
 
+		add_engine_test(ENGINE csmap
+				BINARY iterator_concurrent
+				TRACERS drd # helgrind XXX: https://github.com/pmem/libpmemobj-cpp/issues/797
+				SCRIPT pmemobj_based/default.cmake
+				PARAMS 8)
+
 		if(TESTS_LONG)
 			add_engine_test(ENGINE csmap
 					BINARY concurrent_put_get_remove_single_op_params
@@ -679,6 +685,23 @@ if(ENGINE_CSMAP)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
 			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE csmap
+			BINARY iterator_basic
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY iterator_sorted
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS false)
+
+	add_engine_test(ENGINE csmap
+			BINARY iterator_concurrent
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 true)
 endif(ENGINE_CSMAP)
 ################################################################################
 ###################################### VCMAP ###################################
