@@ -71,6 +71,9 @@ static_assert(sizeof(pmem_type) == sizeof(map_type) + 64, "");
 } /* namespace internal */
 
 class csmap : public pmemobj_engine_base<internal::csmap::pmem_type> {
+	template <bool IsConst>
+	class csmap_iterator;
+
 public:
 	csmap(std::unique_ptr<internal::config> cfg);
 	~csmap();
@@ -105,6 +108,9 @@ public:
 
 	status remove(string_view key) final;
 
+	internal::iterator_base *new_iterator() final;
+	internal::iterator_base *new_const_iterator() final;
+
 private:
 	using node_mutex_type = pmem::obj::shared_mutex;
 	using global_mutex_type = std::shared_timed_mutex;
@@ -126,6 +132,50 @@ private:
 	global_mutex_type mtx;
 	container_type *container;
 	std::unique_ptr<internal::config> config;
+};
+
+template <>
+class csmap::csmap_iterator<true> : virtual public internal::iterator_base {
+	using container_type = csmap::container_type;
+
+public:
+	csmap_iterator(container_type *container, global_mutex_type &mtx);
+
+	status seek(string_view key) final;
+	status seek_lower(string_view key) final;
+	status seek_lower_eq(string_view key) final;
+	status seek_higher(string_view key) final;
+	status seek_higher_eq(string_view key) final;
+
+	status seek_to_first() final;
+	status seek_to_last() final;
+
+	status next() final;
+
+	std::pair<string_view, status> key() final;
+
+	std::pair<pmem::obj::slice<const char *>, status> read_range(size_t pos,
+								     size_t n) final;
+
+protected:
+	container_type *container;
+	container_type::iterator _it;
+	csmap::shared_global_lock_type lock;
+	pmem::obj::pool_base pop;
+};
+
+template <>
+class csmap::csmap_iterator<false> : public csmap::csmap_iterator<true>,
+				     public internal::write_iterator_base {
+	using container_type = csmap::container_type;
+
+public:
+	csmap_iterator(container_type *container, global_mutex_type &mtx);
+
+	std::pair<pmem::obj::slice<char *>, status> write_range(size_t pos,
+								size_t n) final;
+
+	status commit() final;
 };
 
 } /* namespace kv */
