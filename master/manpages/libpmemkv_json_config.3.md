@@ -15,8 +15,8 @@ secondary_title: pmemkv_json_config
 [NAME](#name)<br />
 [SYNOPSIS](#synopsis)<br />
 [DESCRIPTION](#description)<br />
-[EXAMPLE](#example)<br />
 [ERRORS](#errors)<br />
+[EXAMPLE](#example)<br />
 [SEE ALSO](#see-also)<br />
 
 
