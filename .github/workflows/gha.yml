@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         CONFIG: ["TYPE=debug OS=fedora OS_VER=32",
-                 "TYPE=debug OS=ubuntu OS_VER=19.10 PUSH_IMAGE=1",
+                 "TYPE=debug OS=ubuntu OS_VER=20.10 PUSH_IMAGE=1",
                  "TYPE=debug OS=ubuntu OS_VER=20.04 CHECK_CPP_STYLE=1 COVERAGE=1",
                  "TYPE=release OS=fedora OS_VER=32",
                  "TYPE=release OS=ubuntu OS_VER=20.04",
