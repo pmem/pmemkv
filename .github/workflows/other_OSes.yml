@@ -24,9 +24,11 @@ jobs:
                  "OS=archlinux-base OS_VER=latest",
                  "OS=debian OS_VER=testing",
                  "OS=debian OS_VER=unstable",
+                 "OS=fedora OS_VER=33",
                  "OS=fedora OS_VER=rawhide",
                  "OS=opensuse-leap OS_VER=latest",
                  "OS=opensuse-tumbleweed OS_VER=latest",
+                 "OS=ubuntu OS_VER=20.10",
                  "OS=ubuntu OS_VER=rolling"]
     steps:
        - name: Print out the current date and time
