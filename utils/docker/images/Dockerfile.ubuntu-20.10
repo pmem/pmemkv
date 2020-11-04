@@ -56,15 +56,12 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	numactl \
 	pandoc \
 	pkg-config \
+	rapidjson-dev \
 	sudo \
 	wget \
 	whois \
 	$COVERITY_DEPS \
  && rm -rf /var/lib/apt/lists/*
-
-# Install rapidjson from sources
-COPY install-rapidjson.sh install-rapidjson.sh
-RUN ./install-rapidjson.sh
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
