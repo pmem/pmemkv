@@ -150,14 +150,6 @@ public:
 	config() noexcept;
 	explicit config(pmemkv_config *cfg) noexcept;
 
-	~config();
-
-	config(const config &other) = delete;
-	config(config &&other) noexcept;
-
-	config &operator=(const config &other) = delete;
-	config &operator=(config &&other) noexcept;
-
 	template <typename T>
 	status put_data(const std::string &key, const T *value,
 			const std::size_t number = 1) noexcept;
@@ -193,7 +185,7 @@ public:
 private:
 	int init() noexcept;
 
-	pmemkv_config *_config;
+	std::unique_ptr<pmemkv_config, decltype(&pmemkv_config_delete)> config_;
 };
 
 /*! \class db
@@ -211,13 +203,6 @@ private:
 class db {
 public:
 	db() noexcept;
-	~db();
-
-	db(const db &other) = delete;
-	db(db &&other) noexcept;
-
-	db &operator=(const db &other) = delete;
-	db &operator=(db &&other) noexcept;
 
 	status open(const std::string &engine_name) noexcept;
 	status open(const std::string &engine_name, config &&cfg) noexcept;
@@ -269,7 +254,7 @@ public:
 	std::string errormsg();
 
 private:
-	pmemkv_db *_db;
+	std::unique_ptr<pmemkv_db, decltype(&pmemkv_close)> db_;
 };
 
 /*! \namespace pmem::kv::internal
@@ -383,55 +368,16 @@ static inline int call_comparator_function(const char *k1, size_t kb1, const cha
 /**
  * Default constructor with uninitialized config.
  */
-inline config::config() noexcept
+inline config::config() noexcept : config_(nullptr, &pmemkv_config_delete)
 {
-	this->_config = nullptr;
-}
-
-/**
- * Move constructor. Initializes config with another config.
- * Ownership is transferred to config class.
- */
-inline config::config(config &&other) noexcept
-{
-	this->_config = other._config;
-	other._config = nullptr;
-}
-
-/**
- * Move assignment operator. Deletes previous config and replaces
- * it with another config. Ownership is transferred to config class.
- */
-inline config &config::operator=(config &&other) noexcept
-{
-	if (this == &other)
-		return *this;
-
-	if (this->_config)
-		pmemkv_config_delete(this->_config);
-
-	this->_config = other._config;
-	other._config = nullptr;
-
-	return *this;
 }
 
 /**
  * Creates config from pointer to pmemkv_config.
  * Ownership is transferred to config class.
  */
-inline config::config(pmemkv_config *cfg) noexcept
+inline config::config(pmemkv_config *cfg) noexcept : config_(cfg, &pmemkv_config_delete)
 {
-	this->_config = cfg;
-}
-
-/**
- * Default destructor. Deletes config if initialized.
- */
-inline config::~config()
-{
-	if (this->_config)
-		pmemkv_config_delete(this->_config);
 }
 
 /**
@@ -442,10 +388,10 @@ inline config::~config()
  */
 inline int config::init() noexcept
 {
-	if (this->_config == nullptr) {
-		this->_config = pmemkv_config_new();
+	if (this->config_.get() == nullptr) {
+		this->config_ = {pmemkv_config_new(), &pmemkv_config_delete};
 
-		if (this->_config == nullptr)
+		if (this->config_.get() == nullptr)
 			return 1;
 	}
 
@@ -470,7 +416,7 @@ inline status config::put_data(const std::string &key, const T *value,
 		return status::UNKNOWN_ERROR;
 
 	return static_cast<status>(pmemkv_config_put_data(
-		this->_config, key.data(), (void *)value, count * sizeof(T)));
+		this->config_.get(), key.data(), (void *)value, count * sizeof(T)));
 }
 
 /**
@@ -490,8 +436,8 @@ inline status config::put_object(const std::string &key, T *value,
 	if (init() != 0)
 		return status::UNKNOWN_ERROR;
 
-	return static_cast<status>(pmemkv_config_put_object(this->_config, key.data(),
-							    (void *)value, deleter));
+	return static_cast<status>(pmemkv_config_put_object(
+		this->config_.get(), key.data(), (void *)value, deleter));
 }
 
 /**
@@ -520,7 +466,7 @@ inline status config::put_object(const std::string &key,
 	}
 
 	return static_cast<status>(pmemkv_config_put_object_cb(
-		this->_config, key.data(), (void *)wrapper, internal::call_up_get,
+		this->config_.get(), key.data(), (void *)wrapper, internal::call_up_get,
 		internal::call_up_destructor));
 }
 
@@ -586,7 +532,7 @@ inline status config::put_comparator(Comparator &&comparator)
 	}
 
 	return static_cast<status>(pmemkv_config_put_object_cb(
-		this->_config, "comparator", (void *)entry, internal::call_up_get,
+		this->config_.get(), "comparator", (void *)entry, internal::call_up_get,
 		internal::call_up_destructor));
 }
 
@@ -604,7 +550,7 @@ inline status config::put_uint64(const std::string &key, std::uint64_t value) no
 		return status::UNKNOWN_ERROR;
 
 	return static_cast<status>(
-		pmemkv_config_put_uint64(this->_config, key.data(), value));
+		pmemkv_config_put_uint64(this->config_.get(), key.data(), value));
 }
 
 /**
@@ -621,7 +567,7 @@ inline status config::put_int64(const std::string &key, std::int64_t value) noex
 		return status::UNKNOWN_ERROR;
 
 	return static_cast<status>(
-		pmemkv_config_put_int64(this->_config, key.data(), value));
+		pmemkv_config_put_int64(this->config_.get(), key.data(), value));
 }
 
 /**
@@ -639,7 +585,7 @@ inline status config::put_string(const std::string &key,
 		return status::UNKNOWN_ERROR;
 
 	return static_cast<status>(
-		pmemkv_config_put_string(this->_config, key.data(), value.data()));
+		pmemkv_config_put_string(this->config_.get(), key.data(), value.data()));
 }
 
 /**
@@ -693,7 +639,7 @@ inline status config::put_oid(PMEMoid *oid) noexcept
 	if (init() != 0)
 		return status::UNKNOWN_ERROR;
 
-	return static_cast<status>(pmemkv_config_put_oid(this->_config, oid));
+	return static_cast<status>(pmemkv_config_put_oid(this->config_.get(), oid));
 }
 
 /**
@@ -710,12 +656,12 @@ template <typename T>
 inline status config::get_data(const std::string &key, T *&value,
 			       std::size_t &count) const noexcept
 {
-	if (this->_config == nullptr)
+	if (this->config_.get() == nullptr)
 		return status::NOT_FOUND;
 
 	std::size_t size;
 	auto s = static_cast<status>(pmemkv_config_get_data(
-		this->_config, key.data(), (const void **)&value, &size));
+		this->config_.get(), key.data(), (const void **)&value, &size));
 
 	if (s != status::OK)
 		return s;
@@ -737,11 +683,11 @@ inline status config::get_data(const std::string &key, T *&value,
 template <typename T>
 inline status config::get_object(const std::string &key, T *&value) const noexcept
 {
-	if (this->_config == nullptr)
+	if (this->config_.get() == nullptr)
 		return status::NOT_FOUND;
 
-	auto s = static_cast<status>(
-		pmemkv_config_get_object(this->_config, key.data(), (void **)&value));
+	auto s = static_cast<status>(pmemkv_config_get_object(
+		this->config_.get(), key.data(), (void **)&value));
 
 	return s;
 }
@@ -757,11 +703,11 @@ inline status config::get_object(const std::string &key, T *&value) const noexce
 inline status config::get_uint64(const std::string &key, std::uint64_t &value) const
 	noexcept
 {
-	if (this->_config == nullptr)
+	if (this->config_.get() == nullptr)
 		return status::NOT_FOUND;
 
 	return static_cast<status>(
-		pmemkv_config_get_uint64(this->_config, key.data(), &value));
+		pmemkv_config_get_uint64(this->config_.get(), key.data(), &value));
 }
 
 /**
@@ -775,11 +721,11 @@ inline status config::get_uint64(const std::string &key, std::uint64_t &value) c
 inline status config::get_int64(const std::string &key, std::int64_t &value) const
 	noexcept
 {
-	if (this->_config == nullptr)
+	if (this->config_.get() == nullptr)
 		return status::NOT_FOUND;
 
 	return static_cast<status>(
-		pmemkv_config_get_int64(this->_config, key.data(), &value));
+		pmemkv_config_get_int64(this->config_.get(), key.data(), &value));
 }
 
 /**
@@ -793,13 +739,13 @@ inline status config::get_int64(const std::string &key, std::int64_t &value) con
 inline status config::get_string(const std::string &key, std::string &value) const
 	noexcept
 {
-	if (this->_config == nullptr)
+	if (this->config_.get() == nullptr)
 		return status::NOT_FOUND;
 
 	const char *data;
 
 	auto s = static_cast<status>(
-		pmemkv_config_get_string(this->_config, key.data(), &data));
+		pmemkv_config_get_string(this->config_.get(), key.data(), &data));
 
 	if (s != status::OK)
 		return s;
@@ -817,9 +763,7 @@ inline status config::get_string(const std::string &key, std::string &value) con
  */
 inline pmemkv_config *config::release() noexcept
 {
-	auto c = this->_config;
-	this->_config = nullptr;
-	return c;
+	return this->config_.release();
 }
 
 /*
@@ -851,40 +795,8 @@ static inline void call_get_copy(const char *v, size_t vb, void *arg)
 /**
  * Default constructor with uninitialized database.
  */
-inline db::db() noexcept
+inline db::db() noexcept : db_(nullptr, &pmemkv_close)
 {
-	this->_db = nullptr;
-}
-
-/**
- * Move constructor. Initializes database with another database.
- * Ownership is being transferred to a class that move constructor was called on.
- *
- * @param[in] other another database, to be moved from
- */
-inline db::db(db &&other) noexcept
-{
-	this->_db = other._db;
-	other._db = nullptr;
-}
-
-/**
- * Move assignment operator. Deletes previous database and replaces
- * it with another database. Ownership is being transferred to a class that
- * assign operator was called on.
- *
- * @param[in] other another database, to be assigned from
- */
-inline db &db::operator=(db &&other) noexcept
-{
-	if (this == &other)
-		return *this;
-
-	close();
-
-	std::swap(this->_db, other._db);
-
-	return *this;
 }
 
 /**
@@ -896,8 +808,11 @@ inline db &db::operator=(db &&other) noexcept
  */
 inline status db::open(const std::string &engine_name) noexcept
 {
-	return static_cast<status>(
-		pmemkv_open(engine_name.c_str(), nullptr, &(this->_db)));
+	pmemkv_db *db;
+	auto s = static_cast<status>(pmemkv_open(engine_name.c_str(), nullptr, &db));
+	if (s == pmem::kv::status::OK)
+		this->db_.reset(db);
+	return s;
 }
 
 /**
@@ -910,8 +825,12 @@ inline status db::open(const std::string &engine_name) noexcept
  */
 inline status db::open(const std::string &engine_name, config &&cfg) noexcept
 {
-	return static_cast<status>(
-		pmemkv_open(engine_name.c_str(), cfg.release(), &(this->_db)));
+	pmemkv_db *db;
+	auto s =
+		static_cast<status>(pmemkv_open(engine_name.c_str(), cfg.release(), &db));
+	if (s == pmem::kv::status::OK)
+		this->db_.reset(db);
+	return s;
 }
 
 /**
@@ -919,18 +838,7 @@ inline status db::open(const std::string &engine_name, config &&cfg) noexcept
  */
 inline void db::close() noexcept
 {
-	if (this->_db != nullptr)
-		pmemkv_close(this->_db);
-
-	this->_db = nullptr;
-}
-
-/**
- * Default destructor. Closes pmemkv database.
- */
-inline db::~db()
-{
-	close();
+	this->db_.reset(nullptr);
 }
 
 /**
@@ -942,7 +850,7 @@ inline db::~db()
  */
 inline status db::count_all(std::size_t &cnt) noexcept
 {
-	return static_cast<status>(pmemkv_count_all(this->_db, &cnt));
+	return static_cast<status>(pmemkv_count_all(this->db_.get(), &cnt));
 }
 
 /**
@@ -958,7 +866,7 @@ inline status db::count_all(std::size_t &cnt) noexcept
 inline status db::count_above(string_view key, std::size_t &cnt) noexcept
 {
 	return static_cast<status>(
-		pmemkv_count_above(this->_db, key.data(), key.size(), &cnt));
+		pmemkv_count_above(this->db_.get(), key.data(), key.size(), &cnt));
 }
 
 /**
@@ -974,7 +882,7 @@ inline status db::count_above(string_view key, std::size_t &cnt) noexcept
 inline status db::count_equal_above(string_view key, std::size_t &cnt) noexcept
 {
 	return static_cast<status>(
-		pmemkv_count_equal_above(this->_db, key.data(), key.size(), &cnt));
+		pmemkv_count_equal_above(this->db_.get(), key.data(), key.size(), &cnt));
 }
 
 /**
@@ -990,7 +898,7 @@ inline status db::count_equal_above(string_view key, std::size_t &cnt) noexcept
 inline status db::count_equal_below(string_view key, std::size_t &cnt) noexcept
 {
 	return static_cast<status>(
-		pmemkv_count_equal_below(this->_db, key.data(), key.size(), &cnt));
+		pmemkv_count_equal_below(this->db_.get(), key.data(), key.size(), &cnt));
 }
 
 /**
@@ -1006,7 +914,7 @@ inline status db::count_equal_below(string_view key, std::size_t &cnt) noexcept
 inline status db::count_below(string_view key, std::size_t &cnt) noexcept
 {
 	return static_cast<status>(
-		pmemkv_count_below(this->_db, key.data(), key.size(), &cnt));
+		pmemkv_count_below(this->db_.get(), key.data(), key.size(), &cnt));
 }
 
 /**
@@ -1023,8 +931,9 @@ inline status db::count_below(string_view key, std::size_t &cnt) noexcept
 inline status db::count_between(string_view key1, string_view key2,
 				std::size_t &cnt) noexcept
 {
-	return static_cast<status>(pmemkv_count_between(
-		this->_db, key1.data(), key1.size(), key2.data(), key2.size(), &cnt));
+	return static_cast<status>(pmemkv_count_between(this->db_.get(), key1.data(),
+							key1.size(), key2.data(),
+							key2.size(), &cnt));
 }
 
 /**
@@ -1041,7 +950,7 @@ inline status db::count_between(string_view key1, string_view key2,
  */
 inline status db::get_all(get_kv_callback *callback, void *arg) noexcept
 {
-	return static_cast<status>(pmemkv_get_all(this->_db, callback, arg));
+	return static_cast<status>(pmemkv_get_all(this->db_.get(), callback, arg));
 }
 
 /**
@@ -1056,7 +965,8 @@ inline status db::get_all(get_kv_callback *callback, void *arg) noexcept
  */
 inline status db::get_all(std::function<get_kv_function> f) noexcept
 {
-	return static_cast<status>(pmemkv_get_all(this->_db, call_get_kv_function, &f));
+	return static_cast<status>(
+		pmemkv_get_all(this->db_.get(), call_get_kv_function, &f));
 }
 
 /**
@@ -1079,7 +989,7 @@ inline status db::get_above(string_view key, get_kv_callback *callback,
 			    void *arg) noexcept
 {
 	return static_cast<status>(
-		pmemkv_get_above(this->_db, key.data(), key.size(), callback, arg));
+		pmemkv_get_above(this->db_.get(), key.data(), key.size(), callback, arg));
 }
 
 /**
@@ -1098,8 +1008,8 @@ inline status db::get_above(string_view key, get_kv_callback *callback,
  */
 inline status db::get_above(string_view key, std::function<get_kv_function> f) noexcept
 {
-	return static_cast<status>(pmemkv_get_above(this->_db, key.data(), key.size(),
-						    call_get_kv_function, &f));
+	return static_cast<status>(pmemkv_get_above(
+		this->db_.get(), key.data(), key.size(), call_get_kv_function, &f));
 }
 
 /**
@@ -1122,8 +1032,8 @@ inline status db::get_above(string_view key, std::function<get_kv_function> f) n
 inline status db::get_equal_above(string_view key, get_kv_callback *callback,
 				  void *arg) noexcept
 {
-	return static_cast<status>(
-		pmemkv_get_equal_above(this->_db, key.data(), key.size(), callback, arg));
+	return static_cast<status>(pmemkv_get_equal_above(this->db_.get(), key.data(),
+							  key.size(), callback, arg));
 }
 
 /**
@@ -1145,7 +1055,7 @@ inline status db::get_equal_above(string_view key,
 				  std::function<get_kv_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_get_equal_above(
-		this->_db, key.data(), key.size(), call_get_kv_function, &f));
+		this->db_.get(), key.data(), key.size(), call_get_kv_function, &f));
 }
 
 /**
@@ -1168,8 +1078,8 @@ inline status db::get_equal_above(string_view key,
 inline status db::get_equal_below(string_view key, get_kv_callback *callback,
 				  void *arg) noexcept
 {
-	return static_cast<status>(
-		pmemkv_get_equal_below(this->_db, key.data(), key.size(), callback, arg));
+	return static_cast<status>(pmemkv_get_equal_below(this->db_.get(), key.data(),
+							  key.size(), callback, arg));
 }
 
 /**
@@ -1191,7 +1101,7 @@ inline status db::get_equal_below(string_view key,
 				  std::function<get_kv_function> f) noexcept
 {
 	return static_cast<status>(pmemkv_get_equal_below(
-		this->_db, key.data(), key.size(), call_get_kv_function, &f));
+		this->db_.get(), key.data(), key.size(), call_get_kv_function, &f));
 }
 
 /**
@@ -1214,7 +1124,7 @@ inline status db::get_below(string_view key, get_kv_callback *callback,
 			    void *arg) noexcept
 {
 	return static_cast<status>(
-		pmemkv_get_below(this->_db, key.data(), key.size(), callback, arg));
+		pmemkv_get_below(this->db_.get(), key.data(), key.size(), callback, arg));
 }
 
 /**
@@ -1233,8 +1143,8 @@ inline status db::get_below(string_view key, get_kv_callback *callback,
  */
 inline status db::get_below(string_view key, std::function<get_kv_function> f) noexcept
 {
-	return static_cast<status>(pmemkv_get_below(this->_db, key.data(), key.size(),
-						    call_get_kv_function, &f));
+	return static_cast<status>(pmemkv_get_below(
+		this->db_.get(), key.data(), key.size(), call_get_kv_function, &f));
 }
 
 /**
@@ -1257,9 +1167,9 @@ inline status db::get_below(string_view key, std::function<get_kv_function> f) n
 inline status db::get_between(string_view key1, string_view key2,
 			      get_kv_callback *callback, void *arg) noexcept
 {
-	return static_cast<status>(pmemkv_get_between(this->_db, key1.data(), key1.size(),
-						      key2.data(), key2.size(), callback,
-						      arg));
+	return static_cast<status>(pmemkv_get_between(this->db_.get(), key1.data(),
+						      key1.size(), key2.data(),
+						      key2.size(), callback, arg));
 }
 /**
  * Executes function for every record stored in pmem::kv::db, whose keys
@@ -1279,9 +1189,9 @@ inline status db::get_between(string_view key1, string_view key2,
 inline status db::get_between(string_view key1, string_view key2,
 			      std::function<get_kv_function> f) noexcept
 {
-	return static_cast<status>(pmemkv_get_between(this->_db, key1.data(), key1.size(),
-						      key2.data(), key2.size(),
-						      call_get_kv_function, &f));
+	return static_cast<status>(
+		pmemkv_get_between(this->db_.get(), key1.data(), key1.size(), key2.data(),
+				   key2.size(), call_get_kv_function, &f));
 }
 
 /**
@@ -1295,7 +1205,8 @@ inline status db::get_between(string_view key1, string_view key2,
  */
 inline status db::exists(string_view key) noexcept
 {
-	return static_cast<status>(pmemkv_exists(this->_db, key.data(), key.size()));
+	return static_cast<status>(
+		pmemkv_exists(this->db_.get(), key.data(), key.size()));
 }
 
 /**
@@ -1316,7 +1227,7 @@ inline status db::exists(string_view key) noexcept
 inline status db::get(string_view key, get_v_callback *callback, void *arg) noexcept
 {
 	return static_cast<status>(
-		pmemkv_get(this->_db, key.data(), key.size(), callback, arg));
+		pmemkv_get(this->db_.get(), key.data(), key.size(), callback, arg));
 }
 
 /**
@@ -1332,8 +1243,8 @@ inline status db::get(string_view key, get_v_callback *callback, void *arg) noex
  */
 inline status db::get(string_view key, std::function<get_v_function> f) noexcept
 {
-	return static_cast<status>(
-		pmemkv_get(this->_db, key.data(), key.size(), call_get_v_function, &f));
+	return static_cast<status>(pmemkv_get(this->db_.get(), key.data(), key.size(),
+					      call_get_v_function, &f));
 }
 
 /**
@@ -1348,8 +1259,8 @@ inline status db::get(string_view key, std::function<get_v_function> f) noexcept
  */
 inline status db::get(string_view key, std::string *value) noexcept
 {
-	return static_cast<status>(
-		pmemkv_get(this->_db, key.data(), key.size(), call_get_copy, value));
+	return static_cast<status>(pmemkv_get(this->db_.get(), key.data(), key.size(),
+					      call_get_copy, value));
 }
 
 /**
@@ -1363,7 +1274,7 @@ inline status db::get(string_view key, std::string *value) noexcept
  */
 inline status db::put(string_view key, string_view value) noexcept
 {
-	return static_cast<status>(pmemkv_put(this->_db, key.data(), key.size(),
+	return static_cast<status>(pmemkv_put(this->db_.get(), key.data(), key.size(),
 					      value.data(), value.size()));
 }
 
@@ -1377,7 +1288,8 @@ inline status db::put(string_view key, string_view value) noexcept
  */
 inline status db::remove(string_view key) noexcept
 {
-	return static_cast<status>(pmemkv_remove(this->_db, key.data(), key.size()));
+	return static_cast<status>(
+		pmemkv_remove(this->db_.get(), key.data(), key.size()));
 }
 
 /**
@@ -1393,7 +1305,7 @@ inline status db::defrag(double start_percent, double amount_percent)
 
 {
 	return static_cast<status>(
-		pmemkv_defrag(this->_db, start_percent, amount_percent));
+		pmemkv_defrag(this->db_.get(), start_percent, amount_percent));
 }
 
 /**
