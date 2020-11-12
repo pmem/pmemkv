@@ -5,7 +5,7 @@ on: [push, pull_request]
 env:
   REPO:           pmemkv
   GITHUB_REPO:    pmem/pmemkv
-  CONTAINER_REG:  ghcr.io/${{github.repository}}
+  CONTAINER_REG:  ghcr.io/pmem/pmemkv
 
 jobs:
   linux:
