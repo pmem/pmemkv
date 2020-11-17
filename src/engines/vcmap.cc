@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2020, Intel Corporation */
 
 #include "vcmap.h"
 #include "../out.h"
@@ -123,6 +123,92 @@ status vcmap::remove(string_view key)
 	size_t erased = pmem_kv_container.erase(
 		pmem_string(key.data(), key.size(), ch_allocator));
 	return (erased == 1) ? status::OK : status::NOT_FOUND;
+}
+
+internal::iterator_base *vcmap::new_iterator()
+{
+	return new vcmap_iterator<false>{&pmem_kv_container, &ch_allocator};
+}
+
+internal::iterator_base *vcmap::new_const_iterator()
+{
+	return new vcmap_iterator<true>{&pmem_kv_container, &ch_allocator};
+}
+
+vcmap::vcmap_iterator<true>::vcmap_iterator(container_type *c, ch_allocator_t *ca)
+    : container(c), _acc(), ch_allocator(ca)
+{
+}
+
+vcmap::vcmap_iterator<false>::vcmap_iterator(container_type *c, ch_allocator_t *ca)
+    : vcmap::vcmap_iterator<true>(c, ca)
+{
+}
+
+status vcmap::vcmap_iterator<true>::seek(string_view key)
+{
+	_acc.release();
+
+	if (container->find(_acc, pmem_string(key.data(), key.size(), *ch_allocator)))
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+std::pair<string_view, status> vcmap::vcmap_iterator<true>::key()
+{
+	if (_acc.empty())
+		return {{}, status::NOT_FOUND};
+
+	return {{_acc->first.c_str()}, status::OK};
+}
+
+std::pair<pmem::obj::slice<const char *>, status>
+vcmap::vcmap_iterator<true>::read_range(size_t pos, size_t n)
+{
+	if (_acc.empty())
+		return {{nullptr, nullptr}, status::NOT_FOUND};
+
+	if (pos + n > _acc->second.size())
+		n = _acc->second.size() - pos;
+
+	return {{_acc->second.c_str() + pos, _acc->second.c_str() + pos + n}, status::OK};
+}
+
+std::pair<pmem::obj::slice<char *>, status>
+vcmap::vcmap_iterator<false>::write_range(size_t pos, size_t n)
+{
+	if (_acc.empty())
+		return {{nullptr, nullptr}, status::NOT_FOUND};
+
+	/* check if position of iterator changed */
+	auto key = _acc->first.c_str();
+	if (snapshotted_key.compare(key) != 0) {
+		abort();
+		snapshotted_key = key;
+	}
+
+	if (pos + n > _acc->second.size())
+		n = _acc->second.size() - pos;
+
+	log.push_back({std::string(_acc->second.c_str() + pos, n), pos});
+	auto &val = log[log.size() - 1].first;
+
+	return {{&val[0], &val[n]}, status::OK};
+}
+
+status vcmap::vcmap_iterator<false>::commit()
+{
+	/* check if position of iterator changed before commit */
+	if (snapshotted_key.compare(_acc->first.c_str()) != 0)
+		abort();
+
+	for (auto &p : log) {
+		auto dest = &(_acc->second[0]) + p.second;
+		std::copy(p.first.begin(), p.first.end(), dest);
+	}
+	log.clear();
+	return status::OK;
 }
 
 } // namespace kv

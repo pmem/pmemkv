@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2020, Intel Corporation */
 
 #pragma once
 
@@ -21,6 +21,9 @@ namespace kv
 {
 
 class vcmap : public engine_base {
+	template <bool IsConst>
+	class vcmap_iterator;
+
 public:
 	vcmap(std::unique_ptr<internal::config> cfg);
 	~vcmap();
@@ -39,6 +42,9 @@ public:
 
 	status remove(string_view key) final;
 
+	internal::iterator_base *new_iterator() final;
+	internal::iterator_base *new_const_iterator() final;
+
 private:
 	typedef memkind_ns::allocator<char> ch_allocator_t;
 	typedef std::basic_string<char, std::char_traits<char>, ch_allocator_t>
@@ -51,6 +57,41 @@ private:
 	kv_allocator_t kv_allocator;
 	ch_allocator_t ch_allocator;
 	map_t pmem_kv_container;
+};
+
+template <>
+class vcmap::vcmap_iterator<true> : virtual public internal::iterator_base {
+	using container_type = vcmap::map_t;
+	using ch_allocator_t = memkind_ns::allocator<char>;
+
+public:
+	vcmap_iterator(container_type *container, ch_allocator_t *ca);
+
+	status seek(string_view key) final;
+
+	std::pair<string_view, status> key() final;
+
+	std::pair<pmem::obj::slice<const char *>, status> read_range(size_t pos,
+								     size_t n) final;
+
+protected:
+	container_type *container;
+	container_type::accessor _acc;
+	ch_allocator_t *ch_allocator;
+};
+
+template <>
+class vcmap::vcmap_iterator<false> : public vcmap::vcmap_iterator<true>,
+				     public internal::write_iterator_base {
+	using container_type = vcmap::map_t;
+	using ch_allocator_t = memkind_ns::allocator<char>;
+
+public:
+	vcmap_iterator(container_type *container, ch_allocator_t *ca);
+
+	std::pair<pmem::obj::slice<char *>, status> write_range(size_t pos,
+								size_t n) final;
+	status commit() final;
 };
 
 } /* namespace kv */

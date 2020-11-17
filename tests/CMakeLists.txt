@@ -778,6 +778,12 @@ if(ENGINE_VCMAP)
 			BINARY memkind_error_handling
 			TRACERS none memcheck
 			SCRIPT memkind_based/memkind/error_handling.cmake)
+
+	add_engine_test(ENGINE vcmap
+			BINARY iterator_basic
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake
+			PARAMS true)
 endif(ENGINE_VCMAP)
 ################################################################################
 ###################################### VSMAP ###################################
