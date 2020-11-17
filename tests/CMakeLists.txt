@@ -384,6 +384,18 @@ if(ENGINE_CMAP)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
 			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE cmap
+			BINARY iterator_basic
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS false false)
+
+	add_engine_test(ENGINE cmap
+			BINARY iterator_concurrent
+			TRACERS none memcheck pmemcheck helgrind drd
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8)
 endif(ENGINE_CMAP)
 ################################################################################
 ###################################### CSMAP ###################################
