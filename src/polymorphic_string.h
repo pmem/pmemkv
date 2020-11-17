@@ -5,6 +5,7 @@
 
 #include <libpmemobj++/container/string.hpp>
 #include <libpmemobj++/p.hpp>
+#include <libpmemobj++/slice.hpp>
 #include <string>
 
 #include "libpmemkv.hpp"
@@ -115,6 +116,11 @@ public:
 	int compare(Args &&... args) const
 	{
 		return pstr.compare(std::forward<Args>(args)...);
+	}
+
+	pmem::obj::slice<char *> range(size_t p, size_t n)
+	{
+		return pstr.range(p, n);
 	}
 
 private:

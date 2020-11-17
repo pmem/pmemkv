@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "../iterator.h"
 #include "../pmemobj_engine.h"
 #include "../polymorphic_string.h"
 
@@ -62,6 +63,9 @@ using map_t = pmem::obj::concurrent_hash_map<string_t, string_t, string_hasher>;
 } /* namespace internal */
 
 class cmap : public pmemobj_engine_base<internal::cmap::map_t> {
+	template <bool IsConst>
+	class cmap_iterator;
+
 public:
 	cmap(std::unique_ptr<internal::config> cfg);
 	~cmap();
@@ -85,9 +89,47 @@ public:
 
 	status defrag(double start_percent, double amount_percent) final;
 
+	internal::iterator_base *new_iterator() final;
+	internal::iterator_base *new_const_iterator() final;
+
 private:
 	void Recover();
 	internal::cmap::map_t *container;
+};
+
+template <>
+class cmap::cmap_iterator<true> : virtual public internal::iterator_base {
+	using container_type = internal::cmap::map_t;
+
+public:
+	cmap_iterator(container_type *container);
+
+	status seek(string_view key) final;
+
+	result<string_view> key() final;
+
+	result<pmem::obj::slice<const char *>> read_range(size_t pos, size_t n) final;
+
+protected:
+	container_type *container;
+	container_type::accessor acc_;
+	pmem::obj::pool_base pop;
+};
+
+template <>
+class cmap::cmap_iterator<false> : public cmap::cmap_iterator<true> {
+	using container_type = internal::cmap::map_t;
+
+public:
+	cmap_iterator(container_type *container);
+
+	result<pmem::obj::slice<char *>> write_range(size_t pos, size_t n) final;
+
+	status commit() final;
+	void abort() final;
+
+private:
+	std::vector<std::pair<std::string, size_t>> log;
 };
 
 } /* namespace kv */

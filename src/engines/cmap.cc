@@ -133,5 +133,85 @@ void cmap::Recover()
 	}
 }
 
+internal::iterator_base *cmap::new_iterator()
+{
+	return new cmap_iterator<false>{container};
+}
+
+internal::iterator_base *cmap::new_const_iterator()
+{
+	return new cmap_iterator<true>{container};
+}
+
+cmap::cmap_iterator<true>::cmap_iterator(container_type *c)
+    : container(c), pop(pmem::obj::pool_by_vptr(c))
+{
+}
+
+cmap::cmap_iterator<false>::cmap_iterator(container_type *c)
+    : cmap::cmap_iterator<true>(c)
+{
+}
+
+status cmap::cmap_iterator<true>::seek(string_view key)
+{
+	init_seek();
+
+	if (container->find(acc_, key))
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+result<string_view> cmap::cmap_iterator<true>::key()
+{
+	assert(!acc_.empty());
+
+	return {{acc_->first.c_str()}};
+}
+
+result<pmem::obj::slice<const char *>> cmap::cmap_iterator<true>::read_range(size_t pos,
+									     size_t n)
+{
+	assert(!acc_.empty());
+
+	if (pos + n > acc_->second.size() || pos + n < pos)
+		n = acc_->second.size() - pos;
+
+	return {{acc_->second.c_str() + pos, acc_->second.c_str() + pos + n}};
+}
+
+result<pmem::obj::slice<char *>> cmap::cmap_iterator<false>::write_range(size_t pos,
+									 size_t n)
+{
+	assert(!acc_.empty());
+
+	if (pos + n > acc_->second.size() || pos + n < pos)
+		n = acc_->second.size() - pos;
+
+	log.push_back({std::string(acc_->second.c_str() + pos, n), pos});
+	auto &val = log.back().first;
+
+	return {{&val[0], &val[n]}};
+}
+
+status cmap::cmap_iterator<false>::commit()
+{
+	pmem::obj::transaction::run(pop, [&] {
+		for (auto &p : log) {
+			auto dest = acc_->second.range(p.second, p.first.size());
+			std::copy(p.first.begin(), p.first.end(), dest.begin());
+		}
+	});
+	log.clear();
+
+	return status::OK;
+}
+
+void cmap::cmap_iterator<false>::abort()
+{
+	log.clear();
+}
+
 } // namespace kv
 } // namespace pmem
