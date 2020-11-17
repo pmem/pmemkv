@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2020, Intel Corporation */
 
 #include "vcmap.h"
 #include "../out.h"
 #include <libpmemobj++/transaction.hpp>
 
+#include <cassert>
 #include <iostream>
 
 namespace pmem
@@ -123,6 +124,84 @@ status vcmap::remove(string_view key)
 	size_t erased = pmem_kv_container.erase(
 		pmem_string(key.data(), key.size(), ch_allocator));
 	return (erased == 1) ? status::OK : status::NOT_FOUND;
+}
+
+internal::iterator_base *vcmap::new_iterator()
+{
+	return new vcmap_iterator<false>{&pmem_kv_container, &ch_allocator};
+}
+
+internal::iterator_base *vcmap::new_const_iterator()
+{
+	return new vcmap_iterator<true>{&pmem_kv_container, &ch_allocator};
+}
+
+vcmap::vcmap_iterator<true>::vcmap_iterator(container_type *c, ch_allocator_t *ca)
+    : container(c), _acc(), ch_allocator(ca)
+{
+}
+
+vcmap::vcmap_iterator<false>::vcmap_iterator(container_type *c, ch_allocator_t *ca)
+    : vcmap::vcmap_iterator<true>(c, ca)
+{
+}
+
+status vcmap::vcmap_iterator<true>::seek(string_view key)
+{
+	init_seek();
+
+	if (container->find(_acc, pmem_string(key.data(), key.size(), *ch_allocator)))
+		return status::OK;
+
+	return status::NOT_FOUND;
+}
+
+std::pair<string_view, status> vcmap::vcmap_iterator<true>::key()
+{
+	assert(!_acc.empty());
+
+	return {{_acc->first.c_str()}, status::OK};
+}
+
+std::pair<pmem::obj::slice<const char *>, status>
+vcmap::vcmap_iterator<true>::read_range(size_t pos, size_t n)
+{
+	assert(!_acc.empty());
+
+	if (pos + n > _acc->second.size() || pos + n < pos)
+		n = _acc->second.size() - pos;
+
+	return {{_acc->second.c_str() + pos, _acc->second.c_str() + pos + n}, status::OK};
+}
+
+std::pair<pmem::obj::slice<char *>, status>
+vcmap::vcmap_iterator<false>::write_range(size_t pos, size_t n)
+{
+	assert(!_acc.empty());
+
+	if (pos + n > _acc->second.size() || pos + n < pos)
+		n = _acc->second.size() - pos;
+
+	log.push_back({std::string(_acc->second.c_str() + pos, n), pos});
+	auto &val = log.back().first;
+
+	return {{&val[0], &val[n]}, status::OK};
+}
+
+status vcmap::vcmap_iterator<false>::commit()
+{
+	for (auto &p : log) {
+		auto dest = &(_acc->second[0]) + p.second;
+		std::copy(p.first.begin(), p.first.end(), dest);
+	}
+	log.clear();
+
+	return status::OK;
+}
+
+void vcmap::vcmap_iterator<false>::abort()
+{
+	log.clear();
 }
 
 } // namespace kv
