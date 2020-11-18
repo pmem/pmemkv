@@ -44,13 +44,16 @@ RUN pacman -S --noconfirm \
 	pandoc \
 	perl-text-diff \
 	pkg-config \
-	rapidjson \
 	sfml \
 	sudo \
 	wget \
 	which \
 	whois \
 	xmlto
+
+# Install rapidjson from sources
+COPY install-rapidjson.sh install-rapidjson.sh
+RUN ./install-rapidjson.sh
 
 # Install libndctl
 COPY install-libndctl.sh install-libndctl.sh

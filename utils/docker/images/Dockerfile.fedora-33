@@ -7,12 +7,12 @@
 #
 
 # Pull base image
-FROM fedora:32
+FROM fedora:33
 MAINTAINER szymon.romik@intel.com
 
 # Set required environment variables
 ENV OS fedora
-ENV OS_VER 32
+ENV OS_VER 33
 ENV PACKAGE_MANAGER rpm
 ENV NOTTY 1
 
@@ -66,13 +66,14 @@ RUN dnf debuginfo-install -y glibc
 COPY install-valgrind.sh install-valgrind.sh
 RUN ./install-valgrind.sh
 
-# Install pmdk
+# Install pmdk from sources, because of:
+# https://github.com/pmem/pmdk/issues/4938
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh rpm
+RUN ./install-pmdk.sh
 
-# Install pmdk c++ bindings
+# Install pmdk c++ bindings (also from sources)
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh rpm
+RUN ./install-libpmemobj-cpp.sh
 
 # Add user
 ENV USER user
