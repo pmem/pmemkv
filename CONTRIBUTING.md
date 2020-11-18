@@ -212,12 +212,15 @@ the repository has to be properly configured.
   which will be target to make an automatic pull request with documentation.
   In most cases it will be the same as Github account name.
 
-To enable automatic images pushing to Github Container Registry, following variables has to be set up:
+To enable automatic images pushing to Github Container Registry, following variables:
 
-* `GH_CR_USER` secret variable. An account (with proper permissions) to publish images to
-  the Container Registry (tab **Packages** in your GH profile/organization).
+* `CONTAINER_REG` existing environment variable (defined in workflow files, in .github/ directory)
+  has to be updated to contain proper GitHub Container Registry address (to forking user's container registry),
 
-* `GH_CR_PAT` secret variable. Personal Access Token (with only read & write packages
-  permissions), to be generated as described
+* `GH_CR_USER` secret variable has to be set up - an account (with proper permissions) to publish
+  images to the Container Registry (tab **Packages** in your GH profile/organization).
+
+* `GH_CR_PAT` secret variable also has to be set up - Personal Access Token
+  (with only read & write packages permissions), to be generated as described
   [here](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token#creating-a-token)
   for selected account (user defined in above variable).
