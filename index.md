@@ -81,6 +81,7 @@ The following series of blog articles provides an introduction to **pmemkv**:
 * [Zero-copy leaf splits in pmemkv](https://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html)
 * [Benchmarking with different storage engines using pmemkv](https://pmem.io/2017/12/27/pmemkv-benchmarking-engines.html)
 * [Language bindings for pmemkv](https://pmem.io/2020/03/04/pmemkv-bindings.html)
+* [API overview of pmemkv-java binding](https://pmem.io/2020/10/30/pmemkv-java-binding.html)
 
 ## Archived documentation
 
