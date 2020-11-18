@@ -26,7 +26,7 @@ before_install:
   - echo $TRAVIS_COMMIT_RANGE
   - export HOST_WORKDIR=`pwd`
   - cd utils/docker
-  - ./pull-or-rebuild-image.sh
+  - ./pull-or-rebuild-image.sh rebuild
 
 script:
   - ./build.sh
