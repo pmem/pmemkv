@@ -9,7 +9,9 @@ add_cppstyle(examples ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_cpp/*.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_c/*.c)
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_c/*.c
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_transaction_cpp/*.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_transaction_c/*.c)
 
 add_check_whitespace(examples ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.*
@@ -17,8 +19,10 @@ add_check_whitespace(examples ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_cpp/*.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_c/*.c)
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_cpp/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_c/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_transaction_cpp/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_transaction_c/*.*)
 
 if(NOT ENGINE_CMAP)
 	message(WARNING
@@ -49,6 +53,14 @@ target_link_libraries(example-pmemkv_pmemobj_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES
 
 add_example(pmemkv_basic_config_c pmemkv_config_c/pmemkv_basic_config.c)
 target_link_libraries(example-pmemkv_basic_config_c pmemkv ${LIBPMEMOBJ++_LIBRARIES})
+
+if (ENGINE_RADIX)
+	add_example(pmemkv_transaction_cpp pmemkv_transaction_cpp/pmemkv_transaction.cpp)
+	target_link_libraries(example-pmemkv_transaction_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
+
+	add_example(pmemkv_transaction_c pmemkv_transaction_c/pmemkv_transaction.c)
+	target_link_libraries(example-pmemkv_transaction_c pmemkv ${LIBPMEMOBJ++_LIBRARIES})
+endif()
 
 if(BUILD_JSON_CONFIG)
 	add_example(pmemkv_config_c pmemkv_config_c/pmemkv_config.c)
