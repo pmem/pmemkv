@@ -475,6 +475,8 @@ private:
 	This API is EXPERIMENTAL and might change.
 
 	This class allows grouping several operations into one atomic action.
+
+	@snippet examples/pmemkv_transaction_cpp/pmemkv_transaction.cpp transaction
 */
 class tx {
 public:
