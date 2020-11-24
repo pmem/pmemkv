@@ -50,6 +50,11 @@ target_link_libraries(example-pmemkv_pmemobj_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES
 add_example(pmemkv_basic_config_c pmemkv_config_c/pmemkv_basic_config.c)
 target_link_libraries(example-pmemkv_basic_config_c pmemkv ${LIBPMEMOBJ++_LIBRARIES})
 
+if (ENGINE_RADIX)
+	add_example(pmemkv_transaction_cpp pmemkv_transaction_cpp/pmemkv_transaction.cpp)
+	target_link_libraries(example-pmemkv_transaction_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
+endif()
+
 if(BUILD_JSON_CONFIG)
 	add_example(pmemkv_config_c pmemkv_config_c/pmemkv_config.c)
 	target_link_libraries(example-pmemkv_config_c pmemkv pmemkv_json_config)
