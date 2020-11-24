@@ -221,6 +221,11 @@ function test_release_installation() {
 	echo "Expect failure - non-existing path is passed:"
 	run_example_standalone pmemkv_open_cpp /non-existing/path && exit 1
 
+	echo "Transaction example:"
+	compile_example_standalone pmemkv_transaction_cpp
+	pmempool create -l "pmemkv_radix" obj $WORKDIR/examples/example.poolset
+	run_example_standalone pmemkv_transaction_cpp $WORKDIR/examples/example.poolset
+
 	echo "Uninstall libraries"
 	cd $WORKDIR/build
 	sudo_password -S make uninstall
