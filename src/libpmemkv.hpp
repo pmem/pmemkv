@@ -558,6 +558,12 @@ private:
 
 	Holding simultaneously in the same thread more than one iterator is undefined
 	behavior.
+
+    Example usage of iterators with single-threaded engines:
+	@snippet examples/pmemkv_iterator_cpp/pmemkv_iterator.cpp Single-threaded
+
+	Example usage of iterators with concurrent engines:
+	@snippet examples/pmemkv_iterator_cpp/pmemkv_iterator.cpp Concurrent
 */
 template <bool IsConst>
 class db::iterator {
