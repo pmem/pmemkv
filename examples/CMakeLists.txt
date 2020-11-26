@@ -9,7 +9,9 @@ add_cppstyle(examples ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_cpp/*.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_c/*.c)
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_c/*.c
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_c/*.c
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_cpp/*.cpp)
 
 add_check_whitespace(examples ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.*
@@ -17,15 +19,10 @@ add_check_whitespace(examples ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_config_c/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_open_cpp/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_cpp/*.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_c/*.c)
-
-if(NOT ENGINE_CMAP)
-	message(WARNING
-		"Examples use cmap engine, which is disabled, hence they are "
-		"not built. If you want to build them use -DENGINE_CMAP=ON option.")
-	return()
-endif()
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_cpp/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_comparator_c/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_c/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_cpp/*.*)
 
 add_custom_target(examples)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
@@ -38,25 +35,31 @@ function(add_example name)
 	add_dependencies(examples example-${name})
 endfunction()
 
-add_example(pmemkv_basic_cpp pmemkv_basic_cpp/pmemkv_basic.cpp)
-target_link_libraries(example-pmemkv_basic_cpp pmemkv)
+if(ENGINE_CMAP)
+	add_example(pmemkv_basic_cpp pmemkv_basic_cpp/pmemkv_basic.cpp)
+	target_link_libraries(example-pmemkv_basic_cpp pmemkv)
 
-add_example(pmemkv_basic_c pmemkv_basic_c/pmemkv_basic.c)
-target_link_libraries(example-pmemkv_basic_c pmemkv)
+	add_example(pmemkv_basic_c pmemkv_basic_c/pmemkv_basic.c)
+	target_link_libraries(example-pmemkv_basic_c pmemkv)
 
-add_example(pmemkv_pmemobj_cpp pmemkv_pmemobj_cpp/pmemkv_pmemobj.cpp)
-target_link_libraries(example-pmemkv_pmemobj_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
+	add_example(pmemkv_pmemobj_cpp pmemkv_pmemobj_cpp/pmemkv_pmemobj.cpp)
+	target_link_libraries(example-pmemkv_pmemobj_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
 
-add_example(pmemkv_basic_config_c pmemkv_config_c/pmemkv_basic_config.c)
-target_link_libraries(example-pmemkv_basic_config_c pmemkv ${LIBPMEMOBJ++_LIBRARIES})
+	add_example(pmemkv_basic_config_c pmemkv_config_c/pmemkv_basic_config.c)
+	target_link_libraries(example-pmemkv_basic_config_c pmemkv ${LIBPMEMOBJ++_LIBRARIES})
 
-if(BUILD_JSON_CONFIG)
-	add_example(pmemkv_config_c pmemkv_config_c/pmemkv_config.c)
-	target_link_libraries(example-pmemkv_config_c pmemkv pmemkv_json_config)
+	if(BUILD_JSON_CONFIG)
+		add_example(pmemkv_config_c pmemkv_config_c/pmemkv_config.c)
+		target_link_libraries(example-pmemkv_config_c pmemkv pmemkv_json_config)
+	endif()
+
+	add_example(pmemkv_open_cpp pmemkv_open_cpp/pmemkv_open.cpp)
+	target_link_libraries(example-pmemkv_open_cpp pmemkv)
+else()
+	message(STATUS
+			"Some examples use cmap engine, which is disabled, hence they are "
+			"not built. If you want to build them use -DENGINE_CMAP=ON option.")
 endif()
-
-add_example(pmemkv_open_cpp pmemkv_open_cpp/pmemkv_open.cpp)
-target_link_libraries(example-pmemkv_open_cpp pmemkv)
 
 if (ENGINE_CSMAP)
 	add_example(pmemkv_comparator_cpp pmemkv_comparator_cpp/pmemkv_comparator.cpp)
@@ -64,4 +67,23 @@ if (ENGINE_CSMAP)
 
 	add_example(pmemkv_comparator_c pmemkv_comparator_c/pmemkv_comparator.c)
 	target_link_libraries(example-pmemkv_comparator_c pmemkv)
+
+	include(FindThreads)
+	if (CMAKE_USE_PTHREADS_INIT)
+		add_example(pmemkv_iterator_cpp pmemkv_iterator_cpp/pmemkv_iterator.cpp)
+		target_link_libraries(example-pmemkv_iterator_cpp pmemkv pthread)
+	endif()
+else()
+	message(STATUS
+		"Some examples use use csmap engine, which is disabled, hence they are "
+		"not built. If you want to build them use -DENGINE_CSMAP=ON option.")
+endif()
+
+if (ENGINE_RADIX)
+	add_example(pmemkv_iterator_c pmemkv_iterator_c/pmemkv_iterator.c)
+	target_link_libraries(example-pmemkv_iterator_c pmemkv)
+else()
+	message(STATUS
+		"Some examples use use radix engine, which is disabled, hence they are "
+		"not built. If you want to build them use -DENGINE_RADIX=ON option.")
 endif()
