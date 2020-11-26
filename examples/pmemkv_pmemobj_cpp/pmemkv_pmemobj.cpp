@@ -16,14 +16,17 @@
 #include <libpmemobj++/persistent_ptr.hpp>
 #include <libpmemobj++/transaction.hpp>
 
-#undef LOG
+#include "../../src/logging.h"
+#include "../../src/out.h"
+
+#undef LOG_EX
 #define ASSERT(expr)                                                                     \
 	do {                                                                             \
 		if (!(expr))                                                             \
 			std::cout << pmemkv_errormsg() << std::endl;                     \
 		assert(expr);                                                            \
 	} while (0)
-#define LOG(msg) std::cout << msg << std::endl
+#define LOG_EX(msg) std::cout << msg << std::endl
 
 using namespace pmem::kv;
 using pmemoid_vector = pmem::obj::vector<PMEMoid>;
@@ -57,7 +60,7 @@ int main(int argc, char *argv[])
 			pop.root()->oids->emplace_back(OID_NULL);
 		});
 
-		LOG("Creating configs");
+		LOG_EX("Creating configs");
 		config cfg_1;
 		config cfg_2;
 
@@ -66,7 +69,7 @@ int main(int argc, char *argv[])
 		ret = cfg_2.put_oid(&(pop.root()->oids->at(1)));
 		ASSERT(ret == status::OK);
 
-		LOG("Starting first cmap engine");
+		LOG_EX("Starting first cmap engine");
 		db *kv_1 = new db();
 		ASSERT(kv_1 != nullptr);
 		status s = kv_1->open("cmap", std::move(cfg_1));
@@ -74,42 +77,42 @@ int main(int argc, char *argv[])
 
 		*(pop.root()->str) = "some string";
 
-		LOG("Starting second cmap engine");
+		LOG_EX("Starting second cmap engine");
 		db *kv_2 = new db();
 		ASSERT(kv_2 != nullptr);
 		s = kv_2->open("cmap", std::move(cfg_2));
 		ASSERT(s == status::OK);
 
-		LOG("Putting new key into first cmap");
+		LOG_EX("Putting new key into first cmap");
 		s = kv_1->put("key_1", "value_1");
 		ASSERT(s == status::OK);
 
-		LOG("Putting new key into second cmap");
+		LOG_EX("Putting new key into second cmap");
 		s = kv_2->put("key_2", "value_2");
 		ASSERT(s == status::OK);
 
-		LOG("Reading key back from first cmap");
+		LOG_EX("Reading key back from first cmap");
 		std::string value;
 		s = kv_1->get("key_1", &value);
 		ASSERT(s == status::OK && value == "value_1");
 
-		LOG("Reading key back from second cmap");
+		LOG_EX("Reading key back from second cmap");
 		value.clear();
 		s = kv_2->get("key_2", &value);
 		ASSERT(s == status::OK && value == "value_2");
 
-		LOG("Defragmenting the first cmap");
+		LOG_EX("Defragmenting the first cmap");
 		s = kv_1->defrag(0, 100);
 		ASSERT(s == status::OK);
 
-		LOG("Defragmenting the second cmap");
+		LOG_EX("Defragmenting the second cmap");
 		s = kv_2->defrag(0, 100);
 		ASSERT(s == status::OK);
 
-		LOG("Stopping first cmap engine");
+		LOG_EX("Stopping first cmap engine");
 		delete kv_1;
 
-		LOG("Stopping second cmap engine");
+		LOG_EX("Stopping second cmap engine");
 		delete kv_2;
 
 	} catch (std::exception &e) {

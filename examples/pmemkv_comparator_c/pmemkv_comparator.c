@@ -19,7 +19,7 @@
 	} while (0)
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
-#define LOG(msg) puts(msg)
+#define LOG_EX(msg) puts(msg)
 
 static const uint64_t SIZE = 1024UL * 1024UL * 1024UL;
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* See libpmemkv_config(3) for more detailed example of config creation */
-	LOG("Creating config");
+	LOG_EX("Creating config");
 	pmemkv_config *cfg = pmemkv_config_new();
 	ASSERT(cfg != NULL);
 
@@ -74,13 +74,13 @@ int main(int argc, char *argv[])
 	s = pmemkv_config_put_comparator(cfg, cmp);
 	ASSERT(s == PMEMKV_STATUS_OK);
 
-	LOG("Opening pmemkv database with 'csmap' engine");
+	LOG_EX("Opening pmemkv database with 'csmap' engine");
 	pmemkv_db *db = NULL;
 	s = pmemkv_open("csmap", cfg, &db);
 	ASSERT(s == PMEMKV_STATUS_OK);
 	ASSERT(db != NULL);
 
-	LOG("Putting new keys");
+	LOG_EX("Putting new keys");
 	const char *key1 = "key1";
 	const char *value1 = "value1";
 	const char *key2 = "key2";
@@ -94,11 +94,11 @@ int main(int argc, char *argv[])
 	s = pmemkv_put(db, key3, strlen(key3), value3, strlen(value3));
 	ASSERT(s == PMEMKV_STATUS_OK);
 
-	LOG("Iterating over existing keys in order specified by the comparator");
+	LOG_EX("Iterating over existing keys in order specified by the comparator");
 	s = pmemkv_get_all(db, &get_kv_callback, NULL);
 	ASSERT(s == PMEMKV_STATUS_OK);
 
-	LOG("Closing database");
+	LOG_EX("Closing database");
 	pmemkv_close(db);
 
 	return 0;

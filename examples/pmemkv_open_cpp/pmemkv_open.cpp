@@ -10,13 +10,16 @@
 #include <iostream>
 #include <libpmemkv.hpp>
 
+#include "../../src/logging.h"
+#include "../../src/out.h"
+
 #define ASSERT(expr)                                                                     \
 	do {                                                                             \
 		if (!(expr))                                                             \
 			std::cout << pmemkv_errormsg() << std::endl;                     \
 		assert(expr);                                                            \
 	} while (0)
-#define LOG(msg) std::cout << msg << std::endl
+#define LOG_EX(msg) std::cout << msg << std::endl
 
 using namespace pmem::kv;
 
@@ -39,19 +42,19 @@ int main(int argc, char *argv[])
 	}
 
 	/* See libpmemkv_config(3) for more detailed example of creating a config */
-	LOG("Creating config");
+	LOG_EX("Creating config");
 	config cfg;
 
 	status s = cfg.put_path(argv[1]);
 	ASSERT(s == status::OK);
 
-	LOG("Opening pmemkv database with 'cmap' engine");
+	LOG_EX("Opening pmemkv database with 'cmap' engine");
 	db *kv = new db();
 	ASSERT(kv != nullptr);
 	s = kv->open("cmap", std::move(cfg));
 	ASSERT(s == status::OK);
 
-	LOG("Putting new key");
+	LOG_EX("Putting new key");
 	s = kv->put("key1", "value1");
 	ASSERT(s == status::OK);
 
@@ -59,28 +62,28 @@ int main(int argc, char *argv[])
 	s = kv->count_all(cnt);
 	ASSERT(s == status::OK && cnt == 1);
 
-	LOG("Reading key back");
+	LOG_EX("Reading key back");
 	std::string value;
 	s = kv->get("key1", &value);
 	ASSERT(s == status::OK && value == "value1");
 
-	LOG("Iterating existing keys");
+	LOG_EX("Iterating existing keys");
 	s = kv->put("key2", "value2");
 	ASSERT(s == status::OK);
 	s = kv->put("key3", "value3");
 	ASSERT(s == status::OK);
 	kv->get_all([](string_view k, string_view v) {
-		LOG("  visited: " << k.data());
+		LOG_EX("  visited: " << k.data());
 		return 0;
 	});
 
-	LOG("Removing existing key");
+	LOG_EX("Removing existing key");
 	s = kv->remove("key1");
 	ASSERT(s == status::OK);
 	s = kv->exists("key1");
 	ASSERT(s == status::NOT_FOUND);
 
-	LOG("Closing database");
+	LOG_EX("Closing database");
 	delete kv;
 
 	return 0;

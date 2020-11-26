@@ -18,7 +18,7 @@
 		assert(expr);                                                            \
 	} while (0)
 
-#define LOG(msg) puts(msg)
+#define LOG_EX(msg) puts(msg)
 #define MAX_VAL_LEN 64
 
 static const uint64_t SIZE = 1024UL * 1024UL * 1024UL;
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* See libpmemkv_config(3) for more detailed example of config creation */
-	LOG("Creating config");
+	LOG_EX("Creating config");
 	pmemkv_config *cfg = pmemkv_config_new();
 	ASSERT(cfg != NULL);
 
@@ -50,13 +50,13 @@ int main(int argc, char *argv[])
 	s = pmemkv_config_put_force_create(cfg, true);
 	ASSERT(s == PMEMKV_STATUS_OK);
 
-	LOG("Opening pmemkv database with 'cmap' engine");
+	LOG_EX("Opening pmemkv database with 'cmap' engine");
 	pmemkv_db *db = NULL;
 	s = pmemkv_open("cmap", cfg, &db);
 	ASSERT(s == PMEMKV_STATUS_OK);
 	ASSERT(db != NULL);
 
-	LOG("Putting new key");
+	LOG_EX("Putting new key");
 	const char *key1 = "key1";
 	const char *value1 = "value1";
 	s = pmemkv_put(db, key1, strlen(key1), value1, strlen(value1));
@@ -67,13 +67,13 @@ int main(int argc, char *argv[])
 	ASSERT(s == PMEMKV_STATUS_OK);
 	ASSERT(cnt == 1);
 
-	LOG("Reading key back");
+	LOG_EX("Reading key back");
 	char val[MAX_VAL_LEN];
 	s = pmemkv_get_copy(db, key1, strlen(key1), val, MAX_VAL_LEN, NULL);
 	ASSERT(s == PMEMKV_STATUS_OK);
 	ASSERT(!strcmp(val, "value1"));
 
-	LOG("Iterating existing keys");
+	LOG_EX("Iterating existing keys");
 	const char *key2 = "key2";
 	const char *value2 = "value2";
 	const char *key3 = "key3";
@@ -82,16 +82,16 @@ int main(int argc, char *argv[])
 	pmemkv_put(db, key3, strlen(key3), value3, strlen(value3));
 	pmemkv_get_all(db, &get_kv_callback, NULL);
 
-	LOG("Removing existing key");
+	LOG_EX("Removing existing key");
 	s = pmemkv_remove(db, key1, strlen(key1));
 	ASSERT(s == PMEMKV_STATUS_OK);
 	ASSERT(pmemkv_exists(db, key1, strlen(key1)) == PMEMKV_STATUS_NOT_FOUND);
 
-	LOG("Defragmenting the database");
+	LOG_EX("Defragmenting the database");
 	s = pmemkv_defrag(db, 0, 100);
 	ASSERT(s == PMEMKV_STATUS_OK);
 
-	LOG("Closing database");
+	LOG_EX("Closing database");
 	pmemkv_close(db);
 
 	return 0;
