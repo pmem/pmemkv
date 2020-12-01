@@ -126,6 +126,159 @@ inline std::ostream &operator<<(std::ostream &os, const status &s)
 	return os;
 }
 
+/*! \exception bad_result_access
+	\brief Defines a type of object to be thrown by result::ok() / result::err() when
+   result doesn't contain value/error.
+ */
+class bad_result_access : public std::exception {
+public:
+	const char *what() const noexcept final
+	{
+		return "bad_result_access (value/error doesn't exists)";
+	}
+};
+
+/*! \class result
+	\brief Stores result of a operation. It contains either correct value or error.
+   It's based on std::result from Rust programming language.
+
+	If result contains value: is_ok() returns true, ok() returns value, is_error()
+   returns false and err() throws bad_result_access
+
+	If result contains error: is_ok() returns false, ok() throws bad_result_access,
+   is_error() returns true and err() returns error
+ */
+template <typename OkType, typename ErrType>
+class result {
+	union {
+		OkType value;
+		ErrType error;
+	};
+
+	bool has_value;
+
+public:
+	result(const OkType &val);
+	result(const ErrType &err);
+	result(const result &other);
+
+	result &operator=(const result &other);
+
+	bool is_ok();
+	bool is_error();
+
+	OkType ok();
+	ErrType err();
+};
+
+/**
+ * Creates result with value.
+ *
+ * @param[in] val value.
+ */
+template <typename OkType, typename ErrType>
+result<OkType, ErrType>::result(const OkType &val) : value(val), has_value(true)
+{
+}
+
+/**
+ * Creates result with error.
+ *
+ * @param[in] err error.
+ */
+template <typename OkType, typename ErrType>
+result<OkType, ErrType>::result(const ErrType &err) : error(err), has_value(false)
+{
+}
+
+/**
+ * Default copy constructor.
+ *
+ * @param[in] other result to copy.
+ */
+template <typename OkType, typename ErrType>
+result<OkType, ErrType>::result(const result &other) : has_value(other.has_value)
+{
+	if (has_value)
+		this->value = other.value;
+	else
+		this->error = other.error;
+}
+
+/**
+ * Default copy assignment operator.
+ *
+ * @param[in] other result to copy.
+ */
+template <typename OkType, typename ErrType>
+result<OkType, ErrType> &result<OkType, ErrType>::operator=(const result &other)
+{
+	this->has_value = other.value;
+
+	if (has_value)
+		this->value = other.value;
+	else
+		this->error = other.error;
+}
+
+/**
+ * Checks if the result contains value.
+ *
+ * @return bool
+ */
+template <typename OkType, typename ErrType>
+bool result<OkType, ErrType>::is_ok()
+{
+	return has_value;
+}
+
+/**
+ * Checks if the result contains error.
+ *
+ * @return bool
+ */
+template <typename OkType, typename ErrType>
+bool result<OkType, ErrType>::is_error()
+{
+	return !has_value;
+}
+
+/**
+ * Returns value from the result.
+ *
+ * If result doesn't contain value, throws bad_result_access.
+ *
+ * @throw bad_result_access
+ *
+ * @return OkType
+ */
+template <typename OkType, typename ErrType>
+OkType result<OkType, ErrType>::ok()
+{
+	if (has_value)
+		return value;
+	else
+		throw bad_result_access();
+}
+
+/**
+ * Returns error from the result.
+ *
+ * If result doesn't contain error, throws bad_result_access.
+ *
+ * @throw bad_result_access
+ *
+ * @return ErrType
+ */
+template <typename OkType, typename ErrType>
+ErrType result<OkType, ErrType>::err()
+{
+	if (!has_value)
+		return error;
+	else
+		throw bad_result_access();
+}
+
 /*! \class config
 	\brief Holds configuration parameters for engines.
 
