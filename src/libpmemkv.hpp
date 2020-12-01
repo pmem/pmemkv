@@ -4,6 +4,7 @@
 #ifndef LIBPMEMKV_HPP
 #define LIBPMEMKV_HPP
 
+#include <cassert>
 #include <functional>
 #include <iostream>
 #include <libpmemobj++/string_view.hpp>
@@ -124,6 +125,177 @@ inline std::ostream &operator<<(std::ostream &os, const status &s)
 	os << statuses[status_no] << " (" << status_no << ")";
 
 	return os;
+}
+
+/*! \exception bad_result_access
+	\brief Defines a type of object to be thrown by result::get_value() when
+   result doesn't contain value.
+ */
+class bad_result_access : public std::exception {
+public:
+	const char *what() const noexcept final
+	{
+		return "bad_result_access (value doesn't exists)";
+	}
+};
+
+/*! \class result
+	\brief Stores result of an operation. It always contains status and optionally can
+   contain value.
+
+	If result contains value: is_ok() returns true, get_value() returns value,
+   get_status() returns status::OK.
+
+	If result contains error: is_ok() returns false, get_value() throws
+   bad_result_access, get_status() returns status other than status::OK.
+ */
+template <typename OkType>
+class result {
+	union {
+		OkType value;
+	};
+
+	status s;
+
+public:
+	result(const OkType &val);
+	result(const status &err);
+	result(const result &other);
+
+	~result();
+
+	result &operator=(const result &other);
+
+	bool is_ok() const;
+
+	OkType get_value() const;
+	status get_status() const;
+};
+
+/**
+ * Creates result with value (status is automatically initialized to status::OK).
+ *
+ * @param[in] val value.
+ */
+template <typename OkType>
+result<OkType>::result(const OkType &val) : value(val), s(status::OK)
+{
+}
+
+/**
+ * Creates result which contains only status.
+ *
+ * @param[in] status status other than status::OK.
+ */
+template <typename OkType>
+result<OkType>::result(const status &status) : s(status)
+{
+	assert(s != status::OK);
+}
+
+/**
+ * Default copy constructor.
+ *
+ * @param[in] other result to copy.
+ */
+template <typename OkType>
+result<OkType>::result(const result &other) : s(other.s)
+{
+	if (s == status::OK)
+		new (&value) OkType(other.value);
+}
+
+/**
+ * Explicit destructor
+ */
+template <typename OkType>
+result<OkType>::~result()
+{
+	if (s == status::OK)
+		value.~OkType();
+}
+
+/**
+ * Default copy assignment operator.
+ *
+ * @param[in] other result to copy.
+ */
+template <typename OkType>
+result<OkType> &result<OkType>::operator=(const result &other)
+{
+	if (s == status::OK)
+		value.~OkType();
+
+	s = other.s;
+
+	if (s == status::OK)
+		new (&value) OkType(other.value);
+
+	return *this;
+}
+
+/**
+ * Checks if the result contains value (status == status::OK).
+ *
+ * @return bool
+ */
+template <typename OkType>
+bool result<OkType>::is_ok() const
+{
+	return s == status::OK;
+}
+
+/**
+ * Returns value from the result.
+ *
+ * If result doesn't contain value, throws bad_result_access.
+ *
+ * @throw bad_result_access
+ *
+ * @return OkType
+ */
+template <typename OkType>
+OkType result<OkType>::get_value() const
+{
+	if (s == status::OK)
+		return value;
+	else
+		throw bad_result_access();
+}
+
+/**
+ * Returns status from the result.
+ *
+ * @return status
+ */
+template <typename OkType>
+status result<OkType>::get_status() const
+{
+	return s;
+}
+
+template <typename OkType>
+bool operator==(const result<OkType> &lhs, const status &rhs)
+{
+	return lhs.get_status() == rhs;
+}
+
+template <typename OkType>
+bool operator==(const status &lhs, const result<OkType> &rhs)
+{
+	return lhs == rhs.get_status();
+}
+
+template <typename OkType>
+bool operator!=(const result<OkType> &lhs, const status &rhs)
+{
+	return lhs.get_status() != rhs;
+}
+
+template <typename OkType>
+bool operator!=(const status &lhs, const result<OkType> &rhs)
+{
+	return lhs != rhs.get_status();
 }
 
 /*! \class config
