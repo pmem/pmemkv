@@ -4,6 +4,7 @@
 #ifndef LIBPMEMKV_HPP
 #define LIBPMEMKV_HPP
 
+#include <cassert>
 #include <functional>
 #include <iostream>
 #include <libpmemobj++/string_view.hpp>
@@ -124,6 +125,262 @@ inline std::ostream &operator<<(std::ostream &os, const status &s)
 	os << statuses[status_no] << " (" << status_no << ")";
 
 	return os;
+}
+
+/*! \exception bad_result_access
+	\brief Defines a type of object to be thrown by result::get_value() when
+   result doesn't contain value.
+ */
+class bad_result_access : public std::exception {
+public:
+	const char *what() const noexcept final
+	{
+		return "bad_result_access (value doesn't exist)";
+	}
+};
+
+/*! \class result
+	\brief Stores result of an operation. It always contains status and optionally can
+   contain value.
+
+	If result contains value: is_ok() returns true, get_value() returns value,
+   get_status() returns status::OK.
+
+	If result contains error: is_ok() returns false, get_value() throws
+   bad_result_access, get_status() returns status other than status::OK.
+ */
+template <typename OkType>
+class result {
+	union {
+		OkType value;
+	};
+
+	status s;
+
+public:
+	result(const OkType &val) noexcept(noexcept(OkType(std::declval<OkType>())));
+	result(const status &err) noexcept;
+	result(const result &other) noexcept(noexcept(OkType(std::declval<OkType>())));
+	result(result &&other) noexcept(noexcept(OkType(std::declval<OkType>())));
+	result(OkType &&val) noexcept(noexcept(OkType(std::declval<OkType>())));
+
+	~result();
+
+	result &operator=(const result &other) noexcept(
+		noexcept(std::declval<OkType>().~OkType()) &&
+		noexcept(OkType(std::declval<OkType>())));
+	result &
+	operator=(result &&other) noexcept(noexcept(std::declval<OkType>().~OkType()) &&
+					   noexcept(OkType(std::declval<OkType>())));
+
+	bool is_ok() const noexcept;
+
+	const OkType &get_value() const;
+	OkType &get_value();
+	status get_status() const noexcept;
+};
+
+/**
+ * Creates result with value (status is automatically initialized to status::OK).
+ *
+ * @param[in] val value.
+ */
+template <typename OkType>
+result<OkType>::result(const OkType &val) noexcept(
+	noexcept(OkType(std::declval<OkType>())))
+    : value(val), s(status::OK)
+{
+}
+
+/**
+ * Creates result which contains only status.
+ *
+ * @param[in] status status other than status::OK.
+ */
+template <typename OkType>
+result<OkType>::result(const status &status) noexcept : s(status)
+{
+	assert(s != status::OK);
+}
+
+/**
+ * Default copy constructor.
+ *
+ * @param[in] other result to copy.
+ */
+template <typename OkType>
+result<OkType>::result(const result &other) noexcept(
+	noexcept(OkType(std::declval<OkType>())))
+    : s(other.s)
+{
+	if (s == status::OK)
+		new (&value) OkType(other.value);
+}
+
+/**
+ * Default move constructor.
+ *
+ * @param[in] other result to move.
+ */
+template <typename OkType>
+result<OkType>::result(result &&other) noexcept(noexcept(OkType(std::declval<OkType>())))
+    : s(other.s)
+{
+	if (s == status::OK)
+		new (&value) OkType(std::move(other.value));
+
+	other.s = status::UNKNOWN_ERROR;
+}
+
+/**
+ * Explicit destructor
+ */
+template <typename OkType>
+result<OkType>::~result()
+{
+	if (s == status::OK)
+		value.~OkType();
+}
+
+/**
+ * Default copy assignment operator.
+ *
+ * @param[in] other result to copy.
+ */
+template <typename OkType>
+result<OkType> &result<OkType>::operator=(const result &other) noexcept(
+	noexcept(std::declval<OkType>().~OkType()) &&
+	noexcept(OkType(std::declval<OkType>())))
+{
+	if (s == status::OK && other.is_ok())
+		value = other.value;
+	else if (other.is_ok())
+		new (&value) OkType(other.value);
+	else if (s == status::OK)
+		value.~OkType();
+
+	s = other.s;
+
+	return *this;
+}
+
+/**
+ * Default move assignment operator.
+ *
+ * @param[in] other result to move.
+ */
+template <typename OkType>
+result<OkType> &result<OkType>::operator=(result &&other) noexcept(
+	noexcept(std::declval<OkType>().~OkType()) &&
+	noexcept(OkType(std::declval<OkType>())))
+{
+	if (s == status::OK && other.is_ok())
+		value = std::move(other.value);
+	else if (other.is_ok())
+		new (&value) OkType(std::move(other.value));
+	else if (s == status::OK)
+		value.~OkType();
+
+	s = other.s;
+	other.s = status::UNKNOWN_ERROR;
+
+	return *this;
+}
+
+/**
+ * Constructor with rvalue reference to OkType.
+ *
+ * @param[in] val rvalue reference to OkType
+ */
+template <typename OkType>
+result<OkType>::result(OkType &&val) noexcept(noexcept(OkType(std::declval<OkType>())))
+    : value(std::move(val)), s(status::OK)
+{
+}
+
+/**
+ * Checks if the result contains value (status == status::OK).
+ *
+ * @return bool
+ */
+template <typename OkType>
+bool result<OkType>::is_ok() const noexcept
+{
+	return s == status::OK;
+}
+
+/**
+ * Returns const reference to value from the result.
+ *
+ * If result doesn't contain value, throws bad_result_access.
+ *
+ * @throw bad_result_access
+ *
+ * @return const reference to value from the result.
+ */
+template <typename OkType>
+const OkType &result<OkType>::get_value() const
+{
+	if (s == status::OK)
+		return value;
+	else
+		throw bad_result_access();
+}
+
+/**
+ * Returns reference to value from the result.
+ *
+ * If result doesn't contain value, throws bad_result_access.
+ *
+ * @throw bad_result_access
+ *
+ * @return reference to value from the result
+ */
+template <typename OkType>
+OkType &result<OkType>::get_value()
+{
+	if (s == status::OK)
+		return value;
+	else
+		throw bad_result_access();
+}
+
+/**
+ * Returns status from the result.
+ *
+ * It returns status::OK if there is a value, and other status (with the appropriate
+ * 'error') if there isn't any value.
+ *
+ * @return status
+ */
+template <typename OkType>
+status result<OkType>::get_status() const noexcept
+{
+	return s;
+}
+
+template <typename OkType>
+bool operator==(const result<OkType> &lhs, const status &rhs)
+{
+	return lhs.get_status() == rhs;
+}
+
+template <typename OkType>
+bool operator==(const status &lhs, const result<OkType> &rhs)
+{
+	return lhs == rhs.get_status();
+}
+
+template <typename OkType>
+bool operator!=(const result<OkType> &lhs, const status &rhs)
+{
+	return lhs.get_status() != rhs;
+}
+
+template <typename OkType>
+bool operator!=(const status &lhs, const result<OkType> &rhs)
+{
+	return lhs != rhs.get_status();
 }
 
 /*! \class config
