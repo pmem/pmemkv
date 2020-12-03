@@ -28,6 +28,7 @@ function tests_gcc_debug_cpp11() {
 
 	CC=gcc CXX=g++ \
 	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+		-DBUILD_TESTS=1 \
 		-DTEST_DIR=$TEST_DIR \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX \
 		-DCOVERAGE=$COVERAGE \
@@ -60,6 +61,7 @@ function tests_gcc_debug_cpp14() {
 
 	CC=gcc CXX=g++ \
 	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+		-DBUILD_TESTS=1 \
 		-DTEST_DIR=$TEST_DIR \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX \
 		-DCOVERAGE=$COVERAGE \
@@ -93,6 +95,7 @@ function tests_gcc_debug_cpp14_valgrind_other() {
 
 	CC=gcc CXX=g++ \
 	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+		-DBUILD_TESTS=1 \
 		-DTEST_DIR=$TEST_DIR \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX \
 		-DCOVERAGE=$COVERAGE \
@@ -124,6 +127,7 @@ function tests_gcc_debug_cpp14_valgrind_memcheck_drd() {
 
 	CC=gcc CXX=g++ \
 	cmake .. -DCMAKE_BUILD_TYPE=Debug \
+		-DBUILD_TESTS=1 \
 		-DTEST_DIR=$TEST_DIR \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX \
 		-DCOVERAGE=$COVERAGE \
