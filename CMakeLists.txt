@@ -10,7 +10,7 @@ set_version(VERSION)
 ## CMake build options
 option(BUILD_DOC "build documentation" ON)
 option(BUILD_EXAMPLES "build examples" ON)
-option(BUILD_TESTS "build tests" ON)
+option(BUILD_TESTS "build tests" OFF)
 option(BUILD_JSON_CONFIG "build the 'libpmemkv_json_config' library" ON)
 
 option(TESTS_LONG "enable long running tests" OFF)
