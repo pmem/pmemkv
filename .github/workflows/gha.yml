@@ -55,11 +55,11 @@ jobs:
       HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
       WORKDIR:        utils/docker
     if:
-      contains( 'refs/heads/master
-                refs/heads/stable-1.0
-                refs/heads/stable-1.1
+      contains('refs/heads/master
+                refs/heads/stable-1.3
                 refs/heads/stable-1.2
-                ' , github.ref)
+                refs/heads/stable-1.1
+                refs/heads/stable-1.0' , github.ref)
     strategy:
       matrix:
         CONFIG: ["TYPE=doc OS=fedora OS_VER=32"]

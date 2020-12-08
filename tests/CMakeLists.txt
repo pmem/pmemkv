@@ -742,13 +742,13 @@ if(ENGINE_VCMAP)
 			BINARY concurrent_put_get_remove_single_op_params
 			TRACERS none # XXX - tbb lock does not work well with drd or helgrind
 			SCRIPT memkind_based/default.cmake
-			PARAMS 1000)
+			DB_SIZE "MIN_JEMALLOC_ARENA_SIZE" PARAMS 1000)
 
 	add_engine_test(ENGINE vcmap
 			BINARY concurrent_put_get_remove_single_op_params
 			TRACERS memcheck # XXX - tbb lock does not work well with drd or helgrind
 			SCRIPT memkind_based/default.cmake
-			PARAMS 400)
+			DB_SIZE "MIN_JEMALLOC_ARENA_SIZE" PARAMS 400)
 
 	add_engine_test(ENGINE vcmap
 			BINARY memkind_error_handling
