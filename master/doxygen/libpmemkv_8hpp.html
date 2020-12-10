@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.20"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PMEMKV: /tmp/pmemkv-qFq/src/libpmemkv.hpp File Reference</title>
+<title>PMEMKV: /tmp/pmemkv-QPf/src/libpmemkv.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.3-git30.gc756be1</span>
+   &#160;<span id="projectnumber">1.3-git53.g355e036</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -80,7 +80,8 @@ $(function() {
 
 <p>Main C++ pmemkv public header.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;functional&gt;</code><br />
+<div class="textblock"><code>#include &lt;cassert&gt;</code><br />
+<code>#include &lt;functional&gt;</code><br />
 <code>#include &lt;iostream&gt;</code><br />
 <code>#include &lt;libpmemobj++/string_view.hpp&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
@@ -94,6 +95,12 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1bad__result__access.html">pmem::kv::bad_result_access</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines a type of object to be thrown by <a class="el" href="classpmem_1_1kv_1_1result.html#a7bd497cb517cdffaaebe0dbd3506d0a6" title="Returns reference to value from the result.">result::get_value()</a> when result doesn't contain value.  <a href="classpmem_1_1kv_1_1bad__result__access.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1result.html">pmem::kv::result&lt; T &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores result of an operation. It always contains status and optionally can contain value.  <a href="classpmem_1_1kv_1_1result.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html">pmem::kv::config</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds configuration parameters for engines.  <a href="classpmem_1_1kv_1_1config.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -170,6 +177,18 @@ Enumerations</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:ae359c3f44cdb3eb1972adc1e85acb880"><td class="memItemLeft" align="right" valign="top">std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#ae359c3f44cdb3eb1972adc1e85acb880">pmem::kv::operator&lt;&lt;</a> (std::ostream &amp;os, const status &amp;s)</td></tr>
 <tr class="separator:ae359c3f44cdb3eb1972adc1e85acb880"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86b8abcaec9635bda73a6ec286ddc5b6"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a86b8abcaec9635bda73a6ec286ddc5b6"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a86b8abcaec9635bda73a6ec286ddc5b6">pmem::kv::operator==</a> (const result&lt; T &gt; &amp;lhs, const status &amp;rhs)</td></tr>
+<tr class="separator:a86b8abcaec9635bda73a6ec286ddc5b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7defdfe77f3ee58a7dae47bf21cdaf3a"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a7defdfe77f3ee58a7dae47bf21cdaf3a"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a7defdfe77f3ee58a7dae47bf21cdaf3a">pmem::kv::operator==</a> (const status &amp;lhs, const result&lt; T &gt; &amp;rhs)</td></tr>
+<tr class="separator:a7defdfe77f3ee58a7dae47bf21cdaf3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade5d9c72af7dcaf30f7428bed6b34de7"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ade5d9c72af7dcaf30f7428bed6b34de7"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#ade5d9c72af7dcaf30f7428bed6b34de7">pmem::kv::operator!=</a> (const result&lt; T &gt; &amp;lhs, const status &amp;rhs)</td></tr>
+<tr class="separator:ade5d9c72af7dcaf30f7428bed6b34de7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee1947b70aeb51040ebab732ebde45cf"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aee1947b70aeb51040ebab732ebde45cf"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#aee1947b70aeb51040ebab732ebde45cf">pmem::kv::operator!=</a> (const status &amp;lhs, const result&lt; T &gt; &amp;rhs)</td></tr>
+<tr class="separator:aee1947b70aeb51040ebab732ebde45cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Main C++ pmemkv public header. </p>
