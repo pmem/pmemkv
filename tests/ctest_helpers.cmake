@@ -260,15 +260,21 @@ function(add_engine_test)
 	if("${TEST_DB_SIZE}" STREQUAL "")
 		set(TEST_DB_SIZE 104857600) # 100MB
 	elseif("${TEST_DB_SIZE}" STREQUAL "MIN_JEMALLOC_ARENA_SIZE")
-		execute_process(COMMAND nproc OUTPUT_VARIABLE NPROC)
-		#By default jemalloc creates 4 arenas for each logical CPU with 2MB chunks
+		execute_process(COMMAND nproc OUTPUT_VARIABLE NPROC OUTPUT_STRIP_TRAILING_WHITESPACE)
+		# By default jemalloc creates 4 arenas for each logical CPU with 2MB chunks
 		math(EXPR TEST_DB_SIZE "${NPROC} * 4 * 2 * 1024 * 1024")
 
-		#Limit size DB_SIZE with arbitrary chosen threshold
-		math(EXPR TEST_DB_SIZE_THRESHOLD "256 * 4 * 2 * 1024 * 1024")
-		if(TEST_DB_SIZE GREATER ${TEST_DB_SIZE_THRESHOLD})
-			message(WARNING "Calculated TEST_DB_SIZE reached threshold: ${TEST_DB_SIZE_THRESHOLD}. This may cause failures in some tests of memkind based engines.")
+		# Limit size DB_SIZE with arbitrary threshold
+		set(TEST_DB_SIZE_THRESHOLD 2147483646) # (almost 2GB; value for nproc=256 minus 2 bytes)
+		if(${TEST_DB_SIZE} GREATER ${TEST_DB_SIZE_THRESHOLD})
+			message(WARNING "Calculated TEST_DB_SIZE (${TEST_DB_SIZE}) reached threshold: ${TEST_DB_SIZE_THRESHOLD}. This may cause failures in some tests of memkind based engines.")
 			set(TEST_DB_SIZE ${TEST_DB_SIZE_THRESHOLD})
+		endif()
+
+		# Set minimum arbitrary DB_SIZE to avoid test failures; this should never happen
+		set(TEST_DB_SIZE_MIN 8388608) # 8 MB
+		if(${TEST_DB_SIZE} LESS ${TEST_DB_SIZE_MIN})
+			message(FATAL_ERROR "DB_SIZE (${TEST_DB_SIZE}) was calculated below the minimum: (${TEST_DB_SIZE_MIN}).")
 		endif()
 	endif()
 
