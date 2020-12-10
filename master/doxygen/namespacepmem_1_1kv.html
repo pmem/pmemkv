@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.3-git30.gc756be1</span>
+   &#160;<span id="projectnumber">1.3-git53.g355e036</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -89,11 +89,17 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1bad__result__access.html">bad_result_access</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines a type of object to be thrown by <a class="el" href="classpmem_1_1kv_1_1result.html#a7bd497cb517cdffaaebe0dbd3506d0a6" title="Returns reference to value from the result.">result::get_value()</a> when result doesn't contain value.  <a href="classpmem_1_1kv_1_1bad__result__access.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1config.html">config</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds configuration parameters for engines.  <a href="classpmem_1_1kv_1_1config.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html">db</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Main pmemkv class, it provides functions to operate on data in database.  <a href="classpmem_1_1kv_1_1db.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1result.html">result</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores result of an operation. It always contains status and optionally can contain value.  <a href="classpmem_1_1kv_1_1result.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
@@ -143,6 +149,18 @@ Enumerations</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:ae359c3f44cdb3eb1972adc1e85acb880"><td class="memItemLeft" align="right" valign="top">std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#ae359c3f44cdb3eb1972adc1e85acb880">operator&lt;&lt;</a> (std::ostream &amp;os, const <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> &amp;s)</td></tr>
 <tr class="separator:ae359c3f44cdb3eb1972adc1e85acb880"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86b8abcaec9635bda73a6ec286ddc5b6"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a86b8abcaec9635bda73a6ec286ddc5b6"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a86b8abcaec9635bda73a6ec286ddc5b6">operator==</a> (const <a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; T &gt; &amp;lhs, const <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> &amp;rhs)</td></tr>
+<tr class="separator:a86b8abcaec9635bda73a6ec286ddc5b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7defdfe77f3ee58a7dae47bf21cdaf3a"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a7defdfe77f3ee58a7dae47bf21cdaf3a"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a7defdfe77f3ee58a7dae47bf21cdaf3a">operator==</a> (const <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> &amp;lhs, const <a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; T &gt; &amp;rhs)</td></tr>
+<tr class="separator:a7defdfe77f3ee58a7dae47bf21cdaf3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade5d9c72af7dcaf30f7428bed6b34de7"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ade5d9c72af7dcaf30f7428bed6b34de7"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#ade5d9c72af7dcaf30f7428bed6b34de7">operator!=</a> (const <a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; T &gt; &amp;lhs, const <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> &amp;rhs)</td></tr>
+<tr class="separator:ade5d9c72af7dcaf30f7428bed6b34de7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee1947b70aeb51040ebab732ebde45cf"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aee1947b70aeb51040ebab732ebde45cf"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#aee1947b70aeb51040ebab732ebde45cf">operator!=</a> (const <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> &amp;lhs, const <a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; T &gt; &amp;rhs)</td></tr>
+<tr class="separator:aee1947b70aeb51040ebab732ebde45cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Main pmemkv namespace. </p>
@@ -309,6 +327,66 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ade5d9c72af7dcaf30f7428bed6b34de7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade5d9c72af7dcaf30f7428bed6b34de7">&#9670;&nbsp;</a></span>operator!=() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">bool pmem::kv::operator!= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> &amp;&#160;</td>
+          <td class="paramname"><em>rhs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aee1947b70aeb51040ebab732ebde45cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee1947b70aeb51040ebab732ebde45cf">&#9670;&nbsp;</a></span>operator!=() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">bool pmem::kv::operator!= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> &amp;&#160;</td>
+          <td class="paramname"><em>lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>rhs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ae359c3f44cdb3eb1972adc1e85acb880"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae359c3f44cdb3eb1972adc1e85acb880">&#9670;&nbsp;</a></span>operator&lt;&lt;()</h2>
 
@@ -341,6 +419,66 @@ Functions</h2></td></tr>
 <span class="mlabels"><span class="mlabel">inline</span></span>  </td>
   </tr>
 </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a86b8abcaec9635bda73a6ec286ddc5b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86b8abcaec9635bda73a6ec286ddc5b6">&#9670;&nbsp;</a></span>operator==() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">bool pmem::kv::operator== </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> &amp;&#160;</td>
+          <td class="paramname"><em>rhs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7defdfe77f3ee58a7dae47bf21cdaf3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7defdfe77f3ee58a7dae47bf21cdaf3a">&#9670;&nbsp;</a></span>operator==() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">bool pmem::kv::operator== </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> &amp;&#160;</td>
+          <td class="paramname"><em>lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>rhs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
 </div><div class="memdoc">
 
 </div>
