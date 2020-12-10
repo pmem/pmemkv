@@ -33,7 +33,7 @@ See its [manual](doc/libpmemkv_json_config.3.md) for details.
 - [Installation](#installation)
 - [Language Bindings](#language-bindings)
 - [Storage Engines](#storage-engines)
-- [Tools and Utilities](#tools-and-utilities)
+- [Benchmarks](#benchmarks)
 
 ## Installation
 
@@ -90,8 +90,9 @@ and the experimental engines are described in the [ENGINES-experimental.md](doc/
 
 [Contributing a new engine](CONTRIBUTING.md#creating-new-engines) is easy and encouraged!
 
-## Tools and Utilities
+## Benchmarks
 
-Benchmarks' scripts and other helpful utilities are available here:
+(Experimental) benchmark based on **leveldb**'s [db_bench](https://github.com/google/leveldb/blob/master/benchmarks/db_bench.cc)
+to measure pmemkv's performance is available here:
 
-https://github.com/pmem/pmemkv-tools
+https://github.com/pmem/pmemkv-bench (repo previously named *pmemkv-tools*).
