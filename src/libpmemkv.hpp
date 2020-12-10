@@ -4,6 +4,7 @@
 #ifndef LIBPMEMKV_HPP
 #define LIBPMEMKV_HPP
 
+#include <cassert>
 #include <functional>
 #include <iostream>
 #include <libpmemobj++/string_view.hpp>
@@ -124,6 +125,264 @@ inline std::ostream &operator<<(std::ostream &os, const status &s)
 	os << statuses[status_no] << " (" << status_no << ")";
 
 	return os;
+}
+
+/*! \exception bad_result_access
+	\brief Defines a type of object to be thrown by result::get_value() when
+   result doesn't contain value.
+ */
+class bad_result_access : public std::runtime_error {
+public:
+	bad_result_access(const char *what_arg) : std::runtime_error(what_arg)
+	{
+	}
+
+	const char *what() const noexcept final
+	{
+		return std::runtime_error::what();
+	}
+
+private:
+};
+
+/*! \class result
+	\brief Stores result of an operation. It always contains status and optionally can
+   contain value.
+
+	If result contains value: is_ok() returns true, get_value() returns value,
+   get_status() returns status::OK.
+
+	If result contains error: is_ok() returns false, get_value() throws
+   bad_result_access, get_status() returns status other than status::OK.
+ */
+template <typename T>
+class result {
+	union {
+		T value;
+	};
+
+	status s;
+
+public:
+	result(const T &val) noexcept(noexcept(T(std::declval<T>())));
+	result(const status &err) noexcept;
+	result(const result &other) noexcept(noexcept(T(std::declval<T>())));
+	result(result &&other) noexcept(noexcept(T(std::declval<T>())));
+	result(T &&val) noexcept(noexcept(T(std::declval<T>())));
+
+	~result();
+
+	result &
+	operator=(const result &other) noexcept(noexcept(std::declval<T>().~T()) &&
+						noexcept(T(std::declval<T>())));
+	result &operator=(result &&other) noexcept(noexcept(std::declval<T>().~T()) &&
+						   noexcept(T(std::declval<T>())));
+
+	bool is_ok() const noexcept;
+
+	const T &get_value() const;
+	T &get_value();
+	status get_status() const noexcept;
+};
+
+/**
+ * Creates result with value (status is automatically initialized to status::OK).
+ *
+ * @param[in] val value.
+ */
+template <typename T>
+result<T>::result(const T &val) noexcept(noexcept(T(std::declval<T>())))
+    : value(val), s(status::OK)
+{
+}
+
+/**
+ * Creates result which contains only status.
+ *
+ * @param[in] status status other than status::OK.
+ */
+template <typename T>
+result<T>::result(const status &status) noexcept : s(status)
+{
+	assert(s != status::OK);
+}
+
+/**
+ * Default copy constructor.
+ *
+ * @param[in] other result to copy.
+ */
+template <typename T>
+result<T>::result(const result &other) noexcept(noexcept(T(std::declval<T>())))
+    : s(other.s)
+{
+	if (s == status::OK)
+		new (&value) T(other.value);
+}
+
+/**
+ * Default move constructor.
+ *
+ * @param[in] other result to move.
+ */
+template <typename T>
+result<T>::result(result &&other) noexcept(noexcept(T(std::declval<T>()))) : s(other.s)
+{
+	if (s == status::OK)
+		new (&value) T(std::move(other.value));
+
+	other.s = status::UNKNOWN_ERROR;
+}
+
+/**
+ * Explicit destructor
+ */
+template <typename T>
+result<T>::~result()
+{
+	if (s == status::OK)
+		value.~T();
+}
+
+/**
+ * Default copy assignment operator.
+ *
+ * @param[in] other result to copy.
+ */
+template <typename T>
+result<T> &
+result<T>::operator=(const result &other) noexcept(noexcept(std::declval<T>().~T()) &&
+						   noexcept(T(std::declval<T>())))
+{
+	if (s == status::OK && other.is_ok())
+		value = other.value;
+	else if (other.is_ok())
+		new (&value) T(other.value);
+	else if (s == status::OK)
+		value.~T();
+
+	s = other.s;
+
+	return *this;
+}
+
+/**
+ * Default move assignment operator.
+ *
+ * @param[in] other result to move.
+ */
+template <typename T>
+result<T> &
+result<T>::operator=(result &&other) noexcept(noexcept(std::declval<T>().~T()) &&
+					      noexcept(T(std::declval<T>())))
+{
+	if (s == status::OK && other.is_ok())
+		value = std::move(other.value);
+	else if (other.is_ok())
+		new (&value) T(std::move(other.value));
+	else if (s == status::OK)
+		value.~T();
+
+	s = other.s;
+	other.s = status::UNKNOWN_ERROR;
+
+	return *this;
+}
+
+/**
+ * Constructor with rvalue reference to T.
+ *
+ * @param[in] val rvalue reference to T
+ */
+template <typename T>
+result<T>::result(T &&val) noexcept(noexcept(T(std::declval<T>())))
+    : value(std::move(val)), s(status::OK)
+{
+}
+
+/**
+ * Checks if the result contains value (status == status::OK).
+ *
+ * @return bool
+ */
+template <typename T>
+bool result<T>::is_ok() const noexcept
+{
+	return s == status::OK;
+}
+
+/**
+ * Returns const reference to value from the result.
+ *
+ * If result doesn't contain value, throws bad_result_access.
+ *
+ * @throw bad_result_access
+ *
+ * @return const reference to value from the result.
+ */
+template <typename T>
+const T &result<T>::get_value() const
+{
+	if (s == status::OK)
+		return value;
+	else
+		throw bad_result_access("bad_result_access: value doesn't exist");
+}
+
+/**
+ * Returns reference to value from the result.
+ *
+ * If result doesn't contain value, throws bad_result_access.
+ *
+ * @throw bad_result_access
+ *
+ * @return reference to value from the result
+ */
+template <typename T>
+T &result<T>::get_value()
+{
+	if (s == status::OK)
+		return value;
+	else
+		throw bad_result_access("bad_result_access: value doesn't exist");
+}
+
+/**
+ * Returns status from the result.
+ *
+ * It returns status::OK if there is a value, and other status (with the appropriate
+ * 'error') if there isn't any value.
+ *
+ * @return status
+ */
+template <typename T>
+status result<T>::get_status() const noexcept
+{
+	return s;
+}
+
+template <typename T>
+bool operator==(const result<T> &lhs, const status &rhs)
+{
+	return lhs.get_status() == rhs;
+}
+
+template <typename T>
+bool operator==(const status &lhs, const result<T> &rhs)
+{
+	return lhs == rhs.get_status();
+}
+
+template <typename T>
+bool operator!=(const result<T> &lhs, const status &rhs)
+{
+	return lhs.get_status() != rhs;
+}
+
+template <typename T>
+bool operator!=(const status &lhs, const result<T> &rhs)
+{
+	return lhs != rhs.get_status();
 }
 
 /*! \class config

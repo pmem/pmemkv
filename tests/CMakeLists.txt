@@ -50,7 +50,8 @@ add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.h*)
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/result/*.c*)
 
 add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.*
@@ -64,7 +65,8 @@ add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/memkind/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/persistent/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*)
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/result/*.*)
 
 if(TESTS_JSON AND NOT BUILD_JSON_CONFIG)
 	message(FATAL_ERROR "Tests requiring 'libpmemkv_json_config' library "
@@ -121,6 +123,9 @@ add_test_generic(NAME blackhole_test TRACERS none memcheck)
 
 build_test_ext(NAME json_to_config SRC_FILES config/json_to_config.cc LIBS json)
 add_test_generic(NAME json_to_config TRACERS none memcheck)
+
+build_test(result result/result.cpp)
+add_test_generic(NAME result TRACERS none memcheck)
 
 ## Test scenarios (parametrized at least with engine name)
 # Tests for all engines
