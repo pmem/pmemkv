@@ -11,6 +11,14 @@ Rather than being tied to a single language or backing implementation,
 
 The **C API** of pmemkv is documented in the following manuals:
 
+| Version branch | libpmemkv(3) | libpmemkv(7) | libpmemkv_config(3) | libpmemkv_json_config(3) |
+| -------------- | ------------ | ------------ | ------------------- | ------------------------ |
+| master | [libpmemkv.3](./master/manpages/libpmemkv.3.html) | [libpmemkv.7](./master/manpages/libpmemkv.7.html) | [libpmemkv_config.3](./master/manpages/libpmemkv_config.3.html) | [libpmemkv_json_config.3](./master/manpages/libpmemkv_json_config.3.html) |
+| stable-1.3 | [libpmemkv.3](./v1.3/manpages/libpmemkv.3.html) | [libpmemkv.7](./v1.3/manpages/libpmemkv.7.html) | [libpmemkv_config.3](./v1.3/manpages/libpmemkv_config.3.html) | [libpmemkv_json_config.3](./v1.3/manpages/libpmemkv_json_config.3.html) |
+| stable-1.2 | [libpmemkv.3](./v1.2/manpages/libpmemkv.3.html) | [libpmemkv.7](./v1.2/manpages/libpmemkv.7.html) | [libpmemkv_config.3](./v1.2/manpages/libpmemkv_config.3.html) | [libpmemkv_json_config.3](./v1.2/manpages/libpmemkv_json_config.3.html) |
+| stable-1.1 | [libpmemkv.3](./v1.1/manpages/libpmemkv.3.html) | [libpmemkv.7](./v1.1/manpages/libpmemkv.7.html) | [libpmemkv_config.3](./v1.1/manpages/libpmemkv_config.3.html) | [libpmemkv_json_config.3](./v1.1/manpages/libpmemkv_json_config.3.html) |
+
+
 for the current **master**:
 
 * [libpmemkv.3](./master/manpages/libpmemkv.3.html)
