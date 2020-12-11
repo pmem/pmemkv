@@ -113,8 +113,6 @@ pipeline {
 								break
 							}
 						def ENV_VAL="export DEFAULT_TEST_DIR=${TEST_DIR}; export WORKDIR=${WORKSPACE_DIR}/${PMEMKV_DIR}; export SCRIPTSDIR=\$WORKDIR/utils/docker; export TESTS_LONG=ON; ${COV_PARAM}"
-						/* Specified Java version must be used for bindings */
-						def JAVA_HOME="JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64"
 						libs.api.echo_header("Running test type: ${params.TEST_TYPE}")
 						dir("${PMEMKV_PATH}/utils/docker")
 						{
