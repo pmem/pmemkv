@@ -180,8 +180,11 @@ public:
 
 	bool is_ok() const noexcept;
 
-	const T &get_value() const;
-	T &get_value();
+	const T &get_value() const &;
+	T &get_value() &;
+
+	T &&get_value() &&;
+
 	status get_status() const noexcept;
 };
 
@@ -321,7 +324,7 @@ bool result<T>::is_ok() const noexcept
  * @return const reference to value from the result.
  */
 template <typename T>
-const T &result<T>::get_value() const
+const T &result<T>::get_value() const &
 {
 	if (s == status::OK)
 		return value;
@@ -339,11 +342,30 @@ const T &result<T>::get_value() const
  * @return reference to value from the result
  */
 template <typename T>
-T &result<T>::get_value()
+T &result<T>::get_value() &
 {
 	if (s == status::OK)
 		return value;
 	else
+		throw bad_result_access("bad_result_access: value doesn't exist");
+}
+
+/**
+ * Returns rvalue reference to value from the result.
+ *
+ * If result doesn't contain value, throws bad_result_access.
+ *
+ * @throw bad_result_access
+ *
+ * @return rvalue reference to value from the result
+ */
+template <typename T>
+T &&result<T>::get_value() &&
+{
+	if (s == status::OK) {
+		s = status::UNKNOWN_ERROR;
+		return std::move(value);
+	} else
 		throw bad_result_access("bad_result_access: value doesn't exist");
 }
 
