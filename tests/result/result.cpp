@@ -23,7 +23,7 @@ public:
 	{
 	}
 
-	moveable(const moveable &other) = default;
+	moveable(const moveable &other) = delete;
 
 	moveable(moveable &&other)
 	{
@@ -186,6 +186,26 @@ static void basic_test()
 	trivial1 = std::move(trivial2);
 	UT_ASSERT(trivial1.is_ok());
 	UT_ASSERT(!trivial2.is_ok());
+
+	/* test moving value out of the result */
+	result<moveable> move_out1(moveable(10));
+	UT_ASSERT(move_out1.is_ok());
+	auto &val = move_out1.get_value();
+
+	auto moved_val1 = std::move(move_out1).get_value();
+	UT_ASSERT(!move_out1.is_ok());
+	UT_ASSERT(val.moved());
+	UT_ASSERTeq(moved_val1.get(), 10);
+
+	/* test moving value out of the empty result */
+	bool exception_thrown = false;
+	try {
+		auto moved_val2 = std::move(move_out1).get_value();
+		(void)moved_val2;
+	} catch (const pmem::kv::bad_result_access &e) {
+		exception_thrown = true;
+	}
+	UT_ASSERT(exception_thrown);
 }
 
 /* counter of constructor/destructor calls */
