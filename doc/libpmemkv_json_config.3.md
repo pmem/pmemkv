@@ -36,6 +36,7 @@ const char *pmemkv_config_from_json_errormsg(void);
 For general description of pmemkv and available engines see **libpmemkv**(7).
 For description of pmemkv core API see **libpmemkv**(3).
 For description of configuration API for libpmemkv see **libpmemkv_config**(3).
+For pmemkv iterator API description see **libpmemkv_iterator**(3).
 
 # DESCRIPTION #
 
@@ -78,4 +79,4 @@ An example can be found in **libpmemkv_config**(3).
 
 # SEE ALSO #
 
-**libpmemkv**(7), **libpmemkv**(3), **libpmemkv_config**(3) and **<https://pmem.io>**
+**libpmemkv**(7), **libpmemkv**(3), **libpmemkv_config**(3), **libpmemkv_iterator**(3) and **<https://pmem.io>**

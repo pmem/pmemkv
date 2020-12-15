@@ -62,6 +62,7 @@ void pmemkv_comparator_delete(pmemkv_comparator *comparator);
 
 For general description of pmemkv and available engines see **libpmemkv**(7).
 For description of pmemkv core API see **libpmemkv**(3).
+For pmemkv iterator API description see **libpmemkv_iterator**(3).
 
 # DESCRIPTION #
 
@@ -245,4 +246,4 @@ Usage of config functions to set and get data based on their data type, e.g. 'pm
 
 # SEE ALSO #
 
-**libpmemkv**(7), **libpmemkv**(3) , **libpmemkv_json_config**(3) and **<https://pmem.io>**
+**libpmemkv**(7), **libpmemkv**(3) , **libpmemkv_json_config**(3), **libpmemkv_iterator**(3) and **<https://pmem.io>**
