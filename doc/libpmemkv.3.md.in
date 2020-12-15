@@ -66,6 +66,7 @@ const char *pmemkv_errormsg(void);
 ```
 
 For pmemkv configuration API description see **libpmemkv_config**(3).
+For pmemkv iterator API description see **libpmemkv_iterator**(3).
 For general pmemkv information, engine descriptions and bindings details see **libpmemkv**(7).
 
 # DESCRIPTION #
@@ -246,4 +247,4 @@ value.append(ptr, sz);
 
 # SEE ALSO #
 
-**libpmemkv**(7), **libpmemkv_config**(3) and **<https://pmem.io>**
+**libpmemkv**(7), **libpmemkv_config**(3), **libpmemkv_iterator**(3) and **<https://pmem.io>**
