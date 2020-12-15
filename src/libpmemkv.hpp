@@ -474,7 +474,12 @@ private:
 
 	This API is EXPERIMENTAL and might change.
 
-	This class allows grouping several operations into one atomic action.
+	The tx class allows grouping put and remove operations into a single atomic action
+	(with respect to persistence and concurrency). Concurrent engines provide
+	transactions with ACID (atomicity, consistency, isolation, durability) properties.
+	Transactions for single threaded engines provide atomicity, consistency and
+	durability. Actions in a transaction are executed in the order in which they were
+	called.
 
 	@snippet examples/pmemkv_transaction_cpp/pmemkv_transaction.cpp transaction
 */
@@ -1079,7 +1084,8 @@ inline tx::tx(pmemkv_tx *tx_) noexcept : tx_(tx_, &pmemkv_tx_end)
 
 /**
  * Removes from database record with given *key*. The removed element is still
- * visible until commit.
+ * visible until commit. This function will succeed even if there is no element in the
+ * database.
  *
  * @param[in] key record's key to query for, to be removed
  *
@@ -1107,7 +1113,8 @@ inline status tx::put(string_view key, string_view value) noexcept
 
 /**
  * Commits the transaction. All operations of this transaction are applied as
- * a single power fail-safe atomic action. Tx object cannot be reused after commit.
+ * a single power fail-safe atomic action. The tx object can be safely used after
+ * commit.
  *
  * @return pmem::kv::status
  */
@@ -1117,7 +1124,8 @@ inline status tx::commit() noexcept
 }
 
 /**
- * Aborts the transaction. Transaction object cannot be used after this.
+ * Aborts the transaction. The tx object can be safely used after
+ * abort.
  */
 inline void tx::abort() noexcept
 {
