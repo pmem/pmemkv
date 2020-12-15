@@ -450,7 +450,12 @@ private:
 /*! \class tx
 	\brief Pmemkv transaction handle.
 
-	This class allows grouping several operations into one atomic action.
+	The tx class allows grouping put and remove operations into a single atomic action
+	(with respect to persistence and concurrency). Concurrent engines provide
+	transactions with ACID (atomicity, consistency, isolation, durability) properties.
+	Transactions for single threaded engines provide atomicity, consistency and
+	durability. Actions in a transaction are executed in the order in which they were
+	called.
 */
 class tx {
 public:

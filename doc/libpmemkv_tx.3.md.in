@@ -1,0 +1,96 @@
+---
+layout: manual
+Content-Style: 'text/css'
+title: _MP(PMEMKV_TX, 3)
+collection: libpmemkv
+header: PMEMKV_TX
+secondary_title: pmemkv
+...
+
+[comment]: <> (SPDX-License-Identifier: BSD-3-Clause)
+[comment]: <> (Copyright 2019-2020, Intel Corporation)
+
+[comment]: <> (libpmemkv_tx.3 -- man page for libpmemkv transactions API)
+
+[NAME](#name)<br />
+[SYNOPSIS](#synopsis)<br />
+[DESCRIPTION](#description)<br />
+[ERRORS](#errors)<br />
+[EXAMPLE](#example)<br />
+[SEE ALSO](#see-also)<br />
+
+
+# NAME #
+
+**pmemkv_tx** - Transactions API for libpmemkv
+
+# SYNOPSIS #
+
+```c
+#include <libpmemkv.h>
+
+int pmemkv_tx_begin(pmemkv_db *db, pmemkv_tx **tx);
+int pmemkv_tx_put(pmemkv_tx *tx, const char *k, size_t kb, const char *v, size_t vb);
+int pmemkv_tx_remove(pmemkv_tx *tx, const char *k, size_t kb);
+int pmemkv_tx_commit(pmemkv_tx *tx);
+void pmemkv_tx_abort(pmemkv_tx *tx);
+```
+
+# DESCRIPTION #
+
+The transaction allows grouping put and remove operations into a single atomic action
+(with respect to persistence and concurrency). Concurrent engines provide transactions
+with ACID (atomicity, consistency, isolation, durability) properties. Transactions for
+single threaded engines provide atomicity, consistency and durability. Actions in a transaction
+are executed in the order in which they were called.
+
+`int pmemkv_tx_begin(pmemkv_db *db, pmemkv_tx **tx);`
+
+:	Starts a pmemkv transaction and stores a pointer to a *pmemkv_tx* instance in `*tx`.
+
+`int pmemkv_tx_put(pmemkv_tx *tx, const char *k, size_t kb, const char *v, size_t vb);`
+
+:   Inserts a key-value pair into pmemkv database. `kb` is the length of key `k` and `vb` is the length of value `v`.
+	When this function returns, caller is free to reuse both buffers. The inserted element is visible only after calling commit.
+
+
+`int pmemkv_tx_remove(pmemkv_tx *tx, const char *k, size_t kb);`
+
+:   Removes record with key `k` of length `kb`. The removed elements are still visible until calling commit.
+
+
+`int pmemkv_tx_commit(pmemkv_tx *tx);`
+
+:   Commits the transaction. All operations of this transaction are applied as a single power fail-safe atomic action.
+
+`void pmemkv_tx_abort(pmemkv_tx *tx);`
+
+:   Discards all operations. 
+
+## ERRORS ##
+
+Each function, except for *pmemkv_tx_abort()* returns status. Possible return values are listed in **libpmemkv**(3).
+
+# EXAMPLE #
+
+The following examples are taken from `examples/pmemkv_config_c` directory.
+
+## C EXAMPLE ##
+
+Usage of pmemkv transaction in C:
+
+```c
+@TRANSACTION_BASIC_C_EXAMPLE@
+```
+
+## C++ EXAMPLE ##
+
+Usage of pmemkv transaction in C++:
+
+```cpp
+@TRANSACTION_BASIC_CPP_EXAMPLE@
+```
+
+# SEE ALSO #
+
+**libpmemkv**(7), **libpmemkv**(3) and **<https://pmem.io>**
