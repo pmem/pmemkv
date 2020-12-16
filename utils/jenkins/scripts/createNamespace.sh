@@ -32,6 +32,7 @@ function clear_namespaces() {
 }
 
 function create_devdax() {
+	echo "Creating devdax namespace"
 	local align=$1
 	local size=$2
 	local cmd="sudo ndctl create-namespace --mode devdax -a ${align} -s ${size} -r ${DEV_DAX_R} -f"
@@ -43,6 +44,7 @@ function create_devdax() {
 }
 
 function create_fsdax() {
+	echo "Creating fsdax namespace"
 	local size=$1
 	local cmd="sudo ndctl create-namespace --mode fsdax -s ${size} -r ${FS_DAX_R} -f"
 	result=$(${cmd})
@@ -102,9 +104,10 @@ if $CREATE_PMEM; then
 		sudo mkfs.ext4 -F /dev/$pmem_name
 		sudo mount -o dax /dev/$pmem_name $MOUNT_POINT
 	fi
+	echo "Mount point: ${MOUNT_POINT}"
 fi
 
-# Changing file permissions.
+echo "Changing file permissions"
 sudo chmod 777 $MOUNT_POINT || true
 
 sudo chmod 777 /dev/dax* || true
@@ -112,6 +115,6 @@ sudo chmod a+rw /sys/bus/nd/devices/region*/deep_flush
 sudo chmod +r /sys/bus/nd/devices/ndbus*/region*/resource
 sudo chmod +r  /sys/bus/nd/devices/ndbus*/region*/dax*/resource
 
-# Print created namespaces.
+echo "Print created namespaces:"
 ndctl list -X | jq -r '.[] | select(.mode=="devdax") | [.daxregion.devices[].chardev, "align: "+(.daxregion.align/1024|tostring+"k"), "size: "+(.size/1024/1024/1024|tostring+"G") ]'
 ndctl list | jq -r '.[] | select(.mode=="fsdax") | [.blockdev, "size: "+(.size/1024/1024/1024|tostring+"G") ]'
