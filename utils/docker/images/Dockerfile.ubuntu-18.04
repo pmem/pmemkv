@@ -3,17 +3,17 @@
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
-#              environment, prepared for running pmemkv build and tests.
-#              Separate image for testing rapidjson installed from package.
+#              environment prepared for running pmemkv build and tests.
+#              It's using rapidjson installed from package.
 #
 
 # Pull base image
-FROM ubuntu:19.10
+FROM ubuntu:18.04
 MAINTAINER szymon.romik@intel.com
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER 19.10
+ENV OS_VER 18.04
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
 
@@ -22,9 +22,22 @@ ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 
+ARG NDCTL_DEPS="\
+	bash-completion \
+	libkeyutils-dev \
+	libkmod-dev \
+	libudev-dev \
+	systemd"
+
+ARG LIBPMEMOBJ_CPP_DEPS="\
+	libatomic1"
+
+ARG PMEMKV_DEPS="\
+	rapidjson-dev"
+
 # Update the Apt cache and install basic tools
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	autoconf \
 	automake \
 	build-essential \
@@ -39,37 +52,46 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	gdb \
 	git \
 	graphviz \
-	gzip \
 	libc6-dbg \
-	libdaxctl-dev \
-	libndctl-dev \
-	libmemkind-dev \
-	libnode-dev \
 	libnuma-dev \
+	libjson-c-dev \
+	libkmod-dev \
 	libtbb-dev \
 	libtext-diff-perl \
-	libtool \
-	libunwind8-dev \
+	libudev-dev \
+	libunwind-dev \
 	numactl \
+	libtool \
 	pandoc \
 	pkg-config \
-	rapidjson-dev \
+	software-properties-common \
 	sudo \
-	wget \
+	uuid-dev \
 	whois \
+	$NDCTL_DEPS \
+	$LIBPMEMOBJ_CPP_DEPS \
+	$PMEMKV_DEPS \
  && rm -rf /var/lib/apt/lists/*
+
+# Install libndctl
+COPY install-libndctl.sh install-libndctl.sh
+RUN ./install-libndctl.sh ubuntu
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
 RUN ./install-valgrind.sh
 
-# Install pmdk
+# Install pmdk from sources (because there are no ndctl packages)
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh dpkg
+RUN ./install-pmdk.sh
 
-# Install pmdk c++ bindings
+# Install pmdk c++ bindings (also from sources)
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh DEB
+RUN ./install-libpmemobj-cpp.sh
+
+# Install memkind
+COPY install-memkind.sh install-memkind.sh
+RUN ./install-memkind.sh
 
 # Add user
 ENV USER user
