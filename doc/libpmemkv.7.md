@@ -39,8 +39,8 @@ Persistent engines usually use libpmemobj++ and PMDK to access NVDIMMs. They can
 
 # ENGINES #
 
-| Engine Name  | Description | Persistent? | Concurrent? | Sorted? |
-| ------------ | ----------- | ----------- | ----------- | ------- |
+| Engine Name  | Description | Persistent  | Concurrent  | Sorted |
+| ------------ | ----------- | :-----------: | :-----------: | :------: |
 | **cmap** | **Concurrent hash map** | **Yes** | **Yes** | **No** |
 | vcmap | Volatile concurrent hash map | No | Yes | No |
 | vsmap | Volatile sorted hash map | No | No | Yes |
@@ -79,7 +79,7 @@ This engine requires the following config parameters (see **libpmemkv_config**(3
 The following table shows three possible combinations of parameters (where '-' means 'cannot be set'):
 
 | **#** | **path** | **force_create** | **size** | **oid** |
-| ----- | -------- | ---------------- | -------- | ------- |
+| ----- | :--------: | :----------------: | :--------: | :-------: |
 | **1** | set | 0 | - | - |
 | **2** | set | 1 | set | - |
 | **3** | - | - | - | set |
