@@ -40,8 +40,10 @@ set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 
+set(PMEMKV_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
 # Set the default build type
-if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+if(EXISTS "${PMEMKV_ROOT_DIR}/.git")
 	set(DEFAULT_BUILD_TYPE "Debug")
 else()
 	set(DEFAULT_BUILD_TYPE "RelWithDebInfo")
@@ -52,7 +54,7 @@ if(NOT CMAKE_BUILD_TYPE)
 		CACHE STRING "Choose a type of build (Debug, Release or RelWithDebInfo)" FORCE)
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PMEMKV_ROOT_DIR}/cmake)
 set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.11)
 set(LIBPMEMOBJ_REQUIRED_VERSION 1.8)
 set(LIBPMEM_REQUIRED_VERSION 1.7)
@@ -233,7 +235,7 @@ string(REPLACE ";" ", " DEB_PACKAGE_REQUIRES "${DEB_DEPENDS}")
 add_library(pmemkv SHARED ${SOURCE_FILES})
 set_target_properties(pmemkv PROPERTIES SOVERSION 1)
 target_link_libraries(pmemkv PRIVATE
-	-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv.map)
+	-Wl,--version-script=${PMEMKV_ROOT_DIR}/src/libpmemkv.map)
 
 target_include_directories(pmemkv PRIVATE src/valgrind)
 # Enable libpmemobj-cpp valgrind annotations
@@ -249,7 +251,7 @@ endif()
 
 ## Configure make install/uninstall and packages
 configure_file(libpmemkv.pc.in libpmemkv.pc @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/libpmemkv.pc
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libpmemkv.pc
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER "src/libpmemkv.h;src/libpmemkv.hpp")
@@ -260,7 +262,7 @@ install(TARGETS pmemkv
 		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 configure_file(
-	"${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+	"${PMEMKV_ROOT_DIR}/cmake/cmake_uninstall.cmake.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
 	IMMEDIATE @ONLY)
 
@@ -268,7 +270,7 @@ add_custom_target(uninstall
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 if(NOT "${CPACK_GENERATOR}" STREQUAL "")
-	include(${CMAKE_SOURCE_DIR}/cmake/packages.cmake)
+	include(${PMEMKV_ROOT_DIR}/cmake/packages.cmake)
 endif()
 
 ## Setup additional targets
@@ -277,8 +279,8 @@ add_custom_target(cppstyle)
 add_custom_target(cppformat)
 add_custom_target(check-whitespace)
 add_custom_target(check-license
-	COMMAND ${CMAKE_SOURCE_DIR}/utils/check_license/check-headers.sh
-		${CMAKE_SOURCE_DIR}
+	COMMAND ${PMEMKV_ROOT_DIR}/utils/check_license/check-headers.sh
+		${PMEMKV_ROOT_DIR}
 		BSD-3-Clause)
 
 if(CHECK_CPP_STYLE)
@@ -327,9 +329,9 @@ add_cppstyle(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
 
-add_check_whitespace(main ${CMAKE_SOURCE_DIR}/utils/check_whitespace
-			${CMAKE_SOURCE_DIR}/utils/check_license/*.sh
-			${CMAKE_SOURCE_DIR}/*.md)
+add_check_whitespace(main ${PMEMKV_ROOT_DIR}/utils/check_whitespace
+			${CMAKE_CURRENT_SOURCE_DIR}/utils/check_license/*.sh
+			${CMAKE_CURRENT_SOURCE_DIR}/*.md)
 
 add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/*.h*
@@ -355,13 +357,13 @@ if(BUILD_JSON_CONFIG)
 	add_library(pmemkv_json_config SHARED ${SOURCE_FILES_JSON_CONFIG})
 	set_target_properties(pmemkv_json_config PROPERTIES SOVERSION 1)
 	target_link_libraries(pmemkv_json_config PRIVATE pmemkv ${RapidJSON_LIBRARIES}
-		-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/libpmemkv_json_config.map)
+		-Wl,--version-script=${PMEMKV_ROOT_DIR}/src/libpmemkv_json_config.map)
 	set_target_properties(pmemkv_json_config
 		PROPERTIES PUBLIC_HEADER "src/libpmemkv_json_config.h")
 
 	configure_file(libpmemkv_json_config.pc.in libpmemkv_json_config.pc @ONLY)
 
-	install(FILES ${CMAKE_BINARY_DIR}/libpmemkv_json_config.pc
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libpmemkv_json_config.pc
 		DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 	install(TARGETS pmemkv_json_config
