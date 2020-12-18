@@ -7,15 +7,15 @@ include(CheckCXXCompilerFlag)
 function(set_version VERSION)
 	set(VERSION_FILE ${PMEMKV_ROOT_DIR}/VERSION)
 	if(EXISTS ${VERSION_FILE})
-		file(READ ${VERSION_FILE} FILE_VERSION)
-		string(REPLACE "[\r\n]" "" FILE_VERSION ${FILE_VERSION})
-		string(STRIP ${FILE_VERSION} FILE_VERSION)
+		file(STRINGS ${VERSION_FILE} FILE_VERSION)
 		set(VERSION ${FILE_VERSION} PARENT_SCOPE)
 		return()
 	endif()
 
 	execute_process(COMMAND git describe
 			OUTPUT_VARIABLE GIT_VERSION
+			WORKING_DIRECTORY ${PMEMKV_ROOT_DIR}
+			OUTPUT_STRIP_TRAILING_WHITESPACE
 			ERROR_QUIET)
 	if(GIT_VERSION)
 		# 1.5-rc1-19-gb8f78a329 -> 1.5-rc1.git19.gb8f78a329
@@ -42,10 +42,10 @@ function(set_version VERSION)
 		endif()
 	else()
 		execute_process(COMMAND git log -1 --format=%h
-				OUTPUT_VARIABLE GIT_COMMIT)
-		set(VERSION
-			${GIT_COMMIT}
-			PARENT_SCOPE)
+				OUTPUT_VARIABLE GIT_COMMIT
+				WORKING_DIRECTORY ${PMEMKV_ROOT_DIR}
+				OUTPUT_STRIP_TRAILING_WHITESPACE)
+		set(VERSION ${GIT_COMMIT} PARENT_SCOPE)
 	endif()
 endfunction()
 
