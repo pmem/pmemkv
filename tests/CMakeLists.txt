@@ -42,8 +42,8 @@ add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/compatibility/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/comparator/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/config/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/all/*.c*
-		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/all/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/concurrent/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/memkind/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/persistent/*.c*
