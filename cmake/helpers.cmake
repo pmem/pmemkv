@@ -5,7 +5,7 @@ include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 
 function(set_version VERSION)
-	set(VERSION_FILE ${CMAKE_SOURCE_DIR}/VERSION)
+	set(VERSION_FILE ${PMEMKV_ROOT_DIR}/VERSION)
 	if(EXISTS ${VERSION_FILE})
 		file(READ ${VERSION_FILE} FILE_VERSION)
 		string(REPLACE "[\r\n]" "" FILE_VERSION ${FILE_VERSION})
@@ -64,7 +64,7 @@ function(add_cppstyle name)
 	if(${ARGC} EQUAL 1)
 		add_custom_target(cppstyle-${name}
 			COMMAND ${PERL_EXECUTABLE}
-				${CMAKE_SOURCE_DIR}/utils/cppstyle
+				${PMEMKV_ROOT_DIR}/utils/cppstyle
 				${CLANG_FORMAT}
 				check
 				${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
@@ -72,7 +72,7 @@ function(add_cppstyle name)
 			)
 		add_custom_target(cppformat-${name}
 			COMMAND ${PERL_EXECUTABLE}
-				${CMAKE_SOURCE_DIR}/utils/cppstyle
+				${PMEMKV_ROOT_DIR}/utils/cppstyle
 				${CLANG_FORMAT}
 				format
 				${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
@@ -81,14 +81,14 @@ function(add_cppstyle name)
 	else()
 		add_custom_target(cppstyle-${name}
 			COMMAND ${PERL_EXECUTABLE}
-				${CMAKE_SOURCE_DIR}/utils/cppstyle
+				${PMEMKV_ROOT_DIR}/utils/cppstyle
 				${CLANG_FORMAT}
 				check
 				${ARGN}
 			)
 		add_custom_target(cppformat-${name}
 			COMMAND ${PERL_EXECUTABLE}
-				${CMAKE_SOURCE_DIR}/utils/cppstyle
+				${PMEMKV_ROOT_DIR}/utils/cppstyle
 				${CLANG_FORMAT}
 				format
 				${ARGN}
@@ -109,7 +109,7 @@ function(add_check_whitespace name)
 
 	add_custom_target(check-whitespace-${name}
 		COMMAND ${PERL_EXECUTABLE}
-			${CMAKE_SOURCE_DIR}/utils/check_whitespace ${ARGN})
+			${PMEMKV_ROOT_DIR}/utils/check_whitespace ${ARGN})
 
 	add_dependencies(check-whitespace check-whitespace-${name})
 endfunction()
