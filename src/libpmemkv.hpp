@@ -14,6 +14,8 @@
 #include <utility>
 
 #include "libpmemkv.h"
+#include "logging.h"
+#include "out.h"
 #include <libpmemobj/pool_base.h>
 
 /*! \file libpmemkv.hpp
@@ -1180,6 +1182,12 @@ inline status db::open(const std::string &engine_name, config &&cfg) noexcept
 		static_cast<status>(pmemkv_open(engine_name.c_str(), cfg.release(), &db));
 	if (s == pmem::kv::status::OK)
 		this->db_.reset(db);
+
+	/* initialize the log file */
+	// XXX: make 1.0 not hardcoded
+	out_init("libpmemkv", "PMEMKV_LOG_LEVEL", "PMEMKV_LOG_FILE", 1, 0);
+
+	LOG_PMDK(3, "db open succesfully");
 	return s;
 }
 
@@ -1189,6 +1197,11 @@ inline status db::open(const std::string &engine_name, config &&cfg) noexcept
 inline void db::close() noexcept
 {
 	this->db_.reset(nullptr);
+
+	LOG_PMDK(3, "db closed succesfully");
+
+	/* close the log file */
+	out_fini();
 }
 
 /**

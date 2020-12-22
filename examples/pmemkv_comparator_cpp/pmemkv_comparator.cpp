@@ -11,13 +11,16 @@
 #include <iostream>
 #include <libpmemkv.hpp>
 
+#include "../../src/logging.h"
+#include "../../src/out.h"
+
 #define ASSERT(expr)                                                                     \
 	do {                                                                             \
 		if (!(expr))                                                             \
 			std::cout << pmemkv_errormsg() << std::endl;                     \
 		assert(expr);                                                            \
 	} while (0)
-#define LOG(msg) std::cout << msg << std::endl
+#define LOG_EX(msg) std::cout << msg << std::endl
 
 using namespace pmem::kv;
 
@@ -52,7 +55,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* See libpmemkv_config(3) for more detailed example of config creation */
-	LOG("Creating config");
+	LOG_EX("Creating config");
 	config cfg;
 
 	status s = cfg.put_path(argv[1]);
@@ -64,13 +67,13 @@ int main(int argc, char *argv[])
 	s = cfg.put_comparator(lexicographical_comparator{});
 	ASSERT(s == status::OK);
 
-	LOG("Opening pmemkv database with 'csmap' engine");
+	LOG_EX("Opening pmemkv database with 'csmap' engine");
 	db *kv = new db();
 	ASSERT(kv != nullptr);
 	s = kv->open("csmap", std::move(cfg));
 	ASSERT(s == status::OK);
 
-	LOG("Putting new keys");
+	LOG_EX("Putting new keys");
 	s = kv->put("key1", "value1");
 	ASSERT(s == status::OK);
 	s = kv->put("key2", "value2");
@@ -78,13 +81,13 @@ int main(int argc, char *argv[])
 	s = kv->put("key3", "value3");
 	ASSERT(s == status::OK);
 
-	LOG("Iterating over existing keys in order specified by the comparator");
+	LOG_EX("Iterating over existing keys in order specified by the comparator");
 	kv->get_all([](string_view k, string_view v) {
-		LOG("  visited: " << k.data());
+		LOG_EX("  visited: " << k.data());
 		return 0;
 	});
 
-	LOG("Closing database");
+	LOG_EX("Closing database");
 	delete kv;
 
 	return 0;

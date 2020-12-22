@@ -22,7 +22,8 @@ option(COVERAGE "run coverage test" OFF)
 
 option(DEVELOPER_MODE "enable developer's checks" OFF)
 option(CHECK_CPP_STYLE "check code style of C++ sources" OFF)
-option(USE_CCACHE "Use ccache if it is available in the system" ON)
+option(USE_CCACHE "use ccache if it is available in the system" ON)
+option(LOGGING "enable logging of debug information in library" OFF)
 
 # Each engine can be enabled separately.
 # By default all experimental engines are turned off.
@@ -78,6 +79,8 @@ set(SOURCE_FILES
 	src/engines/blackhole.h
 	src/out.cc
 	src/out.h
+	src/logging.c
+	src/logging.h
 )
 # Add each engine source separately
 if(ENGINE_CMAP)
@@ -247,6 +250,10 @@ if(ENGINE_VSMAP OR ENGINE_VCMAP)
 endif()
 if(ENGINE_VCMAP)
 	target_link_libraries(pmemkv PRIVATE ${TBB_LIBRARIES})
+endif()
+
+if(LOGGING)
+	add_definitions(-DPMEMKV_USE_LOGGING)
 endif()
 
 ## Configure make install/uninstall and packages

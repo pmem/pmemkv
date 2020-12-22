@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2020, Intel Corporation */
 
 #ifndef LIBPMEMKV_OUT_H
 #define LIBPMEMKV_OUT_H
 
+#include "logging.h"
+
+#include <iostream>
 #include <ostream>
 
 std::ostream &out_err_stream(const char *func);
