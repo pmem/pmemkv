@@ -1,7 +1,19 @@
 var searchData=
 [
-  ['readme_2emd_73',['README.md',['../README_8md.html',1,'']]],
-  ['release_74',['release',['../classpmem_1_1kv_1_1config.html#aa5bc6dcfad199c4c45bb53fd7e7263c0',1,'pmem::kv::config']]],
-  ['remove_75',['remove',['../classpmem_1_1kv_1_1db.html#a31167b93a66c88559ff11010e1e130c1',1,'pmem::kv::db']]],
-  ['result_76',['result',['../classpmem_1_1kv_1_1result.html',1,'pmem::kv::result&lt; T &gt;'],['../classpmem_1_1kv_1_1result.html#a2eced56c83be36381fab0d9b8ffc0c2f',1,'pmem::kv::result::result(const T &amp;val) noexcept(noexcept(T(std::declval&lt; T &gt;())))'],['../classpmem_1_1kv_1_1result.html#af35be760b2a6c7c0e5aa5e9d878238b4',1,'pmem::kv::result::result(const status &amp;err) noexcept'],['../classpmem_1_1kv_1_1result.html#a368e61e948f1e7b2fa5a3ad5ff91ee89',1,'pmem::kv::result::result(const result &amp;other) noexcept(noexcept(T(std::declval&lt; T &gt;())))'],['../classpmem_1_1kv_1_1result.html#af0f7becc824f4c6764a255d979854d07',1,'pmem::kv::result::result(result &amp;&amp;other) noexcept(noexcept(T(std::declval&lt; T &gt;())))'],['../classpmem_1_1kv_1_1result.html#ac730ab766cb79cf24722a9a0f53632dc',1,'pmem::kv::result::result(T &amp;&amp;val) noexcept(noexcept(T(std::declval&lt; T &gt;())))']]]
+  ['pmemkv_59',['pmemkv',['../index.html',1,'']]],
+  ['internal_60',['internal',['../namespacepmem_1_1kv_1_1internal.html',1,'pmem::kv']]],
+  ['kv_61',['kv',['../namespacepmem_1_1kv.html',1,'pmem']]],
+  ['pmem_62',['pmem',['../namespacepmem.html',1,'']]],
+  ['ptr_63',['ptr',['../structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper.html#a8ba6ff57823a1c3c0a89637555280a38',1,'pmem::kv::internal::unique_ptr_wrapper::ptr()'],['../structpmem_1_1kv_1_1internal_1_1comparator__config__entry.html#a242122210993f0ba744ad8dddab549e9',1,'pmem::kv::internal::comparator_config_entry::ptr()']]],
+  ['put_64',['put',['../classpmem_1_1kv_1_1tx.html#a3c6de45d7500d7c2e8bdeba2e6248ba7',1,'pmem::kv::tx::put()'],['../classpmem_1_1kv_1_1db.html#a31dbecf3c960dec47d4a04328b9efd92',1,'pmem::kv::db::put()']]],
+  ['put_5fcomparator_65',['put_comparator',['../classpmem_1_1kv_1_1config.html#a95af80763cf924cf0b656d4ded034222',1,'pmem::kv::config']]],
+  ['put_5fdata_66',['put_data',['../classpmem_1_1kv_1_1config.html#af6c8419518a384cdce1f36cd2a1e4545',1,'pmem::kv::config']]],
+  ['put_5fforce_5fcreate_67',['put_force_create',['../classpmem_1_1kv_1_1config.html#ae64b5cc81866de14f975d7238acb26c3',1,'pmem::kv::config']]],
+  ['put_5fint64_68',['put_int64',['../classpmem_1_1kv_1_1config.html#ad9020906aa23b44157ce25fc83c425c8',1,'pmem::kv::config']]],
+  ['put_5fobject_69',['put_object',['../classpmem_1_1kv_1_1config.html#ab8dba893f7332490c7624a2802ebd931',1,'pmem::kv::config::put_object(const std::string &amp;key, T *value, void(*deleter)(void *)) noexcept'],['../classpmem_1_1kv_1_1config.html#a1c0f1b1157e5922f2287f36be2d92015',1,'pmem::kv::config::put_object(const std::string &amp;key, std::unique_ptr&lt; T, D &gt; object) noexcept']]],
+  ['put_5foid_70',['put_oid',['../classpmem_1_1kv_1_1config.html#ab41100ae393deddbfbcd2bbfef818744',1,'pmem::kv::config']]],
+  ['put_5fpath_71',['put_path',['../classpmem_1_1kv_1_1config.html#acc5378a2f1df9c5273dcfd81b67b3664',1,'pmem::kv::config']]],
+  ['put_5fsize_72',['put_size',['../classpmem_1_1kv_1_1config.html#a44b187e6f020ae04a024a6df2b6629e0',1,'pmem::kv::config']]],
+  ['put_5fstring_73',['put_string',['../classpmem_1_1kv_1_1config.html#a6b14f4878bd1ba832e43da8bf2a6ffc9',1,'pmem::kv::config']]],
+  ['put_5fuint64_74',['put_uint64',['../classpmem_1_1kv_1_1config.html#a3b21e4344c87f542f6e2b6fc152e74a9',1,'pmem::kv::config']]]
 ];

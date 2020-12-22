@@ -1,14 +1,8 @@
 var searchData=
 [
-  ['put_142',['put',['../classpmem_1_1kv_1_1db.html#a31dbecf3c960dec47d4a04328b9efd92',1,'pmem::kv::db']]],
-  ['put_5fcomparator_143',['put_comparator',['../classpmem_1_1kv_1_1config.html#a95af80763cf924cf0b656d4ded034222',1,'pmem::kv::config']]],
-  ['put_5fdata_144',['put_data',['../classpmem_1_1kv_1_1config.html#af6c8419518a384cdce1f36cd2a1e4545',1,'pmem::kv::config']]],
-  ['put_5fforce_5fcreate_145',['put_force_create',['../classpmem_1_1kv_1_1config.html#ae64b5cc81866de14f975d7238acb26c3',1,'pmem::kv::config']]],
-  ['put_5fint64_146',['put_int64',['../classpmem_1_1kv_1_1config.html#ad9020906aa23b44157ce25fc83c425c8',1,'pmem::kv::config']]],
-  ['put_5fobject_147',['put_object',['../classpmem_1_1kv_1_1config.html#ab8dba893f7332490c7624a2802ebd931',1,'pmem::kv::config::put_object(const std::string &amp;key, T *value, void(*deleter)(void *)) noexcept'],['../classpmem_1_1kv_1_1config.html#a1c0f1b1157e5922f2287f36be2d92015',1,'pmem::kv::config::put_object(const std::string &amp;key, std::unique_ptr&lt; T, D &gt; object) noexcept']]],
-  ['put_5foid_148',['put_oid',['../classpmem_1_1kv_1_1config.html#ab41100ae393deddbfbcd2bbfef818744',1,'pmem::kv::config']]],
-  ['put_5fpath_149',['put_path',['../classpmem_1_1kv_1_1config.html#acc5378a2f1df9c5273dcfd81b67b3664',1,'pmem::kv::config']]],
-  ['put_5fsize_150',['put_size',['../classpmem_1_1kv_1_1config.html#a44b187e6f020ae04a024a6df2b6629e0',1,'pmem::kv::config']]],
-  ['put_5fstring_151',['put_string',['../classpmem_1_1kv_1_1config.html#a6b14f4878bd1ba832e43da8bf2a6ffc9',1,'pmem::kv::config']]],
-  ['put_5fuint64_152',['put_uint64',['../classpmem_1_1kv_1_1config.html#a3b21e4344c87f542f6e2b6fc152e74a9',1,'pmem::kv::config']]]
+  ['open_145',['open',['../classpmem_1_1kv_1_1db.html#a2926a0a75fa9f1f36797bddbbe16e98e',1,'pmem::kv::db']]],
+  ['operator_21_3d_146',['operator!=',['../namespacepmem_1_1kv.html#ade5d9c72af7dcaf30f7428bed6b34de7',1,'pmem::kv::operator!=(const result&lt; T &gt; &amp;lhs, const status &amp;rhs)'],['../namespacepmem_1_1kv.html#aee1947b70aeb51040ebab732ebde45cf',1,'pmem::kv::operator!=(const status &amp;lhs, const result&lt; T &gt; &amp;rhs)']]],
+  ['operator_3c_3c_147',['operator&lt;&lt;',['../namespacepmem_1_1kv.html#ae359c3f44cdb3eb1972adc1e85acb880',1,'pmem::kv']]],
+  ['operator_3d_148',['operator=',['../classpmem_1_1kv_1_1result.html#adea22ea2ed3d5510934d1621efbfa829',1,'pmem::kv::result::operator=(const result &amp;other) noexcept(noexcept(std::declval&lt; T &gt;().~T()) &amp;&amp;noexcept(T(std::declval&lt; T &gt;())))'],['../classpmem_1_1kv_1_1result.html#a65e5688e4e7e37648e548a3edd627c4c',1,'pmem::kv::result::operator=(result &amp;&amp;other) noexcept(noexcept(std::declval&lt; T &gt;().~T()) &amp;&amp;noexcept(T(std::declval&lt; T &gt;())))']]],
+  ['operator_3d_3d_149',['operator==',['../namespacepmem_1_1kv.html#a86b8abcaec9635bda73a6ec286ddc5b6',1,'pmem::kv::operator==(const result&lt; T &gt; &amp;lhs, const status &amp;rhs)'],['../namespacepmem_1_1kv.html#a7defdfe77f3ee58a7dae47bf21cdaf3a',1,'pmem::kv::operator==(const status &amp;lhs, const result&lt; T &gt; &amp;rhs)']]]
 ];
