@@ -8,8 +8,9 @@
 
 using namespace pmem::kv;
 
+template <typename Inserter = pmem::kv::db>
 std::map<std::string, std::string> PutToMapTest(size_t n_inserts, size_t key_length,
-						size_t value_length, pmem::kv::db &kv)
+						size_t value_length, Inserter &kv)
 {
 	/**
 	 * Test: Put data into db and get it back
@@ -41,6 +42,10 @@ std::map<std::string, std::string> PutToMapTest(size_t n_inserts, size_t key_len
 
 void VerifyKv(const std::map<std::string, std::string> &prototype, pmem::kv::db &kv)
 {
+	size_t cnt;
+	ASSERT_STATUS(kv.count_all(cnt), pmem::kv::status::OK);
+	UT_ASSERTeq(prototype.size(), cnt);
+
 	/* Retrieve data from db and compare with prototype */
 	for (const auto &record : prototype) {
 		const auto &key = record.first;

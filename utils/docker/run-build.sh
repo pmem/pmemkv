@@ -194,6 +194,7 @@ function test_release_installation() {
 
 	CC=gcc CXX=g++ \
 	cmake .. -DCMAKE_BUILD_TYPE=Release \
+		-DENGINE_RADIX=1 \
 		-DBUILD_TESTS=0 \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX \
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG}
@@ -220,6 +221,17 @@ function test_release_installation() {
 
 	echo "Expect failure - non-existing path is passed:"
 	run_example_standalone pmemkv_open_cpp /non-existing/path && exit 1
+
+	echo "Transaction C++ example:"
+	compile_example_standalone pmemkv_transaction_cpp
+	pmempool create -l "pmemkv_radix" obj $WORKDIR/examples/example.poolset
+	run_example_standalone pmemkv_transaction_cpp $WORKDIR/examples/example.poolset
+
+	echo "Transaction C example:"
+	compile_example_standalone pmemkv_transaction_c
+	pmempool rm -f $WORKDIR/examples/example.poolset
+	pmempool create -l "pmemkv_radix" obj $WORKDIR/examples/example.poolset
+	run_example_standalone pmemkv_transaction_c $WORKDIR/examples/example.poolset
 
 	echo "Uninstall libraries"
 	cd $WORKDIR/build
