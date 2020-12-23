@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['errormsg_24',['errormsg',['../classpmem_1_1kv_1_1db.html#a8a1f3aa460fd01a324c0bd5bd2d6ae92',1,'pmem::kv::db']]],
-  ['exists_25',['exists',['../classpmem_1_1kv_1_1db.html#a130ec5171d0afa3d8fe9b5604910c679',1,'pmem::kv::db']]]
+  ['db_22',['db',['../classpmem_1_1kv_1_1db.html',1,'pmem::kv::db'],['../classpmem_1_1kv_1_1db.html#a56a026a82b2836e68fe4d62a011fd9a5',1,'pmem::kv::db::db()']]],
+  ['db_5f_23',['db_',['../classpmem_1_1kv_1_1db.html#ad34d77b2f37761c709f3fba52bd54134',1,'pmem::kv::db']]],
+  ['defrag_24',['defrag',['../classpmem_1_1kv_1_1db.html#a247061eab0155ce92b24885be6afd207',1,'pmem::kv::db']]],
+  ['defrag_5ferror_25',['DEFRAG_ERROR',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a0f3ff38a7ae1da8aab727eeabca0905a',1,'pmem::kv']]]
 ];

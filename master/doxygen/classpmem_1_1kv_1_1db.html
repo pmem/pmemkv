@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.3-git53.g355e036</span>
+   &#160;<span id="projectnumber">1.3-git74.g14f7035</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -167,6 +167,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a247061eab0155ce92b24885be6afd207"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a247061eab0155ce92b24885be6afd207">defrag</a> (double start_percent=0, double amount_percent=100)</td></tr>
 <tr class="memdesc:a247061eab0155ce92b24885be6afd207"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defragments approximately 'amount_percent' percent of elements in the database starting from 'start_percent' percent of elements.  <a href="classpmem_1_1kv_1_1db.html#a247061eab0155ce92b24885be6afd207">More...</a><br /></td></tr>
 <tr class="separator:a247061eab0155ce92b24885be6afd207"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b3289fa76fff3375d616e8785bcbedb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; <a class="el" href="classpmem_1_1kv_1_1tx.html">tx</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a7b3289fa76fff3375d616e8785bcbedb">tx_begin</a> () noexcept</td></tr>
+<tr class="memdesc:a7b3289fa76fff3375d616e8785bcbedb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starts a pmemkv transaction.  <a href="classpmem_1_1kv_1_1db.html#a7b3289fa76fff3375d616e8785bcbedb">More...</a><br /></td></tr>
+<tr class="separator:a7b3289fa76fff3375d616e8785bcbedb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a1f3aa460fd01a324c0bd5bd2d6ae92"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a8a1f3aa460fd01a324c0bd5bd2d6ae92">errormsg</a> ()</td></tr>
 <tr class="memdesc:a8a1f3aa460fd01a324c0bd5bd2d6ae92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a human readable string describing the last error.  <a href="classpmem_1_1kv_1_1db.html#a8a1f3aa460fd01a324c0bd5bd2d6ae92">More...</a><br /></td></tr>
 <tr class="separator:a8a1f3aa460fd01a324c0bd5bd2d6ae92"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1513,6 +1516,34 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a7b3289fa76fff3375d616e8785bcbedb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b3289fa76fff3375d616e8785bcbedb">&#9670;&nbsp;</a></span>tx_begin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; <a class="el" href="classpmem_1_1kv_1_1tx.html">tx</a> &gt; pmem::kv::db::tx_begin </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Starts a pmemkv transaction. </p>
+<dl class="section return"><dt>Returns</dt><dd>transaction handle </dd></dl>
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a id="ad34d77b2f37761c709f3fba52bd54134"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad34d77b2f37761c709f3fba52bd54134">&#9670;&nbsp;</a></span>db_</h2>
@@ -1537,7 +1568,7 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/tmp/pmemkv-QPf/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
+<li>/tmp/pmemkv-t3f/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

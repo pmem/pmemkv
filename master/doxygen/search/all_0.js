@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['bad_5fresult_5faccess_0',['bad_result_access',['../classpmem_1_1kv_1_1bad__result__access.html',1,'pmem::kv::bad_result_access'],['../classpmem_1_1kv_1_1bad__result__access.html#aed898f99878578c060b533d163de0f9c',1,'pmem::kv::bad_result_access::bad_result_access()']]]
+  ['abort_0',['abort',['../classpmem_1_1kv_1_1tx.html#a223373f8ea3e1f347abde8cacb80dc30',1,'pmem::kv::tx']]]
 ];

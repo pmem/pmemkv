@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['_7ecomparator_5fbase_88',['~comparator_base',['../classpmem_1_1kv_1_1internal_1_1comparator__base.html#a11cc4a794734ed399341c2ca8e09af50',1,'pmem::kv::internal::comparator_base']]],
-  ['_7eresult_89',['~result',['../classpmem_1_1kv_1_1result.html#ae941dcb59a3c1b60492ba273fdd77a66',1,'pmem::kv::result']]],
-  ['_7eunique_5fptr_5fwrapper_5fbase_90',['~unique_ptr_wrapper_base',['../structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper__base.html#a7237cbc1596825cdbe8473ead16f248b',1,'pmem::kv::internal::unique_ptr_wrapper_base']]]
+  ['what_91',['what',['../classpmem_1_1kv_1_1bad__result__access.html#a192a4c4f66a3845325d55e8dc02766d6',1,'pmem::kv::bad_result_access']]],
+  ['wrong_5fengine_5fname_92',['WRONG_ENGINE_NAME',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a1b216524ee497e527dfea31344c137e2',1,'pmem::kv']]]
 ];
