@@ -18,6 +18,8 @@ for the current **master**:
 * C manpages:
 	* [libpmemkv.3](./master/manpages/libpmemkv.3.html)
 	* [libpmemkv.7](./master/manpages/libpmemkv.7.html)
+	* [libpmemkv_tx.3](./master/manpages/libpmemkv_tx.3.html) (EXPERIMENTAL API)
+	* [libpmemkv_iterator.3](./master/manpages/libpmemkv_iterator.3.html) (EXPERIMENTAL API)
 	* [libpmemkv_config.3](./master/manpages/libpmemkv_config.3.html)
 	* [libpmemkv_json_config.3](./master/manpages/libpmemkv_json_config.3.html)
 
