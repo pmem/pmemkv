@@ -46,6 +46,29 @@ The **C++ API** of pmemkv is documented in the Doxygen documentation listed belo
 * [v1.2](./v1.2/doxygen/index.html)
 * [v1.1](./v1.1/doxygen/index.html)
 
+## Language Bindings
+
+Up-to-date overview information about language bindings for pmemkv can be found in
+[pmemkv's README on GitHub](https://github.com/pmem/pmemkv#language-bindings).
+
+Each of bindings has its own detailed API documentation on pmem.io:
+* **pmemkv-java** [docs](https://pmem.io/pmemkv-java)
+* **pmemkv-nodejs** [docs](https://pmem.io/pmemkv-nodejs)
+* **pmemkv-python** [docs](https://pmem.io/pmemkv-python)
+
+or just a readme (on GitHub's repository page):
+* **pmemkv-ruby** [readme](https://github.com/pmem/pmemkv-ruby)
+
+## Blog entries
+
+The following series of blog articles provides an introduction to **pmemkv**:
+
+* [Introduction](https://pmem.io/2017/02/21/pmemkv-intro.html)
+* [Zero-copy leaf splits in pmemkv](https://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html)
+* [Benchmarking with different storage engines using pmemkv](https://pmem.io/2017/12/27/pmemkv-benchmarking-engines.html)
+* [Language bindings for pmemkv](https://pmem.io/2020/03/04/pmemkv-bindings.html)
+* [API overview of pmemkv-java binding](https://pmem.io/2020/10/30/pmemkv-java-binding.html)
+
 ## Releases' support status
 
 Currently all branches/releases are fully supported. Latest releases can be
@@ -72,16 +95,6 @@ Possible statuses:
 	* No support,
 	* No bug fixes,
 	* No official releases.
-
-## Blog entries
-
-The following series of blog articles provides an introduction to **pmemkv**:
-
-* [Introduction](https://pmem.io/2017/02/21/pmemkv-intro.html)
-* [Zero-copy leaf splits in pmemkv](https://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html)
-* [Benchmarking with different storage engines using pmemkv](https://pmem.io/2017/12/27/pmemkv-benchmarking-engines.html)
-* [Language bindings for pmemkv](https://pmem.io/2020/03/04/pmemkv-bindings.html)
-* [API overview of pmemkv-java binding](https://pmem.io/2020/10/30/pmemkv-java-binding.html)
 
 ## Archived documentation
 
