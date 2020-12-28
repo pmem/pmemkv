@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.3-git74.g14f7035</span>
+   &#160;<span id="projectnumber">1.3-git86.g82a7ea8</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -68,6 +68,8 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classpmem_1_1kv_1_1db-members.html">List of all members</a>  </div>
@@ -81,6 +83,19 @@ $(function() {
 
 <p><code>#include &lt;<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html">iterator</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator provides methods to iterate over records in db.  <a href="classpmem_1_1kv_1_1db_1_1iterator.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:a505157900fa3cb36b8959bf24ca1b956"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a505157900fa3cb36b8959bf24ca1b956">read_iterator</a> = <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html">iterator</a>&lt; true &gt;</td></tr>
+<tr class="separator:a505157900fa3cb36b8959bf24ca1b956"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ad9af8412fda11df6feed66b945dff6"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a5ad9af8412fda11df6feed66b945dff6">write_iterator</a> = <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html">iterator</a>&lt; false &gt;</td></tr>
+<tr class="separator:a5ad9af8412fda11df6feed66b945dff6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a56a026a82b2836e68fe4d62a011fd9a5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a56a026a82b2836e68fe4d62a011fd9a5">db</a> () noexcept</td></tr>
@@ -170,6 +185,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7b3289fa76fff3375d616e8785bcbedb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; <a class="el" href="classpmem_1_1kv_1_1tx.html">tx</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a7b3289fa76fff3375d616e8785bcbedb">tx_begin</a> () noexcept</td></tr>
 <tr class="memdesc:a7b3289fa76fff3375d616e8785bcbedb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starts a pmemkv transaction.  <a href="classpmem_1_1kv_1_1db.html#a7b3289fa76fff3375d616e8785bcbedb">More...</a><br /></td></tr>
 <tr class="separator:a7b3289fa76fff3375d616e8785bcbedb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02fafc1f7efbdb910de3318cca762153"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; <a class="el" href="classpmem_1_1kv_1_1db.html#a505157900fa3cb36b8959bf24ca1b956">read_iterator</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a02fafc1f7efbdb910de3318cca762153">new_read_iterator</a> ()</td></tr>
+<tr class="memdesc:a02fafc1f7efbdb910de3318cca762153"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns new read iterator in <a class="el" href="classpmem_1_1kv_1_1result.html" title="Stores result of an operation. It always contains status and optionally can contain value.">pmem::kv::result</a>.  <a href="classpmem_1_1kv_1_1db.html#a02fafc1f7efbdb910de3318cca762153">More...</a><br /></td></tr>
+<tr class="separator:a02fafc1f7efbdb910de3318cca762153"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abaa51b84d1e653ccfd1a67172e6bba20"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; <a class="el" href="classpmem_1_1kv_1_1db.html#a5ad9af8412fda11df6feed66b945dff6">write_iterator</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#abaa51b84d1e653ccfd1a67172e6bba20">new_write_iterator</a> ()</td></tr>
+<tr class="memdesc:abaa51b84d1e653ccfd1a67172e6bba20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns new write iterator in <a class="el" href="classpmem_1_1kv_1_1result.html" title="Stores result of an operation. It always contains status and optionally can contain value.">pmem::kv::result</a>.  <a href="classpmem_1_1kv_1_1db.html#abaa51b84d1e653ccfd1a67172e6bba20">More...</a><br /></td></tr>
+<tr class="separator:abaa51b84d1e653ccfd1a67172e6bba20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a1f3aa460fd01a324c0bd5bd2d6ae92"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html#a8a1f3aa460fd01a324c0bd5bd2d6ae92">errormsg</a> ()</td></tr>
 <tr class="memdesc:a8a1f3aa460fd01a324c0bd5bd2d6ae92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a human readable string describing the last error.  <a href="classpmem_1_1kv_1_1db.html#a8a1f3aa460fd01a324c0bd5bd2d6ae92">More...</a><br /></td></tr>
 <tr class="separator:a8a1f3aa460fd01a324c0bd5bd2d6ae92"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -183,7 +204,36 @@ Private Attributes</h2></td></tr>
 <div class="textblock"><p>Main pmemkv class, it provides functions to operate on data in database. </p>
 <p>Database class for creating, opening and closing pmemkv's data file. It provides functions to write, read &amp; remove data, count elements stored and check for existence of an element based on its key.</p>
 <p>Note: It does not explicitly provide upper_bound/lower_bound functions. If you want to obtain an element(s) above or below the selected key, you can use pmem::kv::get_above() or pmem::kv::get_below(). See descriptions of these functions for details. </p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="a505157900fa3cb36b8959bf24ca1b956"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a505157900fa3cb36b8959bf24ca1b956">&#9670;&nbsp;</a></span>read_iterator</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classpmem_1_1kv_1_1db.html#a505157900fa3cb36b8959bf24ca1b956">pmem::kv::db::read_iterator</a> =  <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html">iterator</a>&lt;true&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5ad9af8412fda11df6feed66b945dff6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ad9af8412fda11df6feed66b945dff6">&#9670;&nbsp;</a></span>write_iterator</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classpmem_1_1kv_1_1db.html#a5ad9af8412fda11df6feed66b945dff6">pmem::kv::db::write_iterator</a> =  <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html">iterator</a>&lt;false&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a56a026a82b2836e68fe4d62a011fd9a5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a56a026a82b2836e68fe4d62a011fd9a5">&#9670;&nbsp;</a></span>db()</h2>
 
@@ -1387,6 +1437,62 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a02fafc1f7efbdb910de3318cca762153"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02fafc1f7efbdb910de3318cca762153">&#9670;&nbsp;</a></span>new_read_iterator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; <a class="el" href="classpmem_1_1kv_1_1db.html#a505157900fa3cb36b8959bf24ca1b956">db::read_iterator</a> &gt; pmem::kv::db::new_read_iterator </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns new read iterator in <a class="el" href="classpmem_1_1kv_1_1result.html" title="Stores result of an operation. It always contains status and optionally can contain value.">pmem::kv::result</a>. </p>
+<dl class="section return"><dt>Returns</dt><dd>pmem::kv::result&lt;db::read_iterator&gt; </dd></dl>
+
+</div>
+</div>
+<a id="abaa51b84d1e653ccfd1a67172e6bba20"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abaa51b84d1e653ccfd1a67172e6bba20">&#9670;&nbsp;</a></span>new_write_iterator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; <a class="el" href="classpmem_1_1kv_1_1db.html#a5ad9af8412fda11df6feed66b945dff6">db::write_iterator</a> &gt; pmem::kv::db::new_write_iterator </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns new write iterator in <a class="el" href="classpmem_1_1kv_1_1result.html" title="Stores result of an operation. It always contains status and optionally can contain value.">pmem::kv::result</a>. </p>
+<dl class="section return"><dt>Returns</dt><dd>pmem::kv::result&lt;db::write_iterator&gt; </dd></dl>
+
+</div>
+</div>
 <a id="a2926a0a75fa9f1f36797bddbbe16e98e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2926a0a75fa9f1f36797bddbbe16e98e">&#9670;&nbsp;</a></span>open()</h2>
 
@@ -1568,7 +1674,7 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/tmp/pmemkv-t3f/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
+<li>/tmp/pmemkv-JLc/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

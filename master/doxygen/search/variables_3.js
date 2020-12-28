@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['s_176',['s',['../classpmem_1_1kv_1_1result.html#a4795c4c0cea3c2e3d03df35cfffc5d2d',1,'pmem::kv::result']]]
+  ['it_5f_240',['it_',['../classpmem_1_1kv_1_1db_1_1iterator.html#aab90b168730ca7ade2f594c2bd2dd9bc',1,'pmem::kv::db::iterator']]]
 ];

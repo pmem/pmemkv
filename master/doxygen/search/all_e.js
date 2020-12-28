@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['unique_5fptr_5fwrapper_87',['unique_ptr_wrapper',['../structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper.html',1,'pmem::kv::internal::unique_ptr_wrapper&lt; T, D &gt;'],['../structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper.html#a2de97c4b277f3522ad1f5e493acb9e6d',1,'pmem::kv::internal::unique_ptr_wrapper::unique_ptr_wrapper()']]],
-  ['unique_5fptr_5fwrapper_5fbase_88',['unique_ptr_wrapper_base',['../structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper__base.html',1,'pmem::kv::internal']]],
-  ['unknown_5ferror_89',['UNKNOWN_ERROR',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a9a10f345b0f755d461a8673a5e9ef6b4',1,'pmem::kv']]]
+  ['transaction_5fscope_5ferror_116',['TRANSACTION_SCOPE_ERROR',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a563d1c46f9b9ece2ee9fc95e85ce2cfe',1,'pmem::kv']]],
+  ['tx_117',['tx',['../classpmem_1_1kv_1_1tx.html',1,'pmem::kv::tx'],['../classpmem_1_1kv_1_1tx.html#a24213c570ab6338eb73dff99bfc9641b',1,'pmem::kv::tx::tx()']]],
+  ['tx_5f_118',['tx_',['../classpmem_1_1kv_1_1tx.html#ade67c06b63f76bc234e64d3be2b187f4',1,'pmem::kv::tx']]],
+  ['tx_5fbegin_119',['tx_begin',['../classpmem_1_1kv_1_1db.html#a7b3289fa76fff3375d616e8785bcbedb',1,'pmem::kv::db']]]
 ];

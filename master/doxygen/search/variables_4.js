@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['tx_5f_177',['tx_',['../classpmem_1_1kv_1_1tx.html#ade67c06b63f76bc234e64d3be2b187f4',1,'pmem::kv::tx']]]
+  ['outputiterator_3c_20t_20_3e_241',['OutputIterator&lt; T &gt;',['../structpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator_1_1assign__only.html#a0b442c788b2e5f7f6f01a727875e5856',1,'pmem::kv::db::iterator::OutputIterator::assign_only']]]
 ];

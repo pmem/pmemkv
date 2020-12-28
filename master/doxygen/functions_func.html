@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.3-git74.g14f7035</span>
+   &#160;<span id="projectnumber">1.3-git86.g82a7ea8</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -67,7 +67,11 @@ $(function() {
 
 <h3><a id="index_a"></a>- a -</h3><ul>
 <li>abort()
-: <a class="el" href="classpmem_1_1kv_1_1tx.html#a223373f8ea3e1f347abde8cacb80dc30">pmem::kv::tx</a>
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#af7457fd86dbd9ed433ee2bc7221aba12">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+, <a class="el" href="classpmem_1_1kv_1_1tx.html#a223373f8ea3e1f347abde8cacb80dc30">pmem::kv::tx</a>
+</li>
+<li>assign_only()
+: <a class="el" href="structpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator_1_1assign__only.html#a7a6b80ac315752d4a482703193aa515e">pmem::kv::db::iterator&lt; IsConst &gt;::OutputIterator&lt; T &gt;::assign_only</a>
 </li>
 </ul>
 
@@ -84,7 +88,8 @@ $(function() {
 : <a class="el" href="classpmem_1_1kv_1_1db.html#ab19d3a8e0b976f5c2ad06b14e542755c">pmem::kv::db</a>
 </li>
 <li>commit()
-: <a class="el" href="classpmem_1_1kv_1_1tx.html#ab414991e48cf5e3d35f82de1b8241bae">pmem::kv::tx</a>
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#a186d57a3355d3847a4816d36256cbfc3">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+, <a class="el" href="classpmem_1_1kv_1_1tx.html#ab414991e48cf5e3d35f82de1b8241bae">pmem::kv::tx</a>
 </li>
 <li>comparator_config_entry()
 : <a class="el" href="structpmem_1_1kv_1_1internal_1_1comparator__config__entry.html#a873db1100a4ff973772c7c0774a7d60b">pmem::kv::internal::comparator_config_entry</a>
@@ -97,7 +102,7 @@ $(function() {
 , <a class="el" href="structpmem_1_1kv_1_1internal_1_1comparator__wrapper.html#a1596fb78cefa108ff9f9fd9552fae20e">pmem::kv::internal::comparator_wrapper&lt; Comparator &gt;</a>
 </li>
 <li>config()
-: <a class="el" href="classpmem_1_1kv_1_1config.html#a453fb71449acb6e81591d4fc4c9a607f">pmem::kv::config</a>
+: <a class="el" href="classpmem_1_1kv_1_1config.html#a4b7a6da90bd85d2d77a55ae191b11ad9">pmem::kv::config</a>
 </li>
 <li>count_above()
 : <a class="el" href="classpmem_1_1kv_1_1db.html#a39d9dd4dafa5f9918666dfc82ae5b4c1">pmem::kv::db</a>
@@ -148,7 +153,7 @@ $(function() {
 , <a class="el" href="structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper__base.html#a8eb3670f74bbffec65e838625f187251">pmem::kv::internal::unique_ptr_wrapper_base</a>
 </li>
 <li>get_above()
-: <a class="el" href="classpmem_1_1kv_1_1db.html#acc008b94f62399f47237d3bdab0989e0">pmem::kv::db</a>
+: <a class="el" href="classpmem_1_1kv_1_1db.html#a944ae4dbb041f63c778b1f67013178c7">pmem::kv::db</a>
 </li>
 <li>get_all()
 : <a class="el" href="classpmem_1_1kv_1_1db.html#a70aedc11acdeceb27297e68e9f366b8b">pmem::kv::db</a>
@@ -174,6 +179,9 @@ $(function() {
 <li>get_object()
 : <a class="el" href="classpmem_1_1kv_1_1config.html#a476ae6c9d078a121836041236ac06c35">pmem::kv::config</a>
 </li>
+<li>get_raw_it()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#a0256e0e67f3dfac145828ea9cbea19d8">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
 <li>get_status()
 : <a class="el" href="classpmem_1_1kv_1_1result.html#aa6320e1b403dc17f5577fc177acff74f">pmem::kv::result&lt; T &gt;</a>
 </li>
@@ -184,7 +192,7 @@ $(function() {
 : <a class="el" href="classpmem_1_1kv_1_1config.html#af1190bc66f99384f8f500dc9c4d84d2a">pmem::kv::config</a>
 </li>
 <li>get_value()
-: <a class="el" href="classpmem_1_1kv_1_1result.html#a422a5c6333122b65a527f446c8382686">pmem::kv::result&lt; T &gt;</a>
+: <a class="el" href="classpmem_1_1kv_1_1result.html#af6ea5c56d8c98ee875428b7822e2bba1">pmem::kv::result&lt; T &gt;</a>
 </li>
 </ul>
 
@@ -193,8 +201,34 @@ $(function() {
 <li>init()
 : <a class="el" href="classpmem_1_1kv_1_1config.html#a6ea782b274b2f02151be855b1be558dc">pmem::kv::config</a>
 </li>
+<li>is_next()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#a4a4fa3b0a39c0e2d795ccace63ec0d28">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
 <li>is_ok()
 : <a class="el" href="classpmem_1_1kv_1_1result.html#a1cd594fafa5f58913bf31d7b05451881">pmem::kv::result&lt; T &gt;</a>
+</li>
+<li>iterator()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#a4de657599d84139468f79ddf9b67a9c0">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
+</ul>
+
+
+<h3><a id="index_k"></a>- k -</h3><ul>
+<li>key()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#a2523529332200fbe78dc5719f2872639">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
+</ul>
+
+
+<h3><a id="index_n"></a>- n -</h3><ul>
+<li>new_read_iterator()
+: <a class="el" href="classpmem_1_1kv_1_1db.html#a02fafc1f7efbdb910de3318cca762153">pmem::kv::db</a>
+</li>
+<li>new_write_iterator()
+: <a class="el" href="classpmem_1_1kv_1_1db.html#abaa51b84d1e653ccfd1a67172e6bba20">pmem::kv::db</a>
+</li>
+<li>next()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#a9492ea63b924f751be08c32f1ca72d51">pmem::kv::db::iterator&lt; IsConst &gt;</a>
 </li>
 </ul>
 
@@ -203,13 +237,38 @@ $(function() {
 <li>open()
 : <a class="el" href="classpmem_1_1kv_1_1db.html#a2926a0a75fa9f1f36797bddbbe16e98e">pmem::kv::db</a>
 </li>
+<li>operator!=()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#a60d8d6f19901e5b39b85e2838f6310b2">pmem::kv::db::iterator&lt; IsConst &gt;::OutputIterator&lt; T &gt;</a>
+</li>
+<li>operator*()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#a2224b23ab546d27e2e7109fe3d31fb07">pmem::kv::db::iterator&lt; IsConst &gt;::OutputIterator&lt; T &gt;</a>
+</li>
+<li>operator++()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#a569c81baaf747d70018d0b9e4f3ccc28">pmem::kv::db::iterator&lt; IsConst &gt;::OutputIterator&lt; T &gt;</a>
+</li>
+<li>operator-()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#abbc6d012249ca192fe5e04001f065b0e">pmem::kv::db::iterator&lt; IsConst &gt;::OutputIterator&lt; T &gt;</a>
+</li>
+<li>operator--()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#acaf507631eab736793ad7c9b0a37bfe2">pmem::kv::db::iterator&lt; IsConst &gt;::OutputIterator&lt; T &gt;</a>
+</li>
 <li>operator=()
-: <a class="el" href="classpmem_1_1kv_1_1result.html#adea22ea2ed3d5510934d1621efbfa829">pmem::kv::result&lt; T &gt;</a>
+: <a class="el" href="structpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator_1_1assign__only.html#ae7ebdcb8091a9b02155b5ccdf0c99f85">pmem::kv::db::iterator&lt; IsConst &gt;::OutputIterator&lt; T &gt;::assign_only</a>
+, <a class="el" href="classpmem_1_1kv_1_1result.html#a65e5688e4e7e37648e548a3edd627c4c">pmem::kv::result&lt; T &gt;</a>
+</li>
+<li>operator[]()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#aadcfcffe5361980aa1aff48d46147cb5">pmem::kv::db::iterator&lt; IsConst &gt;::OutputIterator&lt; T &gt;</a>
+</li>
+<li>OutputIterator()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#a824ffe531056c8c7fd8a4ac381752b84">pmem::kv::db::iterator&lt; IsConst &gt;::OutputIterator&lt; T &gt;</a>
 </li>
 </ul>
 
 
 <h3><a id="index_p"></a>- p -</h3><ul>
+<li>prev()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#a2fa96589da801b21a9c0db9cc79fdbc2">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
 <li>put()
 : <a class="el" href="classpmem_1_1kv_1_1db.html#a31dbecf3c960dec47d4a04328b9efd92">pmem::kv::db</a>
 , <a class="el" href="classpmem_1_1kv_1_1tx.html#a3c6de45d7500d7c2e8bdeba2e6248ba7">pmem::kv::tx</a>
@@ -248,6 +307,9 @@ $(function() {
 
 
 <h3><a id="index_r"></a>- r -</h3><ul>
+<li>read_range()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#ab9e7b849bac68e9292e4bf5eb1b1e9a9">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
 <li>release()
 : <a class="el" href="classpmem_1_1kv_1_1config.html#aa5bc6dcfad199c4c45bb53fd7e7263c0">pmem::kv::config</a>
 </li>
@@ -256,7 +318,32 @@ $(function() {
 , <a class="el" href="classpmem_1_1kv_1_1tx.html#abda692281651e93af2ba89c84e5d3f12">pmem::kv::tx</a>
 </li>
 <li>result()
-: <a class="el" href="classpmem_1_1kv_1_1result.html#a2eced56c83be36381fab0d9b8ffc0c2f">pmem::kv::result&lt; T &gt;</a>
+: <a class="el" href="classpmem_1_1kv_1_1result.html#af35be760b2a6c7c0e5aa5e9d878238b4">pmem::kv::result&lt; T &gt;</a>
+</li>
+</ul>
+
+
+<h3><a id="index_s"></a>- s -</h3><ul>
+<li>seek()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#aff6681866a76a30c6d9105fc7eb09ce6">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
+<li>seek_higher()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#aed444d53bed575d54ebb7dd5d709cb01">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
+<li>seek_higher_eq()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#a6953cb516d9cfb3b2f3977f34ac55c97">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
+<li>seek_lower()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#aa8fbf0bd0527a11a12642581f6b6633a">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
+<li>seek_lower_eq()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#ad799b9b385de17b3f9bba1242428586f">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
+<li>seek_to_first()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#abb3630c22ae3aad3fd637fbcc49a1c02">pmem::kv::db::iterator&lt; IsConst &gt;</a>
+</li>
+<li>seek_to_last()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#aa4ed0549c6e90068e834b4482d61b73d">pmem::kv::db::iterator&lt; IsConst &gt;</a>
 </li>
 </ul>
 
@@ -281,6 +368,9 @@ $(function() {
 <h3><a id="index_w"></a>- w -</h3><ul>
 <li>what()
 : <a class="el" href="classpmem_1_1kv_1_1bad__result__access.html#a192a4c4f66a3845325d55e8dc02766d6">pmem::kv::bad_result_access</a>
+</li>
+<li>write_range()
+: <a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html#a6544ee562ce5389ca1321ac7e1e58427">pmem::kv::db::iterator&lt; IsConst &gt;</a>
 </li>
 </ul>
 

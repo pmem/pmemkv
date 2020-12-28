@@ -148,4 +148,4 @@ Existing bindings:
 
 # SEE ALSO #
 
-**libpmemkv**(3), **libpmemkv_config(3)**, **pmempool**(1), **libpmemobj**(7) and **<https://pmem.io>**
+**libpmemkv**(3), **libpmemkv_config(3)**, **libpmemkv_iterator**(3), **pmempool**(1), **libpmemobj**(7) and **<https://pmem.io>**
