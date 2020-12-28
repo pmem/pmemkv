@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.20"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>PMEMKV: /tmp/pmemkv-t3f/src/libpmemkv.hpp File Reference</title>
+<title>PMEMKV: /tmp/pmemkv-JLc/src/libpmemkv.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.3-git74.g14f7035</span>
+   &#160;<span id="projectnumber">1.3-git86.g82a7ea8</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -83,6 +83,7 @@ $(function() {
 <div class="textblock"><code>#include &lt;cassert&gt;</code><br />
 <code>#include &lt;functional&gt;</code><br />
 <code>#include &lt;iostream&gt;</code><br />
+<code>#include &lt;libpmemobj++/slice.hpp&gt;</code><br />
 <code>#include &lt;libpmemobj++/string_view.hpp&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
 <code>#include &lt;stdexcept&gt;</code><br />
@@ -109,6 +110,14 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db.html">pmem::kv::db</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Main pmemkv class, it provides functions to operate on data in database.  <a href="classpmem_1_1kv_1_1db.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db_1_1iterator.html">pmem::kv::db::iterator&lt; IsConst &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator provides methods to iterate over records in db.  <a href="classpmem_1_1kv_1_1db_1_1iterator.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html">pmem::kv::db::iterator&lt; IsConst &gt;::OutputIterator&lt; T &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html" title="OutputIterator provides iteration through elements without a possibility of reading them....">OutputIterator</a> provides iteration through elements without a possibility of reading them. It is only allowed to modify them.  <a href="classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator_1_1assign__only.html">pmem::kv::db::iterator&lt; IsConst &gt;::OutputIterator&lt; T &gt;::assign_only</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper__base.html">pmem::kv::internal::unique_ptr_wrapper_base</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
