@@ -49,6 +49,7 @@ add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/persistent/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmreorder/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/transaction/*.c*
@@ -66,6 +67,7 @@ add_check_whitespace(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/memkind/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/persistent/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmemobj/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/pmreorder/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/sorted/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/engine_scenarios/transaction/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/result/*.*)
@@ -144,6 +146,7 @@ build_test_ext(NAME concurrent_iterate_params SRC_FILES engine_scenarios/concurr
 build_test_ext(NAME concurrent_put_get_remove_params SRC_FILES engine_scenarios/concurrent/put_get_remove_params.cc LIBS json)
 build_test_ext(NAME concurrent_put_get_remove_gen_params SRC_FILES engine_scenarios/concurrent/put_get_remove_gen_params.cc LIBS json)
 build_test_ext(NAME concurrent_put_get_remove_single_op_params SRC_FILES engine_scenarios/concurrent/put_get_remove_single_op_params.cc LIBS json)
+build_test_ext(NAME iterator_concurrent SRC_FILES engine_scenarios/concurrent/iterator_concurrent.cc LIBS json)
 
 # Tests for peristent engines
 build_test_ext(NAME persistent_not_found_verify SRC_FILES engine_scenarios/persistent/not_found_verify.cc LIBS json)
@@ -155,6 +158,7 @@ build_test_ext(NAME persistent_put_verify SRC_FILES engine_scenarios/persistent/
 build_test_ext(NAME persistent_put_get_std_map_multiple_reopen SRC_FILES engine_scenarios/persistent/put_get_std_map_multiple_reopen.cc LIBS json)
 build_test_ext(NAME pmreorder_insert SRC_FILES engine_scenarios/pmreorder/insert.cc LIBS json)
 build_test_ext(NAME pmreorder_erase SRC_FILES engine_scenarios/pmreorder/erase.cc LIBS json)
+build_test_ext(NAME pmreorder_iterator SRC_FILES engine_scenarios/pmreorder/iterator.cc LIBS json)
 
 # Tests for sorted engines
 build_test_ext(NAME sorted_iterate SRC_FILES engine_scenarios/sorted/iterate.cc LIBS json)
@@ -192,6 +196,10 @@ build_test_ext(NAME comparator_default_reopen_cpp SRC_FILES comparator/default_r
 build_test_ext(NAME transaction_put SRC_FILES engine_scenarios/transaction/put.cc LIBS json)
 build_test_ext(NAME transaction_remove SRC_FILES engine_scenarios/transaction/remove.cc LIBS json)
 build_test_ext(NAME transaction_put_pmreorder SRC_FILES engine_scenarios/transaction/put_pmreorder.cc LIBS json)
+
+# Tests for iterator
+build_test_ext(NAME iterator_basic SRC_FILES engine_scenarios/all/iterator_basic.cc LIBS json)
+build_test_ext(NAME iterator_sorted SRC_FILES engine_scenarios/sorted/iterator_sorted.cc LIBS json)
 
 ###################################### CMAP ####################################
 if(ENGINE_CMAP)
@@ -383,6 +391,17 @@ if(ENGINE_CMAP)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
 			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE cmap
+			BINARY iterator_basic
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE cmap
+			BINARY iterator_concurrent
+			TRACERS none memcheck pmemcheck helgrind drd
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8)
 endif(ENGINE_CMAP)
 ################################################################################
 ###################################### CSMAP ###################################
@@ -583,6 +602,12 @@ if(ENGINE_CSMAP)
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 100)
 
+		add_engine_test(ENGINE csmap
+				BINARY iterator_concurrent
+				TRACERS drd # helgrind XXX: https://github.com/pmem/libpmemobj-cpp/issues/797
+				SCRIPT pmemobj_based/default.cmake
+				PARAMS 8)
+
 		if(TESTS_LONG)
 			add_engine_test(ENGINE csmap
 					BINARY concurrent_put_get_remove_single_op_params
@@ -684,6 +709,22 @@ if(ENGINE_CSMAP)
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
 			PARAMS 1000 100 200)
 
+	add_engine_test(ENGINE csmap
+			BINARY iterator_basic
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY iterator_sorted
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS false)
+
+	add_engine_test(ENGINE csmap
+			BINARY iterator_concurrent
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 true)
 endif(ENGINE_CSMAP)
 ################################################################################
 ###################################### VCMAP ###################################
@@ -767,6 +808,17 @@ if(ENGINE_VCMAP)
 			BINARY memkind_error_handling
 			TRACERS none memcheck
 			SCRIPT memkind_based/memkind/error_handling.cmake)
+
+	add_engine_test(ENGINE vcmap
+			BINARY iterator_basic
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vcmap
+			BINARY iterator_concurrent
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake
+			PARAMS 8)
 endif(ENGINE_VCMAP)
 ################################################################################
 ###################################### VSMAP ###################################
@@ -877,6 +929,16 @@ if(ENGINE_VSMAP)
 			BINARY memkind_error_handling
 			TRACERS none memcheck
 			SCRIPT memkind_based/memkind/error_handling.cmake)
+
+	add_engine_test(ENGINE vsmap
+			BINARY iterator_basic
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vsmap
+			BINARY iterator_sorted
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
 endif(ENGINE_VSMAP)
 ################################################################################
 ###################################### TREE3 ###################################
@@ -1158,6 +1220,11 @@ if(ENGINE_STREE)
 				BINARY pmreorder_erase
 				TRACERS none
 				SCRIPT pmemobj_based/pmreorder/erase.cmake)
+
+		add_engine_test(ENGINE stree
+				BINARY pmreorder_iterator
+				TRACERS none
+				SCRIPT pmemobj_based/pmreorder/iterator.cmake)
 	endif()
 
 	add_engine_test(ENGINE stree
@@ -1318,6 +1385,16 @@ if(ENGINE_STREE)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 32 8)
+
+	add_engine_test(ENGINE stree
+			BINARY iterator_basic
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE stree
+			BINARY iterator_sorted
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_STREE)
 ################################################################################
 ###################################### RADIX ###################################
@@ -1526,6 +1603,16 @@ if(ENGINE_RADIX)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
+	add_engine_test(ENGINE radix
+			BINARY iterator_basic
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE radix
+			BINARY iterator_sorted
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
 	if(PMREORDER_SUPPORTED)
 		add_engine_test(ENGINE radix
 				BINARY transaction_put_pmreorder
@@ -1541,6 +1628,11 @@ if(ENGINE_RADIX)
 				BINARY pmreorder_erase
 				TRACERS none
 				SCRIPT pmemobj_based/pmreorder/erase.cmake)
+
+		add_engine_test(ENGINE radix
+				BINARY pmreorder_iterator
+				TRACERS none
+				SCRIPT pmemobj_based/pmreorder/iterator.cmake)
 	endif()
 endif(ENGINE_RADIX)
 ################################################################################

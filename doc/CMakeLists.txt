@@ -39,6 +39,12 @@ if(PANDOC)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv_tx.3.md.in
 		${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_tx.3.md)
 
+	strip_example(
+		${CMAKE_SOURCE_DIR}/examples/pmemkv_iterator_c/pmemkv_iterator.c
+		ITERATOR_BASIC_EXAMPLE)
+	configure_file(${CMAKE_SOURCE_DIR}/doc/libpmemkv_iterator.3.md.in
+		${CMAKE_BINARY_DIR}/man/tmp/libpmemkv_iterator.3.md)
+
 	# convert md files to manpage format
 	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv.7
 		MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv.7.md
@@ -75,6 +81,13 @@ if(PANDOC)
 			${PMEMKV_ROOT_DIR}/utils/md2man/default.man
 			${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_tx.3
 			${VERSION})
+	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/libpmemkv_iterator.3
+		MAIN_DEPENDENCY ${CMAKE_BINARY_DIR}/man/tmp/libpmemkv_iterator.3.md
+		COMMAND ${CMAKE_SOURCE_DIR}/utils/md2man/md2man.sh
+			${CMAKE_BINARY_DIR}/man/tmp/libpmemkv_iterator.3.md
+			${CMAKE_SOURCE_DIR}/utils/md2man/default.man
+			${CMAKE_BINARY_DIR}/man/libpmemkv_iterator.3
+			${VERSION})
 
 	# install manpages
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv.7
@@ -86,6 +99,8 @@ if(PANDOC)
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_json_config.3
 		DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_tx.3
+		DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
+	install(FILES ${CMAKE_BINARY_DIR}/man/libpmemkv_iterator.3
 		DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
 else()
 	message(WARNING "pandoc not found - man pages will not be generated")
@@ -118,6 +133,7 @@ if(PANDOC AND DOXYGEN_FOUND AND DOXYGEN_DOT_FOUND)
 		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_config.3
 		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_json_config.3
 		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_tx.3
+		DEPENDS ${CMAKE_BINARY_DIR}/man/libpmemkv_iterator.3
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 elseif(PANDOC)
 	add_custom_target(doc ALL
@@ -126,6 +142,7 @@ elseif(PANDOC)
 		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_config.3
 		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_json_config.3
 		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_tx.3
+		DEPENDS ${CMAKE_BINARY_DIR}/man/libpmemkv_iterator.3
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 elseif(DOXYGEN_FOUND AND DOXYGEN_DOT_FOUND)
 	add_custom_target(doc ALL
