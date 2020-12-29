@@ -143,6 +143,7 @@ add_test_generic(NAME result TRACERS none memcheck)
 ## Test scenarios (parametrized at least with engine name)
 # ----------------------------------------------------------------- #
 # Tests for all engines
+# XXX: Parameterize to work with fixed size keys/values.
 build_test_ext(NAME put_get_remove SRC_FILES engine_scenarios/all/put_get_remove.cc LIBS json)
 build_test_ext(NAME put_get_remove_charset_params SRC_FILES engine_scenarios/all/put_get_remove_charset_params.cc LIBS json)
 build_test_ext(NAME put_get_remove_long_key SRC_FILES engine_scenarios/all/put_get_remove_long_key.cc LIBS json)
@@ -171,6 +172,7 @@ build_test_ext(NAME pmreorder_erase SRC_FILES engine_scenarios/pmreorder/erase.c
 build_test_ext(NAME pmreorder_iterator SRC_FILES engine_scenarios/pmreorder/iterator.cc LIBS json)
 
 # Tests for sorted engines
+# XXX: Parameterize to work with fixed size keys/values.
 build_test_ext(NAME sorted_iterate SRC_FILES engine_scenarios/sorted/iterate.cc LIBS json)
 build_test_ext(NAME sorted_get_all_gen_params SRC_FILES engine_scenarios/sorted/get_all_gen_params.cc LIBS json)
 build_test_ext(NAME sorted_get_above_gen_params SRC_FILES engine_scenarios/sorted/get_above_gen_params.cc LIBS json)
@@ -180,6 +182,7 @@ build_test_ext(NAME sorted_get_equal_below_gen_params SRC_FILES engine_scenarios
 build_test_ext(NAME sorted_get_between_gen_params SRC_FILES engine_scenarios/sorted/get_between_gen_params.cc LIBS json)
 
 # Tests for pmemobj engines
+# XXX: Parameterize to work with fixed size keys/values.
 build_test_ext(NAME pmemobj_error_handling_create SRC_FILES engine_scenarios/pmemobj/error_handling_create.cc LIBS json)
 build_test_ext(NAME pmemobj_error_handling_defrag SRC_FILES engine_scenarios/pmemobj/error_handling_defrag.cc LIBS json)
 build_test_ext(NAME pmemobj_error_handling_tx_path SRC_FILES engine_scenarios/pmemobj/error_handling_tx_path.cc LIBS json)
@@ -1417,6 +1420,12 @@ endif(ENGINE_STREE)
 ################################################################################
 ###################################### RADIX ###################################
 if(ENGINE_RADIX)
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_remove_charset_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 16 8)
+
 	add_engine_test(ENGINE radix
 			BINARY c_api_null_db_config
 			TRACERS none memcheck
@@ -1653,4 +1662,113 @@ if(ENGINE_RADIX)
 				SCRIPT pmemobj_based/pmreorder/iterator.cmake)
 	endif()
 endif(ENGINE_RADIX)
+################################################################################
+#################################### ROBINHOOD #################################
+if (ENGINE_ROBINHOOD)
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 1000 8 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS none
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 1000)
+
+	add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 400)
+
+	add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50)
+
+	add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_gen_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY concurrent_iterate_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 24 200)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_not_found_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_overwrite_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_put_get_std_map_multiple_reopen
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 1000 8 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_put_verify_asc_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake
+			DB_SIZE 1G PARAMS 4000)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_put_verify_desc_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake
+			DB_SIZE 1G PARAMS 4000)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_put_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	if(TESTS_PMEMOBJ_DRD_HELGRIND)
+		add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS drd helgrind
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 250)
+
+		add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_params
+			TRACERS drd helgrind
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50)
+
+		add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_gen_params
+			TRACERS drd helgrind
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50 8)
+
+		add_engine_test(ENGINE robinhood
+			BINARY concurrent_iterate_params
+			TRACERS drd helgrind
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 4 50)
+	endif()
+
+	add_engine_test(ENGINE robinhood
+			BINARY pmemobj_error_handling_create
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/pmemobj/error_handling_create.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY pmemobj_put_get_std_map_oid
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_oid.cmake
+			PARAMS 1000 8 8)
+endif()
 ################################################################################

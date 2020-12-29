@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2021, Intel Corporation
 
 #
 # run-test-building.sh - is called inside a Docker container,
@@ -144,6 +144,7 @@ engines_flags=(
 	ENGINE_STREE
 	ENGINE_TREE3
 	ENGINE_RADIX
+	ENGINE_ROBINHOOD
 	# the last item is to test all engines disabled
 	BLACKHOLE_TEST
 )
@@ -187,6 +188,7 @@ cmake .. -DCXX_STANDARD=14 \
 	-DENGINE_STREE=ON \
 	-DENGINE_TREE3=ON \
 	-DENGINE_RADIX=ON \
+	-DENGINE_ROBINHOOD=ON \
 	-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG}
 make -j$(nproc)
 # list all tests in this build
