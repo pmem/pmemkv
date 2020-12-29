@@ -1,22 +1,22 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright 2019-2020, Intel Corporation
 
+#
+# doc/CMakeLists.txt - prepares 'make doc' command for documentation
+#
+
+# Prepares example code to inject into man page:
+# Read file pointed by ${PATH}, remove comments (with license and description)
+# up to the first preprocessor's directive and place it in ${VAL} in a caller scope.
 function(strip_example PATH VAL)
-	# Prepare example code to inject into man page.
-	# Read file pointed by ${PATH}, remove comments (with the license
-	# and the file description) up to the first preprocessor's directive,
-	# and place it in ${VAL} in a caller scope.
-	file(READ
-		${PATH}
-		example_content)
+	file(READ ${PATH} example_content)
 	string(REGEX REPLACE "([/]+[*/]+).*([*]+[/]+)([\n]+#)" "#"
 		example_content "${example_content}")
 	set(${VAL} "${example_content}" PARENT_SCOPE)
 endfunction()
 
-# Converts md files into manpage format
-# NAME is output manpage name, INPUT is a path to source md file
-# Requires pandoc.
+# Converts md files into manpage format. Requires pandoc command.
+# NAME is output manpage name, INPUT is a path to the source md file
 function(configure_man NAME INPUT)
 	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/man/${NAME}
 		MAIN_DEPENDENCY ${INPUT}
@@ -25,16 +25,33 @@ function(configure_man NAME INPUT)
 			${PMEMKV_ROOT_DIR}/utils/md2man/default.man
 			${CMAKE_CURRENT_BINARY_DIR}/man/${NAME}
 			${VERSION})
+	list(APPEND MANPAGE_OUTFILES ${CMAKE_CURRENT_BINARY_DIR}/man/${NAME})
+	set(MANPAGE_OUTFILES ${MANPAGE_OUTFILES} PARENT_SCOPE)
 endfunction()
 
+# ----------------------------------------------------------------- #
+## Setup custom targets and useful variables
+# ----------------------------------------------------------------- #
+set(MANPAGE_OUTFILES "")
+set(DOXYGEN_COMMAND "")
 add_check_whitespace(man ${CMAKE_CURRENT_SOURCE_DIR}/*.*)
 
-# prepare C documentation (using manpage format)
+# ----------------------------------------------------------------- #
+## Prepare C documentation (using manpage format)
+# ----------------------------------------------------------------- #
 find_program(PANDOC NAMES pandoc)
 if(PANDOC)
+	message(STATUS "Found pandoc: ${PANDOC}")
+
+	# manpages without any examples
+	configure_man(libpmemkv.7 ${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv.7.md)
+	configure_man(libpmemkv_json_config.3 ${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv_json_config.3.md)
+
+	# manpages with example(s) injected
 	strip_example(${PMEMKV_ROOT_DIR}/examples/pmemkv_basic_c/pmemkv_basic.c C_EXAMPLE)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv.3.md.in
 		${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv.3.md)
+	configure_man(libpmemkv.3 ${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv.3.md)
 
 	strip_example(
 		${PMEMKV_ROOT_DIR}/examples/pmemkv_config_c/pmemkv_config.c
@@ -44,25 +61,20 @@ if(PANDOC)
 		CONFIG_BASIC_EXAMPLE)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv_config.3.md.in
 		${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_config.3.md)
+	configure_man(libpmemkv_config.3 ${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_config.3.md)
 
 	strip_example(
 		${PMEMKV_ROOT_DIR}/examples/pmemkv_transaction_c/pmemkv_transaction.c
 		TRANSACTION_BASIC_C_EXAMPLE)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv_tx.3.md.in
 		${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_tx.3.md)
+	configure_man(libpmemkv_tx.3 ${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_tx.3.md)
 
 	strip_example(
 		${PMEMKV_ROOT_DIR}/examples/pmemkv_iterator_c/pmemkv_iterator.c
 		ITERATOR_BASIC_EXAMPLE)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv_iterator.3.md.in
 		${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_iterator.3.md)
-
-	# convert md files to manpage format
-	configure_man(libpmemkv.7 ${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv.7.md)
-	configure_man(libpmemkv.3 ${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv.3.md)
-	configure_man(libpmemkv_config.3 ${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_config.3.md)
-	configure_man(libpmemkv_json_config.3 ${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv_json_config.3.md)
-	configure_man(libpmemkv_tx.3 ${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_tx.3.md)
 	configure_man(libpmemkv_iterator.3 ${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_iterator.3.md)
 
 	# install manpages
@@ -74,10 +86,12 @@ if(PANDOC)
 		PATTERN "*.3"
 		PATTERN "tmp" EXCLUDE)
 else()
-	message(WARNING "pandoc not found - man pages will not be generated")
+	message(WARNING "pandoc not found - man pages (C documentation) will not be generated")
 endif()
 
-# prepare C++ documentation (using doxygen format)
+# ----------------------------------------------------------------- #
+## Prepare C++ documentation (using doxygen format)
+# ----------------------------------------------------------------- #
 include(FindDoxygen)
 if(DOXYGEN_FOUND AND DOXYGEN_DOT_FOUND)
 	if(DEVELOPER_MODE)
@@ -86,37 +100,28 @@ if(DOXYGEN_FOUND AND DOXYGEN_DOT_FOUND)
 		set(DOXYGEN_WARN_AS_ERROR "NO")
 	endif()
 
+	set(DOXYGEN_OUTFILE "${CMAKE_CURRENT_BINARY_DIR}/libpmemkv.Doxyfile")
 	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv.Doxyfile.in"
-		"${CMAKE_CURRENT_BINARY_DIR}/libpmemkv.Doxyfile" @ONLY)
+		${DOXYGEN_OUTFILE} @ONLY)
+	set(DOXYGEN_COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUTFILE})
+
 	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cpp_html/ DESTINATION ${CMAKE_INSTALL_DOCDIR})
 elseif(NOT DOXYGEN_FOUND)
-	message(WARNING "Doxygen not found - Doxygen documentation will not be generated")
+	message(WARNING "Doxygen not found - Doxygen (C++) documentation will not be generated")
 else()
-	message(WARNING "Dot tool not found - Doxygen documentation will not be generated")
+	message(WARNING "Dot tool not found - Doxygen (C++) documentation will not be generated")
 endif()
 
-# set 'doc' target for make
-if(PANDOC AND DOXYGEN_FOUND AND DOXYGEN_DOT_FOUND)
+# ----------------------------------------------------------------- #
+## Prepare the actual 'make doc' command
+# ----------------------------------------------------------------- #
+if(MANPAGE_OUTFILES OR DOXYGEN_COMMAND)
 	add_custom_target(doc ALL
-		${DOXYGEN_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/libpmemkv.Doxyfile"
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv.7
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv.3
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_config.3
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_json_config.3
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_tx.3
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_iterator.3
+		${DOXYGEN_COMMAND}
+		DEPENDS ${MANPAGE_OUTFILES}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-elseif(PANDOC)
-	add_custom_target(doc ALL
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv.7
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv.3
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_config.3
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_json_config.3
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_tx.3
-		DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_iterator.3
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-elseif(DOXYGEN_FOUND AND DOXYGEN_DOT_FOUND)
-	add_custom_target(doc ALL
-		${DOXYGEN_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/libpmemkv.Doxyfile"
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+else()
+	message(WARNING "Neither C or C++ docs could be built. "
+		"If you wish to build them install pandoc (for C) and/or doxygen (for C++), "
+		"otherwise disable it using CMake option -DBUILD_DOC=OFF")
 endif()
