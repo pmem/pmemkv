@@ -3,9 +3,9 @@
 
 function(strip_example PATH VAL)
 	# Prepare example code to inject into man page.
-	# Read file file pointed by ${PATH}, remove comments (with the license
+	# Read file pointed by ${PATH}, remove comments (with the license
 	# and the file description) up to the first preprocessor's directive,
-	# and place it in ${VAL} in caller scope
+	# and place it in ${VAL} in a caller scope.
 	file(READ
 		${PATH}
 		example_content)
@@ -14,10 +14,9 @@ function(strip_example PATH VAL)
 	set(${VAL} "${example_content}" PARENT_SCOPE)
 endfunction()
 
-add_check_whitespace(man
-	${CMAKE_CURRENT_SOURCE_DIR}/*.*)
+add_check_whitespace(man ${CMAKE_CURRENT_SOURCE_DIR}/*.*)
 
-# prepare C documenation (using manpage format)
+# prepare C documentation (using manpage format)
 find_program(PANDOC NAMES pandoc)
 if(PANDOC)
 	strip_example(${PMEMKV_ROOT_DIR}/examples/pmemkv_basic_c/pmemkv_basic.c C_EXAMPLE)
@@ -92,16 +91,11 @@ if(PANDOC)
 	# install manpages
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv.7
 		DESTINATION ${CMAKE_INSTALL_MANDIR}/man7)
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv.3
-		DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_config.3
-		DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_json_config.3
-		DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_tx.3
-		DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv_iterator.3
-		DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
+	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/man/
+		DESTINATION ${CMAKE_INSTALL_MANDIR}/man3
+		FILES_MATCHING
+		PATTERN "*.3"
+		PATTERN "tmp" EXCLUDE)
 else()
 	message(WARNING "pandoc not found - man pages will not be generated")
 endif()
