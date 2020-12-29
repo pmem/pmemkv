@@ -1521,3 +1521,21 @@ if(ENGINE_RADIX)
 	endif()
 endif(ENGINE_RADIX)
 ################################################################################
+
+if (ENGINE_ROBINHOOD)
+	# add_engine_test(ENGINE robinhood
+	#			BINARY put_get_remove
+	#			TRACERS none memcheck pmemcheck
+	#			SCRIPT pmemobj_based/default.cmake)
+
+	# add_engine_test(ENGINE robinhood
+	#			BINARY iterate
+	#			TRACERS none memcheck pmemcheck
+	#			SCRIPT pmemobj_based/default.cmake)
+
+	# add_engine_test(ENGINE robinhood
+	#			BINARY put_get_remove_charset_params
+	#			TRACERS none memcheck pmemcheck
+	#			SCRIPT pmemobj_based/default.cmake
+	#			PARAMS 100 8)
+endif()
