@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "engine.h"
 
@@ -31,6 +31,10 @@
 
 #ifdef ENGINE_TREE3
 #include "engines-experimental/tree3.h"
+#endif
+
+#ifdef ENGINE_ROBINHOOD
+#include "engines-experimental/robinhood.h"
 #endif
 
 namespace pmem
@@ -67,6 +71,9 @@ static constexpr const char *available_engines = "blackhole"
 #endif
 #ifdef ENGINE_STREE
 						 ", stree"
+#endif
+#ifdef ENGINE_ROBINHOOD
+						 ", robinhood"
 #endif
 	;
 
@@ -134,6 +141,14 @@ engine_base::create_engine(const std::string &engine,
 	if (engine == "stree") {
 		engine_base::check_config_null(engine, cfg);
 		return std::unique_ptr<engine_base>(new pmem::kv::stree(std::move(cfg)));
+	}
+#endif
+
+#ifdef ENGINE_ROBINHOOD
+	if (engine == "robinhood") {
+		engine_base::check_config_null(engine, cfg);
+		return std::unique_ptr<engine_base>(
+			new pmem::kv::robinhood(std::move(cfg)));
 	}
 #endif
 
