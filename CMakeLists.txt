@@ -33,6 +33,7 @@ option(ENGINE_CSMAP "enable experimental csmap engine (requires CXX_STANDARD to 
 option(ENGINE_STREE "enable experimental stree engine" ON)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 option(ENGINE_RADIX "enable experimental radix engine" OFF)
+option(ENGINE_ROBINHOOD "enable experimental robinhood engine" ON)
 
 ## Set required and useful variables
 set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
@@ -121,6 +122,12 @@ if(ENGINE_RADIX)
 		src/engines-experimental/radix.cc
 	)
 endif()
+if(ENGINE_ROBINHOOD)
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/robinhood.h
+		src/engines-experimental/robinhood.cc
+	)
+endif()
 
 ## Setup defines and check status of each engine
 if(ENGINE_CMAP)
@@ -168,6 +175,12 @@ if(ENGINE_RADIX)
 	message(STATUS "RADIX engine is ON")
 else()
 	message(STATUS "RADIX engine is OFF")
+endif()
+if(ENGINE_RADIX)
+	add_definitions(-DENGINE_ROBINHODD)
+	message(STATUS "ROBINHOOD engine is ON")
+else()
+	message(STATUS "ROBINHOOD engine is OFF")
 endif()
 
 ## Set compiler's flags

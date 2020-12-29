@@ -11,32 +11,26 @@ using namespace pmem::kv;
 
 static void SimpleTest(pmem::kv::db &kv)
 {
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
-	ASSERT_STATUS(kv.exists("key1"), status::NOT_FOUND);
-	std::string value;
-	ASSERT_STATUS(kv.get("key1", &value), status::NOT_FOUND);
-	ASSERT_STATUS(kv.put("key1", "value1"), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
-	ASSERT_STATUS(kv.exists("key1"), status::OK);
-	ASSERT_STATUS(kv.get("key1", &value), status::OK);
-	UT_ASSERT(value == "value1");
-	value = "";
-	UT_ASSERT(kv.get("key1", [&](string_view v) {
-		value.append(v.data(), v.size());
-	}) == status::OK);
-	UT_ASSERT(value == "value1");
+	std::string value = "abcdefgh";
+	ASSERT_STATUS(kv.put(value, value), status::OK);
+
+	std::string v1 = "";
+	ASSERT_STATUS(kv.get(value, &v1), status::OK);
+
+	std::cerr << std::hex << *(uint64_t *)(v1.data()) << std::endl;
+	std::cerr << std::hex << *(uint64_t *)(value.data()) << std::endl;
+
+	UT_ASSERT(*(uint64_t *)(v1.data()) == *(uint64_t *)(value.data()));
 }
 
 static void EmptyKeyTest(pmem::kv::db &kv)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
+	std::cerr << cnt << std::endl;
 	UT_ASSERT(cnt == 0);
-	ASSERT_STATUS(kv.put("", "empty"), status::OK);
+	std::string to_put = "" + std::string(7, 0);
+	ASSERT_STATUS(kv.put(to_put, to_put), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 1);
@@ -51,9 +45,10 @@ static void EmptyKeyTest(pmem::kv::db &kv)
 	std::string value1;
 	std::string value2;
 	std::string value3;
-	ASSERT_STATUS(kv.exists(""), status::OK);
-	ASSERT_STATUS(kv.get("", &value1), status::OK);
-	UT_ASSERT(value1 == "empty");
+	ASSERT_STATUS(kv.exists(to_put), status::OK);
+	ASSERT_STATUS(kv.get(to_put, &value1), status::OK);
+	// UT_ASSERT(value1 == "empty");
+	std::cerr << *(uint64_t *)(value1.data()) << std::endl;
 	ASSERT_STATUS(kv.exists(" "), status::OK);
 	ASSERT_STATUS(kv.get(" ", &value2), status::OK);
 	UT_ASSERT(value2 == "1-space");

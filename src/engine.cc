@@ -5,6 +5,8 @@
 
 #include "engines/blackhole.h"
 
+#include "engines-experimental/robinhood.h"
+
 #ifdef ENGINE_VSMAP
 #include "engines/vsmap.h"
 #endif
@@ -31,6 +33,10 @@
 
 #ifdef ENGINE_TREE3
 #include "engines-experimental/tree3.h"
+#endif
+
+#ifdef ENGINE_ROBINHOOD
+#include "engines-experimental/robinhood.h"
 #endif
 
 namespace pmem
@@ -136,6 +142,14 @@ engine_base::create_engine(const std::string &engine,
 		return std::unique_ptr<engine_base>(new pmem::kv::stree(std::move(cfg)));
 	}
 #endif
+
+	//#ifdef ENGINE_ROBINHOOD
+	if (engine == "robinhood") {
+		engine_base::check_config_null(engine, cfg);
+		return std::unique_ptr<engine_base>(
+			new pmem::kv::robinhood(std::move(cfg)));
+	}
+	//#endif
 
 	throw internal::wrong_engine_name("Unknown engine name \"" + engine +
 					  "\". Available engines: " + available_engines);

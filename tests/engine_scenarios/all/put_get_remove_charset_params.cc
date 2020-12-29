@@ -8,9 +8,9 @@
 
 using namespace pmem::kv;
 
-static const std::string PREFIX = "init";
+static const std::string PREFIX = "init1";
 static const std::string SUFFIX = ";";
-static const std::string CLEAN_KEY_SUFFIX = "_clean";
+static const std::string CLEAN_KEY_SUFFIX = "_cl";
 
 static constexpr size_t CHARSET_RANGE_START = 0;
 static constexpr size_t CHARSET_RANGE_END = (size_t)UCHAR_MAX;
@@ -46,7 +46,8 @@ static void BinaryKeyTest(pmem::kv::db &kv)
 	UT_ASSERT(cnt == 0);
 	ASSERT_STATUS(kv.exists(PREFIX), status::NOT_FOUND);
 
-	ASSERT_STATUS(kv.put(PREFIX, "should_not_change"), status::OK);
+	std::string shnc = "shnc" + std::string(8, 0);
+	ASSERT_STATUS(kv.put(PREFIX, shnc), status::OK);
 	ASSERT_STATUS(kv.exists(PREFIX), status::OK);
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 1);
@@ -56,19 +57,21 @@ static void BinaryKeyTest(pmem::kv::db &kv)
 		/* key with prefix and suffix */
 		std::string key1 = std::string(PREFIX + char(i) + SUFFIX);
 		ASSERT_STATUS(kv.exists(key1), status::NOT_FOUND);
-		ASSERT_STATUS(kv.put(key1, std::to_string(i)), status::OK);
+		std::string val = std::to_string(i) + std::string(8, 0);
+		ASSERT_STATUS(kv.put(key1, val), status::OK);
 
 		/* "clean" key */
-		std::string key2 = std::string(1, char(i));
+		std::string key2 = std::string(8, char(i));
 		ASSERT_STATUS(kv.exists(key2), status::NOT_FOUND);
-		ASSERT_STATUS(kv.put(key2, std::to_string(i)), status::OK);
+		ASSERT_STATUS(kv.put(key2, val), status::OK);
 	}
 
 	std::string value;
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == (CHARSET_LEN * 2 + 1));
 	ASSERT_STATUS(kv.get(PREFIX, &value), status::OK);
-	UT_ASSERT(value == "should_not_change");
+
+	UT_ASSERT(*(uint64_t *)(value.data()) == *(uint64_t *)(shnc.data()));
 
 	/* Read and remove binary keys */
 	for (auto i = CHARSET_RANGE_START; i <= CHARSET_RANGE_END; i++) {
@@ -76,16 +79,20 @@ static void BinaryKeyTest(pmem::kv::db &kv)
 		std::string key1 = std::string(PREFIX + char(i) + SUFFIX);
 		ASSERT_STATUS(kv.exists(key1), status::OK);
 		ASSERT_STATUS(kv.get(key1, &value), status::OK);
-		UT_ASSERT(value == std::to_string(i));
+
+		std::string excepted = std::to_string(i) + std::string(10, 0);
+
+		UT_ASSERT(*(uint64_t *)(value.data()) == *(uint64_t *)(excepted.data()));
 
 		ASSERT_STATUS(kv.remove(key1), status::OK);
 		ASSERT_STATUS(kv.exists(key1), status::NOT_FOUND);
 
 		/* "clean" key */
-		std::string key2 = std::string(1, char(i));
+		std::string key2 = std::string(8, char(i));
 		ASSERT_STATUS(kv.exists(key2), status::OK);
 		ASSERT_STATUS(kv.get(key2, &value), status::OK);
-		UT_ASSERT(value == std::to_string(i));
+
+		UT_ASSERT(*(uint64_t *)(value.data()) == *(uint64_t *)(excepted.data()));
 
 		ASSERT_STATUS(kv.remove(key2), status::OK);
 		ASSERT_STATUS(kv.exists(key2), status::NOT_FOUND);
@@ -94,7 +101,7 @@ static void BinaryKeyTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 1);
 	ASSERT_STATUS(kv.get(PREFIX, &value), status::OK);
-	UT_ASSERT(value == "should_not_change");
+	UT_ASSERT(*(uint64_t *)(value.data()) == *(uint64_t *)(shnc.data()));
 	ASSERT_STATUS(kv.remove(PREFIX), status::OK);
 }
 
