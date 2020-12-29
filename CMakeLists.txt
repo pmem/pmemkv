@@ -45,16 +45,28 @@ set(PMEMKV_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include(cmake/helpers.cmake)
 set_version(VERSION)
 
-# Set the default build type
+# Specify and print the build type
 if(EXISTS "${PMEMKV_ROOT_DIR}/.git")
+	# current sources were downloaded using git, so we assume it's for debug (developing) purposes
 	set(DEFAULT_BUILD_TYPE "Debug")
 else()
 	set(DEFAULT_BUILD_TYPE "RelWithDebInfo")
 endif()
+set(predefined_build_types
+	Debug
+	Release
+	RelWithDebInfo
+	MinSizeRel)
 if(NOT CMAKE_BUILD_TYPE)
-	message(STATUS "Setting build type to the default one (${DEFAULT_BUILD_TYPE})")
+	message(STATUS "CMAKE_BUILD_TYPE not set, setting the default one: ${DEFAULT_BUILD_TYPE}")
 	set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}"
-		CACHE STRING "Choose a type of build (Debug, Release or RelWithDebInfo)" FORCE)
+		CACHE STRING "choose the type of build (${predefined_build_types})" FORCE STRINGS)
+else()
+	message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+	if(NOT CMAKE_BUILD_TYPE IN_LIST predefined_build_types)
+		message(WARNING "Unusual build type was set, please make sure it's proper one. "
+			"By default supported are only following: ${predefined_build_types}.")
+	endif()
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PMEMKV_ROOT_DIR}/cmake)
