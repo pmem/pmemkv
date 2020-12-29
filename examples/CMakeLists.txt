@@ -1,6 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright 2019-2020, Intel Corporation
 
+#
+# doc/CMakeLists.txt - CMake file for building all examples along with
+#	the current pmemkv sources, for verification purposes.
+#	To build an example as a standalone application (with pmemkv from the system)
+#	see a CMake file in any of the subdirectories.
+#
 add_common_flag(-Wno-unused-but-set-variable)
 
 add_cppstyle(examples ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c
@@ -61,11 +67,11 @@ if(ENGINE_CMAP)
 	target_link_libraries(example-pmemkv_open_cpp pmemkv)
 else()
 	message(STATUS
-			"Some examples use cmap engine, which is disabled, hence they are "
-			"not built. If you want to build them use -DENGINE_CMAP=ON option.")
+		"Some examples use cmap engine, which is disabled, hence they are "
+		"not built. If you want to build them use -DENGINE_CMAP=ON option.")
 endif()
 
-if (ENGINE_CSMAP)
+if(ENGINE_CSMAP)
 	add_example(pmemkv_comparator_cpp pmemkv_comparator_cpp/pmemkv_comparator.cpp)
 	target_link_libraries(example-pmemkv_comparator_cpp pmemkv)
 
@@ -79,11 +85,11 @@ if (ENGINE_CSMAP)
 	endif()
 else()
 	message(STATUS
-		"Some examples use use csmap engine, which is disabled, hence they are "
+		"Some examples use csmap engine, which is disabled, hence they are "
 		"not built. If you want to build them use -DENGINE_CSMAP=ON option.")
 endif()
 
-if (ENGINE_RADIX)
+if(ENGINE_RADIX)
 	add_example(pmemkv_transaction_cpp pmemkv_transaction_cpp/pmemkv_transaction.cpp)
 	target_link_libraries(example-pmemkv_transaction_cpp pmemkv ${LIBPMEMOBJ++_LIBRARIES})
 
@@ -96,4 +102,9 @@ else()
 	message(STATUS
 		"Some examples use radix engine, which is disabled, hence they are "
 		"not built. If you want to build them use -DENGINE_RADIX=ON option.")
+endif()
+
+if(NOT ENGINE_CMAP AND NOT ENGINE_CSMAP AND NOT ENGINE_RADIX)
+	message(WARNING "None of engines required for examples was enabled, "
+		"so no examples were built. See messages above for instructions.")
 endif()
