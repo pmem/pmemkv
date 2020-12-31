@@ -48,7 +48,7 @@ cd ${REPO_DIR}/build
 
 cmake .. -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF
 make -j$(nproc) doc
-cp ${REPO_DIR}/build/man/tmp/*.md ${REPO_DIR}/doc/
+cp ${REPO_DIR}/build/doc/man/tmp/*.md ${REPO_DIR}/doc/
 cp -r ${REPO_DIR}/doc ${ARTIFACTS_DIR}/
 cp -r ${REPO_DIR}/build/doc/cpp_html ${ARTIFACTS_DIR}/
 
