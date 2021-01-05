@@ -18,14 +18,14 @@ endfunction()
 # Converts md files into manpage format. Requires pandoc command.
 # NAME is output manpage name, INPUT is a path to the source md file
 function(configure_man NAME INPUT)
-	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/man/${NAME}
+	add_custom_command(OUTPUT ${MAN_DIR}/${NAME}
 		MAIN_DEPENDENCY ${INPUT}
 		COMMAND ${PMEMKV_ROOT_DIR}/utils/md2man/md2man.sh
 			${INPUT}
 			${PMEMKV_ROOT_DIR}/utils/md2man/default.man
-			${CMAKE_CURRENT_BINARY_DIR}/man/${NAME}
+			${MAN_DIR}/${NAME}
 			${VERSION})
-	list(APPEND MANPAGE_OUTFILES ${CMAKE_CURRENT_BINARY_DIR}/man/${NAME})
+	list(APPEND MANPAGE_OUTFILES ${MAN_DIR}/${NAME})
 	set(MANPAGE_OUTFILES ${MANPAGE_OUTFILES} PARENT_SCOPE)
 endfunction()
 
@@ -34,6 +34,7 @@ endfunction()
 # ----------------------------------------------------------------- #
 set(MANPAGE_OUTFILES "")
 set(DOXYGEN_COMMAND "")
+set(MAN_DIR ${CMAKE_CURRENT_BINARY_DIR}/man)
 add_check_whitespace(man ${CMAKE_CURRENT_SOURCE_DIR}/*.*)
 
 # ----------------------------------------------------------------- #
@@ -50,8 +51,8 @@ if(PANDOC)
 	# manpages with example(s) injected
 	strip_example(${PMEMKV_ROOT_DIR}/examples/pmemkv_basic_c/pmemkv_basic.c C_EXAMPLE)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv.3.md.in
-		${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv.3.md)
-	configure_man(libpmemkv.3 ${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv.3.md)
+		${MAN_DIR}/tmp/libpmemkv.3.md)
+	configure_man(libpmemkv.3 ${MAN_DIR}/tmp/libpmemkv.3.md)
 
 	strip_example(
 		${PMEMKV_ROOT_DIR}/examples/pmemkv_config_c/pmemkv_config.c
@@ -60,27 +61,27 @@ if(PANDOC)
 		${PMEMKV_ROOT_DIR}/examples/pmemkv_config_c/pmemkv_basic_config.c
 		CONFIG_BASIC_EXAMPLE)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv_config.3.md.in
-		${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_config.3.md)
-	configure_man(libpmemkv_config.3 ${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_config.3.md)
+		${MAN_DIR}/tmp/libpmemkv_config.3.md)
+	configure_man(libpmemkv_config.3 ${MAN_DIR}/tmp/libpmemkv_config.3.md)
 
 	strip_example(
 		${PMEMKV_ROOT_DIR}/examples/pmemkv_transaction_c/pmemkv_transaction.c
 		TRANSACTION_BASIC_C_EXAMPLE)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv_tx.3.md.in
-		${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_tx.3.md)
-	configure_man(libpmemkv_tx.3 ${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_tx.3.md)
+		${MAN_DIR}/tmp/libpmemkv_tx.3.md)
+	configure_man(libpmemkv_tx.3 ${MAN_DIR}/tmp/libpmemkv_tx.3.md)
 
 	strip_example(
 		${PMEMKV_ROOT_DIR}/examples/pmemkv_iterator_c/pmemkv_iterator.c
 		ITERATOR_BASIC_EXAMPLE)
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpmemkv_iterator.3.md.in
-		${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_iterator.3.md)
-	configure_man(libpmemkv_iterator.3 ${CMAKE_CURRENT_BINARY_DIR}/man/tmp/libpmemkv_iterator.3.md)
+		${MAN_DIR}/tmp/libpmemkv_iterator.3.md)
+	configure_man(libpmemkv_iterator.3 ${MAN_DIR}/tmp/libpmemkv_iterator.3.md)
 
 	# install manpages
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/libpmemkv.7
+	install(FILES ${MAN_DIR}/libpmemkv.7
 		DESTINATION ${CMAKE_INSTALL_MANDIR}/man7)
-	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/man/
+	install(DIRECTORY ${MAN_DIR}/
 		DESTINATION ${CMAKE_INSTALL_MANDIR}/man3
 		FILES_MATCHING
 		PATTERN "*.3"
