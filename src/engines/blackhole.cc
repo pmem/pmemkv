@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "blackhole.h"
 #include <iostream>
@@ -148,6 +148,32 @@ status blackhole::remove(string_view key)
 	LOG("remove key=" << std::string(key.data(), key.size()));
 
 	return status::OK;
+}
+
+internal::iterator_base *blackhole::new_iterator()
+{
+	return new blackhole_iterator{};
+}
+
+internal::iterator_base *blackhole::new_const_iterator()
+{
+	return new blackhole_iterator{};
+}
+
+status blackhole::blackhole_iterator::seek(string_view key)
+{
+	return status::OK;
+}
+
+result<string_view> blackhole::blackhole_iterator::key()
+{
+	return status::NOT_FOUND;
+}
+
+result<pmem::obj::slice<const char *>>
+blackhole::blackhole_iterator::read_range(size_t pos, size_t n)
+{
+	return status::NOT_FOUND;
 }
 
 } // namespace kv
