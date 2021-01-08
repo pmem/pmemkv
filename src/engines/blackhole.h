@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #pragma once
 
@@ -11,6 +11,8 @@ namespace kv
 {
 
 class blackhole : public engine_base {
+	class blackhole_iterator;
+
 public:
 	blackhole(std::unique_ptr<internal::config> cfg);
 	~blackhole();
@@ -41,6 +43,21 @@ public:
 	status put(string_view key, string_view value) final;
 
 	status remove(string_view key) final;
+
+	internal::iterator_base *new_iterator() final;
+	internal::iterator_base *new_const_iterator() final;
+};
+
+class blackhole::blackhole_iterator : public internal::iterator_base {
+public:
+	status seek(string_view key) final;
+
+	result<string_view> key() final;
+
+	result<pmem::obj::slice<const char *>> read_range(size_t pos, size_t n) final;
+
+private:
+	std::string name();
 };
 
 } /* namespace kv */
