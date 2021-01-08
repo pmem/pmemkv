@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "unittest.hpp"
+#include "../engine_scenarios/iterator.hpp"
 
 using namespace pmem::kv;
 
@@ -148,19 +149,54 @@ static void BlackholeRangeTest()
 	kv.close();
 }
 
+template <bool IsConst>
+typename std::enable_if<IsConst>::type test_write(iterator<IsConst> &it)
+{
+	/* It does nothing for a read iterator */
+}
+
+template <bool IsConst>
+typename std::enable_if<!IsConst>::type test_write(iterator<IsConst> &it)
+{
+	auto write_res = it.write_range();
+	UT_ASSERT(!write_res.is_ok());
+	ASSERT_STATUS(write_res.get_status(), status::NOT_SUPPORTED);
+
+	ASSERT_STATUS(it.commit(), status::NOT_SUPPORTED);
+
+	/* It returns void */
+	it.abort();
+}
+
+template <bool IsConst>
 static void BlackholeIteratorTest()
 {
 	db kv;
 	auto s = kv.open("blackhole");
 	ASSERT_STATUS(s, status::OK);
 
-	auto write_res = kv.new_write_iterator();
-	UT_ASSERT(!write_res.is_ok());
-	ASSERT_STATUS(write_res.get_status(), pmem::kv::status::NOT_SUPPORTED);
+	auto it = new_iterator<IsConst>(kv);
 
-	auto read_res = kv.new_read_iterator();
+	ASSERT_STATUS(it.seek("abc"), status::OK);
+	ASSERT_STATUS(it.seek_lower("abc"), status::NOT_SUPPORTED);
+	ASSERT_STATUS(it.seek_lower_eq("abc"), status::NOT_SUPPORTED);
+	ASSERT_STATUS(it.seek_higher("abc"), status::NOT_SUPPORTED);
+	ASSERT_STATUS(it.seek_higher_eq("abc"), status::NOT_SUPPORTED);
+	ASSERT_STATUS(it.seek_to_first(), status::NOT_SUPPORTED);
+	ASSERT_STATUS(it.seek_to_last(), status::NOT_SUPPORTED);
+	ASSERT_STATUS(it.is_next(), status::NOT_SUPPORTED);
+	ASSERT_STATUS(it.next(), status::NOT_SUPPORTED);
+	ASSERT_STATUS(it.prev(), status::NOT_SUPPORTED);
+
+	test_write<IsConst>(it);
+
+	auto key_res = it.key();
+	UT_ASSERT(!key_res.is_ok());
+	ASSERT_STATUS(key_res.get_status(), status::NOT_FOUND);
+
+	auto read_res = it.read_range();
 	UT_ASSERT(!read_res.is_ok());
-	ASSERT_STATUS(read_res.get_status(), pmem::kv::status::NOT_SUPPORTED);
+	ASSERT_STATUS(read_res.get_status(), status::NOT_FOUND);
 
 	kv.close();
 }
@@ -170,6 +206,7 @@ int main(int argc, char *argv[])
 	return run_test([&] {
 		BlackholeSimpleTest();
 		BlackholeRangeTest();
-		BlackholeIteratorTest();
+		BlackholeIteratorTest<true>();
+		BlackholeIteratorTest<false>();
 	});
 }
