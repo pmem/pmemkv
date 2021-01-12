@@ -72,12 +72,13 @@ echo "Build and install older pmemkv's versions"
 build_and_install_pmemkv "1.0.2"
 build_and_install_pmemkv "1.1"
 build_and_install_pmemkv "1.2"
+build_and_install_pmemkv "1.3"
 
 # checkout HEAD/current version again
 git checkout ${current_version}
-
 
 echo "Test compatibility of previous versions with current one"
 verify_compatibility "1.0.2"
 verify_compatibility "1.1"
 verify_compatibility "1.2"
+verify_compatibility "1.3"
