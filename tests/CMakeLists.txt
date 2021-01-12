@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2021, Intel Corporation
 
 include(ctest_helpers.cmake)
 
@@ -399,9 +399,17 @@ if(ENGINE_CMAP)
 
 	add_engine_test(ENGINE cmap
 			BINARY iterator_concurrent
-			TRACERS none memcheck pmemcheck helgrind drd
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8)
+
+	if(TESTS_PMEMOBJ_DRD_HELGRIND)
+		add_engine_test(ENGINE cmap
+				BINARY iterator_concurrent
+				TRACERS helgrind drd
+				SCRIPT pmemobj_based/default.cmake
+				PARAMS 8)
+	endif()
 endif(ENGINE_CMAP)
 ################################################################################
 ###################################### CSMAP ###################################
