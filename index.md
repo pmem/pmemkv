@@ -9,42 +9,31 @@ layout: main
 Rather than being tied to a single language or backing implementation,
 **pmemkv** provides different options for language bindings and storage engines.
 
-The **C API** of pmemkv is documented in the following manuals:
+The **C API** of pmemkv is documented in the manuals and the **C++ API**
+is documented in the form of Doxygen documentation:
 
 for the current **master**:
 
-* [libpmemkv.3](./master/manpages/libpmemkv.3.html)
-* [libpmemkv.7](./master/manpages/libpmemkv.7.html)
-* [libpmemkv_config.3](./master/manpages/libpmemkv_config.3.html)
-* [libpmemkv_json_config.3](./master/manpages/libpmemkv_json_config.3.html)
+* [C++ Doxygen docs](./master/doxygen/index.html)
+* C manpages:
+	* [libpmemkv.3](./master/manpages/libpmemkv.3.html)
+	* [libpmemkv.7](./master/manpages/libpmemkv.7.html)
+	* [libpmemkv_tx.3](./master/manpages/libpmemkv_tx.3.html) (EXPERIMENTAL API)
+	* [libpmemkv_iterator.3](./master/manpages/libpmemkv_iterator.3.html) (EXPERIMENTAL API)
+	* [libpmemkv_config.3](./master/manpages/libpmemkv_config.3.html)
+	* [libpmemkv_json_config.3](./master/manpages/libpmemkv_json_config.3.html)
 
-for version **1.3**:
+for the latest stable branch (**1.3**):
 
-* [libpmemkv.3](./v1.3/manpages/libpmemkv.3.html)
-* [libpmemkv.7](./v1.3/manpages/libpmemkv.7.html)
-* [libpmemkv_config.3](./v1.3/manpages/libpmemkv_config.3.html)
-* [libpmemkv_json_config.3](./v1.3/manpages/libpmemkv_json_config.3.html)
+* [C++ Doxygen docs](./v1.3/doxygen/index.html)
+* C manpages:
+	* [libpmemkv.3](./v1.3/manpages/libpmemkv.3.html)
+	* [libpmemkv.7](./v1.3/manpages/libpmemkv.7.html)
+	* [libpmemkv_config.3](./v1.3/manpages/libpmemkv_config.3.html)
+	* [libpmemkv_json_config.3](./v1.3/manpages/libpmemkv_json_config.3.html)
 
-for version **1.2**:
 
-* [libpmemkv.3](./v1.2/manpages/libpmemkv.3.html)
-* [libpmemkv.7](./v1.2/manpages/libpmemkv.7.html)
-* [libpmemkv_config.3](./v1.2/manpages/libpmemkv_config.3.html)
-* [libpmemkv_json_config.3](./v1.2/manpages/libpmemkv_json_config.3.html)
-
-for version **1.1**:
-
-* [libpmemkv.3](./v1.1/manpages/libpmemkv.3.html)
-* [libpmemkv.7](./v1.1/manpages/libpmemkv.7.html)
-* [libpmemkv_config.3](./v1.1/manpages/libpmemkv_config.3.html)
-* [libpmemkv_json_config.3](./v1.1/manpages/libpmemkv_json_config.3.html)
-
-The **C++ API** of pmemkv is documented in the Doxygen documentation listed below:
-
-* [master](./master/doxygen/index.html)
-* [v1.3](./v1.3/doxygen/index.html)
-* [v1.2](./v1.2/doxygen/index.html)
-* [v1.1](./v1.1/doxygen/index.html)
+For older documentation [see below](#older-documentation).
 
 ## Language Bindings
 
@@ -61,7 +50,7 @@ or just a readme (on GitHub's repository page):
 
 ## Blog entries
 
-The following series of blog articles provides an introduction to **pmemkv**:
+The following blog articles relates to **pmemkv**:
 
 * [Introduction](https://pmem.io/2017/02/21/pmemkv-intro.html)
 * [Zero-copy leaf splits in pmemkv](https://pmem.io/2017/03/09/pmemkv-zero-copy-leaf-splits.html)
@@ -96,7 +85,27 @@ Possible statuses:
 	* No bug fixes,
 	* No official releases.
 
-## Archived documentation
+## Older documentation
+
+For branch **stable-1.2**:
+
+* [C++ Doxygen docs](./v1.2/doxygen/index.html)
+* C manpages:
+	* [libpmemkv.3](./v1.2/manpages/libpmemkv.3.html)
+	* [libpmemkv.7](./v1.2/manpages/libpmemkv.7.html)
+	* [libpmemkv_config.3](./v1.2/manpages/libpmemkv_config.3.html)
+	* [libpmemkv_json_config.3](./v1.2/manpages/libpmemkv_json_config.3.html)
+
+For branch **stable-1.1**:
+
+* [C++ Doxygen docs](./v1.1/doxygen/index.html)
+* C manpages:
+	* [libpmemkv.3](./v1.1/manpages/libpmemkv.3.html)
+	* [libpmemkv.7](./v1.1/manpages/libpmemkv.7.html)
+	* [libpmemkv_config.3](./v1.1/manpages/libpmemkv_config.3.html)
+	* [libpmemkv_json_config.3](./v1.1/manpages/libpmemkv_json_config.3.html)
+
+### Archived documentation
 
 For version **1.0.3**:
 
