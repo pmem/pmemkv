@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2021, Intel Corporation
 
 #
 # packages.cmake - CPack configuration for rpm and deb generation
@@ -35,6 +35,7 @@ set(CPACK_PACKAGE_NAME "libpmemkv")
 set(CPACK_PACKAGE_VERSION ${VERSION})
 set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
+#set(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH})
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Key/Value Datastore for Persistent Memory")
 set(CPACK_PACKAGE_VENDOR "Intel")
 

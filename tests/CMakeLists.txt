@@ -1,9 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright 2019-2021, Intel Corporation
 
+#
+# tests/CMakeLists.txt - prepares all the tests; it specifies which tests are enabled based on
+#	options and available programs. Build tests with 'make tests' command, execute them using 'ctest'
+#
 include(ctest_helpers.cmake)
 
+# ----------------------------------------------------------------- #
 ## Setup
+# ----------------------------------------------------------------- #
 add_custom_target(tests)
 
 # Find valgrind
@@ -34,7 +40,7 @@ find_pmreorder()
 find_pmempool()
 find_gdb()
 
-# Checks for when DEVELOPER_MODE is ON
+# Add checks when DEVELOPER_MODE is ON
 add_cppstyle(tests ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/c_api/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/common/*.h*
@@ -94,7 +100,9 @@ if(COVERAGE AND VALGRIND_FOUND)
 	message(STATUS "This is the Coverage build, skipping Valgrind tests")
 endif()
 
+# ----------------------------------------------------------------- #
 ## Common tests
+# ----------------------------------------------------------------- #
 build_test(wrong_engine_name_test wrong_engine_name_test.cc)
 add_test_generic(NAME wrong_engine_name_test TRACERS none)
 
@@ -131,7 +139,9 @@ add_test_generic(NAME json_to_config TRACERS none memcheck)
 build_test(result result/result.cpp)
 add_test_generic(NAME result TRACERS none memcheck)
 
+# ----------------------------------------------------------------- #
 ## Test scenarios (parametrized at least with engine name)
+# ----------------------------------------------------------------- #
 # Tests for all engines
 build_test_ext(NAME put_get_remove SRC_FILES engine_scenarios/all/put_get_remove.cc LIBS json)
 build_test_ext(NAME put_get_remove_charset_params SRC_FILES engine_scenarios/all/put_get_remove_charset_params.cc LIBS json)
