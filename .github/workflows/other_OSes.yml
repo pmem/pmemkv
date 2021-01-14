@@ -9,16 +9,16 @@ env:
   REPO:           pmemkv
   GITHUB_REPO:    pmem/pmemkv
   CONTAINER_REG:  ghcr.io/pmem/pmemkv
+  HOST_WORKDIR:   $GITHUB_WORKSPACE
+  WORKDIR:        utils/docker
+  TYPE:           debug
 
 jobs:
   linux:
     name: pmemkv-other
     runs-on: ubuntu-latest
-    env:
-      HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
-      WORKDIR:        utils/docker
-      TYPE:           debug
     strategy:
+      fail-fast: false
       matrix:
         CONFIG: ["OS=centos OS_VER=8",
                  "OS=archlinux-base OS_VER=latest",
@@ -26,21 +26,19 @@ jobs:
                  "OS=debian OS_VER=unstable",
                  "OS=fedora OS_VER=33",
                  "OS=fedora OS_VER=rawhide",
+                 "TYPE=building OS=fedora OS_VER=rawhide",
                  "OS=opensuse-leap OS_VER=latest",
                  "OS=opensuse-tumbleweed OS_VER=latest",
                  "OS=ubuntu OS_VER=18.04",
-                 "OS=ubuntu OS_VER=rolling"]
+                 "OS=ubuntu OS_VER=rolling",
+                 "TYPE=building OS=ubuntu OS_VER=rolling"]
     steps:
-       - name: Print out the current date and time
-         run: date
+      - name: Clone the git repo
+        uses: actions/checkout@v2
 
-       - name: Clone the git repo
-         uses: actions/checkout@v2
-         with:
-            fetch-depth: 50
+      # other_OSes workflow rebuilds images every time
+      - name: Rebuild the image
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh rebuild
 
-       - name: Pull or rebuild the image
-         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh rebuild
-
-       - name: Run the build
-         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
+      - name: Run the build
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
