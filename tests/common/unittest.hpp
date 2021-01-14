@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2018-2020, Intel Corporation */
+/* Copyright 2018-2021, Intel Corporation */
 
 #ifndef PMEMKV_UNITTEST_HPP
 #define PMEMKV_UNITTEST_HPP
@@ -30,6 +30,10 @@ static inline void UT_EXCEPTION(std::exception &e)
 {
 	std::cerr << e.what() << std::endl;
 }
+
+/* fixed size only for robinhood */
+static const size_t min_len = 8;
+static const size_t max_len = 8;
 
 /* assertion with exception related string printed */
 #define UT_FATALexc(exception)                                                           \
@@ -113,6 +117,19 @@ static inline void UT_EXCEPTION(std::exception &e)
 		UT_ASSERTeq(cnt, expected_size);                                         \
 	} while (0)
 
+#define ASSERT_VALUE(result, expected)                                                   \
+	do {                                                                             \
+		auto expected_str = std::string(expected);                               \
+                                                                                         \
+		if (expected_str.size() < min_len)                                       \
+			expected_str +=                                                  \
+				std::string(min_len - expected_str.size(), '\0');        \
+		else if (expected_str.size() > max_len)                                  \
+			expected_str = expected_str.substr(0, max_len);                  \
+                                                                                         \
+		UT_ASSERT(result.compare(expected_str) == 0);                            \
+	} while (0)
+
 static inline int run_test(std::function<void()> test)
 {
 	test_register_sighandlers();
@@ -178,6 +195,166 @@ pmem::kv::config CONFIG_FROM_JSON(std::string json)
 }
 #endif /* JSON_TESTS_SUPPORT */
 
+class kv_to_test : public pmem::kv::db {
+public:
+	kv_to_test(std::string engine, pmem::kv::config &&config)
+	{
+		ASSERT_STATUS(pmem::kv::db::open(engine, std::move(config)),
+			      pmem::kv::status::OK);
+	}
+
+	pmem::kv::status count_above(pmem::kv::string_view key, std::size_t &cnt) noexcept
+	{
+		return pmem::kv::db::count_above(prepare_string(key), cnt);
+	}
+
+	pmem::kv::status count_equal_above(pmem::kv::string_view key,
+					   std::size_t &cnt) noexcept
+	{
+		return pmem::kv::db::count_equal_above(prepare_string(key), cnt);
+	}
+
+	pmem::kv::status count_equal_below(pmem::kv::string_view key,
+					   std::size_t &cnt) noexcept
+	{
+		return pmem::kv::db::count_equal_below(prepare_string(key), cnt);
+	}
+
+	pmem::kv::status count_below(pmem::kv::string_view key, std::size_t &cnt) noexcept
+	{
+		return pmem::kv::db::count_below(prepare_string(key), cnt);
+	}
+
+	pmem::kv::status count_between(pmem::kv::string_view key1,
+				       pmem::kv::string_view key2,
+				       std::size_t &cnt) noexcept
+	{
+		return pmem::kv::db::count_between(prepare_string(key1),
+						   prepare_string(key2), cnt);
+	}
+
+	pmem::kv::status get_above(pmem::kv::string_view key,
+				   pmem::kv::get_kv_callback *callback,
+				   void *arg) noexcept
+	{
+		return pmem::kv::db::get_above(prepare_string(key), callback, arg);
+	}
+
+	pmem::kv::status get_above(pmem::kv::string_view key,
+				   std::function<pmem::kv::get_kv_function> f) noexcept
+	{
+		return pmem::kv::db::get_above(prepare_string(key), f);
+	}
+
+	pmem::kv::status get_equal_above(pmem::kv::string_view key,
+					 pmem::kv::get_kv_callback *callback,
+					 void *arg) noexcept
+	{
+		return pmem::kv::db::get_equal_above(prepare_string(key), callback, arg);
+	}
+
+	pmem::kv::status
+	get_equal_above(pmem::kv::string_view key,
+			std::function<pmem::kv::get_kv_function> f) noexcept
+	{
+		return pmem::kv::db::get_equal_above(prepare_string(key), f);
+	}
+
+	pmem::kv::status get_equal_below(pmem::kv::string_view key,
+					 pmem::kv::get_kv_callback *callback,
+					 void *arg) noexcept
+	{
+		return pmem::kv::db::get_equal_below(prepare_string(key), callback, arg);
+	}
+
+	pmem::kv::status
+	get_equal_below(pmem::kv::string_view key,
+			std::function<pmem::kv::get_kv_function> f) noexcept
+	{
+		return pmem::kv::db::get_equal_below(prepare_string(key), f);
+	}
+
+	pmem::kv::status get_below(pmem::kv::string_view key,
+				   pmem::kv::get_kv_callback *callback,
+				   void *arg) noexcept
+	{
+		return pmem::kv::db::get_below(prepare_string(key), callback, arg);
+	}
+
+	pmem::kv::status get_below(pmem::kv::string_view key,
+				   std::function<pmem::kv::get_kv_function> f) noexcept
+	{
+		return pmem::kv::db::get_below(prepare_string(key), f);
+	}
+
+	pmem::kv::status get_between(pmem::kv::string_view key1,
+				     pmem::kv::string_view key2,
+				     pmem::kv::get_kv_callback *callback,
+				     void *arg) noexcept
+	{
+		return pmem::kv::db::get_between(prepare_string(key1),
+						 prepare_string(key2), callback, arg);
+	}
+
+	pmem::kv::status get_between(pmem::kv::string_view key1,
+				     pmem::kv::string_view key2,
+				     std::function<pmem::kv::get_kv_function> f) noexcept
+	{
+		return pmem::kv::db::get_between(prepare_string(key1),
+						 prepare_string(key2), f);
+	}
+
+	pmem::kv::status exists(pmem::kv::string_view key) noexcept
+	{
+		return pmem::kv::db::exists(prepare_string(key));
+	}
+
+	pmem::kv::status get(pmem::kv::string_view key,
+			     pmem::kv::get_v_callback *callback, void *arg) noexcept
+	{
+		return pmem::kv::db::get(prepare_string(key), callback, arg);
+	}
+
+	pmem::kv::status get(pmem::kv::string_view key,
+			     std::function<pmem::kv::get_v_function> f) noexcept
+	{
+		return pmem::kv::db::get(prepare_string(key), f);
+	}
+
+	pmem::kv::status get(pmem::kv::string_view key, std::string *value) noexcept
+	{
+		return pmem::kv::db::get(prepare_string(key), value);
+	}
+
+	pmem::kv::status put(pmem::kv::string_view key,
+			     pmem::kv::string_view value) noexcept
+	{
+		return pmem::kv::db::put(prepare_string(key), prepare_string(value));
+	}
+
+	pmem::kv::status remove(pmem::kv::string_view key) noexcept
+	{
+		return pmem::kv::db::remove(prepare_string(key));
+	}
+
+private:
+	std::string prepare_string(pmem::kv::string_view &str)
+	{
+		auto ret = std::string{str.data(), str.size()};
+
+		if (min_len == std::numeric_limits<size_t>::max() ||
+		    max_len == std::numeric_limits<size_t>::max())
+			return ret;
+
+		if (ret.size() < min_len)
+			ret += std::string(min_len - ret.size(), '\0');
+		else if (ret.size() > max_len)
+			ret = ret.substr(0, max_len);
+
+		return ret;
+	}
+};
+
 pmem::kv::db INITIALIZE_KV(std::string engine, pmem::kv::config &&config)
 {
 	pmem::kv::db kv;
@@ -200,14 +377,26 @@ void CLEAR_KV(pmem::kv::db &kv)
 		ASSERT_STATUS(kv.remove(k), pmem::kv::status::OK);
 }
 
+void CLEAR_KV(kv_to_test &kv)
+{
+	std::vector<std::string> keys;
+	kv.get_all([&](pmem::kv::string_view key, pmem::kv::string_view value) {
+		keys.emplace_back(key.data(), key.size());
+		return 0;
+	});
+
+	for (auto &k : keys)
+		ASSERT_STATUS(kv.remove(k), pmem::kv::status::OK);
+}
+
 #ifdef JSON_TESTS_SUPPORT
 static inline int run_engine_tests(std::string engine, std::string json,
-				   std::vector<std::function<void(pmem::kv::db &)>> tests)
+				   std::vector<std::function<void(kv_to_test &)>> tests)
 {
 	test_register_sighandlers();
 
 	try {
-		auto kv = INITIALIZE_KV(engine, CONFIG_FROM_JSON(json));
+		auto kv = kv_to_test{engine, CONFIG_FROM_JSON(json)};
 
 		for (auto &test : tests) {
 			test(kv);

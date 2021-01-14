@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "unittest.hpp"
 
@@ -9,7 +9,7 @@
 
 using namespace pmem::kv;
 
-static void SimpleTest(pmem::kv::db &kv)
+static void SimpleTest(kv_to_test &kv)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
@@ -23,15 +23,15 @@ static void SimpleTest(pmem::kv::db &kv)
 	UT_ASSERT(cnt == 1);
 	ASSERT_STATUS(kv.exists("key1"), status::OK);
 	ASSERT_STATUS(kv.get("key1", &value), status::OK);
-	UT_ASSERT(value == "value1");
+	ASSERT_VALUE(value, "value1");
 	value = "";
 	UT_ASSERT(kv.get("key1", [&](string_view v) {
 		value.append(v.data(), v.size());
 	}) == status::OK);
-	UT_ASSERT(value == "value1");
+	ASSERT_VALUE(value, "value1");
 }
 
-static void EmptyKeyTest(pmem::kv::db &kv)
+static void EmptyKeyTest(kv_to_test &kv)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
@@ -53,16 +53,16 @@ static void EmptyKeyTest(pmem::kv::db &kv)
 	std::string value3;
 	ASSERT_STATUS(kv.exists(""), status::OK);
 	ASSERT_STATUS(kv.get("", &value1), status::OK);
-	UT_ASSERT(value1 == "empty");
+	ASSERT_VALUE(value1, "empty");
 	ASSERT_STATUS(kv.exists(" "), status::OK);
 	ASSERT_STATUS(kv.get(" ", &value2), status::OK);
-	UT_ASSERT(value2 == "1-space");
+	ASSERT_VALUE(value2, "1-space");
 	ASSERT_STATUS(kv.exists("\t\t"), status::OK);
 	ASSERT_STATUS(kv.get("\t\t", &value3), status::OK);
-	UT_ASSERT(value3 == "two-tab");
+	ASSERT_VALUE(value3, "two-tab");
 }
 
-static void EmptyValueTest(pmem::kv::db &kv)
+static void EmptyValueTest(kv_to_test &kv)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
@@ -83,14 +83,14 @@ static void EmptyValueTest(pmem::kv::db &kv)
 	std::string value2;
 	std::string value3;
 	ASSERT_STATUS(kv.get("empty", &value1), status::OK);
-	UT_ASSERT(value1 == "");
+	ASSERT_VALUE(value1, "");
 	ASSERT_STATUS(kv.get("1-space", &value2), status::OK);
-	UT_ASSERT(value2 == " ");
+	ASSERT_VALUE(value2, " ");
 	ASSERT_STATUS(kv.get("two-tab", &value3), status::OK);
-	UT_ASSERT(value3 == "\t\t");
+	ASSERT_VALUE(value3, "\t\t");
 }
 
-static void EmptyKeyAndValueTest(pmem::kv::db &kv)
+static void EmptyKeyAndValueTest(kv_to_test &kv)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
@@ -105,29 +105,29 @@ static void EmptyKeyAndValueTest(pmem::kv::db &kv)
 	UT_ASSERT(cnt == 1);
 
 	ASSERT_STATUS(kv.get("", &value), status::OK);
-	UT_ASSERT(value == "");
+	ASSERT_VALUE(value, "");
 }
 
-static void GetClearExternalValueTest(pmem::kv::db &kv)
+static void GetClearExternalValueTest(kv_to_test &kv)
 {
 	ASSERT_STATUS(kv.put("key1", "cool"), status::OK);
 	std::string value = "super";
 	ASSERT_STATUS(kv.get("key1", &value), status::OK);
-	UT_ASSERT(value == "cool");
+	ASSERT_VALUE(value, "cool");
 
 	value = "super";
 	ASSERT_STATUS(kv.get("nope", &value), status::NOT_FOUND);
 	UT_ASSERT(value == "super");
 }
 
-static void GetHeadlessTest(pmem::kv::db &kv)
+static void GetHeadlessTest(kv_to_test &kv)
 {
 	ASSERT_STATUS(kv.exists("waldo"), status::NOT_FOUND);
 	std::string value;
 	ASSERT_STATUS(kv.get("waldo", &value), status::NOT_FOUND);
 }
 
-static void GetMultipleTest(pmem::kv::db &kv)
+static void GetMultipleTest(kv_to_test &kv)
 {
 	ASSERT_STATUS(kv.put("abc", "A1"), status::OK);
 	ASSERT_STATUS(kv.put("def", "B2"), status::OK);
@@ -140,26 +140,26 @@ static void GetMultipleTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.exists("abc"), status::OK);
 	std::string value1;
 	ASSERT_STATUS(kv.get("abc", &value1), status::OK);
-	UT_ASSERT(value1 == "A1");
+	ASSERT_VALUE(value1, "A1");
 	ASSERT_STATUS(kv.exists("def"), status::OK);
 	std::string value2;
 	ASSERT_STATUS(kv.get("def", &value2), status::OK);
-	UT_ASSERT(value2 == "B2");
+	ASSERT_VALUE(value2, "B2");
 	ASSERT_STATUS(kv.exists("hij"), status::OK);
 	std::string value3;
 	ASSERT_STATUS(kv.get("hij", &value3), status::OK);
-	UT_ASSERT(value3 == "C3");
+	ASSERT_VALUE(value3, "C3");
 	ASSERT_STATUS(kv.exists("jkl"), status::OK);
 	std::string value4;
 	ASSERT_STATUS(kv.get("jkl", &value4), status::OK);
-	UT_ASSERT(value4 == "D4");
+	ASSERT_VALUE(value4, "D4");
 	ASSERT_STATUS(kv.exists("mno"), status::OK);
 	std::string value5;
 	ASSERT_STATUS(kv.get("mno", &value5), status::OK);
-	UT_ASSERT(value5 == "E5");
+	ASSERT_VALUE(value5, "E5");
 }
 
-static void GetMultiple2Test(pmem::kv::db &kv)
+static void GetMultiple2Test(kv_to_test &kv)
 {
 	ASSERT_STATUS(kv.put("key1", "value1"), status::OK);
 	ASSERT_STATUS(kv.put("key2", "value2"), status::OK);
@@ -171,15 +171,15 @@ static void GetMultiple2Test(pmem::kv::db &kv)
 	UT_ASSERT(cnt == 2);
 	std::string value1;
 	ASSERT_STATUS(kv.get("key1", &value1), status::OK);
-	UT_ASSERT(value1 == "value1");
+	ASSERT_VALUE(value1, "value1");
 	std::string value2;
 	ASSERT_STATUS(kv.get("key2", &value2), status::NOT_FOUND);
 	std::string value3;
 	ASSERT_STATUS(kv.get("key3", &value3), status::OK);
-	UT_ASSERT(value3 == "VALUE3");
+	ASSERT_VALUE(value3, "VALUE3");
 }
 
-static void GetNonexistentTest(pmem::kv::db &kv)
+static void GetNonexistentTest(kv_to_test &kv)
 {
 	ASSERT_STATUS(kv.put("key1", "value1"), status::OK);
 	ASSERT_STATUS(kv.exists("waldo"), status::NOT_FOUND);
@@ -187,7 +187,7 @@ static void GetNonexistentTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.get("waldo", &value), status::NOT_FOUND);
 }
 
-static void PutTest(pmem::kv::db &kv)
+static void PutTest(kv_to_test &kv)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
@@ -199,7 +199,7 @@ static void PutTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 1);
 	ASSERT_STATUS(kv.get("key1", &value), status::OK);
-	UT_ASSERT(value == "value1");
+	ASSERT_VALUE(value, "value1");
 
 	std::string new_value;
 	ASSERT_STATUS(kv.put("key1", "VALUE1"), status::OK); // same size
@@ -207,7 +207,7 @@ static void PutTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 1);
 	ASSERT_STATUS(kv.get("key1", &new_value), status::OK);
-	UT_ASSERT(new_value == "VALUE1");
+	ASSERT_VALUE(new_value, "VALUE1");
 
 	std::string new_value2;
 	ASSERT_STATUS(kv.put("key1", "new_value"), status::OK); // longer size
@@ -215,7 +215,7 @@ static void PutTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 1);
 	ASSERT_STATUS(kv.get("key1", &new_value2), status::OK);
-	UT_ASSERT(new_value2 == "new_value");
+	ASSERT_VALUE(new_value2, "new_value");
 
 	std::string new_value3;
 	ASSERT_STATUS(kv.put("key1", "?"), status::OK); // shorter size
@@ -223,10 +223,10 @@ static void PutTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 1);
 	ASSERT_STATUS(kv.get("key1", &new_value3), status::OK);
-	UT_ASSERT(new_value3 == "?");
+	ASSERT_VALUE(new_value3, "?");
 }
 
-static void PutValuesOfDifferentSizesTest(pmem::kv::db &kv)
+static void PutValuesOfDifferentSizesTest(kv_to_test &kv)
 {
 	std::string value;
 	ASSERT_STATUS(kv.put("A", "123456789ABCDE"), status::OK);
@@ -234,7 +234,7 @@ static void PutValuesOfDifferentSizesTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 1);
 	ASSERT_STATUS(kv.get("A", &value), status::OK);
-	UT_ASSERT(value == "123456789ABCDE");
+	ASSERT_VALUE(value, "123456789ABCDE");
 
 	std::string value2;
 	ASSERT_STATUS(kv.put("B", "123456789ABCDEF"), status::OK);
@@ -242,7 +242,7 @@ static void PutValuesOfDifferentSizesTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 2);
 	ASSERT_STATUS(kv.get("B", &value2), status::OK);
-	UT_ASSERT(value2 == "123456789ABCDEF");
+	ASSERT_VALUE(value2, "123456789ABCDEF");
 
 	std::string value3;
 	ASSERT_STATUS(kv.put("C", "12345678ABCDEFG"), status::OK);
@@ -250,7 +250,7 @@ static void PutValuesOfDifferentSizesTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 3);
 	ASSERT_STATUS(kv.get("C", &value3), status::OK);
-	UT_ASSERT(value3 == "12345678ABCDEFG");
+	ASSERT_VALUE(value3, "12345678ABCDEFG");
 
 	std::string value4;
 	ASSERT_STATUS(kv.put("D", "123456789"), status::OK);
@@ -258,7 +258,7 @@ static void PutValuesOfDifferentSizesTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 4);
 	ASSERT_STATUS(kv.get("D", &value4), status::OK);
-	UT_ASSERT(value4 == "123456789");
+	ASSERT_VALUE(value4, "123456789");
 
 	std::string value5;
 	ASSERT_STATUS(kv.put("E", "123456789ABCDEFGHI"), status::OK);
@@ -266,10 +266,10 @@ static void PutValuesOfDifferentSizesTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 5);
 	ASSERT_STATUS(kv.get("E", &value5), status::OK);
-	UT_ASSERT(value5 == "123456789ABCDEFGHI");
+	ASSERT_VALUE(value5, "123456789ABCDEFGHI");
 }
 
-static void RemoveAllTest(pmem::kv::db &kv)
+static void RemoveAllTest(kv_to_test &kv)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
@@ -287,7 +287,7 @@ static void RemoveAllTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.get("tmpkey", &value), status::NOT_FOUND);
 }
 
-static void RemoveAndInsertTest(pmem::kv::db &kv)
+static void RemoveAndInsertTest(kv_to_test &kv)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
@@ -309,7 +309,7 @@ static void RemoveAndInsertTest(pmem::kv::db &kv)
 	UT_ASSERT(cnt == 1);
 	ASSERT_STATUS(kv.exists("tmpkey1"), status::OK);
 	ASSERT_STATUS(kv.get("tmpkey1", &value), status::OK);
-	UT_ASSERT(value == "tmpvalue1");
+	ASSERT_VALUE(value, "tmpvalue1");
 	ASSERT_STATUS(kv.remove("tmpkey1"), status::OK);
 	cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
@@ -318,7 +318,7 @@ static void RemoveAndInsertTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.get("tmpkey1", &value), status::NOT_FOUND);
 }
 
-static void RemoveExistingTest(pmem::kv::db &kv)
+static void RemoveExistingTest(kv_to_test &kv)
 {
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
@@ -344,15 +344,15 @@ static void RemoveExistingTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.get("tmpkey1", &value), status::NOT_FOUND);
 	ASSERT_STATUS(kv.exists("tmpkey2"), status::OK);
 	ASSERT_STATUS(kv.get("tmpkey2", &value), status::OK);
-	UT_ASSERT(value == "tmpvalue2");
+	ASSERT_VALUE(value, "tmpvalue2");
 }
 
-static void RemoveHeadlessTest(pmem::kv::db &kv)
+static void RemoveHeadlessTest(kv_to_test &kv)
 {
 	ASSERT_STATUS(kv.remove("nada"), status::NOT_FOUND);
 }
 
-static void RemoveNonexistentTest(pmem::kv::db &kv)
+static void RemoveNonexistentTest(kv_to_test &kv)
 {
 	ASSERT_STATUS(kv.put("key1", "value1"), status::OK);
 	ASSERT_STATUS(kv.remove("nada"), status::NOT_FOUND);
