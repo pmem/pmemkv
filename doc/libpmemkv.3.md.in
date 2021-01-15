@@ -8,7 +8,7 @@ secondary_title: pmemkv
 ...
 
 [comment]: <> (SPDX-License-Identifier: BSD-3-Clause)
-[comment]: <> (Copyright 2019-2020, Intel Corporation)
+[comment]: <> (Copyright 2019-2021, Intel Corporation)
 
 [comment]: <> (libpmemkv.3 -- man page for libpmemkv)
 
@@ -218,6 +218,10 @@ versions it will return PMEMKV_STATUS_INVALID_ARGUMENT. Recommended way to check
 is to compare status with PMEMKV_STATUS_OK.
 
 # EXAMPLE #
+
+The following example is taken from `examples/pmemkv_basic_c` directory.
+
+Basic pmemkv usage in C:
 
 ```c
 @C_EXAMPLE@

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_HPP
 #define LIBPMEMKV_HPP
@@ -36,10 +36,14 @@ namespace pmem
 	\brief Main pmemkv namespace.
 
 	It contains all pmemkv public types, enums, classes with their functions and
-   members. It is located within pmem namespace.
+	members. It is located within pmem namespace.
 */
 namespace kv
 {
+/**
+ * Partial string_view implemenetation, defined in pmem::obj namespace
+ * in libpmemobj-cpp library (see: https://pmem.io/libpmemobj-cpp ).
+ */
 using string_view = obj::string_view;
 
 /**
@@ -56,7 +60,6 @@ typedef int get_kv_function(string_view key, string_view value);
  * @param[in] value returned by callback item's data
  */
 typedef void get_v_function(string_view value);
-
 typedef int comparator_function(string_view key1, string_view key2);
 
 /**
@@ -69,10 +72,15 @@ using get_kv_callback = pmemkv_get_kv_callback;
 using get_v_callback = pmemkv_get_v_callback;
 
 /*! \enum status
-	\brief Status returned by pmemkv functions.
+	\brief Status returned by most of pmemkv functions.
 
-	Each function, except for db::close() and pmem::kv::errormsg(), returns one of the
-	following status codes.
+	Most of functions in libpmemkv API return one of the following status codes.
+
+	Status returned from a function can change in a future version of a library to a
+	more specific one. For example, if a function returns status::UNKNOWN_ERROR, it is
+	possible that in future versions it will return status::INVALID_ARGUMENT.
+	Recommended way to check for an error is to compare status with status::OK
+	(see pmem::kv::db basic example).
 */
 enum class status {
 	OK = PMEMKV_STATUS_OK,			     /**< no error */
@@ -105,6 +113,15 @@ enum class status {
 						      comparator */
 };
 
+/**
+ * Provides string representation of a status, along with its number
+ * as specified by enum.
+ *
+ * It's useful for debugging, e.g. with pmem::db::errormsg()
+ * @code
+ * std::cout << pmemkv_errormsg() << std::endl;
+ * @endcode
+ */
 inline std::ostream &operator<<(std::ostream &os, const status &s)
 {
 	static const std::string statuses[] = {"OK",
@@ -129,7 +146,7 @@ inline std::ostream &operator<<(std::ostream &os, const status &s)
 
 /*! \exception bad_result_access
 	\brief Defines a type of object to be thrown by result::get_value() when
-   result doesn't contain value.
+	result doesn't contain value.
  */
 class bad_result_access : public std::runtime_error {
 public:
@@ -147,13 +164,13 @@ private:
 
 /*! \class result
 	\brief Stores result of an operation. It always contains status and optionally can
-   contain value.
+	contain value.
 
 	If result contains value: is_ok() returns true, get_value() returns value,
-   get_status() returns status::OK.
+	get_status() returns status::OK.
 
 	If result contains error: is_ok() returns false, get_value() throws
-   bad_result_access, get_status() returns status other than status::OK.
+	bad_result_access, get_status() returns status other than status::OK.
  */
 template <typename T>
 class result {
@@ -472,7 +489,7 @@ private:
 /*! \class tx
 	\brief Pmemkv transaction handle.
 
-	This API is EXPERIMENTAL and might change.
+	__This API is EXPERIMENTAL and might change.__
 
 	The tx class allows grouping put and remove operations into a single atomic action
 	(with respect to persistence and concurrency). Concurrent engines provide
@@ -578,7 +595,7 @@ private:
 /*! \class db::iterator
 	\brief Iterator provides methods to iterate over records in db.
 
-	This API is EXPERIMENTAL and might change.
+	__This API is EXPERIMENTAL and might change.__
 
 	It can be only created by methods in db (db::new_read_iterator() - for a read
 	iterator, and db::new_write_iterator() for a write iterator).
@@ -1111,11 +1128,10 @@ inline pmemkv_iterator *db::iterator<false>::get_raw_it()
 }
 
 /*! \namespace pmem::kv::internal
-	\brief internal pmemkv classes for C++ API
+	\brief Internal pmemkv classes for C++ API
 
 	Nothing from this namespace should be used by the users.
-	It holds pmemkv internal classes which might be changed or
-	removed in future.
+	It holds pmemkv internal classes which might be changed or removed in future.
 */
 namespace internal
 {
@@ -1330,7 +1346,7 @@ inline status config::put_object(const std::string &key,
  * - implement `int compare(pmem::kv::string_view, pmem::kv::string_view)`
  * - implement `std::string name()`
  * - be copy or move constructible
- * - be thread safe
+ * - be thread-safe
  *
  * @param[in] comparator forwarding reference to a comparator
  *
