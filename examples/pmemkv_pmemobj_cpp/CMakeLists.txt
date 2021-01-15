@@ -6,13 +6,9 @@ project(pmemkv_pmemobj CXX)
 
 set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.9)
 
-find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
-	pkg_check_modules(LIBPMEMKV REQUIRED libpmemkv)
-	pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++>=${LIBPMEMOBJ_CPP_REQUIRED_VERSION})
-else()
-	message(FATAL_ERROR "pkg-config not found")
-endif()
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBPMEMKV REQUIRED libpmemkv)
+pkg_check_modules(LIBPMEMOBJ++ REQUIRED libpmemobj++>=${LIBPMEMOBJ_CPP_REQUIRED_VERSION})
 
 include_directories(${LIBPMEMKV_INCLUDE_DIRS})
 link_directories(${LIBPMEMKV_LIBRARY_DIRS})

@@ -1,31 +1,34 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2017-2020, Intel Corporation
+# Copyright 2017-2021, Intel Corporation
 
 cmake_minimum_required(VERSION 3.3)
+
 project(pmemkv)
+set(PMEMKV_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(cmake/helpers.cmake)
 set_version(VERSION)
 
+# ----------------------------------------------------------------- #
 ## CMake build options
+# ----------------------------------------------------------------- #
 option(BUILD_DOC "build documentation" ON)
 option(BUILD_EXAMPLES "build examples" ON)
 option(BUILD_TESTS "build tests" ON)
 option(BUILD_JSON_CONFIG "build the 'libpmemkv_json_config' library" ON)
 
 option(TESTS_LONG "enable long running tests" OFF)
-option(TESTS_USE_FORCED_PMEM "run tests with PMEM_IS_PMEM_FORCE=1" OFF)
+option(TESTS_USE_FORCED_PMEM "run tests with PMEM_IS_PMEM_FORCE=1 - it speeds up tests execution on emulated pmem" OFF)
 option(TESTS_USE_VALGRIND "enable tests with valgrind (if found)" ON)
 option(TESTS_PMEMOBJ_DRD_HELGRIND "enable test of pmemobj engines under drd and helgrind (they should only be run on PMEM)" OFF)
 option(TESTS_JSON "enable tests which require libpmemkv_json_config library (BUILD_JSON_CONFIG has to be ON)" ON)
-option(COVERAGE "run coverage test" OFF)
 
+option(COVERAGE "enable collecting of coverage data" OFF)
 option(DEVELOPER_MODE "enable developer's checks" OFF)
 option(CHECK_CPP_STYLE "check code style of C++ sources" OFF)
-option(USE_CCACHE "Use ccache if it is available in the system" ON)
+option(USE_CCACHE "use ccache if it is available in the system" ON)
 
 # Each engine can be enabled separately.
-# By default all experimental engines are turned off.
 option(ENGINE_CMAP "enable cmap engine" ON)
 option(ENGINE_VCMAP "enable vcmap engine" ON)
 option(ENGINE_VSMAP "enable vsmap engine" ON)
@@ -34,24 +37,36 @@ option(ENGINE_STREE "enable experimental stree engine" ON)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 option(ENGINE_RADIX "enable experimental radix engine" OFF)
 
+# ----------------------------------------------------------------- #
 ## Set required and useful variables
+# ----------------------------------------------------------------- #
 set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 
-set(PMEMKV_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-
-# Set the default build type
+# Specify and print the build type
 if(EXISTS "${PMEMKV_ROOT_DIR}/.git")
+	# current sources were downloaded using git, so we assume it's for debug (developing) purposes
 	set(DEFAULT_BUILD_TYPE "Debug")
 else()
 	set(DEFAULT_BUILD_TYPE "RelWithDebInfo")
 endif()
+set(predefined_build_types
+	Debug
+	Release
+	RelWithDebInfo
+	MinSizeRel)
 if(NOT CMAKE_BUILD_TYPE)
-	message(STATUS "Setting build type to the default one (${DEFAULT_BUILD_TYPE})")
+	message(STATUS "CMAKE_BUILD_TYPE not set, setting the default one: ${DEFAULT_BUILD_TYPE}")
 	set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}"
-		CACHE STRING "Choose a type of build (Debug, Release or RelWithDebInfo)" FORCE)
+		CACHE STRING "choose the type of build (${predefined_build_types})" FORCE STRINGS)
+else()
+	message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+	if(NOT CMAKE_BUILD_TYPE IN_LIST predefined_build_types)
+		message(WARNING "Unusual build type was set, please make sure it's proper one. "
+			"By default supported are only following: ${predefined_build_types}.")
+	endif()
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PMEMKV_ROOT_DIR}/cmake)
@@ -65,6 +80,7 @@ set(DEB_DEPENDS)
 set(RPM_DEPENDS)
 
 set(TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/test CACHE STRING "working directory for tests")
+message(STATUS "TEST_DIR set to: ${TEST_DIR}")
 
 # Do not treat include directories from the interfaces
 # of consumed Imported Targets as SYSTEM by default.
@@ -126,7 +142,9 @@ if(ENGINE_RADIX)
 	)
 endif()
 
+# ----------------------------------------------------------------- #
 ## Setup defines and check status of each engine
+# ----------------------------------------------------------------- #
 if(ENGINE_CMAP)
 	add_definitions(-DENGINE_CMAP)
 	message(STATUS "CMAP engine is ON")
@@ -174,7 +192,9 @@ else()
 	message(STATUS "RADIX engine is OFF")
 endif()
 
+# ----------------------------------------------------------------- #
 ## Set compiler's flags
+# ----------------------------------------------------------------- #
 if(DEVELOPER_MODE)
 	add_common_flag(-Werror)
 endif()
@@ -196,7 +216,10 @@ add_common_flag(-DDEBUG DEBUG)
 
 add_common_flag("-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2" RELEASE)
 
-## Setup environment, find packages, configure list of package dependencies
+# ----------------------------------------------------------------- #
+## Setup environment, find packages,
+## configure list of package dependencies
+# ----------------------------------------------------------------- #
 find_package(PkgConfig QUIET)
 include(FindPerl)
 include(ExternalProject)
@@ -233,7 +256,9 @@ string(REPLACE ";" " " PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES}")
 string(REPLACE ";" ", " RPM_PACKAGE_REQUIRES "${RPM_DEPENDS}")
 string(REPLACE ";" ", " DEB_PACKAGE_REQUIRES "${DEB_DEPENDS}")
 
+# ----------------------------------------------------------------- #
 ## Link libraries, setup targets
+# ----------------------------------------------------------------- #
 add_library(pmemkv SHARED ${SOURCE_FILES})
 set_target_properties(pmemkv PROPERTIES SOVERSION 1)
 target_link_libraries(pmemkv PRIVATE
@@ -251,7 +276,9 @@ if(ENGINE_VCMAP)
 	target_link_libraries(pmemkv PRIVATE ${TBB_LIBRARIES})
 endif()
 
+# ----------------------------------------------------------------- #
 ## Configure make install/uninstall and packages
+# ----------------------------------------------------------------- #
 configure_file(libpmemkv.pc.in libpmemkv.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libpmemkv.pc
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
@@ -275,7 +302,9 @@ if(NOT "${CPACK_GENERATOR}" STREQUAL "")
 	include(${PMEMKV_ROOT_DIR}/cmake/packages.cmake)
 endif()
 
+# ----------------------------------------------------------------- #
 ## Setup additional targets
+# ----------------------------------------------------------------- #
 add_custom_target(checkers ALL)
 add_custom_target(cppstyle)
 add_custom_target(cppformat)
@@ -344,7 +373,9 @@ add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
 
+# ----------------------------------------------------------------- #
 ## Add sub-directories if builds enabled
+# ----------------------------------------------------------------- #
 if(BUILD_JSON_CONFIG)
 	include(rapidjson)
 	add_definitions(-DBUILD_JSON_CONFIG)

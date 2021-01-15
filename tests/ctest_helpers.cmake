@@ -309,14 +309,17 @@ function(add_engine_test)
 		# By default jemalloc creates 4 arenas for each logical CPU with 2MB chunks
 		math(EXPR TEST_DB_SIZE "${NPROC} * 4 * 2 * 1024 * 1024")
 
-		# Limit size DB_SIZE with arbitrary threshold
-		set(TEST_DB_SIZE_THRESHOLD 2147483646) # (almost 2GB; value for nproc=256 minus 2 bytes)
+		# Limit size of the test database with arbitrary threshold: almost 2GB
+		# (value for nproc=256 minus 2 bytes).
+		# Can be overwritten in CMake cache using build param: -DTEST_DB_SIZE_THRESHOLD=<size>
+		set(TEST_DB_SIZE_THRESHOLD 2147483646 CACHE STRING "Limit calculated size of the TEST_DB_SIZE for some of the memkind tests")
 		if(${TEST_DB_SIZE} GREATER ${TEST_DB_SIZE_THRESHOLD})
-			message(WARNING "Calculated TEST_DB_SIZE (${TEST_DB_SIZE}) reached threshold: ${TEST_DB_SIZE_THRESHOLD}. This may cause failures in some tests of memkind based engines.")
+			message(WARNING "Calculated TEST_DB_SIZE (${TEST_DB_SIZE}) reached threshold: ${TEST_DB_SIZE_THRESHOLD}. "
+				"This may cause failures in some tests of memkind based engines.")
 			set(TEST_DB_SIZE ${TEST_DB_SIZE_THRESHOLD})
 		endif()
 
-		# Set minimum arbitrary DB_SIZE to avoid test failures; this should never happen
+		# Set minimum arbitrary test database to avoid test failures; this should never happen
 		set(TEST_DB_SIZE_MIN 8388608) # 8 MB
 		if(${TEST_DB_SIZE} LESS ${TEST_DB_SIZE_MIN})
 			message(FATAL_ERROR "DB_SIZE (${TEST_DB_SIZE}) was calculated below the minimum: (${TEST_DB_SIZE_MIN}).")
