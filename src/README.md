@@ -3,8 +3,11 @@ pmemkv	{#mainpage}
 
 Key/Value Datastore for Persistent Memory
 
-All general information about (lib)pmemkv can be found on webstie:
+All general information about (lib)pmemkv can be found on the webstie:
 https://pmem.io/pmemkv
+
+Main code repository location:
+https://github.com/pmem/pmemkv
 
 Here user can found description of C++ API.
 
@@ -18,3 +21,5 @@ Here user can found description of C++ API.
  * class pmem::kv::config to setup parameters to open/create database
  * class pmem::kv::tx for grouping operations into a single atomic action
  * class pmem::kv::db::iterator to iterate over records in db
+ * enum class pmem::kv::status containing all possible statuses returned by
+	most of public functions

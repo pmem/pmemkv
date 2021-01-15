@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_HPP
 #define LIBPMEMKV_HPP
@@ -40,6 +40,10 @@ namespace pmem
 */
 namespace kv
 {
+/**
+ * Partial string_view implemenetation, defined in pmem::obj namespace
+ * in libpmemobj-cpp library (see: https://pmem.io/libpmemobj-cpp ).
+ */
 using string_view = obj::string_view;
 
 /**
@@ -56,7 +60,9 @@ typedef int get_kv_function(string_view key, string_view value);
  * @param[in] value returned by callback item's data
  */
 typedef void get_v_function(string_view value);
-
+/**
+ * Function type ...
+ */
 typedef int comparator_function(string_view key1, string_view key2);
 
 /**
@@ -69,10 +75,15 @@ using get_kv_callback = pmemkv_get_kv_callback;
 using get_v_callback = pmemkv_get_v_callback;
 
 /*! \enum status
-	\brief Status returned by pmemkv functions.
+	\brief Status returned by most of pmemkv functions.
 
-	Each function, except for db::close() and pmem::kv::errormsg(), returns one of the
-	following status codes.
+	Each function in pmem::kv::db class (except for db::close() and pmem::kv::errormsg() )
+	and most of other classes' functions return one of the following status codes.
+
+	Status returned from a function can change in a future version of a library to a more specific one.
+	For example, if a function returns status::UNKNOWN_ERROR, it is possible that in future
+	versions it will return status::INVALID_ARGUMENT. Recommended way to check for an error
+	is to compare status with status::OK.
 */
 enum class status {
 	OK = PMEMKV_STATUS_OK,			     /**< no error */
@@ -105,6 +116,9 @@ enum class status {
 						      comparator */
 };
 
+/**
+ * ...
+ */
 inline std::ostream &operator<<(std::ostream &os, const status &s)
 {
 	static const std::string statuses[] = {"OK",
@@ -383,6 +397,9 @@ status result<T>::get_status() const noexcept
 	return s;
 }
 
+/**
+ * ...
+ */
 template <typename T>
 bool operator==(const result<T> &lhs, const status &rhs)
 {
@@ -1111,11 +1128,10 @@ inline pmemkv_iterator *db::iterator<false>::get_raw_it()
 }
 
 /*! \namespace pmem::kv::internal
-	\brief internal pmemkv classes for C++ API
+	\brief Internal pmemkv classes for C++ API
 
 	Nothing from this namespace should be used by the users.
-	It holds pmemkv internal classes which might be changed or
-	removed in future.
+	It holds pmemkv internal classes which might be changed or removed in future.
 */
 namespace internal
 {
@@ -1330,7 +1346,7 @@ inline status config::put_object(const std::string &key,
  * - implement `int compare(pmem::kv::string_view, pmem::kv::string_view)`
  * - implement `std::string name()`
  * - be copy or move constructible
- * - be thread safe
+ * - be thread-safe
  *
  * @param[in] comparator forwarding reference to a comparator
  *
