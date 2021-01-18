@@ -18,3 +18,4 @@ Here user can found description of C++ API.
  * class pmem::kv::config to setup parameters to open/create database
  * class pmem::kv::tx for grouping operations into a single atomic action
  * class pmem::kv::db::iterator to iterate over records in db
+ * enum pmem::kv::status status returned by pmemkv methods
