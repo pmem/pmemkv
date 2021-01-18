@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 /*
  * pmemkv_transaction.cpp -- example usage of pmemkv transactions.
@@ -20,8 +20,9 @@
 
 using namespace pmem::kv;
 
-/**
- * This example expects a path to already created pool.
+/*
+ * This example expects a path to already created pool
+ * (in pmemkv context it usually equals to a database).
  *
  * To create a pool use one of the following commands.
  *

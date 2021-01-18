@@ -500,6 +500,7 @@ private:
 	durability. Actions in a transaction are executed in the order in which they were
 	called.
 
+	__Example__ usage:
 	@snippet examples/pmemkv_transaction_cpp/pmemkv_transaction.cpp transaction
 */
 class tx {
@@ -526,6 +527,15 @@ private:
 	If you want to obtain an element(s) above or below the selected key,
 	you can use pmem::kv::get_above() or pmem::kv::get_below().
 	See descriptions of these functions for details.
+
+	__Example__ of basic usage:
+	@snippet examples/pmemkv_basic_cpp/pmemkv_basic.cpp basic
+
+	__Example__ with existing database:
+	@snippet examples/pmemkv_open_cpp/pmemkv_open.cpp open
+
+	__Example__ for pmemkv's database supporting multiple engines:
+	@snippet examples/pmemkv_pmemobj_cpp/pmemkv_pmemobj.cpp multiple-engines
 */
 class db {
 	template <bool IsConst>
@@ -609,11 +619,11 @@ private:
 	Holding simultaneously in the same thread more than one iterator is undefined
 	behavior.
 
-	Example usage of iterators with single-threaded engines:
-	@snippet examples/pmemkv_iterator_cpp/pmemkv_iterator.cpp Single-threaded
+	__Example__ usage of iterators with single-threaded engines:
+	@snippet examples/pmemkv_iterator_cpp/pmemkv_iterator.cpp single-threaded
 
-	Example usage of iterators with concurrent engines:
-	@snippet examples/pmemkv_iterator_cpp/pmemkv_iterator.cpp Concurrent
+	__Example__ usage of iterators with concurrent engines:
+	@snippet examples/pmemkv_iterator_cpp/pmemkv_iterator.cpp concurrent
 */
 template <bool IsConst>
 class db::iterator {
@@ -1354,8 +1364,11 @@ inline status config::put_object(const std::string &key,
  *
  * @return pmem::kv::status
  *
- * Example of custom comparator:
- * @snippet examples/pmemkv_comparator_cpp/pmemkv_comparator.cpp Custom comparator
+ * __Example__ implementation of custom comparator:
+ * @snippet examples/pmemkv_comparator_cpp/pmemkv_comparator.cpp custom-comparator
+ *
+ * And __example__ usage (set in config and use while itarating over keys):
+ * @snippet examples/pmemkv_comparator_cpp/pmemkv_comparator.cpp comparator-usage
  */
 template <typename Comparator>
 inline status config::put_comparator(Comparator &&comparator)

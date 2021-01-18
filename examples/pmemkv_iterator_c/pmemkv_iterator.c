@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 /*
- * pmemkv_iterator.c -- example usage of pmemkv.
+ * pmemkv_iterator.c -- example usage of pmemkv's iterator.
  */
 
 #include "libpmemkv.h"
