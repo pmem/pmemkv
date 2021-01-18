@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2018-2020, Intel Corporation */
+/* Copyright 2018-2021, Intel Corporation */
 
 #ifndef PMEMKV_UNITTEST_HPP
 #define PMEMKV_UNITTEST_HPP
@@ -113,6 +113,8 @@ static inline void UT_EXCEPTION(std::exception &e)
 		UT_ASSERTeq(cnt, expected_size);                                         \
 	} while (0)
 
+static std::string currently_tested;
+
 static inline int run_test(std::function<void()> test)
 {
 	test_register_sighandlers();
@@ -206,6 +208,8 @@ static inline int run_engine_tests(std::string engine, std::string json,
 {
 	test_register_sighandlers();
 
+	currently_tested = engine;
+
 	try {
 		auto kv = INITIALIZE_KV(engine, CONFIG_FROM_JSON(json));
 
@@ -226,6 +230,25 @@ static inline int run_engine_tests(std::string engine, std::string json,
 static inline pmem::kv::string_view uint64_to_strv(uint64_t &key)
 {
 	return pmem::kv::string_view((char *)&key, sizeof(uint64_t));
+}
+
+static inline std::string allign_to_size(size_t size, std::string str)
+{
+	if (str.size() < size)
+		return str + std::string(size - str.size(), 'x');
+	else
+		return str.substr(0, size);
+}
+
+static inline std::string generate_key(size_t number, std::string prefix = "",
+				       std::string postfix = "")
+{
+	std::string res = prefix + std::to_string(number) + postfix;
+
+	if (currently_tested == "robinhood")
+		return allign_to_size(8, res);
+
+	return res;
 }
 
 #endif /* PMEMKV_UNITTEST_HPP */

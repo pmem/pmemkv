@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2021, Intel Corporation */
 
 #include "unittest.hpp"
 
@@ -21,13 +21,15 @@ void generate_keys(std::vector<std::string> &keys, const size_t max_key_len,
 	const size_t charset_size = sizeof(charset);
 
 	for (size_t k = 0; k < cnt; k++) {
+		size_t max_len = max_key_len - std::to_string(k).size();
 		/* various lenght of key, min: 1 */
-		size_t key_len = 1 + ((size_t)rand() % max_key_len);
-		std::string gen_key;
-		gen_key.reserve(key_len);
+		size_t key_len = 1 + ((size_t)rand() % max_len);
+		std::string postfix;
+		postfix.reserve(key_len);
 		for (size_t i = 0; i < key_len; i++) {
-			gen_key.push_back(charset[(size_t)rand() % charset_size]);
+			postfix.push_back(charset[(size_t)rand() % charset_size]);
 		}
+		std::string gen_key = generate_key(k, "", postfix);
 		keys.push_back(std::move(gen_key));
 	}
 }
@@ -42,8 +44,9 @@ static void MultithreadedTestRemoveDataAside(const size_t threads_number,
 	size_t initial_count = 128;
 	/* put initial data, which won't be modified */
 	for (size_t i = 0; i < initial_count; i++) {
-		std::string istr = "init_" + std::to_string(i);
-		ASSERT_STATUS(kv.put(istr, (istr + "!")), status::OK);
+		std::string key = generate_key(i, "in_");
+		std::string val = generate_key(i, "in_", "!");
+		ASSERT_STATUS(kv.put(key, val), status::OK);
 	}
 
 	std::vector<std::string> keys;
@@ -54,27 +57,26 @@ static void MultithreadedTestRemoveDataAside(const size_t threads_number,
 	parallel_exec(threads_number + 1, [&](size_t thread_id) {
 		if (thread_id == threads_number) {
 			for (size_t i = 0; i < initial_count; i++) {
-				std::string istr = "init_" + std::to_string(i);
+				std::string key = generate_key(i, "in_");
+				std::string val = generate_key(i, "in_", "!");
 				std::string value;
-				ASSERT_STATUS(kv.get(istr, &value), status::OK);
-				UT_ASSERT(value == (istr + "!"));
+				ASSERT_STATUS(kv.get(key, &value), status::OK);
+				UT_ASSERT(value == val);
 			}
 			return;
 		}
 		size_t begin = thread_id * thread_items;
 		size_t end = begin + thread_items;
 		for (auto i = begin; i < end; i++) {
-			std::string istr = std::to_string(i);
-			ASSERT_STATUS(kv.put((istr + keys[i]), (istr + "!")), status::OK);
+			ASSERT_STATUS(kv.put(keys[i], keys[i]), status::OK);
 		}
 		for (auto i = begin; i < end; i++) {
 			std::string istr = std::to_string(i);
 			std::string value;
-			ASSERT_STATUS(kv.get((istr + keys[i]), &value), status::OK);
-			UT_ASSERT(value == (istr + "!"));
+			ASSERT_STATUS(kv.get(keys[i], &value), status::OK);
+			UT_ASSERT(value == keys[i]);
 		}
 	});
-
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERTeq(cnt, initial_count + keys_cnt);
@@ -83,18 +85,18 @@ static void MultithreadedTestRemoveDataAside(const size_t threads_number,
 	parallel_exec(threads_number + 1, [&](size_t thread_id) {
 		if (thread_id == threads_number) {
 			for (size_t i = 0; i < initial_count; i++) {
-				std::string istr = "init_" + std::to_string(i);
+				std::string key = generate_key(i, "in_");
+				std::string val = generate_key(i, "in_", "!");
 				std::string value;
-				ASSERT_STATUS(kv.get(istr, &value), status::OK);
-				UT_ASSERT(value == (istr + "!"));
+				ASSERT_STATUS(kv.get(key, &value), status::OK);
+				UT_ASSERT(value == val);
 			}
 			return;
 		}
 		size_t begin = thread_id * thread_items;
 		size_t end = begin + thread_items;
 		for (auto i = begin; i < end; i++) {
-			std::string istr = std::to_string(i);
-			ASSERT_STATUS(kv.remove((istr + keys[i])), status::OK);
+			ASSERT_STATUS(kv.remove(keys[i]), status::OK);
 		}
 	});
 	cnt = std::numeric_limits<std::size_t>::max();
@@ -103,10 +105,11 @@ static void MultithreadedTestRemoveDataAside(const size_t threads_number,
 
 	/* get initial data and confirm it's unmodified */
 	for (size_t i = 0; i < initial_count; i++) {
-		std::string istr = "init_" + std::to_string(i);
+		std::string key = generate_key(i, "in_");
+		std::string val = generate_key(i, "in_", "!");
 		std::string value;
-		ASSERT_STATUS(kv.get(istr, &value), status::OK);
-		UT_ASSERT(value == (istr + "!"));
+		ASSERT_STATUS(kv.get(key, &value), status::OK);
+		UT_ASSERT(value == val);
 	}
 }
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2021, Intel Corporation */
 
 #include "unittest.hpp"
 
@@ -60,9 +60,9 @@ void verify_init_elements(const std::set<uint64_t> &init, pmem::kv::db &kv)
 		uint64_t *uk = (uint64_t *)k.data();
 
 		std::string value1 =
-			std::string(value_prefix_size, '0') + std::to_string(*uk);
+			generate_key(*uk, std::string(value_prefix_size, '0'));
 		std::string value2 =
-			std::string(value_prefix_size, '1') + std::to_string(*uk);
+			generate_key(*uk, std::string(value_prefix_size, '1'));
 		UT_ASSERT(v.compare(value1) == 0 || v.compare(value2) == 0);
 
 		keys.insert(*uk);
@@ -94,8 +94,7 @@ static void ConcurrentIterationAndPutTest(const size_t threads_number,
 		auto k = unique_value(main_generator, set);
 		set.insert(k);
 
-		std::string value =
-			std::string(value_prefix_size, '0') + std::to_string(k);
+		std::string value = generate_key(k, std::string(value_prefix_size, '0'));
 		ASSERT_STATUS(kv.put(uint64_to_strv(k), value), status::OK);
 	}
 
@@ -107,9 +106,8 @@ static void ConcurrentIterationAndPutTest(const size_t threads_number,
 			if (thread_id < threads_number / 4) {
 				for (uint64_t i = 0; i < thread_items; i++) {
 					auto k = unique_value(g, set);
-					std::string value =
-						std::string(value_prefix_size, '0') +
-						std::to_string(k);
+					std::string value = generate_key(
+						k, std::string(value_prefix_size, '0'));
 					ASSERT_STATUS(kv.put(uint64_to_strv(k), value),
 						      status::OK);
 				}
@@ -117,9 +115,9 @@ static void ConcurrentIterationAndPutTest(const size_t threads_number,
 				for (uint64_t i = 0; i < thread_items; i++) {
 					auto existing_e = *set.find(g() % set.size());
 
-					std::string value =
-						std::string(value_prefix_size, '1') +
-						std::to_string(existing_e);
+					std::string value = generate_key(
+						existing_e,
+						std::string(value_prefix_size, '1'));
 					ASSERT_STATUS(
 						kv.put(uint64_to_strv(existing_e), value),
 						status::OK);
@@ -148,8 +146,7 @@ static void ConcurrentIterationAndRemoveTest(const size_t threads_number,
 		auto k = unique_value(main_generator, init_set);
 		init_set.insert(k);
 
-		std::string value =
-			std::string(value_prefix_size, '0') + std::to_string(k);
+		std::string value = generate_key(k, std::string(value_prefix_size, '0'));
 		ASSERT_STATUS(kv.put(uint64_to_strv(k), value), status::OK);
 	}
 
@@ -157,8 +154,7 @@ static void ConcurrentIterationAndRemoveTest(const size_t threads_number,
 		auto k = unique_value(main_generator, to_remove_set);
 		to_remove_set.insert(k);
 
-		std::string value =
-			std::string(value_prefix_size, '0') + std::to_string(k);
+		std::string value = generate_key(k, std::string(value_prefix_size, '0'));
 		ASSERT_STATUS(kv.put(uint64_to_strv(k), value), status::OK);
 	}
 
