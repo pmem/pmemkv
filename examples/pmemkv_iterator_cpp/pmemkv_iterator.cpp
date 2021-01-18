@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 /*
- * pmemkv_iterator.cpp -- example usage of pmemkv.
+ * pmemkv_iterator.cpp -- example of pmemkv's iterators.
+ *		Two usages, to show: single-threaded and concurrent approach.
  */
 
 #include <cassert>
@@ -53,7 +54,7 @@ static std::unique_ptr<db> init_kv(const std::string &engine, const std::string 
 	return kv;
 }
 
-//! [Single-threaded]
+//! [single-threaded]
 static std::string read_key(pmem::kv::db::read_iterator &it)
 {
 	/* key_result's type is a pmem::kv::result<string_view>, for more information
@@ -182,9 +183,9 @@ static void single_threaded_engine_example(const std::string &path)
 		/* write iterator is being destroyed now */
 	}
 }
-//! [Single-threaded]
+//! [single-threaded]
 
-//! [Concurrent]
+//! [concurrent]
 static void concurrent_engine_example(const std::string &path)
 {
 	const size_t n_elements = 20;
@@ -224,7 +225,7 @@ static void concurrent_engine_example(const std::string &path)
 	for (auto &th : threads)
 		th.join();
 }
-//! [Concurrent]
+//! [concurrent]
 
 int main(int argc, char *argv[])
 {

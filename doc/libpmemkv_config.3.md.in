@@ -8,7 +8,7 @@ secondary_title: pmemkv
 ...
 
 [comment]: <> (SPDX-License-Identifier: BSD-3-Clause)
-[comment]: <> (Copyright 2019-2020, Intel Corporation)
+[comment]: <> (Copyright 2019-2021, Intel Corporation)
 
 [comment]: <> (libpmemkv_config.3 -- man page for libpmemkv configuration API)
 
@@ -104,7 +104,7 @@ Every engine has documented all supported config parameters (please see **libpme
 `int pmemkv_config_put_force_create(pmemkv_config Wconfig, bool value);`
 
 :	Puts force_create parameter to a config. In engines which supports this parameter, if false,
-	pmemkv opens the file specified by 'path', otherwise it creates it. False by default.
+	pmemkv opens the file specified by `path`, otherwise it creates it. False by default.
 
 `int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);`
 
@@ -229,7 +229,7 @@ The following examples are taken from `examples/pmemkv_config_c` directory.
 
 ## BASIC EXAMPLE ##
 
-Usage of basic config functions to set parameters based on their functionality and get based on their data type, e.g. 'pmemkv_config_put_path()' or 'pmemkv_config_put_size()'.
+Usage of basic config functions to set parameters based on their functionalities, e.g. `pmemkv_config_put_path()` or `pmemkv_config_put_size()`.
 
 ```c
 @CONFIG_BASIC_EXAMPLE@
@@ -237,7 +237,7 @@ Usage of basic config functions to set parameters based on their functionality a
 
 ## TYPE BASED CONFIGURATION EXAMPLE ##
 
-Usage of config functions to set and get data based on their data type, e.g. 'pmemkv_config_put_int64()' or 'pmemkv_config_put_object()'.
+Usage of config functions to set and get data based on their data type, e.g. `pmemkv_config_put_int64()` or `pmemkv_config_put_object()`.
 
 ```c
 @CONFIG_TYPE_BASED_EXAMPLE@
