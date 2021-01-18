@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 /*
- * pmemkv_basic.cpp -- example usage of pmemkv.
+ * pmemkv_basic.cpp -- example of basic pmemkv usage.
  */
 
+//! [basic]
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
@@ -95,3 +96,4 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+//! [basic]

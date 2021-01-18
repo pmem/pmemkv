@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 /*
- * pmemkv_comparator.cpp -- example usage of pmemkv with comparator.
+ * pmemkv_comparator.cpp -- example usage of pmemkv with custom comparator.
  */
 
 #include <algorithm>
@@ -23,7 +23,7 @@ using namespace pmem::kv;
 
 const uint64_t SIZE = 1024UL * 1024UL * 1024UL;
 
-//! [Custom comparator]
+//! [custom-comparator]
 class lexicographical_comparator {
 public:
 	int compare(string_view k1, string_view k2)
@@ -42,7 +42,7 @@ public:
 		return "lexicographical_comparator";
 	}
 };
-//! [Custom comparator]
+//! [custom-comparator]
 
 int main(int argc, char *argv[])
 {
@@ -53,6 +53,8 @@ int main(int argc, char *argv[])
 
 	/* See libpmemkv_config(3) for more detailed example of config creation */
 	LOG("Creating config");
+
+	//! [comparator-usage]
 	config cfg;
 
 	status s = cfg.put_path(argv[1]);
@@ -83,6 +85,7 @@ int main(int argc, char *argv[])
 		LOG("  visited: " << k.data());
 		return 0;
 	});
+	//! [comparator-usage]
 
 	LOG("Closing database");
 	delete kv;
