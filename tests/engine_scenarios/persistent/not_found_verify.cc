@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "unittest.hpp"
 
@@ -7,15 +7,16 @@ using namespace pmem::kv;
 
 static void insert(pmem::kv::db &kv)
 {
-	ASSERT_STATUS(kv.put("tmpkey", "tmpvalue1"), status::OK);
+	ASSERT_STATUS(kv.put(entry_from_string("tmpkey"), entry_from_string("tmpvalue1")),
+		      status::OK);
 }
 
 static void check(pmem::kv::db &kv)
 {
-
-	ASSERT_STATUS(kv.remove("tmpkey"), status::OK);
+	std::string key = entry_from_string("tmpkey");
+	ASSERT_STATUS(kv.remove(key), status::OK);
 	std::string value;
-	ASSERT_STATUS(kv.get("tmpkey", &value), status::NOT_FOUND);
+	ASSERT_STATUS(kv.get(key, &value), status::NOT_FOUND);
 }
 
 static void test(int argc, char *argv[])
