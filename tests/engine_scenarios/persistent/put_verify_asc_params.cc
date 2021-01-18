@@ -1,31 +1,30 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "unittest.hpp"
 
 using namespace pmem::kv;
 
 static void insert(const size_t iterations, pmem::kv::db &kv)
-
 {
-
 	for (size_t i = 1; i <= iterations; i++) {
-		std::string istr = std::to_string(i);
-		ASSERT_STATUS(kv.put(istr, (istr + "!")), status::OK);
+		auto key = entry_from_number(i);
+		auto expected_value = entry_from_number(i, "", "!");
+		ASSERT_STATUS(kv.put(key, expected_value), status::OK);
 		std::string value;
-		ASSERT_STATUS(kv.get(istr, &value), status::OK);
-		UT_ASSERT(value == (istr + "!"));
+		ASSERT_STATUS(kv.get(key, &value), status::OK);
+		UT_ASSERT(value == expected_value);
 	}
 }
 
 static void check(const size_t iterations, pmem::kv::db &kv)
 {
-
 	for (size_t i = 1; i <= iterations; i++) {
-		std::string istr = std::to_string(i);
+		auto key = entry_from_number(i);
+		auto expected_value = entry_from_number(i, "", "!");
 		std::string value;
-		ASSERT_STATUS(kv.get(istr, &value), status::OK);
-		UT_ASSERT(value == (istr + "!"));
+		ASSERT_STATUS(kv.get(key, &value), status::OK);
+		UT_ASSERT(value == expected_value);
 	}
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
