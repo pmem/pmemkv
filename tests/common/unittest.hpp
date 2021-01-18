@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2018-2020, Intel Corporation */
+/* Copyright 2018-2021, Intel Corporation */
 
 #ifndef PMEMKV_UNITTEST_HPP
 #define PMEMKV_UNITTEST_HPP
@@ -113,6 +113,8 @@ static inline void UT_EXCEPTION(std::exception &e)
 		UT_ASSERTeq(cnt, expected_size);                                         \
 	} while (0)
 
+static std::string currently_tested;
+
 static inline int run_test(std::function<void()> test)
 {
 	test_register_sighandlers();
@@ -180,6 +182,8 @@ pmem::kv::config CONFIG_FROM_JSON(std::string json)
 
 pmem::kv::db INITIALIZE_KV(std::string engine, pmem::kv::config &&config)
 {
+	currently_tested = engine;
+
 	pmem::kv::db kv;
 	auto s = kv.open(engine, std::move(config));
 	ASSERT_STATUS(s, pmem::kv::status::OK);
@@ -226,6 +230,30 @@ static inline int run_engine_tests(std::string engine, std::string json,
 static inline pmem::kv::string_view uint64_to_strv(uint64_t &key)
 {
 	return pmem::kv::string_view((char *)&key, sizeof(uint64_t));
+}
+
+static inline std::string align_to_size(size_t size, std::string str,
+					char char_to_fill = 'x')
+{
+	if (str.size() < size)
+		return str + std::string(size - str.size(), char_to_fill);
+	else
+		return str.substr(0, size);
+}
+
+static inline std::string key_from_number(size_t number, std::string prefix = "",
+					  std::string postfix = "")
+{
+	std::string res = prefix + std::to_string(number) + postfix;
+
+	return res;
+}
+
+/* It returns a key filled/shrank to a certain size. It's necessary during testing engines
+ * with fixed size keys */
+static inline std::string aligned_key(std::string str)
+{
+	return str;
 }
 
 #endif /* PMEMKV_UNITTEST_HPP */

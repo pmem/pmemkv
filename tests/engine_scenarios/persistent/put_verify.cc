@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "unittest.hpp"
 
@@ -7,32 +7,30 @@ using namespace pmem::kv;
 
 static void insert(pmem::kv::db &kv)
 {
-
-	ASSERT_STATUS(kv.put("abc", "A1"), status::OK);
-	ASSERT_STATUS(kv.put("def", "B2"), status::OK);
-	ASSERT_STATUS(kv.put("hij", "C3"), status::OK);
+	ASSERT_STATUS(kv.put(aligned_key("abc"), aligned_key("A1")), status::OK);
+	ASSERT_STATUS(kv.put(aligned_key("def"), aligned_key("B2")), status::OK);
+	ASSERT_STATUS(kv.put(aligned_key("hij"), aligned_key("C3")), status::OK);
 }
 
 static void check(pmem::kv::db &kv)
 {
-
-	ASSERT_STATUS(kv.put("jkl", "D4"), status::OK);
-	ASSERT_STATUS(kv.put("mno", "E5"), status::OK);
+	ASSERT_STATUS(kv.put(aligned_key("jkl"), aligned_key("D4")), status::OK);
+	ASSERT_STATUS(kv.put(aligned_key("mno"), aligned_key("E5")), status::OK);
 	std::string value1;
-	ASSERT_STATUS(kv.get("abc", &value1), status::OK);
-	UT_ASSERT(value1 == "A1");
+	ASSERT_STATUS(kv.get(aligned_key("abc"), &value1), status::OK);
+	UT_ASSERT(value1 == aligned_key("A1"));
 	std::string value2;
-	ASSERT_STATUS(kv.get("def", &value2), status::OK);
-	UT_ASSERT(value2 == "B2");
+	ASSERT_STATUS(kv.get(aligned_key("def"), &value2), status::OK);
+	UT_ASSERT(value2 == aligned_key("B2"));
 	std::string value3;
-	ASSERT_STATUS(kv.get("hij", &value3), status::OK);
-	UT_ASSERT(value3 == "C3");
+	ASSERT_STATUS(kv.get(aligned_key("hij"), &value3), status::OK);
+	UT_ASSERT(value3 == aligned_key("C3"));
 	std::string value4;
-	ASSERT_STATUS(kv.get("jkl", &value4), status::OK);
-	UT_ASSERT(value4 == "D4");
+	ASSERT_STATUS(kv.get(aligned_key("jkl"), &value4), status::OK);
+	UT_ASSERT(value4 == aligned_key("D4"));
 	std::string value5;
-	ASSERT_STATUS(kv.get("mno", &value5), status::OK);
-	UT_ASSERT(value5 == "E5");
+	ASSERT_STATUS(kv.get(aligned_key("mno"), &value5), status::OK);
+	UT_ASSERT(value5 == aligned_key("E5"));
 }
 
 static void test(int argc, char *argv[])
