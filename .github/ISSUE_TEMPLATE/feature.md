@@ -1,6 +1,6 @@
 ---
 name: Feature
-about: Feature your request
+about: Request a feature
 labels: "Type: Feature"
 ---
 # FEAT: <!-- fill the title of feature -->
