@@ -60,7 +60,6 @@ typedef int get_kv_function(string_view key, string_view value);
  * @param[in] value returned by callback item's data
  */
 typedef void get_v_function(string_view value);
-typedef int comparator_function(string_view key1, string_view key2);
 
 /**
  * Key-value pair callback, C-style.
