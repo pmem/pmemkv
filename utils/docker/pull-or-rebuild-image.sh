@@ -42,7 +42,7 @@ fi
 function build_image() {
 	echo "Building the Docker image for the Dockerfile.${OS}-${OS_VER}"
 	pushd ${IMAGES_DIR_NAME}
-	./build-image.sh ${OS}-${OS_VER}
+	./build-image.sh
 	popd
 }
 
