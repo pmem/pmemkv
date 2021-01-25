@@ -6,6 +6,8 @@ env:
   REPO:           pmemkv
   GITHUB_REPO:    pmem/pmemkv
   CONTAINER_REG:  ghcr.io/pmem/pmemkv
+  HOST_WORKDIR:   ${{ github.workspace }}
+  WORKDIR:        utils/docker
 
 jobs:
   linux:
@@ -15,8 +17,6 @@ jobs:
       # use org's Private Access Token to log in to GitHub Container Registry
       CONTAINER_REG_USER:   ${{ secrets.GH_CR_USER }}
       CONTAINER_REG_PASS:   ${{ secrets.GH_CR_PAT }}
-      HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
-      WORKDIR:        utils/docker
     strategy:
       matrix:
         CONFIG: ["TYPE=debug OS=fedora OS_VER=32",
@@ -34,7 +34,7 @@ jobs:
       - name: Clone the git repo
         uses: actions/checkout@v2
         with:
-          fetch-depth: 50
+          fetch-depth: 0
 
       - name: Pull or rebuild the image
         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh
@@ -52,8 +52,6 @@ jobs:
       DOC_UPDATE_GITHUB_TOKEN: ${{ secrets.DOC_UPDATE_GITHUB_TOKEN }}
       DOC_UPDATE_BOT_NAME: ${{ secrets.DOC_UPDATE_BOT_NAME }}
       DOC_REPO_OWNER: ${{ secrets.DOC_REPO_OWNER }}
-      HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
-      WORKDIR:        utils/docker
     if:
       contains('refs/heads/master
                 refs/heads/stable-1.3
@@ -66,7 +64,6 @@ jobs:
     steps:
       - name: Clone the git repo
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 50
+
       - name: Run the build
         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh

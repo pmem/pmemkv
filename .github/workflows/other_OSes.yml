@@ -9,13 +9,13 @@ env:
   REPO:           pmemkv
   GITHUB_REPO:    pmem/pmemkv
   CONTAINER_REG:  ghcr.io/pmem/pmemkv
-  HOST_WORKDIR:   $GITHUB_WORKSPACE
+  HOST_WORKDIR:   ${{ github.workspace }}
   WORKDIR:        utils/docker
   TYPE:           debug
 
 jobs:
   linux:
-    name: pmemkv-other
+    name: Linux-other
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

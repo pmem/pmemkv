@@ -9,23 +9,19 @@ env:
   REPO:           pmemkv
   GITHUB_REPO:    pmem/pmemkv
   CONTAINER_REG:  ghcr.io/pmem/pmemkv
+  HOST_WORKDIR:   ${{ github.workspace }}
+  WORKDIR:        utils/docker
+  COVERITY_SCAN_NOTIFICATION_EMAIL:  ${{ secrets.COVERITY_SCAN_NOTIFICATION_EMAIL }}
+  COVERITY_SCAN_TOKEN:               ${{ secrets.COVERITY_SCAN_TOKEN }}
 
 jobs:
   linux:
-    name: pmemkv-coverity
+    name: Linux-coverity
     runs-on: ubuntu-latest
-    env:
-      COVERITY_SCAN_NOTIFICATION_EMAIL:  ${{ secrets.COVERITY_SCAN_NOTIFICATION_EMAIL }}
-      COVERITY_SCAN_TOKEN:               ${{ secrets.COVERITY_SCAN_TOKEN }}
-      HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
-      WORKDIR:        utils/docker
     strategy:
       matrix:
         CONFIG: ["TYPE=coverity OS=ubuntu OS_VER=20.04"]
     steps:
-      - name: Print out the current date and time
-        run: date
-
       - name: Clone the git repo
         uses: actions/checkout@v2
 
