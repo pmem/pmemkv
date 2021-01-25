@@ -1,102 +1,117 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2016-2021, Intel Corporation
 
 #
 # pull-or-rebuild-image.sh - rebuilds the Docker image used in the
-#                            current build if necessary.
+#		current build (if necessary) or pulls it from the Container Registry.
+#
+# If Docker was rebuilt and all requirements are fulfilled (more details in
+# push_image function below) image will be pushed to the ${CONTAINER_REG}.
 #
 # The script rebuilds the Docker image if:
 # 1. the Dockerfile for the current OS version (Dockerfile.${OS}-${OS_VER})
 #    or any .sh script in the Dockerfiles directory were modified and committed, or
-# 2. "rebuild" param was passed as first argument to this script.
+# 2. "rebuild" param was passed as a first argument to this script.
 #
-# If the CI build is not of the "pull_request" type (i.e. in case of
-# a pull request merge or any other "push" event) and it succeeds, the Docker image
-# should be pushed to the ${CONTAINER_REG} repository.
-# An empty file is created to signal that to next scripts.
-#
-# If the Docker image does not have to be rebuilt, it will be pulled from
-# the ${CONTAINER_REG}.
+# The script pulls the Docker image if:
+# 1. it does not have to be rebuilt (based on commited changes), or
+# 2. "pull" param was passed as a first argument to this script.
 #
 
 set -e
 
 source $(dirname $0)/set-ci-vars.sh
-source $(dirname $0)/set-vars.sh
+
+TAG="1.4-${OS}-${OS_VER}"
+IMAGES_DIR_NAME=images
+BASE_DIR=utils/docker/${IMAGES_DIR_NAME}
 
 if [[ -z "$OS" || -z "$OS_VER" ]]; then
 	echo "ERROR: The variables OS and OS_VER have to be set properly " \
-             "(eg. OS=fedora, OS_VER=31)."
+             "(eg. OS=fedora, OS_VER=32)."
 	exit 1
 fi
 
-if [[ -z "$HOST_WORKDIR" ]]; then
-	echo "ERROR: The variable HOST_WORKDIR has to contain a path to " \
-		"the root of this project on the host machine"
+if [[ -z "${CONTAINER_REG}" ]]; then
+	echo "ERROR: CONTAINER_REG environment variable is not set " \
+		"(e.g. \"<registry_addr>/<org_name>/<package_name>\")."
 	exit 1
 fi
 
-# Path to directory with Dockerfiles and image building scripts
-images_dir_name=images
-base_dir=utils/docker/$images_dir_name
-
-# If "rebuild" param is passed to script, force rebuild
-if [[ "$1" == "rebuild" ]]; then
-	pushd $images_dir_name
+function build_image() {
+	echo "Building the Docker image for the Dockerfile.${OS}-${OS_VER}"
+	pushd ${IMAGES_DIR_NAME}
 	./build-image.sh ${OS}-${OS_VER}
 	popd
+}
+
+function pull_image() {
+	echo "Pull the image '${CONTAINER_REG}:${TAG}' from the Container Registry."
+	docker pull ${CONTAINER_REG}:${TAG}
+}
+
+function push_image {
+	# Check if the image has to be pushed to the Container Registry:
+	# - only upstream (not forked) repository,
+	# - stable-* or master branch,
+	# - not a pull_request event,
+	# - and PUSH_IMAGE flag was set for current build.
+	if [[ "${CI_REPO_SLUG}" == "${GITHUB_REPO}" \
+		&& (${CI_BRANCH} == stable-* || ${CI_BRANCH} == master) \
+		&& ${CI_EVENT_TYPE} != "pull_request" \
+		&& ${PUSH_IMAGE} == "1" ]]
+	then
+		echo "The image will be pushed to the Container Registry: ${CONTAINER_REG}"
+		touch ${CI_FILE_PUSH_IMAGE_TO_REPO}
+	else
+		echo "Skip pushing the image to the Container Registry."
+	fi
+}
+
+# If "rebuild" or "pull" are passed to the script as param, force rebuild/pull.
+if [[ "${1}" == "rebuild" ]]; then
+	build_image
+	exit 0
+elif [[ "${1}" == "pull" ]]; then
+	pull_image
 	exit 0
 fi
 
-# Find all the commits for the current build
-if [ -n "$CI_COMMIT_RANGE" ]; then
-	commits=$(git rev-list $CI_COMMIT_RANGE)
+# Determine if we need to rebuild the image or just pull it from
+# the Container Registry, based on commited changes.
+if [ -n "${CI_COMMIT_RANGE}" ]; then
+	commits=$(git rev-list ${CI_COMMIT_RANGE})
 else
-	commits=$CI_COMMIT
+	commits=${CI_COMMIT}
+fi
+
+if [[ -z "${commits}" ]]; then
+	echo "'commits' variable is empty. Docker image will be pulled."
 fi
 
 echo "Commits in the commit range:"
-for commit in $commits; do echo $commit; done
+for commit in ${commits}; do echo ${commit}; done
 
-# Get the list of files modified by the commits
-files=$(for commit in $commits; do git diff-tree --no-commit-id --name-only \
-	-r $commit; done | sort -u)
 echo "Files modified within the commit range:"
-for file in $files; do echo $file; done
+files=$(for commit in ${commits}; do git diff-tree --no-commit-id --name-only \
+	-r ${commit}; done | sort -u)
+for file in ${files}; do echo ${file}; done
 
 # Check if committed file modifications require the Docker image to be rebuilt
-for file in $files; do
+for file in ${files}; do
 	# Check if modified files are relevant to the current build
-	if [[ $file =~ ^($base_dir)\/Dockerfile\.($OS)-($OS_VER)$ ]] \
-		|| [[ $file =~ ^($base_dir)\/.*\.sh$ ]]
+	if [[ ${file} =~ ^(${BASE_DIR})\/Dockerfile\.(${OS})-(${OS_VER})$ ]] \
+		|| [[ ${file} =~ ^(${BASE_DIR})\/.*\.sh$ ]]
 	then
-		# Rebuild Docker image for the current OS version
-		echo "Rebuilding the Docker image for the Dockerfile.$OS-$OS_VER"
-		pushd $images_dir_name
-		./build-image.sh ${OS}-${OS_VER}
-		popd
-
-		# Check if the image has to be pushed to the Container Registry
-		# (i.e. the build is triggered by commits to the $GITHUB_REPO
-		# repository's stable-* or master branch, and the CI build is not
-		# of the "pull_request" type). In that case, create the empty
-		# file.
-		if [[ "$CI_REPO_SLUG" == "$GITHUB_REPO" \
-			&& ($CI_BRANCH == stable-* || $CI_BRANCH == master) \
-			&& $CI_EVENT_TYPE != "pull_request" \
-			&& $PUSH_IMAGE == "1" ]]
-		then
-			echo "The image will be pushed to the Container Registry: ${CONTAINER_REG}"
-			touch $CI_FILE_PUSH_IMAGE_TO_REPO
-		else
-			echo "Skip pushing the image to the Container Registry"
-		fi
-
+		build_image
+		push_image
 		exit 0
 	fi
 done
 
-# Getting here means rebuilding the Docker image is not required.
-# Pull the image from the Container Registry.
-docker pull ${CONTAINER_REG}:1.4-${OS}-${OS_VER}
+# Getting here means rebuilding the Docker image isn't required (based on changed files).
+# Pull the image from the Container Registry or rebuild anyway, if pull fails.
+if ! pull_image; then
+	build_image
+fi
