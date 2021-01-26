@@ -18,7 +18,6 @@
 set -e
 
 source $(dirname $0)/set-ci-vars.sh
-source $(dirname $0)/set-vars.sh
 
 doc_variables_error="To build documentation and upload it as a Github pull request, \
 variables 'DOC_UPDATE_BOT_NAME', 'DOC_REPO_OWNER' and 'DOC_UPDATE_GITHUB_TOKEN' have to be provided. \

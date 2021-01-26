@@ -63,7 +63,9 @@ function push_image {
 		&& ${PUSH_IMAGE} == "1" ]]
 	then
 		echo "The image will be pushed to the Container Registry: ${CONTAINER_REG}"
-		touch ${CI_FILE_PUSH_IMAGE_TO_REPO}
+		pushd ${IMAGES_DIR_NAME}
+		./push-image.sh
+		popd
 	else
 		echo "Skip pushing the image to the Container Registry."
 	fi
@@ -72,6 +74,7 @@ function push_image {
 # If "rebuild" or "pull" are passed to the script as param, force rebuild/pull.
 if [[ "${1}" == "rebuild" ]]; then
 	build_image
+	push_image
 	exit 0
 elif [[ "${1}" == "pull" ]]; then
 	pull_image
@@ -114,4 +117,5 @@ done
 # Pull the image from the Container Registry or rebuild anyway, if pull fails.
 if ! pull_image; then
 	build_image
+	push_image
 fi

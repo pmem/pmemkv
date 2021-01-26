@@ -38,14 +38,12 @@ jobs:
           fetch-depth: 0
 
       # "pull" or "rebuild" can be passed to a secret FORCE_IMAGE_ACTION to override default action
-      - name: Pull the image or rebuild
+      - name: Pull the image or rebuild and push it
         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh $FORCE_IMAGE_ACTION
 
       - name: Run the build
         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
 
-      - name: Push the image
-        run: cd $WORKDIR && source ./set-vars.sh && ${{ matrix.CONFIG }} /bin/bash -c "if [[ -f ${CI_FILE_PUSH_IMAGE_TO_REPO} ]]; then images/push-image.sh $OS-$OS_VER; fi"
   doc:
     name: build and publish docs
     runs-on: ubuntu-latest
