@@ -1,36 +1,51 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2018-2020, Intel Corporation
+# Copyright 2018-2021, Intel Corporation
 
 #
 # run-doc-update.sh - is called inside a Docker container,
-#                     build docs and automatically update manpages
-#                     and doxygen files on gh-pages
+#		to build docs for 'valid branches' and to create a pull request
+#		with and update of doxygen and manpage files (on gh-pages).
 #
 
 set -e
 
-source `dirname $0`/valid-branches.sh
+if [[ -z "${DOC_UPDATE_GITHUB_TOKEN}" || -z "${DOC_UPDATE_BOT_NAME}" || -z "${DOC_REPO_OWNER}" ]]; then
+	echo "To build documentation and upload it as a Github pull request, variables " \
+		"'DOC_UPDATE_BOT_NAME', 'DOC_REPO_OWNER' and 'DOC_UPDATE_GITHUB_TOKEN' have to " \
+		"be provided. For more details please read CONTRIBUTING.md"
+	exit 0
+fi
 
-BOT_NAME=${DOC_UPDATE_BOT_NAME:-"pmem-bot"}
-DOC_REPO_OWNER="${DOC_REPO_OWNER:-"pmem"}"
-REPO_NAME="pmemkv"
+# Set up required variables
+BOT_NAME=${DOC_UPDATE_BOT_NAME}
+DOC_REPO_OWNER=${DOC_REPO_OWNER}
+REPO_NAME=${REPO:-"pmemkv"}
+export GITHUB_TOKEN=${DOC_UPDATE_GITHUB_TOKEN} # export for hub command
+REPO_DIR=$(mktemp -d -t pmemkv-XXX)
 ARTIFACTS_DIR=$(mktemp -d -t ARTIFACTS-XXX)
 
-ORIGIN="https://${DOC_UPDATE_GITHUB_TOKEN}@github.com/${BOT_NAME}/${REPO_NAME}"
-UPSTREAM="https://github.com/${DOC_REPO_OWNER}/${REPO_NAME}"
-# master or stable-* branch
+# Only 'master' or 'stable-*' branches are valid; determine docs location dir on gh-pages branch
 TARGET_BRANCH=${CI_BRANCH}
-VERSION=${TARGET_BRANCHES[$TARGET_BRANCH]}
-export GITHUB_TOKEN=${DOC_UPDATE_GITHUB_TOKEN}
-
-if [ -z $VERSION ]; then
-	echo "Target location for branch ${TARGET_BRANCH} is not defined."
+if [[ "${TARGET_BRANCH}" == "master" ]]; then
+	TARGET_DOCS_DIR="master"
+elif [[ ${TARGET_BRANCH} == stable-* ]]; then
+	TARGET_DOCS_DIR=v$(echo ${TARGET_BRANCH} | cut -d"-" -f2 -s)
+else
+	echo "Skipping docs build, this script should be run only on master or stable-* branches."
+	echo "TARGET_BRANCH is set to: \'${TARGET_BRANCH}\'."
+	exit 0
+fi
+if [ -z "${TARGET_DOCS_DIR}" ]; then
+	echo "ERROR: Target docs location for branch: ${TARGET_BRANCH} is not set."
 	exit 1
 fi
-REPO_DIR=$(mktemp -d -t pmemkv-XXX)
+
+ORIGIN="https://${GITHUB_TOKEN}@github.com/${BOT_NAME}/${REPO_NAME}"
+UPSTREAM="https://github.com/${DOC_REPO_OWNER}/${REPO_NAME}"
+
 pushd ${REPO_DIR}
-# Clone repo
+echo "Clone repo:"
 git clone ${ORIGIN} ${REPO_DIR}
 cd ${REPO_DIR}
 git remote add upstream ${UPSTREAM}
@@ -42,7 +57,7 @@ hub config --global hub.protocol https
 git remote update
 git checkout -B ${TARGET_BRANCH} upstream/${TARGET_BRANCH}
 
-# Build docs
+echo "Build docs:"
 mkdir -p ${REPO_DIR}/build
 cd ${REPO_DIR}/build
 
@@ -55,24 +70,24 @@ cp -r ${REPO_DIR}/build/doc/cpp_html ${ARTIFACTS_DIR}/
 cd ${REPO_DIR}
 
 # Checkout gh-pages and copy docs
-GH_PAGES_NAME="gh-pages-for-${TARGET_BRANCH}"
+GH_PAGES_NAME="${TARGET_DOCS_DIR}-gh-pages-update"
 git checkout -B ${GH_PAGES_NAME} upstream/gh-pages
 git clean -dfx
 
 # Clean old content, since some files might have been deleted
-rm -rf ./${VERSION}
-mkdir -p ./${VERSION}/manpages/
-mkdir -p ./${VERSION}/doxygen/
+rm -rf ./${TARGET_DOCS_DIR}
+mkdir -p ./${TARGET_DOCS_DIR}/manpages/
+mkdir -p ./${TARGET_DOCS_DIR}/doxygen/
 
 # copy all manpages (with format like <manpage>.<section>.md)
-cp -f ${ARTIFACTS_DIR}/doc/*.*.md ./${VERSION}/manpages/
-cp -fr ${ARTIFACTS_DIR}/cpp_html/* ./${VERSION}/doxygen/
+cp -f ${ARTIFACTS_DIR}/doc/*.*.md ./${TARGET_DOCS_DIR}/manpages/
+cp -fr ${ARTIFACTS_DIR}/cpp_html/* ./${TARGET_DOCS_DIR}/doxygen/
 
-# Fix the title tag:
+# Fix the title tag in manpages:
 # get rid of _MP macro, it changes e.g. "_MP(PMEMKV, 7)" to "PMEMKV"
-sed -i 's/^title:\ _MP(*\([A-Za-z_-]*\).*$/title:\ \1/g' ./${VERSION}/manpages/*.md
+sed -i 's/^title:\ _MP(*\([A-Za-z_-]*\).*$/title:\ \1/g' ./${TARGET_DOCS_DIR}/manpages/*.md
 
-# Add and push changes.
+echo "Add and push changes:"
 # git commit command may fail if there is nothing to commit.
 # In that case we want to force push anyway (there might be open pull request with
 # changes which were reverted).
@@ -82,6 +97,7 @@ git push -f ${ORIGIN} ${GH_PAGES_NAME}
 
 # Makes pull request.
 # When there is already an open PR or there are no changes an error is thrown, which we ignore.
-hub pull-request -f -b ${DOC_REPO_OWNER}:gh-pages -h ${BOT_NAME}:${GH_PAGES_NAME} -m "doc: automatic gh-pages docs update" && true
+hub pull-request -f -b ${DOC_REPO_OWNER}:gh-pages -h ${BOT_NAME}:${GH_PAGES_NAME} \
+	-m "doc: automatic gh-pages docs update" && true
 
 popd

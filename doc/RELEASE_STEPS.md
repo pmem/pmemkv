@@ -36,7 +36,6 @@ Publish package and make it official:
 - announce the release on pmem group and on pmem slack channel(s)
 
 Later, for major/minor release:
-- add new branch in valid-branches.sh and in "doc" job definition within .github/workflows/gha.yml, on stable-$VER branch
 - add new version in compatibility test in run-compatibility.sh, on stable-$VER branch
 - once gh-pages branch contains new documentation:
   - add there (in index.md) new links to manpages and Doxygen docs

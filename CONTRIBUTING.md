@@ -5,7 +5,7 @@
 - [Submitting Pull Requests](#submitting-pull-requests)
 - [Creating New Engines](#creating-new-engines)
 - [Creating Experimental Engines](#creating-experimental-engines)
-- [Configuring Github fork](#configuring-github-fork)
+- [Configuring GitHub fork](#configuring-github-fork)
 
 # Opening New Issues
 
@@ -195,24 +195,24 @@ As noted in the example above, the experimental CMake module should use `-experi
 
 * In `doc/ENGINES-experimental.md`, add `mytree` section
 
-# Configuring Github fork
+# Configuring GitHub fork
 
 To build and submit documentation as an automatically generated pull request,
 the repository has to be properly configured.
 
-* [Personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) for Github account has to be generated.
+* [Personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) for GitHub account has to be generated.
   * Such personal access token has to be set in pmemkv repository's
   [secrets](https://docs.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets)
   as `DOC_UPDATE_GITHUB_TOKEN` variable.
 
 * `DOC_UPDATE_BOT_NAME` secret variable has to be set. In most cases it will be
-  the same as Github account name.
+  the same as GitHub account name.
 
-* `DOC_REPO_OWNER` secret variable has to be set. Name of the Github account,
+* `DOC_REPO_OWNER` secret variable has to be set. Name of the GitHub account,
   which will be target to make an automatic pull request with documentation.
-  In most cases it will be the same as Github account name.
+  In most cases it will be the same as GitHub account name.
 
-To enable automatic images pushing to Github Container Registry, following variables:
+To enable automatic images pushing to GitHub Container Registry, following variables:
 
 * `CONTAINER_REG` existing environment variable (defined in workflow files, in .github/ directory)
   has to be updated to contain proper GitHub Container Registry address (to forking user's container registry),
