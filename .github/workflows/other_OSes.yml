@@ -11,6 +11,7 @@ env:
   CONTAINER_REG:  ghcr.io/pmem/pmemkv
   HOST_WORKDIR:   ${{ github.workspace }}
   WORKDIR:        utils/docker
+  IMG_VER:        latest
   TYPE:           debug
   PUSH_IMAGE:     1
   # use org's Private Access Token to log in to GitHub Container Registry
