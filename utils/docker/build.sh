@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2017-2020, Intel Corporation
+# Copyright 2017-2021, Intel Corporation
 
 #
 # build.sh - runs a Docker container from a Docker image with environment
-#            prepared for running pmemkv build and tests.
-#
+#		prepared for running libpmemobj-cpp builds and tests. It uses Docker image
+#		tagged as described in ./images/build-image.sh.
 #
 # Notes:
 # - run this script from its location or set the variable 'HOST_WORKDIR' to
@@ -18,6 +18,8 @@
 set -e
 
 source $(dirname $0)/set-ci-vars.sh
+IMG_VER=${IMG_VER:-devel}
+TAG="${OS}-${OS_VER}-${IMG_VER}"
 
 doc_variables_error="To build documentation and upload it as a Github pull request, \
 variables 'DOC_UPDATE_BOT_NAME', 'DOC_REPO_OWNER' and 'DOC_UPDATE_GITHUB_TOKEN' have to be provided. \
@@ -35,7 +37,7 @@ if [[ -z "$HOST_WORKDIR" ]]; then
 	exit 1
 fi
 
-imageName=${CONTAINER_REG}:1.4-${OS}-${OS_VER}
+imageName=${CONTAINER_REG}:${TAG}
 containerName=pmemkv-${OS}-${OS_VER}
 
 if [[ "$command" == "" ]]; then

@@ -11,6 +11,7 @@ env:
   CONTAINER_REG:  ghcr.io/pmem/pmemkv
   HOST_WORKDIR:   ${{ github.workspace }}
   WORKDIR:        utils/docker
+  IMG_VER:        latest
   COVERITY_SCAN_NOTIFICATION_EMAIL:  ${{ secrets.COVERITY_SCAN_NOTIFICATION_EMAIL }}
   COVERITY_SCAN_TOKEN:               ${{ secrets.COVERITY_SCAN_TOKEN }}
 

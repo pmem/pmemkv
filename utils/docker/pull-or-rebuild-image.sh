@@ -5,6 +5,9 @@
 #
 # pull-or-rebuild-image.sh - rebuilds the Docker image used in the
 #		current build (if necessary) or pulls it from the Container Registry.
+#		Docker image is tagged as described in ./images/build-image.sh,
+#		but IMG_VER defaults in this script to "latest" (just in case it's
+#		used locally without building any images).
 #
 # If Docker was rebuilt and all requirements are fulfilled (more details in
 # push_image function below) image will be pushed to the ${CONTAINER_REG}.
@@ -22,8 +25,8 @@
 set -e
 
 source $(dirname $0)/set-ci-vars.sh
-
-TAG="1.4-${OS}-${OS_VER}"
+IMG_VER=${IMG_VER:-latest}
+TAG="${OS}-${OS_VER}-${IMG_VER}"
 IMAGES_DIR_NAME=images
 BASE_DIR=utils/docker/${IMAGES_DIR_NAME}
 

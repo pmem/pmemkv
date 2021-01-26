@@ -5,6 +5,9 @@ This document contains all the steps required to make a new release of pmemkv.
 \#define $VERSION = current full version (e.g. 1.0.2); $VER = major+minor only version (e.g. 1.0)
 
 Make a release locally:
+- for major/minor release:
+  - change version of Docker images (IMG_VER) in gha.yml to $VER
+  - and change "$FORCE_IMAGE_ACTION" flag for pull-or-rebuild.sh to "rebuild" (in linux job)
 - add an entry to ChangeLog, remember to change the day of the week in the release date
   - for major/minor releases mention compatibility with the previous release
 - echo $VERSION > VERSION
@@ -15,6 +18,9 @@ Make a release locally:
 Undo temporary release changes:
 - git rm VERSION
 - git commit -m "Remove VERSION file"
+- for major/minor release:
+  - create stable-$VER branch now: git checkout -b stable-$VER
+  - and on **master** branch, change back gha.yml (set IMG_VER to "latest"; and swap "rebuild" to "$FORCE_IMAGE_ACTION" again)
 
 Publish changes:
 - for major/minor release:
@@ -30,7 +36,6 @@ Publish package and make it official:
 - announce the release on pmem group and on pmem slack channel(s)
 
 Later, for major/minor release:
-- bump version of Docker images (build.sh, build-image.sh, push-image.sh, pull-or-rebuild-image.sh) to $VER+1 on master branch
 - add new branch in valid-branches.sh and in "doc" job definition within .github/workflows/gha.yml, on stable-$VER branch
 - add new version in compatibility test in run-compatibility.sh, on stable-$VER branch
 - once gh-pages branch contains new documentation:
