@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2018-2020, Intel Corporation */
+/* Copyright 2018-2021, Intel Corporation */
 
 #ifndef PMEMKV_UNITTEST_HPP
 #define PMEMKV_UNITTEST_HPP
@@ -226,6 +226,30 @@ static inline int run_engine_tests(std::string engine, std::string json,
 static inline pmem::kv::string_view uint64_to_strv(uint64_t &key)
 {
 	return pmem::kv::string_view((char *)&key, sizeof(uint64_t));
+}
+
+static inline std::string align_to_size(size_t size, std::string str,
+					char char_to_fill = 'x')
+{
+	if (str.size() < size)
+		return str + std::string(size - str.size(), char_to_fill);
+	else
+		return str.substr(0, size);
+}
+
+static inline std::string entry_from_number(size_t number, std::string prefix = "",
+					    std::string postfix = "")
+{
+	std::string res = prefix + std::to_string(number) + postfix;
+
+	return res;
+}
+
+/* It returns an entry filled/shrank to a certain size. It's necessary during testing
+ * engines with fixed size keys/values */
+static inline std::string entry_from_string(std::string str)
+{
+	return str;
 }
 
 #endif /* PMEMKV_UNITTEST_HPP */
