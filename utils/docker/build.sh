@@ -21,10 +21,6 @@ source $(dirname $0)/set-ci-vars.sh
 IMG_VER=${IMG_VER:-devel}
 TAG="${OS}-${OS_VER}-${IMG_VER}"
 
-doc_variables_error="To build documentation and upload it as a Github pull request, \
-variables 'DOC_UPDATE_BOT_NAME', 'DOC_REPO_OWNER' and 'DOC_UPDATE_GITHUB_TOKEN' have to be provided. \
-For more details please read CONTRIBUTING.md"
-
 if [[ -z "$OS" || -z "$OS_VER" ]]; then
 	echo "ERROR: The variables OS and OS_VER have to be set " \
 		"(eg. OS=fedora, OS_VER=31)."
@@ -73,10 +69,6 @@ if [[ "$command" == "" ]]; then
 			command="./run-bindings.sh";
 			;;
 		doc)
-			if [[ -z "${DOC_UPDATE_BOT_NAME}" || -z "${DOC_UPDATE_GITHUB_TOKEN}" || -z "${DOC_REPO_OWNER}" ]]; then
-				echo "${doc_variables_error}"
-				exit 0
-			fi
 			command="./run-doc-update.sh";
 			;;
 		*)
