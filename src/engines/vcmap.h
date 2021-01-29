@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019, Intel Corporation
+ * Copyright 2017-2021, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -72,7 +72,8 @@ private:
 	typedef memkind_ns::allocator<char> ch_allocator_t;
 	typedef std::basic_string<char, std::char_traits<char>, ch_allocator_t>
 		pmem_string;
-	typedef memkind_ns::allocator<std::pair<pmem_string, pmem_string>> kv_allocator_t;
+	typedef memkind_ns::allocator<std::pair<const pmem_string, pmem_string>>
+		kv_allocator_t;
 	typedef tbb::concurrent_hash_map<pmem_string, pmem_string,
 					 tbb::tbb_hash_compare<pmem_string>,
 					 std::scoped_allocator_adaptor<kv_allocator_t>>
