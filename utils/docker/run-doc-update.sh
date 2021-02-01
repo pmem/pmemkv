@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2018-2020, Intel Corporation
+# Copyright 2018-2021, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -42,7 +42,7 @@ CURR_DIR=$(pwd)
 ORIGIN="https://${GITHUB_TOKEN}@github.com/${BOT_NAME}/${REPO_NAME}"
 UPSTREAM="https://github.com/${USER_NAME}/${REPO_NAME}"
 # master or stable-* branch
-TARGET_BRANCH=${TRAVIS_BRANCH}
+TARGET_BRANCH=${CI_BRANCH}
 VERSION=${TARGET_BRANCHES[$TARGET_BRANCH]}
 
 if [ -z $VERSION ]; then
