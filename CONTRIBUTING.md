@@ -38,6 +38,9 @@ make cppformat
 
 We take outside code contributions to `PMEMKV` through GitHub pull requests.
 
+If your add a new feature, implement new engine or fix critical bug please append
+appropriate entry to ChangeLog under newest release.
+
 **NOTE: If you do decide to implement code changes and contribute them,
 please make sure you agree your contribution can be made available under the
 [BSD-style License used for PMEMKV](LICENSE).**
