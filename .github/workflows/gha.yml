@@ -1,11 +1,3 @@
-#
-# The 'XXX_DISABLE_' suffix is used twice in this file to disable two actions:
-# 1) XXX_DISABLE_${CI_FILE_PUSH_IMAGE_TO_REPO} - disables pushing the rebuilt Docker image and
-# 2) XXX_DISABLE_AUTO_DOC_UPDATE - disables making pull requests with the update of documentation.
-# Those two actions are disabled, because they conflict with the same ones run on Travis.
-# Only one CI (Travis or GitHub Actions) can run them at the time, so they can be enabled here,
-# when we decide to switch from Travis to GitHub Actions. The 'XXX_DISABLE_' suffix should be removed then.
-#
 
 name: pmemkv
 on: [push, pull_request]
@@ -30,7 +22,7 @@ jobs:
                  "TYPE=normal OS=ubuntu OS_VER=20.10",
                  "TYPE=normal OS=ubuntu OS_VER=20.04 CHECK_CPP_STYLE=1",
                  "TYPE=normal OS=ubuntu OS_VER=20.04 COVERAGE=1",
-                 "TYPE=building OS=fedora OS_VER=32 COVERAGE=1 PUSH_IMAGE=1 XXX_DISABLE_AUTO_DOC_UPDATE=1",
+                 "TYPE=building OS=fedora OS_VER=32 COVERAGE=1 PUSH_IMAGE=1 AUTO_DOC_UPDATE=1",
                  "TYPE=building OS=ubuntu OS_VER=20.04 COVERAGE=1 PUSH_IMAGE=1",
                  "TYPE=bindings OS=ubuntu OS_VER=20.04_bindings PUSH_IMAGE=1",
                  "TYPE=compatibility OS=fedora OS_VER=32",
@@ -48,4 +40,4 @@ jobs:
          run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
 
        - name: Push the image
-         run: cd $WORKDIR && source ./set-vars.sh && ${{ matrix.CONFIG }} /bin/bash -c "if [[ -f XXX_DISABLE_${CI_FILE_PUSH_IMAGE_TO_REPO} ]]; then images/push-image.sh $OS-$OS_VER; fi"
+         run: cd $WORKDIR && source ./set-vars.sh && ${{ matrix.CONFIG }} /bin/bash -c "if [[ -f ${CI_FILE_PUSH_IMAGE_TO_REPO} ]]; then images/push-image.sh $OS-$OS_VER; fi"
