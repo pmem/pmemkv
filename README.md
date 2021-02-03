@@ -94,6 +94,6 @@ to measure pmemkv's performance is available here:
 https://github.com/pmem/pmemkv-bench (previously *pmemkv-tools*).
 
 ## Contact us
-For more information about **pmemkv**, contact Szymon Romik (szymon.romik@intel.com),
+For more information about **pmemkv**, contact Igor Chorążewicz (igor.chorazewicz@intel.com),
 Piotr Balcer (piotr.balcer@intel.com) or post on our **#pmem** Slack channel using
 [this invite link](https://join.slack.com/t/pmem-io/shared_invite/enQtNzU4MzQ2Mzk3MDQwLWQ1YThmODVmMGFkZWI0YTdhODg4ODVhODdhYjg3NmE4N2ViZGI5NTRmZTBiNDYyOGJjYTIyNmZjYzQxODcwNDg) or [Google group](https://groups.google.com/group/pmem).
