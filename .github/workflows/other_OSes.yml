@@ -9,13 +9,18 @@ env:
   REPO:           pmemkv
   GITHUB_REPO:    pmem/pmemkv
   CONTAINER_REG:  ghcr.io/pmem/pmemkv
-  HOST_WORKDIR:   $GITHUB_WORKSPACE
+  HOST_WORKDIR:   ${{ github.workspace }}
   WORKDIR:        utils/docker
+  IMG_VER:        latest
   TYPE:           debug
+  PUSH_IMAGE:     1
+  # use org's Private Access Token to log in to GitHub Container Registry
+  CONTAINER_REG_USER:   ${{ secrets.GH_CR_USER }}
+  CONTAINER_REG_PASS:   ${{ secrets.GH_CR_PAT }}
 
 jobs:
   linux:
-    name: pmemkv-other
+    name: Linux-other
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -25,19 +30,19 @@ jobs:
                  "OS=debian OS_VER=testing",
                  "OS=debian OS_VER=unstable",
                  "OS=fedora OS_VER=33",
-                 "OS=fedora OS_VER=rawhide",
+                 "OS=fedora OS_VER=rawhide PUSH_IMAGE=0",
                  "TYPE=building OS=fedora OS_VER=rawhide",
                  "OS=opensuse-leap OS_VER=latest",
                  "OS=opensuse-tumbleweed OS_VER=latest",
                  "OS=ubuntu OS_VER=18.04",
-                 "OS=ubuntu OS_VER=rolling",
+                 "OS=ubuntu OS_VER=rolling PUSH_IMAGE=0",
                  "TYPE=building OS=ubuntu OS_VER=rolling"]
     steps:
       - name: Clone the git repo
         uses: actions/checkout@v2
 
-      # other_OSes workflow rebuilds images every time
-      - name: Rebuild the image
+      # other_OSes workflow rebuilds images every time and push them to the container registry
+      - name: Rebuild and push the image
         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh rebuild
 
       - name: Run the build

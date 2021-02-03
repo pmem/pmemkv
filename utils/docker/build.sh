@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2017-2020, Intel Corporation
+# Copyright 2017-2021, Intel Corporation
 
 #
 # build.sh - runs a Docker container from a Docker image with environment
-#            prepared for running pmemkv build and tests.
-#
+#		prepared for running pmemkv builds and tests. It uses Docker image
+#		tagged as described in ./images/build-image.sh.
 #
 # Notes:
 # - run this script from its location or set the variable 'HOST_WORKDIR' to
@@ -18,11 +18,8 @@
 set -e
 
 source $(dirname $0)/set-ci-vars.sh
-source $(dirname $0)/set-vars.sh
-
-doc_variables_error="To build documentation and upload it as a Github pull request, \
-variables 'DOC_UPDATE_BOT_NAME', 'DOC_REPO_OWNER' and 'DOC_UPDATE_GITHUB_TOKEN' have to be provided. \
-For more details please read CONTRIBUTING.md"
+IMG_VER=${IMG_VER:-devel}
+TAG="${OS}-${OS_VER}-${IMG_VER}"
 
 if [[ -z "$OS" || -z "$OS_VER" ]]; then
 	echo "ERROR: The variables OS and OS_VER have to be set " \
@@ -36,7 +33,7 @@ if [[ -z "$HOST_WORKDIR" ]]; then
 	exit 1
 fi
 
-imageName=${CONTAINER_REG}:1.4-${OS}-${OS_VER}
+imageName=${CONTAINER_REG}:${TAG}
 containerName=pmemkv-${OS}-${OS_VER}
 
 if [[ "$command" == "" ]]; then
@@ -72,10 +69,6 @@ if [[ "$command" == "" ]]; then
 			command="./run-bindings.sh";
 			;;
 		doc)
-			if [[ -z "${DOC_UPDATE_BOT_NAME}" || -z "${DOC_UPDATE_GITHUB_TOKEN}" || -z "${DOC_REPO_OWNER}" ]]; then
-				echo "${doc_variables_error}"
-				exit 0
-			fi
 			command="./run-doc-update.sh";
 			;;
 		*)
@@ -137,6 +130,7 @@ docker run --privileged=true --name=$containerName -i $TTY \
 	--env COVERITY_SCAN_NOTIFICATION_EMAIL=$COVERITY_SCAN_NOTIFICATION_EMAIL \
 	--env TEST_PACKAGES=${TEST_PACKAGES:-ON} \
 	--env TESTS_LONG=${TESTS_LONG:-OFF} \
+	--env TEST_TIMEOUT=${TEST_TIMEOUT} \
 	--env BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON} \
 	--env CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-OFF} \
 	--env DEFAULT_TEST_DIR=/dev/shm \

@@ -6,6 +6,10 @@ env:
   REPO:           pmemkv
   GITHUB_REPO:    pmem/pmemkv
   CONTAINER_REG:  ghcr.io/pmem/pmemkv
+  HOST_WORKDIR:   ${{ github.workspace }}
+  WORKDIR:        utils/docker
+  TEST_TIMEOUT:   600
+  IMG_VER:        latest
 
 jobs:
   linux:
@@ -15,8 +19,7 @@ jobs:
       # use org's Private Access Token to log in to GitHub Container Registry
       CONTAINER_REG_USER:   ${{ secrets.GH_CR_USER }}
       CONTAINER_REG_PASS:   ${{ secrets.GH_CR_PAT }}
-      HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
-      WORKDIR:        utils/docker
+      FORCE_IMAGE_ACTION:   ${{ secrets.FORCE_IMAGE_ACTION }}
     strategy:
       matrix:
         CONFIG: ["TYPE=debug OS=fedora OS_VER=32",
@@ -34,39 +37,31 @@ jobs:
       - name: Clone the git repo
         uses: actions/checkout@v2
         with:
-          fetch-depth: 50
+          fetch-depth: 0
 
-      - name: Pull or rebuild the image
-        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh
+      # "pull" or "rebuild" can be passed to a secret FORCE_IMAGE_ACTION to override default action
+      - name: Pull the image or rebuild and push it
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh $FORCE_IMAGE_ACTION
 
       - name: Run the build
         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
 
-      - name: Push the image
-        run: cd $WORKDIR && source ./set-vars.sh && ${{ matrix.CONFIG }} /bin/bash -c "if [[ -f ${CI_FILE_PUSH_IMAGE_TO_REPO} ]]; then images/push-image.sh $OS-$OS_VER; fi"
   doc:
     name: build and publish docs
     runs-on: ubuntu-latest
     needs: linux
     env:
-      DOC_UPDATE_GITHUB_TOKEN: ${{ secrets.DOC_UPDATE_GITHUB_TOKEN }}
-      DOC_UPDATE_BOT_NAME: ${{ secrets.DOC_UPDATE_BOT_NAME }}
-      DOC_REPO_OWNER: ${{ secrets.DOC_REPO_OWNER }}
-      HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
-      WORKDIR:        utils/docker
+      DOC_UPDATE_GITHUB_TOKEN:  ${{ secrets.DOC_UPDATE_GITHUB_TOKEN }}
+      DOC_UPDATE_BOT_NAME:      ${{ secrets.DOC_UPDATE_BOT_NAME }}
+      DOC_REPO_OWNER:           ${{ secrets.DOC_REPO_OWNER }}
     if:
-      contains('refs/heads/master
-                refs/heads/stable-1.3
-                refs/heads/stable-1.2
-                refs/heads/stable-1.1
-                refs/heads/stable-1.0' , github.ref)
+      github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/stable-')
     strategy:
       matrix:
         CONFIG: ["TYPE=doc OS=fedora OS_VER=32"]
     steps:
       - name: Clone the git repo
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 50
+
       - name: Run the build
         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh

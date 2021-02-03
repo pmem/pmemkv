@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2016-2021, Intel Corporation
 
 #
-# push-image.sh - pushes the Docker image tagged with OS-VER to the ${CONTAINER_REG}.
+# push-image.sh - pushes the Docker image tagged as described in
+#		./build-image.sh, to the ${CONTAINER_REG}.
 #
 # The script utilizes ${CONTAINER_REG_USER} and ${CONTAINER_REG_PASS} variables to
 # log in to the ${CONTAINER_REG}. The variables can be set in the CI's configuration
@@ -11,6 +12,8 @@
 #
 
 set -e
+IMG_VER=${IMG_VER:-devel}
+TAG="${OS}-${OS_VER}-${IMG_VER}"
 
 if [[ -z "${OS}" ]]; then
 	echo "OS environment variable is not set"
@@ -32,8 +35,6 @@ if [[ -z "${CONTAINER_REG_USER}" || -z "${CONTAINER_REG_PASS}" ]]; then
 		"have to be set properly to allow login to the Container Registry."
 	exit 1
 fi
-
-TAG="1.4-${OS}-${OS_VER}"
 
 # Check if the image tagged with ${CONTAINER_REG}:${TAG} exists locally
 if [[ ! $(docker images -a | awk -v pattern="^${CONTAINER_REG}:${TAG}\$" \
