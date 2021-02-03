@@ -8,7 +8,7 @@
 
 # Pull base image
 FROM centos:8
-MAINTAINER szymon.romik@intel.com
+MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
 ENV OS centos

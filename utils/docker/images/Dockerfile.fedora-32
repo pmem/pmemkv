@@ -8,7 +8,7 @@
 
 # Pull base image
 FROM fedora:32
-MAINTAINER szymon.romik@intel.com
+MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
 ENV OS fedora
