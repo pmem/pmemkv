@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_HPP
 #define LIBPMEMKV_HPP
@@ -1065,9 +1065,13 @@ db::iterator<false>::write_range(size_t pos, size_t n) noexcept
 	auto s = static_cast<status>(
 		pmemkv_write_iterator_write_range(this->it_.get(), pos, n, &data, &size));
 
-	if (s == status::OK)
-		return {{data, data + size}};
-	else
+	if (s == status::OK) {
+		try {
+			return {{data, data + size}};
+		} catch (std::out_of_range &e) {
+			return {status::INVALID_ARGUMENT};
+		}
+	} else
 		return {s};
 }
 
