@@ -169,6 +169,7 @@ build_test_ext(NAME persistent_put_get_std_map_multiple_reopen SRC_FILES engine_
 build_test_ext(NAME pmreorder_insert SRC_FILES engine_scenarios/pmreorder/insert.cc LIBS json)
 build_test_ext(NAME pmreorder_erase SRC_FILES engine_scenarios/pmreorder/erase.cc LIBS json)
 build_test_ext(NAME pmreorder_iterator SRC_FILES engine_scenarios/pmreorder/iterator.cc LIBS json)
+build_test_ext(NAME pmreorder_recover SRC_FILES engine_scenarios/pmreorder/recover.cc LIBS json)
 
 # Tests for sorted engines
 build_test_ext(NAME sorted_iterate SRC_FILES engine_scenarios/sorted/iterate.cc LIBS json)
@@ -1243,6 +1244,11 @@ if(ENGINE_STREE)
 				BINARY pmreorder_iterator
 				TRACERS none
 				SCRIPT pmemobj_based/pmreorder/iterator.cmake)
+
+		add_engine_test(ENGINE stree
+				BINARY pmreorder_recover
+				TRACERS none
+				SCRIPT pmemobj_based/pmreorder/recover.cmake)
 	endif()
 
 	add_engine_test(ENGINE stree
@@ -1651,6 +1657,11 @@ if(ENGINE_RADIX)
 				BINARY pmreorder_iterator
 				TRACERS none
 				SCRIPT pmemobj_based/pmreorder/iterator.cmake)
+
+		add_engine_test(ENGINE radix
+				BINARY pmreorder_recover
+				TRACERS none
+				SCRIPT pmemobj_based/pmreorder/recover.cmake)
 	endif()
 endif(ENGINE_RADIX)
 ################################################################################
@@ -1768,5 +1779,12 @@ if (ENGINE_ROBINHOOD)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_oid.cmake
 			PARAMS 1000 8 8)
+
+	if(PMREORDER_SUPPORTED)
+		add_engine_test(ENGINE robinhood
+				BINARY pmreorder_recover
+				TRACERS none
+				SCRIPT pmemobj_based/pmreorder/recover.cmake)
+	endif()
 endif()
 ################################################################################
