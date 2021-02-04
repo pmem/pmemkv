@@ -213,17 +213,17 @@ status engine_base::defrag(double start_percent, double amount_percent)
 
 internal::transaction *engine_base::begin_tx()
 {
-	throw status::NOT_SUPPORTED;
+	throw internal::not_supported("Transactions are not supported");
 }
 
 engine_base::iterator *engine_base::new_iterator()
 {
-	throw status::NOT_SUPPORTED;
+	throw internal::not_supported("Iterators are not supported");
 }
 
 engine_base::iterator *engine_base::new_const_iterator()
 {
-	throw status::NOT_SUPPORTED;
+	throw internal::not_supported("Iterators are not supported");
 }
 
 } // namespace kv
