@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 /*
  * pmemkv_config.c -- example usage of the part of the pmemkv config API
- * to set and get data based on their data type.
+ *		to set and get data based on their data types.
  */
 
 #include <assert.h>

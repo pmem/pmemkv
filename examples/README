@@ -8,13 +8,35 @@ pmemkv_basic_c/pmemkv_basic.c -- contains basic example workflow
 pmemkv_basic_cpp/pmemkv_basic.cpp -- contains basic example workflow
 		of C++ application
 
-pmemkv_config_c/pmemkv_config.c -- contains example usage of
-		pmemkv config API. It requires to be built:
-		- 'rapidjson-devel' package to be installed in the OS and
-		- 'BUILD_JSON_CONFIG' CMake variable to be set to ON
+pmemkv_comparator_c/pmemkv_comparator.c -- example of pmemkv used with
+		custom comparator (C API)
 
-pmemkv_pmemobj_cpp/pmemkv_pmemobj_basic.cpp -- contains example usage
+pmemkv_comparator_c/pmemkv_comparator.cpp -- example of pmemkv used with
+		custom comparator (C++ API)
+
+pmemkv_config_c/
+	* pmemkv_basic_config.c -- example usage of the part of the pmemkv config API,
+		which should be preferred.
+
+	* pmemkv_config.c -- example usage of the part of the pmemkv config API
+		to set and get data based on their data types.
+		It requires to be built:
+		- 'rapidjson-devel' package to be installed in the OS and
+		- 'BUILD_JSON_CONFIG' pmemkv's CMake variable to be set to ON
+
+pmemkv_iterator_c/pmemkv_iterator.c -- example of pmemkv's iterator
+
+pmemkv_iterator_cpp/pmemkv_iterator.cpp -- example of pmemkv's iterators.
+		It shows how to use it in single-threaded and concurrent approach.
+		It requires to be built:
+		- pthread available in the OS
+
+pmemkv_open_cpp/pmemkv_open_cpp -- contains example of pmemkv usage
+		for already existing pools (and poolsets)
+
+pmemkv_pmemobj_cpp/pmemkv_pmemobj_basic.cpp -- contains example
 		of pmemkv supporting multiple engines
 
-pmemkv_open_cpp/pmemkv_open_cpp -- contains example usage
-		of pmemkv for already existing pools (and poolsets)
+pmemkv_transaction_c/pmemkv_transaction.c -- example with pmemkv transactions (C API)
+
+pmemkv_transaction_cpp/pmemkv_transaction.cpp -- example with pmemkv transactions (C++ API)

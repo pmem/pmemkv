@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 /*
  * pmemkv_open.cpp -- example usage of pmemkv with already existing pools.
@@ -20,10 +20,11 @@
 
 using namespace pmem::kv;
 
-/**
- * This example expects a path to already created pool.
+//! [open]
+/*
+ * This example expects a path to already created database pool.
  *
- * To create a pool use one of the following commands.
+ * If you want to create pool, use one of the following commands.
  *
  * For regular pools use:
  * pmempool create -l -s 1G "pmemkv" obj path_to_a_pool
@@ -85,3 +86,4 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+//! [open]
