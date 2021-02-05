@@ -211,6 +211,7 @@ build_test_ext(NAME transaction_not_supported SRC_FILES engine_scenarios/transac
 # Tests for iterator
 build_test_ext(NAME iterator_basic SRC_FILES engine_scenarios/all/iterator_basic.cc LIBS json)
 build_test_ext(NAME iterator_sorted SRC_FILES engine_scenarios/sorted/iterator_sorted.cc LIBS json)
+build_test_ext(NAME iterator_not_supported SRC_FILES engine_scenarios/all/iterator_not_supported.cc LIBS json)
 
 ###################################### CMAP ####################################
 if(ENGINE_CMAP)
@@ -1184,6 +1185,11 @@ if(ENGINE_TREE3)
 	add_engine_test(ENGINE tree3
 			BINARY transaction_not_supported
 			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE tree3
+			BINARY iterator_not_supported
+			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_TREE3)
 ################################################################################
