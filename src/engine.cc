@@ -218,12 +218,12 @@ internal::transaction *engine_base::begin_tx()
 
 engine_base::iterator *engine_base::new_iterator()
 {
-	throw status::NOT_SUPPORTED;
+	throw internal::not_supported("Iterators are not supported in this engine");
 }
 
 engine_base::iterator *engine_base::new_const_iterator()
 {
-	throw status::NOT_SUPPORTED;
+	throw internal::not_supported("Iterators are not supported in this engine");
 }
 
 } // namespace kv
