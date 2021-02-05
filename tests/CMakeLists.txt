@@ -130,9 +130,6 @@ add_test_generic(NAME config_c TRACERS none memcheck)
 build_test(config_cpp config/config_cpp.cc)
 add_test_generic(NAME config_cpp TRACERS none memcheck)
 
-build_test(blackhole_test engines/blackhole/blackhole_test.cc)
-add_test_generic(NAME blackhole_test TRACERS none memcheck)
-
 build_test_ext(NAME json_to_config SRC_FILES config/json_to_config.cc LIBS json)
 add_test_generic(NAME json_to_config TRACERS none memcheck)
 
@@ -213,7 +210,16 @@ build_test_ext(NAME iterator_basic SRC_FILES engine_scenarios/all/iterator_basic
 build_test_ext(NAME iterator_sorted SRC_FILES engine_scenarios/sorted/iterator_sorted.cc LIBS json)
 build_test_ext(NAME iterator_not_supported SRC_FILES engine_scenarios/all/iterator_not_supported.cc LIBS json)
 
-###################################### CMAP ####################################
+###################################### BLACKHOLE ##############################
+build_test(blackhole_test engines/blackhole/blackhole_test.cc)
+add_test_generic(NAME blackhole_test TRACERS none memcheck)
+#
+add_engine_test(ENGINE blackhole
+		BINARY transaction_not_supported
+		TRACERS none memcheck
+		SCRIPT blackhole/default.cmake)
+################################################################################
+##################################### CMAP ####################################
 if(ENGINE_CMAP)
 	add_engine_test(ENGINE cmap
 			BINARY c_api_null_db_config
