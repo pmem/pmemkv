@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include <memory>
 
@@ -657,8 +657,8 @@ int pmemkv_iterator_new(pmemkv_db *db, pmemkv_iterator **it)
 	try {
 		*it = iterator_from_internal(db_to_internal(db)->new_const_iterator());
 		return PMEMKV_STATUS_OK;
-	} catch (const pmem::kv::status &s) {
-		return static_cast<int>(s);
+	} catch (const pmem::kv::internal::error &e) {
+		return e.status_code;
 	} catch (...) {
 		return PMEMKV_STATUS_UNKNOWN_ERROR;
 	}
@@ -675,9 +675,9 @@ int pmemkv_write_iterator_new(pmemkv_db *db, pmemkv_write_iterator **it)
 		*it = new pmemkv_write_iterator();
 		(*it)->iter = iterator_from_internal(db_to_internal(db)->new_iterator());
 		return PMEMKV_STATUS_OK;
-	} catch (const pmem::kv::status &s) {
+	} catch (const pmem::kv::internal::error &e) {
 		delete *it;
-		return static_cast<int>(s);
+		return e.status_code;
 	} catch (...) {
 		delete *it;
 		return PMEMKV_STATUS_UNKNOWN_ERROR;
