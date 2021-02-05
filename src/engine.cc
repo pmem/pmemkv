@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "engine.h"
 
@@ -213,7 +213,7 @@ status engine_base::defrag(double start_percent, double amount_percent)
 
 internal::transaction *engine_base::begin_tx()
 {
-	throw status::NOT_SUPPORTED;
+	throw internal::not_supported("Transactions are not supported in this engine");
 }
 
 engine_base::iterator *engine_base::new_iterator()
