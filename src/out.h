@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_OUT_H
 #define LIBPMEMKV_OUT_H
@@ -18,5 +18,6 @@ std::ostream &out_err_stream(const char *func);
 #define ERR() out_err_stream(__func__)
 
 const char *out_get_errormsg(void);
+void set_last_status(int status);
 
 #endif /* LIBPMEMKV_OUT_H */
