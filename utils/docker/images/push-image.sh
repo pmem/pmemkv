@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2016-2021, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -68,5 +68,5 @@ fi
 # Log in to the Docker Hub
 docker login -u="$DOCKERHUB_USER" -p="$DOCKERHUB_PASSWORD"
 
-# Push the image to the repository
+echo "Push the image to the repository"
 docker push ${DOCKERHUB_REPO}:${TAG}
