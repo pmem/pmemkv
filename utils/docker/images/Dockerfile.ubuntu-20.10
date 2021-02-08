@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2016-2021, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
@@ -8,12 +8,12 @@
 #
 
 # Pull base image
-FROM ubuntu:19.10
+FROM ubuntu:20.10
 MAINTAINER szymon.romik@intel.com
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER 19.10
+ENV OS_VER 20.10
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
 
@@ -25,6 +25,9 @@ ARG SKIP_LIBPMEMOBJCPP_BUILD
 ENV COVERITY_DEPS "\
 	ruby \
 	wget"
+
+ARG PMEMKV_DEPS="\
+	rapidjson-dev"
 
 # Update the Apt cache and install basic tools
 RUN apt-get update
@@ -57,11 +60,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	numactl \
 	pandoc \
 	pkg-config \
-	rapidjson-dev \
 	sudo \
 	wget \
 	whois \
 	$COVERITY_DEPS \
+	$PMEMKV_DEPS \
  && rm -rf /var/lib/apt/lists/*
 
 # Install valgrind

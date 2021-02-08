@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "vcmap.h"
 #include "../out.h"
@@ -103,15 +103,13 @@ status vcmap::put(string_view key, string_view value)
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 
-	map_t::value_type kv_pair{// XXX - do not create temporary string
-				  pmem_string(key.data(), key.size(), ch_allocator),
-				  pmem_string(value.data(), value.size(), ch_allocator)};
-	bool result = pmem_kv_container.insert(kv_pair);
-	if (!result) {
-		map_t::accessor result_found;
-		pmem_kv_container.find(result_found, kv_pair.first);
-		result_found->second = kv_pair.second;
-	}
+	// XXX - do not create temporary string
+	pmem_string k(key.data(), key.size(), ch_allocator);
+
+	map_t::accessor acc;
+	pmem_kv_container.insert(acc, k);
+	acc->second.assign(value.data(), value.size());
+
 	return status::OK;
 }
 
