@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2016-2021, Intel Corporation
 
 #
 # push-image.sh - pushes the Docker image tagged with OS-VER to the Docker Hub.
@@ -40,5 +40,5 @@ fi
 # Log in to the Docker Hub
 docker login -u="${DOCKERHUB_USER}" -p="${DOCKERHUB_PASSWORD}"
 
-# Push the image to the repository
+echo "Push the image to the repository"
 docker push ${DOCKERHUB_REPO}:${TAG}

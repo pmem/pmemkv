@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2016-2021, Intel Corporation
 
 #
 # pull-or-rebuild-image.sh - rebuilds the Docker image used in the
@@ -53,6 +53,18 @@ if [[ "$1" == "rebuild" ]]; then
 	pushd $images_dir_name
 	./build-image.sh ${OS}-${OS_VER}
 	popd
+
+	if [[ "$CI_REPO_SLUG" == "$GITHUB_REPO" \
+		&& ($CI_BRANCH == stable-* || $CI_BRANCH == master) \
+		&& $CI_EVENT_TYPE != "pull_request" \
+		&& $PUSH_IMAGE == "1" ]]
+	then
+		echo "The image will be pushed to Docker Hub"
+		touch $CI_FILE_PUSH_IMAGE_TO_REPO
+	else
+		echo "Skip pushing the image to Docker Hub"
+	fi
+
 	exit 0
 fi
 
