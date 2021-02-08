@@ -1,4 +1,15 @@
-Fri May 29 2019 Szymon Romik <szymon.romik@intel.com>
+Tue Oct 06 2020 Szymon Romik <szymon.romik@intel.com>
+
+	* Version 1.0.3
+
+	This is the last bugfix release for pmemkv 1.0 version.
+	Maintance of this version is no longer supported.
+
+	Notable changes:
+	- VSmap::put method refactor (to use emplace)
+	- add errormsg() to db class
+
+Fri May 29 2020 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.2
 
