@@ -79,7 +79,9 @@ template <typename Function>
 static inline int catch_and_return_status(const char *func_name, Function &&f)
 {
 	try {
-		return static_cast<int>(f());
+		pmem::kv::status s = static_cast<pmem::kv::status>(f());
+		set_last_status(s);
+		return static_cast<int>(s);
 	} catch (pmem::kv::internal::error &e) {
 		out_err_stream(func_name) << e.what();
 		return e.status_code;

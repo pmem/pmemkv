@@ -4,6 +4,7 @@
 #ifndef LIBPMEMKV_OUT_H
 #define LIBPMEMKV_OUT_H
 
+#include "libpmemkv.hpp"
 #include <ostream>
 
 std::ostream &out_err_stream(const char *func);
@@ -18,5 +19,6 @@ std::ostream &out_err_stream(const char *func);
 #define ERR() out_err_stream(__func__)
 
 const char *out_get_errormsg(void);
+void set_last_status(pmem::kv::status s);
 
 #endif /* LIBPMEMKV_OUT_H */

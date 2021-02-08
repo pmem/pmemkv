@@ -2,12 +2,14 @@
 /* Copyright 2019, Intel Corporation */
 
 #include "out.h"
+#include "libpmemkv.hpp"
 
 #include <sstream>
 #include <string>
 
 static thread_local std::stringstream error_stream;
 static thread_local std::string str;
+static thread_local pmem::kv::status last_status;
 
 std::ostream &out_err_stream(const char *func)
 {
@@ -18,8 +20,16 @@ std::ostream &out_err_stream(const char *func)
 	return error_stream;
 }
 
+void set_last_status(pmem::kv::status s)
+{
+	last_status = s;
+}
+
 const char *out_get_errormsg(void)
 {
+	if (last_status == pmem::kv::status::NOT_FOUND ||
+	    last_status == pmem::kv::status::STOPPED_BY_CB)
+		return "";
 	str = error_stream.str();
 	return str.c_str();
 }
