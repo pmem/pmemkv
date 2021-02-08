@@ -1,11 +1,3 @@
-#
-# The 'XXX_DISABLE_' suffix is used twice in this file to disable two actions:
-# 1) XXX_DISABLE_${CI_FILE_PUSH_IMAGE_TO_REPO} - disables pushing the rebuilt Docker image and
-# 2) XXX_DISABLE_AUTO_DOC_UPDATE - disables making pull requests with the update of documentation.
-# Those two actions are disabled, because they conflict with the same ones run on Travis.
-# Only one CI (Travis or GitHub Actions) can run them at the time, so they can be enabled here,
-# when we decide to switch from Travis to GitHub Actions. The 'XXX_DISABLE_' suffix should be removed then.
-#
 
 name: pmemkv
 on: [push, pull_request]
@@ -22,17 +14,18 @@ jobs:
     env:
       DOCKERHUB_USER:          ${{ secrets.DOCKERHUB_USER }}
       DOCKERHUB_PASSWORD:      ${{ secrets.DOCKERHUB_PASSWORD }}
+      GITHUB_TOKEN:   ${{ secrets.DOC_UPDATE_GITHUB_TOKEN }}
       HOST_WORKDIR:   /home/runner/work/pmemkv/pmemkv
       WORKDIR:        utils/docker
     strategy:
       matrix:
         CONFIG: ["TYPE=normal OS=fedora OS_VER=32",
-                 "TYPE=normal OS=ubuntu OS_VER=19.10 PUSH_IMAGE=1",
+                 "TYPE=normal OS=ubuntu OS_VER=20.10 PUSH_IMAGE=1",
                  "TYPE=normal OS=ubuntu OS_VER=20.04 CHECK_CPP_STYLE=1",
                  "TYPE=normal OS=ubuntu OS_VER=20.04 COVERAGE=1",
                  "TYPE=valgrind OS=ubuntu OS_VER=20.04",
                  "TYPE=memcheck_drd OS=ubuntu OS_VER=20.04",
-                 "TYPE=building OS=fedora OS_VER=32 COVERAGE=1 PUSH_IMAGE=1 XXX_DISABLE_AUTO_DOC_UPDATE=1",
+                 "TYPE=building OS=fedora OS_VER=32 COVERAGE=1 PUSH_IMAGE=1 AUTO_DOC_UPDATE=1",
                  "TYPE=building OS=ubuntu OS_VER=20.04 COVERAGE=1 PUSH_IMAGE=1",
                  "TYPE=bindings OS=ubuntu OS_VER=20.04_bindings PUSH_IMAGE=1",
                  "TYPE=compatibility OS=fedora OS_VER=32",
@@ -44,10 +37,10 @@ jobs:
             fetch-depth: 50
 
        - name: Pull or rebuild the image
-         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh
+         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh rebuild
 
        - name: Run the build
          run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
 
        - name: Push the image
-         run: cd $WORKDIR && source ./set-vars.sh && ${{ matrix.CONFIG }} /bin/bash -c "if [[ -f XXX_DISABLE_${CI_FILE_PUSH_IMAGE_TO_REPO} ]]; then images/push-image.sh $OS-$OS_VER; fi"
+         run: cd $WORKDIR && source ./set-vars.sh && ${{ matrix.CONFIG }} /bin/bash -c "if [[ -f ${CI_FILE_PUSH_IMAGE_TO_REPO} ]]; then images/push-image.sh $OS-$OS_VER; fi"
