@@ -79,25 +79,38 @@ template <typename Function>
 static inline int catch_and_return_status(const char *func_name, Function &&f)
 {
 	try {
-		return static_cast<int>(f());
+		pmem::kv::status s = static_cast<pmem::kv::status>(f());
+		set_last_status(s);
+		return static_cast<int>(s);
 	} catch (pmem::kv::internal::error &e) {
 		out_err_stream(func_name) << e.what();
+		set_last_status(static_cast<pmem::kv::status>(e.status_code));
 		return e.status_code;
 	} catch (std::bad_alloc &e) {
 		out_err_stream(func_name) << e.what();
-		return PMEMKV_STATUS_OUT_OF_MEMORY;
+		auto s = pmem::kv::status::OUT_OF_MEMORY;
+		set_last_status(s);
+		return static_cast<int>(s);
 	} catch (std::runtime_error &e) {
 		out_err_stream(func_name) << e.what();
-		return PMEMKV_STATUS_UNKNOWN_ERROR;
+		auto s = pmem::kv::status::UNKNOWN_ERROR;
+		set_last_status(s);
+		return static_cast<int>(s);
 	} catch (pmem::transaction_scope_error &e) {
 		out_err_stream(func_name) << e.what();
-		return PMEMKV_STATUS_TRANSACTION_SCOPE_ERROR;
+		auto s = pmem::kv::status::TRANSACTION_SCOPE_ERROR;
+		set_last_status(s);
+		return static_cast<int>(s);
 	} catch (std::exception &e) {
 		out_err_stream(func_name) << e.what();
-		return PMEMKV_STATUS_UNKNOWN_ERROR;
+		auto s = pmem::kv::status::UNKNOWN_ERROR;
+		set_last_status(s);
+		return static_cast<int>(s);
 	} catch (...) {
 		out_err_stream(func_name) << "Unspecified error";
-		return PMEMKV_STATUS_UNKNOWN_ERROR;
+		auto s = pmem::kv::status::UNKNOWN_ERROR;
+		set_last_status(s);
+		return static_cast<int>(s);
 	}
 }
 
