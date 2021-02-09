@@ -130,9 +130,6 @@ add_test_generic(NAME config_c TRACERS none memcheck)
 build_test(config_cpp config/config_cpp.cc)
 add_test_generic(NAME config_cpp TRACERS none memcheck)
 
-build_test(blackhole_test engines/blackhole/blackhole_test.cc)
-add_test_generic(NAME blackhole_test TRACERS none memcheck)
-
 build_test_ext(NAME json_to_config SRC_FILES config/json_to_config.cc LIBS json)
 add_test_generic(NAME json_to_config TRACERS none memcheck)
 
@@ -206,12 +203,23 @@ build_test_ext(NAME comparator_default_reopen_cpp SRC_FILES comparator/default_r
 build_test_ext(NAME transaction_put SRC_FILES engine_scenarios/transaction/put.cc LIBS json)
 build_test_ext(NAME transaction_remove SRC_FILES engine_scenarios/transaction/remove.cc LIBS json)
 build_test_ext(NAME transaction_put_pmreorder SRC_FILES engine_scenarios/transaction/put_pmreorder.cc LIBS json)
+build_test_ext(NAME transaction_not_supported SRC_FILES engine_scenarios/transaction/not_supported.cc LIBS json)
 
 # Tests for iterator
 build_test_ext(NAME iterator_basic SRC_FILES engine_scenarios/all/iterator_basic.cc LIBS json)
 build_test_ext(NAME iterator_sorted SRC_FILES engine_scenarios/sorted/iterator_sorted.cc LIBS json)
+build_test_ext(NAME iterator_not_supported SRC_FILES engine_scenarios/all/iterator_not_supported.cc LIBS json)
 
-###################################### CMAP ####################################
+###################################### BLACKHOLE ##############################
+build_test(blackhole_test engines/blackhole/blackhole_test.cc)
+add_test_generic(NAME blackhole_test TRACERS none memcheck)
+#
+add_engine_test(ENGINE blackhole
+		BINARY transaction_not_supported
+		TRACERS none memcheck
+		SCRIPT blackhole/default.cmake)
+################################################################################
+##################################### CMAP ####################################
 if(ENGINE_CMAP)
 	add_engine_test(ENGINE cmap
 			BINARY c_api_null_db_config
@@ -412,6 +420,11 @@ if(ENGINE_CMAP)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8)
+
+	add_engine_test(ENGINE cmap
+			BINARY transaction_not_supported
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
 
 	if(TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE cmap
@@ -743,6 +756,11 @@ if(ENGINE_CSMAP)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8 true)
+
+	add_engine_test(ENGINE csmap
+			BINARY transaction_not_supported
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_CSMAP)
 ################################################################################
 ###################################### VCMAP ###################################
@@ -837,6 +855,11 @@ if(ENGINE_VCMAP)
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake
 			PARAMS 8)
+
+	add_engine_test(ENGINE vcmap
+			BINARY transaction_not_supported
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
 endif(ENGINE_VCMAP)
 ################################################################################
 ###################################### VSMAP ###################################
@@ -955,6 +978,11 @@ if(ENGINE_VSMAP)
 
 	add_engine_test(ENGINE vsmap
 			BINARY iterator_sorted
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vsmap
+			BINARY transaction_not_supported
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake)
 endif(ENGINE_VSMAP)
@@ -1159,6 +1187,16 @@ if(ENGINE_TREE3)
 	# TRACERS none memcheck pmemcheck
 	# SCRIPT pmemobj_based/default.cmake
 	# PARAMS 32 8)
+
+	add_engine_test(ENGINE tree3
+			BINARY transaction_not_supported
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE tree3
+			BINARY iterator_not_supported
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_TREE3)
 ################################################################################
 ###################################### STREE ###################################
@@ -1413,6 +1451,11 @@ if(ENGINE_STREE)
 			BINARY iterator_sorted
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE stree
+		BINARY transaction_not_supported
+		TRACERS none memcheck pmemcheck
+		SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_STREE)
 ################################################################################
 ###################################### RADIX ###################################
