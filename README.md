@@ -80,6 +80,7 @@ all language bindings and utilities. Engines are loaded by name at runtime.
 | [radix](doc/ENGINES-experimental.md#radix) | [Radix tree](https://pmem.io/libpmemobj-cpp/master/doxygen/classpmem_1_1obj_1_1experimental_1_1radix__tree.html) | Yes | No | Yes |
 | [tree3](doc/ENGINES-experimental.md#tree3) | Persistent B+ tree | Yes | No | No |
 | [stree](doc/ENGINES-experimental.md#stree) | Sorted persistent B+ tree | Yes | No | Yes |
+| [robinhood](doc/ENGINES-experimental.md#robinhood) | Persistent hash map with Robin Hood hashing | Yes | Yes | No |
 
 The production quality engines are described in the [libpmemkv(7)](doc/libpmemkv.7.md#engines) manual
 and the experimental ones are described in the [ENGINES-experimental.md](doc/ENGINES-experimental.md) file.

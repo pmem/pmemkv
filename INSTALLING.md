@@ -20,7 +20,7 @@ Installation of Key-Value Datastore for Persistent Memory
 ### Prerequisites
 
 * **Linux 64-bit** (OSX and Windows are not yet supported)
-* **libpmem** and **libpmemobj**, which are part of [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.8
+* **libpmem** and **libpmemobj**, which are part of [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.9.1
 * [**libpmemobj-cpp**](https://github.com/pmem/libpmemobj-cpp) - C++ PMDK bindings 1.11
 * [**memkind**](https://github.com/memkind/memkind) - Volatile memory manager 1.8.0 (required by vsmap & vcmap engines)
 * [**TBB**](https://github.com/01org/tbb) - Thread Building Blocks (required by vcmap engine)

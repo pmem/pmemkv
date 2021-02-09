@@ -36,6 +36,7 @@ option(ENGINE_CSMAP "enable experimental csmap engine (requires CXX_STANDARD to 
 option(ENGINE_STREE "enable experimental stree engine" ON)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 option(ENGINE_RADIX "enable experimental radix engine" OFF)
+option(ENGINE_ROBINHOOD "enable experimental robinhood engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
 
 # ----------------------------------------------------------------- #
 ## Set required and useful variables
@@ -71,7 +72,7 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PMEMKV_ROOT_DIR}/cmake)
 set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.11)
-set(LIBPMEMOBJ_REQUIRED_VERSION 1.8)
+set(LIBPMEMOBJ_REQUIRED_VERSION 1.9.1)
 set(LIBPMEM_REQUIRED_VERSION 1.7)
 set(MEMKIND_REQUIRED_VERSION 1.8.0)
 
@@ -141,6 +142,14 @@ if(ENGINE_RADIX)
 		src/engines-experimental/radix.cc
 	)
 endif()
+if(ENGINE_ROBINHOOD)
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/robinhood.h
+		src/engines-experimental/robinhood.cc
+		src/fast_hash.h
+		src/fast_hash.cc
+	)
+endif()
 
 # ----------------------------------------------------------------- #
 ## Setup defines and check status of each engine
@@ -190,6 +199,16 @@ if(ENGINE_RADIX)
 	message(STATUS "RADIX engine is ON")
 else()
 	message(STATUS "RADIX engine is OFF")
+endif()
+if(ENGINE_ROBINHOOD)
+	add_definitions(-DENGINE_ROBINHOOD)
+	message(STATUS "ROBINHOOD engine is ON")
+
+	if(CXX_STANDARD LESS 14)
+		message(FATAL_ERROR "CXX_STANDARD must be >= 14 if ENGINE_ROBINHOOD is ON")
+	endif()
+else()
+	message(STATUS "ROBINHOOD engine is OFF")
 endif()
 
 # ----------------------------------------------------------------- #

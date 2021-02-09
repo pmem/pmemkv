@@ -4,6 +4,7 @@
 - [csmap](#csmap)
 - [radix](#radix)
 - [stree](#stree)
+- [robinhood](#robinhood)
 
 # tree3
 
@@ -72,7 +73,7 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_RADIX` o
 
 ### Configuration
 
-* **path** -- Path to the database file (layout "pmemkv_csmap")
+* **path** -- Path to the database file (layout "pmemkv_radix")
 	+ type: string
 * **force_create** -- If 0, pmemkv opens the file specified by 'path', otherwise it creates the file
 	+ type: uint64_t
@@ -102,6 +103,31 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_STREE` o
 ### Internals
 
 (TBD)
+
+### Prerequisites
+
+No additional packages are required.
+
+# robinhood
+
+A persistent and concurrent engine, backed by a hash table with Robin Hood hashing
+(some [info](https://www.sebastiansylvan.com/post/robin-hood-hashing-should-be-your-default-hash-table-implementation/) about the algorithm).
+It uses only fixed size keys and values (8 bytes).
+It is disabled by default. It can be enabled in CMake using the `ENGINE_ROBINHOOD` option.
+
+There are two parameters to be optionally modified by env variables:
+* **PMEMKV_ROBINHOOD_LOAD_FACTOR** -- load factor to indicate resize threshold
+* **PMEMKV_ROBINHOOD_SHARDS_NUMBER** -- number of shards within the engine
+
+### Configuration
+
+* **path** -- Path to the database file (layout "pmemkv_robinhood")
+	+ type: string
+* **force_create** -- If 0, pmemkv opens the file specified by 'path', otherwise it creates the file
+	+ type: uint64_t
+	+ default value: 0
+* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+	+ type: uint64_t
 
 ### Prerequisites
 

@@ -1,5 +1,5 @@
 SPDX-License-Identifier: BSD-3-Clause
-Copyright 2017-2019, Intel Corporation
+Copyright 2017-2021, Intel Corporation
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -36,3 +36,6 @@ with the following exceptions:
 * src/valgrind/valgrind.h, src/valgrind/memcheck.h,
   src/valgrind/helgrind.h, src/valgrind/drd.h are covered by
   another similar BSD license variant, contained in those files.
+
+* src/fast_hash.h and src/fast_hash.cc are covered by MIT license,
+  contained in those files.
