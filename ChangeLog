@@ -1,3 +1,26 @@
+XXX 2021 Igor Chorążewicz <igor.chorazewicz@intel.com>
+
+	* Version 1.4-rc1
+
+	Features:
+	- new experimental engine - robinhood (concurrent, unsorted,
+		persistent map)
+	- experimental iterators API which allows to directly modify values
+		(or parts of values)
+	- experimental transaction API which allows grouping `put` and `remove`
+		operations into a single atomic action
+
+	Other changes:
+	- optimized put() in radix engine
+
+	Major fixes:
+	- calling pmemkv_errormsg() now returns empty message for NOT_FOUND and
+		STOPPED_BY_CB (instead of a possible previous, unrelated error)
+	- fix vcmap OOM error on put (github issue #798)
+
+	Known issues:
+	- vcmap (github issue #894)
+
 Tue Oct 06 2020 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.0.3
