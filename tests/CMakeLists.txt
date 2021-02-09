@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2021, Intel Corporation
 
 include(ctest_helpers.cmake)
 
@@ -69,6 +69,9 @@ endif()
 ## Common tests
 build_test(wrong_engine_name_test wrong_engine_name_test.cc)
 add_test_generic(NAME wrong_engine_name_test TRACERS none)
+
+build_test(error_msg_test error_msg_test.cc)
+add_test_generic(NAME error_msg_test TRACERS none)
 
 if(BUILD_EXAMPLES AND ENGINE_CMAP)
 	add_dependencies(tests example-pmemkv_basic_c
