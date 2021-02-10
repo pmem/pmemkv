@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['string_5fview_257',['string_view',['../namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b',1,'pmem::kv']]]
+  ['value_5ftype_256',['value_type',['../classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#ae58703064a87cedc593c7cafdfea3c06',1,'pmem::kv::db::iterator::OutputIterator']]]
 ];

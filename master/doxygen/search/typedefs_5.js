@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['read_5fiterator_255',['read_iterator',['../classpmem_1_1kv_1_1db.html#a505157900fa3cb36b8959bf24ca1b956',1,'pmem::kv::db']]],
-  ['reference_256',['reference',['../classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#af8c3d9841def32320d2f89c8934bccc7',1,'pmem::kv::db::iterator::OutputIterator']]]
+  ['string_5fview_255',['string_view',['../namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b',1,'pmem::kv']]]
 ];
