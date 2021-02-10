@@ -8,7 +8,7 @@ secondary_title: pmemkv
 ...
 
 [comment]: <> (SPDX-License-Identifier: BSD-3-Clause)
-[comment]: <> (Copyright 2020, Intel Corporation)
+[comment]: <> (Copyright 2020-2021, Intel Corporation)
 
 [comment]: <> (libpmemkv_tx.3 -- man page for libpmemkv transactions API)
 
@@ -81,9 +81,7 @@ Each function, except for *pmemkv_tx_abort()* and *pmemkv_tx_end()* returns stat
 
 # EXAMPLE #
 
-The following examples are taken from `examples/pmemkv_transaction_c` directory.
-
-## C EXAMPLE ##
+The following example is taken from `examples/pmemkv_transaction_c` directory.
 
 Usage of pmemkv transaction in C:
 
@@ -103,8 +101,8 @@ Usage of pmemkv transaction in C:
 
 #define LOG(msg) puts(msg)
 
-/**
- * This example expects a path to already created pool.
+/*
+ * This example expects a path to already created database pool.
  *
  * To create a pool use one of the following commands.
  *

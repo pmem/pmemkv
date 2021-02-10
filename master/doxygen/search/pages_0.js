@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['pmemkv_274',['pmemkv',['../index.html',1,'']]]
+  ['pmemkv_272',['pmemkv',['../index.html',1,'']]]
 ];

@@ -8,7 +8,7 @@ secondary_title: pmemkv
 ...
 
 [comment]: <> (SPDX-License-Identifier: BSD-3-Clause)
-[comment]: <> (Copyright 2020, Intel Corporation)
+[comment]: <> (Copyright 2020-2021, Intel Corporation)
 
 [comment]: <> (libpmemkv_iterator.3 -- man page for libpmemkv iterators API)
 
@@ -197,8 +197,6 @@ returns one of the pmemkv status codes. To check possible options see **libpmemk
 # EXAMPLE #
 
 The following example is taken from `examples/pmemkv_iterator_c` directory.
-
-## BASIC EXAMPLE ##
 
 Usage of basic iterator functions to iterate over all records and modify one of them.
 

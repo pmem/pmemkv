@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.3-git109.g672aeb5</span>
+   &#160;<span id="projectnumber">1.4-rc1.git1.ge273b6a</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -273,7 +273,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -319,7 +319,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -367,7 +367,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -413,7 +413,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -459,7 +459,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -523,7 +523,7 @@ template&lt;typename Comparator &gt; </div>
 <li>implement <code>int compare(pmem::kv::string_view, pmem::kv::string_view)</code></li>
 <li>implement <code>std::string name()</code></li>
 <li>be copy or move constructible</li>
-<li>be thread safe</li>
+<li>be thread-safe</li>
 </ul>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -531,8 +531,8 @@ template&lt;typename Comparator &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a></dd></dl>
-<p>Example of custom comparator: </p><div class="fragment"><div class="line"><span class="keyword">class </span>lexicographical_comparator {</div>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a></dd></dl>
+<p><b>Example</b> implementation of custom comparator: </p><div class="fragment"><div class="line"><span class="keyword">class </span>lexicographical_comparator {</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    <span class="keywordtype">int</span> compare(<a class="code" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> k1, <a class="code" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> k2)</div>
 <div class="line">    {</div>
@@ -550,6 +550,36 @@ template&lt;typename Comparator &gt; </div>
 <div class="line">        <span class="keywordflow">return</span> <span class="stringliteral">&quot;lexicographical_comparator&quot;</span>;</div>
 <div class="line">    }</div>
 <div class="line">};</div>
+</div><!-- fragment --><p> And <b>example</b> usage (set in config and use while itarating over keys): </p><div class="fragment"><div class="line">    <a class="code" href="classpmem_1_1kv_1_1config.html#a453fb71449acb6e81591d4fc4c9a607f">config</a> cfg;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> s = cfg.put_path(argv[1]);</div>
+<div class="line">    ASSERT(s == status::OK);</div>
+<div class="line">    s = cfg.put_size(SIZE);</div>
+<div class="line">    ASSERT(s == status::OK);</div>
+<div class="line">    s = cfg.put_force_create(<span class="keyword">true</span>);</div>
+<div class="line">    ASSERT(s == status::OK);</div>
+<div class="line">    s = cfg.put_comparator(lexicographical_comparator{});</div>
+<div class="line">    ASSERT(s == status::OK);</div>
+<div class="line"> </div>
+<div class="line">    LOG(<span class="stringliteral">&quot;Opening pmemkv database with &#39;csmap&#39; engine&quot;</span>);</div>
+<div class="line">    db *kv = <span class="keyword">new</span> db();</div>
+<div class="line">    ASSERT(kv != <span class="keyword">nullptr</span>);</div>
+<div class="line">    s = kv-&gt;open(<span class="stringliteral">&quot;csmap&quot;</span>, std::move(cfg));</div>
+<div class="line">    ASSERT(s == status::OK);</div>
+<div class="line"> </div>
+<div class="line">    LOG(<span class="stringliteral">&quot;Putting new keys&quot;</span>);</div>
+<div class="line">    s = kv-&gt;put(<span class="stringliteral">&quot;key1&quot;</span>, <span class="stringliteral">&quot;value1&quot;</span>);</div>
+<div class="line">    ASSERT(s == status::OK);</div>
+<div class="line">    s = kv-&gt;put(<span class="stringliteral">&quot;key2&quot;</span>, <span class="stringliteral">&quot;value2&quot;</span>);</div>
+<div class="line">    ASSERT(s == status::OK);</div>
+<div class="line">    s = kv-&gt;put(<span class="stringliteral">&quot;key3&quot;</span>, <span class="stringliteral">&quot;value3&quot;</span>);</div>
+<div class="line">    ASSERT(s == status::OK);</div>
+<div class="line"> </div>
+<div class="line">    LOG(<span class="stringliteral">&quot;Iterating over existing keys in order specified by the comparator&quot;</span>);</div>
+<div class="line">    kv-&gt;get_all([](<a class="code" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> k, <a class="code" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> v) {</div>
+<div class="line">        LOG(<span class="stringliteral">&quot;  visited: &quot;</span> &lt;&lt; k.data());</div>
+<div class="line">        <span class="keywordflow">return</span> 0;</div>
+<div class="line">    });</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -605,7 +635,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -635,7 +665,7 @@ template&lt;typename T &gt; </div>
 
 <p>Puts force_create parameter to a config, For supporting engines If false, pmemkv opens file specified by 'path', otherwise it creates it. </p>
 <p>False by default.</p>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -681,7 +711,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -729,7 +759,7 @@ template&lt;typename T , typename D &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -784,7 +814,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -819,7 +849,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -854,7 +884,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -889,7 +919,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -935,7 +965,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -981,7 +1011,7 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -1037,10 +1067,12 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/tmp/pmemkv-QmQ/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
+<li>/tmp/pmemkv-lzf/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
 </ul>
 </div><!-- contents -->
-<div class="ttc" id="anamespacepmem_1_1kv_html_aa8cc4736e5bca1f316a2c9a79ff1150b"><div class="ttname"><a href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">pmem::kv::string_view</a></div><div class="ttdeci">obj::string_view string_view</div><div class="ttdef"><b>Definition:</b> libpmemkv.hpp:43</div></div>
+<div class="ttc" id="anamespacepmem_1_1kv_html_a966ec5140bba4b6f4cc4e9aa15979231"><div class="ttname"><a href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">pmem::kv::status</a></div><div class="ttdeci">status</div><div class="ttdoc">Status returned by most of pmemkv functions.</div><div class="ttdef"><b>Definition:</b> libpmemkv.hpp:84</div></div>
+<div class="ttc" id="anamespacepmem_1_1kv_html_aa8cc4736e5bca1f316a2c9a79ff1150b"><div class="ttname"><a href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">pmem::kv::string_view</a></div><div class="ttdeci">obj::string_view string_view</div><div class="ttdoc">Partial string_view implemenetation, defined in pmem::obj namespace in libpmemobj-cpp library (see: h...</div><div class="ttdef"><b>Definition:</b> libpmemkv.hpp:47</div></div>
+<div class="ttc" id="aclasspmem_1_1kv_1_1config_html_a453fb71449acb6e81591d4fc4c9a607f"><div class="ttname"><a href="classpmem_1_1kv_1_1config.html#a453fb71449acb6e81591d4fc4c9a607f">pmem::kv::config::config</a></div><div class="ttdeci">config() noexcept</div><div class="ttdoc">Default constructor with uninitialized config.</div><div class="ttdef"><b>Definition:</b> libpmemkv.hpp:1253</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20

@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['get_5fkv_5fcallback_248',['get_kv_callback',['../namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d',1,'pmem::kv']]],
-  ['get_5fkv_5ffunction_249',['get_kv_function',['../namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4',1,'pmem::kv']]],
-  ['get_5fv_5fcallback_250',['get_v_callback',['../namespacepmem_1_1kv.html#a314a9ee9a3cb6fd0fb696ee02de9b9d1',1,'pmem::kv']]],
-  ['get_5fv_5ffunction_251',['get_v_function',['../namespacepmem_1_1kv.html#a3d14c2b2e57bef5dbca29560b4b7e721',1,'pmem::kv']]]
+  ['iterator_5fcategory_250',['iterator_category',['../classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#a36e8099219f87f8e062b23b9c3f0eb23',1,'pmem::kv::db::iterator::OutputIterator']]],
+  ['iterator_5ftype_251',['iterator_type',['../classpmem_1_1kv_1_1db_1_1iterator.html#a05d8b4defba5a1ab1432e77c35b4c500',1,'pmem::kv::db::iterator']]]
 ];

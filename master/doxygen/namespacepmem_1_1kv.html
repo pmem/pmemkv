@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.3-git109.g672aeb5</span>
+   &#160;<span id="projectnumber">1.4-rc1.git1.ge273b6a</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -84,7 +84,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacepmem_1_1kv_1_1internal"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv_1_1internal.html">internal</a></td></tr>
-<tr class="memdesc:namespacepmem_1_1kv_1_1internal"><td class="mdescLeft">&#160;</td><td class="mdescRight">internal pmemkv classes for C++ API <br /></td></tr>
+<tr class="memdesc:namespacepmem_1_1kv_1_1internal"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal pmemkv classes for C++ API. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
@@ -108,6 +108,7 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:aa8cc4736e5bca1f316a2c9a79ff1150b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> = obj::string_view</td></tr>
+<tr class="memdesc:aa8cc4736e5bca1f316a2c9a79ff1150b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partial string_view implemenetation, defined in pmem::obj namespace in libpmemobj-cpp library (see: <a href="https://pmem.io/libpmemobj-cpp">https://pmem.io/libpmemobj-cpp</a> ).  <a href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">More...</a><br /></td></tr>
 <tr class="separator:aa8cc4736e5bca1f316a2c9a79ff1150b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aecad92e5fa73c55c5b7cd33f1a6c5bb4"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">get_kv_function</a>(<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key, <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> value)</td></tr>
 <tr class="memdesc:aecad92e5fa73c55c5b7cd33f1a6c5bb4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The C++ idiomatic function type to use for callback using key-value pair.  <a href="namespacepmem_1_1kv.html#aecad92e5fa73c55c5b7cd33f1a6c5bb4">More...</a><br /></td></tr>
@@ -115,8 +116,6 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a3d14c2b2e57bef5dbca29560b4b7e721"><td class="memItemLeft" align="right" valign="top">typedef void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a3d14c2b2e57bef5dbca29560b4b7e721">get_v_function</a>(<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> value)</td></tr>
 <tr class="memdesc:a3d14c2b2e57bef5dbca29560b4b7e721"><td class="mdescLeft">&#160;</td><td class="mdescRight">The C++ idiomatic function type to use for callback using only the value.  <a href="namespacepmem_1_1kv.html#a3d14c2b2e57bef5dbca29560b4b7e721">More...</a><br /></td></tr>
 <tr class="separator:a3d14c2b2e57bef5dbca29560b4b7e721"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a030860872cabda2262ece46fc77785d7"><td class="memItemLeft" align="right" valign="top">typedef int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a030860872cabda2262ece46fc77785d7">comparator_function</a>(<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key1, <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key2)</td></tr>
-<tr class="separator:a030860872cabda2262ece46fc77785d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c0f1ef8ac77b4f70bd027c60956ea9d"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">get_kv_callback</a> = pmemkv_get_kv_callback</td></tr>
 <tr class="memdesc:a9c0f1ef8ac77b4f70bd027c60956ea9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Key-value pair callback, C-style.  <a href="namespacepmem_1_1kv.html#a9c0f1ef8ac77b4f70bd027c60956ea9d">More...</a><br /></td></tr>
 <tr class="separator:a9c0f1ef8ac77b4f70bd027c60956ea9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -145,12 +144,13 @@ Enumerations</h2></td></tr>
 &#160;&#160;<a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a756f166f53b2a5ff80f7c72ea796c562">status::COMPARATOR_MISMATCH</a>
 <br />
  }</td></tr>
-<tr class="memdesc:a966ec5140bba4b6f4cc4e9aa15979231"><td class="mdescLeft">&#160;</td><td class="mdescRight">Status returned by pmemkv functions.  <a href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">More...</a><br /></td></tr>
+<tr class="memdesc:a966ec5140bba4b6f4cc4e9aa15979231"><td class="mdescLeft">&#160;</td><td class="mdescRight">Status returned by most of pmemkv functions.  <a href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">More...</a><br /></td></tr>
 <tr class="separator:a966ec5140bba4b6f4cc4e9aa15979231"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ae359c3f44cdb3eb1972adc1e85acb880"><td class="memItemLeft" align="right" valign="top">std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#ae359c3f44cdb3eb1972adc1e85acb880">operator&lt;&lt;</a> (std::ostream &amp;os, const <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> &amp;s)</td></tr>
+<tr class="memdesc:ae359c3f44cdb3eb1972adc1e85acb880"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides string representation of a status, along with its number as specified by enum.  <a href="namespacepmem_1_1kv.html#ae359c3f44cdb3eb1972adc1e85acb880">More...</a><br /></td></tr>
 <tr class="separator:ae359c3f44cdb3eb1972adc1e85acb880"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a86b8abcaec9635bda73a6ec286ddc5b6"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a86b8abcaec9635bda73a6ec286ddc5b6"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacepmem_1_1kv.html#a86b8abcaec9635bda73a6ec286ddc5b6">operator==</a> (const <a class="el" href="classpmem_1_1kv_1_1result.html">result</a>&lt; T &gt; &amp;lhs, const <a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">status</a> &amp;rhs)</td></tr>
@@ -169,20 +169,6 @@ Functions</h2></td></tr>
 <div class="textblock"><p>Main pmemkv namespace. </p>
 <p>It contains all pmemkv public types, enums, classes with their functions and members. It is located within pmem namespace. </p>
 </div><h2 class="groupheader">Typedef Documentation</h2>
-<a id="a030860872cabda2262ece46fc77785d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a030860872cabda2262ece46fc77785d7">&#9670;&nbsp;</a></span>comparator_function</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef int pmem::kv::comparator_function(<a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key1, <a class="el" href="namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b">string_view</a> key2)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a9c0f1ef8ac77b4f70bd027c60956ea9d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9c0f1ef8ac77b4f70bd027c60956ea9d">&#9670;&nbsp;</a></span>get_kv_callback</h2>
 
@@ -273,6 +259,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Partial string_view implemenetation, defined in pmem::obj namespace in libpmemobj-cpp library (see: <a href="https://pmem.io/libpmemobj-cpp">https://pmem.io/libpmemobj-cpp</a> ). </p>
+
 </div>
 </div>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
@@ -296,8 +284,9 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Status returned by pmemkv functions. </p>
-<p>Each function, except for <a class="el" href="classpmem_1_1kv_1_1db.html#ab19d3a8e0b976f5c2ad06b14e542755c" title="Closes pmemkv database.">db::close()</a> and pmem::kv::errormsg(), returns one of the following status codes. </p>
+<p>Status returned by most of pmemkv functions. </p>
+<p>Most of functions in libpmemkv API return one of the following status codes.</p>
+<p>Status returned from a function can change in a future version of a library to a more specific one. For example, if a function returns status::UNKNOWN_ERROR, it is possible that in future versions it will return status::INVALID_ARGUMENT. Recommended way to check for an error is to compare status with status::OK (see <a class="el" href="classpmem_1_1kv_1_1db.html" title="Main pmemkv class, it provides functions to operate on data in database.">pmem::kv::db</a> basic example). </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a966ec5140bba4b6f4cc4e9aa15979231ae0aa021e21dddbd6d8cecec71e9cf564"></a>OK&#160;</td><td class="fielddoc"><p>no error </p>
 </td></tr>
@@ -424,6 +413,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>Provides string representation of a status, along with its number as specified by enum. </p>
+<p>It's useful for debugging, e.g. with pmem::db::errormsg() </p><div class="fragment"><div class="line">std::cout &lt;&lt; pmemkv_errormsg() &lt;&lt; std::endl;</div>
+</div><!-- fragment --> 
 </div>
 </div>
 <a id="a86b8abcaec9635bda73a6ec286ddc5b6"></a>

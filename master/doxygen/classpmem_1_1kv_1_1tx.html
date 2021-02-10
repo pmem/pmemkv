@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.3-git109.g672aeb5</span>
+   &#160;<span id="projectnumber">1.4-rc1.git1.ge273b6a</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -106,9 +106,9 @@ Private Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Pmemkv transaction handle. </p>
-<p>This API is EXPERIMENTAL and might change.</p>
+<p><b>This API is EXPERIMENTAL and might change.</b></p>
 <p>The tx class allows grouping put and remove operations into a single atomic action (with respect to persistence and concurrency). Concurrent engines provide transactions with ACID (atomicity, consistency, isolation, durability) properties. Transactions for single threaded engines provide atomicity, consistency and durability. Actions in a transaction are executed in the order in which they were called.</p>
-<div class="fragment"><div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[])</div>
+<p><b>Example</b> usage: </p><div class="fragment"><div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[])</div>
 <div class="line">{</div>
 <div class="line">    <span class="keywordflow">if</span> (argc &lt; 2) {</div>
 <div class="line">        std::cerr &lt;&lt; <span class="stringliteral">&quot;Usage: &quot;</span> &lt;&lt; argv[0] &lt;&lt; <span class="stringliteral">&quot; pool\n&quot;</span>;</div>
@@ -250,7 +250,7 @@ Private Attributes</h2></td></tr>
 
 <p>Commits the transaction. </p>
 <p>All operations of this transaction are applied as a single power fail-safe atomic action. The tx object can be safely used after commit.</p>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -297,7 +297,7 @@ Private Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -333,7 +333,7 @@ Private Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by pmemkv functions.">pmem::kv::status</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231" title="Status returned by most of pmemkv functions.">pmem::kv::status</a> </dd></dl>
 
 </div>
 </div>
@@ -361,11 +361,11 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/tmp/pmemkv-QmQ/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
+<li>/tmp/pmemkv-lzf/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
 </ul>
 </div><!-- contents -->
-<div class="ttc" id="aclasspmem_1_1kv_1_1tx_html_a24213c570ab6338eb73dff99bfc9641b"><div class="ttname"><a href="classpmem_1_1kv_1_1tx.html#a24213c570ab6338eb73dff99bfc9641b">pmem::kv::tx::tx</a></div><div class="ttdeci">tx(pmemkv_tx *tx_) noexcept</div><div class="ttdoc">Constructs C++ tx object from a C pmemkv_tx pointer.</div><div class="ttdef"><b>Definition:</b> libpmemkv.hpp:1625</div></div>
-<div class="ttc" id="anamespacepmem_1_1kv_html_a966ec5140bba4b6f4cc4e9aa15979231"><div class="ttname"><a href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">pmem::kv::status</a></div><div class="ttdeci">status</div><div class="ttdoc">Status returned by pmemkv functions.</div><div class="ttdef"><b>Definition:</b> libpmemkv.hpp:77</div></div>
+<div class="ttc" id="aclasspmem_1_1kv_1_1tx_html_a24213c570ab6338eb73dff99bfc9641b"><div class="ttname"><a href="classpmem_1_1kv_1_1tx.html#a24213c570ab6338eb73dff99bfc9641b">pmem::kv::tx::tx</a></div><div class="ttdeci">tx(pmemkv_tx *tx_) noexcept</div><div class="ttdoc">Constructs C++ tx object from a C pmemkv_tx pointer.</div><div class="ttdef"><b>Definition:</b> libpmemkv.hpp:1657</div></div>
+<div class="ttc" id="anamespacepmem_1_1kv_html_a966ec5140bba4b6f4cc4e9aa15979231"><div class="ttname"><a href="namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231">pmem::kv::status</a></div><div class="ttdeci">status</div><div class="ttdoc">Status returned by most of pmemkv functions.</div><div class="ttdef"><b>Definition:</b> libpmemkv.hpp:84</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
