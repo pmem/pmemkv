@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020, Intel Corporation
+ * Copyright 2017-2021, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -171,4 +171,29 @@ TEST_F(BlackholeTest, ErrormsgTest)
 
 	/* Test whether errormsg is cleared correctly after each error */
 	ASSERT_TRUE(pmem::kv::errormsg() == err);
+}
+
+TEST_F(BlackholeTest, ErrormsgClearedTest)
+{
+	auto s = kv.open("non-existing name");
+	ASSERT_TRUE(s == pmem::kv::status::WRONG_ENGINE_NAME);
+
+	auto err = pmem::kv::errormsg();
+	ASSERT_TRUE(err.size() > 0);
+
+	ASSERT_TRUE(pmem::kv::errormsg() == err);
+
+	s = kv.open("blackhole");
+	ASSERT_TRUE(s == pmem::kv::status::OK);
+
+	std::string value;
+	s = kv.get("Nonexisting key:", &value);
+	ASSERT_TRUE(s == pmem::kv::status::NOT_FOUND);
+	err = pmem::kv::errormsg();
+	ASSERT_TRUE(err == "");
+
+	s = kv.open("non-existing name");
+	ASSERT_TRUE(s == pmem::kv::status::WRONG_ENGINE_NAME);
+	err = pmem::kv::errormsg();
+	ASSERT_TRUE(err.size() > 0);
 }

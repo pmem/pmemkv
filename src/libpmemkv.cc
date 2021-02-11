@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020, Intel Corporation
+ * Copyright 2017-2021, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -71,24 +71,27 @@ static inline pmemkv_db *db_from_internal(pmem::kv::engine_base *db)
 template <typename Function>
 static inline int catch_and_return_status(const char *func_name, Function &&f)
 {
+	int status = PMEMKV_STATUS_UNKNOWN_ERROR;
 	try {
-		return static_cast<int>(f());
+		status = static_cast<int>(f());
 	} catch (pmem::kv::internal::error &e) {
 		out_err_stream(func_name) << e.what();
-		return e.status_code;
+		status = e.status_code;
 	} catch (std::bad_alloc &e) {
 		out_err_stream(func_name) << e.what();
-		return PMEMKV_STATUS_OUT_OF_MEMORY;
+		status = PMEMKV_STATUS_OUT_OF_MEMORY;
 	} catch (std::runtime_error &e) {
 		out_err_stream(func_name) << e.what();
-		return PMEMKV_STATUS_UNKNOWN_ERROR;
+		status = PMEMKV_STATUS_UNKNOWN_ERROR;
 	} catch (pmem::transaction_scope_error &e) {
 		out_err_stream(func_name) << e.what();
-		return PMEMKV_STATUS_TRANSACTION_SCOPE_ERROR;
+		status = PMEMKV_STATUS_TRANSACTION_SCOPE_ERROR;
 	} catch (...) {
 		out_err_stream(func_name) << "Unspecified error";
-		return PMEMKV_STATUS_UNKNOWN_ERROR;
+		status = PMEMKV_STATUS_UNKNOWN_ERROR;
 	}
+	set_last_status(status);
+	return status;
 }
 
 extern "C" {

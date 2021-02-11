@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2021, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,5 +47,6 @@ std::ostream &out_err_stream(const char *func);
 #define ERR() out_err_stream(__func__)
 
 const char *out_get_errormsg(void);
+void set_last_status(int status);
 
 #endif /* LIBPMEMKV_OUT_H */
