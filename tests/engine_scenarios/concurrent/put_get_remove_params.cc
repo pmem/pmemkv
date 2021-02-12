@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "unittest.hpp"
 
@@ -69,6 +69,39 @@ static void MultithreadedTestRemoveDataAside(const size_t threads_number,
 	}
 }
 
+static void MultithreadedPutRemove(const size_t threads_number, const size_t thread_items,
+				   pmem::kv::db &kv)
+{
+	size_t initial_items = threads_number * thread_items;
+	for (size_t i = 0; i < initial_items; i++) {
+		std::string istr = std::to_string(i);
+		ASSERT_STATUS(kv.put(istr, (istr + "!")), status::OK);
+	}
+
+	parallel_exec(threads_number, [&](size_t thread_id) {
+		if (thread_id < threads_number / 2) {
+			for (size_t i = 0; i < initial_items; i++) {
+				std::string istr = std::to_string(i);
+				ASSERT_STATUS(kv.put(istr, (istr + "!")), status::OK);
+			}
+		} else {
+			for (size_t i = 0; i < initial_items; i++) {
+				std::string istr = std::to_string(i);
+				auto s = kv.remove(istr);
+				UT_ASSERT(s == status::OK || s == status::NOT_FOUND);
+			}
+		}
+	});
+
+	for (size_t i = 0; i < initial_items; i++) {
+		std::string istr = std::to_string(i);
+		std::string value;
+		auto s = kv.get(istr, &value);
+		UT_ASSERT((s == status::OK && value == (istr + "!")) ||
+			  s == status::NOT_FOUND);
+	}
+}
+
 static void test(int argc, char *argv[])
 {
 	using namespace std::placeholders;
@@ -84,6 +117,8 @@ static void test(int argc, char *argv[])
 					   thread_items, _1),
 				 std::bind(MultithreadedTestRemoveDataAside,
 					   threads_number, thread_items, _1),
+				 std::bind(MultithreadedPutRemove, threads_number,
+					   thread_items, _1),
 			 });
 }
 

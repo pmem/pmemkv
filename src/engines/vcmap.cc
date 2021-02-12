@@ -103,11 +103,13 @@ status vcmap::put(string_view key, string_view value)
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
 
-	// XXX - do not create temporary string
-	pmem_string k(key.data(), key.size(), ch_allocator);
+	map_t::value_type kv_pair(
+		std::piecewise_construct,
+		std::forward_as_tuple(key.data(), key.size(), ch_allocator),
+		std::forward_as_tuple(ch_allocator));
 
 	map_t::accessor acc;
-	pmem_kv_container.insert(acc, k);
+	pmem_kv_container.insert(acc, std::move(kv_pair));
 	acc->second.assign(value.data(), value.size());
 
 	return status::OK;
