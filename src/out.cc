@@ -2,6 +2,7 @@
 /* Copyright 2019-2021, Intel Corporation */
 
 #include "out.h"
+#include "libpmemkv.h"
 
 #include "libpmemkv.h"
 
