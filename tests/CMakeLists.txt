@@ -70,6 +70,9 @@ endif()
 build_test(wrong_engine_name_test wrong_engine_name_test.cc)
 add_test_generic(NAME wrong_engine_name_test TRACERS none)
 
+build_test(error_msg_test error_msg_test.cc)
+add_test_generic(NAME error_msg_test TRACERS none)
+
 if(BUILD_EXAMPLES AND ENGINE_CMAP)
 	add_dependencies(tests example-pmemkv_basic_c
 		example-pmemkv_basic_cpp
