@@ -589,7 +589,7 @@ if(ENGINE_CSMAP)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8 50)
 
-	if(TESTS_PMEMOBJ_DRD_HELGRIND)
+	if(TESTS_PMEMOBJ_DRD_HELGRIND AND TESTS_LONG)
 		add_engine_test(ENGINE csmap
 				BINARY concurrent_put_get_remove_params
 				TRACERS drd # helgrind XXX: skip list lock order error
