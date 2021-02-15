@@ -1,6 +1,11 @@
 
 name: pmemkv
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  release:
+    types:
+      - created
 
 env:
   REPO:           pmemkv
@@ -34,6 +39,23 @@ jobs:
                  "TYPE=compatibility OS=fedora OS_VER=32",
                  "TYPE=bindings OS=ubuntu OS_VER=20.04_bindings PUSH_IMAGE=1"]
     steps:
+      - name: Get release version
+        if: github.event_name == 'release'
+        id: get_release_version
+        run: echo ::set-output name=VERSION::$(echo ${{ github.event.release.tag_name }} | grep -E "^[0-9]+.[0-9]+(-rc[0-9]+)?$" | cut -f 1,2 -d . | cut -f 1 -d -)
+
+      - name: Set image version and force image action for release
+        if: github.event_name == 'release' && steps.get_release_version.outputs.VERSION != ''
+        run: |
+          echo "IMG_VER=${{ steps.get_release_version.outputs.VERSION }}" >> $GITHUB_ENV
+          echo "FORCE_IMAGE_ACTION=rebuild" >> $GITHUB_ENV
+
+      - name: Set image version and force image action for stable branch
+        if: startsWith(github.ref, 'refs/heads/stable-')
+        run: |
+          echo "IMG_VER=$(echo ${GITHUB_REF#refs/heads/} | cut -d - -f 2)" >> $GITHUB_ENV
+          echo "FORCE_IMAGE_ACTION=rebuild" >> $GITHUB_ENV
+
       - name: Clone the git repo
         uses: actions/checkout@v2
         with:
