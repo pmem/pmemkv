@@ -23,14 +23,16 @@ for the current **master**:
 	* [libpmemkv_config.3](./master/manpages/libpmemkv_config.3.html)
 	* [libpmemkv_json_config.3](./master/manpages/libpmemkv_json_config.3.html)
 
-for the latest stable branch (**1.3**):
+for the latest stable branch (**1.4**):
 
-* [C++ Doxygen docs](./v1.3/doxygen/index.html)
+* [C++ Doxygen docs](./v1.4/doxygen/index.html)
 * C manpages:
-	* [libpmemkv.3](./v1.3/manpages/libpmemkv.3.html)
-	* [libpmemkv.7](./v1.3/manpages/libpmemkv.7.html)
-	* [libpmemkv_config.3](./v1.3/manpages/libpmemkv_config.3.html)
-	* [libpmemkv_json_config.3](./v1.3/manpages/libpmemkv_json_config.3.html)
+	* [libpmemkv.3](./v1.4/manpages/libpmemkv.3.html)
+	* [libpmemkv.7](./v1.4/manpages/libpmemkv.7.html)
+	* [libpmemkv_tx.3](./v1.4/manpages/libpmemkv_tx.3.html) (EXPERIMENTAL API)
+	* [libpmemkv_iterator.3](./v1.4/manpages/libpmemkv_iterator.3.html) (EXPERIMENTAL API)
+	* [libpmemkv_config.3](./v1.4/manpages/libpmemkv_config.3.html)
+	* [libpmemkv_json_config.3](./v1.4/manpages/libpmemkv_json_config.3.html)
 
 
 For older documentation [see below](#older-documentation).
@@ -65,6 +67,7 @@ seen on the ["releases" tab on the Github page](https://github.com/pmem/pmemkv/r
 
 | Version branch | First release date | Last patch release | Maintenance status |
 | -------------- | ------------------ | ------------------ | ------------------ |
+| stable-1.4 | Feb 15, 2021 | N/A | Full |
 | stable-1.3 | Oct 02, 2020 | N/A | Full |
 | stable-1.2 | May 29, 2020 | N/A | Full |
 | stable-1.1 | Jan 31, 2020 | N/A | Full |
@@ -86,6 +89,14 @@ Possible statuses:
 	* No official releases.
 
 ## Older documentation
+
+For branch **stable-1.3**:
+* [C++ Doxygen docs](./v1.3/doxygen/index.html)
+* C manpages:
+	* [libpmemkv.3](./v1.3/manpages/libpmemkv.3.html)
+	* [libpmemkv.7](./v1.3/manpages/libpmemkv.7.html)
+	* [libpmemkv_config.3](./v1.3/manpages/libpmemkv_config.3.html)
+	* [libpmemkv_json_config.3](./v1.3/manpages/libpmemkv_json_config.3.html)
 
 For branch **stable-1.2**:
 
