@@ -266,6 +266,7 @@ endif()
 
 if(ENGINE_VCMAP)
 	include(tbb)
+	add_definitions(-DTBB_DEFINE_STD_HASH_SPECIALIZATIONS)
 	list(APPEND PKG_CONFIG_REQUIRES tbb)
 	list(APPEND RPM_DEPENDS tbb)
 	list(APPEND DEB_DEPENDS libtbb2)
