@@ -4,14 +4,14 @@
 message(STATUS "Checking for module 'RapidJSON'")
 
 if(PKG_CONFIG_FOUND)
-    pkg_check_modules(RapidJSON QUIET RapidJSON)
+    pkg_check_modules(RapidJSON QUIET RapidJSON>=${RAPIDJSON_REQUIRED_VERSION})
 endif()
 
 if(NOT RapidJSON_FOUND)
     # find_package (run after pkg-config) without unsetting this var is not working correctly
     unset(RapidJSON_FOUND CACHE)
 
-    find_package(RapidJSON QUIET REQUIRED)
+    find_package(RapidJSON ${RAPIDJSON_REQUIRED_VERSION} QUIET REQUIRED)
 
     set(RapidJSON_LIBRARIES ${RapidJSON_LIBRARY})
     set(RapidJSON_INCLUDE_DIRS ${RapidJSON_INCLUDE_DIR})

@@ -24,7 +24,7 @@ Installation of Key-Value Datastore for Persistent Memory
 * [**libpmemobj-cpp**](https://github.com/pmem/libpmemobj-cpp) - C++ PMDK bindings 1.12
 * [**memkind**](https://github.com/memkind/memkind) - Volatile memory manager 1.8.0 (required by vsmap & vcmap engines)
 * [**TBB**](https://github.com/01org/tbb) - Thread Building Blocks (required by vcmap engine)
-* [**RapidJSON**](https://github.com/tencent/rapidjson) - JSON parser (required by `libpmemkv_json_config` helper library)
+* [**RapidJSON**](https://github.com/tencent/rapidjson) - JSON parser 1.0.0 (required by `libpmemkv_json_config` helper library)
 * Used only for **testing**:
 	* [**pmempool**](https://github.com/pmem/pmdk/tree/master/src/tools/pmempool) - pmempool utility, part of PMDK
 	* [**valgrind**](https://github.com/pmem/valgrind) - tool for profiling and memory leak detection. *pmem* forked version with *pmemcheck*
