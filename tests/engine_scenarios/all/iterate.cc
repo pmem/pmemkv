@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "unittest.hpp"
 
@@ -35,18 +35,21 @@ static void GetAllTest(pmem::kv::db &kv)
 	 * TEST: get_all should return all elements in db and count_all should count them
 	 * properly
 	 */
-	ASSERT_STATUS(kv.put("1", "one"), status::OK);
+	ASSERT_STATUS(kv.put(entry_from_string("1"), entry_from_string("one")),
+		      status::OK);
 	std::size_t cnt = std::numeric_limits<std::size_t>::max();
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 1);
 	cnt = std::numeric_limits<std::size_t>::max();
 
-	ASSERT_STATUS(kv.put("2", "two"), status::OK);
+	ASSERT_STATUS(kv.put(entry_from_string("2"), entry_from_string("two")),
+		      status::OK);
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 2);
 	cnt = std::numeric_limits<std::size_t>::max();
 
-	ASSERT_STATUS(kv.put("记!", "RR"), status::OK);
+	ASSERT_STATUS(kv.put(entry_from_string("记!"), entry_from_string("RR")),
+		      status::OK);
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 3);
 
@@ -59,7 +62,9 @@ static void GetAllTest(pmem::kv::db &kv)
 	});
 	ASSERT_STATUS(s, status::OK);
 
-	auto expected = test_kv_list{{"1", "one"}, {"2", "two"}, {"记!", "RR"}};
+	auto expected = test_kv_list{{entry_from_string("1"), entry_from_string("one")},
+				     {entry_from_string("2"), entry_from_string("two")},
+				     {entry_from_string("记!"), entry_from_string("RR")}};
 	UT_ASSERT((sort(result) == sort(expected)));
 	result = {};
 
@@ -73,7 +78,6 @@ static void GetAllTest(pmem::kv::db &kv)
 		&result);
 	ASSERT_STATUS(s, status::OK);
 
-	expected = test_kv_list{{"1", "one"}, {"2", "two"}, {"记!", "RR"}};
 	UT_ASSERT((sort(result) == sort(expected)));
 }
 

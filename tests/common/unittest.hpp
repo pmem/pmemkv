@@ -232,13 +232,22 @@ static inline pmem::kv::string_view uint64_to_strv(uint64_t &key)
 	return pmem::kv::string_view((char *)&key, sizeof(uint64_t));
 }
 
+static inline std::string uint64_to_string(uint64_t &key)
+{
+	return std::string(reinterpret_cast<const char *>(&key), 8);
+}
+
 static inline std::string align_to_size(size_t size, std::string str,
 					char char_to_fill = 'x')
 {
-	if (str.size() < size)
-		return str + std::string(size - str.size(), char_to_fill);
+	std::string res;
+	if (str.size() <= size)
+		res = str + std::string(size - str.size(), char_to_fill);
 	else
-		return str.substr(0, size);
+		UT_FATAL((str + " - too long entry for the engine: " + currently_tested)
+				 .c_str());
+
+	return res;
 }
 
 /* It returns an entry filled/shrank to a certain size. It's necessary during testing

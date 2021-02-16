@@ -144,6 +144,7 @@ add_test_generic(NAME result TRACERS none memcheck)
 # ----------------------------------------------------------------- #
 # Tests for all engines
 build_test_ext(NAME put_get_remove SRC_FILES engine_scenarios/all/put_get_remove.cc LIBS json)
+build_test_ext(NAME put_get_remove_not_aligned SRC_FILES engine_scenarios/all/put_get_remove_not_aligned.cc LIBS json)
 build_test_ext(NAME put_get_remove_charset_params SRC_FILES engine_scenarios/all/put_get_remove_charset_params.cc LIBS json)
 build_test_ext(NAME put_get_remove_long_key SRC_FILES engine_scenarios/all/put_get_remove_long_key.cc LIBS json)
 build_test_ext(NAME put_get_remove_params SRC_FILES engine_scenarios/all/put_get_remove_params.cc LIBS json)
@@ -234,6 +235,12 @@ if(ENGINE_CMAP)
 			BINARY put_get_remove
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE cmap
+			BINARY put_get_remove_not_aligned
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
 
 	add_engine_test(ENGINE cmap
 			BINARY put_get_remove_charset_params
@@ -478,6 +485,11 @@ if(ENGINE_CSMAP)
 
 	add_engine_test(ENGINE csmap
 			BINARY put_get_remove
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY put_get_remove_not_aligned
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
@@ -780,6 +792,11 @@ if(ENGINE_VCMAP)
 			SCRIPT memkind_based/default.cmake)
 
 	add_engine_test(ENGINE vcmap
+			BINARY put_get_remove_not_aligned
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vcmap
 			BINARY put_get_remove_charset_params
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake
@@ -880,6 +897,11 @@ if(ENGINE_VSMAP)
 
 	add_engine_test(ENGINE vsmap
 			BINARY put_get_remove
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vsmap
+			BINARY put_get_remove_not_aligned
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake)
 
@@ -1009,6 +1031,11 @@ if(ENGINE_TREE3)
 
 	add_engine_test(ENGINE tree3
 			BINARY put_get_remove
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE tree3
+			BINARY put_get_remove_not_aligned
 			TRACERS none #memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
@@ -1242,6 +1269,11 @@ if(ENGINE_STREE)
 
 	add_engine_test(ENGINE stree
 			BINARY put_get_remove
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE stree
+			BINARY put_get_remove_not_aligned
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
@@ -1480,6 +1512,11 @@ if(ENGINE_RADIX)
 			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE radix
+			BINARY put_get_remove_not_aligned
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE radix
 			BINARY put_get_std_map
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
@@ -1712,13 +1749,46 @@ if(ENGINE_RADIX)
 endif(ENGINE_RADIX)
 ################################################################################
 #################################### ROBINHOOD #################################
-# XXX: Parameterize other tests to work with fixed size keys/values.
 if (ENGINE_ROBINHOOD)
+	# XXX: https://github.com/pmem/pmemkv/issues/916
+	# add_engine_test(ENGINE robinhood
+	#	BINARY error_handling_oom
+	#	TRACERS none memcheck
+	#	SCRIPT pmemobj_based/default.cmake
+	#	DB_SIZE 20M)
+
+	add_engine_test(ENGINE robinhood
+			BINARY iterate
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY iterator_not_supported
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
 	add_engine_test(ENGINE robinhood
 			BINARY put_get_remove_charset_params
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 16 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_remove_params
+			TRACERS none
+			SCRIPT pmemobj_based/default.cmake
+			DB_SIZE 4G PARAMS 40000)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_remove_params
+			TRACERS memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			DB_SIZE 1G PARAMS 4000)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_remove
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE robinhood
 			BINARY put_get_std_map
@@ -1754,7 +1824,7 @@ if (ENGINE_ROBINHOOD)
 			BINARY concurrent_iterate_params
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
-			PARAMS 24 200)
+			PARAMS 24 200 0)
 
 	add_engine_test(ENGINE robinhood
 			BINARY persistent_not_found_verify
@@ -1771,6 +1841,11 @@ if (ENGINE_ROBINHOOD)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 1000 8 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_put_remove_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
 
 	add_engine_test(ENGINE robinhood
 			BINARY persistent_put_verify_asc_params
@@ -1812,7 +1887,7 @@ if (ENGINE_ROBINHOOD)
 			BINARY concurrent_iterate_params
 			TRACERS drd helgrind
 			SCRIPT pmemobj_based/default.cmake
-			PARAMS 4 50)
+			PARAMS 4 50 0)
 	endif()
 
 	add_engine_test(ENGINE robinhood
@@ -1821,16 +1896,38 @@ if (ENGINE_ROBINHOOD)
 			SCRIPT pmemobj_based/pmemobj/error_handling_create.cmake)
 
 	add_engine_test(ENGINE robinhood
+			BINARY pmemobj_error_handling_tx_oid
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/pmemobj/error_handling_tx_oid.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY pmemobj_error_handling_tx_path
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/pmemobj/error_handling_tx_path.cmake)
+
+	add_engine_test(ENGINE robinhood
 			BINARY pmemobj_put_get_std_map_oid
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_oid.cmake
 			PARAMS 1000 8 8)
 
-	if(PMREORDER_SUPPORTED AND TESTS_LONG)
+	if(PMREORDER_SUPPORTED)
 		add_engine_test(ENGINE robinhood
-				BINARY pmreorder_recover
+				BINARY pmreorder_insert
 				TRACERS none
-				SCRIPT pmemobj_based/pmreorder/recover.cmake)
+				SCRIPT pmemobj_based/pmreorder/insert.cmake)
+
+		add_engine_test(ENGINE robinhood
+				BINARY pmreorder_erase
+				TRACERS none
+				SCRIPT pmemobj_based/pmreorder/erase.cmake)
+
+		if (TESTS_LONG)
+			add_engine_test(ENGINE robinhood
+					BINARY pmreorder_recover
+					TRACERS none
+					SCRIPT pmemobj_based/pmreorder/recover.cmake)
+		endif()
 	endif()
 endif()
 ################################################################################

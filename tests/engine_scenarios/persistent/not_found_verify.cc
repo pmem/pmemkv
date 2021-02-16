@@ -7,7 +7,7 @@ using namespace pmem::kv;
 
 static void insert(pmem::kv::db &kv)
 {
-	ASSERT_STATUS(kv.put(entry_from_string("tmpkey"), entry_from_string("tmpvalue1")),
+	ASSERT_STATUS(kv.put(entry_from_string("tmpkey"), entry_from_string("tmpval1")),
 		      status::OK);
 }
 
