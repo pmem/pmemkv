@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_PMEMOBJ_ENGINE_H
 #define LIBPMEMKV_PMEMOBJ_ENGINE_H
 
+#include <errno.h>
 #include <iostream>
 #include <unistd.h>
 
@@ -58,10 +59,33 @@ public:
 					throw internal::invalid_argument(
 						"Config does not contain item with key: \"size\"");
 
-				pop = pmem::obj::pool<Root>::create(path, layout, size,
-								    S_IRWXU);
+				try {
+					pop = pmem::obj::pool<Root>::create(
+						path, layout, size, S_IRWXU);
+				} catch (pmem::pool_error &e) {
+					if (errno == EINVAL) {
+						if (size < PMEMOBJ_MIN_POOL)
+							throw internal::invalid_argument(
+								"Size of the db is too small");
+						else
+							throw internal::invalid_argument(
+								"Path to create the db is wrong");
+					} else if (errno == EFBIG)
+						throw internal::invalid_argument(
+							"Size of the db is too large");
+
+					throw status::UNKNOWN_ERROR;
+				}
 			} else {
-				pop = pmem::obj::pool<Root>::open(path, layout);
+				try {
+					pop = pmem::obj::pool<Root>::open(path, layout);
+				} catch (pmem::pool_error &e) {
+					if (errno == ENOENT)
+						throw internal::invalid_argument(
+							"Path to open the db is wrong");
+
+					throw status::UNKNOWN_ERROR;
+				}
 			}
 
 			root_oid = pop.root()->ptr.raw_ptr();
