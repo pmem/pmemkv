@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_H
 #define LIBPMEMKV_H
@@ -68,7 +68,9 @@ int pmemkv_config_get_string(pmemkv_config *config, const char *key, const char 
 
 int pmemkv_config_put_size(pmemkv_config *config, uint64_t value);
 int pmemkv_config_put_path(pmemkv_config *config, const char *value);
-int pmemkv_config_put_force_create(pmemkv_config *config, bool value);
+int __attribute__((deprecated("use pmemkv_config_put_error_if_exists instead")))
+pmemkv_config_put_force_create(pmemkv_config *config, bool value);
+int pmemkv_config_put_error_if_exists(pmemkv_config *config, bool value);
 int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);
 int pmemkv_config_put_oid(pmemkv_config *config, PMEMoid *oid);
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 /*
  * pmemkv_basic.c -- example usage of pmemkv.
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 	ASSERT(s == PMEMKV_STATUS_OK);
 	s = pmemkv_config_put_size(cfg, SIZE);
 	ASSERT(s == PMEMKV_STATUS_OK);
-	s = pmemkv_config_put_force_create(cfg, true);
+	s = pmemkv_config_put_error_if_exists(cfg, true);
 	ASSERT(s == PMEMKV_STATUS_OK);
 
 	LOG("Opening pmemkv database with 'cmap' engine");
