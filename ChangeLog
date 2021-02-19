@@ -2,10 +2,15 @@ XXX Igor Chorążewicz <igor.chorazewicz@intel.com>
 
 	* Version 1.5
 
-	Features:
+	New features:
 	-
 
-	Major fixes:
+	Bug fixes:
+	-
+
+	Other changes:
+	- Add alias 'create_or_error_if_exists' for 'force_create' config's flag and deprecate the latter one (#576)
+		<compatibility note?>
 	-
 
 	Other changes:

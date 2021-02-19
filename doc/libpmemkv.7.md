@@ -8,7 +8,7 @@ secondary_title: pmemkv
 ...
 
 [comment]: <> (SPDX-License-Identifier: BSD-3-Clause)
-[comment]: <> (Copyright 2019-2020, Intel Corporation)
+[comment]: <> (Copyright 2019-2021, Intel Corporation)
 
 [comment]: <> (libpmemkv.7 -- man page for libpmemkv)
 
@@ -67,10 +67,11 @@ This engine requires the following config parameters (see **libpmemkv_config**(3
 
 * **path** -- Path to a database file or to a poolset file (see **poolset**(5) for details). Note that when using poolset file, size should be 0
 	+ type: string
-* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it.
+* **create_or_error_if_exists** -- If 0, pmemkv opens the file specified by 'path' (path has to exist),
+	if 1, pmemkv creates the file (but it will fail if path exists).
 	+ type: uint64_t
 	+ default value: 0
-* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes].
+* **size** --  Only needed when create_or_error_if_exists is not 0, specifies size of the database [in bytes] to create.
 	+ type: uint64_t
 	+ min value: 8388608 (8MB)
 * **oid** -- Pointer to oid (for details see **libpmemobj**(7)) which points to engine data. If oid is null, engine will allocate new data, otherwise it will use existing one.
@@ -78,7 +79,7 @@ This engine requires the following config parameters (see **libpmemkv_config**(3
 
 The following table shows three possible combinations of parameters (where '-' means 'cannot be set'):
 
-| **#** | **path** | **force_create** | **size** | **oid** |
+| **#** | **path** | **create_or_error_if_exists** | **size** | **oid** |
 | ----- | :--------: | :----------------: | :--------: | :-------: |
 | **1** | set | 0 | - | - |
 | **2** | set | 1 | set | - |

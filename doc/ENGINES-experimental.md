@@ -16,12 +16,13 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_TREE3` o
 Configuration must specify a `path` to a PMDK persistent pool (with layout "pmemkv_tree3"), which can be a file (on a DAX filesystem),
 a DAX device, or a PMDK poolset file.
 
-* **path** -- Path to the database file
+* **path** -- Path to the database pool
 	+ type: string
-* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it
+* **create_or_error_if_exists** -- If 0, pmemkv opens the pool specified by 'path' (path has to exist),
+	if 1, pmemkv creates the pool (but it will fail if path exists).
 	+ type: uint64_t
 	+ default value: 0
-* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+* **size** --  Only needed when create_or_error_if_exists is not 0, specifies size of the database [in bytes] to create.
 	+ type: uint64_t
 	+ min value: 8388608 (8MB)
 
@@ -54,12 +55,13 @@ Remove method is currently implemented to take a global lock - it blocks all oth
 
 ### Configuration
 
-* **path** -- Path to the database file (layout "pmemkv_csmap")
+* **path** -- Path to the database pool (layout "pmemkv_csmap")
 	+ type: string
-* **force_create** -- If 0, pmemkv opens the file specified by 'path', otherwise it creates the file
+* **create_or_error_if_exists** -- If 0, pmemkv opens the pool specified by 'path' (path has to exist),
+	if 1, pmemkv creates the pool (but it will fail if path exists).
 	+ type: uint64_t
 	+ default value: 0
-* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+* **size** --  Only needed when create_or_error_if_exists is not 0, specifies size of the database [in bytes] to create.
 	+ type: uint64_t
 
 ### Prerequisites
@@ -73,12 +75,13 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_RADIX` o
 
 ### Configuration
 
-* **path** -- Path to the database file (layout "pmemkv_radix")
+* **path** -- Path to the database pool (layout "pmemkv_radix")
 	+ type: string
-* **force_create** -- If 0, pmemkv opens the file specified by 'path', otherwise it creates the file
+* **create_or_error_if_exists** -- If 0, pmemkv opens the pool specified by 'path' (path has to exist),
+	if 1, pmemkv creates the pool (but it will fail if path exists).
 	+ type: uint64_t
 	+ default value: 0
-* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+* **size** --  Only needed when create_or_error_if_exists is not 0, specifies size of the database [in bytes] to create.
 	+ type: uint64_t
 
 ### Prerequisites
@@ -92,12 +95,13 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_STREE` o
 
 ### Configuration
 
-* **path** -- Path to the database file (layout "pmemkv_stree")
+* **path** -- Path to the database pool (layout "pmemkv_stree")
 	+ type: string
-* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it
+* **create_or_error_if_exists** -- If 0, pmemkv opens the pool specified by 'path' (path has to exist),
+	if 1, pmemkv creates the pool (but it will fail if path exists).
 	+ type: uint64_t
 	+ default value: 0
-* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+* **size** --  Only needed when create_or_error_if_exists is not 0, specifies size of the database [in bytes] to create.
 	+ type: uint64_t
 
 ### Internals
@@ -121,12 +125,13 @@ There are two parameters to be optionally modified by env variables:
 
 ### Configuration
 
-* **path** -- Path to the database file (layout "pmemkv_robinhood")
+* **path** -- Path to the database pool (layout "pmemkv_robinhood")
 	+ type: string
-* **force_create** -- If 0, pmemkv opens the file specified by 'path', otherwise it creates the file
+* **create_or_error_if_exists** -- If 0, pmemkv opens the pool specified by 'path' (path has to exist),
+	if 1, pmemkv creates the pool (but it will fail if path exists).
 	+ type: uint64_t
 	+ default value: 0
-* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+* **size** --  Only needed when create_or_error_if_exists is not 0, specifies size of the database [in bytes] to create.
 	+ type: uint64_t
 
 ### Prerequisites
