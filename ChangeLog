@@ -2,10 +2,15 @@ XXX Igor Chorążewicz <igor.chorazewicz@intel.com>
 
 	* Version 1.5
 
-	Features:
+	New features:
 	-
 
-	Major fixes:
+	Bug fixes:
+	-
+
+	Other changes:
+	- Deprecate config's flag 'force_create' and add alias error_if_exists (#576)
+		<compatibility note?>
 	-
 
 Mon Feb 15 2021 Igor Chorążewicz <igor.chorazewicz@intel.com>

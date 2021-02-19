@@ -34,7 +34,9 @@ void pmemkv_config_delete(pmemkv_config *config);
 
 int pmemkv_config_put_size(pmemkv_config *config, uint64_t value);
 int pmemkv_config_put_path(pmemkv_config *config, const char *value);
-int pmemkv_config_put_force_create(pmemkv_config *config, bool value);
+int **deprecated** pmemkv_config_put_force_create(pmemkv_config *config,
+							   bool value);
+int pmemkv_config_put_error_if_exists(pmemkv_config *config, bool value);
 int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);
 int pmemkv_config_put_oid(pmemkv_config *config, PMEMoid *oid);
 
@@ -101,10 +103,14 @@ Every engine has documented all supported config parameters (please see **libpme
 :	Puts `value` to a config at key **path**. This function provides type
 	safety for `path` parameter.
 
-`int pmemkv_config_put_force_create(pmemkv_config Wconfig, bool value);`
+`int **deprecated** pmemkv_config_put_force_create(pmemkv_config Wconfig, bool value);`
 
 :	Puts force_create parameter to a config. In engines which supports this parameter, if false,
 	pmemkv opens the file specified by `path`, otherwise it creates it. False by default.
+
+`int pmemkv_config_put_error_if_exists(pmemkv_config *config, bool value);`
+
+:	XXX
 
 `int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);`
 

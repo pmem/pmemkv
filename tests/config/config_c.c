@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #include "unittest.h"
 #include <libpmemkv.h>
@@ -83,7 +83,11 @@ static void simple_test()
 	ret = pmemkv_config_put_size(config, SIZE);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 
-	ret = pmemkv_config_put_force_create(config, true);
+	/* XXX: Check deprecated method (need to omit compiler warning) */
+	/* ret = pmemkv_config_put_force_create(config, true);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK); */
+
+	ret = pmemkv_config_put_error_if_exists(config, true);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 
 	const char *value_string;
@@ -131,7 +135,7 @@ static void simple_test()
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 	UT_ASSERTeq(value_uint, SIZE);
 
-	ret = pmemkv_config_get_uint64(config, "force_create", &value_uint);
+	ret = pmemkv_config_get_uint64(config, "error_if_exists", &value_uint);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 	UT_ASSERTeq(value_uint, 1);
 

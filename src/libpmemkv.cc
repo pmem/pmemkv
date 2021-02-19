@@ -209,9 +209,15 @@ int pmemkv_config_put_path(pmemkv_config *config, const char *value)
 	return pmemkv_config_put_string(config, "path", value);
 }
 
+/* deprecated */
 int pmemkv_config_put_force_create(pmemkv_config *config, bool value)
 {
-	return pmemkv_config_put_uint64(config, "force_create", value ? 1 : 0);
+	return pmemkv_config_put_error_if_exists(config, value);
+}
+
+int pmemkv_config_put_error_if_exists(pmemkv_config *config, bool value)
+{
+	return pmemkv_config_put_uint64(config, "error_if_exists", value ? 1 : 0);
 }
 
 int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator)
