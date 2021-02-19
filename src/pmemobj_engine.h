@@ -45,15 +45,21 @@ public:
 			throw internal::invalid_argument(
 				"Config does not contain item with key: \"path\" or \"oid\"");
 		} else if (is_path) {
-			uint64_t force_create;
+			uint64_t create_or_error_if_exists;
 			cfg_by_path = true;
 
-			if (!cfg->get_uint64("force_create", &force_create)) {
-				force_create = 0;
+			if (!cfg->get_uint64("create_or_error_if_exists",
+					     &create_or_error_if_exists)) {
+				/* 'force_create' is here for compatibility with bindings,
+				 * which may still use this flag in their API */
+				if (!cfg->get_uint64("force_create",
+						     &create_or_error_if_exists)) {
+					create_or_error_if_exists = 0;
+				}
 			}
 
 			pmem::obj::pool<Root> pop;
-			if (force_create) {
+			if (create_or_error_if_exists) {
 				if (!cfg->get_uint64("size", &size)) {
 					throw internal::invalid_argument(
 						"Config does not contain item with key: \"size\"");

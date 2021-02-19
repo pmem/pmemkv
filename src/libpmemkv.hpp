@@ -17,6 +17,8 @@
 #include "libpmemkv.h"
 #include <libpmemobj/pool_base.h>
 
+#define FC_DEPRECATED_MSG "use pmem::kv::config::put_create_or_error_if_exists instead"
+
 /*! \file libpmemkv.hpp
 	\brief Main C++ pmemkv public header.
 
@@ -462,7 +464,9 @@ public:
 
 	status put_size(std::uint64_t size) noexcept;
 	status put_path(const std::string &path) noexcept;
-	status put_force_create(bool value) noexcept;
+	status put_force_create(bool value) noexcept
+		__attribute__((deprecated(FC_DEPRECATED_MSG)));
+	status put_create_or_error_if_exists(bool value) noexcept;
 	status put_oid(PMEMoid *oid) noexcept;
 	template <typename Comparator>
 	status put_comparator(Comparator &&comparator);
@@ -1499,15 +1503,32 @@ inline status config::put_path(const std::string &path) noexcept
 }
 
 /**
- * Puts force_create parameter to a config, For supporting engines If false,
- * pmemkv opens file specified by 'path', otherwise it creates it. False by
- * default.
+ * Puts force_create parameter to a config. For engines supporting this flag:
+ * If true: pmemkv creates the file, unless it exists - than it fails.
+ * If false: pmemkv opens the file specified by 'path' (see config::put_path),
+ *		unless the path does not exist - than it fails.
+ * False by default.
  *
+ * @deprecated use config::put_create_or_error_if_exists instead
  * @return pmem::kv::status
  */
 inline status config::put_force_create(bool value) noexcept
 {
-	return put_uint64("force_create", value ? 1 : 0);
+	return put_create_or_error_if_exists(value);
+}
+
+/**
+ * Puts create_or_error_if_exists parameter to a config. For engines supporting this flag:
+ * If true: pmemkv creates the file, unless it exists - than it fails.
+ * If false: pmemkv opens the file specified by 'path' (see config::put_path),
+ *		unless the path does not exist - than it fails.
+ * False by default.
+ *
+ * @return pmem::kv::status
+ */
+inline status config::put_create_or_error_if_exists(bool value) noexcept
+{
+	return put_uint64("create_or_error_if_exists", value ? 1 : 0);
 }
 
 /**

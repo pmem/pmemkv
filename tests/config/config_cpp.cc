@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #include "unittest.hpp"
 #include <libpmemkv.hpp>
@@ -70,7 +70,7 @@ static void simple_test()
 	s = cfg->put_size(SIZE);
 	ASSERT_STATUS(s, status::OK);
 
-	s = cfg->put_force_create(true);
+	s = cfg->put_create_or_error_if_exists(true);
 	ASSERT_STATUS(s, status::OK);
 
 	std::string value_string;
@@ -124,7 +124,7 @@ static void simple_test()
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(int_us, SIZE);
 
-	s = cfg->get_uint64("force_create", int_us);
+	s = cfg->get_uint64("create_or_error_if_exists", int_us);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(int_us, 1);
 
@@ -150,11 +150,11 @@ static void put_edge_cases()
 	 */
 
 	auto cfg = new config;
-	auto s = cfg->put_force_create(false);
+	auto s = cfg->put_create_or_error_if_exists(false);
 	ASSERT_STATUS(s, status::OK);
 
 	uint64_t int_us;
-	s = cfg->get_uint64("force_create", int_us);
+	s = cfg->get_uint64("create_or_error_if_exists", int_us);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(int_us, 0);
 
