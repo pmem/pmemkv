@@ -3,7 +3,8 @@ XXX Igor Chorążewicz <igor.chorazewicz@intel.com>
 	* Version 1.5
 
 	Features:
-	-
+	- XXX ... deprecate config's flag force_create and add alias error_if_exists (#576)
+		<compatibility note?>
 
 	Major fixes:
 	-

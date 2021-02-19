@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_PMEMOBJ_ENGINE_H
 #define LIBPMEMKV_PMEMOBJ_ENGINE_H
@@ -45,15 +45,15 @@ public:
 			throw internal::invalid_argument(
 				"Config does not contain item with key: \"path\" or \"oid\"");
 		} else if (is_path) {
-			uint64_t force_create;
+			uint64_t error_if_exists;
 			cfg_by_path = true;
 
-			if (!cfg->get_uint64("force_create", &force_create)) {
-				force_create = 0;
+			if (!cfg->get_uint64("error_if_exists", &error_if_exists)) {
+				error_if_exists = 0;
 			}
 
 			pmem::obj::pool<Root> pop;
-			if (force_create) {
+			if (error_if_exists) {
 				if (!cfg->get_uint64("size", &size))
 					throw internal::invalid_argument(
 						"Config does not contain item with key: \"size\"");

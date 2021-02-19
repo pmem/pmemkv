@@ -411,7 +411,7 @@ if(ENGINE_CMAP)
 	add_engine_test(ENGINE cmap
 			BINARY put_get_std_map
 			TRACERS none memcheck pmemcheck
-			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_error_if_exists.cmake
 			PARAMS 1000 100 200)
 
 	add_engine_test(ENGINE cmap
@@ -741,7 +741,7 @@ if(ENGINE_CSMAP)
 	add_engine_test(ENGINE csmap
 			BINARY put_get_std_map
 			TRACERS none memcheck pmemcheck
-			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_error_if_exists.cmake
 			PARAMS 1000 100 200)
 
 	add_engine_test(ENGINE csmap
@@ -1141,7 +1141,7 @@ if(ENGINE_TREE3)
 	add_engine_test(ENGINE tree3
 			BINARY put_get_std_map
 			TRACERS none #memcheck pmemcheck
-			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_error_if_exists.cmake
 			PARAMS 1000 100 200)
 
 	# XXX fail to investigate
@@ -1401,7 +1401,7 @@ if(ENGINE_STREE)
 	add_engine_test(ENGINE stree
 			BINARY put_get_std_map
 			TRACERS none memcheck pmemcheck
-			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_error_if_exists.cmake
 			PARAMS 1000 20 200)
 
 	add_engine_test(ENGINE stree
@@ -1584,7 +1584,7 @@ if(ENGINE_RADIX)
 	add_engine_test(ENGINE radix
 			BINARY put_get_std_map
 			TRACERS none memcheck pmemcheck
-			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_error_if_exists.cmake
 			PARAMS 1000 8 200)
 
 	add_engine_test(ENGINE radix

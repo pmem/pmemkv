@@ -55,8 +55,8 @@ int main(int argc, char *argv[])
 	status = pmemkv_config_put_size(config, SIZE);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
-	/* Specifies value of force create flag */
-	status = pmemkv_config_put_force_create(config, true);
+	/* Specifies value of error_if_exists flag */
+	status = pmemkv_config_put_error_if_exists(config, true);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
 	/* Specifies comparator used by the engine */
