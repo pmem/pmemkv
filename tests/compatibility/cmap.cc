@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #include <cassert>
 #include <iostream>
@@ -18,6 +18,11 @@ pmem::kv::db *db_create(std::string path)
 	assert(s == pmem::kv::status::OK);
 	s = cfg.put_uint64("size", SIZE);
 	assert(s == pmem::kv::status::OK);
+	s = cfg.put_uint64("error_if_exists", 1);
+	assert(s == pmem::kv::status::OK);
+
+	/* force_create flag left here for compatibility. This test's binary
+	 * is used to create/open also with older pmemkv versions. */
 	s = cfg.put_uint64("force_create", 1);
 	assert(s == pmem::kv::status::OK);
 
