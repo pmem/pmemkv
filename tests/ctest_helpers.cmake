@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2018-2020, Intel Corporation
+# Copyright 2018-2021, Intel Corporation
 
 #
 # ctest_helpers.cmake - helper functions for tests/CMakeLists.txt
@@ -122,13 +122,13 @@ function(find_pmempool)
 	endif()
 endfunction()
 
-# Function to build test with custom build options (e.g. passing defines) and
+# Function to build test with custom build options (e.g. passing defines),
 # link it with custom library/-ies (supports 'json', 'libpmemobj_cpp' and
-# 'dl_libs'). It calls build_test function.
-# Usage: build_test_ext(NAME .. SRC_FILES .. .. LIBS .. .. BUILD_OPTIONS .. ..)
+# 'dl_libs') and compile options. It calls build_test function.
+# Usage: build_test_ext(NAME .. SRC_FILES .. .. LIBS .. .. BUILD_OPTIONS .. .. OPTS .. ..)
 function(build_test_ext)
 	set(oneValueArgs NAME)
-	set(multiValueArgs SRC_FILES LIBS BUILD_OPTIONS)
+	set(multiValueArgs SRC_FILES LIBS BUILD_OPTIONS OPTS)
 	cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 	set(LIBS_TO_LINK "")
 
@@ -154,6 +154,7 @@ function(build_test_ext)
 	build_test(${TEST_NAME} ${TEST_SRC_FILES})
 	target_link_libraries(${TEST_NAME} ${LIBS_TO_LINK})
 	target_compile_definitions(${TEST_NAME} PRIVATE ${TEST_BUILD_OPTIONS})
+	target_compile_options(${TEST_NAME} PRIVATE ${TEST_OPTS})
 endfunction()
 
 function(build_test name)
