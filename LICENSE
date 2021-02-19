@@ -1,4 +1,4 @@
-Copyright 2019-2020, Intel Corporation
+Copyright 2019-2021, Intel Corporation
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -38,6 +38,7 @@ with the following exceptions:
   * v1.1/doxygen/jquery.js
   * v1.2/doxygen/jquery.js
   * v1.3/doxygen/jquery.js
+  * v1.4/doxygen/jquery.js
   are dual licensed under the MIT or GPL Version 2 license
   (see: https://jquery.org/license).
 
@@ -47,6 +48,7 @@ with the following exceptions:
   * sizzle.js (included in v1.1/doxygen/jquery.js)
   * sizzle.js (included in v1.2/doxygen/jquery.js)
   * sizzle.js (included in v1.3/doxygen/jquery.js)
+  * sizzle.js (included in v1.4/doxygen/jquery.js)
   are released under the MIT, BSD and GPL licenses
   (see: https://github.com/jquery/sizzle/blob/master/LICENSE.txt).
 
@@ -56,9 +58,11 @@ with the following exceptions:
   * v1.1/doxygen/search/search.js
   * v1.2/doxygen/search/search.js
   * v1.3/doxygen/search/search.js
+  * v1.4/doxygen/search/search.js
   * master/doxygen/dynsections.js
   * v1.0/doxygen/dynsections.js
   * v1.1/doxygen/dynsections.js
   * v1.2/doxygen/dynsections.js
   * v1.3/doxygen/dynsections.js
+  * v1.4/doxygen/dynsections.js
   are licensed under the GPL.
