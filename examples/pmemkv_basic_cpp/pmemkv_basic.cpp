@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	ASSERT(s == status::OK);
 	s = cfg.put_size(SIZE);
 	ASSERT(s == status::OK);
-	s = cfg.put_force_create(true);
+	s = cfg.put_error_if_exists(true);
 	ASSERT(s == status::OK);
 
 	LOG("Opening pmemkv database with 'cmap' engine");
