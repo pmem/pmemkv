@@ -75,6 +75,7 @@ set(LIBPMEMOBJ_CPP_REQUIRED_VERSION 1.12)
 set(LIBPMEMOBJ_REQUIRED_VERSION 1.9.1)
 set(LIBPMEM_REQUIRED_VERSION 1.7)
 set(MEMKIND_REQUIRED_VERSION 1.8.0)
+set(RAPIDJSON_REQUIRED_VERSION 1.0.0)
 
 set(PKG_CONFIG_REQUIRES)
 set(DEB_DEPENDS)
@@ -271,10 +272,6 @@ if(ENGINE_VCMAP)
 	list(APPEND DEB_DEPENDS libtbb2)
 endif()
 
-string(REPLACE ";" " " PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES}")
-string(REPLACE ";" ", " RPM_PACKAGE_REQUIRES "${RPM_DEPENDS}")
-string(REPLACE ";" ", " DEB_PACKAGE_REQUIRES "${DEB_DEPENDS}")
-
 # ----------------------------------------------------------------- #
 ## Link libraries, setup targets
 # ----------------------------------------------------------------- #
@@ -293,32 +290,6 @@ if(ENGINE_VSMAP OR ENGINE_VCMAP)
 endif()
 if(ENGINE_VCMAP)
 	target_link_libraries(pmemkv PRIVATE ${TBB_LIBRARIES})
-endif()
-
-# ----------------------------------------------------------------- #
-## Configure make install/uninstall and packages
-# ----------------------------------------------------------------- #
-configure_file(libpmemkv.pc.in libpmemkv.pc @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libpmemkv.pc
-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-
-set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER "src/libpmemkv.h;src/libpmemkv.hpp")
-
-install(TARGETS pmemkv
-		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-configure_file(
-	"${PMEMKV_ROOT_DIR}/cmake/cmake_uninstall.cmake.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-	IMMEDIATE @ONLY)
-
-add_custom_target(uninstall
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-
-if(NOT "${CPACK_GENERATOR}" STREQUAL "")
-	include(${PMEMKV_ROOT_DIR}/cmake/packages.cmake)
 endif()
 
 # ----------------------------------------------------------------- #
@@ -397,6 +368,9 @@ add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 # ----------------------------------------------------------------- #
 if(BUILD_JSON_CONFIG)
 	include(rapidjson)
+	list(APPEND PKG_CONFIG_REQUIRES "RapidJSON >= ${RAPIDJSON_REQUIRED_VERSION}")
+	list(APPEND RPM_DEPENDS "rapidjson-devel >= ${RAPIDJSON_REQUIRED_VERSION}")
+	list(APPEND DEB_DEPENDS "rapidjson-dev (>= ${RAPIDJSON_REQUIRED_VERSION})")
 	add_definitions(-DBUILD_JSON_CONFIG)
 
 	set(SOURCE_FILES_JSON_CONFIG
@@ -435,4 +409,34 @@ endif()
 
 if(BUILD_DOC)
 	add_subdirectory(doc)
+endif()
+
+# ----------------------------------------------------------------- #
+## Configure make install/uninstall and packages
+# ----------------------------------------------------------------- #
+string(REPLACE ";" " " PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES}")
+string(REPLACE ";" ", " RPM_PACKAGE_REQUIRES "${RPM_DEPENDS}")
+string(REPLACE ";" ", " DEB_PACKAGE_REQUIRES "${DEB_DEPENDS}")
+
+configure_file(libpmemkv.pc.in libpmemkv.pc @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libpmemkv.pc
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
+set_target_properties(pmemkv PROPERTIES PUBLIC_HEADER "src/libpmemkv.h;src/libpmemkv.hpp")
+
+install(TARGETS pmemkv
+		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+configure_file(
+	"${PMEMKV_ROOT_DIR}/cmake/cmake_uninstall.cmake.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+	IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
+if(NOT "${CPACK_GENERATOR}" STREQUAL "")
+	include(${PMEMKV_ROOT_DIR}/cmake/packages.cmake)
 endif()
