@@ -16,8 +16,9 @@ fi
 PACKAGE_TYPE=$1
 PREFIX=${2:-/usr}
 
-# common: 1.9.1, 16.09.2020
-PMDK_VERSION="1.9.1"
+# master: Merge pull request #5150 from kilobyte/rpm-no-lto, 16.02.2021
+# contains fix for packaging
+PMDK_VERSION="7f88d9fae088b81936d2f6d5235169e90e7478c7"
 
 git clone https://github.com/pmem/pmdk
 cd pmdk
