@@ -95,7 +95,10 @@ git add -A
 git commit -m "doc: automatic gh-pages docs update" && true
 git push -f ${ORIGIN} ${GH_PAGES_NAME}
 
-# Makes pull request.
+echo "Make sure hub command is available:"
+hub --version
+
+echo "Make or update pull request:"
 # When there is already an open PR or there are no changes an error is thrown, which we ignore.
 hub pull-request -f -b ${DOC_REPO_OWNER}:gh-pages -h ${BOT_NAME}:${GH_PAGES_NAME} \
 	-m "doc: automatic gh-pages docs update" && true
