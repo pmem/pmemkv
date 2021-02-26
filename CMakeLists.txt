@@ -47,12 +47,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 
 # Specify and print the build type
-if(EXISTS "${PMEMKV_ROOT_DIR}/.git")
-	# current sources were downloaded using git, so we assume it's for debug (developing) purposes
-	set(DEFAULT_BUILD_TYPE "Debug")
-else()
-	set(DEFAULT_BUILD_TYPE "RelWithDebInfo")
-endif()
+set(DEFAULT_BUILD_TYPE "RelWithDebInfo")
 set(predefined_build_types
 	Debug
 	Release
