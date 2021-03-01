@@ -15,17 +15,22 @@ Remember this is just a minimal template. You can extend it with data you think 
 
 ## Environment Information
 
-- pmemkv version(s):                                                 <!-- fill this out -->
-- libpmemobj-cpp version(s):                                         <!-- fill this out -->
-- PMDK (libpmem/libpmemobj) package version(s):                      <!-- fill this out -->
-- OS(es) version(s):                                                 <!-- fill this out -->
-- kernel version(s):                                                 <!-- fill this out -->
-- compiler, libraries, packaging and other related tools version(s): <!-- fill this out -->
+| Name                         | Version                     |
+| :--------------------------- | :-------------------------: |
+| pmemkv version(s)            | <!--fill--> |
+| libpmemobj-cpp version(s)    | <!--fill--> |
+| PMDK (libpmem/libpmemobj) version(s) | <!--fill--> |
+| OS(es) version(s)            | <!--fill--> |
+| kernel version(s)            | <!--fill--> |
+| compiler, libraries, packaging and other related tools version(s) | <!--fill--> |
 
-and possibly:
-- TBB version(s):                                                    <!-- fill this out -->
-- memkind version(s):                                                <!-- fill this out -->
-- ndctl version(s):                                                  <!-- fill this out -->
+and if applicable:
+| Name                        | Version     |
+| :-------------------------- | :---------: |
+| TBB version(s):             | <!--fill--> |
+| memkind version(s):         | <!--fill--> |
+| ndctl version(s):           | <!--fill--> |
+
 <!-- fill in also other useful environment data -->
 
 ## Please provide a reproduction of the bug:
@@ -50,8 +55,9 @@ and possibly:
 <!-- fill this out -->
 
 ## Additional information about Priority and Help Requested:
-
-Are you willing to submit a pull request with a proposed change? (Yes, No)  <!-- check one if possible -->
-
-Requested priority: (Showstopper, High, Medium, Low)                        <!-- check one if possible -->
+<!-- Please fill the table below -->
+| Question | Answer |
+| :------- | :----: |
+| Are you willing to submit a pull request with a proposed change? | Yes/No |
+| Requested priority | Showstopper/High/Medium/Low |
 
