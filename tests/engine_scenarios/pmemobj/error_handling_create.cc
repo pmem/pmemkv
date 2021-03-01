@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "unittest.hpp"
 
@@ -19,9 +19,26 @@ static void FailsToCreateInstanceWithNonExistentPath(std::string non_existent_pa
 	pmem::kv::db kv;
 	s = kv.open(engine, std::move(config));
 
-	/* Not-existent path supplied */
-	// XXX - should be WRONG_PATH
-	ASSERT_STATUS(s, pmem::kv::status::UNKNOWN_ERROR);
+	/* Non-existent path supplied */
+	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
+}
+
+static void FailsToOpenInstanceWithNonExistentPath(std::string non_existent_path,
+						   std::string engine)
+{
+	pmem::kv::config config;
+	auto s = config.put_path(non_existent_path);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+	s = config.put_force_create(false);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+	s = config.put_size(5 * PMEMOBJ_MIN_POOL);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+
+	pmem::kv::db kv;
+	s = kv.open(engine, std::move(config));
+
+	/* Non-existent path supplied */
+	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
 static void FailsToCreateInstanceWithHugeSize(std::string path, std::string engine)
@@ -38,8 +55,7 @@ static void FailsToCreateInstanceWithHugeSize(std::string path, std::string engi
 	s = kv.open(engine, std::move(config));
 
 	/* Too big pool size supplied */
-	// XXX - should be WRONG_SIZE
-	ASSERT_STATUS(s, pmem::kv::status::UNKNOWN_ERROR);
+	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
 static void FailsToCreateInstanceWithTinySize(std::string path, std::string engine)
@@ -56,8 +72,7 @@ static void FailsToCreateInstanceWithTinySize(std::string path, std::string engi
 	s = kv.open(engine, std::move(config));
 
 	/* Too small pool size supplied */
-	// XXX - should be WRONG_SIZE
-	ASSERT_STATUS(s, pmem::kv::status::UNKNOWN_ERROR);
+	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
 static void FailsToCreateInstanceWithNoSize(std::string path, std::string engine)
@@ -111,6 +126,28 @@ static void FailsToCreateInstanceWithNoPathAndOid(std::string path, std::string 
 	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
+static void FailsToCreateInstanceWithCornerCasePaths(std::string engine)
+{
+	std::vector<std::string> paths = {"/", " ", "", "//",
+					  ",./;'[]-=<>?:\"{}|_+!@#$%^&*()`~"};
+
+	for (auto &path : paths) {
+		pmem::kv::config config;
+		auto s = config.put_force_create(true);
+		ASSERT_STATUS(s, pmem::kv::status::OK);
+		s = config.put_size(5 * PMEMOBJ_MIN_POOL);
+		ASSERT_STATUS(s, pmem::kv::status::OK);
+		s = config.put_path(path);
+		ASSERT_STATUS(s, pmem::kv::status::OK);
+
+		pmem::kv::db kv;
+		s = kv.open(engine, std::move(config));
+
+		/* Invalid path supplied */
+		ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
+	}
+}
+
 static void test(int argc, char *argv[])
 {
 	if (argc < 3)
@@ -121,11 +158,13 @@ static void test(int argc, char *argv[])
 	auto non_existent_path = argv[3];
 
 	FailsToCreateInstanceWithNonExistentPath(non_existent_path, engine);
+	FailsToOpenInstanceWithNonExistentPath(non_existent_path, engine);
 	FailsToCreateInstanceWithHugeSize(path, engine);
 	FailsToCreateInstanceWithTinySize(path, engine);
 	FailsToCreateInstanceWithNoSize(path, engine);
 	FailsToCreateInstanceWithPathAndOid(path, engine);
 	FailsToCreateInstanceWithNoPathAndOid(path, engine);
+	FailsToCreateInstanceWithCornerCasePaths(engine);
 }
 
 int main(int argc, char *argv[])

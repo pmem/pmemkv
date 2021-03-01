@@ -19,7 +19,8 @@ PACKAGE_TYPE=${1^^} #To uppercase
 echo "PACKAGE_TYPE: ${PACKAGE_TYPE}"
 
 # Merge pull request #1044 from lukaszstolarczuk/change-default-build-type; 01.03.2021
-LIBPMEMOBJ_CPP_VERSION="083de85d3abb2793986ba1234417b9df1376e8ff"
+# It contains new exception: pool_invalid_argument
+LIBPMEMOBJ_CPP_VERSION="515f097bca0b3bb215ff132fcb2da948858f1f04"
 echo "LIBPMEMOBJ_CPP_VERSION: ${LIBPMEMOBJ_CPP_VERSION}"
 
 build_dir=$(mktemp -d -t libpmemobj-cpp-XXX)
