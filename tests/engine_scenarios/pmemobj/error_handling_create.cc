@@ -6,12 +6,14 @@
 #include <libpmemobj/pool_base.h>
 
 static void FailsToCreateInstanceWithNonExistentPath(std::string non_existent_path,
-						     std::string engine)
+						     std::string engine, bool error_flag)
 {
 	pmem::kv::config config;
 	auto s = config.put_path(non_existent_path);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
-	s = config.put_error_if_exists(true);
+	s = config.put_error_if_exists(error_flag);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+	s = config.put_create_if_missing(!error_flag);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_size(5 * PMEMOBJ_MIN_POOL);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
@@ -24,12 +26,14 @@ static void FailsToCreateInstanceWithNonExistentPath(std::string non_existent_pa
 }
 
 static void FailsToOpenInstanceWithNonExistentPath(std::string non_existent_path,
-						   std::string engine)
+						   std::string engine, bool error_flag)
 {
 	pmem::kv::config config;
 	auto s = config.put_path(non_existent_path);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
-	s = config.put_error_if_exists(false);
+	s = config.put_error_if_exists(error_flag);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+	s = config.put_create_if_missing(!error_flag);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_size(5 * PMEMOBJ_MIN_POOL);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
@@ -41,12 +45,15 @@ static void FailsToOpenInstanceWithNonExistentPath(std::string non_existent_path
 	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
-static void FailsToCreateInstanceWithHugeSize(std::string path, std::string engine)
+static void FailsToCreateInstanceWithHugeSize(std::string path, std::string engine,
+					      bool error_flag)
 {
 	pmem::kv::config config;
 	auto s = config.put_path(path);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
-	s = config.put_error_if_exists(true);
+	s = config.put_error_if_exists(error_flag);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+	s = config.put_create_if_missing(!error_flag);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_size(std::numeric_limits<uint64_t>::max());
 	ASSERT_STATUS(s, pmem::kv::status::OK);
@@ -58,12 +65,15 @@ static void FailsToCreateInstanceWithHugeSize(std::string path, std::string engi
 	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
-static void FailsToCreateInstanceWithTinySize(std::string path, std::string engine)
+static void FailsToCreateInstanceWithTinySize(std::string path, std::string engine,
+					      bool error_flag)
 {
 	pmem::kv::config config;
 	auto s = config.put_path(path);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
-	s = config.put_error_if_exists(true);
+	s = config.put_error_if_exists(error_flag);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+	s = config.put_create_if_missing(!error_flag);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_size(PMEMOBJ_MIN_POOL - 1);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
@@ -75,12 +85,15 @@ static void FailsToCreateInstanceWithTinySize(std::string path, std::string engi
 	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
-static void FailsToCreateInstanceWithNoSize(std::string path, std::string engine)
+static void FailsToCreateInstanceWithNoSize(std::string path, std::string engine,
+					    bool error_flag)
 {
 	pmem::kv::config config;
 	auto s = config.put_path(path);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
-	s = config.put_error_if_exists(true);
+	s = config.put_error_if_exists(error_flag);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+	s = config.put_create_if_missing(!error_flag);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
@@ -90,7 +103,8 @@ static void FailsToCreateInstanceWithNoSize(std::string path, std::string engine
 	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
-static void FailsToCreateInstanceWithPathAndOid(std::string path, std::string engine)
+static void FailsToCreateInstanceWithPathAndOid(std::string path, std::string engine,
+						bool error_flag)
 {
 	PMEMoid oid;
 
@@ -99,7 +113,9 @@ static void FailsToCreateInstanceWithPathAndOid(std::string path, std::string en
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_oid(&oid);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
-	s = config.put_error_if_exists(true);
+	s = config.put_error_if_exists(error_flag);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+	s = config.put_create_if_missing(!error_flag);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_size(5 * PMEMOBJ_MIN_POOL);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
@@ -111,10 +127,13 @@ static void FailsToCreateInstanceWithPathAndOid(std::string path, std::string en
 	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
-static void FailsToCreateInstanceWithNoPathAndOid(std::string path, std::string engine)
+static void FailsToCreateInstanceWithNoPathOrOid(std::string path, std::string engine,
+						 bool error_flag)
 {
 	pmem::kv::config config;
-	auto s = config.put_error_if_exists(true);
+	auto s = config.put_error_if_exists(error_flag);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+	s = config.put_create_if_missing(!error_flag);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_size(5 * PMEMOBJ_MIN_POOL);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
@@ -126,7 +145,7 @@ static void FailsToCreateInstanceWithNoPathAndOid(std::string path, std::string 
 	ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
 }
 
-static void FailsToCreateInstanceWithCornerCasePaths(std::string engine)
+static void FailsToCreateInstanceWithCornerCasePaths(std::string engine, bool error_flag)
 {
 	std::vector<std::string> paths = {"/", "", "//",
 					  ",./;'[]-=<>?:\"{}|_+!@#$%^&*()`~"};
@@ -134,6 +153,8 @@ static void FailsToCreateInstanceWithCornerCasePaths(std::string engine)
 	for (auto &path : paths) {
 		pmem::kv::config config;
 		auto s = config.put_error_if_exists(true);
+		ASSERT_STATUS(s, pmem::kv::status::OK);
+		s = config.put_create_if_missing(true);
 		ASSERT_STATUS(s, pmem::kv::status::OK);
 		s = config.put_size(5 * PMEMOBJ_MIN_POOL);
 		ASSERT_STATUS(s, pmem::kv::status::OK);
@@ -157,14 +178,16 @@ static void test(int argc, char *argv[])
 	auto path = argv[2];
 	auto non_existent_path = argv[3];
 
-	FailsToCreateInstanceWithNonExistentPath(non_existent_path, engine);
-	FailsToOpenInstanceWithNonExistentPath(non_existent_path, engine);
-	FailsToCreateInstanceWithHugeSize(path, engine);
-	FailsToCreateInstanceWithTinySize(path, engine);
-	FailsToCreateInstanceWithNoSize(path, engine);
-	FailsToCreateInstanceWithPathAndOid(path, engine);
-	FailsToCreateInstanceWithNoPathAndOid(path, engine);
-	FailsToCreateInstanceWithCornerCasePaths(engine);
+	for (auto flag : {true, false}) {
+		FailsToCreateInstanceWithNonExistentPath(non_existent_path, engine, flag);
+		FailsToOpenInstanceWithNonExistentPath(non_existent_path, engine, flag);
+		FailsToCreateInstanceWithHugeSize(path, engine, flag);
+		FailsToCreateInstanceWithTinySize(path, engine, flag);
+		FailsToCreateInstanceWithNoSize(path, engine, flag);
+		FailsToCreateInstanceWithPathAndOid(path, engine, flag);
+		FailsToCreateInstanceWithNoPathOrOid(path, engine, flag);
+		FailsToCreateInstanceWithCornerCasePaths(engine, flag);
+	}
 }
 
 int main(int argc, char *argv[])
