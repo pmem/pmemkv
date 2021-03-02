@@ -45,33 +45,40 @@ public:
 			throw internal::invalid_argument(
 				"Config does not contain item with key: \"path\" or \"oid\"");
 		} else if (is_path) {
-			uint64_t create_or_error_if_exists;
+			uint64_t create_or_error_if_exists = 0;
+			uint64_t create_if_missing = 0;
+			pmem::obj::pool<Root> pop;
 			cfg_by_path = true;
 
+			auto is_size = cfg->get_uint64("size", &size);
+			cfg->get_uint64("create_if_missing", &create_if_missing);
 			if (!cfg->get_uint64("create_or_error_if_exists",
 					     &create_or_error_if_exists)) {
 				/* 'force_create' is here for compatibility with bindings,
 				 * which may still use this flag in their API */
-				if (!cfg->get_uint64("force_create",
-						     &create_or_error_if_exists)) {
-					create_or_error_if_exists = 0;
-				}
+				cfg->get_uint64("force_create",
+						&create_or_error_if_exists);
 			}
 
-			pmem::obj::pool<Root> pop;
-			if (create_or_error_if_exists) {
-				if (!cfg->get_uint64("size", &size)) {
-					throw internal::invalid_argument(
-						"Config does not contain item with key: \"size\"");
+			if (create_if_missing && create_or_error_if_exists) {
+				throw internal::invalid_argument(
+					"Both flags set in config: \"create_if_missing\" and \"create_or_error_if_exists\"");
+			}
+
+			if (create_if_missing) {
+				bool failed_open = false;
+				try {
+					pop = pmem::obj::pool<Root>::open(path, layout);
+				} catch (pmem::pool_invalid_argument &e) {
+					failed_open = true;
 				}
 
-				try {
-					pop = pmem::obj::pool<Root>::create(
-						path, layout, size, S_IRWXU);
-				} catch (pmem::pool_invalid_argument &e) {
-					throw internal::invalid_argument(e.what());
+				if (failed_open) {
+					pop = create_or_fail(path, is_size, size, layout);
 				}
-			} else {
+			} else if (create_or_error_if_exists) {
+				pop = create_or_fail(path, is_size, size, layout);
+			} else { /* no flags set, just open */
 				try {
 					pop = pmem::obj::pool<Root>::open(path, layout);
 				} catch (pmem::pool_invalid_argument &e) {
@@ -104,6 +111,23 @@ protected:
 	PMEMoid *root_oid;
 
 	bool cfg_by_path = false;
+
+private:
+	pmem::obj::pool<Root> create_or_fail(const char *path, const bool is_size,
+					     const std::size_t size,
+					     const std::string &layout)
+	{
+		if (!is_size) {
+			throw internal::invalid_argument(
+				"Config does not contain item with key \"size\"");
+		}
+
+		try {
+			return pmem::obj::pool<Root>::create(path, layout, size, S_IRWXU);
+		} catch (pmem::pool_invalid_argument &e) {
+			throw internal::invalid_argument(e.what());
+		}
+	}
 };
 
 } /* namespace kv */
