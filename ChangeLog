@@ -9,8 +9,9 @@ XXX Igor Chorążewicz <igor.chorazewicz@intel.com>
 	-
 
 	Other changes:
-	- Deprecate config's flag 'force_create' and add alias error_if_exists (#576)
-		<compatibility note?>
+	- Deprecate config's flag 'force_create' and add an alias: 'error_if_exists' (#576)
+		The old flag can still be used and it behaves with no difference. It's
+		discouraged from using, though.
 	-
 
 	Other changes:

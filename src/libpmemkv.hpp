@@ -17,8 +17,6 @@
 #include "libpmemkv.h"
 #include <libpmemobj/pool_base.h>
 
-#define FC_DEPRECATED_MSG "use pmem::kv::config::put_error_if_exists instead"
-
 /*! \file libpmemkv.hpp
 	\brief Main C++ pmemkv public header.
 
@@ -445,6 +443,9 @@ bool operator!=(const status &lhs, const result<T> &rhs)
 	details).
 */
 class config {
+#define force_create_deprecated                                                          \
+	__attribute__((deprecated("use config::put_error_if_exists instead")))
+
 public:
 	config() noexcept;
 	explicit config(pmemkv_config *cfg) noexcept;
@@ -464,9 +465,9 @@ public:
 
 	status put_size(std::uint64_t size) noexcept;
 	status put_path(const std::string &path) noexcept;
-	status put_force_create(bool value) noexcept
-		__attribute__((deprecated(FC_DEPRECATED_MSG)));
+	status put_force_create(bool value) noexcept force_create_deprecated;
 	status put_error_if_exists(bool value) noexcept;
+	status put_create_if_missing(bool value) noexcept;
 	status put_oid(PMEMoid *oid) noexcept;
 	template <typename Comparator>
 	status put_comparator(Comparator &&comparator);
@@ -1503,13 +1504,9 @@ inline status config::put_path(const std::string &path) noexcept
 }
 
 /**
- * Puts force_create parameter to a config. For engines supporting this flag:
- * If true: pmemkv creates the file, unless it exists - than it fails.
- * If false: pmemkv opens the file specified by 'path' (see config::put_path),
- *		unless the path does not exist - than it fails.
- * False by default.
+ * It's an alias for config::put_error_if_exists, kept for compatibility.
  *
- * @deprecated use config::put_error_if_exists instead
+ * @deprecated use config::put_error_if_exists instead.
  * @return pmem::kv::status
  */
 inline status config::put_force_create(bool value) noexcept
@@ -1518,17 +1515,34 @@ inline status config::put_force_create(bool value) noexcept
 }
 
 /**
- * Puts error_if_exists parameter to a config. For engines supporting this flag:
- * If true: pmemkv creates the file, unless it exists - than it fails.
- * If false: pmemkv opens the file specified by 'path' (see config::put_path),
- *		unless the path does not exist - than it fails.
- * False by default.
+ * Puts error_if_exists parameter to a config. This flag has lower priority than
+ * **create_if_missing** (see config::put_create_if_missing), setting them both makes no
+ *sense. Works only with engines supporting this flag and it means: If true: pmemkv
+ *creates the file, unless it exists - than it fails. If false: pmemkv opens the file
+ *specified by 'path' (see config::put_path), unless the path does not exist - than it
+ *fails. False by default.
  *
  * @return pmem::kv::status
  */
 inline status config::put_error_if_exists(bool value) noexcept
 {
-	return put_uint64("error_if_exists", value ? 1 : 0);
+	return put_uint64("error_if_exists", (std::uint64_t)value);
+}
+
+/**
+ * Puts create_if_missing parameter to a config. This flag is prioritized before
+ * **error_if_exists** (see config::put_error_if_exists) and is encouraged to use.
+ * Works only with engines supporting this flag and it means:
+ * If true: pmemkv tries to create the file, if that doesn't succeed
+ *	  it means there's (most likely) a file ready to use, so it tries to open it.
+ * If false: pmemkv uses **error_if_exists** flag to create/open the file.
+ * False by default.
+ *
+ * @return pmem::kv::status
+ */
+inline status config::put_create_if_missing(bool value) noexcept
+{
+	return put_uint64("create_if_missing", (std::uint64_t)value);
 }
 
 /**

@@ -105,17 +105,25 @@ Every engine has documented all supported config parameters (please see **libpme
 
 `int pmemkv_config_put_force_create(pmemkv_config *config, bool value);`
 
-:	**deprecated** Puts force_create parameter to a config. For engines supporting this flag:
-	If false: pmemkv opens the file specified by key **path**, unless the path does not exist - than it fails.
-	If true: pmemkv creates the file, unless it exists - than it fails.
-	False by default.
-	It's recommended to use `pmemkv_config_put_error_if_exists` instead.
+:	It is **deprecated**. It's recommended to use `pmemkv_config_put_error_if_exists` instead.
 
 `int pmemkv_config_put_error_if_exists(pmemkv_config *config, bool value);`
 
-:	Puts error_if_exists parameter to a config. For engines supporting this flag:
-	If false: pmemkv opens the file specified by key **path**, unless the path does not exist - than it fails.
+:	Puts error_if_exists parameter to a config. This flag has lower priority than
+		**create_if_missing**, setting them both makes no sense.
+	Works only with engines supporting this flag and it means:
 	If true: pmemkv creates the file, unless it exists - than it fails.
+	If false: pmemkv opens the file specified by 'path' (see pmemkv_config_put_path),
+		unless the path does not exist - than it fails.
+	False by default.
+
+`int pmemkv_config_put_create_if_missing(pmemkv_config *config, bool value)`
+
+:	Puts create_if_missing parameter to a config. This flag is prioritized before **error_if_exists**
+	and is encouraged to use. Works only with engines supporting this flag and it means:
+	If true: pmemkv tries to create the file, if that doesn't succeed it means there's
+		(most likely) a file ready to use, so it tries to open it.
+	If false: pmemkv uses **error_if_exists** flag to create/open the file.
 	False by default.
 
 `int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);`
