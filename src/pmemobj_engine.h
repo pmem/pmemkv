@@ -46,6 +46,7 @@ public:
 				"Config does not contain item with key: \"path\" or \"oid\"");
 		} else if (is_path) {
 			uint64_t error_if_exists;
+			uint64_t create_if_missing;
 			cfg_by_path = true;
 
 			if (!cfg->get_uint64("error_if_exists", &error_if_exists)) {
@@ -55,9 +56,24 @@ public:
 					error_if_exists = 0;
 				}
 			}
+			if (!cfg->get_uint64("create_if_missing", &create_if_missing)) {
+				create_if_missing = 0;
+			}
 
 			pmem::obj::pool<Root> pop;
-			if (error_if_exists) {
+			if (create_if_missing) {
+				if (!cfg->get_uint64("size", &size))
+					throw internal::invalid_argument(
+						"Config does not contain item with key: \"size\"");
+
+				try {
+					pop = pmem::obj::pool<Root>::create(
+						path, layout, size, S_IRWXU);
+				} catch (pmem::pool_invalid_argument &e) {
+					// XXX: check for EEXIST ?!
+					pop = pmem::obj::pool<Root>::open(path, layout);
+				}
+			} else if (error_if_exists) {
 				if (!cfg->get_uint64("size", &size))
 					throw internal::invalid_argument(
 						"Config does not contain item with key: \"size\"");

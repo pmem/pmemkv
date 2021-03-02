@@ -55,8 +55,11 @@ int main(int argc, char *argv[])
 	status = pmemkv_config_put_size(config, SIZE);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
-	/* Specifies value of error_if_exists flag */
-	status = pmemkv_config_put_error_if_exists(config, true);
+	/* Specifies value of create_if_missing flag.
+	 * Alternatively, another flag - 'error_if_exists' can be set using:
+	 * `pmemkv_config_put_create_if_missing`
+	 * For differences between the two, see manpage libpmemkv(7). */
+	status = pmemkv_config_put_create_if_missing(config, true);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
 	/* Specifies comparator used by the engine */

@@ -71,6 +71,7 @@ int pmemkv_config_put_path(pmemkv_config *config, const char *value);
 int __attribute__((deprecated("use pmemkv_config_put_error_if_exists instead")))
 pmemkv_config_put_force_create(pmemkv_config *config, bool value);
 int pmemkv_config_put_error_if_exists(pmemkv_config *config, bool value);
+int pmemkv_config_put_create_if_missing(pmemkv_config *config, bool value);
 int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);
 int pmemkv_config_put_oid(pmemkv_config *config, PMEMoid *oid);
 

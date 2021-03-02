@@ -465,6 +465,7 @@ public:
 	status put_force_create(bool value) noexcept __attribute__((deprecated));
 	// XXX: add depr. msg ("use pmem::kv::config::put_error_if_exists instead")
 	status put_error_if_exists(bool value) noexcept;
+	status put_create_if_missing(bool value) noexcept;
 	status put_oid(PMEMoid *oid) noexcept;
 	template <typename Comparator>
 	status put_comparator(Comparator &&comparator);
@@ -1516,7 +1517,9 @@ inline status config::put_force_create(bool value) noexcept
 }
 
 /**
- * Puts error_if_exists parameter to a config. For engines supporting this flag:
+ * Puts error_if_exists parameter to a config. This flag has lower priority than
+ * **create_if_missing** (see config::put_create_if_missing), setting both makes no sense.
+ * Works only with engines supporting this flag and it means:
  * If true: pmemkv creates the file, unless it exists - than it fails.
  * If false: pmemkv opens the file specified by 'path' (see config::put_path),
  *		unless the path does not exist - than it fails.
@@ -1526,7 +1529,23 @@ inline status config::put_force_create(bool value) noexcept
  */
 inline status config::put_error_if_exists(bool value) noexcept
 {
-	return put_uint64("error_if_exists", value ? 1 : 0);
+	return put_uint64("error_if_exists", (std::uint64_t)value);
+}
+
+/**
+ * Puts create_if_missing parameter to a config. This flag is prioritized before
+ * **error_if_exists** (see config::put_error_if_exists) and is encouraged to use (XXX ?).
+ * Works only with engines supporting this flag and it means:
+ * If true: pmemkv tries to create the file, if that doesn't succeed
+ *	  it means there's (most likely) a file ready to use, so it tries to open it.
+ * If false: pmemkv uses **error_if_exists** flag to create/open the file.
+ * False by default.
+ *
+ * @return pmem::kv::status
+ */
+inline status config::put_create_if_missing(bool value) noexcept
+{
+	return put_uint64("create_if_missing", (std::uint64_t)value);
 }
 
 /**
