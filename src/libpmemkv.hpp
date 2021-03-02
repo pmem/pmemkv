@@ -17,8 +17,6 @@
 #include "libpmemkv.h"
 #include <libpmemobj/pool_base.h>
 
-#define FC_DEPRECATED_MSG "use pmem::kv::config::put_create_or_error_if_exists instead"
-
 /*! \file libpmemkv.hpp
 	\brief Main C++ pmemkv public header.
 
@@ -445,6 +443,9 @@ bool operator!=(const status &lhs, const result<T> &rhs)
 	details).
 */
 class config {
+#define force_create_deprecated                                                          \
+	__attribute__((deprecated("use config::put_create_or_error_if_exists instead")))
+
 public:
 	config() noexcept;
 	explicit config(pmemkv_config *cfg) noexcept;
@@ -464,9 +465,9 @@ public:
 
 	status put_size(std::uint64_t size) noexcept;
 	status put_path(const std::string &path) noexcept;
-	status put_force_create(bool value) noexcept
-		__attribute__((deprecated(FC_DEPRECATED_MSG)));
+	status put_force_create(bool value) noexcept force_create_deprecated;
 	status put_create_or_error_if_exists(bool value) noexcept;
+	status put_create_if_missing(bool value) noexcept;
 	status put_oid(PMEMoid *oid) noexcept;
 	template <typename Comparator>
 	status put_comparator(Comparator &&comparator);
@@ -1503,13 +1504,9 @@ inline status config::put_path(const std::string &path) noexcept
 }
 
 /**
- * Puts force_create parameter to a config. For engines supporting this flag:
- * If true: pmemkv creates the pool, unless it exists - than it fails.
- * If false: pmemkv opens the pool specified by 'path' (see config::put_path),
- *		unless the path does not exist - than it fails.
- * False by default.
+ * It's an alias for config::put_create_or_error_if_exists, kept for compatibility.
  *
- * @deprecated use config::put_create_or_error_if_exists instead
+ * @deprecated use config::put_create_or_error_if_exists instead.
  * @return pmem::kv::status
  */
 inline status config::put_force_create(bool value) noexcept
@@ -1518,17 +1515,37 @@ inline status config::put_force_create(bool value) noexcept
 }
 
 /**
- * Puts create_or_error_if_exists parameter to a config. For engines supporting this flag:
- * If true: pmemkv creates the pool, unless it exists - than it fails.
- * If false: pmemkv opens the pool specified by 'path' (see config::put_path),
- *		unless the path does not exist - than it fails.
+ * Puts create_or_error_if_exists parameter to a config. This flag has lower priority than
+ * **create_if_missing** (see config::put_create_if_missing), setting them both makes no
+ * sense. It uses 'path' (as specified by e.g. config::put_path).
+ * Works only with engines supporting this flag and it means:
+ * If true: pmemkv creates the pool, unless it exists - then it fails.
+ * If false: pmemkv opens the pool, unless the path does not exist - then it fails.
  * False by default.
  *
  * @return pmem::kv::status
  */
 inline status config::put_create_or_error_if_exists(bool value) noexcept
 {
-	return put_uint64("create_or_error_if_exists", value ? 1 : 0);
+	return put_uint64("create_or_error_if_exists", static_cast<std::uint64_t>(value));
+}
+
+/**
+ * Puts create_if_missing parameter to a config. This flag is prioritized before
+ * **create_or_error_if_exists** (see config::put_create_or_error_if_exists)
+ * and is encouraged to use. It uses 'path' (as specified by e.g. config::put_path).
+ * Works only with engines supporting this flag and it means:
+ * If true: pmemkv tries to open the pool and if that doesn't succeed
+ *	  it means there's (most likely) no pool to use, so it tries to create it.
+ * If false: pmemkv creates or opens the pool based on setting of
+ *	  **create_or_error_if_exists** flag.
+ * False by default.
+ *
+ * @return pmem::kv::status
+ */
+inline status config::put_create_if_missing(bool value) noexcept
+{
+	return put_uint64("create_if_missing", static_cast<std::uint64_t>(value));
 }
 
 /**

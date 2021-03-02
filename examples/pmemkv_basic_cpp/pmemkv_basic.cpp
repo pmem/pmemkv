@@ -39,8 +39,12 @@ int main(int argc, char *argv[])
 	ASSERT(s == status::OK);
 	s = cfg.put_size(SIZE);
 	ASSERT(s == status::OK);
-	s = cfg.put_create_or_error_if_exists(true);
+	s = cfg.put_create_if_missing(true);
 	ASSERT(s == status::OK);
+
+	/* Alternatively create_or_error_if_exists flag can be set, to fail if file exists
+	 * For differences between the two flags, see e.g. libpmemkv(7) manpage. */
+	/* s = cfg.put_create_or_error_if_exists(true); */
 
 	LOG("Opening pmemkv database with 'cmap' engine");
 	db *kv = new db();

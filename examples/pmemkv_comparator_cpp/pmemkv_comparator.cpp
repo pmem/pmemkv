@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	ASSERT(s == status::OK);
 	s = cfg.put_size(SIZE);
 	ASSERT(s == status::OK);
-	s = cfg.put_create_or_error_if_exists(true);
+	s = cfg.put_create_if_missing(true);
 	ASSERT(s == status::OK);
 	s = cfg.put_comparator(lexicographical_comparator{});
 	ASSERT(s == status::OK);

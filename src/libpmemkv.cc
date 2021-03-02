@@ -218,7 +218,13 @@ int pmemkv_config_put_force_create(pmemkv_config *config, bool value)
 int pmemkv_config_put_create_or_error_if_exists(pmemkv_config *config, bool value)
 {
 	return pmemkv_config_put_uint64(config, "create_or_error_if_exists",
-					value ? 1 : 0);
+					static_cast<std::uint64_t>(value));
+}
+
+int pmemkv_config_put_create_if_missing(pmemkv_config *config, bool value)
+{
+	return pmemkv_config_put_uint64(config, "create_if_missing",
+					static_cast<std::uint64_t>(value));
 }
 
 int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator)

@@ -2,10 +2,7 @@
 /* Copyright 2019-2021, Intel Corporation */
 
 #include "unittest.h"
-#include <libpmemkv.h>
 
-#include <libpmemobj/pool_base.h>
-#include <stdlib.h>
 #include <string.h>
 
 /**
