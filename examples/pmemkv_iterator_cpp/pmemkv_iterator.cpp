@@ -36,7 +36,7 @@ static std::unique_ptr<db> init_kv(const std::string &engine, const std::string 
 	ASSERT(s == status::OK);
 	s = cfg.put_size(SIZE);
 	ASSERT(s == status::OK);
-	s = cfg.put_create_or_error_if_exists(true);
+	s = cfg.put_create_if_missing(true);
 	ASSERT(s == status::OK);
 
 	LOG("Opening pmemkv database with " + engine + " engine");
