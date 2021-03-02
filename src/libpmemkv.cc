@@ -220,6 +220,11 @@ int pmemkv_config_put_error_if_exists(pmemkv_config *config, bool value)
 	return pmemkv_config_put_uint64(config, "error_if_exists", value ? 1 : 0);
 }
 
+int pmemkv_config_put_create_if_missing(pmemkv_config *config, bool value)
+{
+	return pmemkv_config_put_uint64(config, "create_if_missing", value ? 1 : 0);
+}
+
 int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator)
 {
 	return pmemkv_config_put_object(config, "comparator", comparator,

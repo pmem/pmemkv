@@ -18,6 +18,7 @@ a DAX device, or a PMDK poolset file.
 
 * **path** -- Path to the database file
 	+ type: string
+* **create_if_missing** -- XXX
 * **error_if_exists** -- If 0, pmemkv opens the file specified by 'path' (path has to exist),
 	if 1, pmemkv creates the file (but it will fail if path exists).
 	+ type: uint64_t
@@ -129,6 +130,9 @@ There are two parameters to be optionally modified by env variables:
 	+ type: string
 * **error_if_exists** -- If 0, pmemkv opens the file specified by 'path' (path has to exist),
 	if 1, pmemkv creates the file (but it will fail if path exists).
+	+ type: uint64_t
+	+ default value: 0
+* **create_if_missing** -- XXX
 	+ type: uint64_t
 	+ default value: 0
 * **size** --  Only needed when error_if_exists is not 0, specifies size of the database [in bytes] to create.

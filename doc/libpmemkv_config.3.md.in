@@ -113,9 +113,18 @@ Every engine has documented all supported config parameters (please see **libpme
 
 `int pmemkv_config_put_error_if_exists(pmemkv_config *config, bool value);`
 
-:	Puts error_if_exists parameter to a config. For engines supporting this flag:
+:	XXX
+	Puts error_if_exists parameter to a config. For engines supporting this flag:
 	If false: pmemkv opens the file specified by key **path**, unless the path does not exist - than it fails.
 	If true: pmemkv creates the file, unless it exists - than it fails.
+	False by default.
+
+`int pmemkv_config_put_create_if_missing(pmemkv_config *config, bool value)`
+
+:	XXX
+	Puts error_if_exists parameter to a config. For engines supporting this flag:
+	If false: .
+	If true: .
 	False by default.
 
 `int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);`

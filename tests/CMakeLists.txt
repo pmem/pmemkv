@@ -422,6 +422,12 @@ if(ENGINE_CMAP)
 			PARAMS 1000 100 200)
 
 	add_engine_test(ENGINE cmap
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 32 16)
+
+	add_engine_test(ENGINE cmap
 			BINARY iterator_basic
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
@@ -750,6 +756,12 @@ if(ENGINE_CSMAP)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_error_if_exists.cmake
 			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE csmap
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 32 16)
 
 	add_engine_test(ENGINE csmap
 			BINARY iterator_basic
@@ -1151,6 +1163,12 @@ if(ENGINE_TREE3)
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_error_if_exists.cmake
 			PARAMS 1000 100 200)
 
+	add_engine_test(ENGINE tree3
+			BINARY put_get_std_map
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 32 16)
+
 	# XXX fail to investigate
 	# add_engine_test(ENGINE tree3
 	# BINARY sorted_iterate
@@ -1412,6 +1430,12 @@ if(ENGINE_STREE)
 			PARAMS 1000 20 200)
 
 	add_engine_test(ENGINE stree
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 32 16)
+
+	add_engine_test(ENGINE stree
 			BINARY sorted_iterate
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
@@ -1593,6 +1617,12 @@ if(ENGINE_RADIX)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/pmemobj/put_get_std_map_error_if_exists.cmake
 			PARAMS 1000 8 200)
+
+	add_engine_test(ENGINE radix
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 32 16)
 
 	add_engine_test(ENGINE radix
 			BINARY put_get_remove_charset_params
@@ -1826,6 +1856,18 @@ if (ENGINE_ROBINHOOD)
 			BINARY pmemobj_error_handling_create
 			TRACERS none memcheck
 			SCRIPT pmemobj_based/pmemobj/error_handling_create.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_error_if_exists.cmake
+			PARAMS 1000 8 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 8 8)
 
 	add_engine_test(ENGINE robinhood
 			BINARY pmemobj_put_get_std_map_oid

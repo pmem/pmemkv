@@ -43,6 +43,8 @@ int main(int argc, char *argv[])
 	LOG("Creating config");
 	config cfg;
 
+	/* Instead of expecting already created database pool, we could simply
+	 * set 'create_if_missing' flag in the config, to provide a pool if needed. */
 	status s = cfg.put_path(argv[1]);
 	ASSERT(s == status::OK);
 

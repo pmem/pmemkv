@@ -2,11 +2,9 @@
 /* Copyright 2019-2021, Intel Corporation */
 
 #include "unittest.hpp"
-#include <libpmemkv.hpp>
-#include <string>
-#include <vector>
 
 #include <limits>
+#include <vector>
 
 /**
  * Tests all config methods using C++ API
@@ -73,6 +71,9 @@ static void simple_test()
 	s = cfg->put_error_if_exists(true);
 	ASSERT_STATUS(s, status::OK);
 
+	s = cfg->put_create_if_missing(true);
+	ASSERT_STATUS(s, status::OK);
+
 	std::string value_string;
 	s = cfg->get_string("string", value_string);
 	ASSERT_STATUS(s, status::OK);
@@ -128,6 +129,10 @@ static void simple_test()
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(int_us, 1);
 
+	s = cfg->get_uint64("create_if_missing", int_us);
+	ASSERT_STATUS(s, status::OK);
+	UT_ASSERTeq(int_us, 1);
+
 	delete cfg;
 	cfg = nullptr;
 
@@ -153,8 +158,15 @@ static void put_edge_cases()
 	auto s = cfg->put_error_if_exists(false);
 	ASSERT_STATUS(s, status::OK);
 
+	s = cfg->put_create_if_missing(false);
+	ASSERT_STATUS(s, status::OK);
+
 	uint64_t int_us;
 	s = cfg->get_uint64("error_if_exists", int_us);
+	ASSERT_STATUS(s, status::OK);
+	UT_ASSERTeq(int_us, 0);
+
+	s = cfg->get_uint64("create_if_missing", int_us);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERTeq(int_us, 0);
 
