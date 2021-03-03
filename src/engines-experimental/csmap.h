@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #pragma once
+#ifdef ENGINE_CSMAP
 
 #include "../comparator/pmemobj_comparator.h"
 #include "../pmemobj_engine.h"
@@ -186,3 +187,4 @@ private:
 
 } /* namespace kv */
 } /* namespace pmem */
+#endif /* ENGINE_CSMAP */

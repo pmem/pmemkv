@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #pragma once
+#ifdef ENGINE_STREE
 
 #include <libpmemobj++/container/string.hpp>
 #include <libpmemobj++/make_persistent.hpp>
@@ -136,3 +137,5 @@ private:
 
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif /* ENGINE_STREE */

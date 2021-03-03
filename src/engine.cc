@@ -2,40 +2,15 @@
 /* Copyright 2017-2021, Intel Corporation */
 
 #include "engine.h"
-
-#include "engines/blackhole.h"
-
-#ifdef ENGINE_VSMAP
-#include "engines/vsmap.h"
-#endif
-
-#ifdef ENGINE_VCMAP
-#include "engines/vcmap.h"
-#endif
-
-#ifdef ENGINE_CMAP
-#include "engines/cmap.h"
-#endif
-
-#ifdef ENGINE_CSMAP
 #include "engines-experimental/csmap.h"
-#endif
-
-#ifdef ENGINE_RADIX
 #include "engines-experimental/radix.h"
-#endif
-
-#ifdef ENGINE_STREE
-#include "engines-experimental/stree.h"
-#endif
-
-#ifdef ENGINE_TREE3
-#include "engines-experimental/tree3.h"
-#endif
-
-#ifdef ENGINE_ROBINHOOD
 #include "engines-experimental/robinhood.h"
-#endif
+#include "engines-experimental/stree.h"
+#include "engines-experimental/tree3.h"
+#include "engines/blackhole.h"
+#include "engines/cmap.h"
+#include "engines/vcmap.h"
+#include "engines/vsmap.h"
 
 namespace pmem
 {

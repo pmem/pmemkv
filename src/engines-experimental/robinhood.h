@@ -2,6 +2,7 @@
 /* Copyright 2020-2021, Intel Corporation */
 
 #pragma once
+#ifdef ENGINE_ROBINHOOD
 
 #include <libpmemobj.h>
 #include <stddef.h>
@@ -141,3 +142,5 @@ private:
 
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif /* ENGINE_ROBINHOOD */

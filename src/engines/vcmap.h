@@ -2,6 +2,7 @@
 /* Copyright 2017-2021, Intel Corporation */
 
 #pragma once
+#ifdef ENGINE_VCMAP
 
 #include "../engine.h"
 #include "pmem_allocator.h"
@@ -98,3 +99,5 @@ private:
 
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif /* ENGINE_VCMAP */
