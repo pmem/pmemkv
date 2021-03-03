@@ -100,10 +100,6 @@ Next we'll walk you through the steps of creating a new engine.
 * Relatively short (users will have to type this!)
 * Formatted in all lower-case
 * No whitespace or special characters
-* Names should use common prefixes to denote capabilities:
-  - prefix of "v" denotes volatile (persistent if omitted), appears first
-  - prefix of "c" denotes concurrent (single-threaded if omitted), appears second
-  - prefix of "s" denotes sorted (unsorted if omitted), appears last
 * For this example: `mytree` (persistent, single-threaded, unsorted)
 
 ### Creating Engine Header
