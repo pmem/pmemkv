@@ -110,7 +110,7 @@ endif()
 if(ENGINE_VCMAP)
 	list(APPEND SOURCE_FILES
 		src/engines/vcmap.h
-		src/engines/vcmap.cc
+		src/engines/basic_vcmap.h
 	)
 endif()
 if(ENGINE_VSMAP)
