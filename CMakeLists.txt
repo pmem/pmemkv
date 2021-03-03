@@ -37,6 +37,7 @@ option(ENGINE_STREE "enable experimental stree engine" ON)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 option(ENGINE_RADIX "enable experimental radix engine" OFF)
 option(ENGINE_ROBINHOOD "enable experimental robinhood engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
+option(ENGINE_DRAM_VCMAP "enable testing dram_vcmap engine" OFF)
 
 # ----------------------------------------------------------------- #
 ## Set required and useful variables
@@ -146,6 +147,12 @@ if(ENGINE_ROBINHOOD)
 		src/fast_hash.cc
 	)
 endif()
+if(ENGINE_DRAM_VCMAP)
+	list(APPEND SOURCE_FILES
+		src/engines-testing/dram_vcmap.h
+		src/engines/basic_vcmap.h
+	)
+endif()
 
 # ----------------------------------------------------------------- #
 ## Setup defines and check status of each engine
@@ -206,6 +213,12 @@ if(ENGINE_ROBINHOOD)
 else()
 	message(STATUS "ROBINHOOD engine is OFF")
 endif()
+if(ENGINE_DRAM_VCMAP)
+	add_definitions(-DENGINE_DRAM_VCMAP)
+	message(STATUS "DRAM_VCMAP engine is ON")
+else()
+	message(STATUS "DRAM_VCMAP engine is OFF")
+endif()
 
 # ----------------------------------------------------------------- #
 ## Set compiler's flags
@@ -260,7 +273,7 @@ if(ENGINE_VSMAP OR ENGINE_VCMAP)
 	list(APPEND DEB_DEPENDS "libmemkind0 (>= ${MEMKIND_REQUIRED_VERSION})")
 endif()
 
-if(ENGINE_VCMAP)
+if(ENGINE_VCMAP OR ENGINE_DRAM_VCMAP)
 	include(tbb)
 	list(APPEND PKG_CONFIG_REQUIRES tbb)
 	list(APPEND RPM_DEPENDS tbb)
@@ -283,7 +296,7 @@ target_link_libraries(pmemkv PRIVATE ${LIBPMEMOBJ++_LIBRARIES})
 if(ENGINE_VSMAP OR ENGINE_VCMAP)
 	target_link_libraries(pmemkv PRIVATE ${MEMKIND_LIBRARIES})
 endif()
-if(ENGINE_VCMAP)
+if(ENGINE_VCMAP OR ENGINE_DRAM_VCMAP)
 	target_link_libraries(pmemkv PRIVATE ${TBB_LIBRARIES})
 endif()
 
