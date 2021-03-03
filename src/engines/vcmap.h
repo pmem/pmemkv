@@ -47,6 +47,7 @@ public:
 	}
 };
 }
+
 using vcmap = basic_vcmap<internal::memkind_allocator_wrapper>;
 
 } /* namespace kv */
