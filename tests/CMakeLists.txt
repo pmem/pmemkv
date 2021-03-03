@@ -1931,3 +1931,91 @@ if (ENGINE_ROBINHOOD)
 	endif()
 endif()
 ################################################################################
+###################################### DRAM_VCMAP ###################################
+if(ENGINE_DRAM_VCMAP)
+	add_engine_test(ENGINE dram_vcmap
+			BINARY c_api_null_db_config
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_remove
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_remove_charset_params
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake
+			PARAMS 16 8)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_remove_long_key
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_remove_params
+			TRACERS none
+			SCRIPT dram/default.cmake
+			PARAMS 400000)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_remove_params
+			TRACERS memcheck
+			SCRIPT dram/default.cmake
+			PARAMS 4000)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_std_map
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake
+			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY iterate
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY concurrent_put_get_remove_params
+			TRACERS none memcheck # XXX - tbb lock does not work well with drd or helgrind
+			SCRIPT dram/default.cmake
+			PARAMS 8 50)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY concurrent_put_get_remove_gen_params
+			TRACERS none memcheck # XXX - tbb lock does not work well with drd or helgrind
+			SCRIPT dram/default.cmake
+			PARAMS 8 50 100)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS none # XXX - tbb lock does not work well with drd or helgrind
+			SCRIPT dram/default.cmake
+			PARAMS 1000)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS memcheck # XXX - tbb lock does not work well with drd or helgrind
+			SCRIPT dram/default.cmake
+			PARAMS 400)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY iterator_basic
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY iterator_concurrent
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake
+			PARAMS 8)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY transaction_not_supported
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+endif(ENGINE_DRAM_VCMAP)
+################################################################################
+
