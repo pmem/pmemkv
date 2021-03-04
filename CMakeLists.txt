@@ -298,6 +298,10 @@ add_custom_target(check-license
 	COMMAND ${PMEMKV_ROOT_DIR}/utils/check_license/check-headers.sh
 		${PMEMKV_ROOT_DIR}
 		BSD-3-Clause)
+add_custom_target(copyright-format
+	COMMAND ${PMEMKV_ROOT_DIR}/utils/check_license/check-headers.sh
+		${PMEMKV_ROOT_DIR}
+		BSD-3-Clause -d)
 
 if(CHECK_CPP_STYLE)
 	# check for required programs for code style check and add dependency to ALL
