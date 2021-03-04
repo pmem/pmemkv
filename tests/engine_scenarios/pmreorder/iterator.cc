@@ -7,7 +7,7 @@
 
 #include "../iterator.hpp"
 
-static constexpr int elements_length = 20;
+static constexpr size_t elements_length = 20;
 
 static void check_exist(pmem::kv::db &kv, const std::string &key,
 			const std::string &value)
@@ -22,7 +22,7 @@ static void check_exist(pmem::kv::db &kv, const std::string &key,
 
 static void test_init(pmem::kv::db &kv)
 {
-	for (int i = 0; i < elements_length; i++) {
+	for (size_t i = 0; i < elements_length; i++) {
 		auto key = std::to_string(i);
 		auto val = std::string(elements_length, static_cast<char>(i + 10));
 		ASSERT_STATUS(kv.put(key, val), pmem::kv::status::OK);
@@ -58,7 +58,7 @@ static void check_consistency(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(size), pmem::kv::status::OK);
 	std::size_t count = 0;
 
-	for (int i = 1; i < elements_length; i++) {
+	for (size_t i = 1; i < elements_length; i++) {
 		std::string key = std::to_string(i);
 		std::string val = std::string(elements_length, static_cast<char>(i + 10));
 		ASSERT_STATUS(it.seek(key), pmem::kv::status::OK);
