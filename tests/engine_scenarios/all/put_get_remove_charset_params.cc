@@ -5,6 +5,7 @@
 
 #include <ctime>
 #include <limits.h>
+#include <set>
 
 using namespace pmem::kv;
 
@@ -16,14 +17,14 @@ static constexpr size_t CHARSET_RANGE_START = 0;
 static constexpr size_t CHARSET_RANGE_END = (size_t)UCHAR_MAX;
 static constexpr size_t CHARSET_LEN = CHARSET_RANGE_END - CHARSET_RANGE_START + 1;
 
-/* It generates a vector that contains random strings of various length but no longer than
+/* It generates a set that contains random strings of various length but no longer than
  * 'max_str_len'. */
-std::vector<std::string> generate_binary_strings(const size_t cnt,
-						 const size_t max_str_len)
+std::set<std::string> generate_binary_strings(const size_t cnt, const size_t max_str_len)
 {
-	std::vector<std::string> strings;
-	for (size_t s = 0; s < cnt; ++s) {
-		std::string gen_str = std::to_string(s);
+	std::set<std::string> strings;
+	size_t n = 0;
+	do {
+		std::string gen_str = std::to_string(n);
 		/* various lenght of string, min: len of gen_str */
 		size_t rand_len = (size_t)rand() % (max_str_len - gen_str.size());
 
@@ -31,8 +32,9 @@ std::vector<std::string> generate_binary_strings(const size_t cnt,
 			gen_str.push_back(
 				char(CHARSET_RANGE_START + (size_t)rand() % CHARSET_LEN));
 		}
-		strings.push_back(gen_str);
-	}
+		if (strings.insert(gen_str).second)
+			++n;
+	} while (n != cnt);
 
 	return strings;
 }
@@ -115,13 +117,13 @@ static void BinaryRandKeyTest(const size_t elements_cnt, const size_t max_key_le
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 0);
 
-	std::vector<std::string> keys =
-		generate_binary_strings(elements_cnt, max_key_len);
+	auto keys = generate_binary_strings(elements_cnt, max_key_len);
 
 	/* Add elements with generated keys */
-	for (size_t i = 0; i < elements_cnt; i++) {
-		std::string istr = entry_from_number(i);
-		std::string key = entry_from_string(keys[i]);
+	size_t i = 0;
+	for (auto &str : keys) {
+		std::string istr = entry_from_number(i++);
+		std::string key = entry_from_string(str);
 		ASSERT_STATUS(kv.put(key, istr), status::OK);
 	}
 
@@ -130,9 +132,10 @@ static void BinaryRandKeyTest(const size_t elements_cnt, const size_t max_key_le
 	UT_ASSERT(cnt == elements_cnt);
 
 	/* Read and remove elements with generated keys (in reverse order) */
-	for (size_t i = elements_cnt; i > 0; i--) {
-		std::string istr = entry_from_number(i - 1);
-		std::string key = entry_from_string(keys[i - 1]);
+	i = cnt;
+	for (auto it = keys.rbegin(); it != keys.rend(); ++it) {
+		std::string istr = entry_from_number(--i);
+		std::string key = entry_from_string(*it);
 
 		ASSERT_STATUS(kv.exists(key), status::OK);
 		ASSERT_STATUS(kv.get(key, &value), status::OK);
@@ -214,13 +217,13 @@ static void BinaryRandValueTest(const size_t elements_cnt, const size_t max_valu
 	ASSERT_STATUS(kv.count_all(cnt), status::OK);
 	UT_ASSERT(cnt == 0);
 
-	std::vector<std::string> values =
-		generate_binary_strings(elements_cnt, max_value_len);
+	auto values = generate_binary_strings(elements_cnt, max_value_len);
 
 	/* Add elements with generated values */
-	for (size_t i = 0; i < elements_cnt; i++) {
-		std::string key = entry_from_number(i);
-		std::string value = entry_from_string(std::string(1, char(i)));
+	size_t i = 0;
+	for (auto &str : values) {
+		std::string key = entry_from_number(i++);
+		std::string value = entry_from_string(str);
 
 		ASSERT_STATUS(kv.put(key, value), status::OK);
 	}
@@ -230,9 +233,10 @@ static void BinaryRandValueTest(const size_t elements_cnt, const size_t max_valu
 	UT_ASSERT(cnt == elements_cnt);
 
 	/* Read and remove elements with generated values (in reverse order) */
-	for (size_t i = elements_cnt; i > 0; i--) {
-		std::string key = entry_from_number(i - 1);
-		std::string exp_value = entry_from_string(std::string(1, char(i - 1)));
+	i = cnt;
+	for (auto it = values.rbegin(); it != values.rend(); ++it) {
+		std::string key = entry_from_number(--i);
+		std::string exp_value = entry_from_string(*it);
 
 		ASSERT_STATUS(kv.get(key, &value), status::OK);
 		UT_ASSERT(value == exp_value);
