@@ -16,20 +16,22 @@ static constexpr size_t CHARSET_RANGE_START = 0;
 static constexpr size_t CHARSET_RANGE_END = (size_t)UCHAR_MAX;
 static constexpr size_t CHARSET_LEN = CHARSET_RANGE_END - CHARSET_RANGE_START + 1;
 
+/* It generates a vector that contains random strings of various length but no longer than
+ * 'max_str_len'. */
 std::vector<std::string> generate_binary_strings(const size_t cnt,
 						 const size_t max_str_len)
 {
 	std::vector<std::string> strings;
 	for (size_t s = 0; s < cnt; ++s) {
-		/* various lenght of string, min: 1 */
-		size_t str_len = 1 + ((size_t)rand() % max_str_len);
-		std::string gen_str;
-		gen_str.reserve(str_len);
-		for (size_t i = 0; i < str_len; i++) {
+		std::string gen_str = std::to_string(s);
+		/* various lenght of string, min: len of gen_str */
+		size_t rand_len = (size_t)rand() % (max_str_len - gen_str.size());
+
+		for (size_t i = 0; i < rand_len; i++) {
 			gen_str.push_back(
 				char(CHARSET_RANGE_START + (size_t)rand() % CHARSET_LEN));
 		}
-		strings.push_back(entry_from_string(gen_str));
+		strings.push_back(gen_str);
 	}
 
 	return strings;
@@ -46,7 +48,7 @@ static void BinaryKeyTest(pmem::kv::db &kv)
 	UT_ASSERT(cnt == 0);
 
 	auto key = entry_from_string(PREFIX);
-	auto value = entry_from_string("should_not_change");
+	auto value = entry_from_string("constval");
 	ASSERT_STATUS(kv.exists(key), status::NOT_FOUND);
 
 	ASSERT_STATUS(kv.put(key, value), status::OK);
@@ -119,7 +121,7 @@ static void BinaryRandKeyTest(const size_t elements_cnt, const size_t max_key_le
 	/* Add elements with generated keys */
 	for (size_t i = 0; i < elements_cnt; i++) {
 		std::string istr = entry_from_number(i);
-		std::string key = entry_from_number(i, "", keys[i]);
+		std::string key = entry_from_string(keys[i]);
 		ASSERT_STATUS(kv.put(key, istr), status::OK);
 	}
 
@@ -130,7 +132,7 @@ static void BinaryRandKeyTest(const size_t elements_cnt, const size_t max_key_le
 	/* Read and remove elements with generated keys (in reverse order) */
 	for (size_t i = elements_cnt; i > 0; i--) {
 		std::string istr = entry_from_number(i - 1);
-		std::string key = entry_from_number(i - 1, "", keys[i - 1]);
+		std::string key = entry_from_string(keys[i - 1]);
 
 		ASSERT_STATUS(kv.exists(key), status::OK);
 		ASSERT_STATUS(kv.get(key, &value), status::OK);

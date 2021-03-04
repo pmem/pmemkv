@@ -11,7 +11,7 @@
 
 using namespace pmem::kv;
 
-static constexpr int value_prefix_size = 256;
+static size_t value_prefix_size = 256;
 
 static std::map<uint64_t, uint64_t> t_seed;
 static std::mutex mtx;
@@ -59,10 +59,10 @@ void verify_init_elements(const std::set<uint64_t> &init, pmem::kv::db &kv)
 	auto s = kv.get_all([&](string_view k, string_view v) {
 		uint64_t *uk = (uint64_t *)k.data();
 
-		std::string value1 =
-			entry_from_number(*uk, std::string(value_prefix_size, '0'));
-		std::string value2 =
-			entry_from_number(*uk, std::string(value_prefix_size, '1'));
+		std::string value1 = entry_from_string(
+			uint64_to_string(*uk) + std::string(value_prefix_size, '0'));
+		std::string value2 = entry_from_string(
+			uint64_to_string(*uk) + std::string(value_prefix_size, '1'));
 		UT_ASSERT(v.compare(value1) == 0 || v.compare(value2) == 0);
 
 		keys.insert(*uk);
@@ -94,8 +94,8 @@ static void ConcurrentIterationAndPutTest(const size_t threads_number,
 		auto k = unique_value(main_generator, set);
 		set.insert(k);
 
-		std::string value =
-			entry_from_number(k, std::string(value_prefix_size, '0'));
+		std::string value = entry_from_string(
+			uint64_to_string(k) + std::string(value_prefix_size, '0'));
 		ASSERT_STATUS(kv.put(uint64_to_strv(k), value), status::OK);
 	}
 
@@ -107,8 +107,9 @@ static void ConcurrentIterationAndPutTest(const size_t threads_number,
 			if (thread_id < threads_number / 4) {
 				for (uint64_t i = 0; i < thread_items; i++) {
 					auto k = unique_value(g, set);
-					std::string value = entry_from_number(
-						k, std::string(value_prefix_size, '0'));
+					std::string value = entry_from_string(
+						uint64_to_string(k) +
+						std::string(value_prefix_size, '0'));
 					ASSERT_STATUS(kv.put(uint64_to_strv(k), value),
 						      status::OK);
 				}
@@ -116,8 +117,8 @@ static void ConcurrentIterationAndPutTest(const size_t threads_number,
 				for (uint64_t i = 0; i < thread_items; i++) {
 					auto existing_e = *set.find(g() % set.size());
 
-					std::string value = entry_from_number(
-						existing_e,
+					std::string value = entry_from_string(
+						uint64_to_string(existing_e) +
 						std::string(value_prefix_size, '1'));
 					ASSERT_STATUS(
 						kv.put(uint64_to_strv(existing_e), value),
@@ -147,8 +148,8 @@ static void ConcurrentIterationAndRemoveTest(const size_t threads_number,
 		auto k = unique_value(main_generator, init_set);
 		init_set.insert(k);
 
-		std::string value =
-			entry_from_number(k, std::string(value_prefix_size, '0'));
+		std::string value = entry_from_string(
+			uint64_to_string(k) + std::string(value_prefix_size, '0'));
 		ASSERT_STATUS(kv.put(uint64_to_strv(k), value), status::OK);
 	}
 
@@ -156,8 +157,8 @@ static void ConcurrentIterationAndRemoveTest(const size_t threads_number,
 		auto k = unique_value(main_generator, to_remove_set);
 		to_remove_set.insert(k);
 
-		std::string value =
-			entry_from_number(k, std::string(value_prefix_size, '0'));
+		std::string value = entry_from_string(
+			uint64_to_string(k) + std::string(value_prefix_size, '0'));
 		ASSERT_STATUS(kv.put(uint64_to_strv(k), value), status::OK);
 	}
 
@@ -188,7 +189,10 @@ static void test(int argc, char *argv[])
 	using namespace std::placeholders;
 
 	if (argc < 5)
-		UT_FATAL("usage: %s engine json_config threads items", argv[0]);
+		UT_FATAL("usage: %s engine json_config threads items [value_prefix_size]",
+			 argv[0]);
+	if (argc > 5)
+		value_prefix_size = std::stoul(argv[5]);
 
 	std::random_device rd;
 	auto seed = rd();
