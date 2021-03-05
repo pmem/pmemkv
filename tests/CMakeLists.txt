@@ -1645,7 +1645,7 @@ if(ENGINE_RADIX)
 			BINARY put_get_remove_params
 			TRACERS none
 			SCRIPT pmemobj_based/default.cmake
-			DB_SIZE 4G PARAMS 400000)
+			DB_SIZE 1G PARAMS 400000)
 
 	add_engine_test(ENGINE radix
 			BINARY put_get_remove_params
@@ -1777,7 +1777,7 @@ if (ENGINE_ROBINHOOD)
 			BINARY put_get_remove_params
 			TRACERS none
 			SCRIPT pmemobj_based/default.cmake
-			DB_SIZE 4G PARAMS 40000)
+			DB_SIZE 1G PARAMS 40000)
 
 	add_engine_test(ENGINE robinhood
 			BINARY put_get_remove_params
