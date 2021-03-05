@@ -79,6 +79,9 @@ int main()
 #ifndef ENGINE_ROBINHOOD
 	UT_ASSERT(wrong_engine_name_test("robinhood"));
 #endif
+#ifndef ENGINE_DRAM_VCMAP
+	UT_ASSERT(wrong_engine_name_test("dram_vcmap"));
+#endif
 
 	errormsg_test();
 

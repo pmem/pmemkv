@@ -3,11 +3,8 @@
 
 #pragma once
 
-#include "../engine.h"
+#include "basic_vcmap.h"
 #include "pmem_allocator.h"
-#include <scoped_allocator>
-#include <string>
-#include <tbb/concurrent_hash_map.h>
 
 #ifdef USE_LIBMEMKIND_NAMESPACE
 namespace memkind_ns = libmemkind::pmem;
@@ -19,82 +16,40 @@ namespace pmem
 {
 namespace kv
 {
-
-class vcmap : public engine_base {
-	template <bool IsConst>
-	class vcmap_iterator;
-
+namespace internal
+{
+template <typename AllocatorT>
+class memkind_allocator_wrapper : public memkind_ns::allocator<AllocatorT> {
 public:
-	vcmap(std::unique_ptr<internal::config> cfg);
-	~vcmap();
+	using memkind_ns::allocator<AllocatorT>::allocator;
+	memkind_allocator_wrapper(internal::config &cfg)
+	    : memkind_ns::allocator<AllocatorT>(get_path(cfg), get_size(cfg))
+	{
+	}
 
-	std::string name() final;
+	static std::string get_path(internal::config &cfg)
+	{
+		const char *path;
+		if (!cfg.get_string("path", &path))
+			throw internal::invalid_argument(
+				"Config does not contain item with key: \"path\"");
 
-	status count_all(std::size_t &cnt) final;
+		return std::string(path);
+	}
 
-	status get_all(get_kv_callback *callback, void *arg) final;
+	static uint64_t get_size(internal::config &cfg)
+	{
+		std::size_t size;
+		if (!cfg.get_uint64("size", &size))
+			throw internal::invalid_argument(
+				"Config does not contain item with key: \"size\"");
 
-	status exists(string_view key) final;
-
-	status get(string_view key, get_v_callback *callback, void *arg) final;
-
-	status put(string_view key, string_view value) final;
-
-	status remove(string_view key) final;
-
-	internal::iterator_base *new_iterator() final;
-	internal::iterator_base *new_const_iterator() final;
-
-private:
-	typedef memkind_ns::allocator<char> ch_allocator_t;
-	typedef std::basic_string<char, std::char_traits<char>, ch_allocator_t>
-		pmem_string;
-	typedef memkind_ns::allocator<std::pair<const pmem_string, pmem_string>>
-		kv_allocator_t;
-	typedef tbb::concurrent_hash_map<pmem_string, pmem_string,
-					 tbb::tbb_hash_compare<pmem_string>,
-					 std::scoped_allocator_adaptor<kv_allocator_t>>
-		map_t;
-	kv_allocator_t kv_allocator;
-	ch_allocator_t ch_allocator;
-	map_t pmem_kv_container;
+		return size;
+	}
 };
+}
 
-template <>
-class vcmap::vcmap_iterator<true> : virtual public internal::iterator_base {
-	using container_type = vcmap::map_t;
-	using ch_allocator_t = memkind_ns::allocator<char>;
-
-public:
-	vcmap_iterator(container_type *container, ch_allocator_t *ca);
-
-	status seek(string_view key) final;
-
-	result<string_view> key() final;
-
-	result<pmem::obj::slice<const char *>> read_range(size_t pos, size_t n) final;
-
-protected:
-	container_type *container;
-	container_type::accessor acc_;
-	ch_allocator_t *ch_allocator;
-};
-
-template <>
-class vcmap::vcmap_iterator<false> : public vcmap::vcmap_iterator<true> {
-	using container_type = vcmap::map_t;
-	using ch_allocator_t = memkind_ns::allocator<char>;
-
-public:
-	vcmap_iterator(container_type *container, ch_allocator_t *ca);
-
-	result<pmem::obj::slice<char *>> write_range(size_t pos, size_t n) final;
-	status commit() final;
-	void abort() final;
-
-private:
-	std::vector<std::pair<std::string, size_t>> log;
-};
+using vcmap = basic_vcmap<internal::memkind_allocator_wrapper>;
 
 } /* namespace kv */
 } /* namespace pmem */
