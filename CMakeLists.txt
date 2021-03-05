@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2017-2020, Intel Corporation
+# Copyright 2017-2021, Intel Corporation
 
 cmake_minimum_required(VERSION 3.10)
 project(pmemkv)
@@ -213,6 +213,7 @@ endif()
 
 if(ENGINE_VCMAP)
 	include(tbb)
+	add_definitions(-DTBB_DEFINE_STD_HASH_SPECIALIZATIONS)
 	list(APPEND PKG_CONFIG_REQUIRES tbb)
 	list(APPEND RPM_DEPENDS tbb)
 	list(APPEND DEB_DEPENDS libtbb2)
