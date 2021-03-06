@@ -8,7 +8,7 @@
 
 /**
  * Tests concurrency with parallel data read and removal. Data is generated with
- * paramatrized thread count, database elements count and max key lenght.
+ * parametrized thread count, database elements count and max key length.
  */
 
 using namespace pmem::kv;
@@ -25,7 +25,7 @@ void generate_keys(std::vector<std::string> &keys, const size_t max_key_len,
 
 	size_t k = 0;
 	while (k < cnt) {
-		/* various lenght of key, min: 1 */
+		/* various lengths of key, min: 1 */
 		size_t key_len = 1 + ((size_t)rand() % max_key_len);
 		std::string key;
 		key.reserve(key_len);
