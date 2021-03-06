@@ -132,7 +132,7 @@ Enter the Job view and click "Build with Parameters". Some build configuration c
 
 **BRANCH** - Pmemkv repository branch.
 
-**TEST_TYPE** - PMEMKV test type to run: normal, building, compability.
+**TEST_TYPE** - PMEMKV test type to run: normal, building, compatibility.
 
 **DEVICE_TYPE** - Selects tested device type. If "NONE" - test will run on HDD.
 

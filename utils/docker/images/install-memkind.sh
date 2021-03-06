@@ -4,7 +4,7 @@
 
 #
 # install-memkind.sh - installs memkind from sources; depends on
-#		the system it uses proper installation paramaters
+#		the system it uses proper installation parameters
 #
 
 set -e

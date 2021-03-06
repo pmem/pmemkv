@@ -42,7 +42,7 @@ Tue Oct 06 2020 Szymon Romik <szymon.romik@intel.com>
 	* Version 1.0.3
 
 	This is the last bugfix release for pmemkv 1.0 version.
-	Maintance of this version is no longer supported.
+	Maintenance of this version is no longer supported.
 
 	Notable changes:
 	- VSmap::put method refactor (to use emplace)
@@ -78,7 +78,7 @@ Fri May 29 2020 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.2
 
-	This release introduces a new experimantal engine - csmap (cuncurrent
+	This release introduces a new experimental engine - csmap (concurrent
 	sorted map, backed by libpmemobj-cpp's concurrent_map).
 
 	We have also provided support for custom comparators for sorted engines.

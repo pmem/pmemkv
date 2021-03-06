@@ -131,7 +131,7 @@ static void GetAllIncrTest(std::string engine, pmem::kv::config &&config,
 		verify_get_all(kv, i + 1, kv_sort(expected));
 	}
 
-	/* start over with 3 inital keys */
+	/* start over with 3 initial keys */
 	CLEAR_KV(kv);
 	const std::string mid_key = std::string(2, char(127));
 

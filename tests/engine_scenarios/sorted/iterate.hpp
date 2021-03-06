@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "unittest.hpp"
 
@@ -279,7 +279,7 @@ inline std::vector<std::string> gen_rand_keys(const size_t cnt, const size_t max
 
 	for (size_t k = 0; k < cnt; k++) {
 		do {
-			/* various lenght of key, min: 2 */
+			/* various lengths of key, min: 2 */
 			size_t key_len = 2 + ((size_t)rand() % (max_key_len - 1));
 			gen_key.clear();
 			gen_key.reserve(key_len);

@@ -41,7 +41,7 @@ namespace pmem
 namespace kv
 {
 /**
- * Partial string_view implemenetation, defined in pmem::obj namespace
+ * Partial string_view implementation, defined in pmem::obj namespace
  * in libpmemobj-cpp library (see: https://pmem.io/libpmemobj-cpp ).
  */
 using string_view = obj::string_view;
@@ -1043,7 +1043,7 @@ inline result<string_view> db::iterator<IsConst>::key() noexcept
  * @param[in] pos position of the element in a value which will be the first element in
  * the returned range (default = 0)
  * @param[in] n number of elements in range (default = std::numeric_limits<size_t>::max(),
- * if n is bigger than the length of a value it's automatically shrinked)
+ * if n is bigger than the length of a value it's automatically shrunk)
  *
  * @return pmem::kv::result<pmem::kv::string_view>
  */
@@ -1077,7 +1077,7 @@ inline result<string_view> db::iterator<IsConst>::read_range(size_t pos,
  * @param[in] pos position of the element in a value which will be the first element in
  * the returned range (default = 0)
  * @param[in] n number of elements in range (default = std::numeric_limits<size_t>::max(),
- * if n is bigger than the length of a value it's automatically shrinked)
+ * if n is bigger than the length of a value it's automatically shrunk)
  *
  * @return pmem::kv::result<pmem::obj::slice<db::iterator::OutputIterator<char>>>
  */
