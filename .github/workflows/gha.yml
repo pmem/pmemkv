@@ -40,9 +40,13 @@ jobs:
                  "TYPE=bindings OS=ubuntu OS_VER=20.04_bindings PUSH_IMAGE=1"]
     steps:
       - name: Set image version and force image action for stable branch
-        if: startsWith(github.ref, 'refs/heads/stable-')
+        if:
+          startsWith(github.ref, 'refs/heads/stable-') || startsWith(github.base_ref, 'stable-')
+        # base_ref is only set for PRs; it's required to set proper IMG_VER also for PRs against stable branches
         run: |
-          echo "IMG_VER=$(echo ${GITHUB_REF#refs/heads/} | cut -d - -f 2)" >> $GITHUB_ENV
+          IMG_VER=$(echo ${GITHUB_BASE_REF} | cut -d - -f 2)
+          [ -z "${IMG_VER}" ] && echo "IMG_VER=$(echo ${GITHUB_REF#refs/heads/} | cut -d - -f 2)" >> $GITHUB_ENV \
+                              || echo "IMG_VER=${IMG_VER}" >> $GITHUB_ENV
           echo "FORCE_IMAGE_ACTION=rebuild" >> $GITHUB_ENV
 
       - name: Clone the git repo
