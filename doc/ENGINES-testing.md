@@ -1,8 +1,8 @@
 # Testing Storage Engines for pmemkv
 
-- [dram-vcmap](#dram-vcmap)
+- [dram_vcmap](#dram_vcmap)
 
-# dram-vcmap
+# dram_vcmap
 
 A volatile concurrent engine backed by std::allocator. Data written using this engine is stored entierly in DRAM and lost after the database is closed.
 
