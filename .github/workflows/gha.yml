@@ -71,14 +71,16 @@ jobs:
       matrix:
         CONFIG: ["TYPE=doc OS=fedora OS_VER=32"]
     steps:
-      - name: Set image version and force image action for stable branch
+      - name: Set image version for stable branch
         if: startsWith(github.ref, 'refs/heads/stable-')
         run: |
           echo "IMG_VER=$(echo ${GITHUB_REF#refs/heads/} | cut -d - -f 2)" >> $GITHUB_ENV
-          echo "FORCE_IMAGE_ACTION=rebuild" >> $GITHUB_ENV
 
       - name: Clone the git repo
         uses: actions/checkout@v2
+
+      - name: Pull the image
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh pull
 
       - name: Run the build
         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
