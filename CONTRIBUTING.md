@@ -5,6 +5,7 @@
 - [Submitting Pull Requests](#submitting-pull-requests)
 - [Creating New Engines](#creating-new-engines)
 - [Creating Experimental Engines](#creating-experimental-engines)
+- [Extending Public API](#extending-public-api)
 - [Configuring GitHub fork](#configuring-github-fork)
 
 # Opening New Issues
@@ -193,6 +194,18 @@ As noted in the example above, the experimental CMake module should use `-experi
 ### Documentation
 
 * In `doc/ENGINES-experimental.md`, add `mytree` section
+
+# Extending Public API
+
+When adding a new public function, you have to make sure to update:
+- manpages `libpmemkv.3` or `libpmemkv_config.3` in `doc` dir
+- `doc/CMakeLists.txt` with new manpage link
+- map file with debug symbols (`src/libpmemkv.map`)
+- source and header files (incl. libpmemkv.h, libpmemkv.cc, libpmemkv.hpp)
+- engines' sources if needed (in `src/engines`)
+- appropriate examples, to show usage
+- tests (incl. compatibility, c_api and more...)
+- ChangeLog with new entry for next release
 
 # Configuring GitHub fork
 
