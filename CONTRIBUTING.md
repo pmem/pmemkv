@@ -85,6 +85,18 @@ to use your real name (not an alias) when committing your changes to PMEMKV:
 Author: Random J Developer <random@developer.example.org>
 ```
 
+# Adding new dependency
+
+Adding each new dependency (including new docker image and package) should be done in
+a separate commit. The commit message should be:
+
+```
+New dependency: dependency_name
+
+license: SPDX license tag
+origin: https://dependency_origin.com
+```
+
 # Creating New Engines
 
 There are several motivations to create a `pmemkv` storage engine:
