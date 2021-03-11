@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2016-2021, Intel Corporation
 
 # check-headers.sh - check copyright and license in source files
 
@@ -8,9 +8,10 @@ SELF=$0
 
 function usage() {
 	echo "Usage: $SELF <source_root_path> <license_tag> [-h|-v|-a]"
-	echo "   -h, --help      this help message"
-	echo "   -v, --verbose   verbose mode"
-	echo "   -a, --all       check all files (only modified files are checked by default)"
+	echo "   -h, --help          this help message"
+	echo "   -v, --verbose       verbose mode"
+	echo "   -a, --all           check all files (only modified files are checked by default)"
+	echo "   -d, --update_dates  change Copyright dates in all analyzed files (rather not use with -a)"
 }
 
 if [ "$#" -lt 2 ]; then
@@ -49,6 +50,7 @@ fi
 
 VERBOSE=0
 CHECK_ALL=0
+UPDATE_DATES=0
 while [ "$1" != "" ]; do
 	case $1 in
 	-v|--verbose)
@@ -56,6 +58,9 @@ while [ "$1" != "" ]; do
 		;;
 	-a|--all)
 		CHECK_ALL=1
+		;;
+	-d|--update_dates)
+		UPDATE_DATES=1
 		;;
 	esac
 	shift
@@ -156,8 +161,12 @@ s/.*Copyright \([0-9]\+\),.*/\1-\1/' $src_path`
 			else
 				NEW=$COMMIT_FIRST-$COMMIT_LAST
 			fi
-			echo "$file:1: error: wrong copyright date: (is: $YEARS, should be: $NEW)" >&2
-			RV=1
+			if [ ${UPDATE_DATES} -eq 1 ]; then
+				sed -i "s/Copyright ${YEARS}/Copyright ${NEW}/g" "${src_path}"
+			else
+				echo "$file:1: error: wrong copyright date: (is: $YEARS, should be: $NEW)" >&2
+				RV=1
+			fi
 		fi
 	else
 		echo "error: unknown commit dates in file: $file" >&2
