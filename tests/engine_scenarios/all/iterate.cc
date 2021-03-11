@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "unittest.hpp"
 
@@ -61,6 +61,10 @@ static void GetAllTest(pmem::kv::db &kv)
 
 	auto expected = test_kv_list{{"1", "one"}, {"2", "two"}, {"记!", "RR"}};
 	UT_ASSERT((sort(result) == sort(expected)));
+	/* get_all with non-zero exit status from callback*/
+	s = kv.get_all([&](string_view k, string_view v) { return 1; });
+	ASSERT_STATUS(s, status::STOPPED_BY_CB);
+
 	result = {};
 
 	/* get_all with C-like API */
