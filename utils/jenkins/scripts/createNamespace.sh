@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2021, Intel Corporation
 
 # createNamespace.sh - Remove old namespaces and create new for pmemkv tests.
 
@@ -72,7 +72,7 @@ while getopts ":dhp-:" optchar; do
 	esac
 done
 
-# There is no default test cofiguration in this script. Configurations has to be specified.
+# There is no default test configuration in this script. Configurations have to be specified.
 if ! $CREATE_DAX && ! $CREATE_PMEM; then
 	echo ""
 	echo "ERROR: No config type selected. Please select one or more config types."

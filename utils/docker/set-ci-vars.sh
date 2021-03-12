@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2020, Intel Corporation
+# Copyright 2020-2021, Intel Corporation
 
 #
 # set-ci-vars.sh -- set CI variables common for both:
@@ -29,7 +29,7 @@ function get_commit_range_from_last_merge {
 		fi
 	elif [ "$LAST_MERGE" == "$LAST_COMMIT" ] &&
 		([ "$TRAVIS_EVENT_TYPE" == "push" ] || [ "$GITHUB_EVENT_NAME" == "push" ]); then
-		# Other case in which last commit equals last merge, is when commiting
+		# Other case in which last commit equals last merge, is when committing
 		# a manual merge. Push events don't set proper COMMIT_RANGE.
 		# It has to be then set: from merge's left parent to the current commit.
 		LAST_MERGE=$(git log --merges --pretty=%P -1 | cut -d" " -f1)

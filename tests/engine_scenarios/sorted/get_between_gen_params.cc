@@ -251,7 +251,7 @@ static void GetBetweenIncrTest(std::string engine, pmem::kv::config &&config,
 		}
 	}
 
-	/* start over with two inital keys */
+	/* start over with two initial keys */
 	CLEAR_KV(kv);
 
 	const std::string mid_key = std::string(2, char(127));

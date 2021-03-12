@@ -85,7 +85,7 @@ static void ConcurrentIterationAndPutTest(const size_t threads_number,
 	 * TEST: prepares thread_number * thread_items elements in pmemkv.
 	 * Then, it concurrently inserts additional element and updates existing one.
 	 * At the same time some threads are iterating over pmemkv making sure
-	 * the inital data is still accessible.
+	 * the initial data is still accessible.
 	 */
 	std::set<uint64_t> set;
 	auto init_size = threads_number * thread_items;

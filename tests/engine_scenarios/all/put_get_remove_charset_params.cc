@@ -25,7 +25,7 @@ std::set<std::string> generate_binary_strings(const size_t cnt, const size_t max
 	size_t n = 0;
 	do {
 		std::string gen_str = std::to_string(n);
-		/* various lenght of string, min: len of gen_str */
+		/* various length of string, min: len of gen_str */
 		size_t rand_len = (size_t)rand() % (max_str_len - gen_str.size());
 
 		for (size_t i = 0; i < rand_len; i++) {

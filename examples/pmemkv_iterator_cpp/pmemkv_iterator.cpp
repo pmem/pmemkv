@@ -154,7 +154,7 @@ static void single_threaded_engine_example(const std::string &path)
 		status s = w_it.seek_lower("5");
 		ASSERT(s == status::OK);
 
-		/* read a value before writting */
+		/* read a value before writing */
 		std::string value_before_write = w_it.read_range().get_value().data();
 
 		/* Get a write range. By default it is a whole value (pos = 0, n =

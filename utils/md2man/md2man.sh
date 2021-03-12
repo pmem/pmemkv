@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2019, Intel Corporation
+# Copyright 2016-2021, Intel Corporation
 #
 
 #
@@ -29,7 +29,7 @@ secondary_title=`sed -n 's/^secondary_title:\ *\(.*\)$/\1/p' $filename`
 
 dt="$(date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%F)"
 year="$(date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y)"
-# since genereted docs are not kept in the repo the output dir may not exist
+# since generated docs are not kept in the repo the output dir may not exist
 out_dir=`echo $outfile | sed 's/\(.*\)\/.*/\1/'`
 mkdir -p $out_dir
 

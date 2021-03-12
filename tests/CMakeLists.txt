@@ -159,7 +159,7 @@ build_test_ext(NAME concurrent_put_get_remove_gen_params SRC_FILES engine_scenar
 build_test_ext(NAME concurrent_put_get_remove_single_op_params SRC_FILES engine_scenarios/concurrent/put_get_remove_single_op_params.cc LIBS json)
 build_test_ext(NAME iterator_concurrent SRC_FILES engine_scenarios/concurrent/iterator_concurrent.cc LIBS json)
 
-# Tests for peristent engines
+# Tests for persistent engines
 build_test_ext(NAME persistent_not_found_verify SRC_FILES engine_scenarios/persistent/not_found_verify.cc LIBS json)
 build_test_ext(NAME persistent_overwrite_verify SRC_FILES engine_scenarios/persistent/overwrite_verify.cc LIBS json)
 build_test_ext(NAME persistent_put_remove_verify SRC_FILES engine_scenarios/persistent/put_remove_verify.cc LIBS json)
