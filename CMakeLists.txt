@@ -55,9 +55,9 @@ set(predefined_build_types
 	RelWithDebInfo
 	MinSizeRel)
 if(NOT CMAKE_BUILD_TYPE)
-	message(STATUS "CMAKE_BUILD_TYPE not set, setting the default one: ${DEFAULT_BUILD_TYPE}")
-	set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}"
-		CACHE STRING "choose the type of build (${predefined_build_types})" FORCE STRINGS)
+	set(CMAKE_BUILD_TYPE ${DEFAULT_BUILD_TYPE}
+		CACHE STRING "choose the type of build (${predefined_build_types})" FORCE)
+	message(STATUS "CMAKE_BUILD_TYPE not set, setting the default one: ${CMAKE_BUILD_TYPE}")
 else()
 	message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 	if(NOT CMAKE_BUILD_TYPE IN_LIST predefined_build_types)
