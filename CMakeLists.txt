@@ -363,7 +363,9 @@ add_cppstyle(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-testing/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-testing/*.h*)
 
 add_check_whitespace(main ${PMEMKV_ROOT_DIR}/utils/check_whitespace
 			${CMAKE_CURRENT_SOURCE_DIR}/utils/check_license/*.sh
@@ -376,7 +378,9 @@ add_check_whitespace(src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines/*.h*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.c*
 		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/*.h*
-		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*)
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-experimental/stree/*.h*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-testing/*.c*
+		${CMAKE_CURRENT_SOURCE_DIR}/src/engines-testing/*.h*)
 
 # ----------------------------------------------------------------- #
 ## Add sub-directories if builds enabled
