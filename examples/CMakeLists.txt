@@ -1,14 +1,23 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2021, Intel Corporation
 
 #
-# doc/CMakeLists.txt - CMake file for building all examples along with
+# examples/CMakeLists.txt - CMake file for building all examples along with
 #	the current pmemkv sources, for verification purposes.
 #	To build an example as a standalone application (with pmemkv from the system)
 #	see a CMake file in any of the subdirectories.
 #
+add_custom_target(examples)
+
+# ----------------------------------------------------------------- #
+## Setup examples
+# ----------------------------------------------------------------- #
 add_common_flag(-Wno-unused-but-set-variable)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
+add_dependencies(examples pmemkv)
+
+# Add developer checks
 add_cppstyle(examples ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_cpp/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_pmemobj_cpp/*.cpp
@@ -34,10 +43,6 @@ add_check_whitespace(examples ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_c/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_cpp/*.*)
 
-add_custom_target(examples)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
-add_dependencies(examples pmemkv)
-
 function(add_example name)
 	set(srcs ${ARGN})
 	prepend(srcs ${CMAKE_CURRENT_SOURCE_DIR} ${srcs})
@@ -45,6 +50,9 @@ function(add_example name)
 	add_dependencies(examples example-${name})
 endfunction()
 
+# ----------------------------------------------------------------- #
+## Add examples (if engine used in specific example is enabled)
+# ----------------------------------------------------------------- #
 if(ENGINE_CMAP)
 	add_example(pmemkv_basic_cpp pmemkv_basic_cpp/pmemkv_basic.cpp)
 	target_link_libraries(example-pmemkv_basic_cpp pmemkv)
