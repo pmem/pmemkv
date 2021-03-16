@@ -2,7 +2,8 @@
 # Copyright 2018-2021, Intel Corporation
 
 #
-# ctest_helpers.cmake - helper functions for tests/CMakeLists.txt
+# ctest_helpers.cmake - helper functions for building and adding
+#		new testcases (in tests/CMakeLists.txt)
 #
 
 set(TEST_ROOT_DIR ${PROJECT_SOURCE_DIR}/tests)
@@ -18,15 +19,21 @@ if(TRACE_TESTS)
 	set(GLOBAL_TEST_ARGS ${GLOBAL_TEST_ARGS} --trace-expand)
 endif()
 
-set(INCLUDE_DIRS ${LIBPMEMOBJ++_INCLUDE_DIRS} common/ ../src .)
-set(LIBS_DIRS ${LIBPMEMOBJ++_LIBRARY_DIRS})
-
 # List of supported Valgrind tracers
 set(vg_tracers memcheck helgrind drd pmemcheck)
+
+# ----------------------------------------------------------------- #
+## Include and link required dirs/libs for tests
+# ----------------------------------------------------------------- #
+set(INCLUDE_DIRS ${LIBPMEMOBJ++_INCLUDE_DIRS} common/ ../src .)
+set(LIBS_DIRS ${LIBPMEMOBJ++_LIBRARY_DIRS})
 
 include_directories(${INCLUDE_DIRS})
 link_directories(${LIBS_DIRS})
 
+# ----------------------------------------------------------------- #
+## Define functions to use in tests/CMakeLists.txt
+# ----------------------------------------------------------------- #
 function(find_gdb)
 	execute_process(COMMAND gdb --help
 			RESULT_VARIABLE GDB_RET
@@ -93,11 +100,11 @@ function(find_pmreorder)
 		return()
 	endif()
 
-	if(NOT VALGRIND_FOUND)
+	if(NOT VALGRIND_FOUND OR NOT VALGRIND_PMEMCHECK_FOUND)
 		return()
 	endif()
 
-	if ((NOT(PMEMCHECK_VERSION LESS 1.0)) AND PMEMCHECK_VERSION LESS 2.0)
+	if((NOT(PMEMCHECK_VERSION LESS 1.0)) AND PMEMCHECK_VERSION LESS 2.0)
 		find_program(PMREORDER names pmreorder HINTS ${LIBPMEMOBJ_PREFIX}/bin)
 
 		if(PMREORDER)
@@ -132,6 +139,10 @@ function(build_test_ext)
 	cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 	set(LIBS_TO_LINK "")
 
+	if(${TEST_NAME} MATCHES "posix$" AND WIN32)
+		return()
+	endif()
+
 	foreach(lib ${TEST_LIBS})
 		if("${lib}" STREQUAL "json")
 			if(NOT BUILD_JSON_CONFIG)
@@ -157,8 +168,6 @@ function(build_test_ext)
 endfunction()
 
 function(build_test name)
-	# skip posix tests
-	# XXX: a WIN32 test will break if used with build_test_ext() func.
 	if(${name} MATCHES "posix$" AND WIN32)
 		return()
 	endif()

@@ -1,9 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright 2019-2021, Intel Corporation
 
+#
+# helpers.cmake - helper functions for top-level CMakeLists.txt
+#
+
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 
+# Sets project's version based on git output, in ${VERSION}
 function(set_version VERSION)
 	set(VERSION_FILE ${PMEMKV_ROOT_DIR}/VERSION)
 	if(EXISTS ${VERSION_FILE})
@@ -119,7 +124,7 @@ function(get_program_version_major_minor name ret)
 	execute_process(COMMAND ${name} --version
 		OUTPUT_VARIABLE cmd_ret
 		ERROR_QUIET)
-	STRING(REGEX MATCH "([0-9]+.)([0-9]+.)" VERSION ${cmd_ret})
+	STRING(REGEX MATCH "([0-9]+.)([0-9]+)" VERSION ${cmd_ret})
 	SET(${ret} ${VERSION} PARENT_SCOPE)
 endfunction()
 
