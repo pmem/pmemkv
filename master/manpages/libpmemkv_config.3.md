@@ -109,7 +109,7 @@ Every engine has documented all supported config parameters (please see **libpme
 `int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);`
 
 :	Puts comparator object to a config. To create an instance of pmemkv_comparator object,
-	`pmemkv_comparator_new()` function shoud be used.
+	`pmemkv_comparator_new()` function should be used.
 
 `int pmemkv_config_put_oid(pmemkv_config *config, PMEMoid *oid);`
 
