@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 		s = tx.put("key5", "value5");
 	}
 
-	/* The second tx was not commited, so the changes are not visible. */
+	/* The second tx was not committed, so the changes are not visible. */
 	ASSERT(kv.exists("key4") == status::NOT_FOUND);
 	ASSERT(kv.exists("key5") == status::NOT_FOUND);
 

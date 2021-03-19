@@ -106,6 +106,9 @@ endif()
 build_test(wrong_engine_name_test wrong_engine_name_test.cc)
 add_test_generic(NAME wrong_engine_name_test TRACERS none)
 
+build_test(error_msg_test error_msg_test.cc)
+add_test_generic(NAME error_msg_test TRACERS none)
+
 if(BUILD_EXAMPLES AND ENGINE_CMAP)
 	add_dependencies(tests example-pmemkv_basic_c
 		example-pmemkv_basic_cpp
@@ -130,9 +133,6 @@ add_test_generic(NAME config_c TRACERS none memcheck)
 build_test(config_cpp config/config_cpp.cc)
 add_test_generic(NAME config_cpp TRACERS none memcheck)
 
-build_test(blackhole_test engines/blackhole/blackhole_test.cc)
-add_test_generic(NAME blackhole_test TRACERS none memcheck)
-
 build_test_ext(NAME json_to_config SRC_FILES config/json_to_config.cc LIBS json)
 add_test_generic(NAME json_to_config TRACERS none memcheck)
 
@@ -144,6 +144,7 @@ add_test_generic(NAME result TRACERS none memcheck)
 # ----------------------------------------------------------------- #
 # Tests for all engines
 build_test_ext(NAME put_get_remove SRC_FILES engine_scenarios/all/put_get_remove.cc LIBS json)
+build_test_ext(NAME put_get_remove_not_aligned SRC_FILES engine_scenarios/all/put_get_remove_not_aligned.cc LIBS json)
 build_test_ext(NAME put_get_remove_charset_params SRC_FILES engine_scenarios/all/put_get_remove_charset_params.cc LIBS json)
 build_test_ext(NAME put_get_remove_long_key SRC_FILES engine_scenarios/all/put_get_remove_long_key.cc LIBS json)
 build_test_ext(NAME put_get_remove_params SRC_FILES engine_scenarios/all/put_get_remove_params.cc LIBS json)
@@ -158,7 +159,7 @@ build_test_ext(NAME concurrent_put_get_remove_gen_params SRC_FILES engine_scenar
 build_test_ext(NAME concurrent_put_get_remove_single_op_params SRC_FILES engine_scenarios/concurrent/put_get_remove_single_op_params.cc LIBS json)
 build_test_ext(NAME iterator_concurrent SRC_FILES engine_scenarios/concurrent/iterator_concurrent.cc LIBS json)
 
-# Tests for peristent engines
+# Tests for persistent engines
 build_test_ext(NAME persistent_not_found_verify SRC_FILES engine_scenarios/persistent/not_found_verify.cc LIBS json)
 build_test_ext(NAME persistent_overwrite_verify SRC_FILES engine_scenarios/persistent/overwrite_verify.cc LIBS json)
 build_test_ext(NAME persistent_put_remove_verify SRC_FILES engine_scenarios/persistent/put_remove_verify.cc LIBS json)
@@ -169,6 +170,7 @@ build_test_ext(NAME persistent_put_get_std_map_multiple_reopen SRC_FILES engine_
 build_test_ext(NAME pmreorder_insert SRC_FILES engine_scenarios/pmreorder/insert.cc LIBS json)
 build_test_ext(NAME pmreorder_erase SRC_FILES engine_scenarios/pmreorder/erase.cc LIBS json)
 build_test_ext(NAME pmreorder_iterator SRC_FILES engine_scenarios/pmreorder/iterator.cc LIBS json)
+build_test_ext(NAME pmreorder_recover SRC_FILES engine_scenarios/pmreorder/recover.cc LIBS json)
 
 # Tests for sorted engines
 build_test_ext(NAME sorted_iterate SRC_FILES engine_scenarios/sorted/iterate.cc LIBS json)
@@ -206,12 +208,23 @@ build_test_ext(NAME comparator_default_reopen_cpp SRC_FILES comparator/default_r
 build_test_ext(NAME transaction_put SRC_FILES engine_scenarios/transaction/put.cc LIBS json)
 build_test_ext(NAME transaction_remove SRC_FILES engine_scenarios/transaction/remove.cc LIBS json)
 build_test_ext(NAME transaction_put_pmreorder SRC_FILES engine_scenarios/transaction/put_pmreorder.cc LIBS json)
+build_test_ext(NAME transaction_not_supported SRC_FILES engine_scenarios/transaction/not_supported.cc LIBS json)
 
 # Tests for iterator
 build_test_ext(NAME iterator_basic SRC_FILES engine_scenarios/all/iterator_basic.cc LIBS json)
 build_test_ext(NAME iterator_sorted SRC_FILES engine_scenarios/sorted/iterator_sorted.cc LIBS json)
+build_test_ext(NAME iterator_not_supported SRC_FILES engine_scenarios/all/iterator_not_supported.cc LIBS json)
 
-###################################### CMAP ####################################
+###################################### BLACKHOLE ##############################
+build_test(blackhole_test engines/blackhole/blackhole_test.cc)
+add_test_generic(NAME blackhole_test TRACERS none memcheck)
+#
+add_engine_test(ENGINE blackhole
+		BINARY transaction_not_supported
+		TRACERS none memcheck
+		SCRIPT blackhole/default.cmake)
+################################################################################
+##################################### CMAP ####################################
 if(ENGINE_CMAP)
 	add_engine_test(ENGINE cmap
 			BINARY c_api_null_db_config
@@ -222,6 +235,12 @@ if(ENGINE_CMAP)
 			BINARY put_get_remove
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE cmap
+			BINARY put_get_remove_not_aligned
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
 
 	add_engine_test(ENGINE cmap
 			BINARY put_get_remove_charset_params
@@ -413,6 +432,11 @@ if(ENGINE_CMAP)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8)
 
+	add_engine_test(ENGINE cmap
+			BINARY transaction_not_supported
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
 	if(TESTS_PMEMOBJ_DRD_HELGRIND)
 		add_engine_test(ENGINE cmap
 				BINARY iterator_concurrent
@@ -461,6 +485,11 @@ if(ENGINE_CSMAP)
 
 	add_engine_test(ENGINE csmap
 			BINARY put_get_remove
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY put_get_remove_not_aligned
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
@@ -572,7 +601,7 @@ if(ENGINE_CSMAP)
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8 50)
 
-	if(TESTS_PMEMOBJ_DRD_HELGRIND)
+	if(TESTS_PMEMOBJ_DRD_HELGRIND AND TESTS_LONG)
 		add_engine_test(ENGINE csmap
 				BINARY concurrent_put_get_remove_params
 				TRACERS drd # helgrind XXX: skip list lock order error
@@ -743,6 +772,11 @@ if(ENGINE_CSMAP)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 8 true)
+
+	add_engine_test(ENGINE csmap
+			BINARY transaction_not_supported
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_CSMAP)
 ################################################################################
 ###################################### VCMAP ###################################
@@ -754,6 +788,11 @@ if(ENGINE_VCMAP)
 
 	add_engine_test(ENGINE vcmap
 			BINARY put_get_remove
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vcmap
+			BINARY put_get_remove_not_aligned
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake)
 
@@ -837,6 +876,11 @@ if(ENGINE_VCMAP)
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake
 			PARAMS 8)
+
+	add_engine_test(ENGINE vcmap
+			BINARY transaction_not_supported
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
 endif(ENGINE_VCMAP)
 ################################################################################
 ###################################### VSMAP ###################################
@@ -853,6 +897,11 @@ if(ENGINE_VSMAP)
 
 	add_engine_test(ENGINE vsmap
 			BINARY put_get_remove
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vsmap
+			BINARY put_get_remove_not_aligned
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake)
 
@@ -957,6 +1006,11 @@ if(ENGINE_VSMAP)
 			BINARY iterator_sorted
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vsmap
+			BINARY transaction_not_supported
+			TRACERS none memcheck
+			SCRIPT memkind_based/default.cmake)
 endif(ENGINE_VSMAP)
 ################################################################################
 ###################################### TREE3 ###################################
@@ -977,6 +1031,11 @@ if(ENGINE_TREE3)
 
 	add_engine_test(ENGINE tree3
 			BINARY put_get_remove
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE tree3
+			BINARY put_get_remove_not_aligned
 			TRACERS none #memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
@@ -1159,6 +1218,16 @@ if(ENGINE_TREE3)
 	# TRACERS none memcheck pmemcheck
 	# SCRIPT pmemobj_based/default.cmake
 	# PARAMS 32 8)
+
+	add_engine_test(ENGINE tree3
+			BINARY transaction_not_supported
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE tree3
+			BINARY iterator_not_supported
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_TREE3)
 ################################################################################
 ###################################### STREE ###################################
@@ -1204,6 +1273,11 @@ if(ENGINE_STREE)
 			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE stree
+			BINARY put_get_remove_not_aligned
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE stree
 			BINARY put_get_remove_charset_params
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
@@ -1243,6 +1317,11 @@ if(ENGINE_STREE)
 				BINARY pmreorder_iterator
 				TRACERS none
 				SCRIPT pmemobj_based/pmreorder/iterator.cmake)
+
+		add_engine_test(ENGINE stree
+				BINARY pmreorder_recover
+				TRACERS none
+				SCRIPT pmemobj_based/pmreorder/recover.cmake)
 	endif()
 
 	add_engine_test(ENGINE stree
@@ -1413,6 +1492,11 @@ if(ENGINE_STREE)
 			BINARY iterator_sorted
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE stree
+		BINARY transaction_not_supported
+		TRACERS none memcheck pmemcheck
+		SCRIPT pmemobj_based/default.cmake)
 endif(ENGINE_STREE)
 ################################################################################
 ###################################### RADIX ###################################
@@ -1424,6 +1508,11 @@ if(ENGINE_RADIX)
 
 	add_engine_test(ENGINE radix
 			BINARY put_get_remove
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE radix
+			BINARY put_get_remove_not_aligned
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
 
@@ -1556,7 +1645,7 @@ if(ENGINE_RADIX)
 			BINARY put_get_remove_params
 			TRACERS none
 			SCRIPT pmemobj_based/default.cmake
-			DB_SIZE 4G PARAMS 400000)
+			DB_SIZE 1G PARAMS 400000)
 
 	add_engine_test(ENGINE radix
 			BINARY put_get_remove_params
@@ -1651,6 +1740,282 @@ if(ENGINE_RADIX)
 				BINARY pmreorder_iterator
 				TRACERS none
 				SCRIPT pmemobj_based/pmreorder/iterator.cmake)
+
+		add_engine_test(ENGINE radix
+				BINARY pmreorder_recover
+				TRACERS none
+				SCRIPT pmemobj_based/pmreorder/recover.cmake)
 	endif()
 endif(ENGINE_RADIX)
 ################################################################################
+#################################### ROBINHOOD #################################
+if (ENGINE_ROBINHOOD)
+	# XXX: https://github.com/pmem/pmemkv/issues/916
+	# add_engine_test(ENGINE robinhood
+	#	BINARY error_handling_oom
+	#	TRACERS none memcheck
+	#	SCRIPT pmemobj_based/default.cmake
+	#	DB_SIZE 20M)
+
+	add_engine_test(ENGINE robinhood
+			BINARY iterate
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY iterator_not_supported
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_remove_charset_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 16 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_remove_params
+			TRACERS none
+			SCRIPT pmemobj_based/default.cmake
+			DB_SIZE 1G PARAMS 40000)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_remove_params
+			TRACERS memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			DB_SIZE 1G PARAMS 4000)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_remove
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 1000 8 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS none
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 1000)
+
+	add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 400)
+
+	add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50)
+
+	add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_gen_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY concurrent_iterate_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 24 200 0)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_not_found_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_overwrite_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_put_get_std_map_multiple_reopen
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 1000 8 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_put_remove_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_put_verify_asc_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake
+			DB_SIZE 1G PARAMS 4000)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_put_verify_desc_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake
+			DB_SIZE 1G PARAMS 4000)
+
+	add_engine_test(ENGINE robinhood
+			BINARY persistent_put_verify
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/persistent/insert_check.cmake)
+
+	if(TESTS_PMEMOBJ_DRD_HELGRIND)
+		add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS drd helgrind
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 250)
+
+		add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_params
+			TRACERS drd helgrind
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50)
+
+		add_engine_test(ENGINE robinhood
+			BINARY concurrent_put_get_remove_gen_params
+			TRACERS drd helgrind
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 8 50 8)
+
+		add_engine_test(ENGINE robinhood
+			BINARY concurrent_iterate_params
+			TRACERS drd helgrind
+			SCRIPT pmemobj_based/default.cmake
+			PARAMS 4 50 0)
+	endif()
+
+	add_engine_test(ENGINE robinhood
+			BINARY pmemobj_error_handling_create
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/pmemobj/error_handling_create.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY pmemobj_error_handling_tx_oid
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/pmemobj/error_handling_tx_oid.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY pmemobj_error_handling_tx_path
+			TRACERS none memcheck
+			SCRIPT pmemobj_based/pmemobj/error_handling_tx_path.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY pmemobj_put_get_std_map_oid
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_oid.cmake
+			PARAMS 1000 8 8)
+
+	if(PMREORDER_SUPPORTED)
+		add_engine_test(ENGINE robinhood
+				BINARY pmreorder_insert
+				TRACERS none
+				SCRIPT pmemobj_based/pmreorder/insert.cmake)
+
+		add_engine_test(ENGINE robinhood
+				BINARY pmreorder_erase
+				TRACERS none
+				SCRIPT pmemobj_based/pmreorder/erase.cmake)
+
+		if (TESTS_LONG)
+			add_engine_test(ENGINE robinhood
+					BINARY pmreorder_recover
+					TRACERS none
+					SCRIPT pmemobj_based/pmreorder/recover.cmake)
+		endif()
+	endif()
+endif()
+################################################################################
+###################################### DRAM_VCMAP ###################################
+if(ENGINE_DRAM_VCMAP)
+	add_engine_test(ENGINE dram_vcmap
+			BINARY c_api_null_db_config
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_remove
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_remove_charset_params
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake
+			PARAMS 16 8)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_remove_long_key
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_remove_params
+			TRACERS none
+			SCRIPT dram/default.cmake
+			PARAMS 400000)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_remove_params
+			TRACERS memcheck
+			SCRIPT dram/default.cmake
+			PARAMS 4000)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY put_get_std_map
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake
+			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY iterate
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY concurrent_put_get_remove_params
+			TRACERS none memcheck # XXX - tbb lock does not work well with drd or helgrind
+			SCRIPT dram/default.cmake
+			PARAMS 8 50)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY concurrent_put_get_remove_gen_params
+			TRACERS none memcheck # XXX - tbb lock does not work well with drd or helgrind
+			SCRIPT dram/default.cmake
+			PARAMS 8 50 100)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS none # XXX - tbb lock does not work well with drd or helgrind
+			SCRIPT dram/default.cmake
+			PARAMS 1000)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS memcheck # XXX - tbb lock does not work well with drd or helgrind
+			SCRIPT dram/default.cmake
+			PARAMS 400)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY iterator_basic
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY iterator_concurrent
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake
+			PARAMS 8)
+
+	add_engine_test(ENGINE dram_vcmap
+			BINARY transaction_not_supported
+			TRACERS none memcheck
+			SCRIPT dram/default.cmake)
+endif(ENGINE_DRAM_VCMAP)
+################################################################################
+

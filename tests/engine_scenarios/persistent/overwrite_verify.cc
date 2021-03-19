@@ -28,7 +28,7 @@ static void check(pmem::kv::db &kv)
 {
 	std::string key = entry_from_string("key1");
 
-	std::string expected_value = entry_from_string("new_value"); // longer size
+	std::string expected_value = entry_from_string("new_val"); // longer size
 	std::string new_value2;
 	ASSERT_STATUS(kv.put(key, expected_value), status::OK);
 	ASSERT_STATUS(kv.get(key, &new_value2), status::OK);

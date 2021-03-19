@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2021, Intel Corporation
 
 #
 # install-memkind.sh - installs memkind from sources; depends on
-#		the system it uses proper installation paramaters
+#		the system it uses proper installation parameters
 #
 
 set -e
 
-# v1.10.1, contains new libmemkind namespace
-MEMKIND_VERSION=v1.10.1
+# contains new libmemkind namespace
+MEMKIND_VERSION=v1.11.0
 
 WORKDIR=$(pwd)
 

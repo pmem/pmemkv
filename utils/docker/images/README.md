@@ -1,6 +1,6 @@
 # Content
 
-Dockerfiles and scripts placed in this directory are indended to be used as
+Dockerfiles and scripts placed in this directory are intended to be used as
 development process vehicles and part of continuous integration process.
 
 Images built out of those recipes may by used with Docker or podman as

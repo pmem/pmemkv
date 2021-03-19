@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2021, Intel Corporation
 
 #
 # install-pmdk.sh <package_type> - installs PMDK
@@ -16,8 +16,9 @@ fi
 PACKAGE_TYPE=$1
 PREFIX=${2:-/usr}
 
-# common: 1.9, 03.07.2020
-PMDK_VERSION="1.9"
+# master: Merge pull request #5150 from kilobyte/rpm-no-lto, 16.02.2021
+# contains fix for packaging
+PMDK_VERSION="7f88d9fae088b81936d2f6d5235169e90e7478c7"
 
 git clone https://github.com/pmem/pmdk
 cd pmdk
@@ -31,6 +32,7 @@ else
 		sudo dpkg -i dpkg/libpmem_*.deb dpkg/libpmem-dev_*.deb
 		sudo dpkg -i dpkg/libpmemobj_*.deb dpkg/libpmemobj-dev_*.deb
 		sudo dpkg -i dpkg/pmreorder_*.deb
+		sudo dpkg -i dpkg/libpmempool_*.deb dpkg/libpmempool-dev_*.deb
 		sudo dpkg -i dpkg/libpmemblk_*.deb dpkg/libpmemlog_*.deb dpkg/libpmempool_*.deb dpkg/pmempool_*.deb
 	elif [ "$PACKAGE_TYPE" = "rpm" ]; then
 		sudo rpm -i rpm/*/pmdk-debuginfo-*.rpm

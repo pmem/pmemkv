@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #include <libpmemkv.hpp>
 
@@ -74,6 +74,13 @@ int main()
 
 #ifndef ENGINE_RADIX
 	UT_ASSERT(wrong_engine_name_test("radix"));
+#endif
+
+#ifndef ENGINE_ROBINHOOD
+	UT_ASSERT(wrong_engine_name_test("robinhood"));
+#endif
+#ifndef ENGINE_DRAM_VCMAP
+	UT_ASSERT(wrong_engine_name_test("dram_vcmap"));
 #endif
 
 	errormsg_test();

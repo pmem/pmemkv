@@ -66,14 +66,13 @@ RUN dnf debuginfo-install -y glibc
 COPY install-valgrind.sh install-valgrind.sh
 RUN ./install-valgrind.sh
 
-# Install pmdk from sources, because of:
-# https://github.com/pmem/pmdk/issues/4938
+# Install pmdk
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh
+RUN ./install-pmdk.sh rpm
 
-# Install pmdk c++ bindings (also from sources)
+# Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh
+RUN ./install-libpmemobj-cpp.sh RPM
 
 # Add user
 ENV USER user

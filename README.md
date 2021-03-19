@@ -1,6 +1,5 @@
 # **pmemkv**
 
-[![Travis build status](https://travis-ci.org/pmem/pmemkv.svg?branch=master)](https://travis-ci.org/pmem/pmemkv)
 [![GHA build status](https://github.com/pmem/pmemkv/workflows/pmemkv/badge.svg?branch=master)](https://github.com/pmem/pmemkv/actions)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/18408/badge.svg)](https://scan.coverity.com/projects/pmem-pmemkv)
 [![Coverage Status](https://codecov.io/github/pmem/pmemkv/coverage.svg?branch=master)](https://codecov.io/gh/pmem/pmemkv/branch/master)
@@ -81,6 +80,8 @@ all language bindings and utilities. Engines are loaded by name at runtime.
 | [radix](doc/ENGINES-experimental.md#radix) | [Radix tree](https://pmem.io/libpmemobj-cpp/master/doxygen/classpmem_1_1obj_1_1experimental_1_1radix__tree.html) | Yes | No | Yes |
 | [tree3](doc/ENGINES-experimental.md#tree3) | Persistent B+ tree | Yes | No | No |
 | [stree](doc/ENGINES-experimental.md#stree) | Sorted persistent B+ tree | Yes | No | Yes |
+| [robinhood](doc/ENGINES-experimental.md#robinhood) | Persistent hash map with Robin Hood hashing | Yes | Yes | No |
+| [dram_vcmap](doc/ENGINES-testing.md#dram_vcmap) | Volatile concurrent hash map placed entirely on DRAM | Yes | Yes | No |
 
 The production quality engines are described in the [libpmemkv(7)](doc/libpmemkv.7.md#engines) manual
 and the experimental ones are described in the [ENGINES-experimental.md](doc/ENGINES-experimental.md) file.

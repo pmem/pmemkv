@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "engine.h"
 
@@ -31,6 +31,14 @@
 
 #ifdef ENGINE_TREE3
 #include "engines-experimental/tree3.h"
+#endif
+
+#ifdef ENGINE_ROBINHOOD
+#include "engines-experimental/robinhood.h"
+#endif
+
+#ifdef ENGINE_DRAM_VCMAP
+#include "engines-testing/dram_vcmap.h"
 #endif
 
 namespace pmem
@@ -67,6 +75,12 @@ static constexpr const char *available_engines = "blackhole"
 #endif
 #ifdef ENGINE_STREE
 						 ", stree"
+#endif
+#ifdef ENGINE_ROBINHOOD
+						 ", robinhood"
+#endif
+#ifdef ENGINE_DRAM_VCMAP
+						 ", dram_vcmap"
 #endif
 	;
 
@@ -134,6 +148,22 @@ engine_base::create_engine(const std::string &engine,
 	if (engine == "stree") {
 		engine_base::check_config_null(engine, cfg);
 		return std::unique_ptr<engine_base>(new pmem::kv::stree(std::move(cfg)));
+	}
+#endif
+
+#ifdef ENGINE_ROBINHOOD
+	if (engine == "robinhood") {
+		engine_base::check_config_null(engine, cfg);
+		return std::unique_ptr<engine_base>(
+			new pmem::kv::robinhood(std::move(cfg)));
+	}
+#endif
+
+#ifdef ENGINE_DRAM_VCMAP
+	if (engine == "dram_vcmap") {
+		engine_base::check_config_null(engine, cfg);
+		return std::unique_ptr<engine_base>(
+			new pmem::kv::dram_vcmap(std::move(cfg)));
 	}
 #endif
 
@@ -213,17 +243,17 @@ status engine_base::defrag(double start_percent, double amount_percent)
 
 internal::transaction *engine_base::begin_tx()
 {
-	throw status::NOT_SUPPORTED;
+	throw internal::not_supported("Transactions are not supported in this engine");
 }
 
 engine_base::iterator *engine_base::new_iterator()
 {
-	throw status::NOT_SUPPORTED;
+	throw internal::not_supported("Iterators are not supported in this engine");
 }
 
 engine_base::iterator *engine_base::new_const_iterator()
 {
-	throw status::NOT_SUPPORTED;
+	throw internal::not_supported("Iterators are not supported in this engine");
 }
 
 } // namespace kv

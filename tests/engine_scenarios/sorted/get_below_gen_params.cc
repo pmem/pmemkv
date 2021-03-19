@@ -207,7 +207,7 @@ static void GetBelowIncrTest(std::string engine, pmem::kv::config &&config,
 		}
 	}
 
-	/* start over with two inital keys */
+	/* start over with two initial keys */
 	CLEAR_KV(kv);
 	ASSERT_STATUS(kv.put(MIN_KEY, "init0"), status::OK);
 	ASSERT_STATUS(kv.put(MIN_KEY + MIN_KEY, "init1"), status::OK);

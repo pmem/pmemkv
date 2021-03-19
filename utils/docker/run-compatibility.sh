@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2020, Intel Corporation
+# Copyright 2020-2021, Intel Corporation
 
 #
 # run-compatibility.sh - verify compatibility between versions
@@ -73,6 +73,7 @@ build_and_install_pmemkv "1.0.2"
 build_and_install_pmemkv "1.1"
 build_and_install_pmemkv "1.2"
 build_and_install_pmemkv "1.3"
+build_and_install_pmemkv "1.4"
 
 # checkout HEAD/current version again
 git checkout ${current_version}
@@ -82,3 +83,4 @@ verify_compatibility "1.0.2"
 verify_compatibility "1.1"
 verify_compatibility "1.2"
 verify_compatibility "1.3"
+verify_compatibility "1.4"

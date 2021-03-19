@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 /*
  * erase.cc -- erase pmreorder test
@@ -7,7 +7,7 @@
 
 #include "unittest.hpp"
 
-static constexpr int len_elements = 10;
+static constexpr size_t len_elements = 10;
 
 static void check_exist(pmem::kv::db &kv, const std::string &element,
 			pmem::kv::status exists)
@@ -22,8 +22,8 @@ static void check_exist(pmem::kv::db &kv, const std::string &element,
 
 static void test_init(pmem::kv::db &kv)
 {
-	for (int i = 0; i < len_elements; i++) {
-		std::string element = std::to_string(i);
+	for (size_t i = 0; i < len_elements; i++) {
+		std::string element = entry_from_number(i);
 		ASSERT_STATUS(kv.put(element, element), pmem::kv::status::OK);
 		check_exist(kv, element, pmem::kv::status::OK);
 	}
@@ -35,7 +35,7 @@ static void test_erase(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(size), pmem::kv::status::OK);
 	UT_ASSERT(size == len_elements);
 
-	std::string element = std::to_string(1); /* remove this element */
+	std::string element = entry_from_number(1); /* remove this element */
 	check_exist(kv, element, pmem::kv::status::OK);
 
 	ASSERT_STATUS(kv.remove(element), pmem::kv::status::OK);
@@ -48,8 +48,8 @@ static void check_consistency(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.count_all(size), pmem::kv::status::OK);
 	std::size_t count = 0;
 
-	for (int i = 0; i < len_elements; i++) {
-		std::string element = std::to_string(i);
+	for (size_t i = 0; i < len_elements; i++) {
+		std::string element = entry_from_number(i);
 		if (kv.exists(element) == pmem::kv::status::OK) {
 			++count;
 			check_exist(kv, element, pmem::kv::status::OK);

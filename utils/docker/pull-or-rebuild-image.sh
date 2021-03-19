@@ -18,7 +18,7 @@
 # 2. "rebuild" param was passed as a first argument to this script.
 #
 # The script pulls the Docker image if:
-# 1. it does not have to be rebuilt (based on commited changes), or
+# 1. it does not have to be rebuilt (based on committed changes), or
 # 2. "pull" param was passed as a first argument to this script.
 #
 
@@ -85,7 +85,7 @@ elif [[ "${1}" == "pull" ]]; then
 fi
 
 # Determine if we need to rebuild the image or just pull it from
-# the Container Registry, based on commited changes.
+# the Container Registry, based on committed changes.
 if [ -n "${CI_COMMIT_RANGE}" ]; then
 	commits=$(git rev-list ${CI_COMMIT_RANGE})
 else

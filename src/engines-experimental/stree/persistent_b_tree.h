@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #ifndef PERSISTENT_B_TREE
 #define PERSISTENT_B_TREE
@@ -1929,7 +1929,7 @@ b_tree_base<Key, T, Compare, degree>::split_leaf_node(pool_base &pop,
 	pmem::obj::transaction::run(pop, [&] {
 		node = allocate_leaf();
 		node->move(pop, split_leaf, compare);
-		/* insert entriy(key, obj) into needed half */
+		/* insert entry(key, obj) into needed half */
 		if (less) {
 			result = internal_insert(split_leaf, std::forward<K>(key),
 						 std::forward<M>(obj));
@@ -1971,7 +1971,7 @@ b_tree_base<Key, T, Compare, degree>::split_leaf_node(pool_base &pop,
 	pmem::obj::transaction::run(pop, [&] {
 		node = allocate_leaf();
 		node->move(pop, split_leaf, compare);
-		/* insert entriy(key, obj) into needed half */
+		/* insert entry(key, obj) into needed half */
 		if (less) {
 			result = internal_insert(split_leaf, std::forward<K>(key),
 						 std::forward<M>(obj));

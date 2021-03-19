@@ -21,6 +21,14 @@ ENV NOTTY 1
 ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
+ARG SKIP_SCRIPTS_DOWNLOAD
+
+ENV COVERITY_DEPS "\
+	ruby \
+	wget"
+
+ARG PMEMKV_DEPS="\
+	rapidjson-dev"
 
 # Update the Apt cache and install basic tools
 RUN apt-get update
@@ -52,10 +60,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	numactl \
 	pandoc \
 	pkg-config \
-	rapidjson-dev \
 	sudo \
 	wget \
 	whois \
+	$COVERITY_DEPS \
+	$PMEMKV_DEPS \
  && rm -rf /var/lib/apt/lists/*
 
 # Install valgrind
@@ -69,6 +78,11 @@ RUN ./install-pmdk.sh dpkg
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
 RUN ./install-libpmemobj-cpp.sh DEB
+
+# Download scripts required in run-*.sh
+COPY download-scripts.sh download-scripts.sh
+COPY 0001-fix-generating-gcov-files-and-turn-off-verbose-log.patch 0001-fix-generating-gcov-files-and-turn-off-verbose-log.patch
+RUN ./download-scripts.sh
 
 # Add user
 ENV USER user

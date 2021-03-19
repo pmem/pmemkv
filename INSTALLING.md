@@ -20,11 +20,11 @@ Installation of Key-Value Datastore for Persistent Memory
 ### Prerequisites
 
 * **Linux 64-bit** (OSX and Windows are not yet supported)
-* **libpmem** and **libpmemobj**, which are part of [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.8
-* [**libpmemobj-cpp**](https://github.com/pmem/libpmemobj-cpp) - C++ PMDK bindings 1.11
+* **libpmem** and **libpmemobj**, which are part of [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.9.1
+* [**libpmemobj-cpp**](https://github.com/pmem/libpmemobj-cpp) - C++ PMDK bindings 1.12
 * [**memkind**](https://github.com/memkind/memkind) - Volatile memory manager 1.8.0 (required by vsmap & vcmap engines)
 * [**TBB**](https://github.com/01org/tbb) - Thread Building Blocks (required by vcmap engine)
-* [**RapidJSON**](https://github.com/tencent/rapidjson) - JSON parser (required by `libpmemkv_json_config` helper library)
+* [**RapidJSON**](https://github.com/tencent/rapidjson) - JSON parser 1.0.0 (required by `libpmemkv_json_config` helper library)
 * Used only for **testing**:
 	* [**pmempool**](https://github.com/pmem/pmdk/tree/master/src/tools/pmempool) - pmempool utility, part of PMDK
 	* [**valgrind**](https://github.com/pmem/valgrind) - tool for profiling and memory leak detection. *pmem* forked version with *pmemcheck*
@@ -43,9 +43,9 @@ git clone https://github.com/pmem/pmemkv
 cd pmemkv
 mkdir ./build
 cd ./build
-cmake .. -DBUILD_TESTS=ON   # run CMake
-make -j$(nproc)             # build everything
-make test                   # run all tests
+cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug		# run CMake, prepare Debug version
+make -j$(nproc)					# build everything
+make test						# run all tests
 ```
 
 Instead of the last command (`make test`) you can run
@@ -75,15 +75,16 @@ cmake ..
 To package `pmemkv` as a shared library and install on your system:
 
 ```sh
-sudo make install		# install shared library to the default location: /usr/local
-sudo make uninstall		# remove shared library and headers
+cmake .. [-DCMAKE_BUILD_TYPE=Release]	# prepare e.g. Release version
+sudo make install			# install shared library to the default location: /usr/local
+sudo make uninstall			# remove shared library and headers
 ```
 
 To install this library into other locations, pass appropriate value to cmake
 using CMAKE_INSTALL_PREFIX variable like this:
 
 ```sh
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr [-DCMAKE_BUILD_TYPE=Release]
 sudo make install		# install to path specified by CMAKE_INSTALL_PREFIX
 sudo make uninstall		# remove shared library and headers from path specified by CMAKE_INSTALL_PREFIX
 ```
@@ -230,7 +231,7 @@ engine in [ENGINES-experimental.md](doc/ENGINES-experimental.md).
 
 ```sh
 ...
-cmake .. -DCPACK_GENERATOR="$GEN" -DCMAKE_INSTALL_PREFIX=/usr
+cmake .. -DCPACK_GENERATOR="$GEN" -DCMAKE_INSTALL_PREFIX=/usr [-DCMAKE_BUILD_TYPE=Release]
 make -j$(nproc) package
 ```
 

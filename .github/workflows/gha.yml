@@ -1,6 +1,11 @@
 
 name: pmemkv
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  release:
+    types:
+      - created
 
 env:
   REPO:           pmemkv
@@ -23,17 +28,30 @@ jobs:
     strategy:
       matrix:
         CONFIG: ["TYPE=debug OS=fedora OS_VER=32",
-                 "TYPE=debug OS=ubuntu OS_VER=20.10 PUSH_IMAGE=1",
+                 "TYPE=debug OS=ubuntu OS_VER=20.10",
                  "TYPE=debug OS=ubuntu OS_VER=20.04 CHECK_CPP_STYLE=1 COVERAGE=1",
                  "TYPE=release OS=fedora OS_VER=32",
-                 "TYPE=release OS=ubuntu OS_VER=20.04",
+                 "TYPE=release OS=ubuntu OS_VER=20.04 PUSH_IMAGE=1",
                  "TYPE=valgrind OS=ubuntu OS_VER=20.04",
                  "TYPE=memcheck_drd OS=ubuntu OS_VER=20.04",
                  "TYPE=building OS=fedora OS_VER=32 PUSH_IMAGE=1",
-                 "TYPE=building OS=ubuntu OS_VER=20.04 PUSH_IMAGE=1 COVERAGE=1 ",
+                 "TYPE=building OS=ubuntu OS_VER=20.10 PUSH_IMAGE=1 COVERAGE=1 ",
                  "TYPE=compatibility OS=fedora OS_VER=32",
                  "TYPE=bindings OS=ubuntu OS_VER=20.04_bindings PUSH_IMAGE=1"]
     steps:
+      - name: Set image version and force image action for stable branch
+        # we want to set IMG_VER to e.g. '1.x' for stable branches and PRs against them
+        # for PRs we have to use 'base_ref' - this is the target branch (and we have to check that instead)
+        if:
+          startsWith(github.ref, 'refs/heads/stable-') || startsWith(github.base_ref, 'stable-')
+        # we now know we're on (or against) stable branches, so we just need to pick the version (e.g. the mentioned '1.x')
+        run: |
+          IMG_VER=$(echo ${GITHUB_BASE_REF} | cut -d - -f 2)
+          [ -z "${IMG_VER}" ] \
+              && echo "IMG_VER=$(echo ${GITHUB_REF#refs/heads/} | cut -d - -f 2)" >> $GITHUB_ENV \
+              || echo "IMG_VER=${IMG_VER}" >> $GITHUB_ENV
+          echo "FORCE_IMAGE_ACTION=rebuild" >> $GITHUB_ENV
+
       - name: Clone the git repo
         uses: actions/checkout@v2
         with:
@@ -60,8 +78,16 @@ jobs:
       matrix:
         CONFIG: ["TYPE=doc OS=fedora OS_VER=32"]
     steps:
+      - name: Set image version for stable branch
+        if: startsWith(github.ref, 'refs/heads/stable-')
+        run: |
+          echo "IMG_VER=$(echo ${GITHUB_REF#refs/heads/} | cut -d - -f 2)" >> $GITHUB_ENV
+
       - name: Clone the git repo
         uses: actions/checkout@v2
+
+      - name: Pull the image
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh pull
 
       - name: Run the build
         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh

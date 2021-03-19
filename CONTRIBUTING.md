@@ -5,6 +5,7 @@
 - [Submitting Pull Requests](#submitting-pull-requests)
 - [Creating New Engines](#creating-new-engines)
 - [Creating Experimental Engines](#creating-experimental-engines)
+- [Extending Public API](#extending-public-api)
 - [Configuring GitHub fork](#configuring-github-fork)
 
 # Opening New Issues
@@ -37,6 +38,9 @@ make cppformat
 # Submitting Pull Requests
 
 We take outside code contributions to `PMEMKV` through GitHub pull requests.
+
+If you add a new feature, implement a new engine or fix a critical bug please append
+appropriate entry to ChangeLog under newest release.
 
 **NOTE: If you do decide to implement code changes and contribute them,
 please make sure you agree your contribution can be made available under the
@@ -97,11 +101,7 @@ Next we'll walk you through the steps of creating a new engine.
 * Relatively short (users will have to type this!)
 * Formatted in all lower-case
 * No whitespace or special characters
-* Names should use common prefixes to denote capabilities:
-  - prefix of "v" denotes volatile (persistent if omitted), appears first
-  - prefix of "c" denotes concurrent (single-threaded if omitted), appears second
-  - prefix of "s" denotes sorted (unsorted if omitted), appears last
-* For this example: `mytree` (persistent, single-threaded, unsorted)
+* For this example: `mytree`
 
 ### Creating Engine Header
 
@@ -194,6 +194,18 @@ As noted in the example above, the experimental CMake module should use `-experi
 ### Documentation
 
 * In `doc/ENGINES-experimental.md`, add `mytree` section
+
+# Extending Public API
+
+When adding a new public function, you have to make sure to update:
+- manpages `libpmemkv.3` or `libpmemkv_config.3` in `doc` dir
+- `doc/CMakeLists.txt` with new manpage link
+- map file with debug symbols (`src/libpmemkv.map`)
+- source and header files (incl. libpmemkv.h, libpmemkv.cc, libpmemkv.hpp)
+- engines' sources if needed (in `src/engines`)
+- appropriate examples, to show usage
+- tests (incl. compatibility, c_api and more...)
+- ChangeLog with new entry for next release
 
 # Configuring GitHub fork
 

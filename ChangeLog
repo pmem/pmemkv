@@ -1,3 +1,53 @@
+XXX Igor Chorążewicz <igor.chorazewicz@intel.com>
+
+	* Version 1.5
+
+	Features:
+	-
+
+	Major fixes:
+	-
+
+	Other changes:
+	- Switched default CMake's build type from "Debug" to "RelWithDebInfo"
+		when compiling from sources - it's relevant for a GitHub users
+		(who may e.g. run some benchmarks)
+	-
+
+Mon Feb 15 2021 Igor Chorążewicz <igor.chorazewicz@intel.com>
+
+	* Version 1.4
+
+	Features:
+	- new experimental engine - robinhood (concurrent, unsorted,
+		persistent map)
+	- experimental iterators API which allows to directly modify values
+		(or parts of values)
+	- experimental transaction API which allows grouping `put` and `remove`
+		operations into a single atomic action
+
+	Other changes:
+	- optimized put() in radix engine
+
+	Major fixes:
+	- calling pmemkv_errormsg() now returns empty message for NOT_FOUND and
+		STOPPED_BY_CB (instead of a possible previous, unrelated error)
+	- fix vcmap OOM error on put (github issue #798)
+
+	Known issues:
+	- vcmap (github issue #894)
+
+Tue Oct 06 2020 Szymon Romik <szymon.romik@intel.com>
+
+	* Version 1.0.3
+
+	This is the last bugfix release for pmemkv 1.0 version.
+	Maintenance of this version is no longer supported.
+
+	Notable changes:
+	- VSmap::put method refactor (to use emplace)
+	- add errormsg() to db class
+
 Fri Oct 02 2020 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.3
@@ -24,11 +74,11 @@ Fri Oct 02 2020 Szymon Romik <szymon.romik@intel.com>
 	Known issues:
 	- vcmap (github issues #623, #798)
 
-Fri May 29 2019 Szymon Romik <szymon.romik@intel.com>
+Fri May 29 2020 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.2
 
-	This release introduces a new experimantal engine - csmap (cuncurrent
+	This release introduces a new experimental engine - csmap (concurrent
 	sorted map, backed by libpmemobj-cpp's concurrent_map).
 
 	We have also provided support for custom comparators for sorted engines.

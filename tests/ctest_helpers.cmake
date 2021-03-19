@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2018-2020, Intel Corporation
+# Copyright 2018-2021, Intel Corporation
 
 #
 # ctest_helpers.cmake - helper functions for tests/CMakeLists.txt
@@ -294,7 +294,7 @@ function(add_test_generic)
 	endforeach()
 endfunction()
 
-# adds testcase with addtional parameters, required by "engine scenario" tests
+# adds testcase with additional parameters, required by "engine scenario" tests
 function(add_engine_test)
 	set(oneValueArgs BINARY ENGINE SCRIPT DB_SIZE)
 	set(multiValueArgs TRACERS PARAMS)

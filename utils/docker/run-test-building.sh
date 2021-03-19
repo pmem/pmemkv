@@ -147,6 +147,8 @@ engines_flags=(
 	ENGINE_STREE
 	ENGINE_TREE3
 	ENGINE_RADIX
+	ENGINE_ROBINHOOD
+	ENGINE_DRAM_VCMAP
 	# the last item is to test all engines disabled
 	BLACKHOLE_TEST
 )
@@ -190,6 +192,8 @@ cmake .. -DCXX_STANDARD=14 \
 	-DENGINE_STREE=ON \
 	-DENGINE_TREE3=ON \
 	-DENGINE_RADIX=ON \
+	-DENGINE_ROBINHOOD=ON \
+	-DENGINE_DRAM_VCMAP=ON \
 	-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG}
 make -j$(nproc)
 # list all tests in this build
