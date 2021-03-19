@@ -13,13 +13,13 @@ set_version(VERSION)
 ## CMake build options
 # ----------------------------------------------------------------- #
 option(BUILD_DOC "build documentation" ON)
-option(BUILD_EXAMPLES "build examples" ON)
+option(BUILD_EXAMPLES "build examples" OFF)
 option(BUILD_TESTS "build tests" ON)
 option(BUILD_JSON_CONFIG "build the 'libpmemkv_json_config' library" ON)
 
 option(TESTS_LONG "enable long running tests" OFF)
 option(TESTS_USE_FORCED_PMEM "run tests with PMEM_IS_PMEM_FORCE=1 - it speeds up tests execution on emulated pmem" OFF)
-option(TESTS_USE_VALGRIND "enable tests with valgrind (if found)" ON)
+option(TESTS_USE_VALGRIND "enable tests with valgrind (if found)" OFF)
 option(TESTS_PMEMOBJ_DRD_HELGRIND "enable test of pmemobj engines under drd and helgrind (they should only be run on PMEM)" OFF)
 option(TESTS_JSON "enable tests which require libpmemkv_json_config library (BUILD_JSON_CONFIG has to be ON)" ON)
 
@@ -30,12 +30,14 @@ option(USE_CCACHE "use ccache if it is available in the system" ON)
 
 # Each engine can be enabled separately.
 option(ENGINE_CMAP "enable cmap engine" ON)
-option(ENGINE_VCMAP "enable vcmap engine" ON)
-option(ENGINE_VSMAP "enable vsmap engine" ON)
+option(ENGINE_VCMAP "enable vcmap engine" OFF)
+option(ENGINE_VSMAP "enable vsmap engine" OFF)
 option(ENGINE_CSMAP "enable experimental csmap engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
 option(ENGINE_STREE "enable experimental stree engine" ON)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 option(ENGINE_RADIX "enable experimental radix engine" OFF)
+
+option(ENGINE_PSKIPLIST "enable experimental pskiplist engine" ON)
 
 # ----------------------------------------------------------------- #
 ## Set required and useful variables
@@ -141,6 +143,14 @@ if(ENGINE_RADIX)
 		src/engines-experimental/radix.cc
 	)
 endif()
+if(ENGINE_PSKIPLIST)
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/pskiplist.h
+		src/engines-experimental/pskiplist.cc
+		src/engines-experimental/pskiplist/persistent_skiplist.h
+		src/engines-experimental/pskiplist/smartpptr.h
+	)
+endif()
 
 # ----------------------------------------------------------------- #
 ## Setup defines and check status of each engine
@@ -190,6 +200,12 @@ if(ENGINE_RADIX)
 	message(STATUS "RADIX engine is ON")
 else()
 	message(STATUS "RADIX engine is OFF")
+endif()
+if(ENGINE_PSKIPLIST)
+	add_definitions(-DENGINE_PSKIPLIST)
+	message(STATUS "PSKIPLIST engine is ON")
+else()
+	message(STATUS "PSKIPLIST engine is OFF")
 endif()
 
 # ----------------------------------------------------------------- #
