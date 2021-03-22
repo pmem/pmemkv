@@ -169,14 +169,14 @@ Holding simultaneously in the same thread more than one iterator is undefined be
 :	Allows getting record's value's range which can be only read.
 	You can request for either full value or only value's subrange (`n` elements starting from `pos`).
 	Assigns pointer to the beginning of the requested range to `data`, and number of elements in range to `rb`.
-	If `n` is bigger than length of a value it's automatically shrinked.
+	If `n` is bigger than length of a value it's automatically shrunk.
 	If the iterator is on an undefined position, calling this method is undefined behaviour.
 
 `int pmemkv_write_iterator_write_range(pmemkv_write_iterator *it, size_t pos, size_t n, char **data, size_t *wb);`
 :	Allows getting record's value's range which can be modified.
 	You can request for either full value or only value's subrange (`n` elements starting from `pos`).
 	Assigns pointer to the beginning of the requested range to `data`, and number of elements in range to `wb`.
-	If `n` is bigger than length of a value it's automatically shrinked.
+	If `n` is bigger than length of a value it's automatically shrunk.
 	Changes made on a requested range are not persistent until *pmemkv_write_iterator_commit()* is called.
 	If the iterator is on an undefined position, calling this method is undefined behaviour.
 

@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">PMEMKV
-   &#160;<span id="projectnumber">1.4-rc1.git1.ge273b6a</span>
+   &#160;<span id="projectnumber">1.4-git63.gd688863</span>
    </div>
    <div id="projectbrief">This is the C++ documentation for PMEMKV.</div>
   </td>
@@ -161,7 +161,7 @@ Private Attributes</h2></td></tr>
 <div class="line">        s = <a class="code" href="classpmem_1_1kv_1_1tx.html#a24213c570ab6338eb73dff99bfc9641b">tx</a>.put(<span class="stringliteral">&quot;key5&quot;</span>, <span class="stringliteral">&quot;value5&quot;</span>);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
-<div class="line">    <span class="comment">/* The second tx was not commited, so the changes are not visible. */</span></div>
+<div class="line">    <span class="comment">/* The second tx was not committed, so the changes are not visible. */</span></div>
 <div class="line">    ASSERT(kv.exists(<span class="stringliteral">&quot;key4&quot;</span>) == status::NOT_FOUND);</div>
 <div class="line">    ASSERT(kv.exists(<span class="stringliteral">&quot;key5&quot;</span>) == status::NOT_FOUND);</div>
 <div class="line"> </div>
@@ -361,7 +361,7 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/tmp/pmemkv-lzf/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
+<li>/tmp/pmemkv-mMR/src/<a class="el" href="libpmemkv_8hpp_source.html">libpmemkv.hpp</a></li>
 </ul>
 </div><!-- contents -->
 <div class="ttc" id="aclasspmem_1_1kv_1_1tx_html_a24213c570ab6338eb73dff99bfc9641b"><div class="ttname"><a href="classpmem_1_1kv_1_1tx.html#a24213c570ab6338eb73dff99bfc9641b">pmem::kv::tx::tx</a></div><div class="ttdeci">tx(pmemkv_tx *tx_) noexcept</div><div class="ttdoc">Constructs C++ tx object from a C pmemkv_tx pointer.</div><div class="ttdef"><b>Definition:</b> libpmemkv.hpp:1657</div></div>
