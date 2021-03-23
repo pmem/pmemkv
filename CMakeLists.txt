@@ -143,11 +143,24 @@ if(ENGINE_RADIX)
 	)
 endif()
 if(ENGINE_PSKIPLIST)
+	find_package(Git QUIET)
+	if(GIT_SUBMODULE)
+        message(STATUS "Submodule update for ENGINE_PSKIPLIST")
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+            message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+        endif()
+    endif()
 	list(APPEND SOURCE_FILES
 		src/engines-experimental/pskiplist.h
 		src/engines-experimental/pskiplist.cc
 		src/engines-experimental/pskiplist/persistent_skiplist.h
 		src/engines-experimental/pskiplist/smartpptr.h
+	)
+
+endif()
 if(ENGINE_ROBINHOOD)
 	list(APPEND SOURCE_FILES
 		src/engines-experimental/robinhood.h
@@ -218,6 +231,7 @@ if(ENGINE_PSKIPLIST)
 	message(STATUS "PSKIPLIST engine is ON")
 else()
 	message(STATUS "PSKIPLIST engine is OFF")
+endif()
 if(ENGINE_ROBINHOOD)
 	add_definitions(-DENGINE_ROBINHOOD)
 	message(STATUS "ROBINHOOD engine is ON")

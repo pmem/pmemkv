@@ -41,6 +41,10 @@
 #include "engines-testing/dram_vcmap.h"
 #endif
 
+#ifdef ENGINE_PSKIPLIST
+#include "engines-experimental/pskiplist.h"
+#endif
+
 namespace pmem
 {
 namespace kv
