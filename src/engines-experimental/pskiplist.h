@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2021, 4Paradigm Inc. */
+/* Copyright 2021, 4Paradigm Inc. */
 
 #pragma once
 
