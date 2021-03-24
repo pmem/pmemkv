@@ -13,13 +13,13 @@ set_version(VERSION)
 ## CMake build options
 # ----------------------------------------------------------------- #
 option(BUILD_DOC "build documentation" ON)
-option(BUILD_EXAMPLES "build examples" OFF)
+option(BUILD_EXAMPLES "build examples" ON)
 option(BUILD_TESTS "build tests" ON)
 option(BUILD_JSON_CONFIG "build the 'libpmemkv_json_config' library" ON)
 
 option(TESTS_LONG "enable long running tests" OFF)
 option(TESTS_USE_FORCED_PMEM "run tests with PMEM_IS_PMEM_FORCE=1 - it speeds up tests execution on emulated pmem" OFF)
-option(TESTS_USE_VALGRIND "enable tests with valgrind (if found)" OFF)
+option(TESTS_USE_VALGRIND "enable tests with valgrind (if found)" ON)
 option(TESTS_PMEMOBJ_DRD_HELGRIND "enable test of pmemobj engines under drd and helgrind (they should only be run on PMEM)" OFF)
 option(TESTS_JSON "enable tests which require libpmemkv_json_config library (BUILD_JSON_CONFIG has to be ON)" ON)
 
@@ -30,8 +30,8 @@ option(USE_CCACHE "use ccache if it is available in the system" ON)
 
 # Each engine can be enabled separately.
 option(ENGINE_CMAP "enable cmap engine" ON)
-option(ENGINE_VCMAP "enable vcmap engine" OFF)
-option(ENGINE_VSMAP "enable vsmap engine" OFF)
+option(ENGINE_VCMAP "enable vcmap engine" ON)
+option(ENGINE_VSMAP "enable vsmap engine" ON)
 option(ENGINE_CSMAP "enable experimental csmap engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
 option(ENGINE_STREE "enable experimental stree engine" ON)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
@@ -142,24 +142,25 @@ if(ENGINE_RADIX)
 		src/engines-experimental/radix.cc
 	)
 endif()
+# checkout submodule for ENGINE_PSKIPLIST
+find_package(Git QUIET)
+option(GIT_SUBMODULE "Check submodules during build" ON)
+if(GIT_SUBMODULE)
+	message(STATUS "Submodule update for ENGINE_PSKIPLIST")
+	execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+					WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+					RESULT_VARIABLE GIT_SUBMOD_PSKIPLIST)
+endif()
 if(ENGINE_PSKIPLIST)
-	find_package(Git QUIET)
-	if(GIT_SUBMODULE)
-        message(STATUS "Submodule update for ENGINE_PSKIPLIST")
-        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
-        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-            message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
-        endif()
-    endif()
+	if(NOT GIT_SUBMOD_PSKIPLIST EQUAL "0")
+		message(FATAL_ERROR "git submodule update for ENGINE_PSKIPLIST failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+	endif()
 	list(APPEND SOURCE_FILES
 		src/engines-experimental/pskiplist.h
 		src/engines-experimental/pskiplist.cc
 		src/engines-experimental/pskiplist/persistent_skiplist.h
 		src/engines-experimental/pskiplist/smartpptr.h
 	)
-
 endif()
 if(ENGINE_ROBINHOOD)
 	list(APPEND SOURCE_FILES
