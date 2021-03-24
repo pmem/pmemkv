@@ -60,6 +60,11 @@ public:
 						&create_or_error_if_exists);
 			}
 
+			if (create_if_missing && create_or_error_if_exists) {
+				throw internal::invalid_argument(
+					"Both flags set in config: \"create_if_missing\" and \"create_or_error_if_exists\"");
+			}
+
 			if (create_if_missing) {
 				bool failed_open = false;
 				try {

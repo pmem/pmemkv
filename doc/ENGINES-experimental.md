@@ -13,17 +13,17 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_TREE3` o
 
 ### Configuration
 
-Configuration must specify a `path` to a PMDK persistent pool (with layout "pmemkv_tree3"), which can be a file (on a DAX filesystem),
+Configuration must specify a `path` to a PMDK persistent pool, which can be a file (on a DAX filesystem),
 a DAX device, or a PMDK poolset file.
 
-* **path** -- Path to the database pool
+* **path** -- Path to the database pool (with layout "pmemkv_tree3"), to open or create.
 	+ type: string
-* **create_if_missing** -- If 1, pmemkv tries to create the pool and when that doesn't succeed it tries to open it.
-	If 0, pmemkv uses **create_or_error_if_exists** flag to create/open the pool.
+* **create_if_missing** -- If 1, pmemkv tries to open the pool and if that doesn't succeed, it creates it.
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
-* **create_or_error_if_exists** -- If 1, pmemkv creates the pool (but it will fail if path exists),
-	if 0, pmemkv opens the pool specified by 'path' (path has to exist).
+* **create_or_error_if_exists** -- If 1, pmemkv creates the file (but it will fail if path exists).
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
 * **size** --  Only needed if any of the above flags is 1. It specifies size of the database [in bytes] to create.
@@ -59,14 +59,14 @@ Remove method is currently implemented to take a global lock - it blocks all oth
 
 ### Configuration
 
-* **path** -- Path to the database pool (layout "pmemkv_csmap")
+* **path** -- Path to the database pool (layout "pmemkv_csmap"), to open or create.
 	+ type: string
-* **create_if_missing** -- If 1, pmemkv tries to create the file and when that doesn't succeed it tries to open it.
-	If 0, pmemkv uses **create_or_error_if_exists** flag to create/open the file.
+* **create_if_missing** -- If 1, pmemkv tries to open the pool and if that doesn't succeed, it creates it.
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
-* **create_or_error_if_exists** -- If 1, pmemkv creates the pool (but it will fail if path exists),
-	if 0, pmemkv opens the pool specified by 'path' (path has to exist).
+* **create_or_error_if_exists** -- If 1, pmemkv creates the file (but it will fail if path exists).
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
 * **size** --  Only needed if any of the above flags is 1. It specifies size of the database [in bytes] to create.
@@ -83,14 +83,14 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_RADIX` o
 
 ### Configuration
 
-* **path** -- Path to the database pool (layout "pmemkv_radix")
+* **path** -- Path to the database pool (layout "pmemkv_radix"), to open or create.
 	+ type: string
-* **create_if_missing** -- If 1, pmemkv tries to create the pool and when that doesn't succeed it tries to open it.
-	If 0, pmemkv uses **create_or_error_if_exists** flag to create/open the pool.
+* **create_if_missing** -- If 1, pmemkv tries to open the pool and if that doesn't succeed, it creates it.
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
-* **create_or_error_if_exists** -- If 1, pmemkv creates the pool (but it will fail if path exists),
-	if 0, pmemkv opens the pool specified by 'path' (path has to exist).
+* **create_or_error_if_exists** -- If 1, pmemkv creates the file (but it will fail if path exists).
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
 * **size** --  Only needed if any of the above flags is 1. It specifies size of the database [in bytes] to create.
@@ -107,14 +107,14 @@ It is disabled by default. It can be enabled in CMake using the `ENGINE_STREE` o
 
 ### Configuration
 
-* **path** -- Path to the database pool (layout "pmemkv_stree")
+* **path** -- Path to the database pool (layout "pmemkv_stree"), to open or create.
 	+ type: string
-* **create_if_missing** -- If 1, pmemkv tries to create the pool and when that doesn't succeed it tries to open it.
-	If 0, pmemkv uses **create_or_error_if_exists** flag to create/open the pool.
+* **create_if_missing** -- If 1, pmemkv tries to open the pool and if that doesn't succeed, it creates it.
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
-* **create_or_error_if_exists** -- If 1, pmemkv creates the pool (but it will fail if path exists),
-	if 0, pmemkv opens the pool specified by 'path' (path has to exist).
+* **create_or_error_if_exists** -- If 1, pmemkv creates the file (but it will fail if path exists).
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
 * **size** --  Only needed if any of the above flags is 1. It specifies size of the database [in bytes] to create.
@@ -141,14 +141,14 @@ There are two parameters to be optionally modified by env variables:
 
 ### Configuration
 
-* **path** -- Path to the database pool (layout "pmemkv_robinhood")
+* **path** -- Path to the database pool (layout "pmemkv_robinhood"), to open or create.
 	+ type: string
-* **create_if_missing** -- If 1, pmemkv tries to create the pool and when that doesn't succeed it tries to open it.
-	If 0, pmemkv uses **create_or_error_if_exists** flag to create/open the pool.
+* **create_if_missing** -- If 1, pmemkv tries to open the pool and if that doesn't succeed, it creates it.
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
-* **create_or_error_if_exists** -- If 1, pmemkv creates the pool (but it will fail if path exists),
-	if 0, pmemkv opens the pool specified by 'path' (path has to exist).
+* **create_or_error_if_exists** -- If 1, pmemkv creates the file (but it will fail if path exists).
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
 * **size** --  Only needed if any of the above flags is 1. It specifies size of the database [in bytes] to create.

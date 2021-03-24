@@ -1479,7 +1479,7 @@ inline status config::put_string(const std::string &key,
 }
 
 /**
- * Puts size to a config
+ * Puts size to a config, it's required when creating new database pool.
  *
  * @param[in] size of the database in bytes.
  *
@@ -1491,7 +1491,7 @@ inline status config::put_size(std::uint64_t size) noexcept
 }
 
 /**
- * Puts path to a config.
+ * Puts path (of a database pool) to a config, to open or create.
  *
  * @param[in] path to a database file or to a poolset file (see **poolset**(5) for
  * details). Note that when using poolset file, size should be 0.
@@ -1515,10 +1515,9 @@ inline status config::put_force_create(bool value) noexcept
 }
 
 /**
- * Puts create_or_error_if_exists parameter to a config. This flag has lower priority than
- * **create_if_missing** (see config::put_create_if_missing), setting them both makes no
- * sense. It uses 'path' (as specified by e.g. config::put_path).
- * Works only with engines supporting this flag and it means:
+ * Puts create_or_error_if_exists parameter to a config. This flag is mutually exclusive
+ * with **create_if_missing** (see config::put_create_if_missing).
+ * It works only with engines supporting this flag and it means:
  * If true: pmemkv creates the pool, unless it exists - then it fails.
  * If false: pmemkv opens the pool, unless the path does not exist - then it fails.
  * False by default.
@@ -1531,14 +1530,12 @@ inline status config::put_create_or_error_if_exists(bool value) noexcept
 }
 
 /**
- * Puts create_if_missing parameter to a config. This flag is prioritized before
- * **create_or_error_if_exists** (see config::put_create_or_error_if_exists)
- * and is encouraged to use. It uses 'path' (as specified by e.g. config::put_path).
- * Works only with engines supporting this flag and it means:
+ * Puts create_if_missing parameter to a config. This flag is mutually exclusive
+ * with **create_or_error_if_exists** (see config::put_create_or_error_if_exists).
+ * It works only with engines supporting this flag and it means:
  * If true: pmemkv tries to open the pool and if that doesn't succeed
- *	  it means there's (most likely) no pool to use, so it tries to create it.
- * If false: pmemkv creates or opens the pool based on setting of
- *	  **create_or_error_if_exists** flag.
+ *	  it means there's (most likely) no pool to use, so it creates it.
+ * If false: pmemkv opens the pool, unless the path does not exist - then it fails.
  * False by default.
  *
  * @return pmem::kv::status
@@ -1549,10 +1546,10 @@ inline status config::put_create_if_missing(bool value) noexcept
 }
 
 /**
- * Puts PMEMoid object to a config
+ * Puts PMEMoid object to a config.
  *
  * @param[in] oid pointer (for details see **libpmemobj**(7)) which points to the engine
- * data. If oid is null engine will allocate new data, otherwise it will use existing
+ * data. If oid is null, engine will allocate new data, otherwise it will use existing
  * one.
  *
  * @return pmem::kv::status

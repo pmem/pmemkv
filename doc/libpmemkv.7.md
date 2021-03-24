@@ -65,14 +65,14 @@ Internally this engine uses persistent concurrent hashmap and persistent string 
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
-* **path** -- Path to a database file or to a poolset file (see **poolset**(5) for details). Note that when using poolset file, size should be 0
+* **path** -- Path to a database file or to a poolset file (see **poolset**(5) for details). Note that when using poolset file, size should be 0. It's used to open or create pool (layout "pmemkv").
 	+ type: string
-* **create_if_missing** -- If 1, pmemkv tries to create the file and when that doesn't succeed it tries to open it.
-	If 0, pmemkv uses **create_or_error_if_exists** flag to create/open the file.
+* **create_if_missing** -- If 1, pmemkv tries to open the pool and if that doesn't succeed, it creates it.
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
-* **create_or_error_if_exists** -- If 1, pmemkv creates the file (but it will fail if path exists),
-	if 0, pmemkv opens the file specified by 'path' (path has to exist).
+* **create_or_error_if_exists** -- If 1, pmemkv creates the file (but it will fail if path exists).
+	If 0, pmemkv opens the pool (unless the path does not exist - then it fails).
 	+ type: uint64_t
 	+ default value: 0
 * **size** --  Only needed if any of the above flags is 1. It specifies size of the database [in bytes] to create.
@@ -86,19 +86,20 @@ The following table shows four possible combinations of parameters (where '-' me
 | **#** | **path** | **create_if_missing** | **create_or_error_if_exists** | **size** | **oid** |
 | ----- | :------: | :-------------------: | :---------------------------: | :------: | :-----: |
 | **1** | set	| 0   | 0	| N/A	| - |
-| **2** | set	| 1   | N/A	| set	| - |
-| **3** | set	| 0   | 1	| set	| - |
+| **2** | set	| 1   | -	| set	| - |
+| **3** | set	| -   | 1	| set	| - |
 | **4** | -		| N/A | N/A | N/A	| set |
 
->*ad 1*: If both flags are not set (default values are false), pmemkv will only try to open the file.
+>*ad 1*: If no flag is set (default flag values are false), pmemkv will only try to open the file. Size is ignored.
 
->*ad 2*: If **create_if_missing** flag is set, pmemkv will try to create the file (based on path) and
-> if it doesn't succeed pmemkv tries to open the file. Flag create_or_error_if_exists is ignored if this one is set.
+>*ad 2*: If **create_if_missing** flag is set, pmemkv will try to open the file (based on path)
+> and if it doesn't succeed, pmemkv tries to create the file.
+> Flag **create_or_error_if_exists** can't be set (or it should be set to 0).
 
->*ad 3*: If **create_or_error_if_exists** flag is set (and create_if_missing is not set),
-> pmemkv will try to create the file (and fails if it exists).
+>*ad 3*: If **create_or_error_if_exists** flag is set, pmemkv will try to create the file (and fails if it exists).
+> Flag **create_if_missing** can't be set (or it should be set to 0).
 
->*ad 4*: If **oid** is set, path should not be set, flags and size are ignored.
+>*ad 4*: If **oid** is set, path should not be set. Both flags and size are ignored.
 
 A database file or a poolset file can also be created using **pmempool** utility (see **pmempool-create**(1)).
 When using **pmempool create**, "pmemkv" should be passed as layout for cmap engine and "pmemkv_\<engine-name\>" for other engines (e.g. "pmemkv_stree" for stree engine). Only PMEMOBJ pools are supported.

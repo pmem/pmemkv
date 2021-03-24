@@ -5,18 +5,17 @@
 
 /*
  * Tests for config flags.
- * Setting both of them to control kv.open() should not fail in any engine.
- * If engine supports them, one of them should be prioritzed, and the second one should be
- * ignored. Engines with no support for these flags should just not read them.
+ * Setting create_if_missing to control kv.open() or unsetting both flags
+ * should not fail in any engine.
+ * If engine supports these flags the scenarios below, should just open the pool.
+ * Engines with no support for these flags should just not read them.
  */
 
-static void OpenWithBothFlags(std::string path, std::string engine, size_t size,
-			      bool flags_value)
+static void OpenWithCreateIfMissing(std::string path, std::string engine, size_t size,
+				    bool flag_value)
 {
 	/**
-	 * TEST: Pmemobj-based engines should use create_if_missing as priority, so it
-	 *should work well to open existing pool. If none set it should just open the
-	 *pool.
+	 * TEST: create_if_missing should work fine with either setting, on existing pool.
 	 */
 
 	pmem::kv::config config;
@@ -24,9 +23,7 @@ static void OpenWithBothFlags(std::string path, std::string engine, size_t size,
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_size(size);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
-	s = config.put_create_or_error_if_exists(flags_value);
-	ASSERT_STATUS(s, pmem::kv::status::OK);
-	s = config.put_create_if_missing(flags_value);
+	s = config.put_create_if_missing(flag_value);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
@@ -34,11 +31,10 @@ static void OpenWithBothFlags(std::string path, std::string engine, size_t size,
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 }
 
-static void OpenWithOneFlag(std::string path, std::string engine, size_t size,
-			    bool flags_value)
+static void OpenWithBothFlagsFalse(std::string path, std::string engine, size_t size)
 {
 	/**
-	 * TEST: create_if_missing is prioritized and should work fine with existing pool.
+	 * TEST: both flags set to false, it should just open pool.
 	 */
 
 	pmem::kv::config config;
@@ -46,11 +42,9 @@ static void OpenWithOneFlag(std::string path, std::string engine, size_t size,
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 	s = config.put_size(size);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
-	s = config.put_create_if_missing(true);
+	s = config.put_create_or_error_if_exists(false);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
-
-	/* the second flag should have no impact if the first flag is set */
-	s = config.put_create_or_error_if_exists(flags_value);
+	s = config.put_create_if_missing(false);
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
@@ -67,9 +61,10 @@ static void test(int argc, char *argv[])
 	auto path = argv[2];
 	size_t size = std::stoul(argv[3]);
 
+	OpenWithBothFlagsFalse(path, engine, size);
+
 	for (auto flag : {true, false}) {
-		OpenWithBothFlags(path, engine, size, flag);
-		OpenWithOneFlag(path, engine, size, flag);
+		OpenWithCreateIfMissing(path, engine, size, flag);
 	}
 }
 
