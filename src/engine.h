@@ -5,6 +5,7 @@
 #define LIBPMEMKV_ENGINE_H
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <string>
 
@@ -26,8 +27,8 @@ public:
 
 	virtual ~engine_base();
 
-	static std::unique_ptr<engine_base>
-	create_engine(const std::string &name, std::unique_ptr<internal::config> cfg);
+	// virtual std::unique_ptr<engine_base>
+	// create_engine(std::unique_ptr<internal::config> cfg) = 0;
 
 	virtual std::string name() = 0;
 
@@ -61,9 +62,26 @@ public:
 	virtual iterator *new_iterator();
 	virtual iterator *new_const_iterator();
 
+    class IFactory {
+    public:
+        virtual std::unique_ptr<engine_base> create(std::unique_ptr<internal::config>) = 0;
+        virtual std::string getCanonicalName() = 0;
+    };
 private:
 	static void check_config_null(const std::string &engine_name,
 				      std::unique_ptr<internal::config> &cfg);
+};
+
+class StorageEngineFactory {
+public:
+    using TCreateMethod = std::unique_ptr<engine_base::IFactory>;
+
+    StorageEngineFactory() = delete;
+    static bool Register(const std::string name, TCreateMethod factory);
+    static std::unique_ptr<engine_base> Create(const std::string& name, std::unique_ptr<internal::config> cfg);
+
+private:
+	static std::map<std::string, TCreateMethod>& getPairs();
 };
 
 } /* namespace kv */

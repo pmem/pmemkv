@@ -46,6 +46,9 @@ public:
 
 	internal::iterator_base *new_iterator() final;
 	internal::iterator_base *new_const_iterator() final;
+
+private:
+	static bool is_registered;
 };
 
 class blackhole::blackhole_iterator : public internal::iterator_base {
@@ -58,6 +61,16 @@ public:
 
 private:
 	std::string name();
+};
+
+class BlackholeFactory : public engine_base::IFactory {
+public:
+	virtual std::unique_ptr<engine_base> create(std::unique_ptr<internal::config> cfg) {
+		return std::unique_ptr<engine_base>(new blackhole(std::move(cfg)));
+	};
+	virtual std::string getCanonicalName() {
+		return "blackhole";
+	};
 };
 
 } /* namespace kv */

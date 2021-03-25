@@ -192,5 +192,9 @@ blackhole::blackhole_iterator::read_range(size_t pos, size_t n)
 	return status::NOT_FOUND;
 }
 
+bool blackhole::is_registered =
+  StorageEngineFactory::Register("blackhole",
+                                 std::unique_ptr<engine_base::IFactory>(new BlackholeFactory));
+
 } // namespace kv
 } // namespace pmem
