@@ -60,5 +60,18 @@ private:
 	std::string name();
 };
 
+class blackhole_factory : public engine_base::factory_base {
+public:
+	std::unique_ptr<engine_base>
+	create(std::unique_ptr<internal::config> cfg) override
+	{
+		return std::unique_ptr<engine_base>(new blackhole(std::move(cfg)));
+	};
+	std::string get_name() override
+	{
+		return "blackhole";
+	};
+};
+
 } /* namespace kv */
 } /* namespace pmem */
