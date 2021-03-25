@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "radix.h"
 #include "../out.h"
@@ -516,6 +516,9 @@ void radix::radix_iterator<false>::abort()
 {
 	log.clear();
 }
+
+factory_registerer
+	register_radix(std::unique_ptr<engine_base::factory_base>(new radix_factory));
 
 } // namespace kv
 } // namespace pmem

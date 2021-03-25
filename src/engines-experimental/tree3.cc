@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2019, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "tree3.h"
 #include "../out.h"
@@ -587,6 +587,9 @@ void internal::tree3::KVInnerNode::assert_invariants()
 	for (auto i = keycount + 1; i < INNER_KEYS + 1; ++i)
 		assert(children[i] == nullptr);
 }
+
+factory_registerer
+	register_tree3(std::unique_ptr<engine_base::factory_base>(new tree3_factory));
 
 } // namespace kv
 } // namespace pmem

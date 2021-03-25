@@ -14,5 +14,8 @@ std::string vcmap::name()
 	return "vcmap";
 }
 
+factory_registerer
+	register_vcmap(std::unique_ptr<engine_base::factory_base>(new vcmap_factory));
+
 } // namespace kv
 } // namespace pmem

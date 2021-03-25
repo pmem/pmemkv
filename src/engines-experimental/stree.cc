@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include <iostream>
 #include <unistd.h>
@@ -481,6 +481,9 @@ void stree::stree_iterator<false>::abort()
 {
 	log.clear();
 }
+
+factory_registerer
+	register_stree(std::unique_ptr<engine_base::factory_base>(new stree_factory));
 
 } // namespace kv
 } // namespace pmem
