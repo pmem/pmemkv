@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #pragma once
 
@@ -95,6 +95,7 @@ public:
 private:
 	void Recover();
 	internal::cmap::map_t *container;
+	static bool is_registered;
 };
 
 template <>
@@ -130,6 +131,20 @@ public:
 
 private:
 	std::vector<std::pair<std::string, size_t>> log;
+};
+
+class cmap_factory : public engine_base::IFactory {
+public:
+	std::unique_ptr<engine_base>
+	create(std::unique_ptr<internal::config> cfg) override
+	{
+		check_config_null(get_name(), cfg);
+		return std::unique_ptr<engine_base>(new cmap(std::move(cfg)));
+	};
+	std::string get_name() override
+	{
+		return "cmap";
+	};
 };
 
 } /* namespace kv */

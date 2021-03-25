@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_ENGINE_H
 #define LIBPMEMKV_ENGINE_H
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <string>
 
@@ -18,16 +19,15 @@ namespace pmem
 namespace kv
 {
 
+void check_config_null(const std::string &engine_name,
+		       std::unique_ptr<internal::config> &cfg);
+
 class engine_base {
 	using iterator = internal::iterator_base;
 
 public:
 	engine_base();
-
 	virtual ~engine_base();
-
-	static std::unique_ptr<engine_base>
-	create_engine(const std::string &name, std::unique_ptr<internal::config> cfg);
 
 	virtual std::string name() = 0;
 
@@ -61,9 +61,28 @@ public:
 	virtual iterator *new_iterator();
 	virtual iterator *new_const_iterator();
 
+	class IFactory {
+	public:
+		IFactory() = default;
+		virtual ~IFactory() = default;
+		virtual std::unique_ptr<engine_base>
+			create(std::unique_ptr<internal::config>) = 0;
+		virtual std::string get_name() = 0;
+	};
+};
+
+class storage_engine_factory {
+public:
+	using factory_object = std::unique_ptr<engine_base::IFactory>;
+
+	storage_engine_factory() = delete;
+	static bool Register(factory_object factory);
+	static std::unique_ptr<engine_base> Create(const std::string &name,
+						   std::unique_ptr<internal::config> cfg);
+
 private:
-	static void check_config_null(const std::string &engine_name,
-				      std::unique_ptr<internal::config> &cfg);
+	static std::map<std::string, factory_object> &get_pairs();
+	static std::string get_names();
 };
 
 } /* namespace kv */

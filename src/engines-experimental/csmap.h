@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #pragma once
 
@@ -132,6 +132,7 @@ private:
 	global_mutex_type mtx;
 	container_type *container;
 	std::unique_ptr<internal::config> config;
+	static bool is_registered;
 };
 
 template <>
@@ -182,6 +183,20 @@ private:
 	std::vector<std::pair<std::string, size_t>> log;
 
 	void init_seek() final;
+};
+
+class csmap_factory : public engine_base::IFactory {
+public:
+	std::unique_ptr<engine_base>
+	create(std::unique_ptr<internal::config> cfg) override
+	{
+		check_config_null(get_name(), cfg);
+		return std::unique_ptr<engine_base>(new csmap(std::move(cfg)));
+	};
+	std::string get_name() override
+	{
+		return "csmap";
+	};
 };
 
 } /* namespace kv */

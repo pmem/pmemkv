@@ -13,5 +13,9 @@ std::string dram_vcmap::name() {
 	return "dram_vcmap";
 }
 
+template<>
+bool dram_vcmap::is_registered =
+    storage_engine_factory::Register(std::unique_ptr<engine_base::IFactory>(new dram_vcmap_factory));
+
 } // namespace kv
 } // namespace pmem

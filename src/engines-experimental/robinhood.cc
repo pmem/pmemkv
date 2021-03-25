@@ -706,5 +706,8 @@ void robinhood::Recover()
 	mtxs = std::vector<mutex_type>(shards_number);
 }
 
+bool robinhood::is_registered = storage_engine_factory::Register(
+	std::unique_ptr<engine_base::IFactory>(new robinhood_factory));
+
 } // namespace kv
 } // namespace pmem

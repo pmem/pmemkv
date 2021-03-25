@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "cmap.h"
 #include "../out.h"
@@ -212,6 +212,9 @@ void cmap::cmap_iterator<false>::abort()
 {
 	log.clear();
 }
+
+bool cmap::is_registered = storage_engine_factory::Register(
+	std::unique_ptr<engine_base::IFactory>(new cmap_factory));
 
 } // namespace kv
 } // namespace pmem

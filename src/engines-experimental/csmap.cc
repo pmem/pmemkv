@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "csmap.h"
 #include "../out.h"
@@ -486,6 +486,9 @@ void csmap::csmap_iterator<false>::init_seek()
 
 	log.clear();
 }
+
+bool csmap::is_registered = storage_engine_factory::Register(
+	std::unique_ptr<engine_base::IFactory>(new csmap_factory));
 
 } // namespace kv
 } // namespace pmem

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #pragma once
 
@@ -75,6 +75,7 @@ private:
 	map_allocator_type kv_allocator;
 	map_type pmem_kv_container;
 	std::unique_ptr<internal::config> config;
+	static bool is_registered;
 };
 
 template <>
@@ -123,6 +124,19 @@ public:
 
 private:
 	std::vector<std::pair<std::string, size_t>> log;
+};
+
+class vsmap_factory : public engine_base::IFactory {
+public:
+	virtual std::unique_ptr<engine_base> create(std::unique_ptr<internal::config> cfg)
+	{
+		check_config_null(get_name(), cfg);
+		return std::unique_ptr<engine_base>(new vsmap(std::move(cfg)));
+	};
+	virtual std::string get_name()
+	{
+		return "vsmap";
+	};
 };
 
 } /* namespace kv */

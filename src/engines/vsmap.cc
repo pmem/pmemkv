@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #include "vsmap.h"
 #include "../comparator/comparator.h"
@@ -495,6 +495,9 @@ void vsmap::vsmap_iterator<false>::abort()
 {
 	log.clear();
 }
+
+bool vsmap::is_registered = storage_engine_factory::Register(
+	std::unique_ptr<engine_base::IFactory>(new vsmap_factory));
 
 } // namespace kv
 } // namespace pmem
