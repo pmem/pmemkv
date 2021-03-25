@@ -127,6 +127,8 @@ Next we'll walk you through the steps of creating a new engine.
 * Create `src/engines/mytree.cc` implementation file
 * For new engines, use `blackhole.cc` as a template
 * Use `pmem::kv` namespace defined by the header
+* implement engine interface with its factory
+* register engine factory (e.g. look at the blackhole)
 
 ### Providing Unit Test
 
@@ -149,22 +151,12 @@ Next we'll walk you through the steps of creating a new engine.
 * In `CMakeLists.txt`:
     * Add a build option for a new engine with a name like `ENGINE_MYTREE`
     and use it to ifdef all includes, dependencies and linking you may add
-    * Add definition of the new option, like `-DENGINE_MYTREE`, so it can
-    be used to ifdef engine-specific code in common sources (e.g. in `src/engine.cc`), like:
-    ```
-    #ifdef ENGINE_MYTREE
-    ...
-    #endif
-    ```
     * Add `src/engines/mytree.h` and `src/engines/mytree.cc` to `SOURCE_FILES`
     * Use `pkg_check_modules` and/or `find_package` for upstream libraries
 * CMake build and `make test` should complete without any errors now
 
 ### Updating Common Source
 
-* In `src/engine.cc`:
-    * Add `#include "engines/mytree.h"` (within `#ifdef ENGINE_MYTREE` clause)
-    * Update `create_engine` to return new `my_tree` instances
 * In script(s) executed in CIs (at least in `utils/docker/run-test-building.sh`) add a check/build for new engine
 * Build & verify engine now works with high-level bindings (see [README](README.md#language-bindings) for information on current bindings)
 

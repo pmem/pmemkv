@@ -57,6 +57,7 @@ private:
 	kv_allocator_t kv_allocator;
 	ch_allocator_t ch_allocator;
 	map_t pmem_kv_container;
+	static bool is_registered;
 };
 
 template <template <typename T> class AllocatorT>
