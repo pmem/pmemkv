@@ -34,7 +34,10 @@ void pmemkv_config_delete(pmemkv_config *config);
 
 int pmemkv_config_put_size(pmemkv_config *config, uint64_t value);
 int pmemkv_config_put_path(pmemkv_config *config, const char *value);
-int pmemkv_config_put_force_create(pmemkv_config *config, bool value);
+int **deprecated** pmemkv_config_put_force_create(pmemkv_config *config,
+							   bool value);
+int pmemkv_config_put_create_or_error_if_exists(pmemkv_config *config, bool value);
+int pmemkv_config_put_create_if_missing(pmemkv_config *config, bool value)
 int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);
 int pmemkv_config_put_oid(pmemkv_config *config, PMEMoid *oid);
 
@@ -93,18 +96,37 @@ Every engine has documented all supported config parameters (please see **libpme
 
 `int pmemkv_config_put_size(pmemkv_config *config, uint64_t value);`
 
-:	Puts `value` to a config at key `size`. This function provides type
-	safety for **size** parameter.
+:	Puts `value` to a config at key `size`, it's required when creating
+	new database pool. This function provides type safety for **size** parameter.
 
 `int pmemkv_config_put_path(pmemkv_config *config, const char *value);`
 
-:	Puts `value` to a config at key **path**. This function provides type
-	safety for `path` parameter.
+:	Puts `value` to a config at key **path**. It's a path to a database file
+	or to a poolset file (see **poolset**(5) for details), to open or create.
+	Note that when using poolset file, size should be 0.
+	This function provides type safety for `path` parameter.
 
-`int pmemkv_config_put_force_create(pmemkv_config Wconfig, bool value);`
+`int pmemkv_config_put_force_create(pmemkv_config *config, bool value);`
 
-:	Puts force_create parameter to a config. In engines which supports this parameter, if false,
-	pmemkv opens the file specified by `path`, otherwise it creates it. False by default.
+:	It is **deprecated** and kept for compatibility. It's an alias for
+	`pmemkv_config_put_create_or_error_if_exists` - use it instead.
+
+`int pmemkv_config_put_create_or_error_if_exists(pmemkv_config *config, bool value);`
+
+:	Puts `value` to a config at key `create_or_error_if_exists`. This flag is mutually exclusive
+	with **create_if_missing**. It works only with engines supporting this flag and it means:
+	If true: pmemkv creates the pool, unless it exists - then it fails.
+	If false: pmemkv opens the pool, unless the path does not exist - then it fails.
+	False by default.
+
+`int pmemkv_config_put_create_if_missing(pmemkv_config *config, bool value)`
+
+:	Puts `value` to a config at key `create_if_missing`. This flag is mutually exclusive with
+	**create_or_error_if_exists**. It works only with engines supporting this flag and it means:
+	If true: pmemkv tries to open the pool and if that doesn't succeed
+		it means there's (most likely) no pool to use, so it tries to create it.
+	If false: pmemkv opens the pool, unless the path does not exist - then it fails.
+	False by default.
 
 `int pmemkv_config_put_comparator(pmemkv_config *config, pmemkv_comparator *comparator);`
 

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2021, Intel Corporation
 #
 #
 # src/libpmemkv.map -- linker map file for libpmemkv
@@ -24,6 +24,8 @@ LIBPMEMKV_1.0 {
 		pmemkv_config_put_path;
 		pmemkv_config_put_oid;
 		pmemkv_config_put_comparator;
+		pmemkv_config_put_create_if_missing;
+		pmemkv_config_put_create_or_error_if_exists;
 		pmemkv_config_put_force_create;
 		pmemkv_comparator_new;
 		pmemkv_comparator_delete;

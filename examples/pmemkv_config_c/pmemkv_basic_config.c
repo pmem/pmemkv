@@ -55,8 +55,11 @@ int main(int argc, char *argv[])
 	status = pmemkv_config_put_size(config, SIZE);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
-	/* Specifies value of force create flag */
-	status = pmemkv_config_put_force_create(config, true);
+	/* Specifies value of create_if_missing flag.
+	 * Alternatively, another flag - 'create_or_error_if_exists' can be set using:
+	 * `pmemkv_config_put_create_or_error_if_exists`
+	 * For differences between the two, see manpage libpmemkv(7). */
+	status = pmemkv_config_put_create_if_missing(config, true);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
 	/* Specifies comparator used by the engine */
