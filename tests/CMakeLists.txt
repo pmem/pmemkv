@@ -23,6 +23,8 @@ if(NOT VALGRIND_FOUND AND TESTS_USE_VALGRIND)
 	message(FATAL_ERROR "Valgrind not found, but flag TESTS_USE_VALGRIND was set.")
 elseif(NOT VALGRIND_FOUND)
 	message(WARNING "Valgrind not found. Valgrind tests will not be performed.")
+elseif(VALGRIND_FOUND)
+	message(STATUS "Found Valgrind in '${VALGRIND_LIBRARY_DIRS}' (version: ${VALGRIND_VERSION})")
 endif()
 
 # Find libpmem & libpmemobj
