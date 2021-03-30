@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
-#ifndef LIBPMEMKV_ITERATOR_H
-#define LIBPMEMKV_ITERATOR_H
+#pragma once
 
 #include "libpmemkv.hpp"
 
@@ -46,8 +45,14 @@ protected:
 	virtual void init_seek();
 };
 
+template <typename It>
+std::size_t distance(It first, It last)
+{
+	auto dist = std::distance(first, last);
+	assert(dist >= 0);
+	return static_cast<std::size_t>(dist);
+}
+
 } /* namespace internal */
 } /* namespace kv */
 } /* namespace pmem */
-
-#endif /* LIBPMEMKV_ITERATOR_H */

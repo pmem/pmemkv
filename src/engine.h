@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2019-2021, Intel Corporation */
 
-#ifndef LIBPMEMKV_ENGINE_H
-#define LIBPMEMKV_ENGINE_H
+#pragma once
 
 #include <map>
 #include <memory>
@@ -118,5 +117,3 @@ public:
 
 } /* namespace kv */
 } /* namespace pmem */
-
-#endif /* LIBPMEMKV_ENGINE_H */

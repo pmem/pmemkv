@@ -1,19 +1,15 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
-#ifndef LIBPMEMKV_CONFIG_H
-#define LIBPMEMKV_CONFIG_H
+#pragma once
 
-#include <cstring>
 #include <limits>
 #include <string>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include "exceptions.h"
 #include "libpmemkv.hpp"
-#include "out.h"
 
 namespace pmem
 {
@@ -22,7 +18,7 @@ namespace kv
 namespace internal
 {
 
-struct config {
+class config {
 public:
 	config() = default;
 
@@ -53,14 +49,17 @@ public:
 		put(key, value);
 	}
 
+	/*
+	 * @return 'false' if no item with specified key exists,
+	 * 'true' if item was obtained successfully
+	 *
+	 * @throw pmem::kv::internal::type_error if item has type different than 'data'
+	 */
 	bool get_data(const char *key, const void **value, size_t *value_size)
 	{
-		auto item = get(key);
-		if (item == nullptr)
+		auto item = get_checked_item(key, type::DATA);
+		if (!item)
 			return false;
-
-		if (item->item_type != type::DATA)
-			throw_type_error(key, item->item_type);
 
 		*value = item->data.data();
 		*value_size = item->data.size();
@@ -76,12 +75,9 @@ public:
 	 */
 	bool get_object(const char *key, void **value)
 	{
-		auto item = get(key);
+		auto item = get_checked_item(key, type::OBJECT);
 		if (item == nullptr)
 			return false;
-
-		if (item->item_type != type::OBJECT)
-			throw_type_error(key, item->item_type);
 
 		*value = (*item->object.getter)(item->object.ptr);
 
@@ -154,15 +150,11 @@ public:
 	 */
 	bool get_string(const char *key, const char **value)
 	{
-		auto item = get(key);
+		auto item = get_checked_item(key, type::STRING);
 		if (item == nullptr)
 			return false;
 
-		if (item->item_type != type::STRING)
-			throw_type_error(key, item->item_type);
-
 		*value = item->string_v.c_str();
-
 		return true;
 	}
 
@@ -276,8 +268,7 @@ private:
 				     std::forward_as_tuple(std::forward<Args>(args)...));
 
 		if (!ret.second)
-			throw error("Item with key: " + std::string(key) +
-				    " already exists");
+			throw error("Item with key: " + key + " already exists");
 	}
 
 	variant *get(const std::string &key)
@@ -292,12 +283,22 @@ private:
 
 	void throw_type_error(const std::string &key, type item_type)
 	{
-		throw config_type_error("Item with key: " + std::string(key) + " is " +
+		throw config_type_error("Item with key: " + key + " is " +
 					type_names[static_cast<int>(item_type)]);
 	}
+
+	struct variant *get_checked_item(const char *key, type item_type)
+	{
+		auto item = get(key);
+		if (!item)
+			return nullptr;
+
+		if (item->item_type != item_type)
+			throw_type_error(key, item->item_type);
+		return item;
+	}
 };
+
 } /* namespace internal */
 } /* namespace kv */
 } /* namespace pmem */
-
-#endif
