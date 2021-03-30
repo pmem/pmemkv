@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_ENGINE_H
 #define LIBPMEMKV_ENGINE_H
@@ -65,6 +65,12 @@ private:
 	static void check_config_null(const std::string &engine_name,
 				      std::unique_ptr<internal::config> &cfg);
 };
+
+namespace internal
+{
+uint64_t get_size(internal::config &cfg);
+std::string get_path(internal::config &cfg);
+} /* namespace internal */
 
 } /* namespace kv */
 } /* namespace pmem */

@@ -26,26 +26,6 @@ public:
 	    : memkind_ns::allocator<AllocatorT>(get_path(cfg), get_size(cfg))
 	{
 	}
-
-	static std::string get_path(internal::config &cfg)
-	{
-		const char *path;
-		if (!cfg.get_string("path", &path))
-			throw internal::invalid_argument(
-				"Config does not contain item with key: \"path\"");
-
-		return std::string(path);
-	}
-
-	static uint64_t get_size(internal::config &cfg)
-	{
-		std::size_t size;
-		if (!cfg.get_uint64("size", &size))
-			throw internal::invalid_argument(
-				"Config does not contain item with key: \"size\"");
-
-		return size;
-	}
 };
 }
 
