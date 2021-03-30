@@ -86,6 +86,9 @@ static constexpr const char *available_engines = "blackhole"
 #ifdef ENGINE_DRAM_VCMAP
 						 ", dram_vcmap"
 #endif
+#ifdef ENGINE_PSKIPLIST
+						 ", pskiplist"
+#endif
 	;
 
 /* throws internal error (status) if config is null */
@@ -168,6 +171,13 @@ engine_base::create_engine(const std::string &engine,
 		engine_base::check_config_null(engine, cfg);
 		return std::unique_ptr<engine_base>(
 			new pmem::kv::dram_vcmap(std::move(cfg)));
+	}
+#endif
+
+#ifdef ENGINE_PSKIPLIST
+	if (engine == "pskiplist") {
+		engine_base::check_config_null(engine, cfg);
+		return std::unique_ptr<engine_base>(new pmem::kv::pskiplist(std::move(cfg)));
 	}
 #endif
 

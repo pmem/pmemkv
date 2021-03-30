@@ -82,6 +82,9 @@ int main()
 #ifndef ENGINE_DRAM_VCMAP
 	UT_ASSERT(wrong_engine_name_test("dram_vcmap"));
 #endif
+#ifndef ENGINE_PSKIPLIST
+	UT_ASSERT(wrong_engine_name_test("pskiplist"));
+#endif
 
 	errormsg_test();
 

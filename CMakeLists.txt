@@ -160,6 +160,7 @@ if(ENGINE_PSKIPLIST)
 		src/engines-experimental/pskiplist.cc
 		src/engines-experimental/pskiplist/persistent_skiplist.h
 		src/engines-experimental/pskiplist/smartpptr.h
+		src/engines-experimental/pskiplist/log4p.h
 	)
 endif()
 if(ENGINE_ROBINHOOD)

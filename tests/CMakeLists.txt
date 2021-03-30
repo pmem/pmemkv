@@ -224,6 +224,45 @@ add_engine_test(ENGINE blackhole
 		TRACERS none memcheck
 		SCRIPT blackhole/default.cmake)
 ################################################################################
+
+###################################### PSKIPLIST ##############################
+if(ENGINE_PSKIPLIST)
+	add_engine_test(ENGINE pskiplist
+		BINARY c_api_null_db_config
+		TRACERS none memcheck
+		SCRIPT pskiplist/default.cmake)
+
+	add_engine_test(ENGINE pskiplist
+		BINARY put_get_remove
+		TRACERS none memcheck pmemcheck
+		SCRIPT pskiplist/default.cmake)
+	
+	add_engine_test(ENGINE pskiplist
+			BINARY put_get_remove_not_aligned
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pskiplist/default.cmake)
+
+
+	add_engine_test(ENGINE pskiplist
+			BINARY put_get_remove_charset_params
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pskiplist/default.cmake
+			PARAMS 16 8)
+
+	add_engine_test(ENGINE pskiplist
+			BINARY put_get_remove_long_key
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pskiplist/default.cmake)
+
+	add_engine_test(ENGINE pskiplist
+			BINARY put_get_remove_params
+			TRACERS none
+			SCRIPT pskiplist/default.cmake
+			DB_SIZE 4G PARAMS 400000)
+
+endif(ENGINE_PSKIPLIST)
+################################################################################
+
 ##################################### CMAP ####################################
 if(ENGINE_CMAP)
 	add_engine_test(ENGINE cmap
