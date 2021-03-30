@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2020, Intel Corporation */
+/* Copyright 2017-2021, Intel Corporation */
 
 #pragma once
 
@@ -74,11 +74,10 @@ private:
 
 	map_allocator_type kv_allocator;
 	map_type pmem_kv_container;
-	std::unique_ptr<internal::config> config;
 };
 
 template <>
-class vsmap::vsmap_iterator<true> : virtual public internal::iterator_base {
+class vsmap::vsmap_iterator<true> : public internal::iterator_base {
 	using container_type = vsmap::map_type;
 
 public:

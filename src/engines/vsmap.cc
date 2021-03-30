@@ -18,7 +18,14 @@ namespace kv
 
 namespace
 {
-auto count_iterations = [](auto it, auto end) {
+
+/**
+ * XXX(kfilipek): when C++14 bump then change definition to:
+ * auto count_iterations = [](auto it, auto end)
+ */
+template <typename T, typename T2>
+std::size_t count_iterations(T it, T2 end)
+{
 	std::size_t result = 0;
 	for (; it != end; it++)
 		result++;
