@@ -66,6 +66,12 @@ private:
 				      std::unique_ptr<internal::config> &cfg);
 };
 
+namespace internal
+{
+uint64_t get_size(internal::config &cfg);
+std::string get_path(internal::config &cfg);
+} /* namespace internal */
+
 } /* namespace kv */
 } /* namespace pmem */
 
