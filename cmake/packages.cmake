@@ -8,12 +8,12 @@
 string(TOUPPER "${CPACK_GENERATOR}" CPACK_GENERATOR)
 
 if(NOT ("${CPACK_GENERATOR}" STREQUAL "DEB" OR
-	"${CPACK_GENERATOR}" STREQUAL "RPM"))
+		"${CPACK_GENERATOR}" STREQUAL "RPM"))
 	message(FATAL_ERROR "Wrong CPACK_GENERATOR value, valid generators are: DEB, RPM")
 endif()
 
 set(CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
-set(CMAKE_INSTALL_TMPDIR /tmp CACHE PATH "Output dir for tmp")
+set(CMAKE_INSTALL_TMPDIR /tmp CACHE PATH "Output dir for temporary package")
 set(CPACK_COMPONENTS_ALL_IN_ONE)
 
 # Filter out some of directories from %dir section, which are expected

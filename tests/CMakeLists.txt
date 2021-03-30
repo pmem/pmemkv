@@ -23,6 +23,8 @@ if(NOT VALGRIND_FOUND AND TESTS_USE_VALGRIND)
 	message(FATAL_ERROR "Valgrind not found, but flag TESTS_USE_VALGRIND was set.")
 elseif(NOT VALGRIND_FOUND)
 	message(WARNING "Valgrind not found. Valgrind tests will not be performed.")
+elseif(VALGRIND_FOUND)
+	message(STATUS "Found Valgrind in '${VALGRIND_LIBRARY_DIRS}' (version: ${VALGRIND_VERSION})")
 endif()
 
 # Find libpmem & libpmemobj
@@ -136,6 +138,13 @@ add_test_generic(NAME config_cpp TRACERS none memcheck)
 build_test_ext(NAME json_to_config SRC_FILES config/json_to_config.cc LIBS json)
 add_test_generic(NAME json_to_config TRACERS none memcheck)
 
+# Separate binaries for config tests using deprecated functions
+build_test_ext(NAME deprecated_config_c SRC_FILES config/deprecated_config.c LIBS json OPTS -Wno-deprecated-declarations)
+add_test_generic(NAME deprecated_config_c TRACERS none memcheck)
+
+build_test_ext(NAME deprecated_config_cpp SRC_FILES config/deprecated_config.cc LIBS json OPTS -Wno-deprecated-declarations)
+add_test_generic(NAME deprecated_config_cpp TRACERS none memcheck)
+
 build_test(result result/result.cpp)
 add_test_generic(NAME result TRACERS none memcheck)
 
@@ -143,6 +152,7 @@ add_test_generic(NAME result TRACERS none memcheck)
 ## Test scenarios (parametrized at least with engine name)
 # ----------------------------------------------------------------- #
 # Tests for all engines
+build_test(open engine_scenarios/all/open.cc)
 build_test_ext(NAME put_get_remove SRC_FILES engine_scenarios/all/put_get_remove.cc LIBS json)
 build_test_ext(NAME put_get_remove_not_aligned SRC_FILES engine_scenarios/all/put_get_remove_not_aligned.cc LIBS json)
 build_test_ext(NAME put_get_remove_charset_params SRC_FILES engine_scenarios/all/put_get_remove_charset_params.cc LIBS json)
@@ -189,6 +199,7 @@ build_test_ext(NAME pmemobj_put_get_std_map_defrag SRC_FILES engine_scenarios/pm
 build_test_ext(NAME pmemobj_error_handling_tx_oom SRC_FILES engine_scenarios/pmemobj/error_handling_tx_oom.cc engine_scenarios/pmemobj/mock_tx_alloc.cc LIBS json dl_libs)
 build_test_ext(NAME pmemobj_error_handling_tx_oid SRC_FILES engine_scenarios/pmemobj/error_handling_tx_oid.cc LIBS json libpmemobj_cpp)
 build_test_ext(NAME pmemobj_put_get_std_map_oid SRC_FILES engine_scenarios/pmemobj/put_get_std_map_oid.cc LIBS json libpmemobj_cpp)
+build_test(pmemobj_create_or_error_if_exists engine_scenarios/pmemobj/create_or_error_if_exists.cc)
 
 # Tests for memkind engines
 build_test_ext(NAME memkind_error_handling SRC_FILES engine_scenarios/memkind/error_handling.cc LIBS json)
@@ -269,6 +280,11 @@ if(ENGINE_CMAP)
 			BINARY c_api_null_db_config
 			TRACERS none memcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE cmap
+			BINARY open
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
 
 	add_engine_test(ENGINE cmap
 			BINARY put_get_remove
@@ -443,6 +459,11 @@ if(ENGINE_CMAP)
 			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE cmap
+			BINARY pmemobj_create_or_error_if_exists
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
+
+	add_engine_test(ENGINE cmap
 			BINARY pmemobj_put_get_std_map_defrag
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
@@ -457,8 +478,14 @@ if(ENGINE_CMAP)
 	add_engine_test(ENGINE cmap
 			BINARY put_get_std_map
 			TRACERS none memcheck pmemcheck
-			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_create_or_error_if_exists.cmake
 			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE cmap
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 32 16)
 
 	add_engine_test(ENGINE cmap
 			BINARY iterator_basic
@@ -491,6 +518,11 @@ if(ENGINE_CSMAP)
 			BINARY c_api_null_db_config
 			TRACERS none memcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE csmap
+			BINARY open
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
 
 	add_engine_test(ENGINE csmap
 			BINARY comparator_basic_c
@@ -770,6 +802,11 @@ if(ENGINE_CSMAP)
 			TRACERS none memcheck
 			SCRIPT pmemobj_based/pmemobj/error_handling_tx_path.cmake)
 
+	add_engine_test(ENGINE csmap
+			BINARY pmemobj_create_or_error_if_exists
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
+
 	# XXX - CSMAP does not support defrag yet
 	# add_engine_test(ENGINE csmap
 	# BINARY pmemobj_error_handling_defrag
@@ -792,8 +829,14 @@ if(ENGINE_CSMAP)
 	add_engine_test(ENGINE csmap
 			BINARY put_get_std_map
 			TRACERS none memcheck pmemcheck
-			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_create_or_error_if_exists.cmake
 			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE csmap
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 32 16)
 
 	add_engine_test(ENGINE csmap
 			BINARY iterator_basic
@@ -824,6 +867,11 @@ if(ENGINE_VCMAP)
 			BINARY c_api_null_db_config
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vcmap
+			BINARY open
+			TRACERS none memcheck
+			SCRIPT memkind_based/default_no_config.cmake)
 
 	add_engine_test(ENGINE vcmap
 			BINARY put_get_remove
@@ -928,6 +976,11 @@ if(ENGINE_VSMAP)
 			BINARY c_api_null_db_config
 			TRACERS none memcheck
 			SCRIPT memkind_based/default.cmake)
+
+	add_engine_test(ENGINE vsmap
+			BINARY open
+			TRACERS none memcheck
+			SCRIPT memkind_based/default_no_config.cmake)
 
 	add_engine_test(ENGINE vsmap
 			BINARY comparator_basic_c
@@ -1062,6 +1115,11 @@ if(ENGINE_TREE3)
 			TRACERS none #memcheck
 			SCRIPT pmemobj_based/default.cmake)
 
+	add_engine_test(ENGINE tree3
+			BINARY open
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
+
 	# XXX - add comparator support to tree3
 	# add_engine_test(ENGINE tree3
 	# BINARY c_api_comparator
@@ -1173,6 +1231,11 @@ if(ENGINE_TREE3)
 			TRACERS none #memcheck
 			SCRIPT pmemobj_based/pmemobj/error_handling_create.cmake)
 
+	add_engine_test(ENGINE tree3
+			BINARY pmemobj_create_or_error_if_exists
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
+
 	# XXX - defrag not supported
 	# add_engine_test(ENGINE tree3
 	# BINARY pmemobj_error_handling_tx_oid
@@ -1207,8 +1270,14 @@ if(ENGINE_TREE3)
 	add_engine_test(ENGINE tree3
 			BINARY put_get_std_map
 			TRACERS none #memcheck pmemcheck
-			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_create_or_error_if_exists.cmake
 			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE tree3
+			BINARY put_get_std_map
+			TRACERS none #memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 32 16)
 
 	# XXX fail to investigate
 	# add_engine_test(ENGINE tree3
@@ -1275,6 +1344,11 @@ if(ENGINE_STREE)
 			BINARY c_api_null_db_config
 			TRACERS none memcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE stree
+			BINARY open
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
 
 	add_engine_test(ENGINE stree
 			BINARY comparator_basic_c
@@ -1424,6 +1498,11 @@ if(ENGINE_STREE)
 			TRACERS none memcheck
 			SCRIPT pmemobj_based/pmemobj/error_handling_create.cmake)
 
+	add_engine_test(ENGINE stree
+			BINARY pmemobj_create_or_error_if_exists
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
+
 	# XXX - defrag not supported
 	# add_engine_test(ENGINE stree
 	# BINARY pmemobj_error_handling_tx_oid
@@ -1472,8 +1551,14 @@ if(ENGINE_STREE)
 	add_engine_test(ENGINE stree
 			BINARY put_get_std_map
 			TRACERS none memcheck pmemcheck
-			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_create_or_error_if_exists.cmake
 			PARAMS 1000 20 200)
+
+	add_engine_test(ENGINE stree
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 32 16)
 
 	add_engine_test(ENGINE stree
 			BINARY sorted_iterate
@@ -1544,6 +1629,11 @@ if(ENGINE_RADIX)
 			BINARY c_api_null_db_config
 			TRACERS none memcheck
 			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE radix
+			BINARY open
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
 
 	add_engine_test(ENGINE radix
 			BINARY put_get_remove
@@ -1638,6 +1728,11 @@ if(ENGINE_RADIX)
 			TRACERS none memcheck
 			SCRIPT pmemobj_based/pmemobj/error_handling_tx_path.cmake)
 
+	add_engine_test(ENGINE radix
+			BINARY pmemobj_create_or_error_if_exists
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
+
 	# XXX - defrag not supported
 	# add_engine_test(ENGINE radix
 	# BINARY pmemobj_error_handling_defrag
@@ -1660,8 +1755,14 @@ if(ENGINE_RADIX)
 	add_engine_test(ENGINE radix
 			BINARY put_get_std_map
 			TRACERS none memcheck pmemcheck
-			SCRIPT pmemobj_based/pmemobj/put_get_std_map_force_create.cmake
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_create_or_error_if_exists.cmake
 			PARAMS 1000 8 200)
+
+	add_engine_test(ENGINE radix
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 32 16)
 
 	add_engine_test(ENGINE radix
 			BINARY put_get_remove_charset_params
@@ -1807,6 +1908,11 @@ if (ENGINE_ROBINHOOD)
 			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE robinhood
+			BINARY open
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
+
+	add_engine_test(ENGINE robinhood
 			BINARY put_get_remove_charset_params
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
@@ -1943,6 +2049,23 @@ if (ENGINE_ROBINHOOD)
 			BINARY pmemobj_error_handling_tx_path
 			TRACERS none memcheck
 			SCRIPT pmemobj_based/pmemobj/error_handling_tx_path.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY pmemobj_create_or_error_if_exists
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default_no_config.cmake)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/put_get_std_map_create_or_error_if_exists.cmake
+			PARAMS 1000 8 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
+			PARAMS 128 8 8)
 
 	add_engine_test(ENGINE robinhood
 			BINARY pmemobj_put_get_std_map_oid

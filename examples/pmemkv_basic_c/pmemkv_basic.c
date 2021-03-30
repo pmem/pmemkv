@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 /*
  * pmemkv_basic.c -- example usage of pmemkv.
@@ -47,8 +47,12 @@ int main(int argc, char *argv[])
 	ASSERT(s == PMEMKV_STATUS_OK);
 	s = pmemkv_config_put_size(cfg, SIZE);
 	ASSERT(s == PMEMKV_STATUS_OK);
-	s = pmemkv_config_put_force_create(cfg, true);
+	s = pmemkv_config_put_create_if_missing(cfg, true);
 	ASSERT(s == PMEMKV_STATUS_OK);
+
+	/* Alternatively create_or_error_if_exists flag can be set, to fail if file exists
+	 * For differences between the two flags, see manpage libpmemkv(7). */
+	/* s = pmemkv_config_put_create_or_error_if_exists(cfg, true); */
 
 	LOG("Opening pmemkv database with 'cmap' engine");
 	pmemkv_db *db = NULL;

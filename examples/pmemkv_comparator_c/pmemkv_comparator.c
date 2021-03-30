@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 /*
  * pmemkv_comparator.c -- example usage of pmemkv with custom comparator.
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 	ASSERT(s == PMEMKV_STATUS_OK);
 	s = pmemkv_config_put_size(cfg, SIZE);
 	ASSERT(s == PMEMKV_STATUS_OK);
-	s = pmemkv_config_put_force_create(cfg, true);
+	s = pmemkv_config_put_create_if_missing(cfg, true);
 	ASSERT(s == PMEMKV_STATUS_OK);
 
 	pmemkv_comparator *cmp = pmemkv_comparator_new(&reverse_three_way_compare,

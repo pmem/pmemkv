@@ -2,7 +2,8 @@
 # Copyright 2018-2021, Intel Corporation
 
 #
-# ctest_helpers.cmake - helper functions for tests/CMakeLists.txt
+# ctest_helpers.cmake - helper functions for building and adding
+#		new testcases (in tests/CMakeLists.txt)
 #
 
 set(TEST_ROOT_DIR ${PROJECT_SOURCE_DIR}/tests)
@@ -18,15 +19,21 @@ if(TRACE_TESTS)
 	set(GLOBAL_TEST_ARGS ${GLOBAL_TEST_ARGS} --trace-expand)
 endif()
 
-set(INCLUDE_DIRS ${LIBPMEMOBJ++_INCLUDE_DIRS} common/ ../src .)
-set(LIBS_DIRS ${LIBPMEMOBJ++_LIBRARY_DIRS})
-
 # List of supported Valgrind tracers
 set(vg_tracers memcheck helgrind drd pmemcheck)
+
+# ----------------------------------------------------------------- #
+## Include and link required dirs/libs for tests
+# ----------------------------------------------------------------- #
+set(INCLUDE_DIRS ${LIBPMEMOBJ++_INCLUDE_DIRS} common/ ../src .)
+set(LIBS_DIRS ${LIBPMEMOBJ++_LIBRARY_DIRS})
 
 include_directories(${INCLUDE_DIRS})
 link_directories(${LIBS_DIRS})
 
+# ----------------------------------------------------------------- #
+## Define functions to use in tests/CMakeLists.txt
+# ----------------------------------------------------------------- #
 function(find_gdb)
 	execute_process(COMMAND gdb --help
 			RESULT_VARIABLE GDB_RET
@@ -89,26 +96,25 @@ function(find_libunwind)
 endfunction()
 
 function(find_pmreorder)
-	if(WIN32)
+	if(NOT VALGRIND_FOUND OR NOT VALGRIND_PMEMCHECK_FOUND)
+		message(WARNING "Pmreorder will not be used. Valgrind with pmemcheck must be installed")
 		return()
 	endif()
 
-	if(NOT VALGRIND_FOUND)
-		return()
-	endif()
-
-	if ((NOT(PMEMCHECK_VERSION LESS 1.0)) AND PMEMCHECK_VERSION LESS 2.0)
+	if((NOT(PMEMCHECK_VERSION VERSION_LESS 1.0)) AND PMEMCHECK_VERSION VERSION_LESS 2.0)
 		find_program(PMREORDER names pmreorder HINTS ${LIBPMEMOBJ_PREFIX}/bin)
 
 		if(PMREORDER)
+			get_program_version_major_minor(${PMREORDER} PMREORDER_VERSION)
+			message(STATUS "Found pmreorder: ${PMREORDER}, in version: ${PMREORDER_VERSION}")
+
 			set(ENV{PATH} ${LIBPMEMOBJ_PREFIX}/bin:$ENV{PATH})
 			set(PMREORDER_SUPPORTED true CACHE INTERNAL "pmreorder support")
-			message(STATUS "Found pmreorder: ${PMREORDER}")
 		else()
-			message(WARNING "Pmreorder not found. Pmreorder tests will not be performed.")
+			message(WARNING "Pmreorder not found - pmreorder tests will not be performed.")
 		endif()
 	else()
-		message(WARNING "Pmreorder will not be used. Pmemcheck must be installed in version 1.X")
+		message(WARNING "Pmemcheck must be installed in version 1.X for pmreorder to work - pmreorder tests will not be performed.")
 	endif()
 endfunction()
 
@@ -122,15 +128,19 @@ function(find_pmempool)
 	endif()
 endfunction()
 
-# Function to build test with custom build options (e.g. passing defines) and
+# Function to build test with custom build options (e.g. passing defines),
 # link it with custom library/-ies (supports 'json', 'libpmemobj_cpp' and
-# 'dl_libs'). It calls build_test function.
-# Usage: build_test_ext(NAME .. SRC_FILES .. .. LIBS .. .. BUILD_OPTIONS .. ..)
+# 'dl_libs') and compile options. It calls build_test function.
+# Usage: build_test_ext(NAME .. SRC_FILES .. .. LIBS .. .. BUILD_OPTIONS .. .. OPTS .. ..)
 function(build_test_ext)
 	set(oneValueArgs NAME)
-	set(multiValueArgs SRC_FILES LIBS BUILD_OPTIONS)
+	set(multiValueArgs SRC_FILES LIBS BUILD_OPTIONS OPTS)
 	cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 	set(LIBS_TO_LINK "")
+
+	if(${TEST_NAME} MATCHES "posix$" AND WIN32)
+		return()
+	endif()
 
 	foreach(lib ${TEST_LIBS})
 		if("${lib}" STREQUAL "json")
@@ -154,11 +164,10 @@ function(build_test_ext)
 	build_test(${TEST_NAME} ${TEST_SRC_FILES})
 	target_link_libraries(${TEST_NAME} ${LIBS_TO_LINK})
 	target_compile_definitions(${TEST_NAME} PRIVATE ${TEST_BUILD_OPTIONS})
+	target_compile_options(${TEST_NAME} PRIVATE ${TEST_OPTS})
 endfunction()
 
 function(build_test name)
-	# skip posix tests
-	# XXX: a WIN32 test will break if used with build_test_ext() func.
 	if(${name} MATCHES "posix$" AND WIN32)
 		return()
 	endif()

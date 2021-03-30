@@ -2,10 +2,19 @@ XXX Igor Chorążewicz <igor.chorazewicz@intel.com>
 
 	* Version 1.5
 
-	Features:
+	New features:
 	-
 
-	Major fixes:
+	Bug fixes:
+	-
+
+	Other changes:
+	- Add alias 'create_or_error_if_exists' for 'force_create' config's flag and
+		deprecate the latter one. The old flag can still be used and it behaves
+		with no difference. It's discouraged from using, though.
+	- Add new config's flag - 'create_if_missing' to address the missing functionality.
+		If set, pmemkv tries to open the pool and creates it if missing.
+		It's mutually exclusive with 'create_or_error_if_exists' flag.
 	-
 
 	Other changes:

@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.3)
 project(pmemkv)
 set(PMEMKV_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-include(cmake/helpers.cmake)
+include(${PMEMKV_ROOT_DIR}/cmake/helpers.cmake)
 set_version(VERSION)
 
 # ----------------------------------------------------------------- #
@@ -19,7 +19,7 @@ option(BUILD_JSON_CONFIG "build the 'libpmemkv_json_config' library" ON)
 
 option(TESTS_LONG "enable long running tests" OFF)
 option(TESTS_USE_FORCED_PMEM "run tests with PMEM_IS_PMEM_FORCE=1 - it speeds up tests execution on emulated pmem" OFF)
-option(TESTS_USE_VALGRIND "enable tests with valgrind (if found)" ON)
+option(TESTS_USE_VALGRIND "enable tests with valgrind (fail build if Valgrind not found)" ON)
 option(TESTS_PMEMOBJ_DRD_HELGRIND "enable test of pmemobj engines under drd and helgrind (they should only be run on PMEM)" OFF)
 option(TESTS_JSON "enable tests which require libpmemkv_json_config library (BUILD_JSON_CONFIG has to be ON)" ON)
 
@@ -57,9 +57,9 @@ set(predefined_build_types
 	RelWithDebInfo
 	MinSizeRel)
 if(NOT CMAKE_BUILD_TYPE)
-	message(STATUS "CMAKE_BUILD_TYPE not set, setting the default one: ${DEFAULT_BUILD_TYPE}")
-	set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}"
-		CACHE STRING "choose the type of build (${predefined_build_types})" FORCE STRINGS)
+	set(CMAKE_BUILD_TYPE ${DEFAULT_BUILD_TYPE}
+		CACHE STRING "choose the type of build (${predefined_build_types})" FORCE)
+	message(STATUS "CMAKE_BUILD_TYPE not set, setting the default one: ${CMAKE_BUILD_TYPE}")
 else()
 	message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 	if(NOT CMAKE_BUILD_TYPE IN_LIST predefined_build_types)
@@ -80,7 +80,7 @@ set(DEB_DEPENDS)
 set(RPM_DEPENDS)
 
 set(TEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/test CACHE STRING "working directory for tests")
-message(STATUS "TEST_DIR set to: ${TEST_DIR}")
+message(STATUS "TEST_DIR set to: \"${TEST_DIR}\"")
 
 # Do not treat include directories from the interfaces
 # of consumed Imported Targets as SYSTEM by default.
