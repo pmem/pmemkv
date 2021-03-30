@@ -185,6 +185,36 @@ public:
 		umap.erase(item);
 	}
 
+	/*
+	 * Returns value for path property from config.
+	 *
+	 * @throw pmem::kv::internal::invalid_argument if item does not exist
+	 */
+	std::string get_path()
+	{
+		const char *path;
+		if (!get_string("path", &path))
+			throw internal::invalid_argument(
+				"Config does not contain item with key: \"path\"");
+
+		return std::string(path);
+	}
+
+	/*
+	 * Returns value for size property from config.
+	 *
+	 * @throw pmem::kv::internal::invalid_argument if item does not exist
+	 */
+	uint64_t get_size()
+	{
+		std::size_t size;
+		if (!get_uint64("size", &size))
+			throw internal::invalid_argument(
+				"Config does not contain item with key: \"size\"");
+
+		return size;
+	}
+
 private:
 	std::string type_names[6] = {"string", "int64", "uint64", "data", "object"};
 	enum class type { STRING, INT64, UINT64, DATA, OBJECT };

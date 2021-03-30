@@ -16,28 +16,21 @@ namespace pmem
 namespace kv
 {
 
-static std::string get_path(internal::config &cfg)
+namespace
 {
-	const char *path;
-	if (!cfg.get_string("path", &path))
-		throw internal::invalid_argument(
-			"Config does not contain item with key: \"path\"");
 
-	return std::string(path);
+template <typename T>
+std::size_t count_iterations(T &it, T &end)
+{
+	std::size_t result = 0;
+	for (; it != end; it++)
+		result++;
+	return result;
 }
-
-static uint64_t get_size(internal::config &cfg)
-{
-	std::size_t size;
-	if (!cfg.get_uint64("size", &size))
-		throw internal::invalid_argument(
-			"Config does not contain item with key: \"size\"");
-
-	return size;
 }
 
 vsmap::vsmap(std::unique_ptr<internal::config> cfg)
-    : kv_allocator(get_path(*cfg), get_size(*cfg)),
+    : kv_allocator(cfg->get_path(), cfg->get_size()),
       pmem_kv_container(internal::volatile_compare(internal::extract_comparator(*cfg)),
 			kv_allocator),
       config(std::move(cfg))
@@ -65,63 +58,48 @@ status vsmap::count_all(std::size_t &cnt)
 status vsmap::count_above(string_view key, std::size_t &cnt)
 {
 	LOG("count_above for key=" << std::string(key.data(), key.size()));
-	std::size_t result = 0;
 	// XXX - do not create temporary string
 	auto it = pmem_kv_container.upper_bound(
 		key_type(key.data(), key.size(), kv_allocator));
 	auto end = pmem_kv_container.end();
-	for (; it != end; it++)
-		result++;
 
-	cnt = result;
-
+	cnt = count_iterations(it, end);
 	return status::OK;
 }
 
 status vsmap::count_equal_above(string_view key, std::size_t &cnt)
 {
 	LOG("count_equal_above for key=" << std::string(key.data(), key.size()));
-	std::size_t result = 0;
 	// XXX - do not create temporary string
 	auto it = pmem_kv_container.lower_bound(
 		key_type(key.data(), key.size(), kv_allocator));
 	auto end = pmem_kv_container.end();
-	for (; it != end; it++)
-		result++;
 
-	cnt = result;
-
+	cnt = count_iterations(it, end);
 	return status::OK;
 }
 
 status vsmap::count_equal_below(string_view key, std::size_t &cnt)
 {
 	LOG("count_equal_below for key=" << std::string(key.data(), key.size()));
-	std::size_t result = 0;
 	auto it = pmem_kv_container.begin();
 	// XXX - do not create temporary string
 	auto end = pmem_kv_container.upper_bound(
 		key_type(key.data(), key.size(), kv_allocator));
-	for (; it != end; it++)
-		result++;
 
-	cnt = result;
-
+	cnt = count_iterations(it, end);
 	return status::OK;
 }
 
 status vsmap::count_below(string_view key, std::size_t &cnt)
 {
 	LOG("count_below for key=" << std::string(key.data(), key.size()));
-	std::size_t result = 0;
 	auto it = pmem_kv_container.begin();
 	// XXX - do not create temporary string
 	auto end = pmem_kv_container.lower_bound(
 		key_type(key.data(), key.size(), kv_allocator));
-	for (; it != end; it++)
-		result++;
 
-	cnt = result;
+	cnt = count_iterations(it, end);
 
 	return status::OK;
 }
@@ -136,8 +114,7 @@ status vsmap::count_between(string_view key1, string_view key2, std::size_t &cnt
 			key_type(key1.data(), key1.size(), kv_allocator));
 		auto end = pmem_kv_container.lower_bound(
 			key_type(key2.data(), key2.size(), kv_allocator));
-		for (; it != end; it++)
-			result++;
+		result = count_iterations(it, end);
 	}
 
 	cnt = result;
@@ -298,9 +275,9 @@ status vsmap::remove(string_view key)
 	LOG("remove key=" << std::string(key.data(), key.size()));
 
 	// XXX - do not create temporary string
-	size_t erased =
+	bool erased =
 		pmem_kv_container.erase(key_type(key.data(), key.size(), kv_allocator));
-	return (erased == 1) ? status::OK : status::NOT_FOUND;
+	return (erased ? status::OK : status::NOT_FOUND);
 }
 
 internal::iterator_base *vsmap::new_iterator()
