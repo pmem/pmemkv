@@ -143,5 +143,28 @@ engine_base::iterator *engine_base::new_const_iterator()
 	throw internal::not_supported("Iterators are not supported in this engine");
 }
 
+namespace internal
+{
+std::string get_path(internal::config &cfg)
+{
+	const char *path;
+	if (!cfg.get_string("path", &path))
+		throw internal::invalid_argument(
+			"Config does not contain item with key: \"path\"");
+
+	return std::string(path);
+}
+
+uint64_t get_size(internal::config &cfg)
+{
+	std::size_t size;
+	if (!cfg.get_uint64("size", &size))
+		throw internal::invalid_argument(
+			"Config does not contain item with key: \"size\"");
+
+	return size;
+}
+} // namespace internal
+
 } // namespace kv
 } // namespace pmem
