@@ -4,6 +4,7 @@
 #pragma once
 
 #include "../engine.h"
+#include "../out.h"
 
 namespace pmem
 {
