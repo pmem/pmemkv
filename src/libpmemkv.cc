@@ -409,8 +409,8 @@ int pmemkv_open(const char *engine_c_str, pmemkv_config *config, pmemkv_db **db)
 		return PMEMKV_STATUS_INVALID_ARGUMENT;
 
 	return catch_and_return_status(__func__, [&] {
-		auto engine = pmem::kv::engine_base::create_engine(engine_c_str,
-								   std::move(cfg));
+		auto engine = pmem::kv::storage_engine_factory::create_engine(
+			engine_c_str, std::move(cfg));
 
 		*db = db_from_internal(engine.release());
 
