@@ -2,6 +2,8 @@
 /* Copyright 2017-2021, Intel Corporation */
 
 #include "blackhole.h"
+
+#include <../out.h>
 #include <iostream>
 
 namespace pmem
