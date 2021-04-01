@@ -53,6 +53,18 @@ std::size_t distance(It first, It last)
 	return static_cast<std::size_t>(dist);
 }
 
+template <typename It>
+status iterate_through_pairs(It first, It last, get_kv_callback *callback, void *arg)
+{
+	for (auto it = first; it != last; ++it) {
+		auto ret = callback(it->first.c_str(), it->first.size(),
+				    it->second.c_str(), it->second.size(), arg);
+		if (ret != 0)
+			return status::STOPPED_BY_CB;
+	}
+	return status::OK;
+}
+
 } /* namespace internal */
 } /* namespace kv */
 } /* namespace pmem */

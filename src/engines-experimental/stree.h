@@ -80,8 +80,6 @@ public:
 private:
 	stree(const stree &);
 	void operator=(const stree &);
-	status iterate(container_iterator first, container_iterator last,
-		       get_kv_callback *callback, void *arg);
 	void Recover();
 
 	internal::stree::btree_type *my_btree;
