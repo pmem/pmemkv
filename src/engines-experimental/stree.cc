@@ -129,20 +129,6 @@ status stree::count_between(string_view key1, string_view key2, std::size_t &cnt
 	return status::OK;
 }
 
-status stree::iterate(container_iterator first, container_iterator last,
-		      get_kv_callback *callback, void *arg)
-{
-	for (auto it = first; it != last; ++it) {
-		auto ret = callback(it->first.c_str(), it->first.size(),
-				    it->second.c_str(), it->second.size(), arg);
-
-		if (ret != 0)
-			return status::STOPPED_BY_CB;
-	}
-
-	return status::OK;
-}
-
 status stree::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("get_all");
@@ -151,7 +137,7 @@ status stree::get_all(get_kv_callback *callback, void *arg)
 	auto first = my_btree->begin();
 	auto last = my_btree->end();
 
-	return iterate(first, last, callback, arg);
+	return internal::iterate_through_pairs(first, last, callback, arg);
 }
 
 /* (key, end), above key */
@@ -163,7 +149,7 @@ status stree::get_above(string_view key, get_kv_callback *callback, void *arg)
 	auto first = my_btree->upper_bound(key);
 	auto last = my_btree->end();
 
-	return iterate(first, last, callback, arg);
+	return internal::iterate_through_pairs(first, last, callback, arg);
 }
 
 /* [key, end), above or equal to key */
@@ -175,7 +161,7 @@ status stree::get_equal_above(string_view key, get_kv_callback *callback, void *
 	auto first = my_btree->lower_bound(key);
 	auto last = my_btree->end();
 
-	return iterate(first, last, callback, arg);
+	return internal::iterate_through_pairs(first, last, callback, arg);
 }
 
 /* [start, key], below or equal to key */
@@ -187,7 +173,7 @@ status stree::get_equal_below(string_view key, get_kv_callback *callback, void *
 	auto first = my_btree->begin();
 	auto last = my_btree->upper_bound(key);
 
-	return iterate(first, last, callback, arg);
+	return internal::iterate_through_pairs(first, last, callback, arg);
 }
 
 /* [start, key), less than key, key exclusive */
@@ -199,7 +185,7 @@ status stree::get_below(string_view key, get_kv_callback *callback, void *arg)
 	auto first = my_btree->begin();
 	auto last = my_btree->lower_bound(key);
 
-	return iterate(first, last, callback, arg);
+	return internal::iterate_through_pairs(first, last, callback, arg);
 }
 
 /* get between (key1, key2), key1 exclusive, key2 exclusive */
@@ -214,7 +200,7 @@ status stree::get_between(string_view key1, string_view key2, get_kv_callback *c
 		auto first = my_btree->upper_bound(key1);
 		auto last = my_btree->lower_bound(key2);
 
-		return iterate(first, last, callback, arg);
+		return internal::iterate_through_pairs(first, last, callback, arg);
 	}
 
 	return status::OK;
