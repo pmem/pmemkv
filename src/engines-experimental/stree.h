@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2017-2021, Intel Corporation */
 
-#pragma once
+#ifndef LIBPMEMKV_STREE_H
+#define LIBPMEMKV_STREE_H
 
 #include <libpmemobj++/container/string.hpp>
 #include <libpmemobj++/make_persistent.hpp>
@@ -80,8 +81,6 @@ public:
 private:
 	stree(const stree &);
 	void operator=(const stree &);
-	status iterate(container_iterator first, container_iterator last,
-		       get_kv_callback *callback, void *arg);
 	void Recover();
 
 	internal::stree::btree_type *my_btree;
@@ -150,3 +149,5 @@ public:
 
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif /* LIBPMEMKV_STREE_H */
