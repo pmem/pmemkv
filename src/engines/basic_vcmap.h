@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2017-2021, Intel Corporation */
 
-#pragma once
-
-#include "../out.h"
+#ifndef LIBPMEMKV_BASIC_VCMAP_H
+#define LIBPMEMKV_BASIC_VCMAP_H
 
 #include "../engine.h"
+#include "../out.h"
+
+#include <cassert>
 #include <memory>
 #include <scoped_allocator>
 #include <string>
 #include <tbb/concurrent_hash_map.h>
-
-#include <cassert>
 
 namespace pmem
 {
@@ -158,9 +158,9 @@ status basic_vcmap<AllocatorFactory>::remove(string_view key)
 	LOG("remove key=" << std::string(key.data(), key.size()));
 
 	// XXX - do not create temporary string
-	size_t erased = pmem_kv_container.erase(
+	bool erased = pmem_kv_container.erase(
 		pmem_string(key.data(), key.size(), ch_allocator));
-	return (erased == 1) ? status::OK : status::NOT_FOUND;
+	return (erased ? status::OK : status::NOT_FOUND);
 }
 
 template <typename AllocatorFactory>
@@ -294,3 +294,5 @@ void basic_vcmap<AllocatorFactory>::basic_vcmap_iterator::abort()
 
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif
