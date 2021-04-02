@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_ITERATOR_H
 #define LIBPMEMKV_ITERATOR_H
@@ -45,6 +45,26 @@ public:
 protected:
 	virtual void init_seek();
 };
+
+template <typename It>
+std::size_t distance(It first, It last)
+{
+	auto dist = std::distance(first, last);
+	assert(dist >= 0);
+	return static_cast<std::size_t>(dist);
+}
+
+template <typename It>
+status iterate_through_pairs(It first, It last, get_kv_callback *callback, void *arg)
+{
+	for (auto it = first; it != last; ++it) {
+		auto ret = callback(it->first.c_str(), it->first.size(),
+				    it->second.c_str(), it->second.size(), arg);
+		if (ret != 0)
+			return status::STOPPED_BY_CB;
+	}
+	return status::OK;
+}
 
 } /* namespace internal */
 } /* namespace kv */

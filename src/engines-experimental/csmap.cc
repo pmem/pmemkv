@@ -35,15 +35,6 @@ status csmap::count_all(std::size_t &cnt)
 	return status::OK;
 }
 
-template <typename It>
-static std::size_t size(It first, It last)
-{
-	auto dist = std::distance(first, last);
-	assert(dist >= 0);
-
-	return static_cast<std::size_t>(dist);
-}
-
 status csmap::count_above(string_view key, std::size_t &cnt)
 {
 	LOG("count_above for key=" << std::string(key.data(), key.size()));
@@ -54,7 +45,7 @@ status csmap::count_above(string_view key, std::size_t &cnt)
 	auto first = container->upper_bound(key);
 	auto last = container->end();
 
-	cnt = size(first, last);
+	cnt = internal::distance(first, last);
 
 	return status::OK;
 }
@@ -69,7 +60,7 @@ status csmap::count_equal_above(string_view key, std::size_t &cnt)
 	auto first = container->lower_bound(key);
 	auto last = container->end();
 
-	cnt = size(first, last);
+	cnt = internal::distance(first, last);
 
 	return status::OK;
 }
@@ -84,7 +75,7 @@ status csmap::count_equal_below(string_view key, std::size_t &cnt)
 	auto first = container->begin();
 	auto last = container->upper_bound(key);
 
-	cnt = size(first, last);
+	cnt = internal::distance(first, last);
 
 	return status::OK;
 }
@@ -99,7 +90,7 @@ status csmap::count_below(string_view key, std::size_t &cnt)
 	auto first = container->begin();
 	auto last = container->lower_bound(key);
 
-	cnt = size(first, last);
+	cnt = internal::distance(first, last);
 
 	return status::OK;
 }
@@ -115,7 +106,7 @@ status csmap::count_between(string_view key1, string_view key2, std::size_t &cnt
 		auto first = container->upper_bound(key1);
 		auto last = container->lower_bound(key2);
 
-		cnt = size(first, last);
+		cnt = internal::distance(first, last);
 	} else {
 		cnt = 0;
 	}
