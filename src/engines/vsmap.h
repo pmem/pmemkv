@@ -78,7 +78,7 @@ private:
 };
 
 template <>
-class vsmap::vsmap_iterator<true> : virtual public internal::iterator_base {
+class vsmap::vsmap_iterator<true> : public internal::iterator_base {
 	using container_type = vsmap::map_type;
 
 public:

@@ -70,6 +70,7 @@ public:
 	cmap(std::unique_ptr<internal::config> cfg);
 	~cmap();
 
+	cmap() = delete;
 	cmap(const cmap &) = delete;
 	cmap &operator=(const cmap &) = delete;
 
@@ -98,7 +99,7 @@ private:
 };
 
 template <>
-class cmap::cmap_iterator<true> : virtual public internal::iterator_base {
+class cmap::cmap_iterator<true> : public internal::iterator_base {
 	using container_type = internal::cmap::map_t;
 
 public:

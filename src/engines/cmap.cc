@@ -44,15 +44,9 @@ status cmap::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("get_all");
 	check_outside_tx();
-	for (auto it = container->begin(); it != container->end(); ++it) {
-		auto ret = callback(it->first.c_str(), it->first.size(),
-				    it->second.c_str(), it->second.size(), arg);
-
-		if (ret != 0)
-			return status::STOPPED_BY_CB;
-	}
-
-	return status::OK;
+	auto it = container->begin();
+	auto end = container->end();
+	return internal::iterate_through_pairs(it, end, callback, arg);
 }
 
 status cmap::exists(string_view key)
