@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2017-2021, Intel Corporation */
 
-#pragma once
+#ifndef LIBPMEMKV_BASIC_VCMAP_H
+#define LIBPMEMKV_BASIC_VCMAP_H
 
 #include "../out.h"
 
@@ -294,3 +295,5 @@ void basic_vcmap<AllocatorFactory>::basic_vcmap_iterator::abort()
 
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif /* LIBPMEMKV_BASIC_VCMAP_H */
