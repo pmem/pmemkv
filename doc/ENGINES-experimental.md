@@ -181,7 +181,7 @@ No additional packages are required.
 
 # pskiplist
 
-A persistent and concurrent engine, backed by a skiplist implemented using Persistent Compare and Swap (PCAS), contributed by [4Paradigm Inc.](http://www.4paradigm.com/). The skiplist data structure is firstly introduced in a [VLDB paper](http://vldb.org/pvldb/vol14/p799-chen.pdf)). It can be enabled in CMakeLists.txt using the `ENGINE_PSKIPLIST` option.
+A persistent and concurrent engine, backed by a skiplist implemented using Persistent Compare and Swap (PCAS), contributed by [4Paradigm Inc.](http://www.4paradigm.com/). The skiplist data structure is firstly introduced in a [VLDB paper](http://vldb.org/pvldb/vol14/p799-chen.pdf) **("Optimizing In-memory Database Engine for AI-powered On-line Decision Augmentation Using Persistent Memory". Cheng Chen, Jun Yang, Mian Lu, Taize Wang, Zhao Zheng, Yuqiang Chen, Wenyuan Dai, Bingsheng He, Weng-Fai Wong, Guoan Wu, Yuping Zhao, Andy Rudoff)**. It can be enabled in CMakeLists.txt using the `ENGINE_PSKIPLIST` option.
 
 ### Configuration
 

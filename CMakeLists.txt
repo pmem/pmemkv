@@ -39,7 +39,7 @@ option(ENGINE_RADIX "enable experimental radix engine" OFF)
 option(ENGINE_ROBINHOOD "enable experimental robinhood engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
 option(ENGINE_DRAM_VCMAP "enable testing dram_vcmap engine" OFF)
 
-option(ENGINE_PSKIPLIST "enable experimental pskiplist engine" ON)
+option(ENGINE_PSKIPLIST "enable experimental pskiplist engine" OFF)
 
 # ----------------------------------------------------------------- #
 ## Set required and useful variables
