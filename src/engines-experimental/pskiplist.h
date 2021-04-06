@@ -141,5 +141,19 @@ private:
 	std::vector<std::pair<std::string, size_t>> log;
 };
 
+class pskiplist_factory : public engine_base::factory_base {
+public:
+	std::unique_ptr<engine_base>
+	create(std::unique_ptr<internal::config> cfg) override
+	{
+		check_config_null(get_name(), cfg);
+		return std::unique_ptr<engine_base>(new pskiplist(std::move(cfg)));
+	};
+	std::string get_name() override
+	{
+		return "pskiplist";
+	};
+};
+
 } /* namespace kv */
 } /* namespace pmem */

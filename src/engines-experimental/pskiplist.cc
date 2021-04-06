@@ -486,5 +486,8 @@ void pskiplist::pskiplist_iterator<false>::abort()
 	log.clear();
 }
 
+static factory_registerer
+	register_pskiplist(std::unique_ptr<engine_base::factory_base>(new pskiplist_factory));
+
 } // namespace kv
 } // namespace pmem

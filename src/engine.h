@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_ENGINE_H
 #define LIBPMEMKV_ENGINE_H
 
-#include <functional>
+#include <map>
 #include <memory>
 #include <string>
 
@@ -18,16 +18,23 @@ namespace pmem
 namespace kv
 {
 
+void check_config_null(const std::string &engine_name,
+		       std::unique_ptr<internal::config> &cfg);
+
+/**
+ * engine_base is a top-level interface for implementing new storage engine.
+ *
+ * All storage engines should implement its factory (engine_base::factory_base).
+ * To activate new storage engine create object of factory_registerer and pass
+ * factory instance.
+ */
+
 class engine_base {
 	using iterator = internal::iterator_base;
 
 public:
-	engine_base();
-
-	virtual ~engine_base();
-
-	static std::unique_ptr<engine_base>
-	create_engine(const std::string &name, std::unique_ptr<internal::config> cfg);
+	engine_base() = default;
+	virtual ~engine_base() = default;
 
 	virtual std::string name() = 0;
 
@@ -61,9 +68,52 @@ public:
 	virtual iterator *new_iterator();
 	virtual iterator *new_const_iterator();
 
+	/**
+	 * factory_base is an interface for engine factory.
+	 * Should be implemented for registration purposes.
+	 */
+	class factory_base {
+	public:
+		factory_base() = default;
+		virtual ~factory_base() = default;
+		virtual std::unique_ptr<engine_base>
+			create(std::unique_ptr<internal::config>) = 0;
+		virtual std::string get_name() = 0;
+	};
+};
+
+/**
+ * storage_engine_factory is a class for handling auto-registering factories.
+ * Provides simple to use mechanism for factory registration without creating
+ * dependencies for newly added engines.
+ */
+class storage_engine_factory {
+public:
+	using factory_type = std::unique_ptr<engine_base::factory_base>;
+
+	storage_engine_factory() = delete;
+	static bool register_factory(factory_type factory);
+	static std::unique_ptr<engine_base>
+	create_engine(const std::string &name, std::unique_ptr<internal::config> cfg);
+
 private:
-	static void check_config_null(const std::string &engine_name,
-				      std::unique_ptr<internal::config> &cfg);
+	static std::map<std::string, factory_type> &get_engine_factories();
+	static std::string get_names();
+};
+
+/**
+ * This class is intended to successfully initialize storage_engine_factory
+ * despite optimization level due to [basic.stc.static]:
+ * "If a variable with static storage duration has initialization or a destructor
+ * with side effects, it shall not be eliminated even if it appears to be unused".
+ */
+class factory_registerer {
+public:
+	factory_registerer() = delete;
+	factory_registerer(storage_engine_factory::factory_type factory)
+	{
+		storage_engine_factory::register_factory(std::move(factory));
+	}
 };
 
 } /* namespace kv */

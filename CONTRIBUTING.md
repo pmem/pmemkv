@@ -127,6 +127,8 @@ Next we'll walk you through the steps of creating a new engine.
 * Create `src/engines/mytree.cc` implementation file
 * For new engines, use `blackhole.cc` as a template
 * Use `pmem::kv` namespace defined by the header
+* implement engine interface with its factory
+* register engine factory (e.g. look at the blackhole)
 
 ### Providing Unit Test
 
@@ -150,7 +152,7 @@ Next we'll walk you through the steps of creating a new engine.
     * Add a build option for a new engine with a name like `ENGINE_MYTREE`
     and use it to ifdef all includes, dependencies and linking you may add
     * Add definition of the new option, like `-DENGINE_MYTREE`, so it can
-    be used to ifdef engine-specific code in common sources (e.g. in `src/engine.cc`), like:
+    be used to ifdef engine-specific code, like:
     ```
     #ifdef ENGINE_MYTREE
     ...
@@ -162,9 +164,6 @@ Next we'll walk you through the steps of creating a new engine.
 
 ### Updating Common Source
 
-* In `src/engine.cc`:
-    * Add `#include "engines/mytree.h"` (within `#ifdef ENGINE_MYTREE` clause)
-    * Update `create_engine` to return new `my_tree` instances
 * In script(s) executed in CIs (at least in `utils/docker/run-test-building.sh`) add a check/build for new engine
 * Build & verify engine now works with high-level bindings (see [README](README.md#language-bindings) for information on current bindings)
 
@@ -186,9 +185,6 @@ automated and passing tests.
 
 There are subdirectories `engines-experimental` (in `src` and `tests` directories) where all
 experimental source files should be placed.
-
-Whole engine-specific code (located in common source files) should be ifdef'd out using
-(newly) defined option (`ENGINE_MYTREE` in this case).
 
 ### Experimental Build Assets
 

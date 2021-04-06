@@ -69,7 +69,7 @@ public:
 				bool failed_open = false;
 				try {
 					pop = pmem::obj::pool<Root>::open(path, layout);
-				} catch (pmem::pool_invalid_argument &e) {
+				} catch (pmem::pool_error &e) {
 					failed_open = true;
 				}
 
@@ -124,7 +124,7 @@ private:
 
 		try {
 			return pmem::obj::pool<Root>::create(path, layout, size, S_IRWXU);
-		} catch (pmem::pool_invalid_argument &e) {
+		} catch (pmem::pool_error &e) {
 			throw internal::invalid_argument(e.what());
 		}
 	}

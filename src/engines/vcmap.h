@@ -18,15 +18,19 @@ namespace kv
 {
 namespace internal
 {
-template <typename AllocatorT>
-class memkind_allocator_wrapper : public memkind_ns::allocator<AllocatorT> {
+
+class memkind_allocator_factory {
 public:
-	using memkind_ns::allocator<AllocatorT>::allocator;
-	memkind_allocator_wrapper(internal::config &cfg)
-	    : memkind_ns::allocator<AllocatorT>(get_path(cfg), get_size(cfg))
+	template <typename T>
+	using allocator_type = memkind_ns::allocator<T>;
+
+	template <typename T>
+	static allocator_type<T> create(internal::config &cfg)
 	{
+		return allocator_type<T>(get_path(cfg), get_size(cfg));
 	}
 
+private:
 	static std::string get_path(internal::config &cfg)
 	{
 		const char *path;
@@ -49,7 +53,20 @@ public:
 };
 }
 
-using vcmap = basic_vcmap<internal::memkind_allocator_wrapper>;
+using vcmap = basic_vcmap<internal::memkind_allocator_factory>;
+
+class vcmap_factory : public engine_base::factory_base {
+public:
+	virtual std::unique_ptr<engine_base> create(std::unique_ptr<internal::config> cfg)
+	{
+		check_config_null(get_name(), cfg);
+		return std::unique_ptr<engine_base>(new vcmap(std::move(cfg)));
+	};
+	virtual std::string get_name()
+	{
+		return "vcmap";
+	};
+};
 
 } /* namespace kv */
 } /* namespace pmem */
