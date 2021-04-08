@@ -88,7 +88,7 @@ private:
 };
 
 template <>
-class stree::stree_iterator<true> : virtual public internal::iterator_base {
+class stree::stree_iterator<true> : public internal::iterator_base {
 	using container_type = stree::container_type;
 
 public:
