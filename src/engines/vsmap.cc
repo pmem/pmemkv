@@ -16,18 +16,6 @@ namespace pmem
 namespace kv
 {
 
-namespace
-{
-template <typename T>
-std::size_t count_iterations(T &it, T &end)
-{
-	std::size_t result = 0;
-	for (; it != end; it++)
-		result++;
-	return result;
-}
-}
-
 vsmap::vsmap(std::unique_ptr<internal::config> cfg)
     : kv_allocator(cfg->get_path(), cfg->get_size()),
       pmem_kv_container(internal::volatile_compare(internal::extract_comparator(*cfg)),
@@ -62,7 +50,7 @@ status vsmap::count_above(string_view key, std::size_t &cnt)
 		key_type(key.data(), key.size(), kv_allocator));
 	auto end = pmem_kv_container.end();
 
-	cnt = count_iterations(it, end);
+	cnt = static_cast<std::size_t>(std::distance(it, end));
 	return status::OK;
 }
 
@@ -74,7 +62,7 @@ status vsmap::count_equal_above(string_view key, std::size_t &cnt)
 		key_type(key.data(), key.size(), kv_allocator));
 	auto end = pmem_kv_container.end();
 
-	cnt = count_iterations(it, end);
+	cnt = static_cast<std::size_t>(std::distance(it, end));
 	return status::OK;
 }
 
@@ -86,7 +74,7 @@ status vsmap::count_equal_below(string_view key, std::size_t &cnt)
 	auto end = pmem_kv_container.upper_bound(
 		key_type(key.data(), key.size(), kv_allocator));
 
-	cnt = count_iterations(it, end);
+	cnt = static_cast<std::size_t>(std::distance(it, end));
 	return status::OK;
 }
 
@@ -98,7 +86,7 @@ status vsmap::count_below(string_view key, std::size_t &cnt)
 	auto end = pmem_kv_container.lower_bound(
 		key_type(key.data(), key.size(), kv_allocator));
 
-	cnt = count_iterations(it, end);
+	cnt = static_cast<std::size_t>(std::distance(it, end));
 
 	return status::OK;
 }
@@ -113,7 +101,7 @@ status vsmap::count_between(string_view key1, string_view key2, std::size_t &cnt
 			key_type(key1.data(), key1.size(), kv_allocator));
 		auto end = pmem_kv_container.lower_bound(
 			key_type(key2.data(), key2.size(), kv_allocator));
-		result = count_iterations(it, end);
+		result = static_cast<std::size_t>(std::distance(it, end));
 	}
 
 	cnt = result;
