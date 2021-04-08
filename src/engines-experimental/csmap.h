@@ -135,7 +135,7 @@ private:
 };
 
 template <>
-class csmap::csmap_iterator<true> : virtual public internal::iterator_base {
+class csmap::csmap_iterator<true> : public internal::iterator_base {
 	using container_type = csmap::container_type;
 
 public:

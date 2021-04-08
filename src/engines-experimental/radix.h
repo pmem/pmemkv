@@ -126,7 +126,7 @@ private:
 };
 
 template <>
-class radix::radix_iterator<true> : virtual public internal::iterator_base {
+class radix::radix_iterator<true> : public internal::iterator_base {
 	using container_type = radix::container_type;
 
 public:
