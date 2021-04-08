@@ -130,7 +130,7 @@ status pskiplist::count_between(string_view key1, string_view key2, std::size_t 
 }
 
 status pskiplist::iterate(container_iterator first, container_iterator last,
-		      get_kv_callback *callback, void *arg)
+			  get_kv_callback *callback, void *arg)
 {
 	for (auto it = first; it != last; ++it) {
 		auto ret = callback(it->first.c_str(), it->first.size(),
@@ -203,8 +203,8 @@ status pskiplist::get_below(string_view key, get_kv_callback *callback, void *ar
 }
 
 /* get between (key1, key2), key1 exclusive, key2 exclusive */
-status pskiplist::get_between(string_view key1, string_view key2, get_kv_callback *callback,
-			  void *arg)
+status pskiplist::get_between(string_view key1, string_view key2,
+			      get_kv_callback *callback, void *arg)
 {
 	LOG("get_between key range=[" << std::string(key1.data(), key1.size()) << ","
 				      << std::string(key2.data(), key2.size()) << ")");
@@ -256,7 +256,8 @@ status pskiplist::put(string_view key, string_view value)
 
 	auto result = my_skiplist->try_emplace(key, value);
 	if (!result.second) { // key already exists, so update
-		typename internal::pskiplist::skiplist_type::value_type &entry = *result.first;
+		typename internal::pskiplist::skiplist_type::value_type &entry =
+			*result.first;
 		transaction::manual tx(pmpool);
 		entry.second = value;
 		transaction::commit();
@@ -276,17 +277,19 @@ status pskiplist::remove(string_view key)
 void pskiplist::Recover()
 {
 	if (!OID_IS_NULL(*root_oid)) {
-		my_skiplist = (internal::pskiplist::skiplist_type *)pmemobj_direct(*root_oid);
+		my_skiplist =
+			(internal::pskiplist::skiplist_type *)pmemobj_direct(*root_oid);
 		my_skiplist->key_comp().runtime_initialize(
 			internal::extract_comparator(*config));
 	} else {
 		pmem::obj::transaction::run(pmpool, [&] {
 			pmem::obj::transaction::snapshot(root_oid);
-			*root_oid =
-				pmem::obj::make_persistent<internal::pskiplist::skiplist_type>()
-					.raw();
+			*root_oid = pmem::obj::make_persistent<
+					    internal::pskiplist::skiplist_type>()
+					    .raw();
 			my_skiplist =
-				(internal::pskiplist::skiplist_type *)pmemobj_direct(*root_oid);
+				(internal::pskiplist::skiplist_type *)pmemobj_direct(
+					*root_oid);
 			my_skiplist->key_comp().initialize(
 				internal::extract_comparator(*config));
 		});
@@ -393,7 +396,7 @@ status pskiplist::pskiplist_iterator<true>::seek_to_last()
 	// init_seek();
 
 	// if (container->size() == 0)
-	// 	return status::NOT_FOUND;
+	// return status::NOT_FOUND;
 
 	// it_ = container->end();
 	// --it_;
@@ -427,12 +430,11 @@ status pskiplist::pskiplist_iterator<true>::prev()
 	// init_seek();
 
 	// if (it_ == container->begin())
-	// 	return status::NOT_FOUND;
+	// return status::NOT_FOUND;
 
 	// --it_;
 
 	// return status::OK;
-	
 	return status::NOT_SUPPORTED;
 }
 
@@ -443,8 +445,8 @@ result<string_view> pskiplist::pskiplist_iterator<true>::key()
 	return {it_->first.cdata()};
 }
 
-result<pmem::obj::slice<const char *>> pskiplist::pskiplist_iterator<true>::read_range(size_t pos,
-									       size_t n)
+result<pmem::obj::slice<const char *>>
+pskiplist::pskiplist_iterator<true>::read_range(size_t pos, size_t n)
 {
 	assert(it_ != container->end());
 
@@ -454,8 +456,8 @@ result<pmem::obj::slice<const char *>> pskiplist::pskiplist_iterator<true>::read
 	return {it_->second.crange(pos, n)};
 }
 
-result<pmem::obj::slice<char *>> pskiplist::pskiplist_iterator<false>::write_range(size_t pos,
-									   size_t n)
+result<pmem::obj::slice<char *>>
+pskiplist::pskiplist_iterator<false>::write_range(size_t pos, size_t n)
 {
 	assert(it_ != container->end());
 
@@ -486,8 +488,8 @@ void pskiplist::pskiplist_iterator<false>::abort()
 	log.clear();
 }
 
-static factory_registerer
-	register_pskiplist(std::unique_ptr<engine_base::factory_base>(new pskiplist_factory));
+static factory_registerer register_pskiplist(
+	std::unique_ptr<engine_base::factory_base>(new pskiplist_factory));
 
 } // namespace kv
 } // namespace pmem

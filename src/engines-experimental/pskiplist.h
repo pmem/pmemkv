@@ -41,7 +41,8 @@ using string_t = pmem::obj::string;
 
 using key_type = string_t;
 using value_type = string_t;
-using skiplist_type = persistent_skiplist<key_type, value_type, internal::pmemobj_compare, HEIGHT, BRANCH>;
+using skiplist_type = persistent_skiplist<key_type, value_type, internal::pmemobj_compare,
+					  HEIGHT, BRANCH>;
 
 } /* namespace pskiplist */
 } /* namespace internal */

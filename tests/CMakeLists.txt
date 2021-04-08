@@ -247,7 +247,6 @@ if(ENGINE_PSKIPLIST)
 		BINARY put_get_remove
 		TRACERS none #memcheck pmemcheck
 		SCRIPT pskiplist/default.cmake)
-	
 	add_engine_test(ENGINE pskiplist
 			BINARY put_get_remove_not_aligned
 			TRACERS none #memcheck pmemcheck
