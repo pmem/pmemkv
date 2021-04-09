@@ -163,6 +163,17 @@ static void PutTest(pmem::kv::db &kv)
 	UT_ASSERT(cnt == 1);
 	ASSERT_STATUS(kv.get(entry_from_string("key1"), &new_value3), status::OK);
 	UT_ASSERT(new_value3 == entry_from_string("?"));
+
+	uint64_t z = 0;
+	auto zero_filled_str = uint64_to_string(z);
+	ASSERT_STATUS(kv.put(entry_from_string(zero_filled_str),
+			     entry_from_string(zero_filled_str)),
+		      status::OK);
+	ASSERT_STATUS(kv.count_all(cnt), status::OK);
+	UT_ASSERT(cnt == 2);
+	ASSERT_STATUS(kv.get(entry_from_string(zero_filled_str), &value), status::OK);
+	UT_ASSERT(value == entry_from_string(zero_filled_str));
+	UT_ASSERT(value.size() == sizeof(uint64_t));
 }
 
 static void RemoveAllTest(pmem::kv::db &kv)
