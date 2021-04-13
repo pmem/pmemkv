@@ -5,6 +5,7 @@
 - [radix](#radix)
 - [stree](#stree)
 - [robinhood](#robinhood)
+- [pskiplist](#pskiplist)
 
 # tree3
 
@@ -173,6 +174,28 @@ There are two parameters to be optionally modified by env variables:
 	+ type: uint64_t
 
 	For more detailed configuration's description see [cmap section in libpmemkv(7)](libpmemkv.7.md#cmap).
+
+### Prerequisites
+
+No additional packages are required.
+
+# pskiplist
+
+A persistent and concurrent engine, backed by a skiplist implemented using Persistent Compare and Swap (PCAS), contributed by [4Paradigm Inc.](http://www.4paradigm.com/). The skiplist data structure is firstly introduced in a [VLDB paper](http://vldb.org/pvldb/vol14/p799-chen.pdf) **("Optimizing In-memory Database Engine for AI-powered On-line Decision Augmentation Using Persistent Memory". Cheng Chen, Jun Yang, Mian Lu, Taize Wang, Zhao Zheng, Yuqiang Chen, Wenyuan Dai, Bingsheng He, Weng-Fai Wong, Guoan Wu, Yuping Zhao, Andy Rudoff)**. It can be enabled in CMakeLists.txt using the `ENGINE_PSKIPLIST` option.
+
+### Configuration
+
+* **path** -- Path to the database file (layout "pmemkv_stree")
+	+ type: string
+* **force_create** -- If 0, pmemkv opens file specified by 'path', otherwise it creates it
+	+ type: uint64_t
+	+ default value: 0
+* **size** --  Only needed when force_create is not 0, specifies size of the database [in bytes]
+	+ type: uint64_t
+
+### Internals
+
+(TBD)
 
 ### Prerequisites
 

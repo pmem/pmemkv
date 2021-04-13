@@ -39,6 +39,8 @@ option(ENGINE_RADIX "enable experimental radix engine" OFF)
 option(ENGINE_ROBINHOOD "enable experimental robinhood engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
 option(ENGINE_DRAM_VCMAP "enable testing dram_vcmap engine" OFF)
 
+option(ENGINE_PSKIPLIST "enable experimental pskiplist engine" OFF)
+
 # ----------------------------------------------------------------- #
 ## Set required and useful variables
 # ----------------------------------------------------------------- #
@@ -140,6 +142,27 @@ if(ENGINE_RADIX)
 		src/engines-experimental/radix.cc
 	)
 endif()
+# checkout submodule for ENGINE_PSKIPLIST
+find_package(Git QUIET)
+option(GIT_SUBMODULE "Check submodules during build" ON)
+if(GIT_SUBMODULE)
+	message(STATUS "Submodule update for ENGINE_PSKIPLIST")
+	execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+					WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+					RESULT_VARIABLE GIT_SUBMOD_PSKIPLIST)
+endif()
+if(ENGINE_PSKIPLIST)
+	if(NOT GIT_SUBMOD_PSKIPLIST EQUAL "0")
+		message(FATAL_ERROR "git submodule update for ENGINE_PSKIPLIST failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+	endif()
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/pskiplist.h
+		src/engines-experimental/pskiplist.cc
+		src/engines-experimental/pskiplist/persistent_skiplist.h
+		src/engines-experimental/pskiplist/smartpptr.h
+		src/engines-experimental/pskiplist/log4p.h
+	)
+endif()
 if(ENGINE_ROBINHOOD)
 	list(APPEND SOURCE_FILES
 		src/engines-experimental/robinhood.h
@@ -204,6 +227,12 @@ if(ENGINE_RADIX)
 	message(STATUS "RADIX engine is ON")
 else()
 	message(STATUS "RADIX engine is OFF")
+endif()
+if(ENGINE_PSKIPLIST)
+	add_definitions(-DENGINE_PSKIPLIST)
+	message(STATUS "PSKIPLIST engine is ON")
+else()
+	message(STATUS "PSKIPLIST engine is OFF")
 endif()
 if(ENGINE_ROBINHOOD)
 	add_definitions(-DENGINE_ROBINHOOD)
