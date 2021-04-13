@@ -1,6 +1,6 @@
 var indexSectionsWithContent =
 {
-  0: "abcdegiklnoprstuvw~",
+  0: "abcdefgiklnoprstuvw~",
   1: "abcdiortu",
   2: "p",
   3: "lr",
@@ -9,7 +9,8 @@ var indexSectionsWithContent =
   6: "dgiprsvw",
   7: "s",
   8: "cdinostuw",
-  9: "p"
+  9: "f",
+  10: "dp"
 };
 
 var indexSectionNames =
@@ -23,7 +24,8 @@ var indexSectionNames =
   6: "typedefs",
   7: "enums",
   8: "enumvalues",
-  9: "pages"
+  9: "defines",
+  10: "pages"
 };
 
 var indexSectionLabels =
@@ -37,6 +39,7 @@ var indexSectionLabels =
   6: "Typedefs",
   7: "Enumerations",
   8: "Enumerator",
-  9: "Pages"
+  9: "Macros",
+  10: "Pages"
 };
 

@@ -1,7 +1,14 @@
 var searchData=
 [
-  ['transaction_5fscope_5ferror_115',['TRANSACTION_SCOPE_ERROR',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a563d1c46f9b9ece2ee9fc95e85ce2cfe',1,'pmem::kv']]],
-  ['tx_116',['tx',['../classpmem_1_1kv_1_1tx.html',1,'pmem::kv::tx'],['../classpmem_1_1kv_1_1tx.html#a24213c570ab6338eb73dff99bfc9641b',1,'pmem::kv::tx::tx()']]],
-  ['tx_5f_117',['tx_',['../classpmem_1_1kv_1_1tx.html#ade67c06b63f76bc234e64d3be2b187f4',1,'pmem::kv::tx']]],
-  ['tx_5fbegin_118',['tx_begin',['../classpmem_1_1kv_1_1db.html#a7b3289fa76fff3375d616e8785bcbedb',1,'pmem::kv::db']]]
+  ['s_108',['s',['../classpmem_1_1kv_1_1result.html#a4795c4c0cea3c2e3d03df35cfffc5d2d',1,'pmem::kv::result']]],
+  ['seek_109',['seek',['../classpmem_1_1kv_1_1db_1_1iterator.html#aff6681866a76a30c6d9105fc7eb09ce6',1,'pmem::kv::db::iterator']]],
+  ['seek_5fhigher_110',['seek_higher',['../classpmem_1_1kv_1_1db_1_1iterator.html#aed444d53bed575d54ebb7dd5d709cb01',1,'pmem::kv::db::iterator']]],
+  ['seek_5fhigher_5feq_111',['seek_higher_eq',['../classpmem_1_1kv_1_1db_1_1iterator.html#a6953cb516d9cfb3b2f3977f34ac55c97',1,'pmem::kv::db::iterator']]],
+  ['seek_5flower_112',['seek_lower',['../classpmem_1_1kv_1_1db_1_1iterator.html#aa8fbf0bd0527a11a12642581f6b6633a',1,'pmem::kv::db::iterator']]],
+  ['seek_5flower_5feq_113',['seek_lower_eq',['../classpmem_1_1kv_1_1db_1_1iterator.html#ad799b9b385de17b3f9bba1242428586f',1,'pmem::kv::db::iterator']]],
+  ['seek_5fto_5ffirst_114',['seek_to_first',['../classpmem_1_1kv_1_1db_1_1iterator.html#abb3630c22ae3aad3fd637fbcc49a1c02',1,'pmem::kv::db::iterator']]],
+  ['seek_5fto_5flast_115',['seek_to_last',['../classpmem_1_1kv_1_1db_1_1iterator.html#aa4ed0549c6e90068e834b4482d61b73d',1,'pmem::kv::db::iterator']]],
+  ['status_116',['status',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231',1,'pmem::kv']]],
+  ['stopped_5fby_5fcb_117',['STOPPED_BY_CB',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0',1,'pmem::kv']]],
+  ['string_5fview_118',['string_view',['../namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b',1,'pmem::kv']]]
 ];

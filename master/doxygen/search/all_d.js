@@ -1,14 +1,10 @@
 var searchData=
 [
-  ['s_104',['s',['../classpmem_1_1kv_1_1result.html#a4795c4c0cea3c2e3d03df35cfffc5d2d',1,'pmem::kv::result']]],
-  ['seek_105',['seek',['../classpmem_1_1kv_1_1db_1_1iterator.html#aff6681866a76a30c6d9105fc7eb09ce6',1,'pmem::kv::db::iterator']]],
-  ['seek_5fhigher_106',['seek_higher',['../classpmem_1_1kv_1_1db_1_1iterator.html#aed444d53bed575d54ebb7dd5d709cb01',1,'pmem::kv::db::iterator']]],
-  ['seek_5fhigher_5feq_107',['seek_higher_eq',['../classpmem_1_1kv_1_1db_1_1iterator.html#a6953cb516d9cfb3b2f3977f34ac55c97',1,'pmem::kv::db::iterator']]],
-  ['seek_5flower_108',['seek_lower',['../classpmem_1_1kv_1_1db_1_1iterator.html#aa8fbf0bd0527a11a12642581f6b6633a',1,'pmem::kv::db::iterator']]],
-  ['seek_5flower_5feq_109',['seek_lower_eq',['../classpmem_1_1kv_1_1db_1_1iterator.html#ad799b9b385de17b3f9bba1242428586f',1,'pmem::kv::db::iterator']]],
-  ['seek_5fto_5ffirst_110',['seek_to_first',['../classpmem_1_1kv_1_1db_1_1iterator.html#abb3630c22ae3aad3fd637fbcc49a1c02',1,'pmem::kv::db::iterator']]],
-  ['seek_5fto_5flast_111',['seek_to_last',['../classpmem_1_1kv_1_1db_1_1iterator.html#aa4ed0549c6e90068e834b4482d61b73d',1,'pmem::kv::db::iterator']]],
-  ['status_112',['status',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231',1,'pmem::kv']]],
-  ['stopped_5fby_5fcb_113',['STOPPED_BY_CB',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a127180acc7baa30380845d56d178aec0',1,'pmem::kv']]],
-  ['string_5fview_114',['string_view',['../namespacepmem_1_1kv.html#aa8cc4736e5bca1f316a2c9a79ff1150b',1,'pmem::kv']]]
+  ['read_5fiterator_101',['read_iterator',['../classpmem_1_1kv_1_1db.html#a505157900fa3cb36b8959bf24ca1b956',1,'pmem::kv::db']]],
+  ['read_5frange_102',['read_range',['../classpmem_1_1kv_1_1db_1_1iterator.html#ab9e7b849bac68e9292e4bf5eb1b1e9a9',1,'pmem::kv::db::iterator']]],
+  ['readme_2emd_103',['README.md',['../README_8md.html',1,'']]],
+  ['reference_104',['reference',['../classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#af8c3d9841def32320d2f89c8934bccc7',1,'pmem::kv::db::iterator::OutputIterator']]],
+  ['release_105',['release',['../classpmem_1_1kv_1_1config.html#aa5bc6dcfad199c4c45bb53fd7e7263c0',1,'pmem::kv::config']]],
+  ['remove_106',['remove',['../classpmem_1_1kv_1_1tx.html#abda692281651e93af2ba89c84e5d3f12',1,'pmem::kv::tx::remove()'],['../classpmem_1_1kv_1_1db.html#a31167b93a66c88559ff11010e1e130c1',1,'pmem::kv::db::remove()']]],
+  ['result_107',['result',['../classpmem_1_1kv_1_1result.html',1,'pmem::kv::result&lt; T &gt;'],['../classpmem_1_1kv_1_1result.html#a2eced56c83be36381fab0d9b8ffc0c2f',1,'pmem::kv::result::result(const T &amp;val) noexcept(noexcept(T(std::declval&lt; T &gt;())))'],['../classpmem_1_1kv_1_1result.html#af35be760b2a6c7c0e5aa5e9d878238b4',1,'pmem::kv::result::result(const status &amp;err) noexcept'],['../classpmem_1_1kv_1_1result.html#a368e61e948f1e7b2fa5a3ad5ff91ee89',1,'pmem::kv::result::result(const result &amp;other) noexcept(noexcept(T(std::declval&lt; T &gt;())))'],['../classpmem_1_1kv_1_1result.html#af0f7becc824f4c6764a255d979854d07',1,'pmem::kv::result::result(result &amp;&amp;other) noexcept(noexcept(T(std::declval&lt; T &gt;())))'],['../classpmem_1_1kv_1_1result.html#ac730ab766cb79cf24722a9a0f53632dc',1,'pmem::kv::result::result(T &amp;&amp;val) noexcept(noexcept(T(std::declval&lt; T &gt;())))']]]
 ];
