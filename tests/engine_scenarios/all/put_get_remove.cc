@@ -261,6 +261,25 @@ static void RemoveNonexistentTest(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.exists(entry_from_string("key1")), status::OK);
 }
 
+static void ZeroFilledStringTest(pmem::kv::db &kv)
+{
+	uint64_t z = 0;
+	std::string value;
+	auto zero_filled_str = uint64_to_string(z);
+	ASSERT_STATUS(kv.get(entry_from_string(zero_filled_str), &value),
+		      status::NOT_FOUND);
+	ASSERT_STATUS(kv.put(entry_from_string(zero_filled_str),
+			     entry_from_string(zero_filled_str)),
+		      status::OK);
+	ASSERT_STATUS(kv.count_all(z), status::OK);
+	UT_ASSERT(z == 1);
+	ASSERT_STATUS(kv.get(entry_from_string(zero_filled_str), &value), status::OK);
+	UT_ASSERT(value == entry_from_string(zero_filled_str));
+	ASSERT_STATUS(kv.remove(entry_from_string(zero_filled_str)), status::OK);
+	ASSERT_STATUS(kv.count_all(z), status::OK);
+	UT_ASSERT(z == 0);
+}
+
 static void MoveDBTest(pmem::kv::db &kv)
 {
 	/**
@@ -324,6 +343,7 @@ static void test(int argc, char *argv[])
 			RemoveExistingTest,
 			RemoveHeadlessTest,
 			RemoveNonexistentTest,
+			ZeroFilledStringTest,
 			/* move DB test has to be the last one; it invalidates kv */
 			MoveDBTest,
 		});
