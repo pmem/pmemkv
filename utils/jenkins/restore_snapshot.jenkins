@@ -1,0 +1,153 @@
+// SPDX-License-Identifier: BSD-3-Clause
+/* Copyright 2021, Intel Corporation */
+
+/* restore_snapshot.jenkins - pipeline for restoring Timeshift snapshots. Triggers downstream job if succeeded. */
+
+/* declare a map object for holding loaded libraries: */
+libs = [:]
+
+if (params.SNAP_OPT == 'CHOOSE') {
+	SNAP_OPT_DISPLAY = "$SNAP_OPT: $SNAP_OPT_NAME"
+} else {
+	SNAP_OPT_DISPLAY = "$SNAP_OPT"
+}
+
+currentBuild.displayName = "#$currentBuild.id $LABEL, Option: $SNAP_OPT_DISPLAY, Downstream: $DOWNSTREAM_JOB"
+
+/*
+	####### Pipeline restoring Timeshift snapshots. #######
+
+	Requirements:
+	- Linux OS with installed and ready to use Timeshift.
+	- Installed SSH agent plugin in Jenkins.
+	- Imported SSH private key into Jenkins' credential manager. (Make sure that
+	ssh private key matches in all servers on which this pipeline will be used)
+	This pipeline script doesn't create snapshot. Snapshots must be present
+	before using this pipeline. There are four options to use in this pipeline, depending
+	of used "SNAP_OPT" option:
+	- SKIP: skip restore stages and go to actual tasks.
+	- JENKINS_LATEST: use Timeshift snapshot that has "Jenkins_backup_latest" in its
+	description field. Useful when many snapshots are present on the target server and it has
+	specified a restore point for CI.
+	- LATEST: Use most recently created snapshot found on the server.
+	- CHOOSE: Chose specified name of the snapshot. Insert name in the "SNAP_OPT_NAME" field.
+*/
+def targetName
+def targetUser
+def targetAdress
+def snapshotName
+
+/* Pass all parameters to downtream job.*/
+def pass_params = params.collect{
+	string(name: it.key, value: String.valueOf(it.value))
+}
+
+pipeline {
+	/* put timestamps in output log. */
+	options { timestamps () }
+
+	/* execute this pipeline job on the Jenkins master executor. */
+	agent { label 'master' }
+
+	/* each stage represents pipeline step. */
+	stages {
+		stage('Prepare Job') {
+			steps {
+				print "Deleting ${WORKSPACE} directory"
+				deleteDir()
+
+				print "Creating ${WORKSPACE}/output directory"
+				dir('output') {
+					writeFile file: 'console.log', text: ''
+				}
+
+				print "Checkout repository containing Jenkins pipelines"
+				checkout([$class: 'GitSCM', branches: [[name: jenkins_files_branch]],
+					doGenerateSubmoduleConfigurations: false, extensions:
+					[[$class: 'RelativeTargetDirectory', relativeTargetDir: 'jenkins_files']],
+					submoduleCfg: [], userRemoteConfigs: [[url: jenkins_files_repo]]])
+				script {
+					libs.api = load api_lib
+					libs.snapshots = load lib_path + "/snapshots.groovy"
+				}
+			}
+		}
+		stage('Gather information about target') {
+			/* Switch to target node. */
+			agent { label params.LABEL }
+			steps {
+				script {
+					targetName = env.NODE_NAME
+					targetUser = libs.api.run_bash_script("""
+							whoami
+						""").output
+					targetAdress = libs.snapshots.get_node_address(targetName)
+					snapshotName = libs.snapshots.get_snapshot_name(params.SNAP_OPT, params.SNAP_OPT_NAME)
+				}
+			}
+		}
+		stage('Disconnect target') {
+			/* Skip stage when restore is not needed. */
+			when {
+				expression { params.SNAP_OPT != 'SKIP' }
+			}
+			/* Switch to target node. */
+			steps {
+				node(targetName) {
+					script {
+						libs.snapshots.diconnect_node(targetName)
+					}
+				}
+			}
+		}
+		stage('Restore snapshot on target') {
+			/* Skip stage when restore is not needed. */
+			when {
+				expression { params.SNAP_OPT != 'SKIP' }
+			}
+			steps {
+				script {
+					libs.snapshots.restore_snapshot(params.SSH_CRED, targetUser, targetAdress, snapshotName)
+					libs.snapshots.wait_for_reconnect(params.SSH_CRED, targetUser, targetAdress)
+					libs.snapshots.reconnect_node(targetName)
+				}
+			}
+		}
+	}
+/*
+	generate post-build artifacts
+	write "fail" or "success" in result.txt file
+	archive results
+*/
+	post {
+		/* 'always' declarations must be declared first. */
+		always {
+			script {
+				libs.api.write_os_branch_repo(params.LABEL, params.BRANCH, params.REPO_URL)
+				libs.api.archive_output()
+			}
+		}
+		success {
+			script {
+				libs.api.write_result_and_archive('success')
+				pass_params.add(string(name: 'LABEL', value: targetName))
+				jobResult = build job: params.DOWNSTREAM_JOB, parameters: pass_params, wait: true, propagate: false
+				/* Add information about downstream job to builds name and description.*/
+				currentBuild.displayName =
+					"#$currentBuild.id $LABEL, Option: ${SNAP_OPT_DISPLAY}, Downstream: ${DOWNSTREAM_JOB}#${jobResult.number}"
+				currentBuild.description =
+					"JOB: <a href='${jobResult.getAbsoluteUrl()}'>${DOWNSTREAM_JOB}#${jobResult.number}</a> STATUS: ${jobResult.getResult()}"
+			}
+		}
+		failure {
+			script {
+				libs.api.write_result_and_archive('fail')
+			}
+		}
+		unstable {
+			script {
+				libs.api.write_result_and_archive('fail')
+			}
+		}
+	}
+}
