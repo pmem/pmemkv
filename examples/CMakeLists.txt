@@ -28,7 +28,8 @@ add_cppstyle(examples ${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_transaction_cpp/*.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_transaction_c/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_c/*.c
-		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_cpp/*.cpp)
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_cpp/*.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_fill_cpp/*.cpp)
 
 add_check_whitespace(examples ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_basic_c/*.*
@@ -41,7 +42,8 @@ add_check_whitespace(examples ${CMAKE_CURRENT_SOURCE_DIR}/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_transaction_cpp/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_transaction_c/*.*
 		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_c/*.*
-		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_cpp/*.*)
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_iterator_cpp/*.*
+		${CMAKE_CURRENT_SOURCE_DIR}/pmemkv_fill_cpp/*.*)
 
 function(add_example name)
 	set(srcs ${ARGN})
@@ -116,3 +118,7 @@ if(NOT ENGINE_CMAP AND NOT ENGINE_CSMAP AND NOT ENGINE_RADIX)
 	message(WARNING "None of engines required for examples was enabled, "
 		"so no examples were built. See messages above for instructions.")
 endif()
+
+# Engine is this example can be paremetrized at runtime
+add_example(pmemkv_fill_cpp pmemkv_fill_cpp/pmemkv_fill.cpp)
+target_link_libraries(example-pmemkv_fill_cpp pmemkv)
