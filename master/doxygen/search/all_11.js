@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['what_124',['what',['../classpmem_1_1kv_1_1bad__result__access.html#a192a4c4f66a3845325d55e8dc02766d6',1,'pmem::kv::bad_result_access']]],
-  ['write_5fiterator_125',['write_iterator',['../classpmem_1_1kv_1_1db.html#a5ad9af8412fda11df6feed66b945dff6',1,'pmem::kv::db']]],
-  ['write_5frange_126',['write_range',['../classpmem_1_1kv_1_1db_1_1iterator.html#a376580393f38108e5747e99d46b27d0c',1,'pmem::kv::db::iterator::write_range(size_t pos=0, size_t n=std::numeric_limits&lt; size_t &gt;::max()) noexcept'],['../classpmem_1_1kv_1_1db_1_1iterator.html#a6544ee562ce5389ca1321ac7e1e58427',1,'pmem::kv::db::iterator::write_range(size_t pos, size_t n) noexcept']]],
-  ['wrong_5fengine_5fname_127',['WRONG_ENGINE_NAME',['../namespacepmem_1_1kv.html#a966ec5140bba4b6f4cc4e9aa15979231a1b216524ee497e527dfea31344c137e2',1,'pmem::kv']]]
+  ['value_126',['value',['../classpmem_1_1kv_1_1result.html#a58eab3521cdd6e3d82615f4a3d5b606f',1,'pmem::kv::result']]],
+  ['value_5ftype_127',['value_type',['../classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#ae58703064a87cedc593c7cafdfea3c06',1,'pmem::kv::db::iterator::OutputIterator']]]
 ];

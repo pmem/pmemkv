@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['pmemkv_272',['pmemkv',['../index.html',1,'']]]
+  ['deprecated_20list_279',['Deprecated List',['../deprecated.html',1,'']]]
 ];
