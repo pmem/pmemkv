@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2020-2021, Intel Corporation */
 
-#pragma once
+#ifndef LIBPMEMKV_CSMAP_H
+#define LIBPMEMKV_CSMAP_H
 
 #include "../comparator/pmemobj_comparator.h"
 #include "../pmemobj_engine.h"
@@ -135,7 +136,7 @@ private:
 };
 
 template <>
-class csmap::csmap_iterator<true> : virtual public internal::iterator_base {
+class csmap::csmap_iterator<true> : public internal::iterator_base {
 	using container_type = csmap::container_type;
 
 public:
@@ -200,3 +201,5 @@ public:
 
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif /* LIBPMEMKV_CSMAP_H */

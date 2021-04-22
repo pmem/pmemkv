@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2020-2021, Intel Corporation */
 
-#pragma once
+#ifndef LIBPMEMKV_RADIX_H
+#define LIBPMEMKV_RADIX_H
 
 #include "../comparator/pmemobj_comparator.h"
 #include "../iterator.h"
@@ -126,7 +127,7 @@ private:
 };
 
 template <>
-class radix::radix_iterator<true> : virtual public internal::iterator_base {
+class radix::radix_iterator<true> : public internal::iterator_base {
 	using container_type = radix::container_type;
 
 public:
@@ -187,3 +188,5 @@ public:
 
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif /* LIBPMEMKV_RADIX_H */

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2020-2021, Intel Corporation */
 
-#pragma once
+#ifndef LIBPMEMKV_ROBINHOOD_H
+#define LIBPMEMKV_ROBINHOOD_H
 
 #include <libpmemobj.h>
 #include <stddef.h>
@@ -155,3 +156,5 @@ public:
 
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif /* LIBPMEMKV_ROBINHOOD_H */

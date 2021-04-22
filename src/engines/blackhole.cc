@@ -3,6 +3,8 @@
 
 #include "blackhole.h"
 
+#include <../out.h>
+
 namespace pmem
 {
 namespace kv

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright 2017-2021, Intel Corporation */
 
-#pragma once
+#ifndef LIBPMEMKV_VSMAP_H
+#define LIBPMEMKV_VSMAP_H
 
 #include "../comparator/volatile_comparator.h"
 #include "../engine.h"
@@ -78,7 +79,7 @@ private:
 };
 
 template <>
-class vsmap::vsmap_iterator<true> : virtual public internal::iterator_base {
+class vsmap::vsmap_iterator<true> : public internal::iterator_base {
 	using container_type = vsmap::map_type;
 
 public:
@@ -140,3 +141,5 @@ public:
 
 } /* namespace kv */
 } /* namespace pmem */
+
+#endif /* LIBPMEMKV_VSMAP_H */
