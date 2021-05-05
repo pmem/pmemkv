@@ -21,46 +21,83 @@ ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 
+# Base development packages
+ARG BASE_DEPS="\
+	cmake \
+	gcc \
+	gcc-c++ \
+	git \
+	make"
+
+# Dependencies for compiling pmemkv project
+ARG PMEMKV_DEPS="\
+	memkind-devel \
+	rapidjson-devel \
+	tbb-devel"
+
+# PMDK's dependencies (optional; libpmemobj-devel package may be used instead)
+ARG PMDK_DEPS="\
+	autoconf \
+	automake \
+	daxctl-devel \
+	gdb \
+	man \
+	ndctl-devel \
+	pandoc \
+	python3 \
+	rpm-build \
+	rpm-build-libs \
+	rpmdevtools \
+	which"
+
+# libpmemobj-cpp's dependencies (optional; libpmemobj++-devel package may be used instead)
 ARG LIBPMEMOBJ_CPP_DEPS="\
-	libatomic"
+	libatomic \
+	tbb-devel"
+
+# pmem's Valgrind dependencies (optional; valgrind-devel package may be used instead)
+ARG VALGRIND_DEPS="\
+	autoconf \
+	automake"
+
+# Examples (optional)
+ARG EXAMPLES_DEPS="\
+	ncurses-devel \
+	SFML-devel"
+
+# Documentation (optional)
+ARG DOC_DEPS="\
+	doxygen \
+	graphviz"
+
+# Tests (optional)
+# NOTE: glibc is installed as a separate command; see below
+ARG TESTS_DEPS="\
+	gdb \
+	libunwind-devel"
+
+# Misc for our builds/CI (optional)
+ARG MISC_DEPS="\
+	clang \
+	hub \
+	perl-Text-Diff \
+	pkgconf \
+	sudo"
 
 # Install basic tools
 RUN dnf update -y \
  && dnf install -y \
-	autoconf \
-	automake \
-	clang \
-	cmake \
-	daxctl-devel \
-	doxygen \
-	gcc \
-	gcc-c++ \
-	gdb \
-	git \
-	graphviz \
-	gzip \
-	hub \
-	libtool \
-	libunwind-devel \
-	make \
-	man \
-	memkind-devel \
-	ndctl-devel \
-	numactl-devel \
-	pandoc \
-	passwd \
-	perl-Text-Diff \
-	rapidjson-devel \
-	rpm-build \
-	sudo \
-	tbb-devel \
-	wget \
-	which \
-	$LIBPMEMOBJ_CPP_DEPS \
-&& dnf clean all
-
-# Install glibc-debuginfo
-RUN dnf debuginfo-install -y glibc
+	${BASE_DEPS} \
+	${PMEMKV_DEPS} \
+	${PMDK_DEPS} \
+	${LIBPMEMOBJ_CPP_DEPS} \
+	${VALGRIND_DEPS} \
+	${EXAMPLES_DEPS} \
+	${DOC_DEPS} \
+	${TESTS_DEPS} \
+	${MISC_DEPS} \
+ && dnf debuginfo-install -y glibc \
+ && dnf clean all
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -77,7 +114,7 @@ RUN ./install-libpmemobj-cpp.sh rpm
 # Add user
 ENV USER user
 ENV USERPASS pass
-RUN useradd -m $USER
-RUN echo "$USER:$USERPASS" | chpasswd
-RUN gpasswd wheel -a $USER
+RUN useradd -m $USER \
+ && echo "$USER:$USERPASS" | chpasswd \
+ && gpasswd wheel -a $USER
 USER $USER

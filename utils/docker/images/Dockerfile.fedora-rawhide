@@ -4,6 +4,7 @@
 #
 # Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
 #              environment prepared for running pmemkv build and tests.
+#              PMDK (libpmem & libpmemobj) and Valgrind are installed from dnf repo.
 #
 
 # Pull base image
@@ -21,54 +22,65 @@ ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 
-ARG LIBPMEMOBJ_CPP_DEPS="\
-	libatomic"
-
-# Install basic tools
-RUN dnf update -y \
- && dnf install -y \
-	autoconf \
-	automake \
-	clang \
+# Base development packages
+ARG BASE_DEPS="\
 	cmake \
-	daxctl-devel \
-	doxygen \
 	gcc \
 	gcc-c++ \
-	gdb \
 	git \
-	graphviz \
-	gzip \
-	libtool \
-	libunwind-devel \
-	make \
-	man \
+	make"
+
+# Dependencies for compiling pmemkv project
+ARG PMEMKV_DEPS="\
 	memkind-devel \
-	ndctl-devel \
-	numactl-devel \
-	pandoc \
-	passwd \
-	perl-Text-Diff \
 	rapidjson-devel \
+	tbb-devel"
+
+# libpmemobj-cpp's dependencies (optional; libpmemobj++-devel package may be used instead)
+ARG LIBPMEMOBJ_CPP_DEPS="\
+	libatomic \
+	libpmemobj-devel \
 	rpm-build \
-	sudo \
-	tbb-devel \
-	unzip \
-	wget \
-	which \
-	$LIBPMEMOBJ_CPP_DEPS \
-&& dnf clean all
+	tbb-devel"
 
-# Install glibc-debuginfo
-RUN dnf debuginfo-install -y glibc
+# Examples (optional)
+ARG EXAMPLES_DEPS="\
+	ncurses-devel \
+	SFML-devel"
 
-# Install valgrind
-COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
+# Documentation (optional)
+ARG DOC_DEPS="\
+	doxygen \
+	graphviz"
 
-# Install pmdk
-COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh rpm
+# Tests (optional)
+# NOTE: glibc is installed as a separate command; see below
+ARG TESTS_DEPS="\
+	gdb \
+	libpmem-devel \
+	libunwind-devel \
+	pmempool \
+	valgrind-devel"
+
+# Misc for our builds/CI (optional)
+ARG MISC_DEPS="\
+	clang \
+	perl-Text-Diff \
+	pkgconf \
+	sudo"
+
+# Update packages and install basic tools
+RUN dnf update -y \
+ && dnf install -y \
+	${BASE_DEPS} \
+	${PMEMKV_DEPS} \
+	${LIBPMEMOBJ_CPP_DEPS} \
+	${EXAMPLES_DEPS} \
+	${DOC_DEPS} \
+	${TESTS_DEPS} \
+	${MISC_DEPS} \
+ && dnf debuginfo-install -y glibc \
+ && dnf clean all
 
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
@@ -77,7 +89,7 @@ RUN ./install-libpmemobj-cpp.sh RPM
 # Add user
 ENV USER user
 ENV USERPASS pass
-RUN useradd -m $USER
-RUN echo "$USER:$USERPASS" | chpasswd
-RUN gpasswd wheel -a $USER
+RUN useradd -m $USER \
+ && echo "$USER:$USERPASS" | chpasswd \
+ && gpasswd wheel -a $USER
 USER $USER
