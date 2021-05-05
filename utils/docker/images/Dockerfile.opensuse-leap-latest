@@ -21,64 +21,84 @@ ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 
-# Update the OS
-RUN zypper dup -y
-
-# Update all packages
-RUN zypper update -y
-
-# Install basic tools
-RUN zypper install -y \
-	autoconf \
-	automake \
-	bash-completion \
-	clang \
+# Base development packages
+ARG BASE_DEPS="\
 	cmake \
-	doxygen \
-	fdupes \
 	gcc \
 	gcc-c++ \
-	gdb \
 	git \
-	graphviz \
-	gzip \
-	keyutils-devel \
-	make \
-	man \
+	make"
+
+# Dependencies for compiling pmemkv project
+# NOTE: tbb-devel is installed from additional repo; see below
+ARG PMEMKV_DEPS="\
 	memkind-devel \
-	libjson-c-devel \
-	libkmod-devel \
+	rapidjson-devel"
+
+# PMDK's dependencies (optional; libpmemobj-devel package may be used instead)
+ARG PMDK_DEPS="\
+	autoconf \
+	automake \
+	fdupes \
+	gdb \
 	libndctl-devel \
-	libnuma-devel \
-	libtool \
-	libudev-devel \
-	libunwind-devel \
-	libuuid-devel \
+	man \
 	pandoc \
-	perl-Text-Diff \
-	'pkgconfig(bash-completion)' \
-	rapidjson-devel \
+	python3 \
 	rpm-build \
-	sudo \
-	unzip \
-	wget \
-	which
+	rpmdevtools \
+	which"
 
-# Enable the debuginfo repo
-RUN zypper mr -e repo-debug
-RUN zypper install -y \
-	glibc-debuginfo
+# libpmemobj-cpp's dependencies (optional; libpmemobj-cpp-devel package may be used instead)
+# NOTE: tbb-devel is installed from additional repo; see below
+ARG LIBPMEMOBJ_CPP_DEPS="\
+	libatomic1"
 
-# Install a newer version of TBB from the Education repository
-RUN zypper addrepo https://download.opensuse.org/repositories/Education/openSUSE_Leap_15.1/ education
-RUN zypper --gpg-auto-import-keys install -y \
-	tbb-devel
+# pmem's Valgrind dependencies (optional; valgrind-devel package may be used instead)
+ARG VALGRIND_DEPS="\
+	autoconf \
+	automake"
 
-RUN zypper clean all
+# Examples (optional)
+ARG EXAMPLES_DEPS="\
+	ncurses-devel"
 
-# Install libndctl
-COPY install-libndctl.sh install-libndctl.sh
-RUN ./install-libndctl.sh opensuse
+# Documentation (optional)
+ARG DOC_DEPS="\
+	doxygen \
+	graphviz"
+
+# Tests (optional)
+ARG TESTS_DEPS="\
+	gdb \
+	glibc-debuginfo \
+	libunwind-devel"
+
+# Misc for our builds/CI (optional)
+ARG MISC_DEPS="\
+	clang \
+	perl-Text-Diff \
+	pkg-config \
+	sudo"
+
+# Update the OS, packages and install basic tools;
+# using additional repos for glibc debuginfo and for latest tbb
+RUN zypper dup -y \
+ && zypper update -y \
+ && zypper mr -e repo-debug \
+ && zypper install -y \
+	${BASE_DEPS} \
+	${PMEMKV_DEPS} \
+	${PMDK_DEPS} \
+	${LIBPMEMOBJ_CPP_DEPS} \
+	${VALGRIND_DEPS} \
+	${EXAMPLES_DEPS} \
+	${DOC_DEPS} \
+	${TESTS_DEPS} \
+	${MISC_DEPS} \
+ && zypper addrepo https://download.opensuse.org/repositories/Education/openSUSE_Leap_15.1/ education \
+ && zypper --gpg-auto-import-keys install -y tbb-devel \
+ && zypper clean all
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -96,12 +116,12 @@ RUN ./install-libpmemobj-cpp.sh RPM
 ENV USER user
 ENV USERPASS p1a2s3s4
 ENV PFILE ./password
-RUN useradd -m $USER
-RUN echo $USERPASS > $PFILE
-RUN echo $USERPASS >> $PFILE
-RUN passwd $USER < $PFILE
-RUN rm -f $PFILE
-RUN sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
-RUN groupadd wheel
-RUN gpasswd wheel -a $USER
+RUN useradd -m $USER \
+ && echo $USERPASS > $PFILE \
+ && echo $USERPASS >> $PFILE \
+ && passwd $USER < $PFILE \
+ && rm -f $PFILE \
+ && sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers \
+ && groupadd wheel \
+ && gpasswd wheel -a $USER
 USER $USER

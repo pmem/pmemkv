@@ -21,58 +21,82 @@ ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 
-# Update the OS
-RUN zypper dup -y
-
-# Update all packages
-RUN zypper update -y
-
-# Enable the debuginfo repo
-RUN zypper mr -e repo-debug
-
-# Install basic tools
-RUN zypper install -y \
-	autoconf \
-	automake \
-	bash-completion \
-	clang9 \
+# Base development packages
+ARG BASE_DEPS="\
 	cmake \
-	doxygen \
-	fdupes \
 	gcc \
 	gcc-c++ \
+	git \
+	make"
+
+# Dependencies for compiling pmemkv project
+ARG PMEMKV_DEPS="\
+	memkind-devel \
+	rapidjson-devel \
+	tbb-devel"
+
+# PMDK's dependencies (optional; libpmemobj-devel package may be used instead)
+ARG PMDK_DEPS="\
+	autoconf \
+	automake \
+	fdupes \
+	gdb \
+	libndctl-devel \
+	man \
+	pandoc \
+	python3 \
+	rpm-build \
+	rpmdevtools \
+	which"
+
+# libpmemobj-cpp's dependencies (optional; libpmemobj-cpp-devel package may be used instead)
+ARG LIBPMEMOBJ_CPP_DEPS="\
+	libatomic1 \
+	tbb-devel"
+
+# pmem's Valgrind dependencies (optional; valgrind-devel package may be used instead)
+ARG VALGRIND_DEPS="\
+	autoconf \
+	automake"
+
+# Examples (optional)
+ARG EXAMPLES_DEPS="\
+	ncurses-devel"
+
+# Documentation (optional)
+ARG DOC_DEPS="\
+	doxygen \
+	graphviz"
+
+# Tests (optional)
+ARG TESTS_DEPS="\
 	gdb \
 	glibc-debuginfo \
-	git \
-	graphviz \
-	gzip \
-	keyutils-devel \
-	make \
-	man \
-	memkind-devel \
-	libjson-c-devel \
-	libkmod-devel \
-	libndctl-devel \
-	libnuma-devel \
-	libtool \
-	libudev-devel \
-	libunwind-devel \
-	libuuid-devel \
-	pandoc \
+	libunwind-devel"
+
+# Misc for our builds/CI (optional)
+ARG MISC_DEPS="\
+	clang \
 	perl-Text-Diff \
-	'pkgconfig(bash-completion)' \
-	rapidjson-devel \
-	rpm-build \
-	sudo \
-	tbb-devel \
-	wget \
-	which
+	pkg-config \
+	sudo"
 
-RUN zypper clean all
-
-# Install libndctl
-COPY install-libndctl.sh install-libndctl.sh
-RUN ./install-libndctl.sh opensuse
+# Update the OS, packages and install basic tools;
+# using additional repo for glibc debuginfo
+RUN zypper dup -y \
+ && zypper update -y \
+ && zypper mr -e repo-debug \
+ && zypper install -y \
+	${BASE_DEPS} \
+	${PMEMKV_DEPS} \
+	${PMDK_DEPS} \
+	${LIBPMEMOBJ_CPP_DEPS} \
+	${VALGRIND_DEPS} \
+	${EXAMPLES_DEPS} \
+	${DOC_DEPS} \
+	${TESTS_DEPS} \
+	${MISC_DEPS} \
+ && zypper clean all
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -90,12 +114,12 @@ RUN ./install-libpmemobj-cpp.sh RPM
 ENV USER user
 ENV USERPASS p1a2s3s4
 ENV PFILE ./password
-RUN useradd -m $USER
-RUN echo $USERPASS > $PFILE
-RUN echo $USERPASS >> $PFILE
-RUN passwd $USER < $PFILE
-RUN rm -f $PFILE
-RUN sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
-RUN groupadd wheel
-RUN gpasswd wheel -a $USER
+RUN useradd -m $USER \
+ && echo $USERPASS > $PFILE \
+ && echo $USERPASS >> $PFILE \
+ && passwd $USER < $PFILE \
+ && rm -f $PFILE \
+ && sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers \
+ && groupadd wheel \
+ && gpasswd wheel -a $USER
 USER $USER

@@ -3,7 +3,7 @@
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of archlinux-based
-#              environment prepared for running pmemkv tests.
+#              environment prepared for running pmemkv build and tests.
 #
 
 # Pull base image
@@ -21,40 +21,87 @@ ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 
-# Update the pacman cache and install basic tools
-RUN pacman -Syu --noconfirm
-RUN pacman -S --noconfirm \
+# Base development packages
+ARG BASE_DEPS="\
+	cmake \
+	gcc \
+	git \
+	make"
+
+# Dependencies for compiling pmemkv project
+ARG PMEMKV_DEPS="\
+	intel-tbb \
+	rapidjson"
+
+# ndctl's dependencies (optional; ndctl package may be used instead)
+ARG NDCTL_DEPS="\
+	automake \
 	asciidoc \
+	bash-completion \
+	pkg-config \
+	xmlto"
+
+# PMDK's dependencies
+ARG PMDK_DEPS="\
 	autoconf \
 	automake \
-	bash-completion \
-	clang \
-	cmake \
-	doxygen \
-	file \
-	gcc \
 	gdb \
-	git \
-	graphviz \
-	gzip \
-	intel-tbb \
-	libunwind \
-	llvm \
-	make \
-	numactl \
-	pandoc \
+	python3 \
+	which"
+
+# libpmemobj-cpp's dependencies
+ARG LIBPMEMOBJ_CPP_DEPS="\
+	intel-tbb"
+
+# memkind's dependencies
+ARG MEMKIND_DEPS="\
+	autoconf \
+	automake \
+	numactl"
+
+# pmem's Valgrind dependencies (optional; valgrind package may be used instead)
+ARG VALGRIND_DEPS="\
+	autoconf \
+	automake"
+
+# Examples (optional)
+ARG EXAMPLES_DEPS="\
+	sfml"
+
+# Documentation (optional)
+ARG DOC_DEPS="\
+	doxygen \
+	graphviz"
+
+# Tests (optional)
+ARG TESTS_DEPS="\
+	gdb \
+	libunwind"
+
+# Misc for our builds/CI (optional)
+ARG MISC_DEPS="\
+	clang \
+	file \
 	perl-text-diff \
 	pkg-config \
-	sfml \
 	sudo \
-	wget \
-	which \
-	whois \
-	xmlto
+	whois"
 
-# Install rapidjson from sources
-COPY install-rapidjson.sh install-rapidjson.sh
-RUN ./install-rapidjson.sh
+# Update the pacman cache and install basic tools
+RUN pacman -Syu --noconfirm \
+ && pacman -S --noconfirm \
+	${BASE_DEPS} \
+	${PMEMKV_DEPS} \
+	${NDCTL_DEPS} \
+	${PMDK_DEPS} \
+	${LIBPMEMOBJ_CPP_DEPS} \
+	${MEMKIND_DEPS} \
+	${VALGRIND_DEPS} \
+	${EXAMPLES_DEPS} \
+	${DOC_DEPS} \
+	${TESTS_DEPS} \
+	${MISC_DEPS} \
+ && rm -rf /var/cache/pacman/pkg/*
 
 # Install libndctl
 COPY install-libndctl.sh install-libndctl.sh
@@ -80,14 +127,11 @@ RUN ./install-memkind.sh
 ENV USER user
 ENV USERPASS p1a2s3s4
 ENV PFILE ./password
-RUN useradd -m $USER
-RUN echo $USERPASS > $PFILE
-RUN echo $USERPASS >> $PFILE
-RUN passwd $USER < $PFILE
-RUN rm -f $PFILE
-RUN sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
-RUN gpasswd wheel -a $USER
+RUN useradd -m $USER \
+ && echo $USERPASS > $PFILE \
+ && echo $USERPASS >> $PFILE \
+ && passwd $USER < $PFILE \
+ && rm -f $PFILE \
+ && sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers \
+ && gpasswd wheel -a $USER
 USER $USER
-
-# Clean the cache of packages
-RUN rm -rf /var/cache/pacman/pkg/*
