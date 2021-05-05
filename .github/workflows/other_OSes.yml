@@ -25,18 +25,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        CONFIG: ["OS=archlinux-base OS_VER=latest",
-                 "OS=centos OS_VER=8",
+        CONFIG: ["OS=centos OS_VER=8",
+                 "OS=archlinux-base OS_VER=latest",
                  "OS=debian OS_VER=testing",
                  "OS=debian OS_VER=unstable",
+                 "OS=debian OS_VER=latest",
                  "OS=fedora OS_VER=33",
+                 "OS=fedora OS_VER=34",
                  "OS=fedora OS_VER=rawhide PUSH_IMAGE=0",
                  "TYPE=building OS=fedora OS_VER=rawhide",
                  "OS=opensuse-leap OS_VER=latest",
                  "OS=opensuse-tumbleweed OS_VER=latest",
                  "OS=ubuntu OS_VER=18.04",
-                 "OS=ubuntu OS_VER=rolling PUSH_IMAGE=0",
-                 "TYPE=building OS=ubuntu OS_VER=rolling"]
+                 "OS=ubuntu OS_VER=21.04",
+                 "OS=ubuntu OS_VER=devel PUSH_IMAGE=0",
+                 "TYPE=building OS=ubuntu OS_VER=devel"]
     steps:
       - name: Clone the git repo
         uses: actions/checkout@v2
