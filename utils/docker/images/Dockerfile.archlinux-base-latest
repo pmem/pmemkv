@@ -7,12 +7,13 @@
 #
 
 # Pull base image
-FROM archlinux/base:latest
+FROM registry.hub.docker.com/library/archlinux:base
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
 ENV OS archlinux-base
 ENV OS_VER latest
+ENV PACKAGE_MANAGER pacman
 ENV NOTTY 1
 
 # Additional parameters to build docker without building components

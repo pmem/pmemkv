@@ -7,7 +7,7 @@
 #
 
 # Pull base image
-FROM ubuntu:20.04
+FROM registry.hub.docker.com/library/ubuntu:20.04
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
