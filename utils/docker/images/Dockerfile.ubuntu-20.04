@@ -4,6 +4,7 @@
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
 #              environment prepared for running pmemkv build and tests.
+#              Rapidjson is installed from sources because of package bug.
 #
 
 # Pull base image
@@ -22,44 +23,91 @@ ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 ARG SKIP_SCRIPTS_DOWNLOAD
 
-ENV COVERITY_DEPS "\
+# Base development packages
+ARG BASE_DEPS="\
+	cmake \
+	build-essential \
+	git"
+
+# Dependencies for compiling pmemkv project
+ARG PMEMKV_DEPS="\
+	libmemkind-dev \
+	libtbb-dev"
+
+# PMDK's dependencies (optional; libpmemobj-dev package may be used instead)
+ARG PMDK_DEPS="\
+	autoconf \
+	automake \
+	debhelper \
+	devscripts \
+	gdb \
+	libdaxctl-dev \
+	libndctl-dev \
+	pandoc \
+	python3"
+
+# libpmemobj-cpp's dependencies (optional; libpmemobj-cpp-dev package may be used instead)
+ARG LIBPMEMOBJ_CPP_DEPS="\
+	libatomic1 \
+	libtbb-dev"
+
+# pmem's Valgrind dependencies (optional; valgrind package may be used instead)
+ARG VALGRIND_DEPS="\
+	autoconf \
+	automake"
+
+# Examples (optional)
+ARG EXAMPLES_DEPS="\
+	libncurses5-dev \
+	libsfml-dev"
+
+# Documentation (optional)
+ARG DOC_DEPS="\
+	doxygen \
+	graphviz"
+
+# Tests (optional)
+ARG TESTS_DEPS="\
+	gdb \
+	libc6-dbg \
+	libunwind-dev"
+
+# Codecov - coverage tool (optional)
+ARG CODECOV_DEPS="\
+	curl \
+	llvm"
+
+# Coverity - static analysis (optional)
+ARG COVERITY_DEPS="\
+	curl \
 	ruby \
 	wget"
 
-# Update the Apt cache and install basic tools
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-	autoconf \
-	automake \
-	build-essential \
+# Misc for our builds/CI (optional)
+ARG MISC_DEPS="\
 	clang \
 	clang-format-9 \
-	cmake \
-	curl \
-	debhelper \
-	devscripts \
-	doxygen \
-	fakeroot \
-	gdb \
-	git \
-	graphviz \
-	libc6-dbg \
-	libdaxctl-dev \
-	libndctl-dev \
-	libmemkind-dev \
-	libnode-dev \
-	libnuma-dev \
-	libtbb-dev \
 	libtext-diff-perl \
-	libtool \
-	libunwind8-dev \
-	numactl \
-	pandoc \
 	pkg-config \
 	sudo \
-	wget \
-	whois \
-	$COVERITY_DEPS \
+	whois"
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# Update the apt cache and install basic tools
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+	${BASE_DEPS} \
+	${PMEMKV_DEPS} \
+	${PMDK_DEPS} \
+	${LIBPMEMOBJ_CPP_DEPS} \
+	${VALGRIND_DEPS} \
+	${EXAMPLES_DEPS} \
+	${DOC_DEPS} \
+	${TESTS_DEPS} \
+	${CODECOV_DEPS} \
+	${COVERITY_DEPS} \
+	${MISC_DEPS} \
  && rm -rf /var/lib/apt/lists/*
 
 # Install rapidjson from sources

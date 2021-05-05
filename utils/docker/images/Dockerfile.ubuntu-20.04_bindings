@@ -5,6 +5,7 @@
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
 #				environment prepared for executing build and tests
 #				of pmemkv-* bindings repositories.
+#				Rapidjson is installed from sources because of package bug.
 #
 
 # Pull base image
@@ -23,56 +24,65 @@ ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 
-# Update the Apt cache and install basic tools
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-	autoconf \
-	automake \
-	build-essential \
-	clang \
-	clang-format-9 \
+# Base development packages
+ARG BASE_DEPS="\
 	cmake \
-	curl \
-	debhelper \
-	devscripts \
-	doxygen \
-	fakeroot \
-	gdb \
-	git \
-	graphviz \
-	libc6-dbg \
-	libdaxctl-dev \
-	libgtest-dev \
-	libndctl-dev \
-	libnode-dev \
-	libnuma-dev \
+	build-essential \
+	git"
+
+# Dependencies for compiling pmemkv project
+ARG PMEMKV_DEPS="\
 	libmemkind-dev \
-	libtbb-dev \
-	libtext-diff-perl \
-	libtool \
-	libunwind8-dev \
+	libtbb-dev"
+
+# Dependencies for compiling and testing pmemkv bindings
+ARG PMEMKV_BINDINGS_DEPS="\
 	maven \
 	npm \
-	numactl \
 	openjdk-8-jdk \
-	pandoc \
-	pkg-config \
 	python3-dev \
-	python3-distutils \
 	python3-pip \
-	ruby-dev \
+	ruby-dev"
+
+# PMDK's dependencies (optional; libpmemobj-dev package may be used instead)
+ARG PMDK_DEPS="\
+	autoconf \
+	automake \
+	debhelper \
+	devscripts \
+	gdb \
+	libdaxctl-dev \
+	libndctl-dev \
+	pandoc \
+	python3"
+
+# Dependencies for compiling libpmemobj-cpp project
+ARG LIBPMEMOBJ_CPP_DEPS="\
+	libatomic1 \
+	libtbb-dev"
+
+# Misc for our builds/CI (optional)
+ARG MISC_DEPS="\
+	pkg-config \
 	sudo \
-	wget \
-	whois \
+	whois"
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# Update the apt cache and install basic tools
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+	${BASE_DEPS} \
+	${PMEMKV_DEPS} \
+	${PMEMKV_BINDINGS_DEPS} \
+	${PMDK_DEPS} \
+	${LIBPMEMOBJ_CPP_DEPS} \
+	${MISC_DEPS} \
  && rm -rf /var/lib/apt/lists/*
 
 # Install rapidjson from sources
 COPY install-rapidjson.sh install-rapidjson.sh
 RUN ./install-rapidjson.sh
-
-# Install valgrind
-COPY install-valgrind.sh install-valgrind.sh
-RUN ./install-valgrind.sh
 
 # Install pmdk
 COPY install-pmdk.sh install-pmdk.sh
@@ -82,7 +92,7 @@ RUN ./install-pmdk.sh dpkg
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
 RUN ./install-libpmemobj-cpp.sh DEB
 
-# Bindings
+# Install bindings' dependencies
 RUN pip3 install pytest setuptools wheel
 COPY install-bindings-dependencies.sh install-bindings-dependencies.sh
 RUN ./install-bindings-dependencies.sh

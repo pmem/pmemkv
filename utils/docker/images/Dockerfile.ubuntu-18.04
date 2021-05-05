@@ -4,7 +4,6 @@
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
 #              environment prepared for running pmemkv build and tests.
-#              It's using rapidjson installed from package.
 #
 
 # Pull base image
@@ -22,55 +21,97 @@ ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
 
-ARG NDCTL_DEPS="\
-	bash-completion \
-	libkeyutils-dev \
-	libkmod-dev \
-	libudev-dev \
-	systemd"
+# Base development packages
+ARG BASE_DEPS="\
+	cmake \
+	build-essential \
+	git"
 
-ARG LIBPMEMOBJ_CPP_DEPS="\
-	libatomic1"
-
+# Dependencies for compiling pmemkv project
 ARG PMEMKV_DEPS="\
+	libtbb-dev \
 	rapidjson-dev"
 
-# Update the Apt cache and install basic tools
-RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+# ndctl's dependencies
+ARG NDCTL_DEPS="\
+	automake \
+	bash-completion \
+	ca-certificates \
+	libkeyutils-dev \
+	libkmod-dev \
+	libjson-c-dev \
+	libudev-dev \
+	pkg-config \
+	systemd \
+	uuid-dev"
+
+# PMDK's dependencies
+ARG PMDK_DEPS="\
 	autoconf \
 	automake \
-	build-essential \
-	clang \
-	clang-format-9 \
-	cmake \
-	curl \
 	debhelper \
 	devscripts \
-	doxygen \
-	fakeroot \
 	gdb \
-	git \
-	graphviz \
-	libc6-dbg \
-	libnuma-dev \
-	libjson-c-dev \
-	libkmod-dev \
-	libtbb-dev \
-	libtext-diff-perl \
-	libudev-dev \
-	libunwind-dev \
-	numactl \
-	libtool \
 	pandoc \
+	python3"
+
+# libpmemobj-cpp's dependencies
+ARG LIBPMEMOBJ_CPP_DEPS="\
+	libatomic1 \
+	libtbb-dev"
+
+# memkind's dependencies
+ARG MEMKIND_DEPS="\
+	autoconf \
+	automake \
+	numactl \
+	libnuma-dev"
+
+# pmem's Valgrind dependencies (optional; valgrind package may be used instead)
+ARG VALGRIND_DEPS="\
+	autoconf \
+	automake"
+
+# Examples (optional)
+ARG EXAMPLES_DEPS="\
+	libncurses5-dev \
+	libsfml-dev"
+
+# Documentation (optional)
+ARG DOC_DEPS="\
+	doxygen \
+	graphviz"
+
+# Tests (optional)
+ARG TESTS_DEPS="\
+	gdb \
+	libc6-dbg \
+	libunwind-dev"
+
+# Misc for our builds/CI (optional)
+ARG MISC_DEPS="\
+	clang \
+	libtext-diff-perl \
 	pkg-config \
-	software-properties-common \
 	sudo \
-	uuid-dev \
-	whois \
-	$NDCTL_DEPS \
-	$LIBPMEMOBJ_CPP_DEPS \
-	$PMEMKV_DEPS \
+	whois"
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# Update the apt cache and install basic tools
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+	${BASE_DEPS} \
+	${PMEMKV_DEPS} \
+	${NDCTL_DEPS} \
+	${PMDK_DEPS} \
+	${LIBPMEMOBJ_CPP_DEPS} \
+	${MEMKIND_DEPS} \
+	${VALGRIND_DEPS} \
+	${EXAMPLES_DEPS} \
+	${DOC_DEPS} \
+	${TESTS_DEPS} \
+	${MISC_DEPS} \
  && rm -rf /var/lib/apt/lists/*
 
 # Install libndctl
