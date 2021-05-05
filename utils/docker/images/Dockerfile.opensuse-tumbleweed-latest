@@ -7,7 +7,7 @@
 #
 
 # Pull base image
-FROM opensuse/tumbleweed:latest
+FROM registry.opensuse.org/opensuse/tumbleweed:latest
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables

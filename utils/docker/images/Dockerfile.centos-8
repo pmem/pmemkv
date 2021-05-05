@@ -7,7 +7,7 @@
 #
 
 # Pull base image
-FROM centos:8
+FROM registry.hub.docker.com/library/centos:8
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables

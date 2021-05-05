@@ -7,7 +7,7 @@
 #
 
 # Pull base image
-FROM opensuse/leap:latest
+FROM registry.opensuse.org/opensuse/leap:latest
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables

@@ -7,7 +7,7 @@
 #
 
 # Pull base image
-FROM debian:unstable
+FROM registry.hub.docker.com/library/debian:unstable
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
