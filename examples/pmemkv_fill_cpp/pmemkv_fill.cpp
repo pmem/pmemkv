@@ -5,7 +5,8 @@
  * pmemkv_fill.cpp -- example which calculates how many elements fit
  * into pmemkv. It inserts elements with specified key and value size
  * to the database until OUT_OF_MEMORY status is returned. It then prints
- * number of elements inserted.
+ * number of elements inserted. It may be used to observe the memory overhead
+ * of a certain engine with specific key/value sizes.
  */
 
 #include <cassert>
