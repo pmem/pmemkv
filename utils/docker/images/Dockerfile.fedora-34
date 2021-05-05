@@ -1,0 +1,120 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright 2016-2021, Intel Corporation
+
+#
+# Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
+#              environment prepared for running pmemkv build and tests.
+#
+
+# Pull base image
+FROM registry.fedoraproject.org/fedora:34
+MAINTAINER igor.chorazewicz@intel.com
+
+# Set required environment variables
+ENV OS fedora
+ENV OS_VER 34
+ENV PACKAGE_MANAGER rpm
+ENV NOTTY 1
+
+# Additional parameters to build docker without building components
+ARG SKIP_VALGRIND_BUILD
+ARG SKIP_PMDK_BUILD
+ARG SKIP_LIBPMEMOBJCPP_BUILD
+
+# Base development packages
+ARG BASE_DEPS="\
+	cmake \
+	gcc \
+	gcc-c++ \
+	git \
+	make"
+
+# Dependencies for compiling pmemkv project
+ARG PMEMKV_DEPS="\
+	memkind-devel \
+	rapidjson-devel \
+	tbb-devel"
+
+# PMDK's dependencies (optional; libpmemobj-devel package may be used instead)
+ARG PMDK_DEPS="\
+	autoconf \
+	automake \
+	daxctl-devel \
+	gdb \
+	man \
+	ndctl-devel \
+	pandoc \
+	python3 \
+	rpm-build \
+	rpm-build-libs \
+	rpmdevtools \
+	which"
+
+# libpmemobj-cpp's dependencies (optional; libpmemobj++-devel package may be used instead)
+ARG LIBPMEMOBJ_CPP_DEPS="\
+	libatomic \
+	tbb-devel"
+
+# pmem's Valgrind dependencies (optional; valgrind-devel package may be used instead)
+ARG VALGRIND_DEPS="\
+	autoconf \
+	automake"
+
+# Examples (optional)
+ARG EXAMPLES_DEPS="\
+	ncurses-devel \
+	SFML-devel"
+
+# Documentation (optional)
+ARG DOC_DEPS="\
+	doxygen \
+	graphviz"
+
+# Tests (optional)
+# NOTE: glibc is installed as a separate command; see below
+ARG TESTS_DEPS="\
+	gdb \
+	libunwind-devel"
+
+# Misc for our builds/CI (optional)
+ARG MISC_DEPS="\
+	clang \
+	hub \
+	perl-Text-Diff \
+	pkgconf \
+	sudo"
+
+# Install basic tools
+RUN dnf update -y \
+ && dnf install -y \
+	${BASE_DEPS} \
+	${PMEMKV_DEPS} \
+	${PMDK_DEPS} \
+	${LIBPMEMOBJ_CPP_DEPS} \
+	${VALGRIND_DEPS} \
+	${EXAMPLES_DEPS} \
+	${DOC_DEPS} \
+	${TESTS_DEPS} \
+	${MISC_DEPS} \
+ && dnf debuginfo-install -y glibc \
+ && dnf clean all
+
+# Install valgrind
+COPY install-valgrind.sh install-valgrind.sh
+RUN ./install-valgrind.sh
+
+# Install pmdk
+COPY install-pmdk.sh install-pmdk.sh
+RUN ./install-pmdk.sh rpm
+
+# Install pmdk c++ bindings
+COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
+RUN ./install-libpmemobj-cpp.sh RPM
+
+# Add user
+ENV USER user
+ENV USERPASS pass
+RUN useradd -m $USER \
+ && echo "$USER:$USERPASS" | chpasswd \
+ && gpasswd wheel -a $USER
+USER $USER

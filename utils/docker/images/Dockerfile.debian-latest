@@ -2,17 +2,17 @@
 # Copyright 2016-2021, Intel Corporation
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
+# Dockerfile - a 'recipe' for Docker to build an image of debian-based
 #              environment prepared for running pmemkv build and tests.
 #
 
 # Pull base image
-FROM registry.hub.docker.com/library/ubuntu:rolling
+FROM registry.hub.docker.com/library/debian:latest
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
-ENV OS ubuntu
-ENV OS_VER rolling
+ENV OS debian
+ENV OS_VER latest
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
 
@@ -25,8 +25,7 @@ ARG SKIP_LIBPMEMOBJCPP_BUILD
 ARG BASE_DEPS="\
 	cmake \
 	build-essential \
-	git \
-	software-properties-common"
+	git"
 
 # Dependencies for compiling pmemkv project
 ARG PMEMKV_DEPS="\
