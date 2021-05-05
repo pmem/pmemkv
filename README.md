@@ -50,7 +50,7 @@ build rpm and deb packages and explains usage of experimental engines and pool s
 `pmemkv` is written in C/C++ and can be used in other languages - Java, Node.js,
 Python, and Ruby.
 
-![pmemkv-bindings](https://user-images.githubusercontent.com/12031346/65962933-ff6bfc00-e459-11e9-9552-d6326e9c0684.png)
+![pmemkv-bindings](doc/architecture.png)
 
 ### C/C++ Examples
 
