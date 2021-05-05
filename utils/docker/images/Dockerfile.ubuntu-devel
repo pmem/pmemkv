@@ -7,12 +7,12 @@
 #
 
 # Pull base image
-FROM registry.hub.docker.com/library/ubuntu:rolling
+FROM registry.hub.docker.com/library/ubuntu:devel
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER rolling
+ENV OS_VER devel
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
 
