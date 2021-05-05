@@ -7,7 +7,7 @@
 #
 
 # Pull base image
-FROM fedora:32
+FROM registry.fedoraproject.org/fedora:32
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables

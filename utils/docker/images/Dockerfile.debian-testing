@@ -7,7 +7,7 @@
 #
 
 # Pull base image
-FROM debian:testing
+FROM registry.hub.docker.com/library/debian:testing
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables

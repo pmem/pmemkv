@@ -7,7 +7,7 @@
 #
 
 # Pull base image
-FROM ubuntu:rolling
+FROM registry.hub.docker.com/library/ubuntu:rolling
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
