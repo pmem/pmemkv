@@ -43,31 +43,23 @@ git clone https://github.com/pmem/pmemkv
 cd pmemkv
 mkdir ./build
 cd ./build
-cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug		# run CMake, prepare Debug version
-make -j$(nproc)					# build everything
-make test						# run all tests
+cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug    # run CMake, prepare Debug version
+make -j$(nproc)                 # build everything
+make test                       # run all tests
 ```
 
-Instead of the last command (`make test`) you can run
+To see the output of failed tests, instead of the last command (`make test`) you can run:
 
 ```sh
 ctest --output-on-failure
 ```
 
-to see the output of failed tests.
-
 Building of the `libpmemkv_json_config` helper library is enabled by default.
-If you want to disable it (for example to get rid of the RapidJSON dependency)
-run:
+If you want to disable it (for example to get rid of the RapidJSON dependency),
+instead of a standard `cmake ..` command run:
 
 ```sh
 cmake .. -DBUILD_JSON_CONFIG=OFF
-```
-
-instead of:
-
-```sh
-cmake ..
 ```
 
 ### Managing shared library

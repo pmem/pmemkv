@@ -4,8 +4,5 @@
 !.github/
 !.clang-format
 *.d
-/bin/
-/build/
-cmake-build-debug/
-/googletest-*.zip
+build/
 *~
