@@ -149,37 +149,44 @@ static void single_threaded_engine_example(const std::string &path)
 		 * iterator isn't copyable */
 		auto &w_it = res_w_it.get_value();
 
-		LOG("Modify value of the element lower than \"5\"");
+		LOG("Modify value of the elements lower than \"5\"");
 		/* seek to the element lower than "5" */
 		status s = w_it.seek_lower("5");
 		ASSERT(s == status::OK);
+		do {
+			/* read a value before writing */
+			std::string value_before_write =
+				w_it.read_range().get_value().data();
 
-		/* read a value before writing */
-		std::string value_before_write = w_it.read_range().get_value().data();
+			/* Get a write range. By default it is a whole value (pos = 0, n =
+			 * std::numeric_limits<size_t>::max()). */
+			auto res = w_it.write_range();
+			ASSERT(res.is_ok());
 
-		/* Get a write range. By default it is a whole value (pos = 0, n =
-		 * std::numeric_limits<size_t>::max()). */
-		auto res = w_it.write_range();
-		ASSERT(res.is_ok());
+			/* set all chars to 'x' */
+			for (auto &c : res.get_value()) {
+				/* note that you can't read elements from write_range, so
+				 * e.g. char x = c isn't possible. If you want to read a
+				 * value, you need to use read_range method instead of
+				 * write_range */
+				c = 'x';
+			}
 
-		/* set all chars to 'x' */
-		for (auto &c : res.get_value()) {
-			/* note that you can't read elements from write_range, so e.g.
-			 * char x = c isn't possible. If you want to read a value, you
-			 * need to use read_range method instead of write_range */
-			c = 'x';
-		}
+			/* commit modifications */
+			w_it.commit();
 
-		/* commit modifications */
-		w_it.commit();
+			pmem::kv::result<string_view> key_result = w_it.key();
+			ASSERT(key_result.is_ok());
+			std::string current_key = key_result.get_value().data();
+			LOG("Key = " + current_key);
 
-		std::string current_value = w_it.read_range().get_value().data();
-		/* check if the value has changed */
-		ASSERT(current_value.compare(value_before_write) != 0);
-		ASSERT(current_value.compare(std::string(current_value.size(), 'x')) ==
-		       0);
-		LOG("Value after commit = " + current_value);
-
+			std::string current_value = w_it.read_range().get_value().data();
+			/* check if the value has changed */
+			ASSERT(current_value.compare(value_before_write) != 0);
+			ASSERT(current_value.compare(
+				       std::string(current_value.size(), 'x')) == 0);
+			LOG("Value after commit = " + current_value);
+		} while (w_it.next() == status::OK);
 		/* write iterator is being destroyed now */
 	}
 }
