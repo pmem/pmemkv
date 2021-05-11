@@ -158,6 +158,8 @@ function(build_test_ext)
 			endif()
 		elseif("${lib}" STREQUAL "dl_libs")
 			list(APPEND LIBS_TO_LINK ${CMAKE_DL_LIBS})
+		elseif("${lib}" STREQUAL "memkind")
+			list(APPEND LIBS_TO_LINK ${MEMKIND_LIBRARIES})
 		endif()
 	endforeach()
 

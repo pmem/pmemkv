@@ -60,7 +60,11 @@ public:
 	virtual std::unique_ptr<engine_base> create(std::unique_ptr<internal::config> cfg)
 	{
 		check_config_null(get_name(), cfg);
-		return std::unique_ptr<engine_base>(new vcmap(std::move(cfg)));
+		try {
+			return std::unique_ptr<engine_base>(new vcmap(std::move(cfg)));
+		} catch (std::invalid_argument &e) {
+			throw internal::invalid_argument(e.what());
+		}
 	};
 	virtual std::string get_name()
 	{
