@@ -129,8 +129,7 @@ function(find_pmempool)
 endfunction()
 
 # Function to build test with custom build options (e.g. passing defines),
-# link it with custom library/-ies (supports 'json', 'libpmemobj_cpp' and
-# 'dl_libs') and compile options. It calls build_test function.
+# link it with custom library/-ies and compile options. It calls build_test function.
 # Usage: build_test_ext(NAME .. SRC_FILES .. .. LIBS .. .. BUILD_OPTIONS .. .. OPTS .. ..)
 function(build_test_ext)
 	set(oneValueArgs NAME)
@@ -158,6 +157,8 @@ function(build_test_ext)
 			endif()
 		elseif("${lib}" STREQUAL "dl_libs")
 			list(APPEND LIBS_TO_LINK ${CMAKE_DL_LIBS})
+		elseif("${lib}" STREQUAL "memkind")
+			list(APPEND LIBS_TO_LINK ${MEMKIND_LIBRARIES})
 		endif()
 	endforeach()
 
