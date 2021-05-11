@@ -5,6 +5,6 @@ include(${PARENT_SRC_DIR}/helpers.cmake)
 
 setup()
 
-execute(${TEST_EXECUTABLE} ${ENGINE} ${DIR}/nope/nope ${PARAMS})
+execute(${TEST_EXECUTABLE} ${ENGINE} ${DIR}/nope/nope ${DIR} ${PARAMS})
 
 finish()

@@ -1,7 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "unittest.hpp"
+
+#include "pmem_allocator.h"
+
+using namespace libmemkind::pmem;
+using namespace pmem;
+
+static bool older_memkind;
 
 static void FailsToOpenInstanceWithInvalidPath(std::string engine,
 					       std::string non_existent_path)
@@ -13,11 +20,33 @@ static void FailsToOpenInstanceWithInvalidPath(std::string engine,
 	ASSERT_STATUS(s, pmem::kv::status::OK);
 
 	pmem::kv::db kv;
+	/* Non-existent path supplied */
 	s = kv.open(engine, std::move(cfg));
 
-	/* Not-existent path supplied */
-	// XXX - should be WRONG_PATH
-	ASSERT_STATUS(s, pmem::kv::status::UNKNOWN_ERROR);
+	if (older_memkind) {
+		ASSERT_STATUS(s, pmem::kv::status::UNKNOWN_ERROR);
+	} else {
+		ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
+	}
+}
+
+static void FailsToCreateInstanceWithTooSmallSize(std::string engine, std::string path)
+{
+	pmem::kv::config cfg;
+	auto s = cfg.put_path(path);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+	s = cfg.put_size(MEMKIND_PMEM_MIN_SIZE - 1);
+	ASSERT_STATUS(s, pmem::kv::status::OK);
+
+	pmem::kv::db kv;
+	/* Too small size supplied */
+	s = kv.open(engine, std::move(cfg));
+
+	if (older_memkind) {
+		ASSERT_STATUS(s, pmem::kv::status::UNKNOWN_ERROR);
+	} else {
+		ASSERT_STATUS(s, pmem::kv::status::INVALID_ARGUMENT);
+	}
 }
 
 static void NoSizeInConfig(std::string engine)
@@ -49,7 +78,18 @@ static void test(int argc, char *argv[])
 	if (argc < 2)
 		UT_FATAL("usage: %s engine non_existent_path", argv[0]);
 
+	/* Check if memkind has extended error handling
+	XXX: Remove that when we won't support memkind < 1.12 */
+	try {
+		auto alloc = allocator<int>(argv[3], 100000000);
+	} catch (std::invalid_argument &e) {
+		older_memkind = false;
+	} catch (std::exception &e) {
+		older_memkind = true;
+	}
+
 	FailsToOpenInstanceWithInvalidPath(argv[1], argv[2]);
+	FailsToCreateInstanceWithTooSmallSize(argv[1], argv[3]);
 	NoSizeInConfig(argv[1]);
 	NoPathInConfig(argv[1]);
 }
