@@ -90,6 +90,9 @@ static inline int catch_and_return_status(const char *func_name, Function &&f)
 	} catch (std::runtime_error &e) {
 		out_err_stream(func_name) << e.what();
 		status = PMEMKV_STATUS_UNKNOWN_ERROR;
+	} catch (std::invalid_argument &e) {
+		out_err_stream(func_name) << e.what();
+		status = PMEMKV_STATUS_INVALID_ARGUMENT;
 	} catch (pmem::transaction_scope_error &e) {
 		out_err_stream(func_name) << e.what();
 		status = PMEMKV_STATUS_TRANSACTION_SCOPE_ERROR;

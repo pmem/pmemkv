@@ -202,7 +202,9 @@ build_test_ext(NAME pmemobj_put_get_std_map_oid SRC_FILES engine_scenarios/pmemo
 build_test(pmemobj_create_or_error_if_exists engine_scenarios/pmemobj/create_or_error_if_exists.cc)
 
 # Tests for memkind engines
-build_test_ext(NAME memkind_error_handling SRC_FILES engine_scenarios/memkind/error_handling.cc LIBS json)
+if (ENGINE_VCMAP OR ENGINE_VSMAP)
+	build_test_ext(NAME memkind_error_handling SRC_FILES engine_scenarios/memkind/error_handling.cc LIBS json memkind)
+endif()
 
 # Tests for C API
 build_test(c_api_null_db_config c_api/null_db_config.c)
