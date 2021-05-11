@@ -9,8 +9,8 @@
 
 set -e
 
-# contains new libmemkind namespace
-MEMKIND_VERSION=v1.11.0
+# contains better error handling in pmem_allocator
+MEMKIND_VERSION=64a37d4ca46a8a2419871e859d611fff85d0e843
 
 WORKDIR=$(pwd)
 
