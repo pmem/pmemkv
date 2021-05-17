@@ -1588,11 +1588,15 @@ endif(ENGINE_STREE)
 ################################################################################
 ###################################### RADIX ###################################
 if(ENGINE_RADIX)
-	# XXX - add 1 once radix implements dram cache
-	set(DRAM_CACHING_OPTS 0)
+	set(DRAM_CACHING_OPTS 0 1)
 
-	foreach(dram_cache ${DRAM_CACHING_OPTS})
-		set(EXTRA_CFG_PARAM {"dram_cache":${dram_cache}})
+	foreach(dram_caching ${DRAM_CACHING_OPTS})
+		if(dram_caching EQUAL 1)
+			set(EXTRA_CFG_PARAM {"dram_caching":1,"cache_size":100,"log_size":50000})
+		else()
+			set(EXTRA_CFG_PARAM {"dram_caching":0})
+		endif()
+		# XXX: add drd/helgrind tests for radix with dram_caching==1
 
 		add_engine_test(ENGINE radix
 				BINARY c_api_null_db_config
@@ -1625,12 +1629,15 @@ if(ENGINE_RADIX)
 				PARAMS 1000 8 200
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
-		add_engine_test(ENGINE radix
-				BINARY error_handling_oom
-				TRACERS none memcheck
-				SCRIPT pmemobj_based/default.cmake
-				DB_SIZE 20M
-				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+		# XXX: https://github.com/pmem/pmemkv/issues/1014
+		if(dram_caching EQUAL 0)
+			add_engine_test(ENGINE radix
+					BINARY error_handling_oom
+					TRACERS none memcheck
+					SCRIPT pmemobj_based/default.cmake
+					DB_SIZE 20M
+					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+		endif()
 
 		add_engine_test(ENGINE radix
 				BINARY iterate
@@ -1683,19 +1690,22 @@ if(ENGINE_RADIX)
 				DB_SIZE 1G PARAMS 6000
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
-		add_engine_test(ENGINE radix
-				BINARY pmemobj_error_handling_tx_oom
-				TRACERS none
-				SCRIPT pmemobj_based/default.cmake
-				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
-
-		if(TESTS_LONG)
+		if(dram_caching EQUAL 0)
+			# tx_oom does not work with DRAM layer since we rely on non-transactional put
 			add_engine_test(ENGINE radix
 					BINARY pmemobj_error_handling_tx_oom
-					TRACERS memcheck
+					TRACERS none
 					SCRIPT pmemobj_based/default.cmake
-					DB_SIZE 200M
 					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+
+			if(TESTS_LONG)
+				add_engine_test(ENGINE radix
+						BINARY pmemobj_error_handling_tx_oom
+						TRACERS memcheck
+						SCRIPT pmemobj_based/default.cmake
+						DB_SIZE 200M
+						EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+			endif()
 		endif()
 
 		add_engine_test(ENGINE radix
@@ -1845,36 +1855,40 @@ if(ENGINE_RADIX)
 				PARAMS 32 8
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
-		add_engine_test(ENGINE radix
-				BINARY transaction_put
-				TRACERS none memcheck pmemcheck
-				SCRIPT pmemobj_based/default.cmake
-				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+		if(dram_caching EQUAL 0)
+			add_engine_test(ENGINE radix
+					BINARY transaction_put
+					TRACERS none memcheck pmemcheck
+					SCRIPT pmemobj_based/default.cmake
+					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
-		add_engine_test(ENGINE radix
-				BINARY transaction_remove
-				TRACERS none memcheck pmemcheck
-				SCRIPT pmemobj_based/default.cmake
-				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+			add_engine_test(ENGINE radix
+					BINARY transaction_remove
+					TRACERS none memcheck pmemcheck
+					SCRIPT pmemobj_based/default.cmake
+					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
-		add_engine_test(ENGINE radix
-				BINARY iterator_basic
-				TRACERS none memcheck pmemcheck
-				SCRIPT pmemobj_based/default.cmake
-				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+			add_engine_test(ENGINE radix
+					BINARY iterator_basic
+					TRACERS none memcheck pmemcheck
+					SCRIPT pmemobj_based/default.cmake
+					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
-		add_engine_test(ENGINE radix
-				BINARY iterator_sorted
-				TRACERS none memcheck pmemcheck
-				SCRIPT pmemobj_based/default.cmake
-				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+			add_engine_test(ENGINE radix
+					BINARY iterator_sorted
+					TRACERS none memcheck pmemcheck
+					SCRIPT pmemobj_based/default.cmake
+					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+		endif()
 
 		if(PMREORDER_SUPPORTED)
-			add_engine_test(ENGINE radix
-					BINARY transaction_put_pmreorder
-					TRACERS none
-					SCRIPT pmemobj_based/pmreorder/insert.cmake
-					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+			if(dram_caching EQUAL 0)
+				add_engine_test(ENGINE radix
+						BINARY transaction_put_pmreorder
+						TRACERS none
+						SCRIPT pmemobj_based/pmreorder/insert.cmake
+						EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+			endif()
 
 			add_engine_test(ENGINE radix
 					BINARY pmreorder_insert
@@ -1888,11 +1902,13 @@ if(ENGINE_RADIX)
 					SCRIPT pmemobj_based/pmreorder/erase.cmake
 					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
-			add_engine_test(ENGINE radix
-					BINARY pmreorder_iterator
-					TRACERS none
-					SCRIPT pmemobj_based/pmreorder/iterator.cmake
-					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+			if(dram_caching EQUAL 0)
+				add_engine_test(ENGINE radix
+						BINARY pmreorder_iterator
+						TRACERS none
+						SCRIPT pmemobj_based/pmreorder/iterator.cmake
+						EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
+			endif()
 
 			add_engine_test(ENGINE radix
 					BINARY pmreorder_recover
