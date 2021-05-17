@@ -8,11 +8,15 @@
 #include "../iterator.h"
 #include "../pmemobj_engine.h"
 
-#include <libpmemobj++/persistent_ptr.hpp>
-
 #include <libpmemobj++/experimental/inline_string.hpp>
 #include <libpmemobj++/experimental/radix_tree.hpp>
+#include <libpmemobj++/persistent_ptr.hpp>
 
+#include <tbb/concurrent_queue.h>
+
+#include <atomic>
+#include <condition_variable>
+#include <list>
 #include <mutex>
 #include <shared_mutex>
 
@@ -36,7 +40,8 @@ struct pmem_type {
 	}
 
 	map_type map;
-	uint64_t reserved[8];
+	pmem::obj::persistent_ptr<char[]> log;
+	uint64_t reserved[6];
 };
 
 static_assert(sizeof(pmem_type) == sizeof(map_type) + 64, "");
@@ -53,6 +58,110 @@ private:
 	pmem::obj::pool_base &pop;
 	dram_log log;
 	map_type *container;
+};
+
+template <typename Value>
+class ordered_cache {
+private:
+	using key_type = std::string;
+	using dram_value_type = std::pair<key_type, std::atomic<Value *>>;
+	using lru_list_type = std::list<dram_value_type>;
+	using dram_map_type = std::map<string_view, typename lru_list_type::iterator>;
+
+public:
+	using iterator = typename dram_map_type::iterator;
+
+	using value_type = std::atomic<Value *>;
+
+	ordered_cache(size_t max_size) : max_size(max_size)
+	{
+	}
+
+	ordered_cache(const ordered_cache &) = delete;
+	ordered_cache(ordered_cache &&) = delete;
+
+	ordered_cache &operator=(const ordered_cache &) = delete;
+	ordered_cache &operator=(ordered_cache &&) = delete;
+
+	template <typename F>
+	value_type *put(string_view key, Value *v, F &&evict)
+	{
+		auto it = map.find(key);
+		if (it == map.end()) {
+			if (lru_list.size() < max_size) {
+				lru_list.emplace_front(key, v);
+				auto lit = lru_list.begin();
+
+				auto ret = map.try_emplace(lit->first, lit);
+				assert(ret.second);
+
+				it = ret.first;
+			} else {
+				auto lit = evict(lru_list);
+
+				if (lit == lru_list.end())
+					return nullptr;
+
+				auto cnt = map.erase(lit->first);
+
+				assert(cnt == 1 && lit->first != key);
+
+				lru_list.splice(lru_list.begin(), lru_list, lit);
+				lru_list.begin()->first = key;
+				lru_list.begin()->second.store(v,
+							       std::memory_order_release);
+				lit = lru_list.begin();
+
+				auto ret = map.try_emplace(lit->first, lit);
+				assert(ret.second);
+
+				it = ret.first;
+			}
+		} else {
+			lru_list.splice(lru_list.begin(), lru_list, it->second);
+			lru_list.begin()->second.store(v, std::memory_order_release);
+		}
+
+		return &it->second->second;
+	}
+
+	Value *get(string_view key, bool promote)
+	{
+		auto it = map.find(key);
+		if (it == map.end()) {
+			return nullptr;
+		} else {
+			if (promote)
+				lru_list.splice(lru_list.begin(), lru_list, it->second);
+
+			return it->second->second.load(std::memory_order_acquire);
+		}
+	}
+
+	iterator begin()
+	{
+		return map.begin();
+	}
+
+	iterator end()
+	{
+		return map.end();
+	}
+
+	iterator lower_bound(string_view key)
+	{
+		return map.lower_bound(key);
+	}
+
+	iterator upper_bound(string_view key)
+	{
+		return map.upper_bound(key);
+	}
+
+private:
+	lru_list_type lru_list;
+	dram_map_type map;
+	const size_t max_size;
 };
 
 } /* namespace radix */
@@ -118,12 +227,123 @@ private:
 	using container_type = internal::radix::map_type;
 
 	void Recover();
-	status iterate(typename container_type::const_iterator first,
-		       typename container_type::const_iterator last,
-		       get_kv_callback *callback, void *arg);
 
 	container_type *container;
 	std::unique_ptr<internal::config> config;
+};
+
+class heterogenous_radix : public pmemobj_engine_base<internal::radix::pmem_type> {
+public:
+	heterogenous_radix(std::unique_ptr<internal::config> cfg);
+	~heterogenous_radix();
+
+	heterogenous_radix(const heterogenous_radix &) = delete;
+	heterogenous_radix &operator=(const heterogenous_radix &) = delete;
+
+	std::string name() final;
+
+	status count_all(std::size_t &cnt) final;
+	status count_above(string_view key, std::size_t &cnt) final;
+	status count_equal_above(string_view key, std::size_t &cnt) final;
+	status count_equal_below(string_view key, std::size_t &cnt) final;
+	status count_below(string_view key, std::size_t &cnt) final;
+	status count_between(string_view key1, string_view key2, std::size_t &cnt) final;
+
+	status get_all(get_kv_callback *callback, void *arg) final;
+	status get_above(string_view key, get_kv_callback *callback, void *arg) final;
+	status get_equal_above(string_view key, get_kv_callback *callback,
+			       void *arg) final;
+	status get_equal_below(string_view key, get_kv_callback *callback,
+			       void *arg) final;
+	status get_below(string_view key, get_kv_callback *callback, void *arg) final;
+	status get_between(string_view key1, string_view key2, get_kv_callback *callback,
+			   void *arg) final;
+
+	status exists(string_view key) final;
+
+	status put(string_view key, string_view value) final;
+
+	status remove(string_view k) final;
+
+	status get(string_view key, get_v_callback *callback, void *arg) final;
+
+private:
+	using uvalue_type = pmem::obj::experimental::inline_string;
+	using container_type = internal::radix::map_type;
+	using cache_type = internal::radix::ordered_cache<uvalue_type>;
+
+	using dram_iterator = typename cache_type::iterator;
+	using pmem_iterator = typename container_type::iterator;
+
+	struct queue_entry {
+		queue_entry(string_view key_, string_view value_);
+		queue_entry(string_view key_);
+
+		const uvalue_type &key() const;
+		uvalue_type &value();
+
+		cache_type::value_type *dram_entry;
+		bool remove;
+	};
+
+	using pmem_queue_type = tbb::concurrent_bounded_queue<queue_entry *>;
+
+	struct merged_iterator {
+		merged_iterator(cache_type &cache, container_type &pmem,
+				dram_iterator dram_it, pmem_iterator pmem_it);
+		merged_iterator(const merged_iterator &) = default;
+
+		merged_iterator &operator++();
+
+		bool dereferenceable() const;
+
+		merged_iterator *operator->();
+
+		string_view key() const;
+		string_view value() const;
+
+	private:
+		cache_type &cache;
+		container_type &pmem;
+
+		dram_iterator dram_it;
+		pmem_iterator pmem_it;
+
+		enum class current_it { dram, pmem } curr_it;
+
+		void set_current_it();
+	};
+
+	merged_iterator merged_begin();
+	merged_iterator merged_end();
+	merged_iterator merged_lower_bound(string_view key);
+	merged_iterator merged_upper_bound(string_view key);
+
+	void bg_work();
+	cache_type::value_type *cache_put(string_view key, uvalue_type *value,
+					  bool persisted);
+
+	/* Element was logically removed but there might an older version on pmem. */
+	static uvalue_type *tombstone_volatile();
+
+	/* Element removed logically removed from cache and from pmem. */
+	static uvalue_type *tombstone_persistent();
+
+	std::unique_ptr<cache_type> cache;
+	size_t dram_size;
+
+	std::atomic<bool> stopped;
+	std::thread bg_thread;
+
+	pmem::obj::pool_base pop;
+
+	container_type *container;
+	std::unique_ptr<internal::config> config;
+
+	std::mutex eviction_lock;
+	std::condition_variable eviction_cv;
+
+	pmem_queue_type queue;
 };
 
 template <>
@@ -178,8 +398,16 @@ public:
 	create(std::unique_ptr<internal::config> cfg) override
 	{
 		check_config_null(get_name(), cfg);
-		return std::unique_ptr<engine_base>(new radix(std::move(cfg)));
+		return std::unique_ptr<engine_base>(
+			new heterogenous_radix(std::move(cfg)));
+		// uint64_t dram_caching;
+		// if (cfg->get_uint64("dram_caching", &dram_caching) && dram_caching) {
+		// 	return std::unique_ptr<engine_base>(new
+		// heterogenous_radix(std::move(cfg))); } else { 	return
+		// std::unique_ptr<engine_base>(new radix(std::move(cfg)));
+		// }
 	};
+
 	std::string get_name() override
 	{
 		return "radix";

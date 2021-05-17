@@ -73,6 +73,23 @@ std::string radix::name()
 	return "radix";
 }
 
+template <typename Iterator, typename Until>
+static status iterate(Iterator first, get_kv_callback *callback, void *arg, Until &&until)
+{
+	for (auto it = first; until(it); ++it) {
+		string_view key = it->key();
+		string_view value = it->value();
+
+		auto ret =
+			callback(key.data(), key.size(), value.data(), value.size(), arg);
+
+		if (ret != 0)
+			return status::STOPPED_BY_CB;
+	}
+
+	return status::OK;
+}
+
 status radix::count_all(std::size_t &cnt)
 {
 	LOG("count_all");
@@ -151,24 +168,6 @@ status radix::count_between(string_view key1, string_view key2, std::size_t &cnt
 	return status::OK;
 }
 
-status radix::iterate(typename container_type::const_iterator first,
-		      typename container_type::const_iterator last,
-		      get_kv_callback *callback, void *arg)
-{
-	for (auto it = first; it != last; ++it) {
-		string_view key = it->key();
-		string_view value = it->value();
-
-		auto ret =
-			callback(key.data(), key.size(), value.data(), value.size(), arg);
-
-		if (ret != 0)
-			return status::STOPPED_BY_CB;
-	}
-
-	return status::OK;
-}
-
 status radix::get_all(get_kv_callback *callback, void *arg)
 {
 	LOG("get_all");
@@ -177,7 +176,8 @@ status radix::get_all(get_kv_callback *callback, void *arg)
 	auto first = container->begin();
 	auto last = container->end();
 
-	return iterate(first, last, callback, arg);
+	return iterate(first, callback, arg,
+		       [&](const container_type::iterator &it) { return it != last; });
 }
 
 status radix::get_above(string_view key, get_kv_callback *callback, void *arg)
@@ -188,7 +188,8 @@ status radix::get_above(string_view key, get_kv_callback *callback, void *arg)
 	auto first = container->upper_bound(key);
 	auto last = container->end();
 
-	return iterate(first, last, callback, arg);
+	return iterate(first, callback, arg,
+		       [&](const container_type::iterator &it) { return it != last; });
 }
 
 status radix::get_equal_above(string_view key, get_kv_callback *callback, void *arg)
@@ -199,7 +200,8 @@ status radix::get_equal_above(string_view key, get_kv_callback *callback, void *
 	auto first = container->lower_bound(key);
 	auto last = container->end();
 
-	return iterate(first, last, callback, arg);
+	return iterate(first, callback, arg,
+		       [&](const container_type::iterator &it) { return it != last; });
 }
 
 status radix::get_equal_below(string_view key, get_kv_callback *callback, void *arg)
@@ -210,7 +212,8 @@ status radix::get_equal_below(string_view key, get_kv_callback *callback, void *
 	auto first = container->begin();
 	auto last = container->upper_bound(key);
 
-	return iterate(first, last, callback, arg);
+	return iterate(first, callback, arg,
+		       [&](const container_type::iterator &it) { return it != last; });
 }
 
 status radix::get_below(string_view key, get_kv_callback *callback, void *arg)
@@ -221,7 +224,8 @@ status radix::get_below(string_view key, get_kv_callback *callback, void *arg)
 	auto first = container->begin();
 	auto last = container->lower_bound(key);
 
-	return iterate(first, last, callback, arg);
+	return iterate(first, callback, arg,
+		       [&](const container_type::iterator &it) { return it != last; });
 }
 
 status radix::get_between(string_view key1, string_view key2, get_kv_callback *callback,
@@ -233,7 +237,9 @@ status radix::get_between(string_view key1, string_view key2, get_kv_callback *c
 	if (key1.compare(key2) < 0) {
 		auto first = container->upper_bound(key1);
 		auto last = container->lower_bound(key2);
-		return iterate(first, last, callback, arg);
+		return iterate(
+			first, callback, arg,
+			[&](const container_type::iterator &it) { return it != last; });
 	}
 
 	return status::OK;
@@ -316,6 +322,528 @@ void radix::Recover()
 				pmemobj_direct(*root_oid));
 			container = &pmem_ptr->map;
 		});
+	}
+}
+
+// HETEROGENOUS_RADIX
+
+heterogenous_radix::merged_iterator::merged_iterator(
+	internal::radix::ordered_cache<uvalue_type> &cache,
+	internal::radix::map_type &pmem,
+	typename internal::radix::ordered_cache<uvalue_type>::iterator dram_it,
+	typename internal::radix::map_type::iterator pmem_it)
+    : cache(cache), pmem(pmem), dram_it(dram_it), pmem_it(pmem_it)
+{
+	set_current_it();
+}
+
+heterogenous_radix::merged_iterator &heterogenous_radix::merged_iterator::operator++()
+{
+	assert(dereferenceable());
+
+	if (curr_it == current_it::dram) {
+		assert(dram_it != cache.end());
+		assert(pmem_it == pmem.end() ||
+		       dram_it->first.compare(pmem_it->key()) < 0);
+	} else {
+		assert(pmem_it != pmem.end());
+		assert(dram_it == cache.end() ||
+		       dram_it->first.compare(pmem_it->key()) > 0);
+	}
+
+	if (curr_it == current_it::dram)
+		++dram_it;
+	else
+		++pmem_it;
+
+	set_current_it();
+
+	return *this;
+}
+
+heterogenous_radix::merged_iterator *heterogenous_radix::merged_iterator::operator->()
+{
+	return this;
+}
+
+string_view heterogenous_radix::merged_iterator::key() const
+{
+	assert(dereferenceable());
+
+	if (curr_it == current_it::dram)
+		return dram_it->first;
+	else
+		return pmem_it->key();
+}
+
+string_view heterogenous_radix::merged_iterator::value() const
+{
+	assert(dereferenceable());
+
+	if (curr_it == current_it::dram)
+		return *dram_it->second->second
+				.load(); // XXX -optimistic conc control!!! + ebr?
+	else
+		return pmem_it->value();
+}
+
+bool heterogenous_radix::merged_iterator::dereferenceable() const
+{
+	return pmem_it != pmem.end() || dram_it != cache.end();
+}
+
+void heterogenous_radix::merged_iterator::set_current_it()
+{
+	while (dereferenceable()) {
+		if (pmem_it != pmem.end() && dram_it != cache.end() &&
+		    dram_it->first == string_view(pmem_it->key())) {
+			/* If keys are the same, skip the one in pmem (the dram one is
+			 * more recent) */
+			++pmem_it;
+		} else if (dram_it == cache.end() ||
+			   (pmem_it != pmem.end() &&
+			    dram_it->first.compare(pmem_it->key()) > 0)) {
+			/* If there are no more dram elements or pmem element is smaller
+			 */
+			curr_it = current_it::pmem;
+			return;
+		} else {
+			auto v = dram_it->second->second.load(std::memory_order_acquire);
+
+			/* Skip removed entries */
+			if (v == heterogenous_radix::tombstone_volatile() ||
+			    v == heterogenous_radix::tombstone_persistent()) {
+				++dram_it;
+			} else {
+				curr_it = current_it::dram;
+				return;
+			}
+		}
+	}
+}
+
+heterogenous_radix::uvalue_type *heterogenous_radix::tombstone_volatile()
+{
+	return reinterpret_cast<heterogenous_radix::uvalue_type *>(1ULL);
+}
+
+heterogenous_radix::uvalue_type *heterogenous_radix::tombstone_persistent()
+{
+	return reinterpret_cast<heterogenous_radix::uvalue_type *>(2ULL);
+}
+
+heterogenous_radix::queue_entry::queue_entry(string_view key_, string_view value_)
+    : remove(false)
+{
+	auto key_size = pmem::obj::experimental::total_sizeof<uvalue_type>::value(key_);
+
+	auto key_dst = reinterpret_cast<uvalue_type *>(this + 1);
+	auto val_dst = reinterpret_cast<uvalue_type *>(reinterpret_cast<char *>(key_dst) +
+						       key_size);
+
+	new (key_dst) uvalue_type(key_);
+	new (val_dst) uvalue_type(value_);
+}
+
+heterogenous_radix::queue_entry::queue_entry(string_view key_) : queue_entry(key_, "")
+{
+	remove = true;
+}
+
+const heterogenous_radix::uvalue_type &heterogenous_radix::queue_entry::key() const
+{
+	auto key = reinterpret_cast<const uvalue_type *>(this + 1);
+	return *key;
+}
+
+heterogenous_radix::uvalue_type &heterogenous_radix::queue_entry::value()
+{
+	auto key_dst = reinterpret_cast<char *>(this + 1);
+	auto val_dst = reinterpret_cast<uvalue_type *>(
+		key_dst +
+		pmem::obj::experimental::total_sizeof<uvalue_type>::value(key()));
+
+	return *reinterpret_cast<uvalue_type *>(val_dst);
+}
+
+heterogenous_radix::heterogenous_radix(std::unique_ptr<internal::config> cfg)
+    : pmemobj_engine_base(cfg, "pmemkv_radix"), config(std::move(cfg))
+{
+	// size_t log_size;
+	// if (!cfg->get_uint64("log_size", &log_size))
+	// 	throw internal::invalid_argument("XXX");
+	// if (!cfg->get_uint64("dram_size", &dram_size))
+	// 	throw internal::invalid_argument("XXX");
+
+	size_t log_size = std::stoull(std::getenv("PMEMKV_LOG_SIZE"));
+	dram_size = std::stoull(std::getenv("PMEMKV_DRAM_SIZE"));
+
+	internal::radix::pmem_type *pmem_ptr;
+
+	if (!OID_IS_NULL(*root_oid)) {
+		pmem_ptr = static_cast<internal::radix::pmem_type *>(
+			pmemobj_direct(*root_oid));
+	} else {
+		pmem::obj::transaction::run(pmpool, [&] {
+			pmem::obj::transaction::snapshot(root_oid);
+			*root_oid =
+				pmem::obj::make_persistent<internal::radix::pmem_type>()
+					.raw();
+			pmem_ptr = static_cast<internal::radix::pmem_type *>(
+				pmemobj_direct(*root_oid));
+			pmem_ptr->log = pmem::obj::make_persistent<char[]>(log_size);
+		});
+	}
+
+	// XXX - do recovery first
+	// pmem_ptr->log->resize(log_size);
+
+	container = &pmem_ptr->map;
+	container->runtime_initialize_mt();
+
+	cache = std::unique_ptr<cache_type>(new cache_type(dram_size));
+
+	stopped.store(false);
+	bg_thread = std::thread([&] { bg_work(); });
+
+	pop = pmem::obj::pool_by_vptr(&pmem_ptr->log);
+}
+
+heterogenous_radix::~heterogenous_radix()
+{
+	stopped.store(true);
+	bg_thread.join();
+}
+
+heterogenous_radix::cache_type::value_type *
+heterogenous_radix::cache_put(string_view key, uvalue_type *value, bool persisted)
+{
+	auto evict_cb = [&](auto &list) {
+		do {
+			for (auto rit = list.rbegin(); rit != list.rend(); rit++) {
+				auto t = rit->second.load(std::memory_order_relaxed);
+
+				// XXX - check if within mpsc_queue
+				if (pmemobj_pool_by_ptr(t) != nullptr ||
+				    t == tombstone_persistent())
+					return std::next(rit).base();
+			}
+		} while (!persisted);
+
+		return list.end();
+	};
+
+	return cache->put(key, value, evict_cb);
+}
+
+status heterogenous_radix::put(string_view key, string_view value)
+{
+	auto req_size = pmem::obj::experimental::total_sizeof<uvalue_type>::value(key) +
+		pmem::obj::experimental::total_sizeof<uvalue_type>::value(value) +
+		sizeof(queue_entry);
+
+	auto qe = new char[req_size];
+	new (qe) queue_entry(key, value);
+
+	auto entry = reinterpret_cast<queue_entry *>(qe);
+
+	auto ret = cache_put(key, &entry->value(), false);
+	assert(ret);
+
+	entry->dram_entry = ret;
+
+	// XXX - if try_produce == false, we can just allocate new radix node to
+	// TLS and the publish pointer to this node
+	// NEED TX support for produce():
+	// tx {queue.produce([&] (data) { data = make_persistent(); }) }
+
+	queue.emplace(entry);
+
+	return status::OK;
+}
+
+status heterogenous_radix::remove(string_view k)
+{
+	bool found = false;
+	auto ret = cache->get(k, false);
+	if (ret) {
+		found = (ret != tombstone_persistent() && ret != tombstone_volatile());
+	} else {
+		found = container->find(k) != container->end();
+	}
+
+	// XXX - remove duplication
+	auto req_size = pmem::obj::experimental::total_sizeof<uvalue_type>::value(k) +
+		pmem::obj::experimental::total_sizeof<uvalue_type>::value("") +
+		sizeof(queue_entry);
+
+	auto qe = new char[req_size];
+	new (qe) queue_entry(k);
+
+	auto entry = reinterpret_cast<queue_entry *>(qe);
+
+	auto v = cache_put(k, tombstone_volatile(), false);
+	assert(v);
+
+	entry->dram_entry = v;
+
+	// XXX - if try_produce == false, we can just allocate new radix node to
+	// TLS and the publish pointer to this node
+	// NEED TX support for produce():
+	// tx {queue.produce([&] (data) { data = make_persistent(); }) }
+
+	queue.emplace(entry);
+
+	return found ? status::OK : status::NOT_FOUND;
+}
+
+status heterogenous_radix::get(string_view key, get_v_callback *callback, void *arg)
+{
+	auto v = cache->get(key, true);
+	if (v) {
+		if (v == tombstone_volatile() || v == tombstone_persistent())
+			return status::NOT_FOUND;
+
+		callback(v->data(), v->size(), arg);
+
+		return status::OK;
+	} else {
+		auto it = container->find(key);
+		if (it != container->end()) {
+			auto value = string_view(it->value());
+			callback(value.data(), value.size(), arg);
+
+			cache_put(key, &it->value(), true);
+
+			return status::OK;
+		} else
+			return status::NOT_FOUND;
+	}
+}
+
+std::string heterogenous_radix::name()
+{
+	return "radix";
+}
+
+heterogenous_radix::merged_iterator heterogenous_radix::merged_begin()
+{
+	return merged_iterator(*cache, *container, cache->begin(), container->begin());
+}
+
+heterogenous_radix::merged_iterator heterogenous_radix::merged_end()
+{
+	return merged_iterator(*cache, *container, cache->end(), container->end());
+}
+
+heterogenous_radix::merged_iterator
+heterogenous_radix::merged_lower_bound(string_view key)
+{
+	auto dram_lo = cache->lower_bound(key);
+	auto pmem_lo = container->lower_bound(key);
+
+	assert(dram_lo == cache->end() || dram_lo->first.compare(key) >= 0);
+	assert(pmem_lo == container->end() || pmem_lo->key().compare(key) >= 0);
+
+	return merged_iterator(*cache, *container, dram_lo, pmem_lo);
+}
+
+heterogenous_radix::merged_iterator
+heterogenous_radix::merged_upper_bound(string_view key)
+{
+	auto dram_up = cache->upper_bound(key);
+	auto pmem_up = container->upper_bound(key);
+
+	assert(dram_up == cache->end() || dram_up->first.compare(key) > 0);
+	assert(pmem_up == container->end() || pmem_up->key().compare(key) > 0);
+
+	return merged_iterator(*cache, *container, dram_up, pmem_up);
+}
+
+status heterogenous_radix::get_all(get_kv_callback *callback, void *arg)
+{
+	check_outside_tx();
+
+	auto first = merged_begin();
+
+	return iterate(first, callback, arg,
+		       [&](const merged_iterator &it) { return it.dereferenceable(); });
+}
+
+status heterogenous_radix::get_above(string_view key, get_kv_callback *callback,
+				     void *arg)
+{
+	check_outside_tx();
+
+	auto first = merged_upper_bound(key);
+
+	return iterate(first, callback, arg,
+		       [&](const merged_iterator &it) { return it.dereferenceable(); });
+}
+
+status heterogenous_radix::get_equal_above(string_view key, get_kv_callback *callback,
+					   void *arg)
+{
+	check_outside_tx();
+
+	auto first = merged_lower_bound(key);
+
+	return iterate(first, callback, arg,
+		       [&](const merged_iterator &it) { return it.dereferenceable(); });
+}
+
+status heterogenous_radix::get_equal_below(string_view key, get_kv_callback *callback,
+					   void *arg)
+{
+	check_outside_tx();
+
+	auto first = merged_begin();
+
+	/* We cannot rely on iterator comparisons because of concurrent inserts/erases.
+	 * There are two problems:
+	 * 1. Iterator can be erased. In that case `while(it != last) it++;` would
+	 *    spin forever.
+	 * 2. `auto last = merged_upper_bound(key);
+	 *     while (it != last) it++;`
+	 *
+	 *     if merged_upper_bound(key) returns end(), this means there are no
+	 *     elements bigger than key - we can then return all elements
+	 *     from the container, right?
+	 *
+	 *     Not really - while we iterate someone might insert element bigger than key
+	 *     we will process such element (since we are processing all elements).
+	 */
+	return iterate(first, callback, arg, [&](const merged_iterator &it) {
+		return it.dereferenceable() && it.key().compare(key) <= 0;
+	});
+}
+
+status heterogenous_radix::get_below(string_view key, get_kv_callback *callback,
+				     void *arg)
+{
+	check_outside_tx();
+
+	auto first = merged_begin();
+
+	return iterate(first, callback, arg, [&](const merged_iterator &it) {
+		return it.dereferenceable() && it.key().compare(key) < 0;
+	});
+}
+
+status heterogenous_radix::get_between(string_view key1, string_view key2,
+				       get_kv_callback *callback, void *arg)
+{
+	check_outside_tx();
+
+	if (key1.compare(key2) < 0) {
+		auto first = merged_upper_bound(key1);
+
+		return iterate(first, callback, arg, [&](const merged_iterator &it) {
+			return it.dereferenceable() && it.key().compare(key2) < 0;
+		});
+	}
+
+	return status::OK;
+}
+
+static int count_elements(const char *, size_t, const char *, size_t, void *arg)
+{
+	auto *cnt = static_cast<size_t *>(arg);
+	++(*cnt);
+
+	return 0;
+}
+
+status heterogenous_radix::count_all(std::size_t &cnt)
+{
+	check_outside_tx();
+
+	cnt = 0;
+	return get_all(count_elements, (void *)&cnt);
+}
+
+status heterogenous_radix::count_above(string_view key, std::size_t &cnt)
+{
+	check_outside_tx();
+
+	cnt = 0;
+	return get_above(key, count_elements, (void *)&cnt);
+}
+
+status heterogenous_radix::count_equal_above(string_view key, std::size_t &cnt)
+{
+	check_outside_tx();
+
+	cnt = 0;
+	return get_equal_above(key, count_elements, (void *)&cnt);
+}
+
+status heterogenous_radix::count_equal_below(string_view key, std::size_t &cnt)
+{
+	check_outside_tx();
+
+	cnt = 0;
+	return get_equal_below(key, count_elements, (void *)&cnt);
+}
+
+status heterogenous_radix::count_below(string_view key, std::size_t &cnt)
+{
+	check_outside_tx();
+
+	cnt = 0;
+	return get_below(key, count_elements, (void *)&cnt);
+}
+
+status heterogenous_radix::count_between(string_view key1, string_view key2,
+					 std::size_t &cnt)
+{
+	check_outside_tx();
+
+	cnt = 0;
+
+	if (key1.compare(key2) < 0) {
+		auto first = merged_upper_bound(key1);
+		auto last = merged_lower_bound(key2);
+
+		return get_between(key1, key2, count_elements, (void *)&cnt);
+	}
+
+	return status::OK;
+}
+
+status heterogenous_radix::exists(string_view key)
+{
+	return get(
+		key, [](const char *, size_t, void *) {}, nullptr);
+}
+
+void heterogenous_radix::bg_work()
+{
+	// XXX - error handling (OOM)
+	while (!stopped.load()) {
+		queue_entry *e;
+		while (queue.try_pop(e)) {
+			// if (e->timestamp != e->dram_entry->second.timestamp())
+			// consumed_cnt.fetch_add(1);
+			//	continue;
+
+			// XXX - make sure tx does not abort
+			if (e->remove) {
+				container->erase(e->key());
+
+				auto expected = tombstone_volatile();
+				e->dram_entry->compare_exchange_strong(
+					expected, tombstone_persistent());
+			} else {
+				auto ret =
+					container->insert_or_assign(e->key(), e->value());
+
+				auto expected = &e->value();
+				e->dram_entry->compare_exchange_strong(
+					expected, &ret.first->value());
+			}
+			//	delete e; // XXX - not needed on pmem!!!
+		}
 	}
 }
 
