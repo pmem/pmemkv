@@ -8,11 +8,14 @@
 #include "../iterator.h"
 #include "../pmemobj_engine.h"
 
+#include <libpmemobj++/experimental/inline_string.hpp>
+#include <libpmemobj++/experimental/mpsc_queue.hpp>
+#include <libpmemobj++/experimental/radix_tree.hpp>
 #include <libpmemobj++/persistent_ptr.hpp>
 
-#include <libpmemobj++/experimental/inline_string.hpp>
-#include <libpmemobj++/experimental/radix_tree.hpp>
-
+#include <atomic>
+#include <condition_variable>
+#include <list>
 #include <mutex>
 #include <shared_mutex>
 
@@ -29,6 +32,8 @@ using map_type =
 	pmem::obj::experimental::radix_tree<pmem::obj::experimental::inline_string,
 					    pmem::obj::experimental::inline_string>;
 
+using log_type = pmem::obj::experimental::mpsc_queue::pmem_log_type;
+
 struct pmem_type {
 	pmem_type() : map()
 	{
@@ -36,7 +41,8 @@ struct pmem_type {
 	}
 
 	map_type map;
-	uint64_t reserved[8];
+	pmem::obj::persistent_ptr<log_type> log;
+	uint64_t reserved[6];
 };
 
 static_assert(sizeof(pmem_type) == sizeof(map_type) + 64, "");
@@ -53,6 +59,112 @@ private:
 	pmem::obj::pool_base &pop;
 	dram_log log;
 	map_type *container;
+};
+
+template <typename Value>
+class ordered_cache {
+private:
+	using key_type = std::string;
+	using dram_value_type = std::pair<key_type, std::atomic<const Value *>>;
+	using lru_list_type = std::list<dram_value_type>;
+	using dram_map_type = std::map<string_view, typename lru_list_type::iterator>;
+
+public:
+	using iterator = typename dram_map_type::iterator;
+
+	using value_type = std::atomic<const Value *>;
+
+	ordered_cache(size_t max_size) : max_size(max_size)
+	{
+	}
+
+	ordered_cache(const ordered_cache &) = delete;
+	ordered_cache(ordered_cache &&) = delete;
+
+	ordered_cache &operator=(const ordered_cache &) = delete;
+	ordered_cache &operator=(ordered_cache &&) = delete;
+
+	template <typename F>
+	value_type *put(string_view key, const Value *v, F &&evict)
+	{
+		assert(map.size() == lru_list.size());
+
+		auto it = map.find(key);
+		if (it == map.end()) {
+			if (lru_list.size() < max_size) {
+				lru_list.emplace_front(key, v);
+				auto lit = lru_list.begin();
+
+				auto ret = map.try_emplace(lit->first, lit);
+				assert(ret.second);
+
+				it = ret.first;
+			} else {
+				auto lit = evict(lru_list);
+
+				if (lit == lru_list.end())
+					return nullptr;
+
+				map.erase(lit->first);
+
+				lru_list.splice(lru_list.begin(), lru_list, lit);
+				lru_list.begin()->first = key;
+				lru_list.begin()->second.store(v,
+							       std::memory_order_release);
+				lit = lru_list.begin();
+
+				auto ret = map.try_emplace(lit->first, lit);
+				assert(ret.second);
+
+				it = ret.first;
+			}
+		} else {
+			lru_list.splice(lru_list.begin(), lru_list, it->second);
+			lru_list.begin()->second.store(v, std::memory_order_release);
+		}
+
+		return &it->second->second;
+	}
+
+	value_type *get(string_view key, bool promote)
+	{
+		assert(map.size() == lru_list.size());
+
+		auto it = map.find(key);
+		if (it == map.end()) {
+			return nullptr;
+		} else {
+			if (promote)
+				lru_list.splice(lru_list.begin(), lru_list, it->second);
+
+			return &it->second->second;
+		}
+	}
+
+	iterator begin()
+	{
+		return map.begin();
+	}
+
+	iterator end()
+	{
+		return map.end();
+	}
+
+	iterator lower_bound(string_view key)
+	{
+		return map.lower_bound(key);
+	}
+
+	iterator upper_bound(string_view key)
+	{
+		return map.upper_bound(key);
+	}
+
+private:
+	lru_list_type lru_list;
+	dram_map_type map;
+	const size_t max_size;
 };
 
 } /* namespace radix */
@@ -118,12 +230,148 @@ private:
 	using container_type = internal::radix::map_type;
 
 	void Recover();
-	status iterate(typename container_type::const_iterator first,
-		       typename container_type::const_iterator last,
-		       get_kv_callback *callback, void *arg);
 
 	container_type *container;
 	std::unique_ptr<internal::config> config;
+};
+
+/**
+ * Heterogenous engine which implements DRAM cache on top of radix tree container.
+ *
+ * On put, data is first inserted to DRAM cache and appended to pmem log (mpsc_queue).
+ * There is one background thread which consumes data from the log and erases/inserts
+ * conusmed elements to the radix tree.
+ *
+ * On get, dram cache is first checked. If looked-for element is found there, it is
+ * returned to the user. On cache-miss, we search the radix_tree. Read operations on
+ * radix_tree are protected by Epoch Based Reclamation mechanism.
+ */
+class heterogeneous_radix : public pmemobj_engine_base<internal::radix::pmem_type> {
+public:
+	heterogeneous_radix(std::unique_ptr<internal::config> cfg);
+	~heterogeneous_radix();
+
+	heterogeneous_radix(const heterogeneous_radix &) = delete;
+	heterogeneous_radix &operator=(const heterogeneous_radix &) = delete;
+
+	std::string name() final;
+
+	status count_all(std::size_t &cnt) final;
+	status count_above(string_view key, std::size_t &cnt) final;
+	status count_equal_above(string_view key, std::size_t &cnt) final;
+	status count_equal_below(string_view key, std::size_t &cnt) final;
+	status count_below(string_view key, std::size_t &cnt) final;
+	status count_between(string_view key1, string_view key2, std::size_t &cnt) final;
+
+	status get_all(get_kv_callback *callback, void *arg) final;
+	status get_above(string_view key, get_kv_callback *callback, void *arg) final;
+	status get_equal_above(string_view key, get_kv_callback *callback,
+			       void *arg) final;
+	status get_equal_below(string_view key, get_kv_callback *callback,
+			       void *arg) final;
+	status get_below(string_view key, get_kv_callback *callback, void *arg) final;
+	status get_between(string_view key1, string_view key2, get_kv_callback *callback,
+			   void *arg) final;
+
+	status exists(string_view key) final;
+
+	status put(string_view key, string_view value) final;
+
+	status remove(string_view k) final;
+
+	status get(string_view key, get_v_callback *callback, void *arg) final;
+
+private:
+	using uvalue_type = pmem::obj::experimental::inline_string;
+	using container_type = internal::radix::map_type;
+	using cache_type = internal::radix::ordered_cache<uvalue_type>;
+	using pmem_log_type = internal::radix::log_type;
+
+	using dram_iterator = typename cache_type::iterator;
+	using pmem_iterator = typename container_type::iterator;
+
+	struct queue_entry {
+		queue_entry(cache_type::value_type *dram_entry, string_view key_,
+			    string_view value_);
+
+		const uvalue_type &key() const;
+
+		const uvalue_type &value() const;
+		uvalue_type &value();
+
+		cache_type::value_type *dram_entry;
+		bool remove;
+	};
+
+	using pmem_queue_type = pmem::obj::experimental::mpsc_queue;
+
+	struct merged_iterator {
+		merged_iterator(cache_type &cache, container_type &pmem,
+				dram_iterator dram_it, pmem_iterator pmem_it);
+		merged_iterator(const merged_iterator &) = default;
+
+		merged_iterator &operator++();
+
+		bool dereferenceable() const;
+
+		merged_iterator *operator->();
+
+		string_view key() const;
+		string_view value() const;
+
+	private:
+		cache_type &cache;
+		container_type &pmem;
+
+		dram_iterator dram_it;
+		pmem_iterator pmem_it;
+
+		enum class current_it { dram, pmem } curr_it;
+
+		void set_current_it();
+	};
+
+	merged_iterator merged_begin();
+	merged_iterator merged_end();
+	merged_iterator merged_lower_bound(string_view key);
+	merged_iterator merged_upper_bound(string_view key);
+
+	void bg_work();
+	cache_type::value_type *cache_put_with_evict(string_view key,
+						     const uvalue_type *value);
+	bool log_contains(const void *entry);
+	void handle_oom_from_bg();
+	void consume_queue_entry(pmem::obj::string_view item, bool);
+
+	/* Element was logically removed but there might be an older version on pmem. */
+	static const uvalue_type *tombstone_volatile();
+
+	/* Element logically removed from cache and from pmem. */
+	static const uvalue_type *tombstone_persistent();
+
+	std::unique_ptr<cache_type> cache;
+	size_t cache_size;
+
+	std::atomic<bool> stopped;
+	std::thread bg_thread;
+
+	pmem::obj::pool_base pop;
+
+	container_type *container;
+	std::unique_ptr<container_type::ebr::worker> container_worker;
+
+	pmem_log_type *log;
+	std::unique_ptr<internal::config> config;
+
+	std::mutex eviction_lock;
+	std::condition_variable eviction_cv;
+
+	std::mutex bg_lock;
+	std::condition_variable bg_cv;
+	std::atomic<std::exception_ptr *> bg_exception_ptr;
+
+	std::unique_ptr<pmem_queue_type> queue;
+	std::unique_ptr<pmem_queue_type::worker> queue_worker;
 };
 
 template <>
@@ -178,8 +426,16 @@ public:
 	create(std::unique_ptr<internal::config> cfg) override
 	{
 		check_config_null(get_name(), cfg);
-		return std::unique_ptr<engine_base>(new radix(std::move(cfg)));
+
+		uint64_t dram_caching;
+		if (cfg->get_uint64("dram_caching", &dram_caching) && dram_caching) {
+			return std::unique_ptr<engine_base>(
+				new heterogeneous_radix(std::move(cfg)));
+		} else {
+			return std::unique_ptr<engine_base>(new radix(std::move(cfg)));
+		}
 	};
+
 	std::string get_name() override
 	{
 		return "radix";
