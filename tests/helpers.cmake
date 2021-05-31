@@ -225,9 +225,26 @@ function(execute name)
 	execute_common(true ${TRACER}_${TESTCASE} ${name} ${ARGN})
 endfunction()
 
+# Trim '{' and '}' characters from the beginning and end
+function(trim_config config_string out_config)
+	string(LENGTH ${config_string} config_len)
+	math(EXPR config_len "${config_len}-2")
+	string(SUBSTRING ${config_string} 1 ${config_len} out)
+	set(${out_config} ${out} PARENT_SCOPE)
+endfunction()
+
+# Expects config in form of a json-like list, e.g.
+# make_config({"path":"/path/to/file"})
 function(make_config)
 	string(REPLACE " " "" config ${ARGN})
-	set(CONFIG "${config}" CACHE INTERNAL "")
+
+	if ("${EXTRA_CONFIG_PARAMS}" STREQUAL "")
+		set(CONFIG "${config}" CACHE INTERNAL "")
+	else()
+		trim_config(${config} trimmed_config)
+		trim_config(${EXTRA_CONFIG_PARAMS} extra_config_params)
+		set(CONFIG "{${trimmed_config},${extra_config_params}}" CACHE INTERNAL "")
+	endif()
 endfunction()
 
 # Executes command ${name} and creates a storelog.

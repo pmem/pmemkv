@@ -304,9 +304,10 @@ function(add_test_generic)
 endfunction()
 
 # adds testcase with additional parameters, required by "engine scenario" tests
+# EXTRA_CONFIG_PARAMS should be supplied in form of a json-like list, e.g. {"path":"/path/to/file"}
 function(add_engine_test)
 	set(oneValueArgs BINARY ENGINE SCRIPT DB_SIZE)
-	set(multiValueArgs TRACERS PARAMS)
+	set(multiValueArgs TRACERS PARAMS EXTRA_CONFIG_PARAMS)
 	cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
 	set(cmake_script ${CMAKE_CURRENT_SOURCE_DIR}/engines/${TEST_SCRIPT})
@@ -345,6 +346,14 @@ function(add_engine_test)
 		set(TEST_NAME "${TEST_NAME}_${parsed_params}")
 	endif()
 
+	if (NOT ("${TEST_EXTRA_CONFIG_PARAMS}" STREQUAL ""))
+		# Parse TEST_EXTRA_CONFIG_PARAMS so it can be used in test name
+		string(REPLACE " " "" extra_config_params ${TEST_EXTRA_CONFIG_PARAMS})
+		string(REPLACE ":" "_" parsed_extra_config_params ${extra_config_params})
+		string(REPLACE "\"" "" parsed_extra_config_params ${parsed_extra_config_params})
+		set(TEST_NAME "${TEST_NAME}__${parsed_extra_config_params}" CACHE INTERNAL "")
+	endif()
+
 	# Use "|PARAM|" as list separator so that CMake does not expand it
 	# when passing to the test script
 	string(REPLACE ";" "|PARAM|" raw_params "${TEST_PARAMS}")
@@ -353,6 +362,7 @@ function(add_engine_test)
 		add_test_common(${TEST_BINARY} ${TEST_NAME} ${tracer} 0 ${cmake_script}
 			-DENGINE=${TEST_ENGINE}
 			-DDB_SIZE=${TEST_DB_SIZE}
-			-DRAW_PARAMS=${raw_params})
+			-DRAW_PARAMS=${raw_params}
+			-DEXTRA_CONFIG_PARAMS=${extra_config_params})
 	endforeach()
 endfunction()
