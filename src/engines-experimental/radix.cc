@@ -516,19 +516,17 @@ heterogenous_radix::~heterogenous_radix()
 }
 
 heterogenous_radix::cache_type::value_type *
-heterogenous_radix::cache_put(string_view key, uvalue_type *value, bool persisted)
+heterogenous_radix::cache_put(string_view key, uvalue_type *value)
 {
 	auto evict_cb = [&](auto &list) {
-		do {
-			for (auto rit = list.rbegin(); rit != list.rend(); rit++) {
-				auto t = rit->second.load(std::memory_order_relaxed);
+		for (auto rit = list.rbegin(); rit != list.rend(); rit++) {
+			auto t = rit->second.load(std::memory_order_relaxed);
 
-				// XXX - check if within mpsc_queue
-				if (pmemobj_pool_by_ptr(t) != nullptr ||
-				    t == tombstone_persistent())
-					return std::next(rit).base();
-			}
-		} while (!persisted);
+			// XXX - check if within mpsc_queue
+			if (pmemobj_pool_by_ptr(t) != nullptr ||
+			    t == tombstone_persistent())
+				return std::next(rit).base();
+		}
 
 		return list.end();
 	};
@@ -547,10 +545,19 @@ status heterogenous_radix::put(string_view key, string_view value)
 
 	auto entry = reinterpret_cast<queue_entry *>(qe);
 
-	auto ret = cache_put(key, &entry->value(), false);
-	assert(ret);
+	while (true) {
+		std::exception_ptr *exc;
+		if ((exc = bg_exception_ptr.load(std::memory_order_acquire)) !=
+		    nullptr) { // XXX: && !queue.try_produce()
+			std::rethrow_exception(*exc);
+		}
 
-	entry->dram_entry = ret;
+		auto ret = cache_put(key, &entry->value());
+		if (ret) {
+			entry->dram_entry = ret;
+			break;
+		}
+	}
 
 	// XXX - if try_produce == false, we can just allocate new radix node to
 	// TLS and the publish pointer to this node
@@ -582,15 +589,41 @@ status heterogenous_radix::remove(string_view k)
 
 	auto entry = reinterpret_cast<queue_entry *>(qe);
 
-	auto v = cache_put(k, tombstone_volatile(), false);
-	assert(v);
+	while (true) {
+		std::exception_ptr *exc;
+		if ((exc = bg_exception_ptr.load(std::memory_order_acquire)) !=
+		    nullptr) { // XXX: && !queue.try_produce()
+			try {
+				std::rethrow_exception(*exc);
+			} catch (pmem::transaction_out_of_memory &e) {
+				cache_put(k, tombstone_persistent());
 
-	entry->dram_entry = v;
+				/* Try to free the element directly, bypassing the queue.
+				 */
+				std::unique_lock<std::mutex> lock(erase_mtx);
+				auto cnt = container->erase(
+					k); // XXX - force freeing (instead of appending
+					    // to garbage)
 
-	// XXX - if try_produce == false, we can just allocate new radix node to
-	// TLS and the publish pointer to this node
-	// NEED TX support for produce():
-	// tx {queue.produce([&] (data) { data = make_persistent(); }) }
+				delete exc;
+
+				/* Notify bg thread that the exception was consumed */
+				bg_exception_ptr.store(nullptr,
+						       std::memory_order_release);
+				bg_exception_cv.notify_one();
+
+				return cnt ? status::OK : status::NOT_FOUND;
+			} catch (...) {
+				throw;
+			}
+		} else {
+			auto v = cache_put(k, tombstone_volatile());
+			if (v) {
+				entry->dram_entry = v;
+				break;
+			}
+		}
+	}
 
 	queue.emplace(entry);
 
@@ -613,7 +646,7 @@ status heterogenous_radix::get(string_view key, get_v_callback *callback, void *
 			auto value = string_view(it->value());
 			callback(value.data(), value.size(), arg);
 
-			cache_put(key, &it->value(), true);
+			cache_put(key, &it->value());
 
 			return status::OK;
 		} else
@@ -819,30 +852,48 @@ status heterogenous_radix::exists(string_view key)
 
 void heterogenous_radix::bg_work()
 {
-	// XXX - error handling (OOM)
 	while (!stopped.load()) {
 		queue_entry *e;
 		while (queue.try_pop(e)) {
-			// if (e->timestamp != e->dram_entry->second.timestamp())
-			// consumed_cnt.fetch_add(1);
-			//	continue;
+			/* Loop until processing `e` is successfull */
+			while (true) {
+				if (stopped.load())
+					return;
 
-			// XXX - make sure tx does not abort
-			if (e->remove) {
-				container->erase(e->key());
+				try {
+					// XXX - make sure tx does not abort
+					if (e->remove) {
+						container->erase(e->key());
 
-				auto expected = tombstone_volatile();
-				e->dram_entry->compare_exchange_strong(
-					expected, tombstone_persistent());
-			} else {
-				auto ret =
-					container->insert_or_assign(e->key(), e->value());
+						auto expected = tombstone_volatile();
+						e->dram_entry->compare_exchange_strong(
+							expected, tombstone_persistent());
+					} else {
+						auto ret = container->insert_or_assign(
+							e->key(), e->value());
 
-				auto expected = &e->value();
-				e->dram_entry->compare_exchange_strong(
-					expected, &ret.first->value());
+						auto expected = &e->value();
+						e->dram_entry->compare_exchange_strong(
+							expected, &ret.first->value());
+					}
+
+					break;
+					//	delete e; // XXX - not needed on pmem!!!
+				} catch (...) {
+					// XXX - if there is any garbage try freeing it??
+
+					bg_exception_ptr.store(new std::exception_ptr(
+						std::current_exception()));
+
+					std::unique_lock<std::mutex> lock(
+						bg_exception_lock);
+
+					/* Wait until exception is handled. */
+					bg_exception_cv.wait(lock, [&] {
+						return bg_exception_ptr.load() == nullptr;
+					});
+				}
 			}
-			//	delete e; // XXX - not needed on pmem!!!
 		}
 	}
 }

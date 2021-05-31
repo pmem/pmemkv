@@ -320,8 +320,7 @@ private:
 	merged_iterator merged_upper_bound(string_view key);
 
 	void bg_work();
-	cache_type::value_type *cache_put(string_view key, uvalue_type *value,
-					  bool persisted);
+	cache_type::value_type *cache_put(string_view key, uvalue_type *value);
 
 	/* Element was logically removed but there might an older version on pmem. */
 	static uvalue_type *tombstone_volatile();
@@ -342,6 +341,12 @@ private:
 
 	std::mutex eviction_lock;
 	std::condition_variable eviction_cv;
+
+	std::mutex bg_exception_lock;
+	std::condition_variable bg_exception_cv;
+	std::atomic<std::exception_ptr *> bg_exception_ptr;
+
+	std::mutex erase_mtx;
 
 	pmem_queue_type queue;
 };
