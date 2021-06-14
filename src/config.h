@@ -110,7 +110,7 @@ public:
 					"Item with key: " + std::string(key) +
 					" has value which exceeds int64 range");
 		} else
-			throw_type_error(key, item->item_type);
+			throw_type_error(key, item->item_type, type::INT64);
 
 		return true;
 	}
@@ -138,7 +138,7 @@ public:
 				throw config_type_error(
 					"Item with key: " + std::string(key) + " is < 0");
 		} else
-			throw_type_error(key, item->item_type);
+			throw_type_error(key, item->item_type, type::UINT64);
 
 		return true;
 	}
@@ -263,20 +263,22 @@ private:
 		return &found->second;
 	}
 
-	void throw_type_error(const std::string &key, type item_type)
+	void throw_type_error(const std::string &key, type item_type, type expected_type)
 	{
-		throw config_type_error("Item with key: " + key + " is " +
-					type_names[static_cast<int>(item_type)]);
+		throw config_type_error(
+			"Item with key: " + key + " is " +
+			type_names[static_cast<int>(item_type)] +
+			". Expected: " + type_names[static_cast<int>(expected_type)]);
 	}
 
-	struct variant *get_checked_item(const char *key, type item_type)
+	struct variant *get_checked_item(const char *key, type expected_type)
 	{
 		auto item = get(key);
 		if (!item)
 			return nullptr;
 
-		if (item->item_type != item_type)
-			throw_type_error(key, item->item_type);
+		if (item->item_type != expected_type)
+			throw_type_error(key, item->item_type, expected_type);
 		return item;
 	}
 };
