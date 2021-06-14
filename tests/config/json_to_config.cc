@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #include <libpmemkv.hpp>
 #include <libpmemkv_json_config.h>
@@ -20,8 +20,10 @@ static void simple_test()
 	UT_ASSERT(config != nullptr);
 
 	auto ret = pmemkv_config_from_json(
-		config, "{\"string\": \"abc\", \"int\": 123, \"bool\": true}");
-	// XXX: extend by adding "false", subconfig, negative value
+		config,
+		"{\"string\": \"abc\", \"int\": 123, \"int_neg\": -1025,"
+		"\"bool\": true, \"bool_f\": false,"
+		"\"sub_config\": {\"path\": \"/my/path\", \"size\": 1024000000} }");
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 
 	const char *value_string;
@@ -29,17 +31,46 @@ static void simple_test()
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 	UT_ASSERT(std::string(value_string) == "abc");
 
-	int64_t value_int;
-	ret = pmemkv_config_get_int64(config, "int", &value_int);
+	int64_t value_sint;
+	uint64_t value_int;
+	ret = pmemkv_config_get_uint64(config, "int", &value_int);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 	UT_ASSERTeq(value_int, 123);
+
+	ret = pmemkv_config_get_int64(config, "int", &value_sint);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_sint, 123);
+
+	ret = pmemkv_config_get_int64(config, "int_neg", &value_sint);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_sint, -1025);
 
 	int64_t value_bool;
 	ret = pmemkv_config_get_int64(config, "bool", &value_bool);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 	UT_ASSERTeq(value_bool, 1);
 
-	ret = pmemkv_config_get_int64(config, "string", &value_int);
+	ret = pmemkv_config_get_int64(config, "bool_f", &value_bool);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_bool, 0);
+
+	pmemkv_config *sub_config;
+	pmemkv_config_get_object(config, "sub_config", (void **)&sub_config);
+	ret = pmemkv_config_get_string(sub_config, "path", &value_string);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERT(std::string(value_string) == "/my/path");
+	ret = pmemkv_config_get_int64(sub_config, "size", &value_sint);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_sint, 1024000000);
+
+	/* expect errors - wrong types */
+	ret = pmemkv_config_get_int64(config, "string", &value_sint);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
+	ret = pmemkv_config_get_uint64(config, "sub_config", &value_int);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
+	ret = pmemkv_config_get_string(config, "bool_f", &value_string);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
+	ret = pmemkv_config_get_object(config, "bool_f", (void **)&sub_config);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
 
 	pmemkv_config_delete(config);
