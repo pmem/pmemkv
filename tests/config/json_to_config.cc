@@ -20,8 +20,14 @@ static void simple_test()
 	UT_ASSERT(config != nullptr);
 
 	auto ret = pmemkv_config_from_json(
-		config, "{\"string\": \"abc\", \"int\": 123, \"bool\": true}");
-	// XXX: extend by adding "false", subconfig, negative value
+		config, "{\"int64oversize\": 10000000000000000000000 }");
+	UT_ASSERTeq(ret, PMEMKV_STATUS_CONFIG_PARSING_ERROR);
+
+	ret = pmemkv_config_from_json(
+		config,
+		"{\"string\": \"abc\", \"int\": 123, \"int_neg\": -1025, "
+		"\"bool\": true, \"bool_f\": false, "
+		"\"sub_config\": {\"path\": \"/my/path\", \"size\": 1024000000} }");
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 
 	const char *value_string;
@@ -30,16 +36,45 @@ static void simple_test()
 	UT_ASSERT(std::string(value_string) == "abc");
 
 	int64_t value_int;
+	uint64_t value_uint;
+	ret = pmemkv_config_get_uint64(config, "int", &value_uint);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_uint, 123);
+
 	ret = pmemkv_config_get_int64(config, "int", &value_int);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 	UT_ASSERTeq(value_int, 123);
+
+	ret = pmemkv_config_get_int64(config, "int_neg", &value_int);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_int, -1025);
 
 	int64_t value_bool;
 	ret = pmemkv_config_get_int64(config, "bool", &value_bool);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
 	UT_ASSERTeq(value_bool, 1);
 
+	ret = pmemkv_config_get_int64(config, "bool_f", &value_bool);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_bool, 0);
+
+	pmemkv_config *sub_config;
+	pmemkv_config_get_object(config, "sub_config", (void **)&sub_config);
+	ret = pmemkv_config_get_string(sub_config, "path", &value_string);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERT(std::string(value_string) == "/my/path");
+	ret = pmemkv_config_get_int64(sub_config, "size", &value_int);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
+	UT_ASSERTeq(value_int, 1024000000);
+
+	/* expect errors - wrong types */
 	ret = pmemkv_config_get_int64(config, "string", &value_int);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
+	ret = pmemkv_config_get_uint64(config, "sub_config", &value_uint);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
+	ret = pmemkv_config_get_string(config, "bool_f", &value_string);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
+	ret = pmemkv_config_get_object(config, "bool_f", (void **)&sub_config);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_CONFIG_TYPE_ERROR);
 
 	pmemkv_config_delete(config);
