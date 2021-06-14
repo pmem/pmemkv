@@ -35,7 +35,8 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 					config, itr->name.GetString(), value);
 				if (status != PMEMKV_STATUS_OK)
 					throw std::runtime_error(
-						"Inserting string to the config failed");
+						"Inserting string to the config failed with error: " +
+						std::string(pmemkv_errormsg()));
 			} else if (itr->value.IsInt64()) {
 				auto value = itr->value.GetInt64();
 
@@ -43,7 +44,8 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 					config, itr->name.GetString(), value);
 				if (status != PMEMKV_STATUS_OK)
 					throw std::runtime_error(
-						"Inserting int to the config failed");
+						"Inserting int to the config failed with error: " +
+						std::string(pmemkv_errormsg()));
 			} else if (itr->value.IsTrue() || itr->value.IsFalse()) {
 				auto value = itr->value.GetBool();
 
@@ -51,7 +53,8 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 					config, itr->name.GetString(), value);
 				if (status != PMEMKV_STATUS_OK)
 					throw std::runtime_error(
-						"Inserting bool to the config failed");
+						"Inserting bool to the config failed with error: " +
+						std::string(pmemkv_errormsg()));
 			} else if (itr->value.IsObject()) {
 				rapidjson::StringBuffer sb;
 				rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
@@ -69,7 +72,9 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 				if (status != PMEMKV_STATUS_OK) {
 					pmemkv_config_delete(sub_cfg);
 					throw std::runtime_error(
-						"Cannot parse subconfig");
+						"Parsing subconfig failed with error: " +
+						std::string(
+							pmemkv_config_from_json_errormsg()));
 				}
 
 				status = pmemkv_config_put_object(
@@ -77,7 +82,8 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 					(void (*)(void *)) & pmemkv_config_delete);
 				if (status != PMEMKV_STATUS_OK)
 					throw std::runtime_error(
-						"Inserting a new entry to the config failed");
+						"Inserting a new entry to the config failed with error: " +
+						std::string(pmemkv_errormsg()));
 			} else {
 				static std::string kTypeNames[] = {
 					"Null",	 "False",  "True",  "Object",
