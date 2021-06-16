@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2021, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -90,4 +90,20 @@ TEST_F(JsonToConfigTest, MalformedInput_TRACERS_M)
 	ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_PARSING_ERROR);
 	ASSERT_EQ(std::string(pmemkv_config_from_json_errormsg()),
 		  "[pmemkv_config_from_json] Config parsing failed");
+}
+
+TEST_F(JsonToConfigTest, NullJson_TRACERS_M)
+{
+	auto ret = pmemkv_config_from_json(config, NULL);
+	ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_PARSING_ERROR);
+	ASSERT_EQ(std::string(pmemkv_config_from_json_errormsg()),
+		  "[pmemkv_config_from_json] Configuration json have to be specified");
+}
+
+TEST_F(JsonToConfigTest, NullConfig_TRACERS_M)
+{
+	auto ret = pmemkv_config_from_json(NULL, NULL);
+	ASSERT_EQ(ret, PMEMKV_STATUS_CONFIG_PARSING_ERROR);
+	ASSERT_EQ(std::string(pmemkv_config_from_json_errormsg()),
+		  "[pmemkv_config_from_json] Config have to be specified");
 }
