@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Intel Corporation
+ * Copyright 2019-2021, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,9 +45,14 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 	rapidjson::Document doc;
 	rapidjson::Value::ConstMemberIterator itr;
 
-	assert(config && json);
-
 	try {
+		if (!config) {
+			throw std::runtime_error("Config has to be specified");
+		}
+		if (!json) {
+			throw std::runtime_error(
+				"Configuration json has to be specified");
+		}
 		if (doc.Parse(json).HasParseError()) {
 			throw std::runtime_error("Config parsing failed");
 		}
