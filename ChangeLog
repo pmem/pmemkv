@@ -1,3 +1,22 @@
+Mon Jun 21 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
+
+	* Version 1.1.1-rc1
+
+	This is the last bugfix release for pmemkv 1.1 version.
+	Maintenance of this version is no longer supported.
+
+	Notable changes:
+	- json_config: return error status for improper parameters instead of
+		asserting nullptr (and crashing)
+	- fix error messages for NOT_FOUND and STOPPED_BY_CB statuses (which are not errors)
+		by omitting setting (error) message from the previous status
+	- vcmap: fix put() implementation (to be thread-safe)
+		and decrease the number of temporary string allocations
+	- vcmap: fix value_type for concurrent_hash_map
+	- vcmap: fix to work with the latest TBB (2021.1) #894
+	- stree: fix operator==
+	- clarify and extend documentation
+
 Tue Oct 06 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.0.3
