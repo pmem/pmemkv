@@ -852,14 +852,10 @@ status heterogenous_radix::exists(string_view key)
 
 void heterogenous_radix::bg_work()
 {
-	while (!stopped.load()) {
+	while (true) {
 		queue_entry *e;
-		while (queue.try_pop(e)) {
-			/* Loop until processing `e` is successfull */
+		if (queue.try_pop(e)) {
 			while (true) {
-				if (stopped.load())
-					return;
-
 				try {
 					// XXX - make sure tx does not abort
 					if (e->remove) {
@@ -880,6 +876,9 @@ void heterogenous_radix::bg_work()
 					break;
 					//	delete e; // XXX - not needed on pmem!!!
 				} catch (...) {
+					if (stopped.load())
+						return;
+
 					// XXX - if there is any garbage try freeing it??
 
 					bg_exception_ptr.store(new std::exception_ptr(
@@ -894,6 +893,9 @@ void heterogenous_radix::bg_work()
 					});
 				}
 			}
+		} else if (stopped.load()) {
+			/* Stop only if there are no other elements in the queue and stopped is set. */
+			return;
 		}
 	}
 }
