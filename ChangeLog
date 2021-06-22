@@ -1,6 +1,6 @@
-Mon Jun 21 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
+Tue Jun 22 2021 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
 
-	* Version 1.1.1-rc1
+	* Version 1.1.1-rc2
 
 	This is the last bugfix release for pmemkv 1.1 version.
 	Maintenance of this version is no longer supported.
@@ -17,7 +17,7 @@ Mon Jun 21 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
 	- stree: fix operator==
 	- clarify and extend documentation
 
-Tue Oct 06 Szymon Romik <szymon.romik@intel.com>
+Tue Oct 06 2020 Szymon Romik <szymon.romik@intel.com>
 
 	* Version 1.0.3
 
