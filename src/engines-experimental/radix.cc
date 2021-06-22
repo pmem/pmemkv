@@ -422,18 +422,19 @@ void heterogenous_radix::merged_iterator::set_current_it()
 	}
 }
 
-heterogenous_radix::uvalue_type *heterogenous_radix::tombstone_volatile()
+const heterogenous_radix::uvalue_type *heterogenous_radix::tombstone_volatile()
 {
-	return reinterpret_cast<heterogenous_radix::uvalue_type *>(1ULL);
+	return reinterpret_cast<const heterogenous_radix::uvalue_type *>(1ULL);
 }
 
-heterogenous_radix::uvalue_type *heterogenous_radix::tombstone_persistent()
+const heterogenous_radix::uvalue_type *heterogenous_radix::tombstone_persistent()
 {
-	return reinterpret_cast<heterogenous_radix::uvalue_type *>(2ULL);
+	return reinterpret_cast<const heterogenous_radix::uvalue_type *>(2ULL);
 }
 
-heterogenous_radix::queue_entry::queue_entry(string_view key_, string_view value_)
-    : remove(false)
+heterogenous_radix::queue_entry::queue_entry(cache_type::value_type *dram_entry,
+					     string_view key_, string_view value_)
+    : dram_entry(dram_entry)
 {
 	auto key_size = pmem::obj::experimental::total_sizeof<uvalue_type>::value(key_);
 
@@ -442,12 +443,14 @@ heterogenous_radix::queue_entry::queue_entry(string_view key_, string_view value
 						       key_size);
 
 	new (key_dst) uvalue_type(key_);
-	new (val_dst) uvalue_type(value_);
-}
 
-heterogenous_radix::queue_entry::queue_entry(string_view key_) : queue_entry(key_, "")
-{
-	remove = true;
+	if (value_.data() == nullptr) {
+		new (val_dst) uvalue_type("");
+		remove = true;
+	} else {
+		new (val_dst) uvalue_type(value_);
+		remove = false;
+	}
 }
 
 const heterogenous_radix::uvalue_type &heterogenous_radix::queue_entry::key() const
@@ -456,14 +459,20 @@ const heterogenous_radix::uvalue_type &heterogenous_radix::queue_entry::key() co
 	return *key;
 }
 
-heterogenous_radix::uvalue_type &heterogenous_radix::queue_entry::value()
+const heterogenous_radix::uvalue_type &heterogenous_radix::queue_entry::value() const
 {
-	auto key_dst = reinterpret_cast<char *>(this + 1);
-	auto val_dst = reinterpret_cast<uvalue_type *>(
+	auto key_dst = reinterpret_cast<const char *>(this + 1);
+	auto val_dst = reinterpret_cast<const uvalue_type *>(
 		key_dst +
 		pmem::obj::experimental::total_sizeof<uvalue_type>::value(key()));
 
-	return *reinterpret_cast<uvalue_type *>(val_dst);
+	return *reinterpret_cast<const uvalue_type *>(val_dst);
+}
+
+heterogenous_radix::uvalue_type &heterogenous_radix::queue_entry::value()
+{
+	auto val = &const_cast<const queue_entry *>(this)->value();
+	return *const_cast<heterogenous_radix::uvalue_type *>(val);
 }
 
 heterogenous_radix::heterogenous_radix(std::unique_ptr<internal::config> cfg)
@@ -491,17 +500,26 @@ heterogenous_radix::heterogenous_radix(std::unique_ptr<internal::config> cfg)
 					.raw();
 			pmem_ptr = static_cast<internal::radix::pmem_type *>(
 				pmemobj_direct(*root_oid));
-			pmem_ptr->log = pmem::obj::make_persistent<char[]>(log_size);
+			pmem_ptr->log =
+				pmem::obj::make_persistent<internal::radix::log_type>(
+					log_size);
 		});
 	}
 
-	// XXX - do recovery first
-	// pmem_ptr->log->resize(log_size);
+	log = pmem_ptr->log.get();
 
 	container = &pmem_ptr->map;
 	container->runtime_initialize_mt();
 
 	cache = std::unique_ptr<cache_type>(new cache_type(dram_size));
+	queue = std::unique_ptr<pmem_queue_type>(new pmem_queue_type(*pmem_ptr->log, 1));
+	queue_worker = std::unique_ptr<pmem_queue_type::worker>(
+		new pmem_queue_type::worker(queue->register_worker()));
+
+	queue->try_consume_batch([&](pmem_queue_type::batch_type batch) {
+		for (auto entry : batch)
+			consume_queue_entry(entry);
+	});
 
 	stopped.store(false);
 	bg_thread = std::thread([&] { bg_work(); });
@@ -511,20 +529,33 @@ heterogenous_radix::heterogenous_radix(std::unique_ptr<internal::config> cfg)
 
 heterogenous_radix::~heterogenous_radix()
 {
-	stopped.store(true);
+	{
+		std::unique_lock<std::mutex> lock(bg_lock);
+		stopped.store(true);
+	}
+
+	bg_cv.notify_one();
+
 	bg_thread.join();
+
+	// XXX: container->runtime_finalize_mt();
+}
+
+bool heterogenous_radix::log_contains(const void *ptr)
+{
+	return log->data().data() <= reinterpret_cast<const char *>(ptr) &&
+		log->data().data() + log->data().size() >=
+		reinterpret_cast<const char *>(ptr);
 }
 
 heterogenous_radix::cache_type::value_type *
-heterogenous_radix::cache_put(string_view key, uvalue_type *value)
+heterogenous_radix::cache_put(string_view key, const uvalue_type *value)
 {
 	auto evict_cb = [&](auto &list) {
 		for (auto rit = list.rbegin(); rit != list.rend(); rit++) {
 			auto t = rit->second.load(std::memory_order_relaxed);
 
-			// XXX - check if within mpsc_queue
-			if (pmemobj_pool_by_ptr(t) != nullptr ||
-			    t == tombstone_persistent())
+			if (log_contains(t) || t == tombstone_persistent())
 				return std::next(rit).base();
 		}
 
@@ -534,29 +565,55 @@ heterogenous_radix::cache_put(string_view key, uvalue_type *value)
 	return cache->put(key, value, evict_cb);
 }
 
+void heterogenous_radix::handle_oom_from_bg()
+{
+	std::exception_ptr *exc;
+	if ((exc = bg_exception_ptr.load(std::memory_order_acquire)) != nullptr) {
+		std::rethrow_exception(*exc);
+	}
+}
+
 status heterogenous_radix::put(string_view key, string_view value)
 {
 	auto req_size = pmem::obj::experimental::total_sizeof<uvalue_type>::value(key) +
 		pmem::obj::experimental::total_sizeof<uvalue_type>::value(value) +
 		sizeof(queue_entry);
 
-	auto qe = new char[req_size];
-	new (qe) queue_entry(key, value);
+	using alloc_type = typename std::aligned_storage<sizeof(queue_entry),
+							 alignof(queue_entry)>::type;
+	auto alloc_size = (req_size + sizeof(queue_entry) - 1) / sizeof(queue_entry);
+	auto data = std::unique_ptr<alloc_type[]>(new alloc_type[alloc_size]);
 
-	auto entry = reinterpret_cast<queue_entry *>(qe);
+	/* XXX: use aligned_storage */
+	assert(reinterpret_cast<uintptr_t>(data.get()) % alignof(queue_entry) == 0);
+
+	/* XXX: implement blocking cache_put */
+	cache_type::value_type *cache_val = nullptr;
+	while (cache_val == nullptr) {
+		cache_val = cache_put(key, nullptr);
+	}
+
+	new (data.get()) queue_entry(cache_val, key, value);
 
 	while (true) {
-		std::exception_ptr *exc;
-		if ((exc = bg_exception_ptr.load(std::memory_order_acquire)) !=
-		    nullptr) { // XXX: && !queue.try_produce()
-			std::rethrow_exception(*exc);
-		}
+		auto produced = queue_worker->try_produce(
+			pmem::obj::string_view(reinterpret_cast<const char *>(data.get()),
+					       req_size),
+			[&](pmem::obj::string_view target) {
+				auto pmem_entry = reinterpret_cast<const queue_entry *>(
+					target.data());
+				assert(pmem_entry->key() == key);
 
-		auto ret = cache_put(key, &entry->value());
-		if (ret) {
-			entry->dram_entry = ret;
+				const uvalue_type *val = value.data() == nullptr
+					? tombstone_volatile()
+					: &pmem_entry->value();
+
+				cache_val->store(val, std::memory_order_release);
+			});
+		if (produced)
 			break;
-		}
+		else
+			handle_oom_from_bg();
 	}
 
 	// XXX - if try_produce == false, we can just allocate new radix node to
@@ -564,68 +621,47 @@ status heterogenous_radix::put(string_view key, string_view value)
 	// NEED TX support for produce():
 	// tx {queue.produce([&] (data) { data = make_persistent(); }) }
 
-	queue.emplace(entry);
-
 	return status::OK;
 }
 
 status heterogenous_radix::remove(string_view k)
 {
 	bool found = false;
-	auto ret = cache->get(k, false);
-	if (ret) {
-		found = (ret != tombstone_persistent() && ret != tombstone_volatile());
+	auto v = cache->get(k, false);
+	if (v) {
+		auto value = v->load(std::memory_order_acquire);
+		found = (value != tombstone_persistent() &&
+			 value != tombstone_volatile());
 	} else {
 		found = container->find(k) != container->end();
 	}
 
-	// XXX - remove duplication
-	auto req_size = pmem::obj::experimental::total_sizeof<uvalue_type>::value(k) +
-		pmem::obj::experimental::total_sizeof<uvalue_type>::value("") +
-		sizeof(queue_entry);
+	try {
+		auto s = put(k, pmem::obj::string_view());
 
-	auto qe = new char[req_size];
-	new (qe) queue_entry(k);
+		if (s != status::OK)
+			return s;
 
-	auto entry = reinterpret_cast<queue_entry *>(qe);
+		return found ? status::OK : status::NOT_FOUND;
+	} catch (pmem::transaction_out_of_memory &) {
+		cache_put(k, tombstone_persistent());
 
-	while (true) {
-		std::exception_ptr *exc;
-		if ((exc = bg_exception_ptr.load(std::memory_order_acquire)) !=
-		    nullptr) { // XXX: && !queue.try_produce()
-			try {
-				std::rethrow_exception(*exc);
-			} catch (pmem::transaction_out_of_memory &e) {
-				cache_put(k, tombstone_persistent());
+		/* Try to free the element directly, bypassing the queue. */
+		{
+			std::unique_lock<std::mutex> lock(erase_mtx);
+			/* XXX: garbage collect */
+			container->erase(k);
+		}
 
-				/* Try to free the element directly, bypassing the queue.
-				 */
-				std::unique_lock<std::mutex> lock(erase_mtx);
-				auto cnt = container->erase(
-					k); // XXX - force freeing (instead of appending
-					    // to garbage)
+		delete bg_exception_ptr.load(std::memory_order_relaxed);
 
-				delete exc;
-
-				/* Notify bg thread that the exception was consumed */
-				bg_exception_ptr.store(nullptr,
-						       std::memory_order_release);
-				bg_exception_cv.notify_one();
-
-				return cnt ? status::OK : status::NOT_FOUND;
-			} catch (...) {
-				throw;
-			}
-		} else {
-			auto v = cache_put(k, tombstone_volatile());
-			if (v) {
-				entry->dram_entry = v;
-				break;
-			}
+		{
+			std::unique_lock<std::mutex> lock(bg_lock);
+			/* Notify bg thread that the exception was consumed */
+			bg_exception_ptr.store(nullptr, std::memory_order_release);
+			bg_cv.notify_one();
 		}
 	}
-
-	queue.emplace(entry);
 
 	return found ? status::OK : status::NOT_FOUND;
 }
@@ -633,14 +669,8 @@ status heterogenous_radix::remove(string_view k)
 status heterogenous_radix::get(string_view key, get_v_callback *callback, void *arg)
 {
 	auto v = cache->get(key, true);
-	if (v) {
-		if (v == tombstone_volatile() || v == tombstone_persistent())
-			return status::NOT_FOUND;
 
-		callback(v->data(), v->size(), arg);
-
-		return status::OK;
-	} else {
+	if (!v) {
 		auto it = container->find(key);
 		if (it != container->end()) {
 			auto value = string_view(it->value());
@@ -651,6 +681,45 @@ status heterogenous_radix::get(string_view key, get_v_callback *callback, void *
 			return status::OK;
 		} else
 			return status::NOT_FOUND;
+	}
+
+	while (true) {
+		auto value = v->load(std::memory_order_acquire);
+		if (value == tombstone_volatile() || value == tombstone_persistent())
+			return status::NOT_FOUND;
+
+		auto size = value->size();
+		auto data = value->data();
+
+		if (log_contains(value) && log_contains(data + size)) {
+			/* Cache entry points to data in log. To read the data we
+			 * must protect againsts producers which could overwrite
+			 * the data concurrently. To do this we use variant of
+			 * optimistic concurrency control: we validate that data
+			 * is entirely inside the log and copy the data to
+			 * temporary buffer. After that, we check if cache entry
+			 * changed. If it did, it means that the entry was
+			 * conusmed by bg thread and producers might have
+			 * overwritten the data - in this case we start from the
+			 * beginning. Otherwise we just call user callback with
+			 * the temporary buffer. */
+			auto buffer = std::unique_ptr<char[]>(new char[size]);
+			std::copy(data, data + size, buffer.get());
+
+			auto current_value = v->load(std::memory_order_acquire);
+			if (current_value == value)
+				callback(buffer.get(), size, arg);
+			else
+				continue;
+		} else {
+			/* Cache entry points to data in pmem container. It's safe
+			 * to just read from it as entries in containers are
+			 * protected by EBR. */
+			callback(data, size, arg);
+			assert(v->load(std::memory_order_acquire) == value);
+		}
+
+		return status::OK;
 	}
 }
 
@@ -833,15 +902,7 @@ status heterogenous_radix::count_between(string_view key1, string_view key2,
 	check_outside_tx();
 
 	cnt = 0;
-
-	if (key1.compare(key2) < 0) {
-		auto first = merged_upper_bound(key1);
-		auto last = merged_lower_bound(key2);
-
-		return get_between(key1, key2, count_elements, (void *)&cnt);
-	}
-
-	return status::OK;
+	return get_between(key1, key2, count_elements, (void *)&cnt);
 }
 
 status heterogenous_radix::exists(string_view key)
@@ -850,51 +911,58 @@ status heterogenous_radix::exists(string_view key)
 		key, [](const char *, size_t, void *) {}, nullptr);
 }
 
+void heterogenous_radix::consume_queue_entry(pmem::obj::string_view entry)
+{
+	auto e = reinterpret_cast<const queue_entry *>(entry.data());
+	auto dram_entry = const_cast<queue_entry *>(e)->dram_entry;
+	if (e->remove) {
+		container->erase(e->key());
+
+		auto expected = tombstone_volatile();
+		dram_entry->compare_exchange_strong(expected, tombstone_persistent());
+	} else {
+		auto ret = container->insert_or_assign(e->key(), e->value());
+
+		auto expected = &e->value();
+		dram_entry->compare_exchange_strong(expected, &ret.first->value());
+	}
+}
+
 void heterogenous_radix::bg_work()
 {
+	struct engine_stopped {
+	};
+
 	while (true) {
-		queue_entry *e;
-		if (queue.try_pop(e)) {
-			while (true) {
+		/* XXX: only stop if all elements are consumed ? */
+		if (stopped.load())
+			return;
+
+		try {
+			queue->try_consume_batch([&](pmem_queue_type::batch_type batch) {
 				try {
-					// XXX - make sure tx does not abort
-					if (e->remove) {
-						container->erase(e->key());
-
-						auto expected = tombstone_volatile();
-						e->dram_entry->compare_exchange_strong(
-							expected, tombstone_persistent());
-					} else {
-						auto ret = container->insert_or_assign(
-							e->key(), e->value());
-
-						auto expected = &e->value();
-						e->dram_entry->compare_exchange_strong(
-							expected, &ret.first->value());
-					}
-
-					break;
-					//	delete e; // XXX - not needed on pmem!!!
+					for (auto entry : batch)
+						consume_queue_entry(entry);
 				} catch (...) {
-					if (stopped.load())
-						return;
-
-					// XXX - if there is any garbage try freeing it??
-
+					/* XXX: call garbage_collect_force() */
 					bg_exception_ptr.store(new std::exception_ptr(
 						std::current_exception()));
 
-					std::unique_lock<std::mutex> lock(
-						bg_exception_lock);
+					std::unique_lock<std::mutex> lock(bg_lock);
 
 					/* Wait until exception is handled. */
-					bg_exception_cv.wait(lock, [&] {
-						return bg_exception_ptr.load() == nullptr;
+					bg_cv.wait(lock, [&] {
+						return bg_exception_ptr.load() ==
+							nullptr ||
+							stopped.load();
 					});
+
+					/* If engine is stopped, abort consume */
+					if (stopped.load())
+						throw engine_stopped{};
 				}
-			}
-		} else if (stopped.load()) {
-			/* Stop only if there are no other elements in the queue and stopped is set. */
+			});
+		} catch (engine_stopped &) {
 			return;
 		}
 	}

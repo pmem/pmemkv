@@ -9,10 +9,9 @@
 #include "../pmemobj_engine.h"
 
 #include <libpmemobj++/experimental/inline_string.hpp>
+#include <libpmemobj++/experimental/mpsc_queue.hpp>
 #include <libpmemobj++/experimental/radix_tree.hpp>
 #include <libpmemobj++/persistent_ptr.hpp>
-
-#include <tbb/concurrent_queue.h>
 
 #include <atomic>
 #include <condition_variable>
@@ -33,6 +32,8 @@ using map_type =
 	pmem::obj::experimental::radix_tree<pmem::obj::experimental::inline_string,
 					    pmem::obj::experimental::inline_string>;
 
+using log_type = pmem::obj::experimental::mpsc_queue::pmem_log_type;
+
 struct pmem_type {
 	pmem_type() : map()
 	{
@@ -40,7 +41,7 @@ struct pmem_type {
 	}
 
 	map_type map;
-	pmem::obj::persistent_ptr<char[]> log;
+	pmem::obj::persistent_ptr<log_type> log;
 	uint64_t reserved[6];
 };
 
@@ -64,14 +65,14 @@ template <typename Value>
 class ordered_cache {
 private:
 	using key_type = std::string;
-	using dram_value_type = std::pair<key_type, std::atomic<Value *>>;
+	using dram_value_type = std::pair<key_type, std::atomic<const Value *>>;
 	using lru_list_type = std::list<dram_value_type>;
 	using dram_map_type = std::map<string_view, typename lru_list_type::iterator>;
 
 public:
 	using iterator = typename dram_map_type::iterator;
 
-	using value_type = std::atomic<Value *>;
+	using value_type = std::atomic<const Value *>;
 
 	ordered_cache(size_t max_size) : max_size(max_size)
 	{
@@ -84,7 +85,7 @@ public:
 	ordered_cache &operator=(ordered_cache &&) = delete;
 
 	template <typename F>
-	value_type *put(string_view key, Value *v, F &&evict)
+	value_type *put(string_view key, const Value *v, F &&evict)
 	{
 		auto it = map.find(key);
 		if (it == map.end()) {
@@ -103,7 +104,7 @@ public:
 					return nullptr;
 
 				auto cnt = map.erase(lit->first);
-
+				(void)cnt;
 				assert(cnt == 1 && lit->first != key);
 
 				lru_list.splice(lru_list.begin(), lru_list, lit);
@@ -125,7 +126,7 @@ public:
 		return &it->second->second;
 	}
 
-	Value *get(string_view key, bool promote)
+	value_type *get(string_view key, bool promote)
 	{
 		auto it = map.find(key);
 		if (it == map.end()) {
@@ -134,7 +135,7 @@ public:
 			if (promote)
 				lru_list.splice(lru_list.begin(), lru_list, it->second);
 
-			return it->second->second.load(std::memory_order_acquire);
+			return &it->second->second;
 		}
 	}
 
@@ -271,22 +272,25 @@ private:
 	using uvalue_type = pmem::obj::experimental::inline_string;
 	using container_type = internal::radix::map_type;
 	using cache_type = internal::radix::ordered_cache<uvalue_type>;
+	using pmem_log_type = internal::radix::log_type;
 
 	using dram_iterator = typename cache_type::iterator;
 	using pmem_iterator = typename container_type::iterator;
 
 	struct queue_entry {
-		queue_entry(string_view key_, string_view value_);
-		queue_entry(string_view key_);
+		queue_entry(cache_type::value_type *dram_entry, string_view key_,
+			    string_view value_);
 
 		const uvalue_type &key() const;
+
+		const uvalue_type &value() const;
 		uvalue_type &value();
 
 		cache_type::value_type *dram_entry;
 		bool remove;
 	};
 
-	using pmem_queue_type = tbb::concurrent_bounded_queue<queue_entry *>;
+	using pmem_queue_type = pmem::obj::experimental::mpsc_queue;
 
 	struct merged_iterator {
 		merged_iterator(cache_type &cache, container_type &pmem,
@@ -320,13 +324,16 @@ private:
 	merged_iterator merged_upper_bound(string_view key);
 
 	void bg_work();
-	cache_type::value_type *cache_put(string_view key, uvalue_type *value);
+	cache_type::value_type *cache_put(string_view key, const uvalue_type *value);
+	bool log_contains(const void *entry);
+	void handle_oom_from_bg();
+	void consume_queue_entry(pmem::obj::string_view item);
 
 	/* Element was logically removed but there might an older version on pmem. */
-	static uvalue_type *tombstone_volatile();
+	static const uvalue_type *tombstone_volatile();
 
 	/* Element removed logically removed from cache and from pmem. */
-	static uvalue_type *tombstone_persistent();
+	static const uvalue_type *tombstone_persistent();
 
 	std::unique_ptr<cache_type> cache;
 	size_t dram_size;
@@ -337,18 +344,20 @@ private:
 	pmem::obj::pool_base pop;
 
 	container_type *container;
+	pmem_log_type *log;
 	std::unique_ptr<internal::config> config;
 
 	std::mutex eviction_lock;
 	std::condition_variable eviction_cv;
 
-	std::mutex bg_exception_lock;
-	std::condition_variable bg_exception_cv;
+	std::mutex bg_lock;
+	std::condition_variable bg_cv;
 	std::atomic<std::exception_ptr *> bg_exception_ptr;
 
 	std::mutex erase_mtx;
 
-	pmem_queue_type queue;
+	std::unique_ptr<pmem_queue_type> queue;
+	std::unique_ptr<pmem_queue_type::worker> queue_worker;
 };
 
 template <>
