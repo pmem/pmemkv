@@ -1,0 +1,40 @@
+
+name: pmemkv-weekly
+# It runs non-day-to-day checks; "unusual" jobs required to be checked only once in a while.
+
+on:
+  schedule:
+    # run this job at 01:00 UTC every Saturday
+    - cron:  '0 1 * * 6'
+
+env:
+  REPO:           pmemkv
+  GITHUB_REPO:    pmem/pmemkv
+  CONTAINER_REG:  ghcr.io/pmem/pmemkv
+  HOST_WORKDIR:   ${{ github.workspace }}
+  WORKDIR:        utils/docker
+  TEST_TIMEOUT:   900
+  IMG_VER:        latest
+  PUSH_IMAGE:     0
+
+jobs:
+  linux:
+    name: Linux-weekly
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        CONFIG: ["TYPE=debug OS=ubuntu OS_VER=20.04 TESTS_USAN=1",
+                 "TYPE=debug OS=ubuntu OS_VER=20.04 TESTS_UBSAN=1",
+                 "TYPE=valgrind OS=fedora OS_VER=rawhide TESTS_PMREORDER=0",
+                 "TYPE=memcheck_drd OS=fedora OS_VER=rawhide TESTS_PMREORDER=0"]
+    steps:
+      - name: Clone the git repo
+        uses: actions/checkout@v2
+
+      # It rebuilds images every time (push is not neccessary; they are pushed in other workflows)
+      - name: Rebuild the image
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh rebuild
+
+      - name: Run the build
+        run: cd $WORKDIR && ${{ matrix.CONFIG }} ./build.sh
