@@ -26,6 +26,8 @@ option(TESTS_JSON "enable tests which require libpmemkv_json_config library (BUI
 option(COVERAGE "enable collecting of coverage data" OFF)
 option(DEVELOPER_MODE "enable developer's checks" OFF)
 option(CHECK_CPP_STYLE "check code style of C++ sources" OFF)
+option(USE_ASAN "enable AddressSanitizer (debugging)" OFF)
+option(USE_UBSAN "enable UndefinedBehaviorSanitizer (debugging)" OFF)
 option(USE_CCACHE "use ccache if it is available in the system" ON)
 
 # Each engine can be enabled separately.
@@ -227,6 +229,12 @@ endif()
 # ----------------------------------------------------------------- #
 if(DEVELOPER_MODE)
 	add_common_flag(-Werror)
+endif()
+if(USE_ASAN)
+	add_sanitizer_flag(address)
+endif()
+if(USE_UBSAN)
+	add_sanitizer_flag(undefined)
 endif()
 if(COVERAGE)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage")
