@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #include <libpmemkv.hpp>
 #include <libpmemkv_json_config.h>
@@ -78,11 +78,34 @@ static void malformed_input_test()
 	pmemkv_config_delete(config);
 }
 
+static void null_json_test()
+{
+	auto config = pmemkv_config_new();
+	UT_ASSERT(config != nullptr);
+
+	auto ret = pmemkv_config_from_json(config, nullptr);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_CONFIG_PARSING_ERROR);
+	UT_ASSERT(std::string(pmemkv_config_from_json_errormsg()) ==
+		  "[pmemkv_config_from_json] Configuration json has to be specified");
+
+	pmemkv_config_delete(config);
+}
+
+static void null_config_json_test()
+{
+	auto ret = pmemkv_config_from_json(nullptr, nullptr);
+	UT_ASSERTeq(ret, PMEMKV_STATUS_CONFIG_PARSING_ERROR);
+	UT_ASSERT(std::string(pmemkv_config_from_json_errormsg()) ==
+		  "[pmemkv_config_from_json] Config has to be specified");
+}
+
 static void test(int argc, char *argv[])
 {
 	simple_test();
 	double_test();
 	malformed_input_test();
+	null_json_test();
+	null_config_json_test();
 }
 
 int main(int argc, char *argv[])
