@@ -1,6 +1,6 @@
-Tue Jun 22 2021 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
+Mon Jun 28 2021 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
 
-	* Version 1.1.1-rc2
+	* Version 1.1.1
 
 	This is the last bugfix release for pmemkv 1.1 version.
 	Maintenance of this version is no longer supported.
@@ -22,7 +22,7 @@ Tue Oct 06 2020 Szymon Romik <szymon.romik@intel.com>
 	* Version 1.0.3
 
 	This is the last bugfix release for pmemkv 1.0 version.
-	Maintance of this version is no longer supported.
+	Maintenance of this version is no longer supported.
 
 	Notable changes:
 	- VSmap::put method refactor (to use emplace)
