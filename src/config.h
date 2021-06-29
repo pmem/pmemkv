@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2020, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #ifndef LIBPMEMKV_CONFIG_H
 #define LIBPMEMKV_CONFIG_H
@@ -60,7 +60,7 @@ public:
 			return false;
 
 		if (item->item_type != type::DATA)
-			throw_type_error(key, item->item_type);
+			throw_type_error(key, item->item_type, type::DATA);
 
 		*value = item->data.data();
 		*value_size = item->data.size();
@@ -81,7 +81,7 @@ public:
 			return false;
 
 		if (item->item_type != type::OBJECT)
-			throw_type_error(key, item->item_type);
+			throw_type_error(key, item->item_type, type::OBJECT);
 
 		*value = (*item->object.getter)(item->object.ptr);
 
@@ -113,7 +113,7 @@ public:
 					"Item with key: " + std::string(key) +
 					" has value which exceeds int64 range");
 		} else
-			throw_type_error(key, item->item_type);
+			throw_type_error(key, item->item_type, type::INT64);
 
 		return true;
 	}
@@ -141,7 +141,7 @@ public:
 				throw config_type_error(
 					"Item with key: " + std::string(key) + " is < 0");
 		} else
-			throw_type_error(key, item->item_type);
+			throw_type_error(key, item->item_type, type::UINT64);
 
 		return true;
 	}
@@ -159,7 +159,7 @@ public:
 			return false;
 
 		if (item->item_type != type::STRING)
-			throw_type_error(key, item->item_type);
+			throw_type_error(key, item->item_type, type::STRING);
 
 		*value = item->string_v.c_str();
 
@@ -260,12 +260,15 @@ private:
 		return &found->second;
 	}
 
-	void throw_type_error(const std::string &key, type item_type)
+	void throw_type_error(const std::string &key, type item_type, type expected_type)
 	{
-		throw config_type_error("Item with key: " + std::string(key) + " is " +
-					type_names[static_cast<int>(item_type)]);
+		throw config_type_error(
+			"Item with key: " + key + " is " +
+			type_names[static_cast<int>(item_type)] +
+			". Expected: " + type_names[static_cast<int>(expected_type)]);
 	}
 };
+
 } /* namespace internal */
 } /* namespace kv */
 } /* namespace pmem */
