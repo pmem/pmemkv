@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019, Intel Corporation */
+/* Copyright 2019-2021, Intel Corporation */
 
 #include "libpmemkv_json_config.h"
 #include "out.h"
@@ -16,9 +16,14 @@ int pmemkv_config_from_json(pmemkv_config *config, const char *json)
 	rapidjson::Document doc;
 	rapidjson::Value::ConstMemberIterator itr;
 
-	assert(config && json);
-
 	try {
+		if (!config) {
+			throw std::runtime_error("Config has to be specified");
+		}
+		if (!json) {
+			throw std::runtime_error(
+				"Configuration json has to be specified");
+		}
 		if (doc.Parse(json).HasParseError()) {
 			throw std::runtime_error("Config parsing failed");
 		}
