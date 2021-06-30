@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2016-2021, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of centos-based
@@ -7,7 +7,7 @@
 #
 
 # Pull base image
-FROM centos:8
+FROM registry.hub.docker.com/library/centos:8
 MAINTAINER szymon.romik@intel.com
 
 # Set required environment variables
@@ -24,11 +24,11 @@ ARG SKIP_LIBPMEMOBJCPP_BUILD
 RUN dnf update -y
 RUN dnf install -y epel-release
 RUN dnf install -y 'dnf-command(config-manager)'
-RUN dnf config-manager --set-enabled PowerTools
+RUN dnf config-manager --set-enabled powertools
 
 # Install basic tools
 RUN dnf update -y \
- && dnf install -y \
+ && dnf install -y --nobest \
 	autoconf \
 	automake \
 	clang \
