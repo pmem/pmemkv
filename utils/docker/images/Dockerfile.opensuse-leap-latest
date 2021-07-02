@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2016-2021, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of opensuse-based
@@ -7,7 +7,7 @@
 #
 
 # Pull base image
-FROM opensuse/leap:latest
+FROM registry.opensuse.org/opensuse/leap:latest
 MAINTAINER szymon.romik@intel.com
 
 # Set required environment variables
@@ -59,6 +59,7 @@ RUN zypper install -y \
 	rapidjson-devel \
 	rpm-build \
 	sudo \
+	systemd \
 	unzip \
 	wget \
 	which
