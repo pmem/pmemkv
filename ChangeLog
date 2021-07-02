@@ -1,3 +1,17 @@
+Fri Jul 02 2021 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
+
+	* Version 1.2.1-rc1
+
+	This is the last bugfix release for pmemkv 1.2 version.
+	Maintenance of this version is no longer supported.
+
+	Notable changes:
+	- fix of missing checks in move assigment operators
+	- stree: fix operator== by adding missing const specifier
+	- stree: fix missing check in node_iterator operator=
+	- json_config: return error code for wrong parameters, instead of asserting them
+	- json config: extend error messages
+
 Mon Jun 28 2021 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
 
 	* Version 1.1.1
