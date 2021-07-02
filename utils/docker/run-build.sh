@@ -17,6 +17,8 @@ BUILD_JSON_CONFIG=${BUILD_JSON_CONFIG:-ON}
 CHECK_CPP_STYLE=${CHECK_CPP_STYLE:-ON}
 TESTS_LONG=${TESTS_LONG:-OFF}
 TESTS_USE_FORCED_PMEM=${TESTS_USE_FORCED_PMEM:-ON}
+TESTS_USAN=${TESTS_USAN:-OFF}
+TESTS_UBSAN=${TESTS_UBSAN:-OFF}
 TEST_TIMEOUT=${TEST_TIMEOUT:-600}
 
 ###############################################################################
@@ -38,7 +40,9 @@ function tests_gcc_debug_cpp11() {
 		-DDEVELOPER_MODE=1 \
 		-DTESTS_USE_FORCED_PMEM=${TESTS_USE_FORCED_PMEM} \
 		-DTESTS_PMEMOBJ_DRD_HELGRIND=1 \
-		-DCXX_STANDARD=11
+		-DCXX_STANDARD=11 \
+		-DUSE_ASAN=${TESTS_USAN} \
+		-DUSE_UBSAN=${TESTS_UBSAN}
 
 	make -j$(nproc)
 	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout ${TEST_TIMEOUT} --output-on-failure
@@ -73,7 +77,9 @@ function tests_gcc_debug_cpp14() {
 		-DDEVELOPER_MODE=1 \
 		-DTESTS_USE_FORCED_PMEM=${TESTS_USE_FORCED_PMEM} \
 		-DTESTS_PMEMOBJ_DRD_HELGRIND=1 \
-		-DCXX_STANDARD=14
+		-DCXX_STANDARD=14 \
+		-DUSE_ASAN=${TESTS_USAN} \
+		-DUSE_UBSAN=${TESTS_UBSAN}
 
 	make -j$(nproc)
 	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout ${TEST_TIMEOUT} --output-on-failure
@@ -179,7 +185,9 @@ function tests_clang_release_cpp20() {
 		-DTESTS_USE_FORCED_PMEM=${TESTS_USE_FORCED_PMEM} \
 		-DTESTS_PMEMOBJ_DRD_HELGRIND=1 \
 		-DDEVELOPER_MODE=1 \
-		-DCXX_STANDARD=20
+		-DCXX_STANDARD=20 \
+		-DUSE_ASAN=${TESTS_USAN} \
+		-DUSE_UBSAN=${TESTS_UBSAN}
 
 	make -j$(nproc)
 	ctest -E "_memcheck|_drd|_helgrind|_pmemcheck|_pmreorder" --timeout ${TEST_TIMEOUT} --output-on-failure
