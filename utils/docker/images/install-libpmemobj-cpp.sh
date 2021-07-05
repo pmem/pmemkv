@@ -18,9 +18,9 @@ PREFIX="/usr"
 PACKAGE_TYPE=${1^^} #To uppercase
 echo "PACKAGE_TYPE: ${PACKAGE_TYPE}"
 
-# Merge pull request #1048 from lukaszstolarczuk/tests-gdb; 04.03.2021
-# It contains new exception: pool_invalid_argument
-LIBPMEMOBJ_CPP_VERSION="7cc2f387fa261f370a3c5f0f9e122756bc2fffb0"
+# Merge pull request #1126 from igchor/test_workaround
+# tests: do not use basic_string_view comparison as a workaround
+LIBPMEMOBJ_CPP_VERSION="2543afae7b1e9e82809a3e4280753b33cdab8136"
 echo "LIBPMEMOBJ_CPP_VERSION: ${LIBPMEMOBJ_CPP_VERSION}"
 
 build_dir=$(mktemp -d -t libpmemobj-cpp-XXX)
