@@ -2,68 +2,64 @@
 # Copyright 2016-2021, Intel Corporation
 
 #
-# Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
+# Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
 #              environment prepared for running pmemkv build and tests.
 #
 
 # Pull base image
-FROM registry.fedoraproject.org/fedora:33
+FROM registry.hub.docker.com/library/ubuntu:21.04
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
-ENV OS fedora
-ENV OS_VER 33
-ENV PACKAGE_MANAGER rpm
+ENV OS ubuntu
+ENV OS_VER 21.04
+ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
 
 # Additional parameters to build docker without building components
 ARG SKIP_VALGRIND_BUILD
 ARG SKIP_PMDK_BUILD
 ARG SKIP_LIBPMEMOBJCPP_BUILD
+ARG SKIP_SCRIPTS_DOWNLOAD
 
 # Base development packages
 ARG BASE_DEPS="\
 	cmake \
-	gcc \
-	gcc-c++ \
-	git \
-	make"
+	build-essential \
+	git"
 
 # Dependencies for compiling pmemkv project
 ARG PMEMKV_DEPS="\
-	memkind-devel \
-	rapidjson-devel \
-	tbb-devel"
+	libmemkind-dev \
+	libtbb-dev \
+	rapidjson-dev"
 
-# PMDK's dependencies (optional; libpmemobj-devel package may be used instead)
+# PMDK's dependencies (optional; libpmemobj-dev package may be used instead)
 ARG PMDK_DEPS="\
 	autoconf \
 	automake \
-	daxctl-devel \
+	debhelper \
+	devscripts \
 	gdb \
-	man \
-	ndctl-devel \
+	libdaxctl-dev \
+	libndctl-dev \
 	pandoc \
-	python3 \
-	rpm-build \
-	rpm-build-libs \
-	rpmdevtools \
-	which"
+	python3"
 
-# libpmemobj-cpp's dependencies (optional; libpmemobj++-devel package may be used instead)
+# libpmemobj-cpp's dependencies (optional; libpmemobj-cpp-dev package may be used instead)
 ARG LIBPMEMOBJ_CPP_DEPS="\
-	libatomic \
-	tbb-devel"
+	libatomic1 \
+	libtbb-dev"
 
-# pmem's Valgrind dependencies (optional; valgrind-devel package may be used instead)
+# pmem's Valgrind dependencies (optional; valgrind package may be used instead)
 ARG VALGRIND_DEPS="\
 	autoconf \
 	automake"
 
 # Examples (optional)
 ARG EXAMPLES_DEPS="\
-	ncurses-devel \
-	SFML-devel"
+	libncurses5-dev \
+	libsfml-dev"
 
 # Documentation (optional)
 ARG DOC_DEPS="\
@@ -71,22 +67,24 @@ ARG DOC_DEPS="\
 	graphviz"
 
 # Tests (optional)
-# NOTE: glibc is installed as a separate command; see below
 ARG TESTS_DEPS="\
 	gdb \
-	libunwind-devel"
+	libc6-dbg \
+	libunwind-dev"
 
 # Misc for our builds/CI (optional)
 ARG MISC_DEPS="\
 	clang \
-	hub \
-	perl-Text-Diff \
-	pkgconf \
-	sudo"
+	libtext-diff-perl \
+	pkg-config \
+	sudo \
+	whois"
 
-# Install basic tools
-RUN dnf update -y \
- && dnf install -y \
+ENV DEBIAN_FRONTEND noninteractive
+
+# Update the apt cache and install basic tools
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
 	${BASE_DEPS} \
 	${PMEMKV_DEPS} \
 	${PMDK_DEPS} \
@@ -96,8 +94,7 @@ RUN dnf update -y \
 	${DOC_DEPS} \
 	${TESTS_DEPS} \
 	${MISC_DEPS} \
- && dnf debuginfo-install -y glibc \
- && dnf clean all
+ && rm -rf /var/lib/apt/lists/*
 
 # Install valgrind
 COPY install-valgrind.sh install-valgrind.sh
@@ -105,16 +102,14 @@ RUN ./install-valgrind.sh
 
 # Install pmdk
 COPY install-pmdk.sh install-pmdk.sh
-RUN ./install-pmdk.sh rpm
+RUN ./install-pmdk.sh dpkg
 
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh RPM
+RUN ./install-libpmemobj-cpp.sh DEB
 
 # Add user
 ENV USER user
 ENV USERPASS pass
-RUN useradd -m $USER \
- && echo "$USER:$USERPASS" | chpasswd \
- && gpasswd wheel -a $USER
+RUN useradd -m $USER -g sudo -p `mkpasswd $USERPASS`
 USER $USER

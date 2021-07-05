@@ -7,12 +7,12 @@
 #
 
 # Pull base image
-FROM registry.fedoraproject.org/fedora:33
+FROM registry.fedoraproject.org/fedora:34
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
 ENV OS fedora
-ENV OS_VER 33
+ENV OS_VER 34
 ENV PACKAGE_MANAGER rpm
 ENV NOTTY 1
 

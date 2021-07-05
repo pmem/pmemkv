@@ -164,7 +164,7 @@ Next we'll walk you through the steps of creating a new engine.
 
 ### Updating Common Source
 
-* In script(s) executed in CIs (at least in `utils/docker/run-test-building.sh`) add a check/build for new engine
+* In script(s) executed in CIs (at least in `utils/docker/run-test-building.sh` and `utils/docker/images/install-bindings-dependencies.sh`) add a check/build for new engine
 * Build & verify engine now works with high-level bindings (see [README](README.md#language-bindings) for information on current bindings)
 
 ### Documentation
