@@ -1,6 +1,6 @@
-Fri Jul 02 2021 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
+Tue Jul 06 2021 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
 
-	* Version 1.2.1-rc1
+	* Version 1.2.1
 
 	This is the last bugfix release for pmemkv 1.2 version.
 	Maintenance of this version is no longer supported.
