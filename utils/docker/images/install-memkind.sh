@@ -10,7 +10,7 @@
 set -e
 
 # contains better error handling in pmem_allocator
-MEMKIND_VERSION=64a37d4ca46a8a2419871e859d611fff85d0e843
+MEMKIND_VERSION=381b64cdc13b1e55895bd5587a7dbe96bd1e3236 # v1.12.0
 
 WORKDIR=$(pwd)
 
