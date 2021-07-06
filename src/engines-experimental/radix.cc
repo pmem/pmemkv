@@ -462,7 +462,7 @@ result<string_view> radix::radix_iterator<true>::key()
 {
 	assert(it_ != container->end());
 
-	return {it_->key().cdata()};
+	return string_view(it_->key().cdata(), it_->key().size());
 }
 
 result<pmem::obj::slice<const char *>> radix::radix_iterator<true>::read_range(size_t pos,
