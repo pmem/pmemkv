@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2021, Intel Corporation
 
 #
 # install-pmdk.sh <package_type> - installs PMDK
@@ -16,8 +16,8 @@ fi
 PACKAGE_TYPE=$1
 PREFIX=${2:-/usr}
 
-# common: 1.9, 03.07.2020
-PMDK_VERSION="1.9"
+# master: 1.11.0, 02.07.2021
+PMDK_VERSION="8583fcfd68764ac6779e6f93db89b06971b26704"
 
 git clone https://github.com/pmem/pmdk
 cd pmdk

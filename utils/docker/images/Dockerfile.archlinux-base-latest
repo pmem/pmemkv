@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2020, Intel Corporation
+# Copyright 2016-2021, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of archlinux-based
@@ -7,7 +7,7 @@
 #
 
 # Pull base image
-FROM archlinux/base:latest
+FROM registry.hub.docker.com/library/archlinux:base
 MAINTAINER szymon.romik@intel.com
 
 # Set required environment variables
@@ -50,7 +50,8 @@ RUN pacman -S --noconfirm \
 	wget \
 	which \
 	whois \
-	xmlto
+	xmlto \
+&& rm -rf /var/cache/pacman/pkg/*
 
 # Install libndctl
 COPY install-libndctl.sh install-libndctl.sh
@@ -84,6 +85,3 @@ RUN rm -f $PFILE
 RUN sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers
 RUN gpasswd wheel -a $USER
 USER $USER
-
-# Clean the cache of packages
-RUN rm -rf /var/cache/pacman/pkg/*
