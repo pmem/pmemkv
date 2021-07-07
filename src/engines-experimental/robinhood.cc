@@ -552,7 +552,10 @@ status robinhood::get_all(get_kv_callback *callback, void *arg)
 
 	for (size_t i = 0; i < shards_number; ++i) {
 		shared_lock_type lock(mtxs[i]);
-		hm_rp_foreach(pmpool.handle(), container[i], callback, arg);
+		auto ret = hm_rp_foreach(pmpool.handle(), container[i], callback, arg);
+
+		if (ret)
+			return status::STOPPED_BY_CB;
 	}
 
 	return status::OK;

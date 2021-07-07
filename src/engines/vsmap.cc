@@ -368,7 +368,7 @@ result<string_view> vsmap::vsmap_iterator<true>::key()
 {
 	assert(it_ != container->end());
 
-	return {it_->first.data()};
+	return string_view(it_->first.data(), it_->first.length());
 }
 
 result<pmem::obj::slice<const char *>> vsmap::vsmap_iterator<true>::read_range(size_t pos,

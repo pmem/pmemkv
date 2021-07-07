@@ -422,7 +422,7 @@ result<string_view> stree::stree_iterator<true>::key()
 {
 	assert(it_ != container->end());
 
-	return {it_->first.cdata()};
+	return string_view(it_->first.cdata(), it_->first.length());
 }
 
 result<pmem::obj::slice<const char *>> stree::stree_iterator<true>::read_range(size_t pos,

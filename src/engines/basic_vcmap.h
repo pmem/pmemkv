@@ -243,7 +243,7 @@ result<string_view> basic_vcmap<AllocatorFactory>::basic_vcmap_const_iterator::k
 {
 	assert(!acc_.empty());
 
-	return {{acc_->first.c_str()}};
+	return string_view(acc_->first.data(), acc_->first.length());
 }
 
 template <typename AllocatorFactory>
