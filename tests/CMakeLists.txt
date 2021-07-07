@@ -1727,6 +1727,11 @@ if (ENGINE_ROBINHOOD)
 			PARAMS 1000 8 8)
 
 	add_engine_test(ENGINE robinhood
+			BINARY iterate
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
+
+	add_engine_test(ENGINE robinhood
 			BINARY concurrent_put_get_remove_single_op_params
 			TRACERS none
 			SCRIPT pmemobj_based/default.cmake
