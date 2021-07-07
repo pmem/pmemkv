@@ -167,7 +167,7 @@ result<string_view> cmap::cmap_iterator<true>::key()
 {
 	assert(!acc_.empty());
 
-	return {{acc_->first.c_str()}};
+	return string_view(acc_->first.c_str(), acc_->first.length());
 }
 
 result<pmem::obj::slice<const char *>> cmap::cmap_iterator<true>::read_range(size_t pos,

@@ -160,7 +160,7 @@ result<string_view> vcmap::vcmap_iterator<true>::key()
 {
 	assert(!acc_.empty());
 
-	return {{acc_->first.c_str()}};
+	return string_view(acc_->first.data(), acc_->first.length());
 }
 
 result<pmem::obj::slice<const char *>> vcmap::vcmap_iterator<true>::read_range(size_t pos,
