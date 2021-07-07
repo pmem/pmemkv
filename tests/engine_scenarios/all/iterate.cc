@@ -35,23 +35,19 @@ static void GetAllTest(pmem::kv::db &kv)
 	 * TEST: get_all should return all elements in db and count_all should count them
 	 * properly
 	 */
-	ASSERT_STATUS(kv.put(entry_from_string("1"), entry_from_string("one")),
-		      status::OK);
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
-	cnt = std::numeric_limits<std::size_t>::max();
 
-	ASSERT_STATUS(kv.put(entry_from_string("2"), entry_from_string("two")),
-		      status::OK);
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 2);
-	cnt = std::numeric_limits<std::size_t>::max();
-
-	ASSERT_STATUS(kv.put(entry_from_string("记!"), entry_from_string("RR")),
-		      status::OK);
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 3);
+	auto entries = test_kv_list{
+		{entry_from_string("1"), entry_from_string("one")},
+		{entry_from_string("2"), entry_from_string("two")},
+		{entry_from_string("记!"), entry_from_string("RR")},
+	};
+	for (size_t i = 0; i < entries.size(); i++) {
+		auto e = entries[i];
+		ASSERT_STATUS(kv.put(e.first, e.second), status::OK);
+		std::size_t cnt = std::numeric_limits<std::size_t>::max();
+		ASSERT_STATUS(kv.count_all(cnt), status::OK);
+		UT_ASSERTeq(cnt, i + 1);
+	}
 
 	test_kv_list result;
 	/* get_all using string_view */
@@ -61,13 +57,13 @@ static void GetAllTest(pmem::kv::db &kv)
 		return 0;
 	});
 	ASSERT_STATUS(s, status::OK);
+	UT_ASSERT((sort(result) == sort(entries)));
 
-	auto expected = test_kv_list{{entry_from_string("1"), entry_from_string("one")},
-				     {entry_from_string("2"), entry_from_string("two")},
-				     {entry_from_string("记!"), entry_from_string("RR")}};
-	UT_ASSERT((sort(result) == sort(expected)));
+	/* get_all with non-zero exit status from callback*/
+	s = kv.get_all([&](string_view k, string_view v) { return 1; });
+	ASSERT_STATUS(s, status::STOPPED_BY_CB);
+
 	result = {};
-
 	/* get_all with C-like API */
 	s = kv.get_all(
 		[](const char *k, size_t kb, const char *v, size_t vb, void *arg) {
@@ -77,8 +73,7 @@ static void GetAllTest(pmem::kv::db &kv)
 		},
 		&result);
 	ASSERT_STATUS(s, status::OK);
-
-	UT_ASSERT((sort(result) == sort(expected)));
+	UT_ASSERT((sort(result) == sort(entries)));
 }
 
 static void test(int argc, char *argv[])

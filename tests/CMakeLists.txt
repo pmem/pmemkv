@@ -1913,11 +1913,6 @@ if (ENGINE_ROBINHOOD)
 	#	DB_SIZE 20M)
 
 	add_engine_test(ENGINE robinhood
-			BINARY iterate
-			TRACERS none memcheck pmemcheck
-			SCRIPT pmemobj_based/default.cmake)
-
-	add_engine_test(ENGINE robinhood
 			BINARY iterator_not_supported
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake)
@@ -1955,6 +1950,11 @@ if (ENGINE_ROBINHOOD)
 			TRACERS none memcheck pmemcheck
 			SCRIPT pmemobj_based/default.cmake
 			PARAMS 1000 8 8)
+
+	add_engine_test(ENGINE robinhood
+			BINARY iterate
+			TRACERS none memcheck pmemcheck
+			SCRIPT pmemobj_based/default.cmake)
 
 	add_engine_test(ENGINE robinhood
 			BINARY concurrent_put_get_remove_single_op_params
