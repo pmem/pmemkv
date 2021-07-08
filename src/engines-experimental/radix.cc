@@ -56,6 +56,11 @@ void transaction::abort()
 } /* namespace radix */
 } /* namespace internal */
 
+static constexpr size_t align_up(size_t size, size_t align)
+{
+	return ((size) + (align)-1) & ~((align)-1);
+}
+
 radix::radix(std::unique_ptr<internal::config> cfg)
     : pmemobj_engine_base(cfg, "pmemkv_radix"), config(std::move(cfg))
 {
@@ -338,6 +343,7 @@ static void no_delete(const char *)
 	/* do nothing */
 }
 
+/* Must be called inside EBR critical section. */
 heterogeneous_radix::merged_iterator::merged_iterator(
 	heterogeneous_radix &hetero_radix,
 	typename internal::radix::ordered_cache<uvalue_type>::iterator dram_it,
@@ -347,6 +353,7 @@ heterogeneous_radix::merged_iterator::merged_iterator(
 	set_current_it();
 }
 
+/* Must be called inside EBR critical section. */
 heterogeneous_radix::merged_iterator &heterogeneous_radix::merged_iterator::operator++()
 {
 	assert(dereferenceable());
@@ -371,6 +378,7 @@ heterogeneous_radix::merged_iterator &heterogeneous_radix::merged_iterator::oper
 	return *this;
 }
 
+/* Must be called inside EBR critical section. */
 string_view heterogeneous_radix::merged_iterator::key() const
 {
 	assert(dereferenceable());
@@ -460,15 +468,15 @@ heterogeneous_radix::queue_entry::queue_entry(cache_type::value_type *dram_entry
     : dram_entry(dram_entry)
 {
 	auto key_size = pmem::obj::experimental::total_sizeof<uvalue_type>::value(key_);
-
 	auto key_dst = reinterpret_cast<uvalue_type *>(this + 1);
+	auto padding = align_up(key_size, alignof(uvalue_type)) - key_size;
 	auto val_dst = reinterpret_cast<uvalue_type *>(reinterpret_cast<char *>(key_dst) +
-						       key_size);
+						       key_size + padding);
 
 	new (key_dst) uvalue_type(key_);
 
 	if (value_.data() == nullptr) {
-		new (val_dst) uvalue_type("");
+		new (val_dst) uvalue_type(string_view(""));
 		remove = true;
 	} else {
 		new (val_dst) uvalue_type(value_);
@@ -484,10 +492,12 @@ const heterogeneous_radix::uvalue_type &heterogeneous_radix::queue_entry::key() 
 
 const heterogeneous_radix::uvalue_type &heterogeneous_radix::queue_entry::value() const
 {
+	auto key_size = pmem::obj::experimental::total_sizeof<uvalue_type>::value(
+		string_view(key()));
 	auto key_dst = reinterpret_cast<const char *>(this + 1);
-	auto val_dst = reinterpret_cast<const uvalue_type *>(
-		key_dst +
-		pmem::obj::experimental::total_sizeof<uvalue_type>::value(key()));
+	auto padding = align_up(key_size, alignof(uvalue_type)) - key_size;
+	auto val_dst =
+		reinterpret_cast<const uvalue_type *>(key_dst + key_size + padding);
 
 	return *reinterpret_cast<const uvalue_type *>(val_dst);
 }
@@ -614,9 +624,12 @@ status heterogeneous_radix::put(string_view key, string_view value)
 	 * oom to the user.
 	 */
 
-	auto req_size = pmem::obj::experimental::total_sizeof<uvalue_type>::value(key) +
+	auto uvalue_key_size =
+		pmem::obj::experimental::total_sizeof<uvalue_type>::value(key);
+	auto padding = align_up(uvalue_key_size, alignof(uvalue_type)) - uvalue_key_size;
+	auto req_size = uvalue_key_size +
 		pmem::obj::experimental::total_sizeof<uvalue_type>::value(value) +
-		sizeof(queue_entry);
+		sizeof(queue_entry) + padding;
 
 	using alloc_type = typename std::aligned_storage<sizeof(queue_entry),
 							 alignof(queue_entry)>::type;
@@ -858,28 +871,29 @@ heterogeneous_radix::merged_upper_bound(string_view key)
 int heterogeneous_radix::iterate_callback(const merged_iterator &it,
 					  get_kv_callback *callback, void *arg)
 {
-	int s;
-	container_worker->critical([&] {
-		const auto &key = it.key();
-		auto val = it.value();
+	const auto &key = it.key();
+	auto val = it.value();
 
-		s = callback(key.data(), key.size(), val.first.get(), val.second, arg);
-	});
-	return s;
+	return callback(key.data(), key.size(), val.first.get(), val.second, arg);
 }
 
 status heterogeneous_radix::get_all(get_kv_callback *callback, void *arg)
 {
 	check_outside_tx();
 
-	auto first = merged_begin();
+	status s;
+	container_worker->critical([&] {
+		auto first = merged_begin();
 
-	return iterate_generic(
-		first,
-		[&](const merged_iterator &it) {
-			return iterate_callback(it, callback, arg);
-		},
-		[&](const merged_iterator &it) { return it.dereferenceable(); });
+		s = iterate_generic(
+			first,
+			[&](const merged_iterator &it) {
+				return iterate_callback(it, callback, arg);
+			},
+			[&](const merged_iterator &it) { return it.dereferenceable(); });
+	});
+
+	return s;
 }
 
 status heterogeneous_radix::get_above(string_view key, get_kv_callback *callback,
@@ -887,14 +901,19 @@ status heterogeneous_radix::get_above(string_view key, get_kv_callback *callback
 {
 	check_outside_tx();
 
-	auto first = merged_upper_bound(key);
+	status s;
+	container_worker->critical([&] {
+		auto first = merged_upper_bound(key);
 
-	return iterate_generic(
-		first,
-		[&](const merged_iterator &it) {
-			return iterate_callback(it, callback, arg);
-		},
-		[&](const merged_iterator &it) { return it.dereferenceable(); });
+		s = iterate_generic(
+			first,
+			[&](const merged_iterator &it) {
+				return iterate_callback(it, callback, arg);
+			},
+			[&](const merged_iterator &it) { return it.dereferenceable(); });
+	});
+
+	return s;
 }
 
 status heterogeneous_radix::get_equal_above(string_view key, get_kv_callback *callback,
@@ -902,14 +921,19 @@ status heterogeneous_radix::get_equal_above(string_view key, get_kv_callback *ca
 {
 	check_outside_tx();
 
-	auto first = merged_lower_bound(key);
+	status s;
+	container_worker->critical([&] {
+		auto first = merged_lower_bound(key);
 
-	return iterate_generic(
-		first,
-		[&](const merged_iterator &it) {
-			return iterate_callback(it, callback, arg);
-		},
-		[&](const merged_iterator &it) { return it.dereferenceable(); });
+		s = iterate_generic(
+			first,
+			[&](const merged_iterator &it) {
+				return iterate_callback(it, callback, arg);
+			},
+			[&](const merged_iterator &it) { return it.dereferenceable(); });
+	});
+
+	return s;
 }
 
 status heterogeneous_radix::get_equal_below(string_view key, get_kv_callback *callback,
@@ -917,31 +941,36 @@ status heterogeneous_radix::get_equal_below(string_view key, get_kv_callback *ca
 {
 	check_outside_tx();
 
-	auto first = merged_begin();
+	status s;
+	container_worker->critical([&] {
+		auto first = merged_begin();
 
-	/* We cannot rely on iterator comparisons because of concurrent inserts/erases.
-	 * There are two problems:
-	 * 1. Iterator can be erased. In that case `while(it != last) it++;` would
-	 *    spin forever.
-	 * 2. `auto last = merged_upper_bound(key);
-	 *     while (it != last) it++;`
-	 *
-	 *     if merged_upper_bound(key) returns end(), this means there are no
-	 *     elements bigger than key - we can then return all elements
-	 *     from the container, right?
-	 *
-	 *     Not really - while we iterate someone might insert element bigger than key
-	 *     and we will iterate over such element (since we are processing all
-	 * elements).
-	 */
-	return iterate_generic(
-		first,
-		[&](const merged_iterator &it) {
-			return iterate_callback(it, callback, arg);
-		},
-		[&](const merged_iterator &it) {
-			return it.dereferenceable() && it.key().compare(key) <= 0;
-		});
+		/* We cannot rely on iterator comparisons because of concurrent
+		 * inserts/erases. There are two problems:
+		 * 1. Iterator can be erased. In that case `while(it != last) it++;` would
+		 *    spin forever.
+		 * 2. `auto last = merged_upper_bound(key);
+		 *     while (it != last) it++;`
+		 *
+		 *     if merged_upper_bound(key) returns end(), this means there are no
+		 *     elements bigger than key - we can then return all elements
+		 *     from the container, right?
+		 *
+		 *     Not really - while we iterate someone might insert element bigger
+		 * than key and we will iterate over such element (since we are processing
+		 * all elements).
+		 */
+		s = iterate_generic(
+			first,
+			[&](const merged_iterator &it) {
+				return iterate_callback(it, callback, arg);
+			},
+			[&](const merged_iterator &it) {
+				return it.dereferenceable() && it.key().compare(key) <= 0;
+			});
+	});
+
+	return s;
 }
 
 status heterogeneous_radix::get_below(string_view key, get_kv_callback *callback,
@@ -949,16 +978,21 @@ status heterogeneous_radix::get_below(string_view key, get_kv_callback *callback
 {
 	check_outside_tx();
 
-	auto first = merged_begin();
+	status s;
+	container_worker->critical([&] {
+		auto first = merged_begin();
 
-	return iterate_generic(
-		first,
-		[&](const merged_iterator &it) {
-			return iterate_callback(it, callback, arg);
-		},
-		[&](const merged_iterator &it) {
-			return it.dereferenceable() && it.key().compare(key) < 0;
-		});
+		s = iterate_generic(
+			first,
+			[&](const merged_iterator &it) {
+				return iterate_callback(it, callback, arg);
+			},
+			[&](const merged_iterator &it) {
+				return it.dereferenceable() && it.key().compare(key) < 0;
+			});
+	});
+
+	return s;
 }
 
 status heterogeneous_radix::get_between(string_view key1, string_view key2,
@@ -967,16 +1001,22 @@ status heterogeneous_radix::get_between(string_view key1, string_view key2,
 	check_outside_tx();
 
 	if (key1.compare(key2) < 0) {
-		auto first = merged_upper_bound(key1);
+		status s;
+		container_worker->critical([&] {
+			auto first = merged_upper_bound(key1);
 
-		return iterate_generic(
-			first,
-			[&](const merged_iterator &it) {
-				return iterate_callback(it, callback, arg);
-			},
-			[&](const merged_iterator &it) {
-				return it.dereferenceable() && it.key().compare(key2) < 0;
-			});
+			s = iterate_generic(
+				first,
+				[&](const merged_iterator &it) {
+					return iterate_callback(it, callback, arg);
+				},
+				[&](const merged_iterator &it) {
+					return it.dereferenceable() &&
+						it.key().compare(key2) < 0;
+				});
+		});
+
+		return s;
 	}
 
 	return status::OK;

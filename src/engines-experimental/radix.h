@@ -332,7 +332,10 @@ private:
 
 		cache_type::value_type *dram_entry;
 		bool remove;
+		char padding[7];
 	};
+
+	static_assert(sizeof(queue_entry) == 16);
 
 	using pmem_queue_type = pmem::obj::experimental::mpsc_queue;
 
