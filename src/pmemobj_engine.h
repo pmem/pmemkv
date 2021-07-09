@@ -94,8 +94,13 @@ public:
 
 	~pmemobj_engine_base()
 	{
-		if (cfg_by_path)
-			pmpool.close();
+		if (cfg_by_path) {
+			try {
+				pmpool.close();
+			} catch (const std::logic_error &e) {
+				std::terminate();
+			}
+		}
 	}
 
 protected:
