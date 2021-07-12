@@ -12,12 +12,6 @@ set -e
 EXAMPLE_TEST_DIR="/tmp/build_example"
 PREFIX=/usr
 
-# assign CMake's version to variable(s)  - a single number representation for easier comparison
-CMAKE_VERSION=$(cmake --version | head -n1 | grep -oE '[0-9].[0-9]*')
-CMAKE_VERSION_MAJOR=$(echo ${CMAKE_VERSION} | cut -d. -f1)
-CMAKE_VERSION_MINOR=$(echo ${CMAKE_VERSION} | cut -d. -f2)
-CMAKE_VERSION_NUMBER=$((100 * ${CMAKE_VERSION_MAJOR} + ${CMAKE_VERSION_MINOR}))
-
 ### Helper functions, used in run-*.sh scripts
 function sudo_password() {
 	echo ${USERPASS} | sudo -Sk $*
@@ -108,3 +102,12 @@ fi
 if [ "${CI_RUN}" == "YES" ]; then
 	sudo_password chown -R $(id -u).$(id -g) ${WORKDIR}
 fi || true
+
+echo "CMake version:"
+cmake --version
+
+# assign CMake's version to variable(s)  - a single number representation for easier comparison
+CMAKE_VERSION=$(cmake --version | head -n1 | grep -oE '[0-9]\.[0-9]*')
+CMAKE_VERSION_MAJOR=$(echo ${CMAKE_VERSION} | cut -d. -f1)
+CMAKE_VERSION_MINOR=$(echo ${CMAKE_VERSION} | cut -d. -f2)
+CMAKE_VERSION_NUMBER=$((100 * ${CMAKE_VERSION_MAJOR} + ${CMAKE_VERSION_MINOR}))
