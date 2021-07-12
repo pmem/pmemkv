@@ -1,5 +1,7 @@
 
-name: pmemkv-other
+name: pmemkv-nightly
+# It runs non-deafult OSes, listed below with basic set of compilers and tests.
+
 on:
   schedule:
     # run this job at 01:00 UTC everyday
@@ -11,6 +13,7 @@ env:
   CONTAINER_REG:  ghcr.io/pmem/pmemkv
   HOST_WORKDIR:   ${{ github.workspace }}
   WORKDIR:        utils/docker
+  TEST_TIMEOUT:   900
   IMG_VER:        latest
   TYPE:           debug
   PUSH_IMAGE:     1
@@ -20,7 +23,7 @@ env:
 
 jobs:
   linux:
-    name: Linux-other
+    name: Linux-nightly
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -44,7 +47,7 @@ jobs:
       - name: Clone the git repo
         uses: actions/checkout@v2
 
-      # other_OSes workflow rebuilds images every time and push them to the container registry
+      # It rebuilds images every time and pushes them to the container registry
       - name: Rebuild and push the image
         run: cd $WORKDIR && ${{ matrix.CONFIG }} ./pull-or-rebuild-image.sh rebuild
 
