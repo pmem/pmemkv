@@ -1593,10 +1593,13 @@ if(ENGINE_RADIX)
 	foreach(dram_caching ${DRAM_CACHING_OPTS})
 		if(dram_caching EQUAL 1)
 			set(EXTRA_CFG_PARAM {"dram_caching":1,"cache_size":100,"log_size":50000})
+			set(PMEMCHECK "")
 		else()
 			set(EXTRA_CFG_PARAM {"dram_caching":0})
+			set(PMEMCHECK "pmemcheck")
 		endif()
-		# XXX: add drd/helgrind tests for radix with dram_caching==1
+
+		# XXX: add drd/helgrind/pmemcheck tests for radix with dram_caching==1
 
 		add_engine_test(ENGINE radix
 				BINARY c_api_null_db_config
@@ -1606,25 +1609,25 @@ if(ENGINE_RADIX)
 
 		add_engine_test(ENGINE radix
 				BINARY open
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default_no_config.cmake
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY put_get_remove
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY put_get_remove_not_aligned
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY put_get_std_map
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 1000 8 200
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
@@ -1641,51 +1644,51 @@ if(ENGINE_RADIX)
 
 		add_engine_test(ENGINE radix
 				BINARY iterate
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY persistent_put_get_std_map_multiple_reopen
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 1000 8 200
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY persistent_not_found_verify
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/persistent/insert_check.cmake
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY persistent_overwrite_verify
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/persistent/insert_check.cmake
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY persistent_put_remove_verify
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/persistent/insert_check.cmake
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY persistent_put_verify
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/persistent/insert_check.cmake
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY persistent_put_verify_asc_params
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/persistent/insert_check.cmake
 				DB_SIZE 1G PARAMS 6000
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY persistent_put_verify_desc_params
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/persistent/insert_check.cmake
 				DB_SIZE 1G PARAMS 6000
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
@@ -1728,7 +1731,7 @@ if(ENGINE_RADIX)
 
 		add_engine_test(ENGINE radix
 				BINARY pmemobj_create_or_error_if_exists
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default_no_config.cmake
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
@@ -1741,48 +1744,48 @@ if(ENGINE_RADIX)
 		# XXX - defrag not supported
 		# add_engine_test(ENGINE radix
 		# BINARY pmemobj_put_get_std_map_defrag
-		# TRACERS none memcheck pmemcheck
+		# TRACERS none memcheck ${PMEMCHECK}
 		# SCRIPT pmemobj_based/default.cmake
 		# PARAMS 1000 100 200)
 
 		add_engine_test(ENGINE radix
 				BINARY pmemobj_put_get_std_map_oid
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/pmemobj/put_get_std_map_oid.cmake
 				PARAMS 1000 8 200
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY put_get_std_map
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/pmemobj/put_get_std_map_create_or_error_if_exists.cmake
 				PARAMS 1000 8 200
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY put_get_std_map
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/pmemobj/create_if_missing.cmake
 				PARAMS 128 32 16
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY put_get_remove_charset_params
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 1000 16
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY put_get_remove_charset_params
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 1000 1024
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY put_get_remove_long_key
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
@@ -1795,62 +1798,62 @@ if(ENGINE_RADIX)
 
 		add_engine_test(ENGINE radix
 				BINARY put_get_remove_params
-				TRACERS memcheck pmemcheck
+				TRACERS memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				DB_SIZE 1G PARAMS 4000
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY put_get_std_map
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 1000 100 200
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY sorted_iterate
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY sorted_get_all_gen_params
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 32 8
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY sorted_get_above_gen_params
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS default 32 8
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY sorted_get_equal_above_gen_params
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 32 8
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY sorted_get_below_gen_params
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 32 8
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY sorted_get_equal_below_gen_params
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 32 8
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 		add_engine_test(ENGINE radix
 				BINARY sorted_get_between_gen_params
-				TRACERS none memcheck pmemcheck
+				TRACERS none memcheck ${PMEMCHECK}
 				SCRIPT pmemobj_based/default.cmake
 				PARAMS 32 8
 				EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
@@ -1858,25 +1861,25 @@ if(ENGINE_RADIX)
 		if(dram_caching EQUAL 0)
 			add_engine_test(ENGINE radix
 					BINARY transaction_put
-					TRACERS none memcheck pmemcheck
+					TRACERS none memcheck ${PMEMCHECK}
 					SCRIPT pmemobj_based/default.cmake
 					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 			add_engine_test(ENGINE radix
 					BINARY transaction_remove
-					TRACERS none memcheck pmemcheck
+					TRACERS none memcheck ${PMEMCHECK}
 					SCRIPT pmemobj_based/default.cmake
 					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 			add_engine_test(ENGINE radix
 					BINARY iterator_basic
-					TRACERS none memcheck pmemcheck
+					TRACERS none memcheck ${PMEMCHECK}
 					SCRIPT pmemobj_based/default.cmake
 					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 
 			add_engine_test(ENGINE radix
 					BINARY iterator_sorted
-					TRACERS none memcheck pmemcheck
+					TRACERS none memcheck ${PMEMCHECK}
 					SCRIPT pmemobj_based/default.cmake
 					EXTRA_CONFIG_PARAMS ${EXTRA_CFG_PARAM})
 		endif()
