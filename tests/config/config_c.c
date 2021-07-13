@@ -442,4 +442,5 @@ int main(int argc, char *argv[])
 	integral_conversion_test();
 	not_found_test();
 	null_config_test();
+	return 0;
 }
