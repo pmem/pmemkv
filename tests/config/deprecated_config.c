@@ -36,4 +36,5 @@ int main(int argc, char *argv[])
 	START();
 
 	deprecated_funcs_test();
+	return 0;
 }
