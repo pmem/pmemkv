@@ -315,27 +315,29 @@ private:
 	using container_type = internal::radix::map_mt_type;
 	using pmem_type = internal::radix::pmem_type<container_type>;
 	using uvalue_type = pmem::obj::experimental::inline_string;
+	using dram_uvalue_type = pmem::obj::experimental::basic_dram_inline_string<char>;
 	using cache_type = internal::radix::ordered_cache<uvalue_type>;
 	using pmem_log_type = internal::radix::log_type;
 	using unique_ptr_type = std::unique_ptr<const char[], void (*)(const char *)>;
 	using dram_iterator = typename cache_type::iterator;
 	using pmem_iterator = typename container_type::iterator;
 
+	template <typename KeyValueType>
 	struct queue_entry {
 		queue_entry(cache_type::value_type *dram_entry, string_view key_,
 			    string_view value_);
 
-		const uvalue_type &key() const;
+		const KeyValueType &key() const;
 
-		const uvalue_type &value() const;
-		uvalue_type &value();
+		const KeyValueType &value() const;
+		KeyValueType &value();
 
 		cache_type::value_type *dram_entry;
 		bool remove;
 		char padding[7];
 	};
 
-	static_assert(sizeof(queue_entry) == 16);
+	static_assert(sizeof(queue_entry<uvalue_type>) == 16, "");
 
 	using pmem_queue_type = pmem::obj::experimental::mpsc_queue;
 
@@ -414,6 +416,61 @@ private:
 	std::unique_ptr<pmem_queue_type> queue;
 	std::unique_ptr<pmem_queue_type::worker> queue_worker;
 };
+
+static inline constexpr size_t align_up(size_t size, size_t align)
+{
+	return ((size) + (align)-1) & ~((align)-1);
+}
+
+template <typename KeyValueType>
+heterogeneous_radix::queue_entry<KeyValueType>::queue_entry(
+	heterogeneous_radix::cache_type::value_type *dram_entry, string_view key_,
+	string_view value_)
+    : dram_entry(dram_entry)
+{
+	auto key_size = pmem::obj::experimental::total_sizeof<KeyValueType>::value(key_);
+	auto key_dst = reinterpret_cast<KeyValueType *>(this + 1);
+	auto padding = align_up(key_size, alignof(KeyValueType)) - key_size;
+	auto val_dst = reinterpret_cast<KeyValueType *>(
+		reinterpret_cast<char *>(key_dst) + key_size + padding);
+
+	new (key_dst) KeyValueType(key_);
+
+	if (value_.data() == nullptr) {
+		new (val_dst) KeyValueType(string_view(""));
+		remove = true;
+	} else {
+		new (val_dst) KeyValueType(value_);
+		remove = false;
+	}
+}
+
+template <typename KeyValueType>
+const KeyValueType &heterogeneous_radix::queue_entry<KeyValueType>::key() const
+{
+	auto key = reinterpret_cast<const KeyValueType *>(this + 1);
+	return *key;
+}
+
+template <typename KeyValueType>
+const KeyValueType &heterogeneous_radix::queue_entry<KeyValueType>::value() const
+{
+	auto key_size = pmem::obj::experimental::total_sizeof<KeyValueType>::value(
+		string_view(key()));
+	auto key_dst = reinterpret_cast<const char *>(this + 1);
+	auto padding = align_up(key_size, alignof(KeyValueType)) - key_size;
+	auto val_dst =
+		reinterpret_cast<const KeyValueType *>(key_dst + key_size + padding);
+
+	return *reinterpret_cast<const KeyValueType *>(val_dst);
+}
+
+template <typename KeyValueType>
+KeyValueType &heterogeneous_radix::queue_entry<KeyValueType>::value()
+{
+	auto val = &const_cast<const queue_entry<KeyValueType> *>(this)->value();
+	return *const_cast<KeyValueType *>(val);
+}
 
 template <>
 class radix::radix_iterator<true> : public internal::iterator_base {
