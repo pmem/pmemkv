@@ -18,9 +18,8 @@ PREFIX="/usr"
 PACKAGE_TYPE=${1^^} #To uppercase
 echo "PACKAGE_TYPE: ${PACKAGE_TYPE}"
 
-# Merge pull request #1151 from igchor/more_radix_fixes
-# More radix fixes
-LIBPMEMOBJ_CPP_VERSION="36bfcee24b652f5dba702d35adf4989f3e9baa7a"
+# 1.13.0-rc1 release
+LIBPMEMOBJ_CPP_VERSION="5629c29a2a998ce0c1b45db5885358c35435a7a3"
 echo "LIBPMEMOBJ_CPP_VERSION: ${LIBPMEMOBJ_CPP_VERSION}"
 
 build_dir=$(mktemp -d -t libpmemobj-cpp-XXX)
