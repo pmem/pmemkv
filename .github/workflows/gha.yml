@@ -30,16 +30,16 @@ jobs:
       FORCE_IMAGE_ACTION:   ${{ secrets.FORCE_IMAGE_ACTION }}
     strategy:
       matrix:
-        CONFIG: ["TYPE=debug OS=fedora OS_VER=32",
+        CONFIG: ["TYPE=debug OS=fedora OS_VER=34",
                  "TYPE=debug OS=ubuntu OS_VER=20.10",
                  "TYPE=debug OS=ubuntu OS_VER=20.04 CHECK_CPP_STYLE=1 COVERAGE=1",
-                 "TYPE=release OS=fedora OS_VER=32",
+                 "TYPE=release OS=fedora OS_VER=34",
                  "TYPE=release OS=ubuntu OS_VER=20.04 PUSH_IMAGE=1",
                  "TYPE=valgrind OS=ubuntu OS_VER=20.04",
                  "TYPE=memcheck_drd OS=ubuntu OS_VER=20.04",
-                 "TYPE=building OS=fedora OS_VER=32 PUSH_IMAGE=1",
+                 "TYPE=building OS=fedora OS_VER=34 PUSH_IMAGE=1",
                  "TYPE=building OS=ubuntu OS_VER=20.10 PUSH_IMAGE=1 COVERAGE=1 ",
-                 "TYPE=compatibility OS=fedora OS_VER=32",
+                 "TYPE=compatibility OS=fedora OS_VER=34",
                  "TYPE=bindings OS=ubuntu OS_VER=20.04_bindings PUSH_IMAGE=1"]
     steps:
       - name: Set image version and force image action for stable branch
@@ -79,7 +79,7 @@ jobs:
       github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/stable-')
     strategy:
       matrix:
-        CONFIG: ["TYPE=doc OS=fedora OS_VER=32"]
+        CONFIG: ["TYPE=doc OS=fedora OS_VER=34"]
     steps:
       - name: Set image version for stable branch
         if: startsWith(github.ref, 'refs/heads/stable-')
