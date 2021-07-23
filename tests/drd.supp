@@ -1,4 +1,25 @@
 {
+   Conditional variable destruction false-positive
+   drd:CondErr
+   ...
+   fun:pthread_cond_destroy@*
+   ...
+}
+{
+   Pthread mutex lock false positive
+   Drd:Race
+   ...
+   fun:pthread_mutex_*lock*
+   ...
+}
+{
+   Pthread rwlock lock false positive
+   Drd:Race
+   ...
+   fun:pthread_rwlock_*lock*
+   ...
+}
+{
    Dl lookup
    drd:ConflictingAccess
    fun:_dl_lookup_symbol_x
