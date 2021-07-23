@@ -21,7 +21,7 @@ Installation of Key-Value Datastore for Persistent Memory
 
 * **Linux 64-bit** (OSX and Windows are not yet supported)
 * **libpmem** and **libpmemobj**, which are part of [PMDK](https://github.com/pmem/pmdk) - Persistent Memory Development Kit 1.9.1
-* [**libpmemobj-cpp**](https://github.com/pmem/libpmemobj-cpp) - C++ PMDK bindings 1.12
+* [**libpmemobj-cpp**](https://github.com/pmem/libpmemobj-cpp) - C++ PMDK bindings 1.13.0
 * [**memkind**](https://github.com/memkind/memkind) - Volatile memory manager 1.8.0 (required by vsmap & vcmap engines)
 * [**TBB**](https://github.com/01org/tbb) - Thread Building Blocks (required by vcmap engine)
 * [**RapidJSON**](https://github.com/tencent/rapidjson) - JSON parser 1.0.0 (required by `libpmemkv_json_config` helper library)
