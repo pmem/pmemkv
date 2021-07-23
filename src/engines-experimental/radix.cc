@@ -56,11 +56,6 @@ void transaction::abort()
 } /* namespace radix */
 } /* namespace internal */
 
-static constexpr size_t align_up(size_t size, size_t align)
-{
-	return ((size) + (align)-1) & ~((align)-1);
-}
-
 radix::radix(std::unique_ptr<internal::config> cfg)
     : pmemobj_engine_base(cfg, "pmemkv_radix"), config(std::move(cfg))
 {
@@ -463,51 +458,6 @@ const heterogeneous_radix::uvalue_type *heterogeneous_radix::tombstone_persisten
 	return reinterpret_cast<const heterogeneous_radix::uvalue_type *>(2ULL);
 }
 
-heterogeneous_radix::queue_entry::queue_entry(cache_type::value_type *dram_entry,
-					      string_view key_, string_view value_)
-    : dram_entry(dram_entry)
-{
-	auto key_size = pmem::obj::experimental::total_sizeof<uvalue_type>::value(key_);
-	auto key_dst = reinterpret_cast<uvalue_type *>(this + 1);
-	auto padding = align_up(key_size, alignof(uvalue_type)) - key_size;
-	auto val_dst = reinterpret_cast<uvalue_type *>(reinterpret_cast<char *>(key_dst) +
-						       key_size + padding);
-
-	new (key_dst) uvalue_type(key_);
-
-	if (value_.data() == nullptr) {
-		new (val_dst) uvalue_type(string_view(""));
-		remove = true;
-	} else {
-		new (val_dst) uvalue_type(value_);
-		remove = false;
-	}
-}
-
-const heterogeneous_radix::uvalue_type &heterogeneous_radix::queue_entry::key() const
-{
-	auto key = reinterpret_cast<const uvalue_type *>(this + 1);
-	return *key;
-}
-
-const heterogeneous_radix::uvalue_type &heterogeneous_radix::queue_entry::value() const
-{
-	auto key_size = pmem::obj::experimental::total_sizeof<uvalue_type>::value(
-		string_view(key()));
-	auto key_dst = reinterpret_cast<const char *>(this + 1);
-	auto padding = align_up(key_size, alignof(uvalue_type)) - key_size;
-	auto val_dst =
-		reinterpret_cast<const uvalue_type *>(key_dst + key_size + padding);
-
-	return *reinterpret_cast<const uvalue_type *>(val_dst);
-}
-
-heterogeneous_radix::uvalue_type &heterogeneous_radix::queue_entry::value()
-{
-	auto val = &const_cast<const queue_entry *>(this)->value();
-	return *const_cast<heterogeneous_radix::uvalue_type *>(val);
-}
-
 heterogeneous_radix::heterogeneous_radix(std::unique_ptr<internal::config> cfg)
     : pmemobj_engine_base(cfg, "pmemkv_radix"), config(std::move(cfg))
 {
@@ -629,14 +579,18 @@ status heterogeneous_radix::put(string_view key, string_view value)
 	auto padding = align_up(uvalue_key_size, alignof(uvalue_type)) - uvalue_key_size;
 	auto req_size = uvalue_key_size +
 		pmem::obj::experimental::total_sizeof<uvalue_type>::value(value) +
-		sizeof(queue_entry) + padding;
+		sizeof(queue_entry<dram_uvalue_type>) + padding;
 
-	using alloc_type = typename std::aligned_storage<sizeof(queue_entry),
-							 alignof(queue_entry)>::type;
-	auto alloc_size = (req_size + sizeof(queue_entry) - 1) / sizeof(queue_entry);
+	using alloc_type = typename std::aligned_storage<
+		sizeof(queue_entry<dram_uvalue_type>),
+		alignof(queue_entry<dram_uvalue_type>)>::type;
+	auto alloc_size = (req_size + sizeof(queue_entry<dram_uvalue_type>) - 1) /
+		sizeof(queue_entry<dram_uvalue_type>);
 	auto data = std::unique_ptr<alloc_type[]>(new alloc_type[alloc_size]);
 
-	assert(reinterpret_cast<uintptr_t>(data.get()) % alignof(queue_entry) == 0);
+	assert(reinterpret_cast<uintptr_t>(data.get()) %
+		       alignof(queue_entry<dram_uvalue_type>) ==
+	       0);
 
 	/* XXX: implement blocking cache_put_with_evict */
 	cache_type::value_type *cache_val = nullptr;
@@ -645,15 +599,15 @@ status heterogeneous_radix::put(string_view key, string_view value)
 		handle_oom_from_bg();
 	}
 
-	new (data.get()) queue_entry(cache_val, key, value);
+	new (data.get()) queue_entry<dram_uvalue_type>(cache_val, key, value);
 
 	while (true) {
 		auto produced = queue_worker->try_produce(
 			pmem::obj::string_view(reinterpret_cast<const char *>(data.get()),
 					       req_size),
 			[&](pmem::obj::string_view target) {
-				auto pmem_entry = reinterpret_cast<const queue_entry *>(
-					target.data());
+				auto pmem_entry = reinterpret_cast<
+					const queue_entry<uvalue_type> *>(target.data());
 				assert(pmem_entry->key() == key);
 
 				const uvalue_type *val =
@@ -1102,8 +1056,8 @@ void heterogeneous_radix::consume_queue_entry(pmem::obj::string_view entry,
 	 * This allows us to keep processed elements in cache without additional
 	 * value copies.
 	 */
-	auto e = reinterpret_cast<const queue_entry *>(entry.data());
-	auto dram_entry = const_cast<queue_entry *>(e)->dram_entry;
+	auto e = reinterpret_cast<const queue_entry<uvalue_type> *>(entry.data());
+	auto dram_entry = const_cast<queue_entry<uvalue_type> *>(e)->dram_entry;
 	const uvalue_type *expected = e->remove ? tombstone_volatile() : &e->value();
 	const uvalue_type *desired;
 
