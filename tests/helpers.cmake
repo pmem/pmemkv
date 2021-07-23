@@ -108,7 +108,8 @@ function(execute_common expect_success output_file name)
 		set(TRACE valgrind --error-exitcode=99 --tool=pmemcheck)
 	elseif(${TRACER} STREQUAL memcheck)
 		set(TRACE valgrind --error-exitcode=99 --tool=memcheck --leak-check=full --max-threads=3000
-		   --suppressions=${TEST_ROOT_DIR}/ld.supp --suppressions=${TEST_ROOT_DIR}/memcheck-stdcpp.supp --suppressions=${TEST_ROOT_DIR}/memcheck-libunwind.supp)
+		   --suppressions=${TEST_ROOT_DIR}/ld.supp --suppressions=${TEST_ROOT_DIR}/memcheck-stdcpp.supp --suppressions=${TEST_ROOT_DIR}/memcheck-libunwind.supp
+		   --suppressions=${TEST_ROOT_DIR}/memcheck-ndctl.supp)
 	elseif(${TRACER} STREQUAL helgrind)
 		set(TRACE valgrind --error-exitcode=99 --tool=helgrind --max-threads=3000)
 	elseif(${TRACER} STREQUAL drd)
