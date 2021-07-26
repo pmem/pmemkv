@@ -13,6 +13,7 @@ add_custom_target(examples)
 ## Setup examples
 # ----------------------------------------------------------------- #
 add_common_flag(-Wno-unused-but-set-variable)
+add_common_flag(-Wno-maybe-uninitialized)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
 add_dependencies(examples pmemkv)
