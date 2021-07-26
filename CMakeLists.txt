@@ -248,6 +248,7 @@ add_common_flag(-Wmissing-variable-declarations)
 add_common_flag(-fno-common)
 add_common_flag(-Wunused-macros)
 add_common_flag(-Wsign-conversion)
+add_common_flag(-Wno-maybe-uninitialized)
 
 add_common_flag(-ggdb DEBUG)
 add_common_flag(-DDEBUG DEBUG)
