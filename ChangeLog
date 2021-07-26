@@ -1,6 +1,6 @@
-Fri Jul 23 2021 Igor Chorążewicz <igor.chorazewicz@intel.com>
+Mon Jul 26 2021 Igor Chorążewicz <igor.chorazewicz@intel.com>
 
-	* Version 1.5.0-rc1
+	* Version 1.5.0-rc2
 
 	New features:
 	- Introduce (optional) caching layer in radix engine. It can be enabled
