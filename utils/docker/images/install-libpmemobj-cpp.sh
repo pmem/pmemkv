@@ -18,8 +18,8 @@ PREFIX="/usr"
 PACKAGE_TYPE=${1^^} #To uppercase
 echo "PACKAGE_TYPE: ${PACKAGE_TYPE}"
 
-# 1.13.0-rc1 release
-LIBPMEMOBJ_CPP_VERSION="5629c29a2a998ce0c1b45db5885358c35435a7a3"
+# common: 1.13.0 release
+LIBPMEMOBJ_CPP_VERSION="9599f724d4edc3a3d973bac14eeebdc1bc31d327"
 echo "LIBPMEMOBJ_CPP_VERSION: ${LIBPMEMOBJ_CPP_VERSION}"
 
 build_dir=$(mktemp -d -t libpmemobj-cpp-XXX)
