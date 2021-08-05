@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['pmemkv_81',['pmemkv',['../index.html',1,'']]],
-  ['internal_82',['internal',['../namespacepmem_1_1kv_1_1internal.html',1,'pmem::kv']]],
-  ['kv_83',['kv',['../namespacepmem_1_1kv.html',1,'pmem']]],
-  ['pmem_84',['pmem',['../namespacepmem.html',1,'']]],
+  ['internal_81',['internal',['../namespacepmem_1_1kv_1_1internal.html',1,'pmem::kv']]],
+  ['kv_82',['kv',['../namespacepmem_1_1kv.html',1,'pmem']]],
+  ['pmem_83',['pmem',['../namespacepmem.html',1,'']]],
+  ['pmemkv_84',['pmemkv',['../index.html',1,'']]],
   ['pointer_85',['pointer',['../classpmem_1_1kv_1_1db_1_1iterator_1_1OutputIterator.html#ac79dbcd58841cf925919bdbaaa787a9d',1,'pmem::kv::db::iterator::OutputIterator']]],
   ['prev_86',['prev',['../classpmem_1_1kv_1_1db_1_1iterator.html#a2fa96589da801b21a9c0db9cc79fdbc2',1,'pmem::kv::db::iterator']]],
   ['ptr_87',['ptr',['../structpmem_1_1kv_1_1internal_1_1unique__ptr__wrapper.html#a8ba6ff57823a1c3c0a89637555280a38',1,'pmem::kv::internal::unique_ptr_wrapper::ptr()'],['../structpmem_1_1kv_1_1internal_1_1comparator__config__entry.html#a242122210993f0ba744ad8dddab549e9',1,'pmem::kv::internal::comparator_config_entry::ptr()']]],
