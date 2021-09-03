@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "unittest.hpp"
 
@@ -42,9 +42,7 @@ std::map<std::string, std::string> PutToMapTest(size_t n_inserts, size_t key_len
 
 void VerifyKv(const std::map<std::string, std::string> &prototype, pmem::kv::db &kv)
 {
-	size_t cnt;
-	ASSERT_STATUS(kv.count_all(cnt), pmem::kv::status::OK);
-	UT_ASSERTeq(prototype.size(), cnt);
+	ASSERT_SIZE(kv, prototype.size());
 
 	/* Retrieve data from db and compare with prototype */
 	for (const auto &record : prototype) {
@@ -52,7 +50,7 @@ void VerifyKv(const std::map<std::string, std::string> &prototype, pmem::kv::db 
 		const auto &val = record.second;
 
 		auto s = kv.get(key, [&](string_view value) {
-			UT_ASSERT(value.compare(val) == 0);
+			UT_ASSERTeq(value.compare(val), 0);
 		});
 		ASSERT_STATUS(s, status::OK);
 	}

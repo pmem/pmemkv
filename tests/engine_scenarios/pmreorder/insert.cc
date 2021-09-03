@@ -31,9 +31,7 @@ static void test_init(pmem::kv::db &kv)
 
 static void test_insert(pmem::kv::db &kv)
 {
-	std::size_t size;
-	ASSERT_STATUS(kv.count_all(size), pmem::kv::status::OK);
-	UT_ASSERT(size == len_elements);
+	ASSERT_SIZE(kv, len_elements);
 
 	std::string element = entry_from_number(len_elements);
 	ASSERT_STATUS(kv.put(element, element), pmem::kv::status::OK);

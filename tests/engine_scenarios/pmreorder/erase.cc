@@ -31,15 +31,15 @@ static void test_init(pmem::kv::db &kv)
 
 static void test_erase(pmem::kv::db &kv)
 {
-	std::size_t size;
-	ASSERT_STATUS(kv.count_all(size), pmem::kv::status::OK);
-	UT_ASSERT(size == len_elements);
+	ASSERT_SIZE(kv, len_elements);
 
 	std::string element = entry_from_number(1); /* remove this element */
 	check_exist(kv, element, pmem::kv::status::OK);
 
 	ASSERT_STATUS(kv.remove(element), pmem::kv::status::OK);
 	check_exist(kv, element, pmem::kv::status::NOT_FOUND);
+
+	ASSERT_SIZE(kv, len_elements - 1);
 }
 
 static void check_consistency(pmem::kv::db &kv)
