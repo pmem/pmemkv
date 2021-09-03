@@ -90,6 +90,12 @@ static inline void UT_EXCEPTION(std::exception &e)
 				 STR(type), checkpoint, off);                            \
 	} while (0)
 
+#define ASSERT_UNREACHABLE                                                               \
+	do {                                                                             \
+		UT_FATAL("%s:%d in function %s should never be reached", __FILE__,       \
+			 __LINE__, __func__);                                            \
+	} while (0)
+
 #define ASSERT_STATUS(status, expected_status)                                           \
 	do {                                                                             \
 		auto current_status = status;                                            \
