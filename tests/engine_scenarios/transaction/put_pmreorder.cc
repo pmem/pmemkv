@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 /*
  * insert.cc -- insert pmreorder test
@@ -34,11 +34,11 @@ static void check_consistency(pmem::kv::db &kv)
 		ASSERT_STATUS(kv.exists(e), pmem::kv::status::OK);
 
 	if (size > init_elements.size()) {
-		UT_ASSERT(size == init_elements.size() + elements.size());
+		UT_ASSERTeq(size, init_elements.size() + elements.size());
 		for (auto &e : elements)
 			ASSERT_STATUS(kv.exists(e), pmem::kv::status::OK);
 	} else {
-		UT_ASSERT(size == init_elements.size());
+		UT_ASSERTeq(size, init_elements.size());
 	}
 }
 

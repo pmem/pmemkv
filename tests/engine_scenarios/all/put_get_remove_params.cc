@@ -20,9 +20,7 @@ static void LargeAscendingTest(const size_t iterations, pmem::kv::db &kv)
 		ASSERT_STATUS(kv.get(istr, &value), status::OK);
 		UT_ASSERT(value == entry_from_number(i, "", "!"));
 	}
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == iterations);
+	ASSERT_SIZE(kv, iterations);
 }
 
 static void LargeDescendingTest(const size_t iterations, pmem::kv::db &kv)
@@ -40,9 +38,7 @@ static void LargeDescendingTest(const size_t iterations, pmem::kv::db &kv)
 		ASSERT_STATUS(kv.get(istr, &value), status::OK);
 		UT_ASSERT(value == entry_from_number(i, "ABC"));
 	}
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == iterations);
+	ASSERT_SIZE(kv, iterations);
 }
 
 static void test(int argc, char *argv[])

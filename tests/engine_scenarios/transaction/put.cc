@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "../put_get_std_map.hpp"
 #include "unittest.hpp"
@@ -146,9 +146,7 @@ static void test_batched_updates(pmem::kv::db &kv)
 		ASSERT_STATUS(tx.commit(), pmem::kv::status::OK);
 	}
 
-	size_t cnt;
-	ASSERT_STATUS(kv.count_all(cnt), pmem::kv::status::OK);
-	UT_ASSERT(cnt == NUM_BATCH * BATCH_SIZE);
+	ASSERT_SIZE(kv, NUM_BATCH * BATCH_SIZE);
 
 	for (int i = 0; i < NUM_BATCH; i++) {
 		for (int j = 0; j < BATCH_SIZE; j++) {

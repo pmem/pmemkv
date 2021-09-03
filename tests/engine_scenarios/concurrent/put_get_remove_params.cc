@@ -27,9 +27,7 @@ static void SimpleMultithreadedTest(const size_t threads_number,
 			UT_ASSERT(value == val);
 		}
 	});
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == threads_number * thread_items);
+	ASSERT_SIZE(kv, threads_number * thread_items);
 }
 
 static void MultithreadedTestRemoveDataAside(const size_t threads_number,
@@ -61,9 +59,7 @@ static void MultithreadedTestRemoveDataAside(const size_t threads_number,
 			ASSERT_STATUS(kv.remove(key), status::OK);
 		}
 	});
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == initial_items);
+	ASSERT_SIZE(kv, initial_items);
 
 	/* get initial data and confirm it's untouched */
 	for (size_t i = 0; i < initial_items; i++) {

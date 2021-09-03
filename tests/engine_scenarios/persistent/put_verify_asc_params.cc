@@ -26,9 +26,7 @@ static void check(const size_t iterations, pmem::kv::db &kv)
 		ASSERT_STATUS(kv.get(key, &value), status::OK);
 		UT_ASSERT(value == expected_value);
 	}
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == iterations);
+	ASSERT_SIZE(kv, iterations);
 }
 
 static void test(int argc, char *argv[])
