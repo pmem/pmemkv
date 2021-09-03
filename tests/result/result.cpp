@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 /*
  * result.cpp -- tests result class, its members and related exception.
@@ -89,6 +89,7 @@ static void basic_test()
 		bool exception_thrown = false;
 		try {
 			res2.get_value();
+			ASSERT_UNREACHABLE;
 		} catch (pmem::kv::bad_result_access &e) {
 			UT_ASSERTeq(std::string(e.what()).compare(
 					    "bad_result_access: value doesn't exist"),
@@ -111,6 +112,7 @@ static void basic_test()
 		bool exception_thrown = false;
 		try {
 			const_res.get_value();
+			ASSERT_UNREACHABLE;
 		} catch (pmem::kv::bad_result_access &e) {
 			UT_ASSERTeq(std::string(e.what()).compare(
 					    "bad_result_access: value doesn't exist"),
@@ -202,6 +204,7 @@ static void basic_test()
 	try {
 		auto moved_val2 = std::move(move_out1).get_value();
 		(void)moved_val2;
+		ASSERT_UNREACHABLE;
 	} catch (const pmem::kv::bad_result_access &e) {
 		exception_thrown = true;
 	}
