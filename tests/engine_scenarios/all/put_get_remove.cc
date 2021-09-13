@@ -11,17 +11,13 @@ using namespace pmem::kv;
 
 static void SimpleTest(pmem::kv::db &kv)
 {
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 	ASSERT_STATUS(kv.exists(entry_from_string("key1")), status::NOT_FOUND);
 	std::string value;
 	ASSERT_STATUS(kv.get(entry_from_string("key1"), &value), status::NOT_FOUND);
 	ASSERT_STATUS(kv.put(entry_from_string("key1"), entry_from_string("value1")),
 		      status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.exists(entry_from_string("key1")), status::OK);
 	ASSERT_STATUS(kv.get(entry_from_string("key1"), &value), status::OK);
 	UT_ASSERT(value == entry_from_string("value1"));
@@ -64,9 +60,7 @@ static void GetMultipleTest(pmem::kv::db &kv)
 		      status::OK);
 	ASSERT_STATUS(kv.put(entry_from_string("mno"), entry_from_string("E5")),
 		      status::OK);
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERTeq(cnt, 5);
+	ASSERT_SIZE(kv, 5);
 	ASSERT_STATUS(kv.exists(entry_from_string("abc")), status::OK);
 	std::string value1;
 	ASSERT_STATUS(kv.get(entry_from_string("abc"), &value1), status::OK);
@@ -100,9 +94,7 @@ static void GetMultiple2Test(pmem::kv::db &kv)
 	ASSERT_STATUS(kv.remove(entry_from_string("key2")), status::OK);
 	ASSERT_STATUS(kv.put(entry_from_string("key3"), entry_from_string("VALUE3")),
 		      status::OK);
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 2);
+	ASSERT_SIZE(kv, 2);
 	std::string value1;
 	ASSERT_STATUS(kv.get(entry_from_string("key1"), &value1), status::OK);
 	UT_ASSERT(value1 == entry_from_string("value1"));
@@ -124,61 +116,45 @@ static void GetNonexistentTest(pmem::kv::db &kv)
 
 static void PutTest(pmem::kv::db &kv)
 {
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 
 	std::string value;
 	ASSERT_STATUS(kv.put(entry_from_string("key1"), entry_from_string("value1")),
 		      status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.get(entry_from_string("key1"), &value), status::OK);
 	UT_ASSERT(value == entry_from_string("value1"));
 
 	std::string new_value;
 	ASSERT_STATUS(kv.put(entry_from_string("key1"), entry_from_string("VALUE1")),
 		      status::OK); // same size
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.get(entry_from_string("key1"), &new_value), status::OK);
 	UT_ASSERT(new_value == entry_from_string("VALUE1"));
 
 	std::string new_value2;
 	ASSERT_STATUS(kv.put(entry_from_string("key1"), entry_from_string("new_val")),
 		      status::OK); // longer size
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.get(entry_from_string("key1"), &new_value2), status::OK);
 	UT_ASSERT(new_value2 == entry_from_string("new_val"));
 
 	std::string new_value3;
 	ASSERT_STATUS(kv.put(entry_from_string("key1"), entry_from_string("?")),
 		      status::OK); // shorter size
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.get(entry_from_string("key1"), &new_value3), status::OK);
 	UT_ASSERT(new_value3 == entry_from_string("?"));
 }
 
 static void RemoveAllTest(pmem::kv::db &kv)
 {
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 	ASSERT_STATUS(kv.put(entry_from_string("tmpkey"), entry_from_string("tmpval1")),
 		      status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.remove(entry_from_string("tmpkey")), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 	ASSERT_STATUS(kv.exists(entry_from_string("tmpkey")), status::NOT_FOUND);
 	std::string value;
 	ASSERT_STATUS(kv.get(entry_from_string("tmpkey"), &value), status::NOT_FOUND);
@@ -186,60 +162,40 @@ static void RemoveAllTest(pmem::kv::db &kv)
 
 static void RemoveAndInsertTest(pmem::kv::db &kv)
 {
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 	ASSERT_STATUS(kv.put(entry_from_string("tmpkey"), entry_from_string("tmpval1")),
 		      status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.remove(entry_from_string("tmpkey")), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 	ASSERT_STATUS(kv.exists(entry_from_string("tmpkey")), status::NOT_FOUND);
 	std::string value;
 	ASSERT_STATUS(kv.get(entry_from_string("tmpkey"), &value), status::NOT_FOUND);
 	ASSERT_STATUS(kv.put(entry_from_string("tmpkey1"), entry_from_string("tmpval1")),
 		      status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.exists(entry_from_string("tmpkey1")), status::OK);
 	ASSERT_STATUS(kv.get(entry_from_string("tmpkey1"), &value), status::OK);
 	UT_ASSERT(value == entry_from_string("tmpval1"));
 	ASSERT_STATUS(kv.remove(entry_from_string("tmpkey1")), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 	ASSERT_STATUS(kv.exists(entry_from_string("tmpkey1")), status::NOT_FOUND);
 	ASSERT_STATUS(kv.get(entry_from_string("tmpkey1"), &value), status::NOT_FOUND);
 }
 
 static void RemoveExistingTest(pmem::kv::db &kv)
 {
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 	ASSERT_STATUS(kv.put(entry_from_string("tmpkey1"), entry_from_string("tmpval1")),
 		      status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.put(entry_from_string("tmpkey2"), entry_from_string("tmpval2")),
 		      status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 2);
+	ASSERT_SIZE(kv, 2);
 	ASSERT_STATUS(kv.remove(entry_from_string("tmpkey1")), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERTeq(cnt, 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.remove(entry_from_string("tmpkey1")), status::NOT_FOUND);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.exists(entry_from_string("tmpkey1")), status::NOT_FOUND);
 	std::string value;
 	ASSERT_STATUS(kv.get(entry_from_string("tmpkey1"), &value), status::NOT_FOUND);
@@ -266,18 +222,14 @@ static void ZeroFilledStringTest(pmem::kv::db &kv)
 	uint64_t z = 0;
 	std::string value;
 	auto zero_filled_str = uint64_to_string(z);
-	ASSERT_STATUS(kv.get(entry_from_string(zero_filled_str), &value),
-		      status::NOT_FOUND);
-	ASSERT_STATUS(kv.put(entry_from_string(zero_filled_str),
-			     entry_from_string(zero_filled_str)),
-		      status::OK);
-	ASSERT_STATUS(kv.count_all(z), status::OK);
-	UT_ASSERT(z == 1);
-	ASSERT_STATUS(kv.get(entry_from_string(zero_filled_str), &value), status::OK);
-	UT_ASSERT(value == entry_from_string(zero_filled_str));
-	ASSERT_STATUS(kv.remove(entry_from_string(zero_filled_str)), status::OK);
-	ASSERT_STATUS(kv.count_all(z), status::OK);
-	UT_ASSERT(z == 0);
+	auto fixed_size_str = entry_from_string(zero_filled_str);
+	ASSERT_STATUS(kv.get(fixed_size_str, &value), status::NOT_FOUND);
+	ASSERT_STATUS(kv.put(fixed_size_str, fixed_size_str), status::OK);
+	ASSERT_SIZE(kv, 1);
+	ASSERT_STATUS(kv.get(fixed_size_str, &value), status::OK);
+	UT_ASSERT(value == fixed_size_str);
+	ASSERT_STATUS(kv.remove(fixed_size_str), status::OK);
+	ASSERT_SIZE(kv, 0);
 }
 
 static void MoveDBTest(pmem::kv::db &kv)

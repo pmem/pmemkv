@@ -44,9 +44,7 @@ static void GetAllTest(pmem::kv::db &kv)
 	for (size_t i = 0; i < entries.size(); i++) {
 		auto e = entries[i];
 		ASSERT_STATUS(kv.put(e.first, e.second), status::OK);
-		std::size_t cnt = std::numeric_limits<std::size_t>::max();
-		ASSERT_STATUS(kv.count_all(cnt), status::OK);
-		UT_ASSERTeq(cnt, i + 1);
+		ASSERT_SIZE(kv, i + 1);
 	}
 
 	test_kv_list result;

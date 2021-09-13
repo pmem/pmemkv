@@ -45,9 +45,7 @@ static void BinaryKeyTest(pmem::kv::db &kv)
 	 * TEST: each char from the char range is used in two keys
 	 * once with prefix and suffix, once just as is ("clean key")
 	 */
-	size_t cnt = std::numeric_limits<size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 
 	auto key = entry_from_string(PREFIX);
 	auto value = entry_from_string("constval");
@@ -55,8 +53,7 @@ static void BinaryKeyTest(pmem::kv::db &kv)
 
 	ASSERT_STATUS(kv.put(key, value), status::OK);
 	ASSERT_STATUS(kv.exists(key), status::OK);
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 
 	/* Add binary keys */
 	for (auto i = CHARSET_RANGE_START; i <= CHARSET_RANGE_END; i++) {
@@ -73,8 +70,7 @@ static void BinaryKeyTest(pmem::kv::db &kv)
 	}
 
 	std::string val;
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == (CHARSET_LEN * 2 + 1));
+	ASSERT_SIZE(kv, CHARSET_LEN * 2 + 1);
 	ASSERT_STATUS(kv.get(key, &val), status::OK);
 	UT_ASSERT(val == value);
 
@@ -100,8 +96,7 @@ static void BinaryKeyTest(pmem::kv::db &kv)
 		ASSERT_STATUS(kv.exists(key2), status::NOT_FOUND);
 	}
 
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.get(key, &val), status::OK);
 	UT_ASSERT(val == value);
 	ASSERT_STATUS(kv.remove(key), status::OK);
@@ -113,9 +108,7 @@ static void BinaryRandKeyTest(const size_t elements_cnt, const size_t max_key_le
 	/**
 	 * TEST: keys are randomly generated from the full range of the charset
 	 */
-	size_t cnt = std::numeric_limits<size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 
 	auto keys = generate_binary_strings(elements_cnt, max_key_len);
 
@@ -128,11 +121,10 @@ static void BinaryRandKeyTest(const size_t elements_cnt, const size_t max_key_le
 	}
 
 	std::string value;
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == elements_cnt);
+	ASSERT_SIZE(kv, elements_cnt);
 
 	/* Read and remove elements with generated keys (in reverse order) */
-	i = cnt;
+	i = elements_cnt;
 	for (auto it = keys.rbegin(); it != keys.rend(); ++it) {
 		std::string istr = entry_from_number(--i);
 		std::string key = entry_from_string(*it);
@@ -144,8 +136,7 @@ static void BinaryRandKeyTest(const size_t elements_cnt, const size_t max_key_le
 		ASSERT_STATUS(kv.remove(key), status::OK);
 		ASSERT_STATUS(kv.exists(key), status::NOT_FOUND);
 	}
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 }
 
 static void BinaryValueTest(pmem::kv::db &kv)
@@ -154,9 +145,7 @@ static void BinaryValueTest(pmem::kv::db &kv)
 	 * TEST: each char from the char range is used as value twice -
 	 * once with prefix and suffix, once just as is ("clean value")
 	 */
-	size_t cnt = std::numeric_limits<size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 
 	/* Add elements with binary values */
 	for (auto i = CHARSET_RANGE_START; i <= CHARSET_RANGE_END; i++) {
@@ -175,8 +164,7 @@ static void BinaryValueTest(pmem::kv::db &kv)
 	}
 
 	std::string value;
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == (CHARSET_LEN * 2));
+	ASSERT_SIZE(kv, CHARSET_LEN * 2);
 
 	/* Read and remove elements with binary values */
 	for (auto i = CHARSET_RANGE_START; i <= CHARSET_RANGE_END; i++) {
@@ -204,8 +192,7 @@ static void BinaryValueTest(pmem::kv::db &kv)
 		ASSERT_STATUS(kv.exists(key2), status::NOT_FOUND);
 	}
 
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 }
 
 static void BinaryRandValueTest(const size_t elements_cnt, const size_t max_value_len,
@@ -214,9 +201,7 @@ static void BinaryRandValueTest(const size_t elements_cnt, const size_t max_valu
 	/**
 	 * TEST: values are randomly generated from the full range of the charset
 	 */
-	size_t cnt = std::numeric_limits<size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 
 	auto values = generate_binary_strings(elements_cnt, max_value_len);
 
@@ -230,11 +215,10 @@ static void BinaryRandValueTest(const size_t elements_cnt, const size_t max_valu
 	}
 
 	std::string value;
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == elements_cnt);
+	ASSERT_SIZE(kv, elements_cnt);
 
 	/* Read and remove elements with generated values (in reverse order) */
-	i = cnt;
+	i = elements_cnt;
 	for (auto it = values.rbegin(); it != values.rend(); ++it) {
 		std::string key = entry_from_number(--i);
 		std::string exp_value = entry_from_string(*it);
@@ -245,8 +229,7 @@ static void BinaryRandValueTest(const size_t elements_cnt, const size_t max_valu
 		ASSERT_STATUS(kv.remove(key), status::OK);
 	}
 
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 }
 
 static void test(int argc, char *argv[])

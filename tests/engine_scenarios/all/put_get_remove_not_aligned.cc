@@ -12,21 +12,13 @@ using namespace pmem::kv;
 
 static void EmptyKeyTest(pmem::kv::db &kv)
 {
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 	ASSERT_STATUS(kv.put("", "empty"), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.put(" ", "1-space"), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 2);
+	ASSERT_SIZE(kv, 2);
 	ASSERT_STATUS(kv.put("\t\t", "two-tab"), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 3);
+	ASSERT_SIZE(kv, 3);
 	std::string value1;
 	std::string value2;
 	std::string value3;
@@ -43,21 +35,13 @@ static void EmptyKeyTest(pmem::kv::db &kv)
 
 static void EmptyValueTest(pmem::kv::db &kv)
 {
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 	ASSERT_STATUS(kv.put("empty", ""), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.put("1-space", " "), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 2);
+	ASSERT_SIZE(kv, 2);
 	ASSERT_STATUS(kv.put("two-tab", "\t\t"), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 3);
+	ASSERT_SIZE(kv, 3);
 	std::string value1;
 	std::string value2;
 	std::string value3;
@@ -71,17 +55,14 @@ static void EmptyValueTest(pmem::kv::db &kv)
 
 static void EmptyKeyAndValueTest(pmem::kv::db &kv)
 {
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	ASSERT_SIZE(kv, 0);
 
 	std::string value = "abc";
 	ASSERT_STATUS(kv.get("", &value), status::NOT_FOUND);
 	UT_ASSERT(value == "abc");
 
 	ASSERT_STATUS(kv.put("", ""), status::OK);
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 
 	ASSERT_STATUS(kv.get("", &value), status::OK);
 	UT_ASSERT(value == "");
@@ -91,41 +72,31 @@ static void PutValuesOfDifferentSizesTest(pmem::kv::db &kv)
 {
 	std::string value;
 	ASSERT_STATUS(kv.put("A", "123456789ABCDE"), status::OK);
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	ASSERT_SIZE(kv, 1);
 	ASSERT_STATUS(kv.get("A", &value), status::OK);
 	UT_ASSERT(value == "123456789ABCDE");
 
 	std::string value2;
 	ASSERT_STATUS(kv.put("B", "123456789ABCDEF"), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 2);
+	ASSERT_SIZE(kv, 2);
 	ASSERT_STATUS(kv.get("B", &value2), status::OK);
 	UT_ASSERT(value2 == "123456789ABCDEF");
 
 	std::string value3;
 	ASSERT_STATUS(kv.put("C", "12345678ABCDEFG"), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 3);
+	ASSERT_SIZE(kv, 3);
 	ASSERT_STATUS(kv.get("C", &value3), status::OK);
 	UT_ASSERT(value3 == "12345678ABCDEFG");
 
 	std::string value4;
 	ASSERT_STATUS(kv.put("D", "123456789"), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 4);
+	ASSERT_SIZE(kv, 4);
 	ASSERT_STATUS(kv.get("D", &value4), status::OK);
 	UT_ASSERT(value4 == "123456789");
 
 	std::string value5;
 	ASSERT_STATUS(kv.put("E", "123456789ABCDEFGHI"), status::OK);
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 5);
+	ASSERT_SIZE(kv, 5);
 	ASSERT_STATUS(kv.get("E", &value5), status::OK);
 	UT_ASSERT(value5 == "123456789ABCDEFGHI");
 }

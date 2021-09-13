@@ -10,21 +10,17 @@
 static void check_consistency(std::string engine, std::string config)
 {
 	auto kv = INITIALIZE_KV(engine, CONFIG_FROM_JSON(config));
+	ASSERT_SIZE(kv, 0);
 
-	size_t cnt = std::numeric_limits<size_t>::max();
-
-	ASSERT_STATUS(kv.count_all(cnt), pmem::kv::status::OK);
-	UT_ASSERTeq(cnt, 0);
-
-	for (size_t i = 0; i < 100; ++i)
+	const size_t elements_cnt = 100;
+	for (size_t i = 0; i < elements_cnt; ++i)
 		ASSERT_STATUS(kv.put(entry_from_number(i, "", "key"),
 				     entry_from_number(i, "", "val")),
 			      pmem::kv::status::OK);
 
-	ASSERT_STATUS(kv.count_all(cnt), pmem::kv::status::OK);
-	UT_ASSERTeq(cnt, 100);
+	ASSERT_SIZE(kv, elements_cnt);
 
-	for (size_t i = 0; i < 100; ++i) {
+	for (size_t i = 0; i < elements_cnt; ++i) {
 		std::string val;
 		ASSERT_STATUS(kv.get(entry_from_number(i, "", "key"), &val),
 			      pmem::kv::status::OK);
@@ -34,9 +30,7 @@ static void check_consistency(std::string engine, std::string config)
 			      pmem::kv::status::OK);
 	}
 
-	ASSERT_STATUS(kv.count_all(cnt), pmem::kv::status::OK);
-	UT_ASSERTeq(cnt, 0);
-
+	ASSERT_SIZE(kv, 0);
 	kv.close();
 }
 

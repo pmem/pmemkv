@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "iterate.hpp"
 
@@ -19,117 +19,114 @@ static void CommonCountTest(std::string engine, pmem::kv::config &&config)
 	/* insert bunch of keys */
 	add_basic_keys(kv);
 
-	std::size_t cnt;
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 6);
+	ASSERT_SIZE(kv, 6);
 
 	/* insert new key */
 	ASSERT_STATUS(kv.put("BD", "7"), status::OK);
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == 7);
+	ASSERT_SIZE(kv, 7);
 
-	cnt = std::numeric_limits<std::size_t>::max();
+	size_t cnt = std::numeric_limits<std::size_t>::max();
 	/* mixed count functions checked with empty key */
 	ASSERT_STATUS(kv.count_above(EMPTY_KEY, cnt), status::OK);
-	UT_ASSERT(cnt == 7);
+	UT_ASSERTeq(cnt, 7);
 	cnt = 0;
 	ASSERT_STATUS(kv.count_equal_above(EMPTY_KEY, cnt), status::OK);
-	UT_ASSERT(cnt == 7);
+	UT_ASSERTeq(cnt, 7);
 	ASSERT_STATUS(kv.count_below(EMPTY_KEY, cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 	cnt = 256;
 	ASSERT_STATUS(kv.count_equal_below(EMPTY_KEY, cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 	ASSERT_STATUS(kv.count_between(EMPTY_KEY, "ZZZZ", cnt), status::OK);
-	UT_ASSERT(cnt == 7);
+	UT_ASSERTeq(cnt, 7);
 	cnt = 10000;
 	ASSERT_STATUS(kv.count_between(EMPTY_KEY, MAX_KEY, cnt), status::OK);
-	UT_ASSERT(cnt == 7);
+	UT_ASSERTeq(cnt, 7);
 
 	/* group of check for each count_* function, tested with various keys */
 	ASSERT_STATUS(kv.count_above("A", cnt), status::OK);
-	UT_ASSERT(cnt == 6);
+	UT_ASSERTeq(cnt, 6);
 	ASSERT_STATUS(kv.count_above("B", cnt), status::OK);
-	UT_ASSERT(cnt == 3);
+	UT_ASSERTeq(cnt, 3);
 	ASSERT_STATUS(kv.count_above("BC", cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	UT_ASSERTeq(cnt, 1);
 	ASSERT_STATUS(kv.count_above("BD", cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 	cnt = 1;
 	ASSERT_STATUS(kv.count_above("ZZ", cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 
 	cnt = 0;
 	ASSERT_STATUS(kv.count_equal_above("A", cnt), status::OK);
-	UT_ASSERT(cnt == 7);
+	UT_ASSERTeq(cnt, 7);
 	ASSERT_STATUS(kv.count_equal_above("AA", cnt), status::OK);
-	UT_ASSERT(cnt == 6);
+	UT_ASSERTeq(cnt, 6);
 	ASSERT_STATUS(kv.count_equal_above("B", cnt), status::OK);
-	UT_ASSERT(cnt == 4);
+	UT_ASSERTeq(cnt, 4);
 	ASSERT_STATUS(kv.count_equal_above("BC", cnt), status::OK);
-	UT_ASSERT(cnt == 2);
+	UT_ASSERTeq(cnt, 2);
 	ASSERT_STATUS(kv.count_equal_above("BD", cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	UT_ASSERTeq(cnt, 1);
 	ASSERT_STATUS(kv.count_equal_above("Z", cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 
 	cnt = 10;
 	ASSERT_STATUS(kv.count_below("A", cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 	ASSERT_STATUS(kv.count_below("B", cnt), status::OK);
-	UT_ASSERT(cnt == 3);
+	UT_ASSERTeq(cnt, 3);
 	ASSERT_STATUS(kv.count_below("BC", cnt), status::OK);
-	UT_ASSERT(cnt == 5);
+	UT_ASSERTeq(cnt, 5);
 	ASSERT_STATUS(kv.count_below("BD", cnt), status::OK);
-	UT_ASSERT(cnt == 6);
+	UT_ASSERTeq(cnt, 6);
 	ASSERT_STATUS(kv.count_below("ZZZZZ", cnt), status::OK);
-	UT_ASSERT(cnt == 7);
+	UT_ASSERTeq(cnt, 7);
 
 	ASSERT_STATUS(kv.count_equal_below("A", cnt), status::OK);
-	UT_ASSERT(cnt == 1);
+	UT_ASSERTeq(cnt, 1);
 	ASSERT_STATUS(kv.count_equal_below("B", cnt), status::OK);
-	UT_ASSERT(cnt == 4);
+	UT_ASSERTeq(cnt, 4);
 	cnt = 257;
 	ASSERT_STATUS(kv.count_equal_below("BA", cnt), status::OK);
-	UT_ASSERT(cnt == 4);
+	UT_ASSERTeq(cnt, 4);
 	ASSERT_STATUS(kv.count_equal_below("BC", cnt), status::OK);
-	UT_ASSERT(cnt == 6);
+	UT_ASSERTeq(cnt, 6);
 	ASSERT_STATUS(kv.count_equal_below("BD", cnt), status::OK);
-	UT_ASSERT(cnt == 7);
+	UT_ASSERTeq(cnt, 7);
 	cnt = 258;
 	ASSERT_STATUS(kv.count_equal_below("ZZZZZZ", cnt), status::OK);
-	UT_ASSERT(cnt == 7);
+	UT_ASSERTeq(cnt, 7);
 
 	cnt = 1024;
 	ASSERT_STATUS(kv.count_between(EMPTY_KEY, "A", cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 	ASSERT_STATUS(kv.count_between(EMPTY_KEY, "B", cnt), status::OK);
-	UT_ASSERT(cnt == 3);
+	UT_ASSERTeq(cnt, 3);
 	ASSERT_STATUS(kv.count_between("A", "B", cnt), status::OK);
-	UT_ASSERT(cnt == 2);
+	UT_ASSERTeq(cnt, 2);
 	ASSERT_STATUS(kv.count_between("A", "BD", cnt), status::OK);
-	UT_ASSERT(cnt == 5);
+	UT_ASSERTeq(cnt, 5);
 	ASSERT_STATUS(kv.count_between("B", "ZZ", cnt), status::OK);
-	UT_ASSERT(cnt == 3);
+	UT_ASSERTeq(cnt, 3);
 
 	cnt = 1024;
 	ASSERT_STATUS(kv.count_between(EMPTY_KEY, EMPTY_KEY, cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 	cnt = 1025;
 	ASSERT_STATUS(kv.count_between("A", "A", cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 	cnt = 1026;
 	ASSERT_STATUS(kv.count_between("AC", "A", cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 	cnt = 1027;
 	ASSERT_STATUS(kv.count_between("B", "A", cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 	cnt = 1028;
 	ASSERT_STATUS(kv.count_between("BD", "A", cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 	cnt = 1029;
 	ASSERT_STATUS(kv.count_between("ZZZ", "B", cnt), status::OK);
-	UT_ASSERT(cnt == 0);
+	UT_ASSERTeq(cnt, 0);
 
 	CLEAR_KV(kv);
 	kv.close();

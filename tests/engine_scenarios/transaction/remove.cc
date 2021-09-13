@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2021, Intel Corporation */
 
 #include "../put_get_std_map.hpp"
 #include "unittest.hpp"
@@ -80,9 +80,7 @@ static void test_remove_inserted(pmem::kv::db &kv)
 
 		ASSERT_STATUS(tx.commit(), pmem::kv::status::OK);
 
-		std::size_t cnt;
-		ASSERT_STATUS(kv.count_all(cnt), pmem::kv::status::OK);
-		UT_ASSERTeq(cnt, 0);
+		ASSERT_SIZE(kv, 0);
 	}
 
 	/* remove every second inserted element */
@@ -98,9 +96,7 @@ static void test_remove_inserted(pmem::kv::db &kv)
 
 		ASSERT_STATUS(tx.commit(), pmem::kv::status::OK);
 
-		std::size_t cnt;
-		ASSERT_STATUS(kv.count_all(cnt), pmem::kv::status::OK);
-		UT_ASSERTeq(cnt, NUM_ITER / 2);
+		ASSERT_SIZE(kv, NUM_ITER / 2);
 	}
 
 	/* remove each inserted element but start with non-empty database */
@@ -116,9 +112,7 @@ static void test_remove_inserted(pmem::kv::db &kv)
 
 		ASSERT_STATUS(tx.commit(), pmem::kv::status::OK);
 
-		std::size_t cnt;
-		ASSERT_STATUS(kv.count_all(cnt), pmem::kv::status::OK);
-		UT_ASSERTeq(cnt, proto_kv.size());
+		ASSERT_SIZE(kv, proto_kv.size());
 	}
 }
 
@@ -149,9 +143,7 @@ static void test_put_and_remove(pmem::kv::db &kv)
 		ASSERT_STATUS(tx.commit(), pmem::kv::status::OK);
 	}
 
-	std::size_t cnt;
-	ASSERT_STATUS(kv.count_all(cnt), pmem::kv::status::OK);
-	UT_ASSERT(cnt == NUM_BATCH * BATCH_SIZE / 2);
+	ASSERT_SIZE(kv, NUM_BATCH * BATCH_SIZE / 2);
 
 	for (int i = 0; i < NUM_BATCH; i++) {
 		for (int j = 0; j < BATCH_SIZE / 2; j++) {

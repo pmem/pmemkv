@@ -26,10 +26,7 @@ static void OOM(pmem::kv::db &kv)
 		ASSERT_STATUS(s, pmem::kv::status::OK);
 	}
 
-	size_t count = std::numeric_limits<size_t>::max();
-	auto s = kv.count_all(count);
-	ASSERT_STATUS(s, pmem::kv::status::OK);
-	UT_ASSERTeq(count, 0);
+	ASSERT_SIZE(kv, 0);
 }
 
 static void test(int argc, char *argv[])

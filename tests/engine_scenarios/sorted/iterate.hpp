@@ -80,11 +80,9 @@ inline kv_list kv_sort(kv_list list)
 inline void verify_get_all(pmem::kv::db &kv, const size_t exp_cnt,
 			   const kv_list &sorted_exp_result)
 {
-	std::size_t cnt;
-	kv_list result;
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
+	ASSERT_SIZE(kv, exp_cnt);
 
+	kv_list result;
 	auto s = KV_GET_ALL_CPP_CB_LST(result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
@@ -93,10 +91,9 @@ inline void verify_get_all(pmem::kv::db &kv, const size_t exp_cnt,
 inline void verify_get_all_c(pmem::kv::db &kv, const size_t exp_cnt,
 			     const kv_list &sorted_exp_result)
 {
-	std::size_t cnt;
+	ASSERT_SIZE(kv, exp_cnt);
+
 	kv_list result;
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
 	auto s = KV_GET_ALL_C_CB_LST(result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
@@ -108,7 +105,7 @@ inline void verify_get_above(pmem::kv::db &kv, const std::string key,
 	std::size_t cnt;
 	kv_list result;
 	ASSERT_STATUS(kv.count_above(key, cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
+	UT_ASSERTeq(cnt, exp_cnt);
 	auto s = KV_GET_1KEY_CPP_CB_LST(get_above, key, result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
@@ -120,7 +117,7 @@ inline void verify_get_above_c(pmem::kv::db &kv, const std::string key,
 	std::size_t cnt;
 	kv_list result;
 	ASSERT_STATUS(kv.count_above(key, cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
+	UT_ASSERTeq(cnt, exp_cnt);
 	auto s = KV_GET_1KEY_C_CB_LST(get_above, key, result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
@@ -132,7 +129,7 @@ inline void verify_get_equal_above(pmem::kv::db &kv, const std::string key,
 	std::size_t cnt;
 	kv_list result;
 	ASSERT_STATUS(kv.count_equal_above(key, cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
+	UT_ASSERTeq(cnt, exp_cnt);
 	auto s = KV_GET_1KEY_CPP_CB_LST(get_equal_above, key, result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
@@ -145,7 +142,7 @@ inline void verify_get_equal_above_c(pmem::kv::db &kv, const std::string key,
 	std::size_t cnt;
 	kv_list result;
 	ASSERT_STATUS(kv.count_equal_above(key, cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
+	UT_ASSERTeq(cnt, exp_cnt);
 	auto s = KV_GET_1KEY_C_CB_LST(get_equal_above, key, result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
@@ -157,7 +154,7 @@ inline void verify_get_below(pmem::kv::db &kv, const std::string key,
 	std::size_t cnt;
 	kv_list result;
 	ASSERT_STATUS(kv.count_below(key, cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
+	UT_ASSERTeq(cnt, exp_cnt);
 	auto s = KV_GET_1KEY_CPP_CB_LST(get_below, key, result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
@@ -169,7 +166,7 @@ inline void verify_get_below_c(pmem::kv::db &kv, const std::string key,
 	std::size_t cnt;
 	kv_list result;
 	ASSERT_STATUS(kv.count_below(key, cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
+	UT_ASSERTeq(cnt, exp_cnt);
 	auto s = KV_GET_1KEY_C_CB_LST(get_below, key, result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
@@ -181,7 +178,7 @@ inline void verify_get_equal_below(pmem::kv::db &kv, const std::string key,
 	std::size_t cnt;
 	kv_list result;
 	ASSERT_STATUS(kv.count_equal_below(key, cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
+	UT_ASSERTeq(cnt, exp_cnt);
 	auto s = KV_GET_1KEY_CPP_CB_LST(get_equal_below, key, result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
@@ -194,7 +191,7 @@ inline void verify_get_equal_below_c(pmem::kv::db &kv, const std::string key,
 	std::size_t cnt;
 	kv_list result;
 	ASSERT_STATUS(kv.count_equal_below(key, cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
+	UT_ASSERTeq(cnt, exp_cnt);
 	auto s = KV_GET_1KEY_C_CB_LST(get_equal_below, key, result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
@@ -207,7 +204,7 @@ inline void verify_get_between(pmem::kv::db &kv, const std::string key1,
 	std::size_t cnt;
 	kv_list result;
 	ASSERT_STATUS(kv.count_between(key1, key2, cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
+	UT_ASSERTeq(cnt, exp_cnt);
 	auto s = KV_GET_2KEYS_CPP_CB_LST(get_between, key1, key2, result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);
@@ -220,7 +217,7 @@ inline void verify_get_between_c(pmem::kv::db &kv, const std::string key1,
 	std::size_t cnt;
 	kv_list result;
 	ASSERT_STATUS(kv.count_between(key1, key2, cnt), status::OK);
-	UT_ASSERT(cnt == exp_cnt);
+	UT_ASSERTeq(cnt, exp_cnt);
 	auto s = KV_GET_2KEYS_C_CB_LST(get_between, key1, key2, result);
 	ASSERT_STATUS(s, status::OK);
 	UT_ASSERT(result == sorted_exp_result);

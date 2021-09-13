@@ -86,9 +86,7 @@ static void MultithreadedTestRemoveDataAside(const size_t threads_number,
 			UT_ASSERT(value == keys[i]);
 		}
 	});
-	std::size_t cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERTeq(cnt, initial_count + keys_cnt);
+	ASSERT_SIZE(kv, initial_count + keys_cnt);
 
 	/* test parallelly removing data (+ read initial data) */
 	parallel_exec(threads_number + 1, [&](size_t thread_id) {
@@ -108,9 +106,7 @@ static void MultithreadedTestRemoveDataAside(const size_t threads_number,
 			ASSERT_STATUS(kv.remove(keys[i]), status::OK);
 		}
 	});
-	cnt = std::numeric_limits<std::size_t>::max();
-	ASSERT_STATUS(kv.count_all(cnt), status::OK);
-	UT_ASSERT(cnt == initial_count);
+	ASSERT_SIZE(kv, initial_count);
 
 	/* get initial data and confirm it's unmodified */
 	for (size_t i = 0; i < initial_count; i++) {
