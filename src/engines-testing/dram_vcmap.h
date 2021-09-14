@@ -11,20 +11,18 @@ namespace kv
 {
 namespace internal
 {
-
-class std_allocator_factory {
+template <typename AllocatorT>
+class std_allocator_wrapper : public std::allocator<AllocatorT> {
 public:
-	template <typename T>
-	using allocator_type = std::allocator<T>;
-
-	template <typename T>
-	static allocator_type<T> create(internal::config& cfg) {
-		return allocator_type<T>();
+	using std::allocator<AllocatorT>::allocator;
+	std_allocator_wrapper(internal::config &cfg)
+	    : std::allocator<AllocatorT>()
+	{
 	}
 };
 } /* namespace internal */
 
-using dram_vcmap = basic_vcmap<internal::std_allocator_factory>;
+using dram_vcmap = basic_vcmap<internal::std_allocator_wrapper>;
 
 class dram_vcmap_factory : public engine_base::factory_base {
 public:

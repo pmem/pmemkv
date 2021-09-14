@@ -19,21 +19,38 @@ namespace kv
 {
 namespace internal
 {
-
-class memkind_allocator_factory {
+template <typename AllocatorT>
+class memkind_allocator_wrapper : public memkind_ns::allocator<AllocatorT> {
 public:
-	template <typename T>
-	using allocator_type = memkind_ns::allocator<T>;
-
-	template <typename T>
-	static allocator_type<T> create(internal::config &cfg)
+	using memkind_ns::allocator<AllocatorT>::allocator;
+	memkind_allocator_wrapper(internal::config &cfg)
+	    : memkind_ns::allocator<AllocatorT>(get_path(cfg), get_size(cfg))
 	{
-		return allocator_type<T>(cfg.get_path(), cfg.get_size());
+	}
+
+	static std::string get_path(internal::config &cfg)
+	{
+		const char *path;
+		if (!cfg.get_string("path", &path))
+			throw internal::invalid_argument(
+				"Config does not contain item with key: \"path\"");
+
+		return std::string(path);
+	}
+
+	static uint64_t get_size(internal::config &cfg)
+	{
+		std::size_t size;
+		if (!cfg.get_uint64("size", &size))
+			throw internal::invalid_argument(
+				"Config does not contain item with key: \"size\"");
+
+		return size;
 	}
 };
 }
 
-using vcmap = basic_vcmap<internal::memkind_allocator_factory>;
+using vcmap = basic_vcmap<internal::memkind_allocator_wrapper>;
 
 class vcmap_factory : public engine_base::factory_base {
 public:
