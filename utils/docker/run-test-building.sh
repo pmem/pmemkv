@@ -72,6 +72,10 @@ function test_building_of_packages() {
 		-DCMAKE_INSTALL_PREFIX=${PREFIX} \
 		-DDEVELOPER_MODE=1 \
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
+		-DCXX_STANDARD=14 \
+		-DENGINE_CMAP=ON \
+		-DENGINE_CSMAP=ON \
+		-DENGINE_RADIX=ON \
 		-DCPACK_GENERATOR=${PACKAGE_MANAGER}
 
 	echo
@@ -88,11 +92,11 @@ function test_building_of_packages() {
 		sudo_password rpm -i libpmemkv*.rpm
 	fi
 
-	# Verify installed packages
-	compile_example_standalone pmemkv_basic_c
-	run_example_standalone pmemkv_basic_c pool
-	compile_example_standalone pmemkv_basic_cpp
-	run_example_standalone pmemkv_basic_cpp pool
+	echo "Verify installed libraries:"
+
+	# Compile all available examples as standalone apps.
+	# Run most of them - the ones with no special execution requirements.
+	compile_run_examples_standalone
 
 	# Clean after installation
 	if [ ${PACKAGE_MANAGER} = "deb" ]; then
