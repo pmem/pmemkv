@@ -120,6 +120,6 @@ if(NOT ENGINE_CMAP AND NOT ENGINE_CSMAP AND NOT ENGINE_RADIX)
 		"so no examples were built. See messages above for instructions.")
 endif()
 
-# Engine is this example can be paremetrized at runtime
+# Engine in this example is paremetrized at runtime
 add_example(pmemkv_fill_cpp pmemkv_fill_cpp/pmemkv_fill.cpp)
 target_link_libraries(example-pmemkv_fill_cpp pmemkv)
