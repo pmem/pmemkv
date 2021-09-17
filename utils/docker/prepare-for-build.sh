@@ -43,6 +43,26 @@ function upload_codecov() {
 	printf "$(tput setaf 1)$(tput setab 7)COVERAGE ${FUNCNAME[0]} END$(tput sgr 0)\n\n"
 }
 
+# compile all examples (it looks up for examples/ sub-directories)
+# and run them as long as they are not on the block_list
+function compile_run_examples_standalone() {
+	# Examples may have some special execution requirement.
+	# They should be run in the function `test_release_installation` (in run-build.sh).
+	block_list="pmemkv_config_c pmemkv_open_cpp pmemkv_transaction_c pmemkv_transaction_cpp"
+
+	pushd ${WORKDIR}/examples
+	examples=$(find * -prune -type d)
+	echo "Found examples to compile: ${examples}"
+	for example in ${examples}; do
+		compile_example_standalone ${example}
+
+		if ! echo ${block_list} | grep -w -q ${example}; then
+			run_example_standalone ${example} pool
+		fi
+	done
+	popd
+}
+
 function compile_example_standalone() {
 	example_name=${1}
 	echo "Compile standalone example: ${example_name}"
@@ -66,7 +86,7 @@ function compile_example_standalone() {
 function run_example_standalone() {
 	example_name=${1}
 	pool_path=${2}
-	echo "Run standalone example: ${example_name} with path: ${pool_path}"
+	echo "Run standalone example: ${example_name} with pool path: ${pool_path}"
 
 	pushd ${EXAMPLE_TEST_DIR}
 
