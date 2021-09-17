@@ -51,8 +51,8 @@ it will print its usage, otherwise it will run and print the execution results (
 		custom comparator (C++ API)
 
 * pmemkv_config_c/
-	* pmemkv_basic_config.c -- example usage of the part of the pmemkv config API,
-		which should be preferred.
+	* pmemkv_basic_config.c -- example usage for part of the pmemkv config API,
+		which should be preferred
 
 	* pmemkv_config.c -- example usage of the part of the pmemkv config API
 		to set and get data based on their data types.
