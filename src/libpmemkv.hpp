@@ -533,7 +533,7 @@ private:
 	__Example__ of basic usage:
 	@snippet examples/pmemkv_basic_cpp/pmemkv_basic.cpp basic
 
-	__Example__ with existing database:
+	__Example__ on how to open and re-open an existing database:
 	@snippet examples/pmemkv_open_cpp/pmemkv_open.cpp open
 
 	__Example__ for pmemkv's database supporting multiple engines:

@@ -24,13 +24,18 @@ using namespace pmem::kv;
 /*
  * This example expects a path to already created database pool.
  *
- * If you want to create pool, use one of the following commands.
+ * Normally you want to re-use a pool, which was created
+ * by a previous run of pmemkv application. However, for this example
+ * you may want to create pool by hand - use one of the following commands.
  *
  * For regular pools use:
  * pmempool create -l -s 1G "pmemkv" obj path_to_a_pool
  *
  * For poolsets use:
  * pmempool create -l "pmemkv" obj ../examples/example.poolset
+ *
+ * Word of explanation: "pmemkv" is a pool layout used by cmap engine.
+ * For other engines, this may vary, hence it's not advised to create pool manually.
  */
 int main(int argc, char *argv[])
 {
@@ -76,6 +81,28 @@ int main(int argc, char *argv[])
 		LOG("  visited: " << k.data());
 		return 0;
 	});
+
+	LOG("Closing database");
+	delete kv;
+
+	/* After the db is closed, we can easily reopen it. We have to use
+	 * the same pool file and the same engine as during the database creation.
+	 * We could do this with no problem in a different application. */
+
+	LOG("Creating config (the first one is not valid anymore)");
+	config cfg2;
+
+	s = cfg2.put_path(argv[1]);
+	ASSERT(s == status::OK);
+
+	LOG("Re-opening pmemkv database with 'cmap' engine");
+	kv = new db();
+	ASSERT(kv != nullptr);
+	s = kv->open("cmap", std::move(cfg2));
+	ASSERT(s == status::OK);
+
+	s = kv->exists("key1");
+	ASSERT(s == status::OK);
 
 	LOG("Removing existing key");
 	s = kv->remove("key1");
