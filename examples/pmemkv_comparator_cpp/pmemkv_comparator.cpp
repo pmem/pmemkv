@@ -67,28 +67,25 @@ int main(int argc, char *argv[])
 	ASSERT(s == status::OK);
 
 	LOG("Opening pmemkv database with 'csmap' engine");
-	db *kv = new db();
-	ASSERT(kv != nullptr);
-	s = kv->open("csmap", std::move(cfg));
+	db kv;
+	s = kv.open("csmap", std::move(cfg));
 	ASSERT(s == status::OK);
 
 	LOG("Putting new keys");
-	s = kv->put("key1", "value1");
+	s = kv.put("key1", "value1");
 	ASSERT(s == status::OK);
-	s = kv->put("key2", "value2");
+	s = kv.put("key2", "value2");
 	ASSERT(s == status::OK);
-	s = kv->put("key3", "value3");
+	s = kv.put("key3", "value3");
 	ASSERT(s == status::OK);
 
 	LOG("Iterating over existing keys in order specified by the comparator");
-	kv->get_all([](string_view k, string_view v) {
+	kv.get_all([](string_view k, string_view v) {
 		LOG("  visited: " << k.data());
 		return 0;
 	});
 	//! [comparator-usage]
 
 	LOG("Closing database");
-	delete kv;
-
 	return 0;
 }
