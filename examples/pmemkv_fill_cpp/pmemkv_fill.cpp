@@ -81,17 +81,14 @@ int main(int argc, char *argv[])
 	 * For differences between the two flags, see e.g. libpmemkv(7) manpage. */
 	/* s = cfg.put_create_or_error_if_exists(true); */
 
-	db *kv = new db();
-	ASSERT(kv != nullptr);
-	s = kv->open(engine, std::move(cfg));
+	db kv;
+	s = kv.open(engine, std::move(cfg));
 	ASSERT(s == status::OK);
 
-	auto elements = insert_till_oom(kv, key_size, value_size);
+	auto elements = insert_till_oom(&kv, key_size, value_size);
 
 	std::cout << "Number of elements: " << elements << std::endl;
 
 	LOG("Closing database");
-	delete kv;
-
 	return 0;
 }
