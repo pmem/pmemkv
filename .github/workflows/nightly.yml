@@ -3,9 +3,7 @@ name: pmemkv-nightly
 # It runs non-deafult OSes, listed below with basic set of compilers and tests.
 
 on:
-  schedule:
-    # run this job at 01:00 UTC everyday
-    - cron:  '0 1 * * *'
+  push:
 
 env:
   REPO:           pmemkv
