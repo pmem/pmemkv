@@ -116,11 +116,14 @@ Memkind and TBB packages are required.
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
-* **path** -- Path to an existing directory
+* **path** -- Path to an existing **directory** (make sure to use a directory, as oppose to cmap and its file path)
 	+ type: string
 * **size** --  Specifies size of the database [in bytes]
 	+ type: uint64_t
 	+ min value: 16777216 (16MB) (value MEMKIND_PMEM_MIN_SIZE is specified in memkind.h)
+
+In case of any memkind related issues, it's good to enable *MEMKIND_DEBUG* (see [here](https://github.com/memkind/memkind#setting-logging-mechanism))
+to get more details and more verbose output.
 
 ## vsmap
 
@@ -131,13 +134,16 @@ Memkind package is required.
 
 This engine requires the following config parameters (see **libpmemkv_config**(3) for details how to set them):
 
-* **path** -- Path to an existing directory
+* **path** -- Path to an existing **directory** (make sure to use a directory, as oppose to cmap and its file path)
 	+ type: string
 * **size** --  Specifies size of the database [in bytes]
 	+ type: uint64_t
 	+ min value: 16777216 (16MB) (value MEMKIND_PMEM_MIN_SIZE is specified in memkind.h)
 * **comparator** -- (optional) Specified comparator used by the engine
 	+ type: object
+
+In case of any memkind related issues, it's good to enable *MEMKIND_DEBUG* (see [here](https://github.com/memkind/memkind#setting-logging-mechanism))
+to get more details and more verbose output.
 
 ## blackhole
 
