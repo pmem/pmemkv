@@ -94,8 +94,11 @@ int main(int argc, char *argv[])
 	oss << s;
 	assert(oss.str() == "NOT_FOUND (2)");
 
+	/* 'kv' is closed automatically here, when scope ends.
+	 * Alternatively kv can be created on heap (see pmemkv_open_cpp example),
+	 * or using unique_ptr (see pmemkv_iterator_cpp example).
+	 */
 	LOG("Closing database");
-
 	return 0;
 }
 //! [basic]

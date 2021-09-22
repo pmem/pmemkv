@@ -219,17 +219,10 @@ function test_release_installation() {
 	sudo_password -S make -j$(nproc) install
 
 	echo "Verify installed libraries:"
-	compile_example_standalone pmemkv_basic_c
-	run_example_standalone pmemkv_basic_c pool
 	compile_example_standalone pmemkv_basic_cpp
 	run_example_standalone pmemkv_basic_cpp pool
-	if [ "${BUILD_JSON_CONFIG}" == "ON" ]; then
-		compile_example_standalone pmemkv_config_c
-		run_example_standalone pmemkv_config_c pool
-	fi
-	compile_example_standalone pmemkv_pmemobj_cpp
-	run_example_standalone pmemkv_pmemobj_cpp pool
 
+	# Execute examples with special requirements and some unregular use cases
 	echo "Poolset example:"
 	compile_example_standalone pmemkv_open_cpp
 	pmempool create -l "pmemkv" obj ${WORKDIR}/examples/example.poolset
@@ -237,6 +230,17 @@ function test_release_installation() {
 
 	echo "Expect failure - non-existing path is passed:"
 	run_example_standalone pmemkv_open_cpp /non-existing/path && exit 1
+
+	if [ "${BUILD_JSON_CONFIG}" == "ON" ]; then
+		echo "Config example (require JSON helper library):"
+		compile_example_standalone pmemkv_config_c
+		run_example_standalone pmemkv_config_c
+		run_example_standalone pmemkv_basic_config_c pool
+	fi
+
+	echo "Filling up database (C++) example:"
+	compile_example_standalone pmemkv_fill_cpp
+	run_example_standalone pmemkv_fill_cpp pool 10485760 cmap 8 8
 
 	echo "Transaction C++ example:"
 	compile_example_standalone pmemkv_transaction_cpp

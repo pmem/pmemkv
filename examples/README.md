@@ -33,7 +33,7 @@ make
 ./pmemkv_basic_c
 ```
 
-Similarily to previous section, if an example requires additional parameter
+Similarly to previous section, if an example requires additional parameter
 it will print its usage, otherwise it will run and print the execution results (if any).
 
 ## Descriptions and additional dependencies:
@@ -51,8 +51,8 @@ it will print its usage, otherwise it will run and print the execution results (
 		custom comparator (C++ API)
 
 * pmemkv_config_c/
-	* pmemkv_basic_config.c -- example usage of the part of the pmemkv config API,
-		which should be preferred.
+	* pmemkv_basic_config.c -- example usage for part of the pmemkv config API,
+		which should be preferred
 
 	* pmemkv_config.c -- example usage of the part of the pmemkv config API
 		to set and get data based on their data types.
@@ -67,9 +67,9 @@ it will print its usage, otherwise it will run and print the execution results (
 	number of elements inserted. It may be used to observe the memory overhead
 	of a certain engine with specific key/value sizes.
 
-* pmemkv_iterator_c/pmemkv_iterator.c -- example of pmemkv's iterator
+* pmemkv_iterator_c/pmemkv_iterator.c -- example of pmemkv's iterator (C API)
 
-* pmemkv_iterator_cpp/pmemkv_iterator.cpp -- example of pmemkv's iterators.
+* pmemkv_iterator_cpp/pmemkv_iterator.cpp -- example of pmemkv's iterators (C++ API).
 	It shows how to use it in single-threaded and concurrent approach.
 
 	It **requires** to be built:
@@ -78,7 +78,7 @@ it will print its usage, otherwise it will run and print the execution results (
 * pmemkv_open_cpp/pmemkv_open_cpp -- contains example of pmemkv usage
 		for already existing pools (and poolsets)
 
-* pmemkv_pmemobj_cpp/pmemkv_pmemobj_basic.cpp -- contains example
+* pmemkv_pmemobj_cpp/pmemkv_pmemobj.cpp -- contains example
 		of pmemkv supporting multiple engines
 
 * pmemkv_transaction_c/pmemkv_transaction.c -- example with pmemkv transactions (C API)
