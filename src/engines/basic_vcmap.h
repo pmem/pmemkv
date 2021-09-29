@@ -55,6 +55,10 @@ private:
 					 tbb::tbb_hash_compare<pmem_string>,
 					 std::scoped_allocator_adaptor<kv_allocator_t>>
 		map_t;
+
+	/*  **config_** may hold instance of allocator used by memkind_allocator_wrapper,
+	 * so it has to be stored during whole lifetime of vcmap instance. */
+	std::unique_ptr<internal::config> config_;
 	kv_allocator_t kv_allocator;
 	ch_allocator_t ch_allocator;
 	map_t pmem_kv_container;
@@ -62,7 +66,8 @@ private:
 
 template <typename AllocatorFactory>
 basic_vcmap<AllocatorFactory>::basic_vcmap(std::unique_ptr<internal::config> cfg)
-    : kv_allocator(AllocatorFactory::template create<ch_allocator_t>(*cfg)),
+    : config_(std::move(cfg)),
+      kv_allocator(AllocatorFactory::template create<kv_allocator_t>(*config_)),
       ch_allocator(kv_allocator),
       pmem_kv_container(std::scoped_allocator_adaptor<kv_allocator_t>(kv_allocator))
 {
