@@ -51,10 +51,10 @@ private:
 	using kv_allocator_t = typename AllocatorFactory::template allocator_type<
 		std::pair<const pmem_string, pmem_string>>;
 
-	typedef tbb::concurrent_hash_map<pmem_string, pmem_string,
+	using map_t =
+		tbb::concurrent_hash_map<pmem_string, pmem_string,
 					 tbb::tbb_hash_compare<pmem_string>,
-					 std::scoped_allocator_adaptor<kv_allocator_t>>
-		map_t;
+					 std::scoped_allocator_adaptor<kv_allocator_t>>;
 
 	/*  **config_** has to be stored
 	 *  during whole lifetime of basic_vcmap instance, as
