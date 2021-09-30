@@ -16,7 +16,7 @@ env:
   CONTAINER_REG:  ghcr.io/pmem/pmemkv
   HOST_WORKDIR:   ${{ github.workspace }}
   WORKDIR:        utils/docker
-  TEST_TIMEOUT:   600
+  TEST_TIMEOUT:   800
   IMG_VER:        latest
 
 jobs:
