@@ -16,7 +16,7 @@ env:
   CONTAINER_REG:  ghcr.io/pmem/pmemkv
   HOST_WORKDIR:   ${{ github.workspace }}
   WORKDIR:        utils/docker
-  TEST_TIMEOUT:   600
+  TEST_TIMEOUT:   800
   IMG_VER:        latest
 
 jobs:
@@ -42,6 +42,17 @@ jobs:
                  "TYPE=compatibility OS=fedora OS_VER=34",
                  "TYPE=bindings OS=ubuntu OS_VER=20.04_bindings PUSH_IMAGE=1"]
     steps:
+      - name: Get release version
+        if: github.event_name == 'release'
+        id: get_release_version
+        run: echo ::set-output name=VERSION::$(echo ${{ github.event.release.tag_name }} | awk -F '[.-]' '/^[0-9]+.[0-9]+[.0-9]*(-rc[0-9]+)?$/ {print $1 "." $2}')
+
+      - name: Set image version and force image action for release
+        if: github.event_name == 'release' && steps.get_release_version.outputs.VERSION != ''
+        run: |
+          echo "IMG_VER=${{ steps.get_release_version.outputs.VERSION }}" >> $GITHUB_ENV
+          echo "FORCE_IMAGE_ACTION=rebuild" >> $GITHUB_ENV
+
       - name: Set image version and force image action for stable branch
         # we want to set IMG_VER to e.g. '1.x' for stable branches and PRs against them
         # for PRs we have to use 'base_ref' - this is the target branch (and we have to check that instead)

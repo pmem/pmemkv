@@ -17,9 +17,8 @@ fi
 PACKAGE_TYPE=${1}
 PREFIX=${2:-/usr}
 
-# master: Merge pull request #5304 from lukaszstolarczuk/update-build-rpm-sh, 07.09.2021
-# Adds support for rpm's creation on Alma Linux
-PMDK_VERSION="75d3cd27589c7e0823d48b32353253975752666b"
+# master: 1.11.1, 24.09.2021
+PMDK_VERSION="5b21904a257eff47f2e87fcbf2de46111f03ddd8"
 
 git clone https://github.com/pmem/pmdk
 cd pmdk
