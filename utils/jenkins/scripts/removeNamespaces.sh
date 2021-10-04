@@ -7,7 +7,6 @@ set -e
 
 MOUNT_POINT="/mnt/pmem*"
 
-echo "Clearing all existing namespaces"
 sudo umount $MOUNT_POINT || true
 
 namespace_names=$(ndctl list -X | jq -r '.[].dev')
