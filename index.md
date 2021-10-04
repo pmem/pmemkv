@@ -50,6 +50,10 @@ Each of bindings has its own detailed API documentation on pmem.io:
 or just a readme (on GitHub's repository page):
 * **pmemkv-ruby** [readme](https://github.com/pmem/pmemkv-ruby)
 
+## Performance reports
+
+Available performance measurements can be found in ['reports' sub-section](./reports.html).
+
 ## Blog entries
 
 The following blog articles relates to **pmemkv**:
