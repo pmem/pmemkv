@@ -5,13 +5,7 @@
 #define LIBPMEMKV_VCMAP_H
 
 #include "basic_vcmap.h"
-#include "pmem_allocator.h"
-
-#ifdef USE_LIBMEMKIND_NAMESPACE
-namespace memkind_ns = libmemkind::pmem;
-#else
-namespace memkind_ns = pmem;
-#endif
+#include "memkind_allocator_wrapper.h"
 
 namespace pmem
 {
@@ -23,12 +17,21 @@ namespace internal
 class memkind_allocator_factory {
 public:
 	template <typename T>
-	using allocator_type = memkind_ns::allocator<T>;
+	using allocator_type = internal::memkind_allocator_wrapper<T>;
+
+	template <typename T>
+	using wrapped_type = typename allocator_type<T>::allocator_type;
 
 	template <typename T>
 	static allocator_type<T> create(internal::config &cfg)
 	{
-		return allocator_type<T>(cfg.get_path(), cfg.get_size());
+		auto *allocator_ptr = new wrapped_type<T>(cfg.get_path(), cfg.get_size());
+
+		cfg.put_object("allocator", allocator_ptr, [](void *arg) {
+			delete reinterpret_cast<wrapped_type<T> *>(arg);
+		});
+
+		return allocator_type<T>(allocator_ptr);
 	}
 };
 }
