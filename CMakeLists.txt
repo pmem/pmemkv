@@ -41,6 +41,7 @@ option(ENGINE_RADIX "enable experimental radix engine" OFF)
 option(ENGINE_ROBINHOOD "enable experimental robinhood engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
 option(ENGINE_DRAM_VCMAP "enable testing dram_vcmap engine" OFF)
 option(ENGINE_KVDK_UNSORTED "enable testing kvdk_unsorted engine" ON)
+option(ENGINE_KVDK_SORTED "enable testing kvdk_sorted engine" ON)
 
 # ----------------------------------------------------------------- #
 ## Set required and useful variables
@@ -164,6 +165,12 @@ if(ENGINE_KVDK_UNSORTED)
 		src/engines-experimental/kvdk_unsorted.cc
 	)
 endif()
+if(ENGINE_KVDK_SORTED)
+	list(APPEND SOURCE_FILES
+		src/engines-experimental/kvdk_sorted.h
+		src/engines-experimental/kvdk_sorted.cc
+	)
+endif()
 
 # ----------------------------------------------------------------- #
 ## Setup defines and check status of each engine
@@ -236,6 +243,12 @@ if(ENGINE_KVDK_UNSORTED)
 else()
 	message(STATUS "KVDK_UNSORTED engine is OFF")
 endif()
+if(ENGINE_KVDK_SORTED)
+	add_definitions(-DENGINE_KVDK_SORTED)
+	message(STATUS "KVDK_SORTED engine is ON")
+else()
+	message(STATUS "KVDK_SORTED engine is OFF")
+endif()
 
 # ----------------------------------------------------------------- #
 ## Set compiler's flags
@@ -305,7 +318,7 @@ if(ENGINE_VCMAP OR ENGINE_DRAM_VCMAP)
 	list(APPEND DEB_DEPENDS libtbb2)
 endif()
 
-if(ENGINE_KVDK_UNSORTED)
+if(ENGINE_KVDK_UNSORTED OR ENGINE_KVDK_SORTED)
 	include(kvdk)
 	list(APPEND PKG_CONFIG_REQUIRES kvdk)
 endif()
@@ -329,7 +342,7 @@ endif()
 if(ENGINE_VCMAP OR ENGINE_DRAM_VCMAP)
 	target_link_libraries(pmemkv PRIVATE ${TBB_LIBRARIES})
 endif()
-if(ENGINE_KVDK_UNSORTED)
+if(ENGINE_KVDK_UNSORTED OR ENGINE_KVDK_SORTED)
 	target_link_libraries(pmemkv PRIVATE ${kvdk_LIBRARIES})
 endif()
 
