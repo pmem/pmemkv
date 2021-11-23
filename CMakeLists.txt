@@ -34,19 +34,19 @@ option(USE_CCACHE "use ccache if it is available in the system" ON)
 option(ENGINE_CMAP "enable cmap engine" ON)
 option(ENGINE_VCMAP "enable vcmap engine" ON)
 option(ENGINE_VSMAP "enable vsmap engine" ON)
-option(ENGINE_CSMAP "enable experimental csmap engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
+option(ENGINE_CSMAP "enable experimental csmap engine (requires CXX_STANDARD to be set to value >= 14)" ON)
 option(ENGINE_STREE "enable experimental stree engine" ON)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 option(ENGINE_RADIX "enable experimental radix engine" OFF)
 option(ENGINE_ROBINHOOD "enable experimental robinhood engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
 option(ENGINE_DRAM_VCMAP "enable testing dram_vcmap engine" OFF)
-option(ENGINE_KVDK_UNSORTED "enable testing kvdk_unsorted engine" ON)
-option(ENGINE_KVDK_SORTED "enable testing kvdk_sorted engine" ON)
+option(ENGINE_KVDK_UNSORTED "enable experimental kvdk_unsorted engine" ON)
+option(ENGINE_KVDK_SORTED "enable experimental kvdk_sorted engine" ON)
 
 # ----------------------------------------------------------------- #
 ## Set required and useful variables
 # ----------------------------------------------------------------- #
-set(CXX_STANDARD 11 CACHE STRING "C++ language standard")
+set(CXX_STANDARD 14 CACHE STRING "C++ language standard")
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
