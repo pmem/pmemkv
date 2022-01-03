@@ -76,11 +76,6 @@ HIDE_UNDOC_CLASSES = NO
 
 QUIET = NO
 
-# The COLS_IN_ALPHA_INDEX tag can be used to specify the number of columns
-# in which the alphabetical index list will be split.
-
-COLS_IN_ALPHA_INDEX = 1
-
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
