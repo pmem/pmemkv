@@ -289,36 +289,36 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	/* Create config */
+	/* Create config. */
 	pmemkv_config *config = pmemkv_config_new();
 	ASSERT(config != NULL);
 
-	/* Add path parameter to config. Meaning of this is dependent on chosen engine.
-	 *  E.g. if config is used with cmap engine,
-	 *  it is a path to a database file or to a poolset file. However for
-	 *  vcmap it is a path to an existing directory */
+	/* Add path parameter to config. Value is dependent on chosen engine.
+	 * E.g. if config is used for cmap engine, it is a path to a database file or
+	 * a poolset file. However for vcmap it is a path to an existing directory.
+	 * For details see documentation of selected engine. */
 	int status = pmemkv_config_put_path(config, argv[1]);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
-	/* Specifies size of the database */
+	/* Specify size of the database (to create). */
 	status = pmemkv_config_put_size(config, SIZE);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
-	/* Specifies value of create_if_missing flag.
+	/* Specify value of create_if_missing flag.
 	 * Alternatively, another flag - 'create_or_error_if_exists' can be set using:
 	 * `pmemkv_config_put_create_or_error_if_exists`
 	 * For differences between the two, see manpage libpmemkv(7). */
 	status = pmemkv_config_put_create_if_missing(config, true);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
-	/* Specifies comparator used by the engine */
+	/* Specify comparator used by the (sorted) engine. */
 	pmemkv_comparator *cmp =
 		pmemkv_comparator_new(&key_length_compare, "key_length_compare", NULL);
 	ASSERT(cmp != NULL);
 	status = pmemkv_config_put_comparator(config, cmp);
 	ASSERT(status == PMEMKV_STATUS_OK);
 
-	/* Adds pointer to oid (for details see libpmemkv(7)) to the config */
+	/* Add pointer to OID to the config. For details see libpmemkv(7) manpage. */
 	PMEMoid oid;
 	status = pmemkv_config_put_oid(config, &oid);
 	ASSERT(status == PMEMKV_STATUS_OK);
