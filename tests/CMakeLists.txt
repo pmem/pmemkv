@@ -2304,7 +2304,7 @@ if(ENGINE_DRAM_VCMAP)
 			SCRIPT dram/default.cmake)
 endif(ENGINE_DRAM_VCMAP)
 ################################################################################
-###################################### KVDK ####################################
+############################# KVDK_UNSORTED ####################################
 if(ENGINE_KVDK_UNSORTED)
 	add_engine_test(ENGINE kvdk_unsorted
 			BINARY put_get_remove
@@ -2375,5 +2375,78 @@ if(ENGINE_KVDK_UNSORTED)
 			SCRIPT kvdk_unsorted/default.cmake
 			PARAMS 1000 100 200)
 endif(ENGINE_KVDK_UNSORTED)
+
+################################################################################
+############################### KVDK_SORTED ####################################
+if(ENGINE_KVDK_SORTED)
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY put_get_remove
+			TRACERS none memcheck pmemcheck
+			SCRIPT kvdk_sorted/default.cmake)
+
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY put_get_remove_not_aligned
+			TRACERS none memcheck pmemcheck
+			SCRIPT kvdk_sorted/default.cmake)
+
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY put_get_remove_charset_params
+			TRACERS none memcheck pmemcheck
+			SCRIPT kvdk_sorted/default.cmake
+			PARAMS 16 8)
+
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY put_get_remove_long_key
+			TRACERS none memcheck pmemcheck
+			SCRIPT kvdk_sorted/default.cmake)
+
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY put_get_remove_params
+			TRACERS none
+			SCRIPT kvdk_sorted/default.cmake
+			DB_SIZE 4G PARAMS 400000)
+
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY put_get_remove_params
+			TRACERS memcheck pmemcheck
+			SCRIPT kvdk_sorted/default.cmake
+			DB_SIZE 1G PARAMS 4000)
+
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY put_get_std_map
+			TRACERS none memcheck pmemcheck
+			SCRIPT kvdk_sorted/default.cmake
+			PARAMS 1000 100 200)
+
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY concurrent_put_get_remove_params
+			TRACERS none memcheck
+			SCRIPT kvdk_sorted/default.cmake
+			PARAMS 8 50)
+
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY concurrent_put_get_remove_gen_params
+			TRACERS none memcheck
+			SCRIPT kvdk_sorted/default.cmake
+			PARAMS 8 50 100)
+
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS none
+			SCRIPT kvdk_sorted/default.cmake
+			PARAMS 1000)
+
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY concurrent_put_get_remove_single_op_params
+			TRACERS memcheck
+			SCRIPT kvdk_sorted/default.cmake
+			PARAMS 400)
+
+	add_engine_test(ENGINE kvdk_sorted
+			BINARY persistent_put_get_std_map_multiple_reopen
+			TRACERS none memcheck pmemcheck
+			SCRIPT kvdk_sorted/default.cmake
+			PARAMS 1000 100 200)
+endif(ENGINE_KVDK_SORTED)
 
 ################################################################################
