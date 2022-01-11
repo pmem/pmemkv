@@ -31,17 +31,17 @@ option(USE_UBSAN "enable UndefinedBehaviorSanitizer (debugging)" OFF)
 option(USE_CCACHE "use ccache if it is available in the system" ON)
 
 # Each engine can be enabled separately.
-option(ENGINE_CMAP "enable cmap engine" OFF)
-option(ENGINE_VCMAP "enable vcmap engine" OFF)
-option(ENGINE_VSMAP "enable vsmap engine" OFF)
+option(ENGINE_CMAP "enable cmap engine" ON)
+option(ENGINE_VCMAP "enable vcmap engine" ON)
+option(ENGINE_VSMAP "enable vsmap engine" ON)
 option(ENGINE_CSMAP "enable experimental csmap engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
-option(ENGINE_STREE "enable experimental stree engine" OFF)
+option(ENGINE_STREE "enable experimental stree engine" ON)
 option(ENGINE_TREE3 "enable experimental tree3 engine" OFF)
 option(ENGINE_RADIX "enable experimental radix engine" OFF)
 option(ENGINE_ROBINHOOD "enable experimental robinhood engine (requires CXX_STANDARD to be set to value >= 14)" OFF)
 option(ENGINE_DRAM_VCMAP "enable testing dram_vcmap engine" OFF)
-option(ENGINE_KVDK_UNSORTED "enable experimental kvdk_unsorted engine" ON)
-option(ENGINE_KVDK_SORTED "enable experimental kvdk_sorted engine" ON)
+option(ENGINE_KVDK_UNSORTED "enable experimental kvdk_unsorted engine" OFF)
+option(ENGINE_KVDK_SORTED "enable experimental kvdk_sorted engine" OFF)
 
 # ----------------------------------------------------------------- #
 ## Set required and useful variables
