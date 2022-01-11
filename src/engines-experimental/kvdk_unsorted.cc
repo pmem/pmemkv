@@ -19,12 +19,6 @@ status kvdk_unsorted::status_mapper(storage_engine::Status s)
 		case  storage_engine::Status::MemoryOverflow: return status::OUT_OF_MEMORY;
 		case  storage_engine::Status::PmemOverflow: return status::OUT_OF_MEMORY;
 		case  storage_engine::Status::NotSupported: return status::NOT_SUPPORTED;
-//		case  MapError,
-//		case  BatchOverflow,
-//		case  TooManyWriteThreads,
-//		case  InvalidDataSize,
-//		case  IOError,
-//		case  InvalidConfiguration,
 		default: return status::UNKNOWN_ERROR;
 	}
 }
