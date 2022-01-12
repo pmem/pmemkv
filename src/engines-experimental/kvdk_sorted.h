@@ -53,12 +53,12 @@ public:
 
 	internal::iterator_base *new_iterator() final;
 	internal::iterator_base *new_const_iterator() final;
-private:
 
+private:
 	status status_mapper(storage_engine::Status s);
-	
-	const std::string collection { "global_collection" };
-	//XXX: change to uniqe_ptr
+
+	const std::string collection{"global_collection"};
+	// XXX: change to uniqe_ptr
 	storage_engine::Engine *engine;
 };
 
@@ -83,7 +83,10 @@ public:
 
 	result<pmem::obj::slice<const char *>> read_range(size_t pos, size_t n) final;
 
-	explicit kvdk_const_iterator(std::shared_ptr<kvdk::Iterator> iter) : iterator{iter}{}
+	explicit kvdk_const_iterator(std::shared_ptr<kvdk::Iterator> iter)
+	    : iterator{iter}
+	{
+	}
 
 private:
 	status status_mapper(storage_engine::Status s);

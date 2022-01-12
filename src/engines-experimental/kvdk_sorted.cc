@@ -12,14 +12,19 @@ namespace kv
 
 status kvdk_sorted::status_mapper(storage_engine::Status s)
 {
-	switch(s)
-	{
-		case storage_engine::Status::Ok: return status::OK;
-		case storage_engine::Status::NotFound: return status::NOT_FOUND;
-		case storage_engine::Status::MemoryOverflow: return status::OUT_OF_MEMORY;
-		case storage_engine::Status::PmemOverflow: return status::OUT_OF_MEMORY;
-		case storage_engine::Status::NotSupported: return status::NOT_SUPPORTED;
-		default: return status::UNKNOWN_ERROR;
+	switch (s) {
+		case storage_engine::Status::Ok:
+			return status::OK;
+		case storage_engine::Status::NotFound:
+			return status::NOT_FOUND;
+		case storage_engine::Status::MemoryOverflow:
+			return status::OUT_OF_MEMORY;
+		case storage_engine::Status::PmemOverflow:
+			return status::OUT_OF_MEMORY;
+		case storage_engine::Status::NotSupported:
+			return status::NOT_SUPPORTED;
+		default:
+			return status::UNKNOWN_ERROR;
 	}
 }
 
@@ -31,7 +36,8 @@ kvdk_sorted::kvdk_sorted(std::unique_ptr<internal::config> cfg)
 	engine_configs.pmem_segment_blocks = (1ull << 10);
 	engine_configs.hash_bucket_num = (1ull << 20);
 
-	auto status = storage_engine::Engine::Open(cfg->get_path(), &engine, engine_configs, stdout);
+	auto status = storage_engine::Engine::Open(cfg->get_path(), &engine,
+						   engine_configs, stdout);
 	(void)status;
 	assert(status == storage_engine::Status::Ok);
 }
@@ -56,7 +62,7 @@ status kvdk_sorted::count_all(std::size_t &cnt)
 	auto iter = engine->NewSortedIterator(collection);
 	if (!iter)
 		return status::OK;
-	
+
 	for (iter->SeekToFirst(); iter->Valid(); iter->Next())
 		++cnt;
 	return status::OK;
@@ -72,7 +78,7 @@ status kvdk_sorted::count_above(string_view key, std::size_t &cnt)
 	auto iter = engine->NewSortedIterator(collection);
 	if (!iter)
 		return status::OK;
-	
+
 	for (iter->SeekToLast(); iter->Valid() && (iter->Key() > key_copy); iter->Prev())
 		++cnt;
 	return status::OK;
@@ -88,7 +94,7 @@ status kvdk_sorted::count_equal_above(string_view key, std::size_t &cnt)
 	auto iter = engine->NewSortedIterator(collection);
 	if (!iter)
 		return status::OK;
-	
+
 	for (iter->SeekToLast(); iter->Valid() && (iter->Key() >= key_copy); iter->Prev())
 		++cnt;
 	return status::OK;
@@ -104,8 +110,9 @@ status kvdk_sorted::count_equal_below(string_view key, std::size_t &cnt)
 	auto iter = engine->NewSortedIterator(collection);
 	if (!iter)
 		return status::OK;
-	
-	for (iter->SeekToFirst(); iter->Valid() && (iter->Key() <= key_copy); iter->Next())
+
+	for (iter->SeekToFirst(); iter->Valid() && (iter->Key() <= key_copy);
+	     iter->Next())
 		++cnt;
 	return status::OK;
 }
@@ -120,7 +127,7 @@ status kvdk_sorted::count_below(string_view key, std::size_t &cnt)
 	auto iter = engine->NewSortedIterator(collection);
 	if (!iter)
 		return status::OK;
-	
+
 	for (iter->SeekToFirst(); iter->Valid() && (iter->Key() < key_copy); iter->Next())
 		++cnt;
 	return status::OK;
@@ -138,8 +145,9 @@ status kvdk_sorted::count_between(string_view key1, string_view key2, std::size_
 	auto iter = engine->NewSortedIterator(collection);
 	if (!iter)
 		return status::OK;
-	
-	for (iter->Seek(key1_copy); iter->Valid() && (iter->Key() <= key2_copy); iter->Next())
+
+	for (iter->Seek(key1_copy); iter->Valid() && (iter->Key() <= key2_copy);
+	     iter->Next())
 		++cnt;
 	return status::OK;
 }
@@ -152,12 +160,12 @@ status kvdk_sorted::get_all(get_kv_callback *callback, void *arg)
 	if (!iter)
 		return status::NOT_FOUND;
 
-	for (iter->SeekToFirst(); iter->Valid(); iter->Next())
-	{
+	for (iter->SeekToFirst(); iter->Valid(); iter->Next()) {
 		auto key = iter->Key();
 		auto value = iter->Value();
-		auto ret = callback(key.data(), key.size(), value.data(), value.size(), arg);
-		if (ret != 0 )
+		auto ret =
+			callback(key.data(), key.size(), value.data(), value.size(), arg);
+		if (ret != 0)
 			return status::STOPPED_BY_CB;
 	}
 	return status::OK;
@@ -171,13 +179,14 @@ status kvdk_sorted::get_above(string_view key, get_kv_callback *callback, void *
 	auto iter = engine->NewSortedIterator(collection);
 	if (!iter)
 		return status::NOT_FOUND;
-	
-	for (iter->SeekToLast(); iter->Valid() && (iter->Key() > key_copy); iter->Prev())
-	{
+
+	for (iter->SeekToLast(); iter->Valid() && (iter->Key() > key_copy);
+	     iter->Prev()) {
 		auto key = iter->Key();
 		auto value = iter->Value();
-		auto ret = callback(key.data(), key.size(), value.data(), value.size(), arg);
-		if (ret != 0 )
+		auto ret =
+			callback(key.data(), key.size(), value.data(), value.size(), arg);
+		if (ret != 0)
 			return status::STOPPED_BY_CB;
 	}
 	return status::OK;
@@ -191,13 +200,14 @@ status kvdk_sorted::get_equal_above(string_view key, get_kv_callback *callback, 
 	auto iter = engine->NewSortedIterator(collection);
 	if (!iter)
 		return status::NOT_FOUND;
-	
-	for (iter->SeekToLast(); iter->Valid() && (iter->Key() >= key_copy); iter->Prev())
-	{
+
+	for (iter->SeekToLast(); iter->Valid() && (iter->Key() >= key_copy);
+	     iter->Prev()) {
 		auto key = iter->Key();
 		auto value = iter->Value();
-		auto ret = callback(key.data(), key.size(), value.data(), value.size(), arg);
-		if (ret != 0 )
+		auto ret =
+			callback(key.data(), key.size(), value.data(), value.size(), arg);
+		if (ret != 0)
 			return status::STOPPED_BY_CB;
 	}
 	return status::OK;
@@ -211,13 +221,14 @@ status kvdk_sorted::get_equal_below(string_view key, get_kv_callback *callback, 
 	auto iter = engine->NewSortedIterator(collection);
 	if (!iter)
 		return status::NOT_FOUND;
-	
-	for (iter->SeekToFirst(); iter->Valid() && (iter->Key() <= key_copy); iter->Next())
-	{
+
+	for (iter->SeekToFirst(); iter->Valid() && (iter->Key() <= key_copy);
+	     iter->Next()) {
 		auto key = iter->Key();
 		auto value = iter->Value();
-		auto ret = callback(key.data(), key.size(), value.data(), value.size(), arg);
-		if (ret != 0 )
+		auto ret =
+			callback(key.data(), key.size(), value.data(), value.size(), arg);
+		if (ret != 0)
 			return status::STOPPED_BY_CB;
 	}
 	return status::OK;
@@ -231,20 +242,21 @@ status kvdk_sorted::get_below(string_view key, get_kv_callback *callback, void *
 	auto iter = engine->NewSortedIterator(collection);
 	if (!iter)
 		return status::NOT_FOUND;
-	
-	for (iter->SeekToFirst(); iter->Valid() && (iter->Key() < key_copy); iter->Next())
-	{
+
+	for (iter->SeekToFirst(); iter->Valid() && (iter->Key() < key_copy);
+	     iter->Next()) {
 		auto key = iter->Key();
 		auto value = iter->Value();
-		auto ret = callback(key.data(), key.size(), value.data(), value.size(), arg);
-		if (ret != 0 )
+		auto ret =
+			callback(key.data(), key.size(), value.data(), value.size(), arg);
+		if (ret != 0)
 			return status::STOPPED_BY_CB;
 	}
 	return status::OK;
 }
 
 status kvdk_sorted::get_between(string_view key1, string_view key2,
-			      get_kv_callback *callback, void *arg)
+				get_kv_callback *callback, void *arg)
 {
 	std::string key1_copy(key1.data(), key1.size());
 	std::string key2_copy(key2.data(), key2.size());
@@ -253,13 +265,14 @@ status kvdk_sorted::get_between(string_view key1, string_view key2,
 	auto iter = engine->NewSortedIterator(collection);
 	if (!iter)
 		return status::NOT_FOUND;
-	
-	for (iter->Seek(key1_copy); iter->Valid() && (iter->Key() <= key2_copy); iter->Next())
-	{
+
+	for (iter->Seek(key1_copy); iter->Valid() && (iter->Key() <= key2_copy);
+	     iter->Next()) {
 		auto key = iter->Key();
 		auto value = iter->Value();
-		auto ret = callback(key.data(), key.size(), value.data(), value.size(), arg);
-		if (ret != 0 )
+		auto ret =
+			callback(key.data(), key.size(), value.data(), value.size(), arg);
+		if (ret != 0)
 			return status::STOPPED_BY_CB;
 	}
 	return status::OK;
@@ -278,7 +291,7 @@ status kvdk_sorted::get(string_view key, get_v_callback *callback, void *arg)
 
 	std::string value;
 	auto status = engine->SGet(collection, key, &value);
-	if (status == storage_engine::Status::Ok){
+	if (status == storage_engine::Status::Ok) {
 		callback(value.data(), value.size(), arg);
 	}
 	return status_mapper(status);
@@ -288,7 +301,7 @@ status kvdk_sorted::put(string_view key, string_view value)
 {
 	LOG("put key=" << std::string(key.data(), key.size())
 		       << ", value.size=" << std::to_string(value.size()));
-	auto status = engine->SSet(collection ,key, value);
+	auto status = engine->SSet(collection, key, value);
 
 	return status_mapper(status);
 }
@@ -342,8 +355,8 @@ result<string_view> kvdk_sorted::kvdk_iterator::key()
 	// return status::NOT_FOUND;
 }
 
-result<pmem::obj::slice<const char *>>
-kvdk_sorted::kvdk_iterator::read_range(size_t pos, size_t n)
+result<pmem::obj::slice<const char *>> kvdk_sorted::kvdk_iterator::read_range(size_t pos,
+									      size_t n)
 {
 	LOG("read_range, pos=" << pos << " n=" << n);
 	throw std::runtime_error("kvdk_sorted current does not support write iterator.");
@@ -361,21 +374,19 @@ status kvdk_sorted::kvdk_const_iterator::seek(string_view key)
 	std::string key_copy(key.data(), key.size());
 	LOG("seek to key=" << key_copy);
 	iterator->Seek(key_copy);
-	if (iterator->Valid())
-	{
+	if (iterator->Valid()) {
 		if (iterator->Key() == key_copy)
 			return status::OK;
-		else 
+		else
 			return status::NOT_SUPPORTED;
 	}
-	return status::UNKNOWN_ERROR;	
+	return status::UNKNOWN_ERROR;
 }
 
 result<string_view> kvdk_sorted::kvdk_const_iterator::key()
 {
 	LOG("key");
-	if (iterator->Valid())
-	{
+	if (iterator->Valid()) {
 		key_local = iterator->Key();
 		return string_view{key_local};
 	}

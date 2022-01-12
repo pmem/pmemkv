@@ -34,9 +34,8 @@ public:
 	status remove(string_view key) final;
 
 private:
-
 	status status_mapper(storage_engine::Status s);
-	
+
 	storage_engine::Engine *engine;
 };
 

@@ -12,14 +12,19 @@ namespace kv
 
 status kvdk_unsorted::status_mapper(storage_engine::Status s)
 {
-	switch(s)
-	{
-		case storage_engine::Status::Ok: return status::OK;
-		case  storage_engine::Status::NotFound: return status::NOT_FOUND;
-		case  storage_engine::Status::MemoryOverflow: return status::OUT_OF_MEMORY;
-		case  storage_engine::Status::PmemOverflow: return status::OUT_OF_MEMORY;
-		case  storage_engine::Status::NotSupported: return status::NOT_SUPPORTED;
-		default: return status::UNKNOWN_ERROR;
+	switch (s) {
+		case storage_engine::Status::Ok:
+			return status::OK;
+		case storage_engine::Status::NotFound:
+			return status::NOT_FOUND;
+		case storage_engine::Status::MemoryOverflow:
+			return status::OUT_OF_MEMORY;
+		case storage_engine::Status::PmemOverflow:
+			return status::OUT_OF_MEMORY;
+		case storage_engine::Status::NotSupported:
+			return status::NOT_SUPPORTED;
+		default:
+			return status::UNKNOWN_ERROR;
 	}
 }
 
@@ -31,7 +36,8 @@ kvdk_unsorted::kvdk_unsorted(std::unique_ptr<internal::config> cfg)
 	engine_configs.pmem_segment_blocks = (1ULL << 10);
 	engine_configs.hash_bucket_num = (1ULL << 20);
 
-	auto status = storage_engine::Engine::Open(cfg->get_path(), &engine, engine_configs, stdout);
+	auto status = storage_engine::Engine::Open(cfg->get_path(), &engine,
+						   engine_configs, stdout);
 	(void)status;
 	assert(status == storage_engine::Status::Ok);
 }
@@ -60,7 +66,7 @@ status kvdk_unsorted::get(string_view key, get_v_callback *callback, void *arg)
 
 	std::string value;
 	auto status = engine->Get(key, &value);
-	if (status == storage_engine::Status::Ok){
+	if (status == storage_engine::Status::Ok) {
 		callback(value.data(), value.size(), arg);
 	}
 	return status_mapper(status);
@@ -85,9 +91,8 @@ status kvdk_unsorted::remove(string_view key)
 	return status;
 }
 
-
-static factory_registerer register_kvdk(
-	std::unique_ptr<engine_base::factory_base>(new kvdk_factory));
+static factory_registerer
+	register_kvdk(std::unique_ptr<engine_base::factory_base>(new kvdk_factory));
 
 } // namespace kv
 } // namespace pmem
