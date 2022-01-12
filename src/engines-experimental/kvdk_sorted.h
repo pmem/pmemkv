@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2017-2021, Intel Corporation */
+/* Copyright 2017-2022, Intel Corporation */
 
 #ifndef LIBPMEMKV_KVDK_SORTED_H
 #define LIBPMEMKV_KVDK_SORTED_H
