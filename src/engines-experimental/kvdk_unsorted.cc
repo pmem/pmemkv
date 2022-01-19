@@ -10,24 +10,6 @@ namespace pmem
 namespace kv
 {
 
-status kvdk_unsorted::status_mapper(storage_engine::Status s)
-{
-	switch (s) {
-		case storage_engine::Status::Ok:
-			return status::OK;
-		case storage_engine::Status::NotFound:
-			return status::NOT_FOUND;
-		case storage_engine::Status::MemoryOverflow:
-			return status::OUT_OF_MEMORY;
-		case storage_engine::Status::PmemOverflow:
-			return status::OUT_OF_MEMORY;
-		case storage_engine::Status::NotSupported:
-			return status::NOT_SUPPORTED;
-		default:
-			return status::UNKNOWN_ERROR;
-	}
-}
-
 kvdk_unsorted::kvdk_unsorted(std::unique_ptr<internal::config> cfg)
 {
 	LOG("Started ok");
@@ -57,7 +39,7 @@ status kvdk_unsorted::exists(string_view key)
 {
 	LOG("exists for key=" << std::string(key.data(), key.size()));
 	std::string value;
-	return status_mapper(engine->Get(key, &value));
+	return map_kvdk_status(engine->Get(key, &value));
 }
 
 status kvdk_unsorted::get(string_view key, get_v_callback *callback, void *arg)
@@ -69,7 +51,7 @@ status kvdk_unsorted::get(string_view key, get_v_callback *callback, void *arg)
 	if (status == storage_engine::Status::Ok) {
 		callback(value.data(), value.size(), arg);
 	}
-	return status_mapper(status);
+	return map_kvdk_status(status);
 }
 
 status kvdk_unsorted::put(string_view key, string_view value)
@@ -78,7 +60,7 @@ status kvdk_unsorted::put(string_view key, string_view value)
 		       << ", value.size=" << std::to_string(value.size()));
 	auto status = engine->Set(key, value);
 
-	return status_mapper(status);
+	return map_kvdk_status(status);
 }
 
 status kvdk_unsorted::remove(string_view key)
@@ -86,7 +68,7 @@ status kvdk_unsorted::remove(string_view key)
 	LOG("remove key=" << std::string(key.data(), key.size()));
 	auto status = exists(key);
 	if (status == status::OK) {
-		return status_mapper(engine->Delete(key));
+		return map_kvdk_status(engine->Delete(key));
 	}
 	return status;
 }

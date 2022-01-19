@@ -4,10 +4,13 @@
 #ifndef LIBPMEMKV_KVDK_UNSORTED_H
 #define LIBPMEMKV_KVDK_UNSORTED_H
 
-#include "../engine.h"
+#include <memory>
 
 #include "kvdk/engine.hpp"
-#include <memory>
+
+#include "../engine.h"
+
+#include "kvdk_status.h"
 
 namespace pmem
 {
@@ -34,8 +37,6 @@ public:
 	status remove(string_view key) final;
 
 private:
-	status status_mapper(storage_engine::Status s);
-
 	storage_engine::Engine *engine;
 };
 

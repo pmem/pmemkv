@@ -4,10 +4,13 @@
 #ifndef LIBPMEMKV_KVDK_SORTED_H
 #define LIBPMEMKV_KVDK_SORTED_H
 
-#include "../engine.h"
+#include <memory>
 
 #include "kvdk/engine.hpp"
-#include <memory>
+
+#include "../engine.h"
+
+#include "kvdk_status.h"
 
 namespace pmem
 {
@@ -55,8 +58,6 @@ public:
 	internal::iterator_base *new_const_iterator() final;
 
 private:
-	status status_mapper(storage_engine::Status s);
-
 	const std::string collection{"global_collection"};
 	// XXX: change to uniqe_ptr
 	storage_engine::Engine *engine;
@@ -71,7 +72,6 @@ public:
 	result<pmem::obj::slice<const char *>> read_range(size_t pos, size_t n) final;
 
 private:
-	status status_mapper(storage_engine::Status s);
 	std::string name();
 };
 
@@ -89,7 +89,6 @@ public:
 	}
 
 private:
-	status status_mapper(storage_engine::Status s);
 	std::string name();
 
 	std::shared_ptr<kvdk::Iterator> iterator;
