@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2021, Intel Corporation
+# Copyright 2016-2022, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
@@ -7,12 +7,12 @@
 #
 
 # Pull base image
-FROM registry.hub.docker.com/library/ubuntu:20.10
+FROM registry.hub.docker.com/library/ubuntu:22.04
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER 20.10
+ENV OS_VER 22.04
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
 
@@ -32,6 +32,7 @@ ARG BASE_DEPS="\
 ARG PMEMKV_DEPS="\
 	libmemkind-dev \
 	libtbb-dev \
+	libtbb2 \
 	rapidjson-dev"
 
 # PMDK's dependencies (optional; libpmemobj-dev package may be used instead)
