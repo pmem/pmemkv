@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2021, Intel Corporation
+# Copyright 2016-2022, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
@@ -79,7 +79,6 @@ ARG TESTS_DEPS="\
 # Misc for our builds/CI (optional)
 ARG MISC_DEPS="\
 	clang \
-	hub \
 	perl-Text-Diff \
 	pkgconf \
 	sudo"
