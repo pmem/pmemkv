@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2021, Intel Corporation
+# Copyright 2019-2022, Intel Corporation
 
 #
 # install-pmdk.sh [package_type] - installs PMDK
@@ -17,8 +17,9 @@ fi
 PACKAGE_TYPE=${1}
 PREFIX=${2:-/usr}
 
-# master: 1.11.1, 24.09.2021
-PMDK_VERSION="5b21904a257eff47f2e87fcbf2de46111f03ddd8"
+# master: Merge pull request #5399 from kilobyte/codespell, 24.01.2022
+# It contains fix for recognizing AlmaLinux as proper distro
+PMDK_VERSION="43aa506db217c7dd2d98090a525306c3ab45f9cf"
 
 git clone https://github.com/pmem/pmdk
 cd pmdk

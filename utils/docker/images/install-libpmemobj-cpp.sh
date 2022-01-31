@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2021, Intel Corporation
+# Copyright 2019-2022, Intel Corporation
 
 #
 # install-libpmemobj-cpp.sh [package_type]
@@ -18,8 +18,9 @@ PREFIX="/usr"
 PACKAGE_TYPE=${1^^} #To uppercase
 echo "PACKAGE_TYPE: ${PACKAGE_TYPE}"
 
-# common: 1.13.0 release
-LIBPMEMOBJ_CPP_VERSION="9599f724d4edc3a3d973bac14eeebdc1bc31d327"
+# master: Merge pull request #1242 from lukaszstolarczuk/docs-update, 28.01.2022
+# It contains fix for gcc-12 in radix_tree
+LIBPMEMOBJ_CPP_VERSION="7e59f08f65d6d67cd893f4c6b7c1141a04f28ac3"
 echo "LIBPMEMOBJ_CPP_VERSION: ${LIBPMEMOBJ_CPP_VERSION}"
 
 build_dir=$(mktemp -d -t libpmemobj-cpp-XXX)
