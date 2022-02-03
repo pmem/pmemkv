@@ -28,8 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        CONFIG: ["OS=centos OS_VER=8",
-                 "OS=almalinux OS_VER=8",
+        CONFIG: ["OS=almalinux OS_VER=8",
                  "OS=archlinux-base OS_VER=latest",
                  "OS=debian OS_VER=testing",
                  "OS=debian OS_VER=unstable",
