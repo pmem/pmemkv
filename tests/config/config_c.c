@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2019-2021, Intel Corporation */
+/* Copyright 2019-2022, Intel Corporation */
 
 #include "unittest.h"
 
@@ -111,7 +111,7 @@ static void simple_test()
 	ret = pmemkv_config_get_data(config, "object", (const void **)&value_custom,
 				     &value_custom_size);
 	UT_ASSERTeq(ret, PMEMKV_STATUS_OK);
-	UT_ASSERTeq(value_custom_size, sizeof(value_custom));
+	UT_ASSERTeq(value_custom_size, sizeof(*value_custom));
 	UT_ASSERTeq(value_custom->a, INIT_VAL);
 	UT_ASSERTeq(value_custom->b, INIT_VAL);
 
