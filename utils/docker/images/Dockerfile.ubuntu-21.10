@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2021, Intel Corporation
+# Copyright 2016-2022, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of ubuntu-based
@@ -8,12 +8,12 @@
 #
 
 # Pull base image
-FROM ubuntu:20.10
+FROM ubuntu:21.10
 MAINTAINER szymon.romik@intel.com
 
 # Set required environment variables
 ENV OS ubuntu
-ENV OS_VER 20.10
+ENV OS_VER 21.10
 ENV PACKAGE_MANAGER deb
 ENV NOTTY 1
 
@@ -36,7 +36,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 	automake \
 	build-essential \
 	clang \
-	clang-format-9 \
 	cmake \
 	curl \
 	debhelper \
