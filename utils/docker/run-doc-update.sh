@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2018-2021, Intel Corporation
+# Copyright 2018-2022, Intel Corporation
 
 #
 # run-doc-update.sh - is called inside a Docker container,
-#                     build docs and automatically update manpages
-#                     and doxygen files on gh-pages
+#		to build docs for 'valid branches' and to create a pull request
+#		with an update of doxygen and manpage files (on 'docs' branch).
 #
 
 set -e
@@ -54,9 +54,9 @@ cp -r ${REPO_DIR}/build/doc/cpp_html ${ARTIFACTS_DIR}/
 
 cd ${REPO_DIR}
 
-# Checkout gh-pages and copy docs
-GH_PAGES_NAME="gh-pages-for-${TARGET_BRANCH}"
-git checkout -B ${GH_PAGES_NAME} upstream/gh-pages
+# Checkout 'docs' and copy generated documentation
+DOCS_BRANCH_NAME="${TARGET_DOCS_DIR}-docs-update"
+git checkout -B ${DOCS_BRANCH_NAME} upstream/docs
 git clean -dfx
 
 # Clean old content, since some files might have been deleted
@@ -77,11 +77,12 @@ sed -i 's/^title:\ _MP(*\([A-Za-z_-]*\).*$/title:\ \1/g' ./${VERSION}/manpages/*
 # In that case we want to force push anyway (there might be open pull request with
 # changes which were reverted).
 git add -A
-git commit -m "doc: automatic gh-pages docs update" && true
-git push -f ${ORIGIN} ${GH_PAGES_NAME}
+git commit -m "doc: automatic docs update for ${TARGET_BRANCH}" && true
+git push -f ${ORIGIN} ${DOCS_BRANCH_NAME}
 
 # Makes pull request.
 # When there is already an open PR or there are no changes an error is thrown, which we ignore.
-hub pull-request -f -b ${DOC_REPO_OWNER}:gh-pages -h ${BOT_NAME}:${GH_PAGES_NAME} -m "doc: automatic gh-pages docs update" && true
+hub pull-request -f -b ${DOC_REPO_OWNER}:docs -h ${BOT_NAME}:${DOCS_BRANCH_NAME} \
+	-m "doc: automatic docs update for ${TARGET_BRANCH}" && true
 
 popd
