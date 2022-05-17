@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020-2021, Intel Corporation */
+/* Copyright 2020-2022, Intel Corporation */
 
 /*
  * iterator.cc -- iterator pmreorder test (iterator has to support seek_to_first())
@@ -13,7 +13,7 @@ static void check_exist(pmem::kv::db &kv, const std::string &key,
 			const std::string &value)
 {
 	auto it = new_iterator<true>(kv);
-	UT_ASSERTeq(it.seek(key), pmem::kv::status::OK);
+	ASSERT_STATUS(it.seek(key), pmem::kv::status::OK);
 
 	auto res = it.read_range();
 	UT_ASSERT(res.is_ok());
