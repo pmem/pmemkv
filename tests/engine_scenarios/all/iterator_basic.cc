@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020-2021, Intel Corporation */
+/* Copyright 2020-2022, Intel Corporation */
 
 /**
  * Test basic methods available in iterators (sorted and unsorted engines).
@@ -52,7 +52,7 @@ static void write_test(pmem::kv::db &kv)
 
 		/* write only two last characters */
 		auto last = keys.back();
-		it.seek(last.first);
+		ASSERT_STATUS(it.seek(last.first), pmem::kv::status::OK);
 		auto res = it.write_range(last.second.size() - 2,
 					  std::numeric_limits<size_t>::max());
 		UT_ASSERT(res.is_ok());
@@ -65,7 +65,7 @@ static void write_test(pmem::kv::db &kv)
 					    std::string(2, 'a'));
 
 		/* write only two first characters */
-		it.seek(last.first);
+		ASSERT_STATUS(it.seek(last.first), pmem::kv::status::OK);
 		auto res2 = it.write_range(0, 2);
 		UT_ASSERT(res2.is_ok());
 		for (auto &c : res2.get_value())
@@ -75,7 +75,7 @@ static void write_test(pmem::kv::db &kv)
 		verify_value<false>(it, std::string(2, 'b') + std::string(2, 'a'));
 
 		/* write only two elements from the second position */
-		it.seek(last.first);
+		ASSERT_STATUS(it.seek(last.first), pmem::kv::status::OK);
 		auto res3 = it.write_range(1, 2);
 		UT_ASSERT(res3.is_ok());
 		for (auto &c : res3.get_value())
@@ -87,7 +87,7 @@ static void write_test(pmem::kv::db &kv)
 
 	/* check if a read iterator sees modifications */
 	auto r_it = new_iterator<true>(kv);
-	r_it.seek(keys.back().first);
+	ASSERT_STATUS(r_it.seek(keys.back().first), pmem::kv::status::OK);
 	verify_value<true>(r_it, "bcca");
 }
 
@@ -123,7 +123,7 @@ static void write_abort_test(pmem::kv::db &kv)
 	for (auto &c : res.get_value())
 		c = 'a';
 
-	it.seek(keys.back().first);
+	ASSERT_STATUS(it.seek(keys.back().first), pmem::kv::status::OK);
 	it.commit();
 
 	verify_keys<false>(it);
@@ -134,15 +134,11 @@ static void zeroed_key_test(pmem::kv::db &kv)
 	auto element = pmem::kv::string_view("z\0z", 3);
 	UT_ASSERTeq(element.size(), 3);
 
-	auto s = kv.put(element, "val1");
-	ASSERT_STATUS(s, pmem::kv::status::OK);
-
-	s = kv.exists(element);
-	ASSERT_STATUS(s, pmem::kv::status::OK);
+	ASSERT_STATUS(kv.put(element, "val1"), pmem::kv::status::OK);
+	ASSERT_STATUS(kv.exists(element), pmem::kv::status::OK);
 
 	auto it = new_iterator<true>(kv);
-	s = it.seek(element);
-	ASSERT_STATUS(s, pmem::kv::status::OK);
+	ASSERT_STATUS(it.seek(element), pmem::kv::status::OK);
 	verify_key<true>(it, element);
 }
 

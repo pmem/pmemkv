@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2022, Intel Corporation */
 
 /**
  * Tests methods of iterators in the concurrent way (only iterators of concurrent
@@ -103,7 +103,7 @@ static void concurrent_write_abort(size_t threads_number, pmem::kv::db &kv)
 
 		auto it = new_iterator<false>(kv);
 		for (size_t i = thread_id / 2; i < n; i += threads_number) {
-			it.seek(std::to_string(i));
+			ASSERT_STATUS(it.seek(std::to_string(i)), pmem::kv::status::OK);
 			if (thread_id % 2) {
 				auto res = it.write_range(
 					10, std::numeric_limits<size_t>::max());

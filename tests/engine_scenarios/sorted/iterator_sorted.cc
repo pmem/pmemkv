@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-/* Copyright 2020, Intel Corporation */
+/* Copyright 2020-2022, Intel Corporation */
 
 #include "../iterator.hpp"
 
@@ -192,19 +192,19 @@ static void seek_to_first_write_test(pmem::kv::db &kv)
 	insert_keys(kv);
 
 	/* check if seek_to_first() will internally abort transaction */
-	it.seek(keys.back().first);
+	ASSERT_STATUS(it.seek(keys.back().first), pmem::kv::status::OK);
 	auto res = it.write_range();
 	UT_ASSERT(res.is_ok());
 	for (auto &c : res.get_value())
 		c = 'a';
 
-	it.seek_to_first();
+	ASSERT_STATUS(it.seek_to_first(), pmem::kv::status::OK);
 	it.commit();
 
 	verify_keys<false>(it);
 
 	/* write something after seek_to_first() */
-	it.seek_to_first();
+	ASSERT_STATUS(it.seek_to_first(), pmem::kv::status::OK);
 	auto res2 = it.write_range();
 	UT_ASSERT(res2.is_ok());
 	for (auto &c : res2.get_value())
@@ -222,19 +222,19 @@ static void seek_to_last_write_test(pmem::kv::db &kv)
 	insert_keys(kv);
 
 	/* check if seek_to_last will internally abort transaction */
-	it.seek(keys.front().first);
+	ASSERT_STATUS(it.seek(keys.front().first), pmem::kv::status::OK);
 	auto res = it.write_range();
 	UT_ASSERT(res.is_ok());
 	for (auto &c : res.get_value())
 		c = 'a';
 
-	it.seek_to_last();
+	ASSERT_STATUS(it.seek_to_last(), pmem::kv::status::OK);
 	it.commit();
 
 	verify_keys<false>(it);
 
 	/* write something after seek_to_last() */
-	it.seek_to_last();
+	ASSERT_STATUS(it.seek_to_last(), pmem::kv::status::OK);
 	auto res2 = it.write_range();
 	UT_ASSERT(res2.is_ok());
 	for (auto &c : res2.get_value())
