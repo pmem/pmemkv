@@ -9,8 +9,8 @@
 
 set -e
 
-# memkind v1.13.0
-MEMKIND_VERSION=a8c54e4920a4859e9e00073280363ca7281dde10
+# memkind v1.14.0-rc1
+MEMKIND_VERSION=5f47babb81f9cf93369bf02b96c90d5269bfef24
 
 WORKDIR=$(pwd)
 
