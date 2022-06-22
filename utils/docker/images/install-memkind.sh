@@ -9,8 +9,8 @@
 
 set -e
 
-# contains better error handling in pmem_allocator
-MEMKIND_VERSION=64a37d4ca46a8a2419871e859d611fff85d0e843
+# memkind v1.14.0
+MEMKIND_VERSION=d1eb0a391653dab6939497cf589bfc83e56e15b6
 
 WORKDIR=$(pwd)
 
