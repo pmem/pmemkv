@@ -1,10 +1,13 @@
 ---
-layout: manual
-Content-Style: 'text/css'
-title: _MP(PMEMKV_JSON_CONFIG, 3)
-collection: libpmemkv
-header: PMEMKV_JSON_CONFIG
-secondary_title: pmemkv_json_config
+draft: false
+layout: "library"
+slider_enable: true
+description: ""
+disclaimer: "The contents of this web site and the associated <a href=\"https://github.com/pmem\">GitHub repositories</a> are BSD-licensed open source."
+aliases: ["libpmemkv_json_config.3.html"]
+title: pmemkv_json_config
+section: 3
+secondary_title: pmemkv
 ...
 
 [comment]: <> (SPDX-License-Identifier: BSD-3-Clause)
@@ -12,12 +15,14 @@ secondary_title: pmemkv_json_config
 
 [comment]: <> (libpmemkv_json_config.3 -- man page for libpmemkv_json_config configuration API)
 
-[NAME](#name)<br />
-[SYNOPSIS](#synopsis)<br />
-[DESCRIPTION](#description)<br />
-[EXAMPLE](#example)<br />
-[ERRORS](#errors)<br />
-[SEE ALSO](#see-also)<br />
+# Table of Contents
+
+[NAME](#name)\
+[SYNOPSIS](#synopsis)\
+[DESCRIPTION](#description)\
+[EXAMPLE](#example)\
+[ERRORS](#errors)\
+[SEE ALSO](#see-also)
 
 
 # NAME #
