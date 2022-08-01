@@ -9,6 +9,8 @@
 
 set -e
 
+source $(dirname ${0})/prepare-for-build.sh
+
 if [[ -z "${DOC_UPDATE_GITHUB_TOKEN}" || -z "${DOC_UPDATE_BOT_NAME}" || -z "${DOC_REPO_OWNER}" ]]; then
 	echo "To build documentation and upload it as a Github pull request, variables " \
 		"'DOC_UPDATE_BOT_NAME', 'DOC_REPO_OWNER' and 'DOC_UPDATE_GITHUB_TOKEN' have to " \
