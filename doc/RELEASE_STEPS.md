@@ -32,8 +32,6 @@ Publish package and make it official:
 Later, for major/minor release:
 - bump version of Docker images (build.sh, build-image.sh, push-image.sh, pull-or-rebuild-image.sh) to $VER+1 on master branch
 - add new branch in valid-branches.sh and in "doc" job definition within .github/workflows/gha.yml, on stable-$VER branch
-<!-- XXX: re-write this paragraph when transition to pmem.io is done -->
-- once 'docs' branch contains new documentation:
+- once 'main' branch of pmem.io repository contains new documentation:
   - add there (in index.md) new links to manpages and Doxygen docs
   - update there "Releases' support status" table (update any other release's status if needed)
-  - add new docs' links in README.md on **master** branch
