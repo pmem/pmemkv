@@ -8,7 +8,7 @@ aliases: ["libpmemkv.3.html"]
 title: libpmemkv
 section: 3
 secondary_title: pmemkv
-...
+---
 
 [comment]: <> (SPDX-License-Identifier: BSD-3-Clause)
 [comment]: <> (Copyright 2019-2020, Intel Corporation)
