@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2020, Intel Corporation
+# Copyright 2019-2022, Intel Corporation
 
 #
 # prepare-for-build.sh - prepare the Docker image for the builds
@@ -97,6 +97,6 @@ function workspace_cleanup() {
 }
 
 # this should be run only on CIs
-if [ "$CI_RUN" == "YES" ]; then
-	sudo_password chown -R $(id -u).$(id -g) $WORKDIR
+if [ "${CI_RUN}" == "YES" ]; then
+	sudo_password chown -R $(id -u).$(id -g) ${WORKDIR}
 fi || true
