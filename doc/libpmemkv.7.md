@@ -1,22 +1,27 @@
 ---
-layout: manual
-Content-Style: 'text/css'
-title: _MP(PMEMKV, 7)
-collection: libpmemkv
-header: PMEMKV
+draft: false
+layout: "library"
+slider_enable: true
+description: ""
+disclaimer: "The contents of this web site and the associated <a href=\"https://github.com/pmem\">GitHub repositories</a> are BSD-licensed open source."
+aliases: ["libpmemkv.7.html"]
+title: libpmemkv
+section: 7
 secondary_title: pmemkv
-...
+---
 
 [comment]: <> (SPDX-License-Identifier: BSD-3-Clause)
 [comment]: <> (Copyright 2019-2020, Intel Corporation)
 
 [comment]: <> (libpmemkv.7 -- man page for libpmemkv)
 
-[NAME](#name)<br />
-[DESCRIPTION](#description)<br />
-[ENGINES](#engines)<br />
-[BINDINGS](#bindings)<br />
-[SEE ALSO](#see-also)<br />
+# Table of Contents
+
+[NAME](#name)\
+[DESCRIPTION](#description)\
+[ENGINES](#engines)\
+[BINDINGS](#bindings)\
+[SEE ALSO](#see-also)
 
 
 # NAME #
