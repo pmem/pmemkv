@@ -49,7 +49,7 @@ pushd build
 
 cmake .. -DBUILD_DOC=ON -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF
 make -j$(nproc) doc
-cp man/tmp/*.md ${WORKDIR}/doc/
+cp doc/man/tmp/*.md ${WORKDIR}/doc/
 cp -r doc/cpp_html ${ARTIFACTS_DIR}/
 popd
 cp -r doc ${ARTIFACTS_DIR}/
