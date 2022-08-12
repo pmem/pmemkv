@@ -1,3 +1,14 @@
+Mon Aug 29 2022 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
+
+	* Version 1.4.1-rc1
+
+	This is the last bugfix release for pmemkv 1.4 version.
+	Maintenance of this version is no longer supported.
+
+	Notable changes:
+	- Fix get_all return value in robinhood engine
+	- Fix iterator return value for zeroed keys
+
 Mon Aug 08 2022 Łukasz Stolarczuk <lukasz.stolarczuk@intel.com>
 
 	* Version 1.3.1
