@@ -38,9 +38,20 @@ jobs:
                  "TYPE=compatibility OS=fedora OS_VER=32",
                  "TYPE=bindings OS=ubuntu OS_VER=20.04_bindings PUSH_IMAGE=1"]
     steps:
-      - name: Set image version and force image action for stable branch
-        # we want to set IMG_VER to e.g. '1.x' for stable branches and PRs against them
-        # for PRs we have to use 'base_ref' - this is the target branch (and we have to check that instead)
+      - name: Get tagged version
+        if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
+        id: get_tag_version
+        run: echo ::set-output name=VERSION::$(echo ${{ github.ref }} | awk -F '[/.-]' '/refs\/tags\/[0-9]+.[0-9]+.[0-9]+(-rc[0-9]+)?$/ {print $3 "." $4}')
+
+      - name: Set image version and force image action for tags
+        if: steps.get_tag_version.outputs.VERSION != ''
+        run: |
+          echo "IMG_VER=${{ steps.get_tag_version.outputs.VERSION }}" >> $GITHUB_ENV
+          echo "FORCE_IMAGE_ACTION=rebuild" >> $GITHUB_ENV
+
+      - name: Set image version and force image action for stable branches
+        # We want to set IMG_VER to e.g. '1.x' for stable branches and PRs against them.
+        # For PRs we have to use 'base_ref' - this is the target branch (and we have to check that instead).
         if:
           startsWith(github.ref, 'refs/heads/stable-') || startsWith(github.base_ref, 'stable-')
         # we now know we're on (or against) stable branches, so we just need to pick the version (e.g. the mentioned '1.x')
