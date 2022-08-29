@@ -2,10 +2,9 @@
 name: pmemkv-weekly
 # It runs non-day-to-day checks; "unusual" jobs required to be checked only once in a while.
 
+# instead of running it every week, it's now run only on-demand
 on:
-  schedule:
-    # run this job at 01:00 UTC every Saturday
-    - cron:  '0 1 * * 6'
+  workflow_dispatch:
 
 env:
   REPO:           pmemkv
