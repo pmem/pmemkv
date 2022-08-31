@@ -2,10 +2,14 @@
 name: pmemkv-nightly
 # It runs non-deafult OSes, listed below with basic set of compilers and tests.
 
+# instead of running it every night, it's now run only on-demand
 on:
-  schedule:
-    # run this job at 01:00 UTC everyday
-    - cron:  '0 1 * * *'
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type (as defined in build.sh)'
+        required: true
+        default: 'debug'
 
 env:
   REPO:           pmemkv
@@ -15,7 +19,7 @@ env:
   WORKDIR:        utils/docker
   TEST_TIMEOUT:   900
   IMG_VER:        latest
-  TYPE:           debug
+  TYPE:           ${{ github.event.inputs.build_type }}
   PUSH_IMAGE:     1
   # use org's Private Access Token to log in to GitHub Container Registry
   CONTAINER_REG_USER:   ${{ secrets.GH_CR_USER }}

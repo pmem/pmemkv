@@ -2,10 +2,11 @@
 name: pmemkv-coverity
 # It runs static analysis build - Coverity. It requires special token (set in CI's secret).
 
+# Run this job at 00:00 UTC once a month; but also allow manual trigger.
 on:
+  workflow_dispatch:
   schedule:
-    # run this job at 00:00 UTC everyday
-    - cron:  '0 0 * * *'
+    - cron:  '0 0 1 * *'
 
 env:
   REPO:           pmemkv
