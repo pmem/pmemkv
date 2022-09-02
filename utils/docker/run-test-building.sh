@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2021, Intel Corporation
+# Copyright 2019-2022, Intel Corporation
 
 #
 # run-test-building.sh - is called inside a Docker container,
@@ -171,6 +171,7 @@ do
 		-DENGINE_VCMAP=OFF \
 		-DENGINE_CMAP=OFF \
 		-DENGINE_CSMAP=OFF \
+		-DENGINE_STREE=OFF \
 		-DBUILD_JSON_CONFIG=${BUILD_JSON_CONFIG} \
 		-D${engine_flag}=ON
 	make -j$(nproc)
