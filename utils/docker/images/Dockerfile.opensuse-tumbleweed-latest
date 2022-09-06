@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2021, Intel Corporation
+# Copyright 2016-2022, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of opensuse-based
@@ -119,7 +119,7 @@ RUN useradd -m $USER \
  && echo $USERPASS >> $PFILE \
  && passwd $USER < $PFILE \
  && rm -f $PFILE \
- && sed -i 's/# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g' /etc/sudoers \
+ && sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/g' /etc/sudoers \
  && groupadd wheel \
  && gpasswd wheel -a $USER
 USER $USER

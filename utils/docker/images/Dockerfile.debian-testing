@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2021, Intel Corporation
+# Copyright 2016-2022, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of debian-based
@@ -37,6 +37,10 @@ ARG PMEMKV_DEPS="\
 ARG PMDK_DEPS="\
 	autoconf \
 	automake \
+	build-essential \
+	clang \
+	cmake \
+	curl \
 	debhelper \
 	devscripts \
 	gdb \
