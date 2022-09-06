@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2019-2021, Intel Corporation
+# Copyright 2019-2022, Intel Corporation
 
 #
 # prepare-for-build.sh - prepare the Docker image for the builds

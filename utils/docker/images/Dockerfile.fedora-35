@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright 2016-2021, Intel Corporation
+# Copyright 2016-2022, Intel Corporation
 
 #
 # Dockerfile - a 'recipe' for Docker to build an image of Fedora-based
@@ -7,12 +7,12 @@
 #
 
 # Pull base image
-FROM registry.fedoraproject.org/fedora:32
+FROM registry.fedoraproject.org/fedora:35
 MAINTAINER igor.chorazewicz@intel.com
 
 # Set required environment variables
 ENV OS fedora
-ENV OS_VER 32
+ENV OS_VER 35
 ENV PACKAGE_MANAGER rpm
 ENV NOTTY 1
 
@@ -79,6 +79,7 @@ ARG TESTS_DEPS="\
 # Misc for our builds/CI (optional)
 ARG MISC_DEPS="\
 	clang \
+	hub \
 	perl-Text-Diff \
 	pkgconf \
 	sudo"
@@ -108,7 +109,7 @@ RUN ./install-pmdk.sh rpm
 
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
-RUN ./install-libpmemobj-cpp.sh rpm
+RUN ./install-libpmemobj-cpp.sh RPM
 
 # Add user
 ENV USER user
