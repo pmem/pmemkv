@@ -27,7 +27,8 @@ ARG BASE_DEPS="\
 	gcc \
 	gcc-c++ \
 	git \
-	make"
+	make \
+	shadow"
 
 # Dependencies for compiling pmemkv project
 ARG PMEMKV_DEPS="\
@@ -119,7 +120,7 @@ RUN useradd -m $USER \
  && echo $USERPASS >> $PFILE \
  && passwd $USER < $PFILE \
  && rm -f $PFILE \
- && sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/g' /etc/sudoers \
+ && sed -i 's/# %wheel/%wheel/g' /etc/sudoers \
  && groupadd wheel \
  && gpasswd wheel -a $USER
 USER $USER

@@ -31,7 +31,6 @@ ARG BASE_DEPS="\
 
 # Dependencies for compiling pmemkv project
 ARG PMEMKV_DEPS="\
-	memkind-devel \
 	rapidjson-devel \
 	tbb-devel"
 
@@ -59,6 +58,14 @@ ARG LIBPMEMOBJ_CPP_DEPS="\
 ARG VALGRIND_DEPS="\
 	autoconf \
 	automake"
+
+# memkind's dependencies
+ARG MEMKIND_DEPS="\
+	autoconf \
+	automake \
+	libtool \
+	numactl \
+	numactl-devel"
 
 # Examples (optional)
 ARG EXAMPLES_DEPS="\
@@ -92,6 +99,7 @@ RUN dnf update -y \
 	${PMDK_DEPS} \
 	${LIBPMEMOBJ_CPP_DEPS} \
 	${VALGRIND_DEPS} \
+	${MEMKIND_DEPS} \
 	${EXAMPLES_DEPS} \
 	${DOC_DEPS} \
 	${TESTS_DEPS} \
@@ -110,6 +118,10 @@ RUN ./install-pmdk.sh rpm
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
 RUN ./install-libpmemobj-cpp.sh RPM
+
+# Install memkind
+COPY install-memkind.sh install-memkind.sh
+RUN ./install-memkind.sh
 
 # Add user
 ENV USER user

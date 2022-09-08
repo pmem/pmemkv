@@ -43,6 +43,14 @@ ARG LIBPMEMOBJ_CPP_DEPS="\
 	rpm-build \
 	tbb-devel"
 
+# memkind's dependencies
+ARG MEMKIND_DEPS="\
+	autoconf \
+	automake \
+	libtool \
+	numactl \
+	numactl-devel"
+
 # Examples (optional)
 ARG EXAMPLES_DEPS="\
 	ncurses-devel \
@@ -75,6 +83,7 @@ RUN dnf update -y \
 	${BASE_DEPS} \
 	${PMEMKV_DEPS} \
 	${LIBPMEMOBJ_CPP_DEPS} \
+	${MEMKIND_DEPS} \
 	${EXAMPLES_DEPS} \
 	${DOC_DEPS} \
 	${TESTS_DEPS} \
@@ -85,6 +94,10 @@ RUN dnf update -y \
 # Install pmdk c++ bindings
 COPY install-libpmemobj-cpp.sh install-libpmemobj-cpp.sh
 RUN ./install-libpmemobj-cpp.sh RPM
+
+# Install memkind
+COPY install-memkind.sh install-memkind.sh
+RUN ./install-memkind.sh
 
 # Add user
 ENV USER user
