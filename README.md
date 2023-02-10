@@ -6,6 +6,17 @@
 [![PMEMKV version](https://img.shields.io/github/tag/pmem/pmemkv.svg)](https://github.com/pmem/pmemkv/releases/latest)
 [![Packaging status](https://repology.org/badge/tiny-repos/pmemkv.svg)](https://repology.org/project/pmemkv/versions)
 
+## ⚠️ Discontinuation of the project
+The **pmemkv** project will no longer be maintained by Intel.
+- Intel has ceased development and contributions including, but not limited to, maintenance, bug fixes, new releases,
+or updates, to this project.
+- Intel no longer accepts patches to this project.
+- If you have an ongoing need to use this project, are interested in independently developing it, or would like to
+maintain patches for the open source software community, please create your own fork of this project.
+- You will find more information [here](https://pmem.io/blog/2022/11/update-on-pmdk-and-our-long-term-support-strategy/).
+
+## Introduction
+
 `pmemkv` is a local/embedded key-value datastore optimized for persistent memory.
 Rather than being tied to a single language or backing implementation, `pmemkv`
 provides different options for language bindings and storage engines.
@@ -100,6 +111,4 @@ to measure pmemkv's performance is available here:
 https://github.com/pmem/pmemkv-bench (previously *pmemkv-tools*).
 
 ## Contact us
-For more information about **pmemkv**, contact Igor Chorążewicz (igor.chorazewicz@intel.com),
-Piotr Balcer (piotr.balcer@intel.com) or post on our **#pmem** Slack channel using
-[this invite link](https://join.slack.com/t/pmem-io/shared_invite/enQtNzU4MzQ2Mzk3MDQwLWQ1YThmODVmMGFkZWI0YTdhODg4ODVhODdhYjg3NmE4N2ViZGI5NTRmZTBiNDYyOGJjYTIyNmZjYzQxODcwNDg) or [Google group](https://groups.google.com/group/pmem).
+For more information about **pmemkv** contact us using dedicated email: pmdk_support@intel.com.
